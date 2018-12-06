@@ -1,4 +1,4 @@
-Copyright © Microsoft Corporation. All rights reserved.
+Copyright © Microsoft Corporation.
 This work is licensed under a Creative Commons Attribution 4.0 International License:
 
 Attribution 4.0 International
