@@ -86,6 +86,10 @@ UIA provider APIs are Windows specific and will only be supported on Windows 7+ 
 
 This feature is not a web standard, but mappings from ARIA and host language semantics into UIA can be tested. The relevant test suites include:
 
+* [CORE-AAM-1.1](https://github.com/w3c/test-results/tree/gh-pages/core-aam-1.1)
+* [CORE-AAM-1.2](https://github.com/w3c/test-results/tree/gh-pages/core-aam-1.2)
+* [GRAPHICS-AAM](https://github.com/w3c/test-results/tree/gh-pages/graphics-aam)
+
 ## Link to entry on the feature dashboard
 
 <TBD>
