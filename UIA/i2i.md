@@ -74,7 +74,7 @@ UIA is implemented and debugged at the browser layer, thus is not intended to be
 
 ## Will this feature be supported on all six Blink platforms (Windows, Mac, Linux, Chrome OS, Android, and Android WebView)?
 
-UIA provider APIs are Windows specific and will only be supported on Windows 7+ platforms.
+No. UIAutomation provider APIs are specific to Windows and will only be supported on Windows 7+ platforms.
 
 ## Is this feature fully tested by [web-platform-tests](https://chromium.googlesource.com/chromium/src/+/master/docs/testing/web_platform_tests.md)?
 
