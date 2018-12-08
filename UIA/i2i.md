@@ -8,12 +8,6 @@ Rossen.Atanassov@microsoft.com, Melanie.Richards@microsoft.com
 
 [UI Automation Explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/UIA/explainer.md)
 
-## Design doc/Spec 
-
-UI Automation Providers Overview 
-
-A TAG review is not requested, as these interfaces are specific to the Windows platform and not intended to be introduced as web standards. It is not expected that web developers will need to make changes to their content as a result of this work, as UIAutomation support reflects lower-level implementation details, and will not be replacing or removing accessibility APIs already supported in Chromium.
-
 ## Design doc/Spec
 
 [UI Automation Providers Overview](https://docs.microsoft.com/en-us/windows/desktop/winauto/uiauto-providersoverview)
