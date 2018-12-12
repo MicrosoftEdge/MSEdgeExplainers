@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+    <head>
+        <title>HTML Modules Demo</title>
+        <script type="module">
+            import { initialize as initHTML5Element } from "./html5Element.htm";
+            initHTML5Element("my-html5-element", window);
+        </script>
+    </head>
+    <body>
+        <my-html5-element></my-html5-element>
+    </body>
+</html>
