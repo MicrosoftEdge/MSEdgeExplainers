@@ -11,3 +11,5 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * UI Automation
   * [UIA explainer](UIA/explainer.md)
   * [UIA intent-to-implement](UIA/i2i.md)
+* WinRT
+  * [Shortcuts Explainer](WinRT/shortcuts/explainer.md)
