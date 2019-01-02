@@ -12,8 +12,8 @@ This document aims to describe of how we plan to implement HTML modules in Blink
 
 ## V8 changes
 
-Currently the [v8::internal::Module](https://cs.chromium.org/chromium/src/v8/src/objects/module.h) class is V8's representation of a [Source Text Module Record](https://cs.chromium.org/chromium/src/v8/src/objects/module.h), which represents information about a script module such as its RequestedModules, its status ("uninstantiated", "instantiating", etc), and its imports/exports.
-We will introduce two subclasses, ScriptModule and HTMLModule.  ScriptModule will contiain the functionality specific to script modules that currently resides in Module, and HTMLModule will contain the new HTML module code.
+Currently the [v8::internal::Module](https://cs.chromium.org/chromium/src/v8/src/objects/module.h) class is V8's representation of a [Source Text Module Record](https://cs.chromium.org/chromium/src/v8/src/objects/module.h), which represents information about a Script Module such as its RequestedModules, its status ("uninstantiated", "instantiating", etc), and its imports/exports.
+We will introduce two subclasses, ScriptModule and HTMLModule.  ScriptModule will contiain the functionality specific to Script Modules that currently resides in Module, and HTMLModule will contain the new HTML module code.
 
 We will introduce the following new fields for HTMLModule support.  Note that these are added to Module rather than HTMLModule (and all existing fields on Module will remain there) because V8 HeapObjects' don't appear to have an established pattern for splitting up data members between super- and sub-types.  Perhaps a better design would be to push all the members to ScriptModule and HTMLModule (meaning that many would have to be duplicated in both subclasses).  Feedback here is welcome.
 
@@ -125,13 +125,13 @@ Specifically, parsing an HTML module document will follow these changes to the n
 
 * When an inline module `<script>` element is encountered, instead of creating a PendingScript for it and calling FetchDescendants, we will log it as an entry in the HTMLModuleScriptEntry list noted above.
 * When an external module `<script>` element is encountered, instead of calling FetchModuleScriptTree, we will log its URL in an entry in the HTMLModuleScriptEntry list noted above.
-* When a non-module `<script>` element is encountered, an error will be logged.  ModuleLoader will check for this error and skip creation of the module record if it is encountered (this result is analogous to a script module that has a parse error).
+* When a non-module `<script>` element is encountered, an error will be logged.  ModuleLoader will check for this error and skip creation of the module record if it is encountered (this result is analogous to a Script Module that has a parse error).
 
 Once parsing completes, the resulting HTMLDocument and the HTMLModuleScriptEntry list will be used to instantiate a new HTMLModule.
 
 ### ModuleTreeLinker
 
-Changes to [ModuleTreeLinker](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_tree_linker.h?q=ModuleTreeLinker&dr=CSs&l=21) will be minor and will mostly involve generalizing the algorithms from ScriptModule to Module.  FetchDescendants will require an adjustment such that it handles inline script modules descendants of an HTMLModule correctly.  For these there is nothing to fetch (since they have no URL and already have a Module Record created for them), but we still must recurse into them such that their descendants are fetched.
+Changes to [ModuleTreeLinker](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_tree_linker.h?q=ModuleTreeLinker&dr=CSs&l=21) will be minor and will mostly involve generalizing the algorithms from ScriptModule to Module.  FetchDescendants will require an adjustment such that it handles inline Script Modules descendants of an HTMLModule correctly.  For these there is nothing to fetch (since they have no URL and already have a Module Record created for them), but we still must recurse into them such that their descendants are fetched.
 
 ### import.meta.document support
 
