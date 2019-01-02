@@ -39,15 +39,21 @@ Integrating HTML modules into the existing ES6 module system, rather than creati
 
 ### Interoperability and Compatibility
 
-_Question for Travis/Bo: Can we provide any more details in this section about public support from other implementers?  I'm mostly just going off Travis's TPAC report that stated that Domenic, Ryosuke, and Anne expressed support of the proposal._
+**Interoperability risk:**
+
+We plan to initially ship the feature behind a runtime flag so that developers can experiment with the concept while spec changes are still being finalized.
+
+Other browser implementers have expressed their support of the concept and its exploration during a Web Platform WG meeting at TPAC 2018 [_insert link to archived minutes here_].  Specifically:
 
 * **Edge**: We're strongly in favor of the feature.  Given the newly shared engine, Edge's support will arrive in a similar timeframe to Chromium.
-* **Firefox**: Expressed support at TPAC 2018.  Also see: [[1](https://github.com/w3c/webcomponents/issues/645#issuecomment-427317492)].
+* **Firefox**: Expressed support at TPAC 2018.  See also [this response to our initial proposal](https://github.com/w3c/webcomponents/issues/645#issuecomment-427317492) and [this page summarizing Mozilla's stance on HTML imports](https://developer.mozilla.org/en-US/docs/Web/Web_Components/HTML_Imports) and the [status update](https://hacks.mozilla.org/2015/06/the-state-of-web-components/) it links to that indicates their desire to pursue a solution better aligned with ES modules.
 * **Safari**: Expressed support at TPAC 2018.
-* **Web / Framework developers**: The responses to [this post](https://github.com/w3c/webcomponents/issues/645#issuecomment-427205519) include a good cross-section of developer sentiment (mostly positive with some expressing concern about various details of the proposal), e.g. [[2](https://github.com/w3c/webcomponents/issues/645#issuecomment-427395178)], [[3](https://github.com/w3c/webcomponents/issues/645#issuecomment-427446523)], [[4](https://github.com/w3c/webcomponents/issues/645#issuecomment-433036372)].
+* **Web / Framework developers**: The responses to [this post](https://github.com/w3c/webcomponents/issues/645#issuecomment-427205519) include a good cross-section of developer sentiment (mostly positive with some expressing concern about various details of the proposal), e.g. [[1](https://github.com/w3c/webcomponents/issues/645#issuecomment-427395178)], [[2](https://github.com/w3c/webcomponents/issues/645#issuecomment-427446523)], [[3](https://github.com/w3c/webcomponents/issues/645#issuecomment-433036372)].
+* **See also**: [Google presentation](https://docs.google.com/presentation/d/1ksnC9Qr3c8RwbDyo1G8ZZSVOEfXpnfQsTHhR5ny9Wk4/edit#slide=id.gc6fa3c898_0_0) at BlinkOn about the idea of HTML modules as a replacement for HTML imports.
 
+**Compatibility risk:**
 
-**Compatibility risk:** same as Interoperability risk
+Same as Interoperability risk
 
 ### Ergonomics
 
