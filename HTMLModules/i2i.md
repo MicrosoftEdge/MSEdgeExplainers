@@ -43,7 +43,7 @@ Integrating HTML Modules into the existing ES6 Module system, rather than creati
 
 We plan to initially ship the feature behind a runtime flag so that developers can experiment with the concept while spec changes are still being finalized.
 
-Other browser implementers have expressed their support of the concept and its exploration during a Web Platform WG meeting at TPAC 2018 [_insert link to archived minutes here_].  Specifically:
+Other browser implementers have expressed their support of the concept and its exploration during a Web Platform WG meeting at TPAC 2018 (see meeting minutes [here](https://www.w3.org/2018/10/26-WebPlat-minutes.html#item20)).  Specifically:
 
 * **Edge**: We're strongly in favor of the feature.  Given the newly shared engine, Edge's support will arrive in a similar timeframe to Chromium.
 * **Firefox**: Expressed support at TPAC 2018.  See also [this response to our initial proposal](https://github.com/w3c/webcomponents/issues/645#issuecomment-427317492) and [this page summarizing Mozilla's stance on HTML Imports](https://developer.mozilla.org/en-US/docs/Web/Web_Components/HTML_Imports) and the [status update](https://hacks.mozilla.org/2015/06/the-state-of-web-components/) it links to that indicates their desire to pursue a solution better aligned with ES modules.
