@@ -8,6 +8,9 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## Features
 
+* HTML Modules
+  * [HTML Modules Explainer](HTMLModules/explainer.md)
+  * [HTML Modules intent-to-implement](HTMLModules/i2i.md)
 * UI Automation
   * [UIA explainer](UIA/explainer.md)
   * [UIA intent-to-implement](UIA/i2i.md)
