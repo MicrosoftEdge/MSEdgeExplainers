@@ -8,6 +8,8 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## Features
 
+* Highlight API
+  * [Highlight API Explainer](highlight/explainer.md)
 * HTML Modules
   * [HTML Modules Explainer](HTMLModules/explainer.md)
   * [HTML Modules intent-to-implement](HTMLModules/i2i.md)
