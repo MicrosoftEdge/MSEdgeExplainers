@@ -26,7 +26,7 @@ Integrating HTML Modules into the existing ES6 Module system, rather than creati
 ### Importing an HTML Module
 HTML Modules will be imported using the same `import` statements currently used for Script Modules:
 
-```
+```html
 <script type="module">
     import {content} from "import.html"
     document.body.appendChild(content);
@@ -44,7 +44,7 @@ HTML Modules operate in the same javascript realm of the window in which they we
 The following example shows how an HTML Module might use import.meta.document to access its HTML content and use it to define the shadow DOM for a custom element:
 
 **module.html**
-```
+```html
 <template id="myCustomElementTemplate">
     <div>Custom element shadow tree content...</div>
 </template>
@@ -54,14 +54,14 @@ The following example shows how an HTML Module might use import.meta.document to
 
     class myCustomElement extends HTMLElement {
         constructor() {
-			super();
-			let shadowRoot = this.attachShadow({ mode: "open" });
-			let template = importDoc.getElementById("myCustomElementTemplate");
-			shadowRoot.appendChild(template.content.clone(true));
-		}
-	}
+            super();
+            let shadowRoot = this.attachShadow({ mode: "open" });
+            let template = importDoc.getElementById("myCustomElementTemplate");
+            shadowRoot.appendChild(template.content.clone(true));
+        }
+    }
 
-	window.customElements.define("myCustomElement", myCustomElement);
+    window.customElements.define("myCustomElement", myCustomElement);
 </script>
 ```
 
@@ -69,7 +69,7 @@ The following example shows how an HTML Module might use import.meta.document to
 
 An HTML Module will specify its exports using its inline script elements.  Inline Script Modules in an HTML Module document will have their exports redirected via the HTML Module Record such that the importer of the HTML Module can access them.  This is done by computing the exports for the HTML Module's record during its instantiation phase as per the following pseudocode:
 
-```
+```javascript
 for (ModuleScript in HtmlModuleRecord.[[RequestedModules]]) {
     if (ModuleScript.IsFromInlineScriptElement) {
         export * from ModuleScript;
@@ -82,9 +82,9 @@ This is the fundamental way in which HTML Modules will expose their content to t
 Example:
 
 **module.html**
-```
+```html
 <div id="blogPost">
-	<p>Content...</p>
+    <p>Content...</p>
 </div>
 <script type="module">
     let blogPost = import.meta.document.querySelector("#blogPost");
@@ -93,7 +93,7 @@ Example:
 ```
 
 **blog.html**
-```
+```html
 <script type="module">
     import {blogPost} from "module.html"
     document.body.appendChild(blogPost);
@@ -105,11 +105,11 @@ Additionally, if an inline script element specifies a default export it will be 
 Example:
 
 **module.html**
-```
+```html
 <template id="myCustomElementTemplate"></template>
 ```
   **main.html:**
-```
+```javascript
 import importedDoc from "import.html"
 let theTemplate = importedDoc.querySelector("template");
 ```
