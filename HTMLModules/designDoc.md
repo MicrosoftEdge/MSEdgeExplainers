@@ -107,7 +107,7 @@ if (mime_type == "text/html") {
 } else if (MIMETypeRegistry::IsSupportedJavaScriptMIMEType(mime_type)) {
   // Create ScriptModule
 } else {
-  // Emit CORS error and refuse to create a module.
+  // Refuse to create a module, and emit an error that 'text/html' or a JavaScript MIME-type is required.
 }
 ```
 
