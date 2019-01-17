@@ -110,7 +110,7 @@ Example:
 ```
   **main.html:**
 ```javascript
-import importedDoc from "import.html"
+import importedDoc from "module.html"
 let theTemplate = importedDoc.querySelector("template");
 ```
 
