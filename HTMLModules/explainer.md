@@ -8,7 +8,7 @@ We are proposing an extension of the ES6 Script Modules system to include HTML M
 
 ## Why are HTML Modules needed?
 
-The introduction of ES6 Script Modules has provided several benefits for JavaScript developers including more componentized code and better dependency management.  However, easy access to declarative content has been a consistent limitation with Script Modules.  For example, if one wants to pack a custom element definition in a module, how should the HTML for the element's shadow tree be created?  Current solutions would involve generating it dynamically (document.createElement or innerHTML), but it would be preferable from both a developer convenience and from a performance standpoint to simply write HTML and include it with the module.  With HTML Modules this will be possible.
+The introduction of ES6 Script Modules has provided several benefits for JavaScript developers including more componentized code and better dependency management.  However, easy access to declarative content has been a consistent limitation with Script Modules.  For example, if one wants to pack a custom element definition in a module, how should the HTML for the element's shadow tree be created?  Current solutions would involve generating it dynamically (document.createElement,  innerHTML or by using template literals), but it would be preferable from both a developer convenience and from a performance standpoint to simply write HTML and include it with the module.  With HTML Modules this will be possible.
 
 There is clear demand for this functionality in the developer community -- see [this thread](https://github.com/w3c/webcomponents/issues/645) where ideas pertaining to HTML Modules have resulted in a great deal of developer and browser implementer engagement.
 
@@ -17,7 +17,7 @@ There is clear demand for this functionality in the developer community -- see [
 * **Global object pollution:** vars created in an HTML Import show up on the global object by default.  An ideal solution would minimize such side-effects.  Accordingly, global object pollution does not occur in ES6 Modules.
 * **Parse blocking with inline script:** the parsing of an HTML Import will block the main document's parser if included prior to an inline script element.  ES6 Modules have defer semantics and thus do not block the parser.
 * **Independent dependency resolution infrastructures between HTML Imports and ES6 Script Modules:** since these systems were developed independently their infrastructures for dependency resolution don't talk to each other, leading to missed performance opportunities and to bugs like [this one](https://bugs.chromium.org/p/chromium/issues/detail?id=767841).
-* **Non-intuitive import pass through:** HTML Imports requre the consumer to access their content from standard DOM queries like getElementById and querySelector.  This is clumsy and limited relative to Script Modules' import/export statements that allow for explicit specification of the API surface provided by a module.
+* **Non-intuitive import pass through:** HTML Imports require the consumer to access their content from standard DOM queries like getElementById and querySelector.  This is clumsy and limited relative to Script Modules' import/export statements that allow for explicit specification of the API surface provided by a module.
 
 Integrating HTML Modules into the existing ES6 Module system, rather than creating it as a standalone component, will address these gaps.
 
@@ -39,9 +39,9 @@ An HTML Module will be parsed per the normal HTML5 parsing rules, with the excep
 
 ### Accessing declarative content from within an HTML Module
 
-HTML Modules operate in the same javascript realm of the window in which they were imported, and the `document` keyword in an HTML Module's inline script refers to the top-level document (as is the case in Script Modules today).  In order for script in an HTML Module to access the module's own HTML content, we introduce a new `import.meta.document` property that refers to the HTML Module document.  We limit this to **inline module scripts only** because a non-inline module can be imported and run from multiple contexts, making its referrer document ambiguous. Inline scripts are unique to the document into which they are inlined, thus avoiding this problem.
+HTML Modules operate in the same JavaScript realm of the window in which they were imported, and the `document` keyword in an HTML Module's inline script refers to the top-level document (as is the case in Script Modules today).  In order for script in an HTML Module to access the module's own HTML content, we introduce a new `import.meta.document` property that refers to the HTML Module document.  We limit this to **inline module scripts only** because a non-inline module can be imported and run from multiple contexts, making its referrer document ambiguous. Inline scripts are unique to the document into which they are inlined, thus avoiding this problem.
 
-The following example shows how an HTML Module might use import.meta.document to access its HTML content and use it to define the shadow DOM for a custom element:
+The following example shows how an HTML Module might use `import.meta.document` to access its HTML content and use it to define the shadow DOM for a custom element:
 
 **module.html**
 ```html
