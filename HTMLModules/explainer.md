@@ -57,7 +57,7 @@ The following example shows how an HTML Module might use `import.meta.document` 
             super();
             let shadowRoot = this.attachShadow({ mode: "open" });
             let template = importDoc.getElementById("myCustomElementTemplate");
-            shadowRoot.appendChild(template.content.clone(true));
+            shadowRoot.appendChild(template.content.cloneNode(true));
         }
     }
 
