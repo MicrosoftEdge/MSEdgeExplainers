@@ -9,7 +9,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 ## Features
 
 * High Contrast
-  * [High Contrast](HighContrast/explainer.md)
+  * [High Contrast Explainer](HighContrast/explainer.md)
 * Highlight API
   * [Highlight API Explainer](highlight/explainer.md)
 * HTML Modules
