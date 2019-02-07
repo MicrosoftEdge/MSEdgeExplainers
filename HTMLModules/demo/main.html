@@ -3,8 +3,8 @@
     <head>
         <title>HTML Modules Demo</title>
         <script type="module">
-            import { initialize as initHTML5Element } from "./html5Element.html";
-            initHTML5Element("my-html5-element", window);
+            import { HTML5Element } from "./html5Element.html";
+            window.customElements.define("my-html5-element", HTML5Element);
         </script>
     </head>
     <body>
