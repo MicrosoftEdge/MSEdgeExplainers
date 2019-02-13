@@ -13,17 +13,21 @@ This document aims to describe of how we plan to implement HTML modules in Blink
 ## V8 changes
 
 Currently the [v8::internal::Module](https://cs.chromium.org/chromium/src/v8/src/objects/module.h) class is V8's representation of a [Source Text Module Record](https://cs.chromium.org/chromium/src/v8/src/objects/module.h), which represents information about a Script Module such as its RequestedModules, its status ("uninstantiated", "instantiating", etc), and its imports/exports.
-We will introduce two subclasses, ScriptModule and HTMLModule.  ScriptModule will contiain the functionality specific to Script Modules that currently resides in Module, and HTMLModule will contain the new HTML module code.
+We will introduce two subclasses, ScriptModule and HTMLModule.  ScriptModule will contain the functionality specific to Script Modules that currently resides in Module, and HTMLModule will contain the new HTML module code.
 
-We will introduce the following new fields for HTMLModule support.  Note that these are added to Module rather than HTMLModule (and all existing fields on Module will remain there) because V8 HeapObjects' don't appear to have an established pattern for splitting up data members between super- and sub-types.  Perhaps a better design would be to push all the members to ScriptModule and HTMLModule (meaning that many would have to be duplicated in both subclasses).  Feedback here is welcome.
+Module will contain the following new field to distinguish whether it is a ScriptModule or HTMLModule:
 
-```
+``` C++
   DECL_INT_ACCESSORS(type)
   enum Type {
     kScript,
     kHTML
   };
+```
 
+HTMLModule will contain the following new fields in addition to those inherited from Module:
+
+```C++
   // If this is an HTMLModule, this is the Document for the module.
   // For a ScriptModule, this is unused.
   DECL_ACCESSORS(document, Object)
@@ -35,7 +39,7 @@ We will introduce the following new fields for HTMLModule support.  Note that th
 
 script_entries is an array of HTMLModuleScriptEntry, another class introduced to support HTMLModules.  Each script element in an HTML module corresponsds to a single HTMLModuleScriptEntry.  An HTMLModuleScriptEntry has 3 fields:
 
-```
+```C++
   DECL_BOOLEAN_ACCESSORS(is_inline)
   DECL_ACCESSORS(module_record, Object)
   DECL_ACCESSORS(source_name, Object)
