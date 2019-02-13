@@ -115,7 +115,7 @@ ModuleLoader's usage of ModuleScriptFetcher where a ModuleScriptCreationParams i
 
 ### HTML Module Parsing
 
-When a ModuleLoader instance determines that the result of a fetch should be processed as an HTML module, it will instantiate a new HTMLDocument with a new DocumentClass flag marking it as an HTML module document.  A DocumentParser instance will be connected to it and fed the contents of the file fetched by the ModuleLoader.  The parser will follow the standard HTML5 parsing rules, with a few differences.  The main difference is that when `<script>` elements are encountered, they are logged in an HTMLModuleScriptEntry list that records the following for each `<script>`:
+When a ModuleLoader instance determines that the result of a fetch should be processed as an HTML module, it will instantiate a new HTMLDocument with a new DocumentClass flag marking it as an HTML module document.  A DocumentParser instance will be connected to it and fed the contents of the file fetched by the ModuleLoader.  The parser will follow the standard HTML5 parsing rules, with a few differences.  Firstly, if a script without `type="module"` is encountered the parser will terminate with an error that will prevent the HTML Module Record from being created.  Secondly, when  `<script>` elements (of `type="module"`) are encountered, they are logged in an HTMLModuleScriptEntry list that records the following for each `<script>`:
 
 * is_inline: is this an inline script or an external script
 * module: if this is an inline script, then this is the ModuleScript itself
