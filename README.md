@@ -15,6 +15,9 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * HTML Modules
   * [HTML Modules Explainer](HTMLModules/explainer.md)
   * [HTML Modules intent-to-implement](HTMLModules/i2i.md)
+* TSF1 
+  * [TSF1 Explainer](TSF1/explainer.md)
 * UI Automation
   * [UIA explainer](UIA/explainer.md)
   * [UIA intent-to-implement](UIA/i2i.md)
+
