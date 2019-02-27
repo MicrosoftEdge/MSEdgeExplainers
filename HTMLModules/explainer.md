@@ -1,3 +1,7 @@
+# MOVED. This explainer is now maintained at https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md. Please refer to that link for the latest content.
+
+This document remains here for archival purposes.
+
 # HTML Modules Explainer
 
 Author: [@dandclark](https://github.com/dandclark)
