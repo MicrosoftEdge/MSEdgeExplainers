@@ -13,7 +13,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * Highlight API
   * [Highlight API Explainer](highlight/explainer.md)
 * HTML Modules
-  * [HTML Modules Explainer](HTMLModules/explainer.md)
+  * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) (~~[archived initial explainer](HTMLModules/explainer.md)~~)
   * [HTML Modules intent-to-implement](HTMLModules/i2i.md)
 * TSF1 
   * [TSF1 Explainer](TSF1/explainer.md)
