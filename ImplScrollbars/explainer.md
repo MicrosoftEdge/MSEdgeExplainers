@@ -2,7 +2,7 @@
 
 Authors: [Rahul Arakeri](https://github.com/rahul8805)
 
-(ImplScrollbarScrolling.jpg)
+![Impl scrollbar scrolling flow diagram](ImplScrollbarScrolling.jpg)
 
 - Browser proc forwards the MouseEvent to the renderer. This gets added to the CompositorThreadEventQueue (CTEQ) and it stays there until the next rAF.
 

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html onpointermove="onpointermovehandler(event);">
+  <head>
+    <style>
+      body {
+        background-image:linear-gradient(0deg, transparent 50%, #aaa 50%),
+                         linear-gradient(90deg, #aaa 50%, #ccc 50%);
+        background-size:45px 45px,45px 45px;
+      }
+      #expander {
+        xposition:absolute;
+        width: 100px;
+        height: 17px;
+        border-top: 1px solid red;
+        -webkit-animation: expandline 1.5s infinite;
+      }
+
+      @-webkit-keyframes expandline{
+        0%   { width: 25%; }
+        100% { width: 75%; }
+      }
+    </style>
+    <script>
+      var hangTime = 5000;
+      var hangInterval = 500;
+
+      function onpointermovehandler(event) {
+        var pageX = Math.round(event.pageX);
+        var pageY = Math.round(event.pageY);
+        document.getElementById("x").innerHTML = pageX;
+        document.getElementById("y").innerHTML = pageY;
+      }
+
+      function hang() {
+        var now = (new Date()).getTime();
+
+        for (;;) {
+          if((new Date()).getTime() - now > hangTime) {
+            break;
+          }
+        }
+      }
+
+      // Hang for "hangTime" after every "hangInterval"
+      var g_intervalHandle;
+      function stopHangs() {
+        clearInterval(g_intervalHandle);
+      }
+
+      function startIntermittentHangs() {
+        stopHangs();
+        g_intervalHandle = setInterval(hang, hangInterval);
+      }
+
+    </script>
+  </head>
+  <body>
+    <div style="position: fixed; left:0px; right:0px; padding: 10px;">
+      Pointer co-ordinates: (<span id="x">0</span>, <span id="y">0</span>)<br />
+      <div>Click on "Start Intermittent hangs". Root scroller is expected to scroll when you interact with the scrollbar.</div>
+      <button onclick="startIntermittentHangs()">Start Intermittent hangs.</button>
+      <button onclick="stopHangs()">Stop hangs.</button><br /><br />
+      <div id="expander" style="height:100px;width:150px;border: 5px solid;">Main thread Animation.</div>
+    </div>
+    <div style="width:500vw; height:150px; background-color: #00ff00;"></div>
+    <div style="width:150px; height:500vh; background-color: #ff0000;"></div>
+  </body>
+</html>
