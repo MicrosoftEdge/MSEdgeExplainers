@@ -6,14 +6,14 @@ daniec@microsoft.com, sasebree@microsoft.com, travil@microsoft.com, pcupp@micros
 
 ## Introduction
 
-We are proposing an extension of the ES6 Script Modules system to include HTML Modules.  For a high-level description of HTML modules and the motivation for them see the associated [explainer doc](https://github.com/dandclark/MSEdgeExplainers/blob/master/HTMLModules/explainer.md).
+We are proposing an extension of the ES6 Script Modules system to include HTML Modules.  For a high-level description of HTML modules and the motivation for them see the associated [explainer doc](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md).
 
 This document aims to describe of how we plan to implement HTML modules in Blink and V8.
 
 ## V8 changes
 
-Currently the [v8::internal::Module](https://cs.chromium.org/chromium/src/v8/src/objects/module.h) class is V8's representation of a [Source Text Module Record](https://cs.chromium.org/chromium/src/v8/src/objects/module.h), which represents information about a Script Module such as its RequestedModules, its status ("uninstantiated", "instantiating", etc), and its imports/exports.
-We will introduce two subclasses, ScriptModule and HTMLModule.  ScriptModule will contain the functionality specific to Script Modules that currently resides in Module, and HTMLModule will contain the new HTML module code.
+Currently the [v8::internal::Module](https://cs.chromium.org/chromium/src/v8/src/objects/module.h) class is V8's representation of a [Source Text Module Record](https://tc39.github.io/ecma262/#sec-source-text-module-records), which represents information about a Script Module such as its RequestedModules, its status ("uninstantiated", "instantiating", etc), and its imports/exports.
+We will introduce two subclasses, ScriptModule and HTMLModule.  ScriptModule will contain the functionality specific to Script Modules that currently resides in Module, and HTMLModule will contain the new HTML module code.  Common functionality will remain in Module, which can now be considered as roughly equivalent to the spec's [Cyclic Module Record](https://tc39.github.io/ecma262/#sec-source-text-module-records) base type.
 
 Module will contain the following new field to distinguish whether it is a ScriptModule or HTMLModule:
 
@@ -37,7 +37,7 @@ HTMLModule will contain the following new fields in addition to those inherited 
   DECL_ACCESSORS(script_entries, FixedArray)
 ```
 
-script_entries is an array of HTMLModuleScriptEntry, another class introduced to support HTMLModules.  Each script element in an HTML module corresponsds to a single HTMLModuleScriptEntry.  An HTMLModuleScriptEntry has 3 fields:
+script_entries is an array of HTMLModuleScriptEntry, another class introduced to support HTML modules.  Each script element in an HTML module corresponds to a single HTMLModuleScriptEntry.  An HTMLModuleScriptEntry has 3 fields:
 
 ```C++
   DECL_BOOLEAN_ACCESSORS(is_inline)
@@ -45,8 +45,8 @@ script_entries is an array of HTMLModuleScriptEntry, another class introduced to
   DECL_ACCESSORS(source_name, Object)
 ```
 
-Inline script elements will have an associated HTMLModuleScriptEntry with is_inline == true and module_record set to the ScriptModule associated with that script element.
-External script elements will have an associated HTMLModuleScriptEntry with is_inline == false and source_name set to the source of the script element.  The module_record for this HTMLModuleScriptEntry will be filled in later during module graph instantiation.
+Inline `<script>` elements will have an associated HTMLModuleScriptEntry with `is_inline == true` and `module_record` set to the ScriptModule associated with that `<script>` element.
+External script elements will have an associated HTMLModuleScriptEntry with `is_inline == false` and `source_name` set to the value of the src attribute of the `<script>` element.  The `module_record` for this HTMLModuleScriptEntry will be filled in later during module graph instantiation.  Note that the data for these fields are provided from Blink when the HTMLModuleScriptEntries are constructed; V8 doesn't actually have any knowledge of the `<script>` elements or the structure of the HTML module's Document.
 
 The following is an overview of the algorithms for HTMLModule instantiation, evaluation, and import/export resolution.  These will generally be implemented in HTMLModule overrides of Module functions, with their counterpart implementations remaining unchanged in ScriptModule (Module::PrepareInstantiate, Module::ResolveExport, etc).  These descriptions are adapted from this document of [proposed HTML module spec changes](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-module-spec-changes.md).
 
@@ -91,35 +91,39 @@ The following is an overview of the algorithms for HTMLModule instantiation, eva
 
 ## Blink Changes
 
-We will introduce a new blink::HTMLModule class as a counterpart to blink::ModuleScript in addition to a shared blink::Module base class.
+We will introduce the new classes blink::HTMLModuleScript and blink::JSModuleScript, both deriving from the existing blink::ModuleScript.
 
 ![Class Diagram](images/classDiagram.png)
 
-Most existing code in Modulator, ModuleMap, and ModuleTreeLinker will be generalized to work with Module rather than ModuleScript.  Often this will just involve some renaming switching out the class; the core logic will remain the same (e.g., ModuleMap will now map URL --> Module instead of URL --> ModuleScript, ModuleTreeLinker::FetchDescendants will take a Module rather than a ModuleScript as input, etc.).
-Some classes will receive new names based on the fact that they will work with both HTMLModule and ScriptModule:
-* [ScriptModule](https://cs.chromium.org/chromium/src/third_party/blink/renderer/bindings/core/v8/script_module.h?type=cs&q=scriptmodule&g=0&l=31) --> ModuleRecord
-* [ModuleScriptLoader](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_script_loader.h?type=cs&q=modulescriptloader&g=0&l=33) --> ModuleLoader (and [ModuleScriptLoaderRegistry](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_script_loader_registry.h?type=cs&q=ModuleScriptLoaderRegistry&g=0&l=17) --> ModuleLoaderRegistry)
-* [ScriptModuleResolver](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/script/script_module_resolver.h?type=cs&q=scriptmoduleresolver&g=0&l=25) --> ModuleResolver
+The JavaScript-specific bits of ModuleScript will be pushed down to the derived JSModuleScript, but ModuleScript will otherwise remain the same, containing data and functionality common to both module types.  We anticipate that as other module types are introduced, further corresponding derivations of ModuleScript will be added.
 
-### ModuleLoader
+Most existing code in Modulator, ModuleMap, and ModuleTreeLinker will continue to work with ModuleScript, with updates to ensure that they are properly generalized to both HTML and JS modules.
 
-ModuleLoader (renamed from [ModuleScriptLoader](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_script_loader.h?type=cs&q=modulescriptloader&g=0&l=33)) will still have the responsibility for managing the fetching of a given module, now generalized to support both ScriptModules and HTMLModules.  In addition it will now manage the determination of whether a given module is created as HTML or Script.  This is determined based on the HTTP response header's Content-Type as follows:
+We will also rename the [ScriptModule](https://cs.chromium.org/chromium/src/third_party/blink/renderer/bindings/core/v8/script_module.h?type=cs&q=scriptmodule&g=0&l=31) class to ModuleRecord.  ModuleRecord better reflects the usage of the class as Blink's handle to the [ModuleRecord](https://tc39.github.io/ecma262/#sec-abstract-module-records) of the given module, and the old ScriptModule name was confusing when we also have a class named ModuleScript.
 
-```
+### ModuleScriptLoader
+
+[ModuleScriptLoader](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_script_loader.h?type=cs&q=modulescriptloader&g=0&l=33) will still have the responsibility for managing the fetching and consruction of a given module, now generalized to support both JS modules and HTML modules.  It will now use the HTTP response header's Content-Type to determine whether a given module is created as HTML or JavaScript, as follows:
+
+```C++
 if (mime_type == "text/html") {
-  // Create HTMLModule
+  // Create HTMLModuleScript
 } else if (MIMETypeRegistry::IsSupportedJavaScriptMIMEType(mime_type)) {
-  // Create ScriptModule
+  // Create JSModuleScript
 } else {
   // Refuse to create a module, and emit an error that 'text/html' or a JavaScript MIME-type is required.
 }
 ```
 
-ModuleLoader's usage of ModuleScriptFetcher where a ModuleScriptCreationParams is received upon fetch completion will have to be changed, since ModuleScriptCreationParams is not appropriate in the case where the network response was HTML.  Instead, ModuleLoader will interact with the Resource directly, access the Content-Type of the response through it, and then use the contents of the Resource to generate the correct module type.
+Note: per spec discussion [here](https://github.com/w3c/webcomponents/issues/742) a new MIME type may be introduced for HTML modules instead of reusing `text/html`.
+
+ModuleScriptLoader will continue to delagate to ModuleScriptFetcher to perform the actual fetch, and ModuleScriptFetcher will continue to deliver a ModuleScriptCreationParams back to ModuleScriptLoader upon fetch completion.  A MIME type will be added to ModuleScriptCreationParams so that it can be used by ModuleScriptLoader to determine which type of module to create.
+
+DocumentModuleScriptFetcher will be updated so that it doesn't block a response with a `text/html` MIME type.  Other ModuleScriptFetcher derived classes will remain unchanged as we still want to block `text/html` for Workers, ServiceWorkers, etc.
 
 ### HTML Module Parsing
 
-When a ModuleLoader instance determines that the result of a fetch should be processed as an HTML module, it will instantiate a new HTMLDocument with a new DocumentClass flag marking it as an HTML module document.  A DocumentParser instance will be connected to it and fed the contents of the file fetched by the ModuleLoader.  The parser will follow the standard HTML5 parsing rules, with a few differences.  Firstly, if a script without `type="module"` is encountered the parser will terminate with an error that will prevent the HTML Module Record from being created.  Secondly, when  `<script>` elements (of `type="module"`) are encountered, they are logged in an HTMLModuleScriptEntry list that records the following for each `<script>`:
+When a ModuleScriptLoader instance determines that the result of a fetch should be processed as an HTML module, it will instantiate a new HTMLDocument with a new DocumentClass flag marking it as an HTML module document.  A DocumentParser instance will be connected to it and fed the contents of the file fetched by the ModuleScriptLoader.  The parser will follow the standard HTML5 parsing rules, with a few differences.  Firstly, if a script without `type="module"` is encountered the parser will terminate with an error that will prevent the HTML Module Record from being created (note: or we may decide instead to coerce these to `type="module"`; see discussion [here](https://github.com/w3c/webcomponents/issues/798)).  Secondly, when  `<script>` elements (of `type="module"`) are encountered, they are logged in an HTMLModuleScriptEntry list that records the following for each `<script>`:
 
 * is_inline: is this an inline script or an external script
 * module: if this is an inline script, then this is the ModuleScript itself
@@ -129,18 +133,18 @@ Specifically, parsing an HTML module document will follow these changes to the n
 
 * When an inline module `<script>` element is encountered, instead of creating a PendingScript for it and calling FetchDescendants, we will log it as an entry in the HTMLModuleScriptEntry list noted above.
 * When an external module `<script>` element is encountered, instead of calling FetchModuleScriptTree, we will log its URL in an entry in the HTMLModuleScriptEntry list noted above.
-* When a non-module `<script>` element is encountered, an error will be logged.  ModuleLoader will check for this error and skip creation of the module record if it is encountered (this result is analogous to a Script Module that has a parse error).
+* When a non-module `<script>` element is encountered, an error will be logged.  ModuleScriptLoader will check for this error and skip creation of the module record if it is encountered (this result is analogous to a Script Module that has a parse error).
 
 Once parsing completes, the resulting HTMLDocument and the HTMLModuleScriptEntry list will be used to instantiate a new HTMLModule.
 
 ### ModuleTreeLinker
 
-Changes to [ModuleTreeLinker](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_tree_linker.h?q=ModuleTreeLinker&dr=CSs&l=21) will be minor and will mostly involve generalizing the algorithms from ScriptModule to Module.  FetchDescendants will require an adjustment such that it handles inline Script Modules descendants of an HTMLModule correctly.  For these there is nothing to fetch (since they have no URL and already have a Module Record created for them), but we still must recurse into them such that their descendants are fetched.
+Changes to [ModuleTreeLinker](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_tree_linker.h?q=ModuleTreeLinker&dr=CSs&l=21) will be minor and will mostly involve generalizing the algorithms such that they can handle the different structure of HTML modules, e.g. ensuring that ModuleTreeLinker::FetchDescendants treat an HTML module's inline child scripts correctly.  For these there is nothing to fetch (since they have no URL and already have a Module Record created for them), but we still must recurse into them such that their descendants are fetched.
 
 ### import.meta.document support
 
 To support import.meta.document we will make the following changes:
 
-* ModuleScript will have a new `Member<Document> document_for_inline_module_` field.  For inline script elements in an HTML module, this will be populated at construction time of the ModuleScript with the HTML Module's Document.
+* JSModuleScript will have a new `Member<Document> document_for_inline_module_` field.  For inline script elements in an HTML module, this will be populated with the HTML Module's Document at construction time of the ModuleScript.
 * A new `Persistent<Document> document_for_inline_module_` field will be added to the [ModuleImportMeta](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/script/module_import_meta.h?dr=CSs&q=moduleimportmeta&g=0&l=15) class, populated in [ModulatorImplBase::HostGetImportMetaProperties](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/script/modulator_impl_base.cc?type=cs&q=moduleimportmeta&g=0&l=178) from the document_for_inline_module_ of the ModuleScript from which the ModuleImportMeta is being created.
 * [blink::HostGetImportMetaProperties](https://cs.chromium.org/chromium/src/third_party/blink/renderer/bindings/core/v8/v8_initializer.cc?q=HostGetImportMetaProperties&dr=CSs&l=601) will be extended to define the "document" property on the passed in `v8::Local<v8::Object> meta`, using the ModuleImportMeta's document_for_inline_module_.
