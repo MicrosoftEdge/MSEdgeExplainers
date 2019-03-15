@@ -35,7 +35,7 @@ Caret browsing activation confirmation in Microsoft Edge:
 Caret browsing activation confirmation in Mozilla Firefox:
 ![Mozilla Firefox browser dialog that asks user to confirm enabling caret browsing and allow to set the preference to never ask again in the future](firefoxCaretBrosingPrompt.png)
 
-In some cases, function keys may not be available and so alternative shortcuts might be needed. For example, the alternative shortcut for macOS could be a new combination: Command + Option + 7. 
+In some cases, function keys may not be available and so alternative shortcuts might be needed.
 
 We welcome your feedback and opinion on ways we can help improve Chromium caret navigation and browsing in the future! 
 
