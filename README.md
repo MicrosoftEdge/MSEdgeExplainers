@@ -24,4 +24,6 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * UI Automation
   * [UIA explainer](UIA/explainer.md)
   * [UIA intent-to-implement](UIA/i2i.md)
-
+* Web App Manifest
+  * [ImageResource `color_scheme`](ImageResource-color_scheme/explainer.md)
+  * [Shortcuts](Shortcuts/explainer.md)
