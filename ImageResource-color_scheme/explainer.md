@@ -13,7 +13,7 @@ With operating systems beginning to offer multiple color schemes (e.g., “dark 
 
 ## Use Cases
 
-Many websites are beginning to look to the operating system for queues about how the user would prefer their apps be rendered (e.g., “dark mode”). There is a media query which allows them to toggle the color-related styles applied to their website (or PWA), but their app icon (referenced in the Web App Manifest) remains unaffected. In certain cases, it may make sense for an app’s icon to adjust to match the user’s chosen color scheme for maximum legibility.
+Many websites are beginning to look to the operating system for cues about how the user would prefer their apps be rendered (e.g., “dark mode”). There is a media query which allows them to toggle the color-related styles applied to their website (or PWA), but their app icon (referenced in the Web App Manifest) remains unaffected. In certain cases, it may make sense for an app’s icon to adjust to match the user’s chosen color scheme for maximum legibility.
 
 For example, consider [the VS Code Insiders logo as displayed in Windows 10](#vs-code):
 
