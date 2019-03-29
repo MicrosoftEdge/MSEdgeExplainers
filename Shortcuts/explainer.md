@@ -7,9 +7,7 @@ Authors:
 
 ## Introduction
 
-A number of operating systems offer a means by which authors add menu items to the app launcher icon itself. These provide quick access to key tasks for an app. Typically, these are exposed via a right click or similar context menu-triggering action. The list of shortcut actions often contains a mixture of static and dynamic shortcuts.[^1] Generally these number around 4–5, depending on the platform—or in the case of Android, the launcher—used. Adding these to the web platform provides an equivalent capability to native apps on many platforms.
-
-[^1]: In a survey of Android applications, static items are by far the most common.
+A number of operating systems offer a means by which authors add menu items to the app launcher icon itself. These provide quick access to key tasks for an app. Typically, these are exposed via a right click or similar context menu-triggering action. The list of shortcut actions often contains a mixture of static and dynamic shortcuts.<sup id="a1">[1](#f1)</sup> Generally these number around 4–5, depending on the platform—or in the case of Android, the launcher—used. Adding these to the web platform provides an equivalent capability to native apps on many platforms.
 
 ## Why are Shortcuts needed?
 
@@ -255,3 +253,7 @@ Electron enables shortcuts for macOS and Windows app icons as well. ([Documentat
 * Enable a `ServiceWorker` to listen for and respond to Shortcut events (`shortcutclick`?).
 * Allow shortcuts to be aggregated into multiple sections.
 * Allow shortcuts to be designated for different contexts (e.g., all apps list vs. home screen/start menu vs. task bar).
+
+<hr>
+
+<b id="f1">1</b> In a survey of Android applications, static items are by far the most common. [↩](#a1)
