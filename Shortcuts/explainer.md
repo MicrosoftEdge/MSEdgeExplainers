@@ -196,7 +196,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
 
 There is no need to add any special handler for the shortcut aside from having a URL (which is part of the general site architecture) to respond to the action. If one or more windows are currently open within the context of the Manifest, the shortcut action should be directed into the only (or most recently used context). If no contexts are open, a new one should be created to respond to the shortcut action.
 
-Depending on how the site is built and its needs, the author might choose to respond to these shortcuts using the proposed [`ServiceWorker` Launch Event](https://github.com/WICG/sw-launch):
+The proposed [`ServiceWorker` Launch Event](https://github.com/WICG/sw-launch), while not tied to Shortcuts in any way, could be used to respond to shortcut actions:
 
 ```javascript
 self.addEventListener('launch', event => {
