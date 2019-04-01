@@ -97,11 +97,11 @@ This member would take an array of `ShortcutInfo` objects defined thusly:
 
 ```
 dictionary ShortcutInfo {
-  required [USVString](https://heycam.github.io/webidl/#idl-USVString) name;
-  [USVString](https://heycam.github.io/webidl/#idl-USVString) short_name;
-  [USVString](https://heycam.github.io/webidl/#idl-USVString) description;
-  required [USVString](https://heycam.github.io/webidl/#idl-USVString) url;
-  sequence<[ImageResource](https://www.w3.org/TR/appmanifest/#dom-imageresource)> icons;
+  required USVString name;
+  USVString short_name;
+  USVString description;
+  required USVString url;
+  sequence<ImageResource> icons;
   dictionary data;
 }
 ```
