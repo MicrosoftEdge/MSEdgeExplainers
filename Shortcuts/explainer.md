@@ -97,10 +97,11 @@ This member would take an array of `ShortcutInfo` objects defined thusly:
 
 ```
 dictionary ShortcutInfo {
-  DOMString name;
-  DOMString short_name;
-  DOMString description;
-  sequence icons;
+  [USVString](https://heycam.github.io/webidl/#idl-USVString) name;
+  [USVString](https://heycam.github.io/webidl/#idl-USVString) short_name;
+  [USVString](https://heycam.github.io/webidl/#idl-USVString) description;
+  [USVString](https://heycam.github.io/webidl/#idl-USVString) url;
+  sequence<[ImageResource](https://www.w3.org/TR/appmanifest/#dom-imageresource)> icons;
   dictionary data;
 }
 ```
@@ -117,9 +118,9 @@ Optional. Provides an abbreviated, human-readable label for the shortcut action.
 
 Optional. Provides the shortcut action’s purpose.
 
-### `uri`
+### `url`
 
-The URL that loads when a user activates the shortcut. This URL must exist within [the navigation scope (`scope`) defined in the manifest](https://w3c.github.io/manifest/#scope-member). If the `uri` is a relative URL, the base URL will be the URL of the manifest.
+The URL that loads when a user activates the shortcut. This URL must exist within [the navigation scope (`scope`) defined in the manifest](https://w3c.github.io/manifest/#scope-member). If the `url` is a relative URL, the base URL will be the URL of the manifest.
 
 ### `icons`
 
@@ -142,7 +143,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
     {
       "name": "Play Later",
       "description": "View the list of podcasts you saved for later",
-      "uri": "/play-later",
+      "url": "/play-later",
       "icons": [
         {
           "src": "/icons/play-later.svg",
@@ -154,7 +155,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
     {
       "name": "Subscriptions",
       "description": "View the list of podcasts you listen to",
-      "uri": "/subscriptions",
+      "url": "/subscriptions",
       "icons": [
         {
           "src": "/icons/subscriptions.svg",
@@ -166,7 +167,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
     {
       "name": "Search",
       "description": "Search for new podcasts to listen to",
-      "uri": "/search",
+      "url": "/search",
       "icons": [
         {
           "src": "/icons/search.svg",
@@ -178,7 +179,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
     {
       "name": "Discover",
       "description": "Browse for new podcasts to listen to",
-      "uri": "/discover",
+      "url": "/discover",
       "icons": [
         {
           "src": "/icons/discover.svg",
