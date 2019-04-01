@@ -7,7 +7,7 @@ Authors:
 
 ## Introduction
 
-A number of operating systems offer a means by which authors add menu items to the app launcher icon itself. These provide quick access to key tasks for an app. Typically, these are exposed via a right click or similar context menu-triggering action. The list of shortcut actions often contains a mixture of static and dynamic shortcuts.<sup id="a1">[1](#f1)</sup> Generally these number around 4–5, depending on the platform—or in the case of Android, the launcher—used. Adding these to the web platform provides an equivalent capability to native apps on many platforms.
+A number of operating systems offer a means by which authors add menu items to the app launcher icon itself. These provide quick access to key tasks for an app. Typically, these are exposed via a right click, long tap, or a similar context menu-triggering action. The list of shortcut actions often contains a mixture of static and dynamic shortcuts.<sup id="a1">[1](#f1)</sup> Generally these number around 4–5, depending on the platform—or in the case of Android, the launcher—used. Adding these to the web platform provides an equivalent capability to native apps on many platforms.
 
 ## Why are Shortcuts needed?
 
@@ -97,10 +97,11 @@ This member would take an array of `ShortcutInfo` objects defined thusly:
 
 ```
 dictionary ShortcutInfo {
-  DOMString name;
-  DOMString short_name;
-  DOMString description;
-  sequence icons;
+  required [USVString](https://heycam.github.io/webidl/#idl-USVString) name;
+  [USVString](https://heycam.github.io/webidl/#idl-USVString) short_name;
+  [USVString](https://heycam.github.io/webidl/#idl-USVString) description;
+  required [USVString](https://heycam.github.io/webidl/#idl-USVString) url;
+  sequence<[ImageResource](https://www.w3.org/TR/appmanifest/#dom-imageresource)> icons;
   dictionary data;
 }
 ```
@@ -117,13 +118,13 @@ Optional. Provides an abbreviated, human-readable label for the shortcut action.
 
 Optional. Provides the shortcut action’s purpose.
 
-### `uri`
+### `url`
 
-The URL that loads when a user activates the shortcut. This URL must exist within [the navigation scope (`scope`) defined in the manifest](https://w3c.github.io/manifest/#scope-member). If the `uri` is a relative URL, the base URL will be the URL of the manifest.
+The URL that loads when a user activates the shortcut. This URL must exist within [the navigation scope (`scope`) defined in the manifest](https://w3c.github.io/manifest/#scope-member). If the `url` is a relative URL, the base URL will be the URL of the manifest.
 
 ### `icons`
 
-The path to one or more [ImageResource](https://w3c.github.io/manifest/#dom-imageresource)s. If the ImageResource’s `src` is a relative URL, the base URL will be the URL of the manifest.
+Optional. The path to one or more [ImageResource](https://w3c.github.io/manifest/#dom-imageresource)s. If the ImageResource’s `src` is a relative URL, the base URL will be the URL of the manifest.
 
 ### `data`
 
@@ -142,7 +143,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
     {
       "name": "Play Later",
       "description": "View the list of podcasts you saved for later",
-      "uri": "/play-later",
+      "url": "/play-later",
       "icons": [
         {
           "src": "/icons/play-later.svg",
@@ -154,7 +155,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
     {
       "name": "Subscriptions",
       "description": "View the list of podcasts you listen to",
-      "uri": "/subscriptions",
+      "url": "/subscriptions",
       "icons": [
         {
           "src": "/icons/subscriptions.svg",
@@ -166,7 +167,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
     {
       "name": "Search",
       "description": "Search for new podcasts to listen to",
-      "uri": "/search",
+      "url": "/search",
       "icons": [
         {
           "src": "/icons/search.svg",
@@ -178,7 +179,7 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
     {
       "name": "Discover",
       "description": "Browse for new podcasts to listen to",
-      "uri": "/discover",
+      "url": "/discover",
       "icons": [
         {
           "src": "/icons/discover.svg",
@@ -193,9 +194,9 @@ To replicate [the shortcut menu from PlayerFM](#playerfm), an author could do th
 
 ### Responding to shortcut activation
 
-There is no need to add any special handler for the shortcut aside from having a URL (which is part of the general site architecture) to respond to the action.
+There is no need to add any special handler for the shortcut aside from having a URL (which is part of the general site architecture) to respond to the action. If one or more windows are currently open within the context of the Manifest, the shortcut action should be directed into the only (or most recently used context). If no contexts are open, a new one should be created to respond to the shortcut action.
 
-Depending on how the site is built and its needs, the author might choose to respond to these shortcuts using the proposed [`ServiceWorker` Launch Event](https://github.com/WICG/sw-launch):
+The proposed [`ServiceWorker` Launch Event](https://github.com/WICG/sw-launch), while not tied to Shortcuts in any way, could be used to respond to shortcut actions:
 
 ```javascript
 self.addEventListener('launch', event => {
