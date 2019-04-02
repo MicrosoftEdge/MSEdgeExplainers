@@ -17,6 +17,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
   * [HTML Modules intent-to-implement](HTMLModules/i2i.md)
 * Native Caret Browsing
   * [Native Caret Browsing Explainer](CaretBrowsing/explainer.md)
+  * [Native Caret Browsing Design Doc](CaretBrowsing/designDoc.md)
 * Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
 * TSF1 
