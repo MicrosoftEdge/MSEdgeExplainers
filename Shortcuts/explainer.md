@@ -102,7 +102,7 @@ dictionary ShortcutInfo {
   USVString description;
   required USVString url;
   sequence<ImageResource> icons;
-  dictionary data;
+  dictionary params;
 }
 ```
 
@@ -126,9 +126,9 @@ The URL that loads when a user activates the shortcut. This URL must exist withi
 
 Optional. The path to one or more [ImageResource](https://w3c.github.io/manifest/#dom-imageresource)s. If the ImageResource’s `src` is a relative URL, the base URL will be the URL of the manifest.
 
-### `data`
+### `params`
 
-Optional. Configuration data to be passed into the target `url` as part of a query string.
+Optional. Parameters to be passed into the target `url` as part of a query string.
 
 ### Example
 
