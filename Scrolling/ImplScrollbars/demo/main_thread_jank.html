@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html onpointermove="onpointermovehandler(event);">
+  <head>
+    <style>
+      body {
+        background-image:linear-gradient(0deg, transparent 50%, #aaa 50%),
+                         linear-gradient(90deg, #aaa 50%, #ccc 50%);
+        background-size:45px 45px,45px 45px;
+      }
+      #expander {
+        width: 100px;
+        height: 17px;
+        border-top: 1px solid red;
+        -webkit-animation: expandline 1.5s infinite;
+      }
+
+      @-webkit-keyframes expandline{
+        0%   { width: 25%; }
+        100% { width: 75%; }
+      }
+    </style>
+    <script>
+      var hangTime = 1234;
+      var hangInterval = 500;
+
+      function onpointermovehandler(event) {
+        var pageX = Math.round(event.pageX);
+        var pageY = Math.round(event.pageY);
+        document.getElementById("x").innerHTML = pageX;
+        document.getElementById("y").innerHTML = pageY;
+      }
+
+      function hang() {
+        var now = (new Date()).getTime();
+
+        for (;;) {
+          if((new Date()).getTime() - now > hangTime) {
+            break;
+          }
+        }
+      }
+
+      // Hang for "hangTime" after every "hangInterval"
+      var g_intervalHandle;
+      function stopHangs() {
+        clearInterval(g_intervalHandle);
+      }
+
+      function startIntermittentHangs() {
+        stopHangs();
+        g_intervalHandle = setInterval(hang, hangInterval);
+      }
+
+    </script>
+  </head>
+  <body>
+    <div style="position: fixed; left:0px; right:0px; padding: 10px;">
+      Pointer co-ordinates: (<span id="x">0</span>, <span id="y">0</span>)<br />
+      <button onclick="startIntermittentHangs()">Induce main thread jank.</button>
+      <button onclick="stopHangs()">Stop jank.</button><br /><br />
+      <div id="expander" style="height:100px;width:150px;border: 5px solid;">Main thread animation.</div><br />
+      <div style="width: 500px; height: 150px; background-color: #ffffff;">
+      <ul>
+        <li>Must be on Chrome Canary 75.0.3769.0 or higher for this to work.</li>
+        <li>Click on "Induce main thread jank" and try to scroll by clicking repeatedly on the scrollbar arrows. Notice that the scrolling is extremely janky.</li>
+        <li>Now enable "Compositor threaded scrollbar scrolling" from about:flags and try to scroll by clicking repeatedly on the scrollbar arrows (thumb drag and
+        arrow press-and-hold is not yet implemented).</li>
+      </ul>
+      </div>
+    </div>
+    <div style="width:500vw; height:100px; background-color: #00ff00;"></div>
+    <div style="width:100px; height:500vh; background-color: #ff0000;"></div>
+  </body>
+</html>
