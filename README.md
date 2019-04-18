@@ -8,6 +8,8 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## Features
 
+* EUDC
+  * [EUDC Explainer](EUDC/explainer.md)
 * High Contrast
   * [High Contrast Explainer](HighContrast/explainer.md)
 * Highlight API
