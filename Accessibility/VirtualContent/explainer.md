@@ -2,7 +2,7 @@
 
 Author: [Kevin Babbitt](https://github.com/kbabbitt)
 
-Last updated: 2019-01-02
+Last updated: 2019-04-23
 
 ## Introduction
 
@@ -73,13 +73,18 @@ function begin_load_next_section() {
 }
 
 // Callback triggered when the server responds with next section of content.
-function end_load_next_section() {
+function end_load_next_section(response) {
   // Insert response payload into the DOM.
   document.getElementById("main").appendChild(...);
 
   // Signal to the user that we're done loading.
   document.getElementById("loading_spinner").style.visibility = "hidden";
   document.getElementById("announcer").textContent = "Next section loaded.";
+
+  // Update the state of the virtual content container.
+  if (response.isAtEndOfDocument) {
+      document.getElementById("main").removeAttribute("aria-virtualcontent");
+  }
 }
 
 // Listens for scroll events and responds accordingly.
@@ -114,12 +119,15 @@ window.addEventListener("scroll", on_scroll_changed);
 3. The AT searches the parent chain of the last heading element (i.e. the current location of its reading cursor). It finds the `main` element and sees that it is a virtual content container.
 4. The AT reacts to the presence of a virtual content container by looking for a scrollable element, starting with the virtual content container itself and searching the parent chain from there. It finds the scroller for the document itself and asks the user agent to scroll to the bottom of the page. *(Privacy note: APIs already exist on some operating systems that allow an AT to do this without fingerprinting the user.)*
 5. The user agent scrolls as requested by the AT and generates a scroll event.
-6. The `on_scroll_changed()` function is called in reaction to the scroll event. Script code issues a request for additional content, displays a loading spinner, and announces that additional content is being loaded using an ARIA live region.
-7. When additional content is received, the `end_load_next_section()` function is called. Script code inserts the new content into the DOM at the bottom of the virtual content container, hides the loading spinner, and announces to the user that additional content is available.
+6. The `on_scroll_changed()` function is called in reaction to the scroll event. Script code issues a request to a backing server for additional content, displays a loading spinner, and announces that additional content is being loaded using an ARIA live region.
+7. The backing server sends back a payload with additional content. Upon receiving the payload, the `end_load_next_section()` function is called. Script code inserts the new content into the DOM at the bottom of the virtual content container, hides the loading spinner, and announces to the user that additional content is available.
 8. The user agent notifies the platform accessibility API that the web page content has changed.
 9. The user hears the announcement that new content has been loaded. He/she once again directs the AT to navigate to the next heading.
 10. Using the platform accessibility API, the AT searches the web page for a subsequent heading.
 11. The AT finds a heading in the newly loaded content, moves its reading cursor to that heading, and reads the heading to the user.
+12. The user continues navigating through document headings in the same fashion.
+13. Eventually, the backing server sends a content payload which also contains a signal that the end of the document has been reached. Script code removes the `aria-virtualcontent` attribute from the `main` element to indicate there is no more virtualized content.
+14. The next time the user attempts to navigate to the next heading, the AT searches for a virtual content container, finds none, and announces there are no further headings in the document.
 
 ## Alternate solutions
 
