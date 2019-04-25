@@ -19,13 +19,13 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
   * [UIA intent-to-implement](Accessibility/UIA/i2i.md)
 
 ## Editing
+* EditContext API
+  * [EditContext API Explainer](EditContext/explainer.md)
 * Highlight API
   * [Highlight API Explainer](highlight/explainer.md)
 * TSF1 
   * [TSF1 Explainer](TSF1/explainer.md)
-* EditContext API
-  * [EditContext API Explainer](EditContext/explainer.md)
-  
+
 ## Fonts
 * End User Defined Characters
   * [EUDC Explainer](EUDC/explainer.md)
