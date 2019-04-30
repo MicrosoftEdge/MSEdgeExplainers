@@ -38,7 +38,7 @@ Marking an element as a virtual content container establishes a contract between
 * If the virtual content container is also a [scroll container](https://www.w3.org/TR/css-overflow-3/#scroll-container), the web page ***MUST*** begin steps to realize content no later than when the virtual content container is scrolled to a limit where a virtual content edge exists.
 * If the virtual content container is not a [scroll container](https://www.w3.org/TR/css-overflow-3/#scroll-container), the web page ***MUST*** begin steps to realize content no later than when a virtual content edge enters the [scrollport](https://www.w3.org/TR/css-overflow-3/#scrollport) of its nearest ancestor [scroll container](https://www.w3.org/TR/css-overflow-3/#scroll-container).
 
-## Example Use 1: Document with Headings
+## Example 1: Document with Headings
 
 The following simplified example shows one potential usage pattern for `aria-virtualcontent`.
 
@@ -129,14 +129,14 @@ window.addEventListener("scroll", on_scroll_changed);
 13. Eventually, the backing server sends a content payload which also contains a signal that the end of the document has been reached. Script code removes the `aria-virtualcontent` attribute from the `main` element to indicate there is no more virtualized content.
 14. The next time the user attempts to navigate to the next heading, the AT searches for a virtual content container, finds none, and announces there are no further headings in the document.
 
-## Example Use 2: Tabular data
+## Example 2: Tabular data
 
 This example illustrates one use of `aria-virtualcontent` for virtualized content in the inline direction. The document in this scenario is a table of bug reports with the following columns: report ID, report date, status, assigned to, title, fix date, fixed by. The last two columns have been virtualized out of the DOM based on the viewport width. When realized, these two columns do not have any data for bugs that are not yet fixed.
 
 ```
 <html>
 <body>
-<table aria-virtualcontent="block-end">
+<table aria-virtualcontent="block-end" aria-colcount="7">
   <thead>
     <tr aria-virtualcontent="inline-end">
       <th>ID</th>
@@ -144,6 +144,8 @@ This example illustrates one use of `aria-virtualcontent` for virtualized conten
       <th>Assigned To</th>
       <th>Report Date</th>
       <th>Title</th>
+ <!-- <th>Fix Date</th> - Virtualized -->
+ <!-- <th>Fixed By</th> - Virtualized -->
     </tr>
   </thead>
   <tbody>
@@ -153,6 +155,7 @@ This example illustrates one use of `aria-virtualcontent` for virtualized conten
       <td>Alice</td>
       <td>April 21</td>
       <td>Widget freezes up when the network is slow</td>
+ <!-- No Fix Date or Fixed By since the issue is not yet fixed -->
     </tr>
     <tr aria-virtualcontent="inline-end">
       <td>342</td>
@@ -160,6 +163,8 @@ This example illustrates one use of `aria-virtualcontent` for virtualized conten
       <td>Bob</td>
       <td>April 22</td>
       <td>Crash when shift-double-clicking the widget</td>
+ <!-- <td>Fix Date</td> - Virtualized -->
+ <!-- <td>Fixed By</td> - Virtualized -->
     </tr>
     <tr>
       <td>346</td>
@@ -167,6 +172,7 @@ This example illustrates one use of `aria-virtualcontent` for virtualized conten
       <td>Unasssigned</td>
       <td>April 25</td>
       <td>Widget doesn't repaint when user rotates screen</td>
+ <!-- No Fix Date or Fixed By since the issue is not yet fixed -->
     </tr>
   </tbody>
 </table>
@@ -174,9 +180,11 @@ This example illustrates one use of `aria-virtualcontent` for virtualized conten
 </html>
 ```
 
+Backing script performing similar functions as Example 1's virtualcontent.js is assumed to be present.
+
 ### Walkthrough
 
-With appropriate backing script, an AT navigating the above content by table cells might result in the following flow:
+An AT navigating by the above content table cells might result in the following flow:
 1. The AT stops on and reads out each of the five realized cells in the header row.
 2. Upon reaching the end of the row, the AT discovers that the header row is a virtual content container and scrolls the document in the inline-end direction.
 3. Backing script realizes headers and data for the "Fix date" and "Fixed by" columns. It also virtualizes headers and data for the "ID" and "Status" columns. There are no longer any virtualized cells in the inline-end direction, but all rows in the table now have virtualized cells in the inline-start direction. Accordingly, script sets `aria-virtualcontent="inline-start"` on all rows.
@@ -190,7 +198,7 @@ With appropriate backing script, an AT navigating the above content by table cel
 11. Backing script realizes content in the inline-end direction, virtualizes content in the inline-start direction, and updates `aria-virtualcontent` attributes, the same as in step 3.
 12. The AT stops on and reads out the two newly realized cells in the row for bug 342.
 13. Upon reaching the end of the row, the AT again checks for virtualized content in the inline-end direction and finds none, then moves on to the next row (the row for bug 346) and checks for virtualized content in the inline-start direction, the same as in step 5.
-14. Backing script realizes content in the inline-start direction, virtualizes content in the inline-end direction, and updates `aria-virtualcontent` attributes, the same as in step 6.
+14. Backing script realizes content in the inline-start direction, virtualizes content in the inline-end direction, and updates aria-virtualcontent attributes, the same as in step 6.
 15. The AT stops on and reads out each of the five realized cells in the row for bug 346.
 16. After reading the last realized cell in the row for bug 346, the AT checks for virtualized content in the inline-end direction and finds there is none. It looks for another row in the table and finds there are no more realized rows.
 17. The AT discovers that the table itself has virtualized content in the block-end direction. It scrolls the document in the block-end direction. Backing script realizes additional rows in the table, and the AT continues reading.
