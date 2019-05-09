@@ -2,7 +2,7 @@
 
 Author: [Kevin Babbitt](https://github.com/kbabbitt)
 
-Last updated: 2019-04-25
+Last updated: 2019-05-09
 
 ## Introduction
 
@@ -131,14 +131,14 @@ window.addEventListener("scroll", on_scroll_changed);
 
 ## Example 2: Tabular data
 
-This example illustrates one use of `aria-virtualcontent` for virtualized content in the inline direction. The document in this scenario is a table of bug reports with the following columns: report ID, report date, status, assigned to, title, fix date, fixed by. The last two columns have been virtualized out of the DOM based on the viewport width. When realized, these two columns do not have any data for bugs that are not yet fixed.
+This example illustrates one use of `aria-virtualcontent` for virtualized content in the inline direction. The document in this scenario is a table of bug reports with the following columns: report ID, report date, status, assigned to, title, fix date, fixed by. The last two columns have been virtualized out of the DOM based on the viewport width.
 
 ```
 <html>
 <body>
-<table aria-virtualcontent="block-end" aria-colcount="7">
+<table aria-virtualcontent="block-end inline-end" aria-colcount="7">
   <thead>
-    <tr aria-virtualcontent="inline-end">
+    <tr>
       <th>ID</th>
       <th>Status</th>
       <th>Assigned To</th>
@@ -151,13 +151,14 @@ This example illustrates one use of `aria-virtualcontent` for virtualized conten
   <tbody>
     <tr>
       <td>338</td>
-      <td>Assigned</td>
+      <td>Closed</td>
       <td>Alice</td>
       <td>April 21</td>
       <td>Widget freezes up when the network is slow</td>
- <!-- No Fix Date or Fixed By since the issue is not yet fixed -->
+ <!-- <td>Fix Date</td> - Virtualized -->
+ <!-- <td>Fixed By</td> - Virtualized -->
     </tr>
-    <tr aria-virtualcontent="inline-end">
+    <tr>
       <td>342</td>
       <td>Fixed</td>
       <td>Bob</td>
@@ -165,14 +166,6 @@ This example illustrates one use of `aria-virtualcontent` for virtualized conten
       <td>Crash when shift-double-clicking the widget</td>
  <!-- <td>Fix Date</td> - Virtualized -->
  <!-- <td>Fixed By</td> - Virtualized -->
-    </tr>
-    <tr>
-      <td>346</td>
-      <td>Untriaged</td>
-      <td>Unasssigned</td>
-      <td>April 25</td>
-      <td>Widget doesn't repaint when user rotates screen</td>
- <!-- No Fix Date or Fixed By since the issue is not yet fixed -->
     </tr>
   </tbody>
 </table>
@@ -184,24 +177,23 @@ Backing script performing similar functions as Example 1's virtualcontent.js is 
 
 ### Walkthrough
 
-An AT navigating by the above content table cells might result in the following flow:
+An AT navigating the above content by table cells might result in the following flow:
 1. The AT stops on and reads out each of the five realized cells in the header row.
-2. Upon reaching the end of the row, the AT discovers that the header row is a virtual content container and scrolls the document in the inline-end direction.
-3. Backing script realizes headers and data for the "Fix date" and "Fixed by" columns. It also virtualizes headers and data for the "ID" and "Status" columns. There are no longer any virtualized cells in the inline-end direction, but all rows in the table now have virtualized cells in the inline-start direction. Accordingly, script sets `aria-virtualcontent="inline-start"` on all rows.
+2. Upon reaching the end of the row, the AT discovers that the table has virtualized content in the inline-end direction and scrolls the document in that.
+3. Backing script realizes headers and data for the "Fix date" and "Fixed by" columns. It also virtualizes headers and data for the "ID" and "Status" columns. There are no longer any virtualized columns in the inline-end direction, but there are now virtualized columns in the inline-start direction. Accordingly, in the table's `aria-virtualcontent` attribute, script replaces the `inline-end` token with  `inline-start`.
 4. The AT stops on and reads out the two newly realized cells in the header row.
-5. Upon reaching the end of the row, the AT discovers that the row container does not contain virtualized content in the inline-end direction. It moves on to the next row (the row for bug 338) and discovers that it contains virtualized content in the inline-start direction. It scrolls the document in the inline-start direction.
-6. Backing script realizes headers and data for the "ID" and "Status" columns. It also virtualizes headers and data for the "Fix date" and "Fixed by" columns. There are no longer any virtualized cells in the inline-start direction, but some rows in the table now have virtualized cells in the inline-start direction. Script removes `aria-virtualcontent` from those rows that are fully realized (the rows for bugs 338 and 346) and sets `aria-virtualcontent="inline-end"` on those rows that have cells in the inline-end direction (the header row and the row for bug 342).
-7. The AT stops on and reads out each of the five realized cells in the row for bug 338.
-8. After reading the last realized cell in the row for bug 338, the AT checks for virtualized content in the inline-end direction and finds there is none. It moves on to the next row (the row for bug 342). It checks for virtualized content in the inline-start direction and finds there is none, so it simply advances to the first realized cell in the row for bug 342.
-9. The AT stops on and reads out each of the five realized cells in the row for bug 342.
-10. After reading the last realized cell in the row for bug 342, the AT checks for virtualized content in the inline-end direction and finds there is some. It scrolls the document in the inline-end direction.
-11. Backing script realizes content in the inline-end direction, virtualizes content in the inline-start direction, and updates `aria-virtualcontent` attributes, the same as in step 3.
-12. The AT stops on and reads out the two newly realized cells in the row for bug 342.
-13. Upon reaching the end of the row, the AT again checks for virtualized content in the inline-end direction and finds none, then moves on to the next row (the row for bug 346) and checks for virtualized content in the inline-start direction, the same as in step 5.
-14. Backing script realizes content in the inline-start direction, virtualizes content in the inline-end direction, and updates aria-virtualcontent attributes, the same as in step 6.
-15. The AT stops on and reads out each of the five realized cells in the row for bug 346.
-16. After reading the last realized cell in the row for bug 346, the AT checks for virtualized content in the inline-end direction and finds there is none. It looks for another row in the table and finds there are no more realized rows.
-17. The AT discovers that the table itself has virtualized content in the block-end direction. It scrolls the document in the block-end direction. Backing script realizes additional rows in the table, and the AT continues reading.
+5. Upon reaching the end of the row, the AT discovers that the table does not contain virtualized content in the inline-end direction. The next realized cell is the "Assigned To" cell in the row for bug 338. However, the table contains virtualized content in the inline-start direction, so the AT recognizes that the next realized cell is not the next cell in the overall table. The AT notes to itself that it is moving into the row for bug 338 and scrolls the document in the inline-start direction.
+6. Backing script realizes headers and data for the "ID" and "Status" columns. It also virtualizes headers and data for the "Fix date" and "Fixed by" columns. There are no longer any virtualized columns in the inline-start direction, but there are now virtualized columns in the inline-end direction. Accordingly, in the table's `aria-virtualcontent` attribute, script replaces the `inline-start` token with  `inline-end`.
+7. The AT moves to the first realized cell in the row for bug 338. In turn, it stops on and reads out each of the realized cells in that row.
+8. After reading the last realized cell in the row for bug 338, the AT checks for virtualized content in the inline-end direction and finds there is some. It scrolls the document in the inline-end direction.
+9. Backing script realizes content in the inline-end direction, virtualizes content in the inline-start direction, and updates the table's `aria-virtualcontent` attribute, the same as in step 3.
+10. The AT stops on and reads out the two newly realized cells in the row for bug 338.
+11. Upon reaching the end of the row, the AT again checks for virtualized content in the inline-end direction and finds none, then moves on to the next row (the row for bug 342) and checks for virtualized content in the inline-start direction, the same as in step 5.
+12. Backing script realizes content in the inline-start direction, virtualizes content in the inline-end direction, and updates the table's `aria-virtualcontent` attribute, the same as in step 6.
+13. The AT stops on and reads out each of the five realized cells in the row for bug 342, the same as in step 7.
+14. After reading the last realized cell in the row for bug 342, the AT checks for virtualized content in the inline-end direction and finds there is none. It looks for another row in the table and finds there are no more realized rows.
+15. However, the AT also discovers that the table has virtualized content in the block-end direction. The AT issues two scroll requests: first in the inline-start direction to return to the first columns in the table, then in the block-end direction to load additional rows.
+16. Backing script realizes the next few rows in the table, and the AT continues reading.
 
 ## Alternate solutions
 
