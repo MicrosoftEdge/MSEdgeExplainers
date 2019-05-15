@@ -35,6 +35,10 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
   * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) (~~[archived initial explainer](HTMLModules/explainer.md)~~)
   * [HTML Modules intent-to-implement](HTMLModules/i2i.md)
 
+## Controls
+* Password Reveal
+  * [Password Reveal Explainer](PasswordReveal/explainer.md)
+
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
 
