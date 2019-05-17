@@ -34,6 +34,8 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * HTML Modules
   * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) (~~[archived initial explainer](HTMLModules/explainer.md)~~)
   * [HTML Modules intent-to-implement](HTMLModules/i2i.md)
+* Synthetic Modules
+  * [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
 
 ## Controls
 * Password Reveal
