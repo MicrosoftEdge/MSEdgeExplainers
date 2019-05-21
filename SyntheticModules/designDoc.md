@@ -6,7 +6,7 @@ daniec@microsoft.com, sasebree@microsoft.com, travil@microsoft.com, pcupp@micros
 
 ## Introduction
 
-The following document proposes an implementation of [Synthetic Module Records](https://heycam.github.io/webidl/#synthetic-module-records) (originally propsed by [here](https://github.com/tc39/proposal-javascript-standard-library/pull/44) by Domenic) in Chromium.  Also proposed is an implementation of [CSS Modules](https://github.com/w3c/webcomponents/issues/759) and [JSON Modules](https://github.com/whatwg/html/pull/4407) using Synthetic Module Records.
+The following document proposes an implementation of [Synthetic Module Records](https://heycam.github.io/webidl/#synthetic-module-records) (originally propsed by [here](https://github.com/tc39/proposal-javascript-standard-library/pull/44) by Domenic) in Chromium.  Also proposed is an implementation of [CSS Modules](https://github.com/w3c/webcomponents/issues/759) and [JSON Modules](https://github.com/whatwg/html/pull/4407) using Synthetic Module Records.  It is expected that Synthetic Module Record will be used to support additional future module types as well, e.g. [WebIDL Modules](https://github.com/heycam/webidl/pull/675).
 
 At a high level, the changes are:
 - Introduce a `SyntheticModule` type in V8 to implement Synthetic Module Records in the ES module graph.
@@ -166,17 +166,17 @@ It is worth noting that Synthetic Module Record is capable of supporting more so
 ```C++
 public:
 ValueWrapperSyntheticModuleScript::ValueWrapperSyntheticModuleScript(
+    Modulator* modulator,
     v8::Local<v8::Value> value,
     const KURL& source_url,
     const KURL& base_url,
-    Modulator* modulator,
     const ScriptFetchOptions& options,
     const TextPosition& start_position);
 
+private:
 static v8::MaybeLocal<v8::Value> EvaluationSteps(v8::Local<v8::Context> context, v8::Local<v8::Module> module);
 
-private:
-ScopedPersistent<v8::Value> export_value;
+TraceWrapperV8Reference<v8::Value> export_value;
 ```
 
 The `ValueWrapperSyntheticModuleScript` constructor will do the following:
