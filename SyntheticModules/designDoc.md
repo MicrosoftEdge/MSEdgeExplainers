@@ -171,7 +171,7 @@ ValueWrapperSyntheticModuleScript::ValueWrapperSyntheticModuleScript(
     const KURL& source_url,
     const KURL& base_url,
     const ScriptFetchOptions& options,
-    const TextPosition& start_position);
+    const TextPosition& start_position = TextPosition::MinimumPosition());
 
 private:
 static v8::MaybeLocal<v8::Value> EvaluationSteps(v8::Local<v8::Context> context, v8::Local<v8::Module> module);
