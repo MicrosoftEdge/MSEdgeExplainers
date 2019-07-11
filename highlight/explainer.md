@@ -105,6 +105,8 @@ Setting ```rangeGroup1.priority = 1;``` would cause ```rangeGroup1``` to apply o
 
 Ranges are live ranges - DOM changes within one of the Range objects will result in the new contents being highlighted. Changes to the boundary points of Ranges in the HighlightsMap will result in the user-agent invalidating the view and repainting the changed highlights appropriately. If there are DOM/CSS changes that result in a different cascaded highlight map for a given element, and there exists one or more Range objects in the highlights map for the cascaded identifiers, the layout representation of that element should be notified that the painting of the element might have changed. Ranges that are positioned inside of documents that are not in the view are ignored. The HighlightsMap is per-document &mdash; therefore, Ranges that are positioned inside of a different document than the HighlightsMap it is a part of are ignored for rendering.
 
+Note that some browsers have layout limitations in that they are unable to apply ligatures across inline element boundaries.  As a result, text may appear to jump in online editors that implement their own selection using inline elements.  The highlight API offers an alternative way for these editors to implement their own selection without modifying the document and browsers must implement this API using painting techniques similar to those used for native browser selection to avoid impacting the layout of text.
+
 ## Removal of highlights
 
 Because Range objects are live ranges, they must be modified when web developers wish their contents to no longer be highlighted. This can be achieved by removing the Range from the corresponding HighlightRangeGroup, by passing it to the ```delete()``` method.
@@ -116,3 +118,11 @@ Consider refactoring the naming (```RangeDecorationMap``` and ```::range-decorat
 Should we allow empty Ranges to be rendered like a caret, or are they not rendered at all?
 
 How should inline 'inherit' values be treated? The cascaded values are resolved per usual, but a range can span multiple elements which could all have different 'computed' values for 'inherit'.
+
+How to treat existing highlight mechanisms built into the browser?  Should we establish a priority order for those so its clear how the author can defer to or override those built-in highlights?
+
+Some scenarios like highlighting the location of comments in a document require that when the highlight is clicked that some corresponding content be displayed.  Should ranges be made hit testable to accomodate this scenario?
+
+Static ranges have improved performance compared to live ranges.  Could static ranges be used instead?
+
+Obtaining a range from built-in elements and closed shadow roots may be important for extensions like Grammarly.  Should we define a mechanism to obtain a range that refers to the contents of built-in elements?  How would that be done for close shadow roots?

@@ -6,25 +6,46 @@ This repo is intended to be a starting place for explainers originating from the
 
 We welcome public discussion in issues on these explainers. Thanks for your interest! 
 
-## Features
-
+## Accessibility
+* ARIA Virtual Content
+  * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
 * High Contrast
-  * [High Contrast Explainer](HighContrast/explainer.md)
+  * [High Contrast Explainer](Accessibility/HighContrast/explainer.md)
+* Native Caret Browsing
+  * [Native Caret Browsing Explainer](Accessibility/CaretBrowsing/explainer.md)
+  * [Native Caret Browsing Design Doc](Accessibility/CaretBrowsing/designDoc.md)
+* UI Automation
+  * [UIA Explainer](Accessibility/UIA/explainer.md)
+  * [UIA intent-to-implement](Accessibility/UIA/i2i.md)
+
+## Editing
+* EditContext API
+  * [EditContext API Explainer](EditContext/explainer.md)
 * Highlight API
   * [Highlight API Explainer](highlight/explainer.md)
+* TSF1 
+  * [TSF1 Explainer](TSF1/explainer.md)
+
+## Fonts
+* End User Defined Characters
+  * [EUDC Explainer](EUDC/explainer.md)
+  
+## HTML
 * HTML Modules
   * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) (~~[archived initial explainer](HTMLModules/explainer.md)~~)
   * [HTML Modules intent-to-implement](HTMLModules/i2i.md)
-* Native Caret Browsing
-  * [Native Caret Browsing Explainer](CaretBrowsing/explainer.md)
-  * [Native Caret Browsing Design Doc](CaretBrowsing/designDoc.md)
-* Smooth Scrolling
+* Synthetic Modules
+  * [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
+
+## Controls
+* Password Reveal
+  * [Password Reveal Explainer](PasswordReveal/explainer.md)
+
+## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
-* TSF1 
-  * [TSF1 Explainer](TSF1/explainer.md)
-* UI Automation
-  * [UIA explainer](UIA/explainer.md)
-  * [UIA intent-to-implement](UIA/i2i.md)
-* Web App Manifest
-  * [ImageResource `color_scheme`](ImageResource-color_scheme/explainer.md)
-  * [Shortcuts](Shortcuts/explainer.md)
+
+## Web App Manifest
+* Image Resource
+  * [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
+* Shortcuts
+  * [Shortcuts Explainer](Shortcuts/explainer.md)

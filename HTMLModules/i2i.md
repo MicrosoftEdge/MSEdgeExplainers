@@ -22,7 +22,7 @@ We are proposing an extension of the ES6 Script Modules system to include HTML M
 
 ## Motivation
 
-The introduction of ES6 Script Modules has provided several benefits for javascript developers including more componentized code and better dependency management. However, easy access to declarative content has been a consistent limitation with Script Modules. For example, if one wants to pack a custom element definition in a module, how should the HTML for the element's shadow tree be created? Current solutions would involve generating it dynamically (document.createElement or innerHTML), but it would be preferable to simply write HTML and include it with the module. With HTML Modules this will be possible.
+The introduction of ES6 Script Modules has provided several benefits for JavaScript developers including more componentized code and better dependency management. However, easy access to declarative content has been a consistent limitation with Script Modules. For example, if one wants to pack a custom element definition in a module, how should the HTML for the element's shadow tree be created? Current solutions would involve generating it dynamically (document.createElement or innerHTML), but it would be preferable to simply write HTML and include it with the module. With HTML Modules this will be possible.
 
 There is clear demand for this functionality in the developer community -- see [this thread](https://github.com/w3c/webcomponents/issues/645) where ideas pertaining to HTML Modules have resulted in a great deal of developer and browser implementer engagement.
 
@@ -31,7 +31,7 @@ There is clear demand for this functionality in the developer community -- see [
 * **Global object pollution:** vars created in an HTML Import show up on the global object by default.  An ideal solution would minimize such side-effects.  Accordingly, global object pollution does not occur in ES6 Modules.
 * **Parse blocking with inline script:** the load of an HTML Import will block the main document's parser if included prior to an inline script element. ES6 Modules have defer semantics and thus do not block the parser.
 * **Independent of dependency resolution infrastructures between HTML Imports and HTML Modules:** since these systems were developed independently their infrastructures for dependency resolution don't talk to each other, leading to missed performance opportunities and to bugs like this one.
-* **Non-intuitive import pass through:** HTML Imports requre the consumer to access their content due to standard DOM queries like getElementById and querySelector. This is clumsy and limited relative to Script Modules' import/export statements that allow for explicit specification of the API surface provided by a module.
+* **Non-intuitive import pass through:** HTML Imports require the consumer to access their content due to standard DOM queries like getElementById and querySelector. This is clumsy and limited relative to Script Modules' import/export statements that allow for explicit specification of the API surface provided by a module.
 
 Integrating HTML Modules into the existing ES6 Module system, rather than creating it as a standalone component, will address these gaps.
 

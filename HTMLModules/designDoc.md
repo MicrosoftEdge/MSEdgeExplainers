@@ -103,7 +103,7 @@ We will also rename the [ScriptModule](https://cs.chromium.org/chromium/src/thir
 
 ### ModuleScriptLoader
 
-[ModuleScriptLoader](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_script_loader.h?type=cs&q=modulescriptloader&g=0&l=33) will still have the responsibility for managing the fetching and consruction of a given module, now generalized to support both JS modules and HTML modules.  It will now use the HTTP response header's Content-Type to determine whether a given module is created as HTML or JavaScript, as follows:
+[ModuleScriptLoader](https://cs.chromium.org/chromium/src/third_party/blink/renderer/core/loader/modulescript/module_script_loader.h?type=cs&q=modulescriptloader&g=0&l=33) will still have the responsibility for managing the fetching and construction of a given module, now generalized to support both JS modules and HTML modules.  It will now use the HTTP response header's Content-Type to determine whether a given module is created as HTML or JavaScript, as follows:
 
 ```C++
 if (mime_type == "text/html") {
@@ -117,7 +117,7 @@ if (mime_type == "text/html") {
 
 Note: per spec discussion [here](https://github.com/w3c/webcomponents/issues/742) a new MIME type may be introduced for HTML modules instead of reusing `text/html`.
 
-ModuleScriptLoader will continue to delagate to ModuleScriptFetcher to perform the actual fetch, and ModuleScriptFetcher will continue to deliver a ModuleScriptCreationParams back to ModuleScriptLoader upon fetch completion.  A MIME type will be added to ModuleScriptCreationParams so that it can be used by ModuleScriptLoader to determine which type of module to create.
+ModuleScriptLoader will continue to delegate to ModuleScriptFetcher to perform the actual fetch, and ModuleScriptFetcher will continue to deliver a ModuleScriptCreationParams back to ModuleScriptLoader upon fetch completion.  A MIME type will be added to ModuleScriptCreationParams so that it can be used by ModuleScriptLoader to determine which type of module to create.
 
 DocumentModuleScriptFetcher will be updated so that it doesn't block a response with a `text/html` MIME type.  Other ModuleScriptFetcher derived classes will remain unchanged as we still want to block `text/html` for Workers, ServiceWorkers, etc.
 
