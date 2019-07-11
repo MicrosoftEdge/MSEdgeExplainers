@@ -26,6 +26,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## Controls
 * [Password Reveal Explainer](PasswordReveal/explainer.md)
+* [Standardized Form Controls](https://github.com/WICG/form-controls-components)
 
 ## Navigation
 * [Arbitrary Text Fragments Explainer](Fragments/explainer.md)
