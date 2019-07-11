@@ -41,6 +41,10 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * Password Reveal
   * [Password Reveal Explainer](PasswordReveal/explainer.md)
 
+## Navigation
+* Arbitrary Text Fragments
+  * [Arbitrary Text Fragments Explainer](Fragments/explainer.md)
+
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
 
