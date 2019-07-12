@@ -15,8 +15,8 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 ## Editing
 * [EditContext API Explainer](EditContext/explainer.md)
 * [Highlight API Explainer](highlight/explainer.md)
-* [TSF1 Explainer](TSF1/explainer.md)
 * [PenEvents Explainer](PenEvents/explainer.md)
+* [TSF1 Explainer](TSF1/explainer.md)
 
 ## Fonts
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
