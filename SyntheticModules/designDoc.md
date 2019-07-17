@@ -198,3 +198,21 @@ The `ValueWrapperSyntheticModuleScript` constructor will do the following:
   - For a JavaScript MIME type, a `JSModuleScript` will be created as before.
   - For a CSS MIME type, the CSS parser will be applied to `params->GetSourceText()` and the resulting `CSSStyleSheet` will be used to construct a `ValueWrapperSyntheticModuleScript` with the `CSSStyleSheet` as the wrapped value.
   - For a JSON MIME type, the JSON parser will be applied to `params->GetSourceText()` and the resulting JSON `v8::Value` will be used to construct a `ValueWrapperSyntheticModuleScript` with the JSON value as the wrapped value.
+
+## Security considerations for new module types
+
+As we add module types other than JavaScript to the module system, we must be aware that future
+changes to the module infrastructure may have security implications that, even if benign to JavaScript, may be harmful for other resource types.
+
+For example, even though all modules are loaded with CORS, JavaScript code on the web still must be
+aware that it could be loaded cross-origin e.g. via `<script src="otherOrigin/victim.js">`.
+This is not the case for JSON as there are no web APIs that allow no-CORS loads of JSON resources
+(in some cases these too could be loaded via a `<script>` but there would be no way to
+reach in and access the actual JSON data).
+
+If a 'no-cors' mode was added to the module system, then there would now be a way to load JSON content cross-origin -- which would not have been the case if the hypothetical 'no-cors' module system was
+limited to JavaScript.
+
+Thus, as we add additional module types we must be exceedingly wary of any changes
+to the security properties of the module infrastructure overall as there are now security
+implications for more than just JavaScript resources.
