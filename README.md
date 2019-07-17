@@ -22,6 +22,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
   
 ## HTML
+* [CSS Modules Explainer](CSSModules/v1Explainer.md)
 * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md), ~~[archived initial explainer](HTMLModules/explainer.md)~~, and [intent-to-implement](HTMLModules/i2i.md)
 * [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
 * [Media Cache Reduction Explainer](MediaCacheReduction/explainer.md)
