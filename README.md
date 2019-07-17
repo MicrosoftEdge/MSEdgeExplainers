@@ -24,6 +24,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 ## HTML
 * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md), ~~[archived initial explainer](HTMLModules/explainer.md)~~, and [intent-to-implement](HTMLModules/i2i.md)
 * [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
+* [Media Cache Reduction Explainer](MediaCacheReduction/explainer.md)
 
 ## Controls
 * [Password Reveal Explainer](PasswordReveal/explainer.md)
