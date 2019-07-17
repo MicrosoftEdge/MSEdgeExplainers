@@ -9,10 +9,8 @@ The tests showed a 62mW improvement for the main battery rail with the change en
 ## Goals
 * To improve battery life for devices by reducing power consumption during media playback.
 * To minimize adverse impact on common scenarios that may rely on disk caching, specifically the optimization of seek time when the user forwards or rewinds by a few seconds.
-## Non-goals
-* To prevent caching in media scenarios that use methods other than 'Range' request headers for adaptive streaming.
-
-  For example, sites that use a series of smaller discrete transport stream files for their content (instead of Range requests) will still have caching enabled for those scenarios. The detection method for these type of streams would include parsing the URL to look for specific resource naming, such as '.ts' or '.m4s' file extensions. This approach was not pursued since it was a heuristic-based solution and was not based on an existing web standard.
+## Future Opportunities
+This change does not prevent caching in media scenarios that use methods other than 'Range' request headers for adaptive streaming. This means that sites which target segmented content through their URLs will still have caching enabled for their scenarios. For example, sites such as Yahoo and SlingTV use smaller discrete media files for each segment of their content, with a different URL for each file. Another example is YouTube, which specifies the range of the request through the URL query string, rather than through ‘Range’ request headers. The detection method for these type of streams would include parsing the URL to look for specific resource naming, such as '.ts' or '.m4s' file extensions, or ‘&Range=’ in the URL query string. This approach was not pursued since it was a heuristic-based solution and was not based on an existing web standard.
 ## Use-cases
 For adaptive streaming content that uses the 'Range' HTTP request header to obtain partial media resources, this change will prevent the content from being cached to disk during playback.
 
