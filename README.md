@@ -43,3 +43,6 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 ## Web App Manifest
 * [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
 * [Shortcuts Explainer](Shortcuts/explainer.md)
+
+## Web Performance Measurement
+* [Frame Timing Use Cases](FrameTiming/use_cases.md)
