@@ -432,16 +432,16 @@ The audio offload runs showed an average savings of ~150mW improvement.
 **Audio Offload Runs**
 
 Audio Offload Average Power: **5993.3	mW**
-Run 1: 6068.9 mW
-Run 2: 5975.6 mW
-Run 3: 5935.4 mW
+* Run 1: 6068.9 mW
+* Run 2: 5975.6 mW
+* Run 3: 5935.4 mW
 
 **Non-Audio Offload Runs**
 
 Non-Audio Offload Average Power: **6148.133333	mW**
-Run 1: 6237.4 mW
-Run 2: 6099.0 mW
-Run 3: 6108.0 mW
+* Run 1: 6237.4 mW
+* Run 2: 6099.0 mW
+* Run 3: 6108.0 mW
 
 # Phase II
 This explainer covers the initial work to get audio offload enabled - but the feature is not complete with just this work. There are some additional pieces of work that will be required to make audio offload work well enough to be enabled by default.
