@@ -24,6 +24,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 ## HTML
 * [CSS Modules Explainer](CSSModules/v1Explainer.md)
 * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md), ~~[archived initial explainer](HTMLModules/explainer.md)~~, and [intent-to-implement](HTMLModules/i2i.md)
+* [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
 * [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
 * [Media Cache Reduction Explainer](MediaCacheReduction/explainer.md)
 
