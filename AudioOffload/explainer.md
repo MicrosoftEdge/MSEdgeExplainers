@@ -432,94 +432,16 @@ The audio offload runs showed an average savings of ~150mW improvement.
 **Audio Offload Runs**
 
 Audio Offload Average Power: **5993.3	mW**
-<pre>
-|    Line #    |    Channel Name    |    Start Time (ns)    |    End Time (ns)    |    Energy (mJ)    |    Power (mW)    |
-|--------------|--------------------|-----------------------|---------------------|-------------------|------------------|
-|    1         |    EMI_BATTERY     |                       |                     |    32705362       |    60689         |
-|    2         |    EMI_3VSB        |                       |                     |    1321727        |    2452          |
-|    3         |    EMI_BACKLT      |                       |                     |    1068008        |    1981          |
-|    4         |    EMI_5VSB        |                       |                     |    311834         |    578           |
-|    5         |    EMI_CORE        |                       |                     |    233385         |    433           |
-|    6         |    EMI_1P2V_DUA    |                       |                     |    195375         |    362           |
-|    7         |    EMI_1VSB        |                       |                     |    95357          |    176           |
-|    8         |    EMI_GPU         |                       |                     |    72902          |    135           |
-|    9         |    EMI_3P3VSSD     |                       |                     |    71592          |    132           |
-|    10        |    EMI_1P8_VSB     |                       |                     |    49081          |    91            |
-|    11        |    EMI_WLAN        |                       |                     |    24382          |    45            |
-|              |                    |                       |                     |                   |                  |
-|    Line #    |    Channel Name    |    Start Time (ns)    |    End Time (ns)    |    Energy (mJ)    |    Power (mW)    |
-|    1         |    EMI_BATTERY     |                       |                     |    32268340       |    59756         |
-|    2         |    EMI_3VSB        |                       |                     |    1310437        |    2426          |
-|    3         |    EMI_BACKLT      |                       |                     |    1058634        |    1960          |
-|    4         |    EMI_5VSB        |                       |                     |    309271         |    572           |
-|    5         |    EMI_CORE        |                       |                     |    225163         |    416           |
-|    6         |    EMI_1P2V_DUA    |                       |                     |    190624         |    353           |
-|    7         |    EMI_1VSB        |                       |                     |    92898          |    172           |
-|    8         |    EMI_GPU         |                       |                     |    71998          |    133           |
-|    9         |    EMI_3P3VSSD     |                       |                     |    69273          |    128           |
-|    10        |    EMI_1P8_VSB     |                       |                     |    47449          |    87            |
-|    11        |    EMI_WLAN        |                       |                     |    19463          |    36            |
-|              |                    |                       |                     |                   |                  |
-|    Line #    |    Channel Name    |    Start Time (ns)    |    End Time (ns)    |    Energy (mJ)    |    Power (mW)    |
-|    1         |    EMI_BATTERY     |                       |                     |    35611592       |    59354         |
-|    2         |    EMI_3VSB        |                       |                     |    1438604        |    2397          |
-|    3         |    EMI_BACKLT      |                       |                     |    1183001        |    1971          |
-|    4         |    EMI_5VSB        |                       |                     |    347155         |    578           |
-|    5         |    EMI_CORE        |                       |                     |    249628         |    416           |
-|    6         |    EMI_1P2V_DUA    |                       |                     |    205014         |    341           |
-|    7         |    EMI_1VSB        |                       |                     |    99860          |    166           |
-|    8         |    EMI_GPU         |                       |                     |    79588          |    132           |
-|    9         |    EMI_3P3VSSD     |                       |                     |    63097          |    105           |
-|    10        |    EMI_1P8_VSB     |                       |                     |    56161          |    93            |
-|    11        |    EMI_WLAN        |                       |                     |    14517          |    24            |
-|    10        |    EMI_1P8_VSB     |                       |                     |    47494          |    85            |
-|    11        |    EMI_WLAN        |                       |                     |    12160          |    21            |
-</pre>
+Run 1: 6068.9 mW
+Run 2: 5975.6 mW
+Run 3: 5935.4 mW
 
 **Non-Audio Offload Runs**
 
 Non-Audio Offload Average Power: **6148.133333	mW**
-<pre>
-|    Line #    |    Channel Name    |    Start Time (ns)    |    End Time (ns)    |    Energy (mJ)    |    Power (mW)    |
-|--------------|--------------------|-----------------------|---------------------|-------------------|------------------|
-|    1         |    EMI_BATTERY     |                       |                     |    32093284       |    62374         |
-|    2         |    EMI_3VSB        |                       |                     |    1258539        |    2446          |
-|    3         |    EMI_BACKLT      |                       |                     |    1031555        |    2004          |
-|    4         |    EMI_5VSB        |                       |                     |    310408         |    603           |
-|    5         |    EMI_CORE        |                       |                     |    242490         |    471           |
-|    6         |    EMI_1P2V_DUA    |                       |                     |    187028         |    363           |
-|    7         |    EMI_1VSB        |                       |                     |    93139          |    181           |
-|    8         |    EMI_3P3VSSD     |                       |                     |    83937          |    163           |
-|    9         |    EMI_GPU         |                       |                     |    67777          |    131           |
-|    10        |    EMI_1P8_VSB     |                       |                     |    50039          |    97            |
-|    11        |    EMI_WLAN        |                       |                     |    30514          |    59            |
-|              |                    |                       |                     |                   |                  |
-|    Line #    |    Channel Name    |    Start Time (ns)    |    End Time (ns)    |    Energy (mJ)    |    Power (mW)    |
-|    1         |    EMI_BATTERY     |                       |                     |    36593131       |    60990         |
-|    2         |    EMI_3VSB        |                       |                     |    1437721        |    2396          |
-|    3         |    EMI_BACKLT      |                       |                     |    1207011        |    2011          |
-|    4         |    EMI_5VSB        |                       |                     |    357909         |    596           |
-|    5         |    EMI_CORE        |                       |                     |    272882         |    454           |
-|    6         |    EMI_1P2V_DUA    |                       |                     |    212324         |    353           |
-|    7         |    EMI_1VSB        |                       |                     |    104181         |    173           |
-|    8         |    EMI_3P3VSSD     |                       |                     |    83722          |    139           |
-|    9         |    EMI_GPU         |                       |                     |    79145          |    131           |
-|    10        |    EMI_1P8_VSB     |                       |                     |    51662          |    86            |
-|    11        |    EMI_WLAN        |                       |                     |    13793          |    23            |
-|              |                    |                       |                     |                   |                  |
-|    Line #    |    Channel Name    |    Start Time (ns)    |    End Time (ns)    |    Energy (mJ)    |    Power (mW)    |
-|    1         |    EMI_BATTERY     |                       |                     |    33990240       |    61080         |
-|    2         |    EMI_3VSB        |                       |                     |    1336069        |    2400          |
-|    3         |    EMI_BACKLT      |                       |                     |    1110473        |    1995          |
-|    4         |    EMI_5VSB        |                       |                     |    333166         |    598           |
-|    5         |    EMI_CORE        |                       |                     |    255979         |    460           |
-|    6         |    EMI_1P2V_DUA    |                       |                     |    196598         |    353           |
-|    7         |    EMI_1VSB        |                       |                     |    97019          |    174           |
-|    8         |    EMI_3P3VSSD     |                       |                     |    82081          |    147           |
-|    9         |    EMI_GPU         |                       |                     |    73457          |    131           |
-|    10        |    EMI_1P8_VSB     |                       |                     |    47494          |    85            |
-|    11        |    EMI_WLAN        |                       |                     |    12160          |    21            |
-</pre>
+Run 1: 6237.4 mW
+Run 2: 6099.0 mW
+Run 3: 6108.0 mW
 
 # Phase II
 This explainer covers the initial work to get audio offload enabled - but the feature is not complete with just this work. There are some additional pieces of work that will be required to make audio offload work well enough to be enabled by default.
