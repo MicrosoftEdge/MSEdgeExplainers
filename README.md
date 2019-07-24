@@ -46,3 +46,6 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## Web Performance Measurement
 * [Frame Timing Use Cases](FrameTiming/use_cases.md)
+
+## 3D / Immersive Experiences
+* [Native GLTF Pre-explainer](https://github.com/immersive-web/proposals/issues/52)
