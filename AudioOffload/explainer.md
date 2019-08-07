@@ -545,19 +545,25 @@ The first run for each case was from a fresh install (so no cached data), and th
 
 Each trace was pared down to the 100 second - 700 second time window to reflect steady state data.
 
-Average power consumption rate for each buffer size across the 3 runs:
-No Audio Offload: *6691.7 mW*
-20 ms:            *6545.7 mW*
-100 ms:           *6100.7 mW*
-1000 ms:          *6056.6 mW*
-2000 ms:          *6044.7 mW*
+High level metrics
+<pre>
+| Buffer           | Average Power Utilization (mW)   |
+|------------------|----------------------------------|
+| No Audio Offload | 6691.7                           | 
+| 20 ms            | 6545.7                           |
+| 100 ms           | 6100.7                           |
+| 1000 ms          | 6056.6                           |
+| 2000 ms          | 6044.7                           |
+</pre>
 
 (It is worth noting in the non-cached case the 1000ms -> 2000 ms gap was actually much wider at 6343.9 mW vs 6305.1 mW respectively. It may be worth taking further traces of the non-cached case to see if this is consistently in the ~40mW range; since non-cached may be a better representation of a typical user)
 
 Note: The Power column is 10x the actual value due to HW reporting.
 
+Full data set:
+
 <pre>
-|    No Audio Offload                        |                    |    AVERAGE        |                  |             |                    |                   |                  |             |                    |                   |                  |              |                |
+|    No Audio Offload                        |                    |                   |                  |             |                    |                   |                  |             |                    |                   |                  |    AVERAGE   |                |
 |--------------------------------------------|--------------------|-------------------|------------------|-------------|--------------------|-------------------|------------------|-------------|--------------------|-------------------|------------------|--------------|----------------|
 |    Run 1                                   |    Channel Name    |    Energy (mJ)    |    Power (mW)    |    Run 2    |    Channel Name    |    Energy (mJ)    |    Power (mW)    |    Run 3    |    Channel Name    |    Energy (mJ)    |    Power (mW)    |              |                |
 |    1                                       |    EMI_BATTERY     |    44814248       |    67901         |             |    EMI_BATTERY     |    42593021       |    66074         |             |    EMI_BATTERY     |    44070669       |    66776         |    NAO       |    6691.7      |
