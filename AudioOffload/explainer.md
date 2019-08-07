@@ -556,6 +556,8 @@ High level metrics
 | 2000 ms          | 6044.7                           |
 </pre>
 
+![High level metrics line chart](AudioOffload-Metrics2-Chart.png)
+
 (It is worth noting in the non-cached case the 1000ms -> 2000 ms gap was actually much wider at 6343.9 mW vs 6305.1 mW respectively. It may be worth taking further traces of the non-cached case to see if this is consistently in the ~40mW range; since non-cached may be a better representation of a typical user)
 
 Note: The Power column is 10x the actual value due to HW reporting.
