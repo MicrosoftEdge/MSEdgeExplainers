@@ -80,8 +80,8 @@ Adding a TextUpdate event handler:
 let editContext = new EditContext();
 // Add EditContext event listeners
 editContext.addEventListener("textupdate", e => {
-// Update the text in the local buffer
-buffer = buffer.substr(0, e.updateRange.start) + e.updateText + buffer.substr(e.updateRange.end);
+    // Update the text in the local buffer
+    buffer = buffer.substr(0, e.updateRange.start) + e.updateText + buffer.substr(e.updateRange.end);
 });
 
 editContext.focus();
@@ -95,11 +95,11 @@ Adding a TextFormatUpdate event handler:
 let editContext = new EditContext();
 // Add EditContext event listeners
 editContext.addEventListener("textformatupdate", e => {
-formatRange = e.formatRange;
-underlineColor = e.underlineColor;
-backgroundColor = e.backgroundColor;
-compositionTextDecorationColor = e.textDecorationColor;
-compositionTextUnderlineStyle = e.textUnderlineStyle;
+    formatRange = e.formatRange;
+    underlineColor = e.underlineColor;
+    backgroundColor = e.backgroundColor;
+    compositionTextDecorationColor = e.textDecorationColor;
+    compositionTextUnderlineStyle = e.textUnderlineStyle;
 });
 
 editContext.focus();
@@ -208,8 +208,8 @@ Multiple approaches have been discussed during F2F editing meetings and through 
     * Includes implementing boundaries for selection so that it doesn't extend across the boundary of an editable element.
 * Editable elements participate in the view such that they have a size and position known to the browser for themselves and their contents
 * Provide editing operations that are specific to the type of editable element:
-    * Editing commands such as Delete, ForwardDelete, insertText, insertParagraph etc is executed only 
-    if the focused node is editable. Some "special" keys are not sent to the editor to execute the corresponding command if there is a default handler associated with it. These default handlers will execute if the element is not editable. These are only defined for some specific keys such as Tab, Enter, Escape, Space bar etc. For ex: Space bar is handled in the KeyPress event. First the event is handled if the node is editable, else it goes to the default handler where it does scrolling of the content if there is a scrolbar associated with the focused element.
+    * Editing commands such as Delete, ForwardDelete, insertText, insertParagraph etc is executed only if the focused node is editable.
+      Some "special" keys are not sent to the editor to execute the corresponding command if there is a default handler associated with it. These default handlers will execute if the element is not editable. These are only defined for some specific keys such as Tab, Enter, Escape, Space bar etc. For ex: Space bar is handled in the KeyPress event. First the event is handled if the node is editable, else it goes to the default handler where it does scrolling of the content if there is a scrollbar associated with the focused element.
 	* Caret is only painted inside editable regions. Operations such as dragging a link/text inside an editable region will move the caret wherever the text is dragged. Releasing the mouse just pastes the text at that location.
 	* Enabling/disabling spellcheck provider.
 	* Double tap touch gesture sometimes zooms in a non-editable area. Inside an editable element, double tap selects the word with grippers.
