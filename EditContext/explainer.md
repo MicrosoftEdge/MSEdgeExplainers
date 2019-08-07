@@ -41,11 +41,138 @@ Below the two animated gifs contrast the experience touching the screen to place
 
 ## Proposal:
 To avoid the side-effects that come from using editable elements to integrate with input services, we propose using a new object, EditContext, that when created provides a connection to the operating system's input services.
-The EditContext is an abstraction over a shared, plain-text input buffer that provides the underlying platform with a view of the content being edited. Creating an EditContext conceptually tells the browser to instantiate the appropriate machinery to create a target for text input operations. In addition to maintaining a shared buffer, the EditContext also has the notion of selection, expressed as offsets into the buffer, state to describe layout of bounds of the view of the editable region, as well as the bounds of the selection. These values are provided in JavaScript to the EditContext and communicated by the browser to the underlying platform to enable rich input experiences.
+
+The EditContext is an abstraction over a shared, plain-text input buffer that provides the underlying platform with a view of the content being edited. Creating an EditContext conceptually tells the browser to instantiate the appropriate machinery to create a target for text input operations. In addition to maintaining a shared buffer, the EditContext also has the notion of selection, expressed as offsets into the buffer, state to describe the layout bounds of the view of the editable region, as well as the bounds of the selection. These values are provided in JavaScript to the EditContext in terms of client coordinates and communicated by the browser to the underlying platform to enable rich input experiences.
+
 Having a shared buffer and selection for the underlying platform allows it to provide input methods with context regarding the contents being edited, for example, to enable better suggestions while typing. Because the buffer and selection are stateful, updating the contents of the buffer is a cooperative process between the characters coming from user input and changes to the content that are driven by other events. Cooperation takes place through a series of events dispatched on the EditContext to the web application &mdash; these events are requests from the underlying platform to read or update the text of the web application. The web application can also proactively communicate changes in its text to the underlying platform by using methods on the EditContext.
+
 A web application is free to create multiple EditContexts if there are multiple distinct editable areas in the application. Only the focused EditContext (designated by calling the focus method on the EditContext object) receives updates from the system's input services. Note that the concept of the EditContext being focused is separate from that of the document's activeElement which will continue to determine the target for dispatching keyboard events.
 
-[API usage examples](examples.md)
+## EditContext WebIDL file:
+[EditContext WebIDL](editcontext.webidl)
+
+## API usage examples:
+### Example 1
+
+Creating an EditContext: EditContext can be created either by using a dictionary to initialize its various members or use the default constructor
+
+```javascript
+let selectionRange = new EditContextTextRange(11, 11); // stores selection offsets
+let editContextDict = {
+	editContextType: "text",
+	editContextText: "Hello world",
+	editContextSelection: selectionRange,
+	action: "enter",
+	autocorrect: false,
+	spellcheck: false
+
+};
+let editContext = new EditContext(editContextDict);
+
+editContext.focus();
+```
+
+### Example 2
+
+Adding a TextUpdate event handler:
+
+```javascript
+let editContext = new EditContext();
+// Add EditContext event listeners
+editContext.addEventListener("textupdate", e => {
+// Update the text in the local buffer
+buffer = buffer.substr(0, e.updateRange.start) + e.updateText + buffer.substr(e.updateRange.end);
+});
+
+editContext.focus();
+```
+
+### Example 3
+
+Adding a TextFormatUpdate event handler:
+
+```javascript
+let editContext = new EditContext();
+// Add EditContext event listeners
+editContext.addEventListener("textformatupdate", e => {
+formatRange = e.formatRange;
+underlineColor = e.underlineColor;
+backgroundColor = e.backgroundColor;
+compositionTextDecorationColor = e.textDecorationColor;
+compositionTextUnderlineStyle = e.textUnderlineStyle;
+});
+
+editContext.focus();
+```
+
+### Example 4
+
+Text/Selection/Layout Change notifications to EditContext:
+
+```javascript
+	const appText = "Hello"
+
+    let editContext = new EditContext();
+    editContext.textChanged(/*startOffset*/0, /*endOffset*/0, appText)
+    editContext.selectionChanged(new EditContextTextRange(appText.length, appText.length))
+    var clientRect = target.getBoundingClientRect() // target is the focused element
+    // bug: coordinates seem incorrect.
+    const editControlRect = new DOMRect(
+        /*x*/clientRect.x, 
+        /*y*/clientRect.y,
+        /*width*/clientRect.width,
+        /*height*/clientRect.height)
+
+    editContext.layoutChanged(
+        editControlRect,
+        /*selection rect*/editControlRect
+    )
+    editContext.focus()
+```
+### Example 5
+
+ScrollIntoView to EditContext when focus is set and the software keyboard occludes the selection:
+
+```javascript
+	const editable = document.getElementById("focusable-and-editable")
+    editable.addEventListener("focusin", handleFocusIn)
+    editable.addEventListener("focusout", handleFocusOut)
+    editable.addEventListener("pointerdown", handlePointerDown)
+
+    const editContext = new EditContext()
+
+    function handleFocusIn(e) {
+        editContext.focus()
+    }
+
+    function handleFocusOut(e) {
+        editContext.blur()
+    }
+
+    function handlePointerDown(e) {
+        
+        const range = document.caretRangeFromPoint(e.clientX, e.clientY)
+        const rangeRect = range.getBoundingClientRect()
+        const editRect = editable.getBoundingClientRect()
+
+        editContext.layoutChanged(
+            /*editable*/new DOMRect(
+                editRect.x, 
+                editRect.y,
+                editRect.width,
+                editRect.height
+            ),
+            /*selection*/new DOMRect(
+                rangeRect.x, 
+                rangeRect.y,
+                rangeRect.width,
+                rangeRect.height
+            )
+        )
+    }
+```
+
+[Sample EditContext Demo](edit_context_demo.html)
 
 While an EditContext is active, the text services framework may read the following state:
 * Text content
@@ -56,7 +183,7 @@ While an EditContext is active, the text services framework may read the followi
 The text services framework can also request that the buffer or view of the application be modified by requesting that:
 
 * The text contents be updated
-* The selection of be relocated
+* The selection be relocated
 * The text contents be marked over a particular range, for example to indicate visually where composition is occurring
 
 The web application is free to communicate before, after or during a request from the underlying platform that its:
@@ -64,7 +191,7 @@ The web application is free to communicate before, after or during a request fro
 * Text content has changed
 * Selection offsets have changed
 * The location (on the screen) of selection or content has changed
-* The preferred mode of input has changed, for example, to provide software keyboard specialization 
+* The preferred mode of input has changed, for example, to provide software keyboard specialization
 
 ## Alternatives:
 Multiple approaches have been discussed during F2F editing meetings and through online discussions.
@@ -74,8 +201,50 @@ Multiple approaches have been discussed during F2F editing meetings and through 
 
 * As an alternative to `beforeInput` Google has proposed a roadmap in [Google Chrome Roadmap Proposal](https://docs.google.com/document/d/10qltJUVg1-Rlnbjc6RH8WnngpJptMEj-tyrvIZBPSfY/edit) where it was proposed to use existing browser primitives solving CE problems with textarea buffer approach, similar to what developers have already been doing. While we agree with it in concept, we don't think there is a clean way to solve this with existing primitives. Hence, we are proposing EditContext API.
 
+## Open Issues:
+#### What services do editable elements provide?
+* Integrate with the browser's native selection so the user can express where editing operations should occur
+    * This includes displaying a caret to mark an insertion point for text
+    * Includes implementing boundaries for selection so that it doesn't extend across the boundary of an editable element.
+* Editable elements participate in the view such that they have a size and position known to the browser for themselves and their contents
+* Provide editing operations that are specific to the type of editable element:
+    * Editing commands such as Delete, ForwardDelete, insertText, insertParagraph etc is executed only 
+    if the focused node is editable. Some "special" keys are not sent to the editor to execute the corresponding command if there is a default handler associated with it. These default handlers will execute if the element is not editable. These are only defined for some specific keys such as Tab, Enter, Escape, Space bar etc. For ex: Space bar is handled in the KeyPress event. First the event is handled if the node is editable, else it goes to the default handler where it does scrolling of the content if there is a scrolbar associated with the focused element.
+	* Caret is only painted inside editable regions. Operations such as dragging a link/text inside an editable region will move the caret wherever the text is dragged. Releasing the mouse just pastes the text at that location.
+	* Enabling/disabling spellcheck provider.
+	* Double tap touch gesture sometimes zooms in a non-editable area. Inside an editable element, double tap selects the word with grippers.
+	* Applying formatting commands such as bold, underline, italics etc inside an editable element.
+
+* Describe themselves to the OS input services:
+    * To indicate if a specialized software keyboard could be used to facilitate input.
+    * To enable composition and other forms of input like handwriting recognition and shape-writing.
+    * To communicate position information so specialized UI for input can be displayed nearby editable regions and software keyboards can scroll the viewport to avoid occluding the editable area.
+    * To provide a plain-text view of the document for context so that suggestions for auto-completion, spell-checking, and other services can be effectively provided.
+* Handle specialized input requests from the OS
+    * To highlight text to, for example, indicate where composition is occurring
+    * Replace arbitrary runs of text to, for example, facilitate composition updates, provide auto-correction, and other services.
+    * Change the location of selection or the caret.
+    * Blur to lose focus.
+* Describe themselves to accessibility services in a special way to indicate that they are editable regions of the document.
+* Enable clipboard operations
+* Automatically become a drop target
+* Undo Manager that maintains the stack of user actions.
+
+#### If we build an editor without editable elements, i.e. using the DOM to render the view of the editable document, what are we missing?
+* APIs to manage focus exist and can be applied to elements that are not editable.
+* Size and position can be computed for elements in the view that represent the editable document. APIs exist so this information can be queried and fulfill requests for accessibility and the OS input services if new APIs were created to communicate with those services.
+* We lose the ability receive OS input-oriented requests.  An API is needed to replace this.
+* We lose edit pattern support for accessibility.  An API is needed to replace this.
+* To compensate for the loss of caret the editing app must provide its own and may also provide its own selection.
+* APIs exist to register parts of the view as a drop target
+* Clipboard events will still fire on paste even when the area is not editable, but the editing app must take actions on its own.
+* The app must implement its own Undo Manager.
+
+#### Lower-level APIs provided by modern operating systems
+* To facilitate input using a variety of modalities, OSX, iOS, Android, Windows, and others have developed a stateful intermediary that sits between input clients (e.g. IMEs) and input consumers (i.e. an editing app).
+* This intermediary asks the editing app to produce an array-like, plain-text view of its document and allows various input clients to query for that text, for example, to increase the accuracy of suggestions while typing.  It also can request that regions of the document be highlighted or updated to facilitate composition.  It also can request the location of arbitrary parts of the document so that the UI can be augmented with input-client specific UI.
+* Browsers take advantage of these OS input services whenever an editable element is focused by registering for callbacks to handle the requests to highlight or update the content of the DOM and to fulfill the queries mentioned above.
+
 ## Additional Material:
 
 [Dev Design Draft](dev-design.md)
-
-[Open Issues](open-issues.md)
