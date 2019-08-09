@@ -22,7 +22,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
   
 ## HTML
-* [CSS Modules Explainer](CSSModules/v1Explainer.md)
+* [CSS Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) ~~[archived initial explainer](CSSModules/v1Explainer.md)~~
 * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md), ~~[archived initial explainer](HTMLModules/explainer.md)~~, and [intent-to-implement](HTMLModules/i2i.md)
 * [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
 * [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
