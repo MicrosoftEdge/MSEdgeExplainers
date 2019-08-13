@@ -1,3 +1,5 @@
+# MOVED. This doc is now maintained at https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md.  Please refer to that link for the latest content.
+
 # CSS Modules V1 Explainer
 
 Author: [@dandclark](https://github.com/dandclark)
