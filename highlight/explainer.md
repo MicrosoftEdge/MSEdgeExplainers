@@ -66,6 +66,8 @@ where 'text' is covered by a Range (as denoted by the ```|``` characters) in the
 
 There can be multiple such ranges for a given inline box and HighlightRangeGroups added to the map can overlap &mdash; in these cases, the associated text will be partitioned into a set of intervals, such that each member of the set has a unique collection of HighlightRangeGroups covering it. The style properties are then computed for each member in the set by applying the styles of the applicable HighlightRangeGroups in ascending priority order (based on the ```priority``` property), where the last write of a given property wins. In the event that HighlightRangeGroups overlap and have the same priority, the timestamp of when the HighlightRangeGroup was added to the map is used.
 
+Within a HighlightRangeGroup that contains multiple ranges, the ranges are styled in the order that they were added to the group. For example, if a highlight range group contains two Range objects - rangeA and rangeB - and rangeA was added to the group first, the highlight styles will be applied to rangeA before they are applied to rangeB.
+
 It is also possible to add entries in the HighlightsMap, without there being a corresponding ```::highlight()``` pseudo element for the associated document. In this case there are no cascaded properties to apply when painting inline boxes &mdash; only the inline properties directly set on the HighlightRangeGroup objects will apply (and if there are none, there will be no impact on painting).
 
 ## Example with overlapping Ranges
