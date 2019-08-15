@@ -1,18 +1,18 @@
 // Proposed webidl
-
+[Exposed=Window]
 interface EditContextTextRange {
-    void setStart(long start);
-    void setEnd(long end);
     attribute long start;
     attribute long end;
 };
 
+[Exposed=Window]
 interface TextUpdateEvent : Event {
     readonly attribute EditContextTextRange updateRange;
     readonly attribute DOMString updateText;
     readonly attribute EditContextTextRange newSelection;
 };
 
+[Exposed=Window]
 interface TextFormatUpdateEvent : Event {
     readonly attribute EditContextTextRange formatRange;
     readonly attribute DOMString underlineColor;
@@ -21,16 +21,33 @@ interface TextFormatUpdateEvent : Event {
     readonly attribute DOMString textUnderlineStyle;
 };
 
-enum EditContextInputType { "text", "password", "search", "email", "number", "telephone", "url", "date", "datetime" };
-enum EditContextInputAction { "enter", "done", "go", "next", "previous", "search", "send" };
+enum EditContextInputType { 
+    "text", 
+    "password", 
+    "search", 
+    "email", 
+    "number", 
+    "telephone", 
+    "url", 
+    "date", 
+    "datetime" 
+};
+
+enum EditContextInputAction { 
+    "enter", 
+    "done", 
+    "go", 
+    "next", 
+    "previous", 
+    "search", 
+    "send" 
+};
 
 dictionary EditContextInit {
-    EditContextInputType editContextType;
-    DOMString editContextText;
-    EditContextTextRange editContextSelection;
+    EditContextInputType type;
+    DOMString text;
+    EditContextTextRange selection;
     EditContextInputAction action;
-    boolean autocorrect;
-    boolean spellcheck;
 };
 
 /// @event name="textupdate", type="TextUpdateEvent"
@@ -39,19 +56,19 @@ dictionary EditContextInit {
 /// @event name="blur", type="FocusEvent"
 /// @event name="compositionstart", type="CompositionEvent"
 /// @event name="compositionend", type="CompositionEvent"
+[Exposed=Window]
+[Constructor(optional EditContextInit options)]
 interface EditContext : EventTarget {
     void focus();
     void blur();
-    void selectionChanged(EditContextTextRange updateSelection);
-    void layoutChanged(DOMRect controlBounds, DOMRect selectionBounds);
-    void textChanged(unsigned long start, unsigned long end, DOMString updateText);
+    void updateSelection(unsigned long start, unsigned long end);
+    void updateLayout(DOMRect controlBounds, DOMRect selectionBounds);
+    void updateText(unsigned long start, unsigned long end, DOMString updateText);
 
     readonly attribute DOMString text;
     readonly attribute EditContextTextRange selection;
     readonly attribute EditContextInputType type;
     readonly attribute EditContextInputAction action;
-    readonly attribute boolean autocorrect;
-    readonly attribute boolean spellcheck;
 
     // Event handler attributes
     attribute EventHandler ontextupdate;

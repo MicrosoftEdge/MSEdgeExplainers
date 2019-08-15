@@ -46,130 +46,97 @@ The EditContext is an abstraction over a shared, plain-text input buffer that pr
 
 Having a shared buffer and selection for the underlying platform allows it to provide input methods with context regarding the contents being edited, for example, to enable better suggestions while typing. Because the buffer and selection are stateful, updating the contents of the buffer is a cooperative process between the characters coming from user input and changes to the content that are driven by other events. Cooperation takes place through a series of events dispatched on the EditContext to the web application &mdash; these events are requests from the underlying platform to read or update the text of the web application. The web application can also proactively communicate changes in its text to the underlying platform by using methods on the EditContext.
 
-A web application is free to create multiple EditContexts if there are multiple distinct editable areas in the application. Only the focused EditContext (designated by calling the focus method on the EditContext object) receives updates from the system's input services. Note that the concept of the EditContext being focused is separate from that of the document's activeElement which will continue to determine the target for dispatching keyboard events.
+A web application is free to create multiple EditContexts if there are multiple distinct editable areas in the application. Only the focused EditContext (designated by calling the focus method on the EditContext object) receives updates from the system's input services. Note that the concept of the EditContext being focused is separate from that of the document's activeElement, which will continue to determine the target for dispatching keyboard events.
 
 ## EditContext WebIDL file:
 [EditContext WebIDL](editcontext.webidl)
 
-## API usage examples:
-### Example 1
-
-Creating an EditContext: EditContext can be created either by using a dictionary to initialize its various members or use the default constructor
+## Examples
+### Example 1: Creating an EditContext
 
 ```javascript
-let selectionRange = new EditContextTextRange(11, 11); // stores selection offsets
-let editContextDict = {
-	editContextType: "text",
-	editContextText: "Hello world",
-	editContextSelection: selectionRange,
-	action: "enter",
-	autocorrect: false,
-	spellcheck: false
+let editContext = new EditContext({
+    type: "text",
+    text: "Hello ",
+    selection: new EditContextTextRange(6, 6),
+    action: "enter"
+})
 
-};
-let editContext = new EditContext(editContextDict);
-
+// This EditContext is now the target for text input operations
 editContext.focus();
 ```
 
-### Example 2
+### Example 2: Handling textupdate Events
 
 Adding a TextUpdate event handler:
 
 ```javascript
-let editContext = new EditContext();
-// Add EditContext event listeners
+let editContext = new EditContext()
+let myDocumentText = "The quick brown fox jumped over the lazy dog."
+
 editContext.addEventListener("textupdate", e => {
-    // Update the text in the local buffer
-    buffer = buffer.substr(0, e.updateRange.start) + e.updateText + buffer.substr(e.updateRange.end);
-});
+    // Change the text of the document to reflect the user's input
+    myDocumentText = myDocumentText.substr(0, e.updateRange.start) + 
+        e.updateText + 
+        myDocumentText.substr(e.updateRange.end)
 
-editContext.focus();
+    // Invalidate / update the view of the web app to display myDocumentText
+})
+
+editContext.focus()
 ```
 
-### Example 3
-
-Adding a TextFormatUpdate event handler:
+### Example 3: Handling textformatupdate Events:
 
 ```javascript
 let editContext = new EditContext();
-// Add EditContext event listeners
+
+editContext.addEventListener("compositionstart", e => {
+    // prepare to highlight the active composition
+})
+
 editContext.addEventListener("textformatupdate", e => {
-    formatRange = e.formatRange;
-    underlineColor = e.underlineColor;
-    backgroundColor = e.backgroundColor;
-    compositionTextDecorationColor = e.textDecorationColor;
-    compositionTextUnderlineStyle = e.textUnderlineStyle;
+    // apply the requested underline, background, and text decorations
+    // to a location in the view that corresponds to the document text
+    // identified by the formatRange property
+    //
+    // updates to the view of this application omitted for brevity
+    updateActiveCompositionHighlight(
+        e.formatRange,
+        e.underlineColor,
+        e.backgroundColor,
+        e.textDecorationColor,
+        e.textUnderlineStyle
+    )
 });
+
+editContext.addEventListener("compositionstart", e => {
+    // remove any highlights denoting the active composition
+    // now that it has completed
+})
 
 editContext.focus();
 ```
 
-### Example 4
-
-Text/Selection/Layout Change notifications to EditContext:
+### Example 4: Explicitly Position UI for Input Methods using updateLayout
 
 ```javascript
-	const appText = "Hello"
+    let documentView = document.getElementById("my-document-view")
+    let mySelectionRange = getSelectedRangeForMyDocument()
 
-    let editContext = new EditContext();
-    editContext.textChanged(/*startOffset*/0, /*endOffset*/0, appText)
-    editContext.selectionChanged(new EditContextTextRange(appText.length, appText.length))
-    var clientRect = target.getBoundingClientRect() // target is the focused element
-    // bug: coordinates seem incorrect.
-    const editControlRect = new DOMRect(
-        /*x*/clientRect.x, 
-        /*y*/clientRect.y,
-        /*width*/clientRect.width,
-        /*height*/clientRect.height)
-
-    editContext.layoutChanged(
-        editControlRect,
-        /*selection rect*/editControlRect
+    // Report the coordinates for the portion of the view which represents
+    // the location of the selection and the bounds of the editable content.
+    editContext.updateLayout(
+        documentView.getBoundingClientRect(),
+        mySelectionRange.getBoundingClientRect()
     )
-    editContext.focus()
 ```
-### Example 5
-
-ScrollIntoView to EditContext when focus is set and the software keyboard occludes the selection:
+### Example 5: Report Changes in Document Text from the App to the EditContext 
 
 ```javascript
-	const editable = document.getElementById("focusable-and-editable")
-    editable.addEventListener("focusin", handleFocusIn)
-    editable.addEventListener("focusout", handleFocusOut)
-    editable.addEventListener("pointerdown", handlePointerDown)
+	let editContext = new EditContext()
 
-    const editContext = new EditContext()
-
-    function handleFocusIn(e) {
-        editContext.focus()
-    }
-
-    function handleFocusOut(e) {
-        editContext.blur()
-    }
-
-    function handlePointerDown(e) {
-        
-        const range = document.caretRangeFromPoint(e.clientX, e.clientY)
-        const rangeRect = range.getBoundingClientRect()
-        const editRect = editable.getBoundingClientRect()
-
-        editContext.layoutChanged(
-            /*editable*/new DOMRect(
-                editRect.x, 
-                editRect.y,
-                editRect.width,
-                editRect.height
-            ),
-            /*selection*/new DOMRect(
-                rangeRect.x, 
-                rangeRect.y,
-                rangeRect.width,
-                rangeRect.height
-            )
-        )
-    }
+    // TODO: finish this example using updateText and updateSelection    
 ```
 
 [Sample EditContext Demo](edit_context_demo.html)
