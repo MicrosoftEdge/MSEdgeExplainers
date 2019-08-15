@@ -12,6 +12,9 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Native Caret Browsing Explainer](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
 * [UIA Explainer](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md)
 
+## Audio
+* [Hardware-offloaded Audio Processing](AudioOffload/explainer.md)
+
 ## Editing
 * [EditContext API Explainer](EditContext/explainer.md)
 * [Highlight API Explainer](highlight/explainer.md)
