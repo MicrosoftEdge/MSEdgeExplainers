@@ -13,7 +13,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [UIA Explainer](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md)
 
 ## Audio
-* [Hardware-offloaded Audio Processing](AudioOffload/explainer.md)
+* [Hardware-offloaded Audio Processing explainer](AudioOffload/explainer.md)
 
 ## Editing
 * [EditContext API Explainer](EditContext/explainer.md)
@@ -43,6 +43,9 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
+
+## Storage
+* [Storage Access API Explainer](StorageAccessAPI/explainer.md)
 
 ## Web App Manifest
 * [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
