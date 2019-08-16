@@ -437,6 +437,12 @@ class EditController {
             this.view.blur();
         }).bind(this));
 
+        editableviewholder.addEventListener("keypress", e => { 
+            console.log("keypress "+e.key);
+            this.model.updateText(e.key, this.model.selection.start(), this.model.selection.end());
+            this.view.queueUpdate();
+        });
+
         editableviewholder.addEventListener("keydown", e => {
             console.log(`keydown: ${e.key}`)
             switch (e.key) {
