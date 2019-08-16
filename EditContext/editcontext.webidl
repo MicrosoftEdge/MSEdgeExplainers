@@ -1,52 +1,78 @@
 // Proposed webidl
-
+[Exposed=Window]
 interface EditContextTextRange {
-    readonly attribute unsigned long start;
-    readonly attribute unsigned long end;
+    attribute long start;
+    attribute long end;
 };
 
-interface EditEvent : Event {
-};
-
-interface TextUpdateEvent : EditEvent {
+[Exposed=Window]
+interface TextUpdateEvent : Event {
     readonly attribute EditContextTextRange updateRange;
-    readonly attribute USVString updateText;
+    readonly attribute DOMString updateText;
     readonly attribute EditContextTextRange newSelection;
 };
 
-interface SelectionUpdateEvent : EditEvent {
-    readonly attribute EditContextTextRange updatedSelectionRange;
-};
-
-interface TextFormatUpdateEvent : EditEvent {
+[Exposed=Window]
+interface TextFormatUpdateEvent : Event {
     readonly attribute EditContextTextRange formatRange;
-    readonly attribute USVString color;
-    readonly attribute USVString backgroundColor;
-    readonly attribute USVString textDecorationColor;
-    readonly attribute USVString textUnderlineStyle;
+    readonly attribute DOMString underlineColor;
+    readonly attribute DOMString backgroundColor;
+    readonly attribute DOMString textDecorationColor;
+    readonly attribute DOMString textUnderlineStyle;
 };
 
-enum EditContextInputType { "text, "tel", "email" };
+enum EditContextInputType { 
+    "text", 
+    "password", 
+    "search", 
+    "email", 
+    "number", 
+    "telephone", 
+    "url", 
+    "date", 
+    "datetime" 
+};
 
-/// @event name="keydown", type="KeyboardEvent"
-/// @event name="keyup", type="KeyboardEvent"
+enum EditContextInputAction { 
+    "enter", 
+    "done", 
+    "go", 
+    "next", 
+    "previous", 
+    "search", 
+    "send" 
+};
+
+dictionary EditContextInit {
+    EditContextInputType type;
+    DOMString text;
+    EditContextTextRange selection;
+    EditContextInputAction action;
+};
+
 /// @event name="textupdate", type="TextUpdateEvent"
-/// @event name="selectionupdate", type="SelectionUpdateEvent"
 /// @event name="textformatupdate", type="TextFormatUpdateEvent"
 /// @event name="focus", type="FocusEvent"
 /// @event name="blur", type="FocusEvent"
 /// @event name="compositionstart", type="CompositionEvent"
-/// @event name="compositioncompleted", type="CompositionEvent"
+/// @event name="compositionend", type="CompositionEvent"
+[Exposed=Window]
+[Constructor(optional EditContextInit options)]
 interface EditContext : EventTarget {
     void focus();
     void blur();
-    void selectionChanged(unsigned long start, unsigned long end);
-    void layoutChanged(DOMRect controlBounds, DOMRect selectionBounds);
-    void textChanged(unsigned long start, unsigned long end, USVString updateText);
-    
-    readonly attribute USVString currentTextBuffer;
-    readonly attribute EditContextTextRange currentSelection;
+    void updateSelection(unsigned long start, unsigned long end);
+    void updateLayout(DOMRect controlBounds, DOMRect selectionBounds);
+    void updateText(unsigned long start, unsigned long end, DOMString updateText);
 
-    attribute EditContextInputType type;
+    readonly attribute DOMString text;
+    readonly attribute EditContextTextRange selection;
+    readonly attribute EditContextInputType type;
+    readonly attribute EditContextInputAction action;
+
+    // Event handler attributes
+    attribute EventHandler ontextupdate;
+    attribute EventHandler ontextformatupdate;
+    attribute EventHandler oncompositionstart;
+    attribute EventHandler oncompositionend;
 };
-
