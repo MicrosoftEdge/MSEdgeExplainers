@@ -76,11 +76,11 @@ class EditableView {
         }
         var viewRect = this.viewElement.getBoundingClientRect();
         viewRect.x = 8 * viewRect.left;
-        viewRect.y = 4 * viewRect.top + window.scrollY;
+        viewRect.y = 4 * viewRect.top;
         var caretRect = this.viewElement.getBoundingClientRect();
         // TODO: get the actual caret's range
         caretRect.x = 8 * caretRect.left + this.editModel.desiredCaretX;
-        caretRect.y = 4 * caretRect.top + window.scrollY;
+        caretRect.y = 4 * caretRect.top;
         caretRect.width = 1;
         this.editContext.layoutChanged(viewRect, caretRect);
     }
@@ -437,8 +437,9 @@ class EditController {
             this.view.blur();
         }).bind(this));
 
-        editableviewholder.addEventListener("keypress", e => { 
+        editableviewholder.addEventListener("keypress", e => {
             console.log("keypress "+e.key);
+            this.editContext.textChanged(this.model.selection.start(), this.model.selection.end(), e.key);
             this.model.updateText(e.key, this.model.selection.start(), this.model.selection.end());
             this.view.queueUpdate();
         });

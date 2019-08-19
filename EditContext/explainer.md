@@ -110,7 +110,7 @@ editContext.addEventListener("textformatupdate", e => {
     )
 });
 
-editContext.addEventListener("compositionstart", e => {
+editContext.addEventListener("compositionend", e => {
     // remove any highlights denoting the active composition
     // now that it has completed
 })
@@ -200,7 +200,7 @@ Multiple approaches have been discussed during F2F editing meetings and through 
 #### If we build an editor without editable elements, i.e. using the DOM to render the view of the editable document, what are we missing?
 * APIs to manage focus exist and can be applied to elements that are not editable.
 * Size and position can be computed for elements in the view that represent the editable document. APIs exist so this information can be queried and fulfill requests for accessibility and the OS input services if new APIs were created to communicate with those services.
-* We lose the ability receive OS input-oriented requests.  An API is needed to replace this.
+* We lose the ability to receive OS input-oriented requests.  An API is needed to replace this.
 * We lose edit pattern support for accessibility.  An API is needed to replace this.
 * To compensate for the loss of caret the editing app must provide its own and may also provide its own selection.
 * APIs exist to register parts of the view as a drop target
