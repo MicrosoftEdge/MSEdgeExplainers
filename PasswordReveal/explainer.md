@@ -133,13 +133,14 @@ This will allow authors to provide different styles when the password is either 
 **Example**
 
 Here is an example of an author that wants to show an eye image to reveal and a closed eye image to hide the password again.
-
-    <input type="password" />
-    <style>
-    input[type=password]:revealed::reveal {
-        background-image: url(my-eye-image.png);
-    }
-    input[type=password]:revealed::reveal {
-        background-image: url(my-eye-image-revealed.png);
-    }
-    </style>
+```HTML
+<input type="password">
+<style>
+input[type=password]::reveal {
+    background-image: url(my-eye-image.png);
+}
+input[type=password]:revealed::reveal {
+    background-image: url(my-eye-image-revealed.png);
+}
+</style>
+```
