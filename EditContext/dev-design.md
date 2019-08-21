@@ -64,9 +64,9 @@ The ```action``` property on the EditContext (also can be passed in a dictionary
 Some possible values of this property are as follows:
 enum EditContextInputAction { "enter", "done", "go", "next", "previous", "search", "send" }.
 
+### Renderer process IME components:
 ![Renderer process communication](renderer_process_communication.png)
 
-### Renderer process IME components:
 1. WidgetInputHandlerImpl: Receives the IME messages in the IO thread and posts it to the main thread of the renderer process. 
 2. It is then received by the RenderWidget that sends it to the WebInputMethodControllerImpl to decide which component should handle the IME event and fire the corresponding JS event.
 3. WebInputMethodControllerImpl routes the IME events to the EditContext if there is an EditContext in focus, else it calls the InputMethodController APIs if the focused node is editable.
@@ -75,9 +75,9 @@ enum EditContextInputAction { "enter", "done", "go", "next", "previous", "search
 ### EditContext:
 This class implements the WebInputMethodController interface and is also the event target for various JS events that get fired based on the IME and English typing events. The lifetime of the EditContext is managed by the Document. There can be multiple EditContext for an active document but only one can be focused at a time. The EditContext JS events are fired whenever there is an active composition. EditContext also maintains internal states that get updated during these input events. These internal states are used to communicate changes to the text input services that might affect their text view of the edit control. This communication happens through TextInputState data strcuture which lives in RenderWidget. On BeginMainFrame, the TextInputState is queried from the EditContext and compared with the previous state that is fetched from the RenderWidget. If there is a change, then RenderWidget sends an IPC message to Browser process with the updated TextInputState. In the Browser process, this text input state is used to send notifications to the text input service and synchronize the state of the text input service with the EditContext.
 
+### Synchronization mechanism
 ![Synchronization mechanism](sync_mechanism.png)
 
-### Synchronization mechanism
 1. EditContext's state can be manipulated by either text input services or JS authors. This state is kept in sync with the text input services via TextInputState data object. This TextInputState object contains the data that is required by the text input services to synchronize their text view and provide meaningful suggestions and other text input intelligence operation.
 2. The TextInputState object is updated on every BeginMainFrame which gets invoked right before the paint happens. This TextInputState object is then sent by RenderWidget to the browser process through the IPC mechanism.
 3. RenderWidgetHostImpl receives this IPC message in the browser process and forwards it to the TextInputManager via RenderWidgetHostViewBase which then notifies all the TextInputState observers.
