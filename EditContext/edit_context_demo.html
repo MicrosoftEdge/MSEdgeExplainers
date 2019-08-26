@@ -75,14 +75,14 @@ class EditableView {
             this.viewElement.appendChild(this.caret);
         }
         var viewRect = this.viewElement.getBoundingClientRect();
-        viewRect.x = 8 * viewRect.left;
-        viewRect.y = 4 * viewRect.top;
+        viewRect.x = viewRect.left;
+        viewRect.y = viewRect.top;
         var caretRect = this.viewElement.getBoundingClientRect();
         // TODO: get the actual caret's range
-        caretRect.x = 8 * caretRect.left + this.editModel.desiredCaretX;
-        caretRect.y = 4 * caretRect.top;
+        caretRect.x = caretRect.left + this.editModel.desiredCaretX;
+        caretRect.y = 2.2 * caretRect.top;
         caretRect.width = 1;
-        this.editContext.layoutChanged(viewRect, caretRect);
+        this.editContext.updateLayout(viewRect, caretRect);
     }
 
     updateCaret() {
@@ -106,7 +106,7 @@ class EditableView {
     }
 
     blur() {
-        this.editContext.blur();
+        //this.editContext.blur();
         this.updateCaret();
     }
 }
@@ -256,7 +256,9 @@ class EditModel {
     }
 
     updateText(text, start, end) {
-        this.textRows[this.caretPosition.y].splice(this.caretPosition.x - (end - start), end - start, text);
+        console.log(`text:${text}, start:${start}, end:${end}`)
+        console.log(`line: ${this.textRows[this.caretPosition.y].join("")}`)
+        this.textRows[this.caretPosition.y].splice(start, end - start, ...text.split(""));
         this.caretPosition.set(this.caretPosition.x - (end - start) + text.length, this.caretPosition.y);
         this.desiredCaretX = this.caretPosition.x;
     }
@@ -439,9 +441,15 @@ class EditController {
 
         editableviewholder.addEventListener("keypress", e => {
             console.log("keypress "+e.key);
-            this.editContext.textChanged(this.model.selection.start(), this.model.selection.end(), e.key);
-            this.model.updateText(e.key, this.model.selection.start(), this.model.selection.end());
-            this.view.queueUpdate();
+            if (e.key === "Enter"){
+                this.editContext.updateText(this.editContext.selection.start, this.editContext.selection.end, "\n");
+                this.editContext.updateSelection(this.editContext.selection.start + 1, this.editContext.selection.start + 1);
+            } else {
+                this.model.updateText(e.key, this.editContext.selection.start, this.editContext.selection.end);
+                this.editContext.updateText(this.editContext.selection.start, this.editContext.selection.end, e.key);
+                this.editContext.updateSelection(this.editContext.selection.start + e.key.length, this.editContext.selection.start + e.key.length);
+                this.view.queueUpdate();
+            }
         });
 
         editableviewholder.addEventListener("keydown", e => {
@@ -475,7 +483,16 @@ class EditController {
                     this.model.addRow();
                     this.view.queueUpdate();
                     break;
+                case " ":
+                    this.editContext.updateText(this.editContext.selection.start, this.editContext.selection.end, " ");
+                    this.editContext.updateSelection(this.editContext.selection.start + 1, this.editContext.selection.start + 1);
+                    this.model.updateText(" ", this.editContext.selection.start, this.editContext.selection.end);
+                    this.view.queueUpdate();
+                    e.preventDefault();
+                    break;
                 case "Backspace":
+                    this.editContext.updateText(this.editContext.selection.start - 1, this.editContext.selection.end, "");
+                    this.editContext.updateSelection(this.editContext.selection.start - 1, this.editContext.selection.start - 1);
                     this.model.backspace(this.shiftPressed, this.controlPressed);
                     this.view.queueUpdate();
                     break;
@@ -519,9 +536,43 @@ window.addEventListener("load", () => {
     let controller = new EditController(editContext, model, view);
     // Render the initial view, so that you see the first blinking caret
     view.queueUpdate();
+
+    let select = document.querySelector("#input-type")
+    let contextTypes = {
+        text: new EditContext({editContextType: "text" }),
+        password: new EditContext({editContextType: "password" }),
+        search: new EditContext({editContextType: "search" }),
+        email: new EditContext({editContextType: "email" }),
+        number: new EditContext({editContextType: "number" }),
+        telephone: new EditContext({editContextType: "telephone" }),
+        url: new EditContext({editContextType: "url" }),
+        date: new EditContext({editContextType: "date" }),
+        datetime: new EditContext({editContextType: "datetime" })
+    }
+    select.addEventListener("focus", () => {
+        let type = select.options[select.selectedIndex].value
+        contextTypes[type].focus()
+    })
+    select.addEventListener("change", () => {
+        let type = select.options[select.selectedIndex].value
+        contextTypes[type].focus()
+    })
 })
 </script>
 <body>
-<p> This is an editable region, based on EditContext: </p>
+<select style="position:fixed; right: 50px; top: 8px; width: 100px;" id="input-type">
+    <option>text</option>
+    <option>password</option>
+    <option>search</option>
+    <option>email</option>
+    <option>number</option>
+    <option>telephone</option>
+    <option>url</option>
+    <option>date</option>
+    <option>datetime</option>
+</select>
+<p> This is an editable region, based on EditContext:<br>
+    <b>usage:</b> new EditContext()
+</p>
 <div id="editableviewholder" style="width:300px; height:300px; border:blue 1px dashed" tabindex="-1"></div>
 <p> Some footer where other content might live </p>
