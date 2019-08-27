@@ -11,3 +11,6 @@ We would like create KPIs to track our users experience over time in terms of lo
 
 ## Use case 3 – identify regressions related to JS and rendering 
 An engineer builds a web feature / fixes a bug and wants to know if it has regressed JS execution times or introduced rendering overhead, like layout thrashing. We can measure long tasks (JS) but not full frames and the actual rendering time in the frames. It is also not trivial to correlate long tasks with long frame and long rendering times. 
+
+## Use case 4 – identify regressions in asynchronous animations
+In modern browsers, part of the rendering pipeline is executed in parallel with JS execution, for example, threaded scrolling, or slow composited effects like blurs. It should be possible to use this API to identify when asynchronous animations are slow.
