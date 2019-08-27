@@ -1,5 +1,6 @@
 // Proposed webidl
 [Exposed=Window]
+[Constructor()]
 interface EditContextTextRange {
     attribute long start;
     attribute long end;
@@ -21,7 +22,7 @@ interface TextFormatUpdateEvent : Event {
     readonly attribute DOMString textUnderlineStyle;
 };
 
-enum EditContextInputType { 
+enum EditContextInputMode { 
     "text", 
     "password", 
     "search", 
@@ -44,7 +45,7 @@ enum EditContextInputAction {
 };
 
 dictionary EditContextInit {
-    EditContextInputType type;
+    EditContextInputMode inputMode;
     DOMString text;
     EditContextTextRange selection;
     EditContextInputAction action;
@@ -67,7 +68,7 @@ interface EditContext : EventTarget {
 
     readonly attribute DOMString text;
     readonly attribute EditContextTextRange selection;
-    readonly attribute EditContextInputType type;
+    readonly attribute EditContextInputMode inputMode;
     readonly attribute EditContextInputAction action;
 
     // Event handler attributes

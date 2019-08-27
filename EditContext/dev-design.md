@@ -57,12 +57,17 @@ The ```textformatupdate``` event is fired when the input method desires a specif
 
 There can be multiple EditContexts per document, and they each have a notion of focused state. Because there is no implicit representation of the EditContext in the HTML view, focus must be managed by the web developer, most likely by forwarding focus calls from the DOM element that contains the editable view. ```focus()``` and ```blur()``` APIs are used to set focus and blur on the EditContext respectively.
 
-The ```type``` property on the EditContext (also can be passed in a dictionary to the constructor) denotes what type of input the EditContext is associated with. This information is typically provided to the underlying system as a hint for which software keyboard to load (e.g. keyboard for phone numbers may be a numpad instead of the default keyboard). This defaults to 'text'. Some possible values of this property are as follows:
-enum EditContextInputType { "text", "password", "search", "email", "number", "telephone", "url", "date", "datetime" }.
+The ```inputmode``` property on the EditContext (also can be passed in a dictionary to the constructor) denotes what type of input the EditContext is associated with. This information is typically provided to the underlying system as a hint for which software keyboard to load (e.g. keyboard for phone numbers may be a numpad instead of the default keyboard). This defaults to 'text'.
+
+```javascript
+enum EditContextInputMode { "text", "password", "search", "email", "number", "telephone", "url", "date", "datetime" }
+```
 
 The ```action``` property on the EditContext (also can be passed in a dictionary to the constructor) denotes what type of Enter key action the EditContext is associated with. This information indicates to the text input services to display different glyphs for the enter key on the software input panel which also changes the functionality of the enter key such as enter to search, enter to send etc.
-Some possible values of this property are as follows:
-enum EditContextInputAction { "enter", "done", "go", "next", "previous", "search", "send" }.
+
+```javascript
+enum EditContextInputAction { "enter", "done", "go", "next", "previous", "search", "send" }
+```
 
 ### Renderer process IME components:
 ![Renderer process communication](renderer_process_communication.png)
@@ -71,15 +76,18 @@ enum EditContextInputAction { "enter", "done", "go", "next", "previous", "search
 2. It is then received by the RenderWidget that sends it to the WebInputMethodControllerImpl to decide which component should handle the IME event and fire the corresponding JS event.
 3. WebInputMethodControllerImpl routes the IME events to the EditContext if there is an EditContext in focus, else it calls the InputMethodController APIs if the focused node is editable.
 4. InputMethodController: A final class that is created using LocalFrame. This class has APIs to interact with DOM, selection controllers, “visible” range in the plain text view of the DOM etc. It also facilitates composition that is platform agnostic. It uses generic structure to represent the range of the selection, composed text (ImeTextSpan) etc.
+5. If EditContext is in focus, then it updates the internal states and fires the corresponding events to JS.
 
 ### EditContext:
-This class implements the WebInputMethodController interface and is also the event target for various JS events that get fired based on the IME and English typing events. The lifetime of the EditContext is managed by the Document. There can be multiple EditContext for an active document but only one can be focused at a time. The EditContext JS events are fired whenever there is an active composition. EditContext also maintains internal states that get updated during these input events. These internal states are used to communicate changes to the text input services that might affect their text view of the edit control. This communication happens through TextInputState data strcuture which lives in RenderWidget. On BeginMainFrame, the TextInputState is queried from the EditContext and compared with the previous state that is fetched from the RenderWidget. If there is a change, then RenderWidget sends an IPC message to Browser process with the updated TextInputState. In the Browser process, this text input state is used to send notifications to the text input service and synchronize the state of the text input service with the EditContext.
+![Class diagram](edit_context_class_design.png)
+
+This class implements the WebInputMethodController interface and is also the event target for various JS events that get fired based on the IME and English typing events. The lifetime of the EditContext is managed by the Document. There can be multiple EditContext for an active document but only one can be focused at a time. The EditContext JS events are fired whenever there is an active composition. EditContext also maintains internal states that get updated during these input events. These internal states are used to communicate changes to the text input services that might affect their text view of the edit control.
 
 ### Synchronization mechanism
-![Synchronization mechanism](sync_mechanism.png)
+![Synchronization mechanism](edit_context_state_sync.png)
 
 1. EditContext's state can be manipulated by either text input services or JS authors. This state is kept in sync with the text input services via TextInputState data object. This TextInputState object contains the data that is required by the text input services to synchronize their text view and provide meaningful suggestions and other text input intelligence operation.
-2. The TextInputState object is updated on every BeginMainFrame which gets invoked right before the paint happens. This TextInputState object is then sent by RenderWidget to the browser process through the IPC mechanism.
+2. The TextInputState object is updated on every lifecycle update(BeginMainFrame) which gets invoked right before the paint happens. This TextInputState object is then sent by RenderWidget to the browser process through the IPC mechanism.
 3. RenderWidgetHostImpl receives this IPC message in the browser process and forwards it to the TextInputManager via RenderWidgetHostViewBase which then notifies all the TextInputState observers.
 4. The observers of the TextInputState object communicate with the text input services and synchronize the state.
 
