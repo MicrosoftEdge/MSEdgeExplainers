@@ -32,6 +32,7 @@ This class is the native implementation of the JS PenButtonEvents.
 ### IDL file:
 `pen_button_event_init.idl`:
 
+[Exposed=Window]
 dictionary PenButtonEventInit : UIEventInit {
     long pointerId;
     long button;
@@ -39,11 +40,9 @@ dictionary PenButtonEventInit : UIEventInit {
  
 `pen_button_event.idl`:
 
-[
-    Constructor(DOMString type, optional PenButtonEventInit eventInitDict),
-    Exposed=Window
-
-] interface PenButtonEvent : UIEvent {
+[Exposed=Window]
+[Constructor(DOMString type, optional PenButtonEventInit eventInitDict)]
+interface PenButtonEvent : UIEvent {
     readonly attribute long pointerId;
     readonly attribute long button;
 };
@@ -60,7 +59,7 @@ Processes the native window hotkey message for pen and dispatches it to the dele
 
 ### PenButtonEventProcessor API details:
 
-####OnFocusChanged: 
+#### OnFocusChanged: 
 This API is responsible for handling focus change related messages. If there is a focus loss message and pen button keys are registered, then it will unregister them by calling the system APIs.
 
 #### OnPenButtonEvent: 
