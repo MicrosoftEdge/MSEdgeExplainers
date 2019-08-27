@@ -32,20 +32,24 @@ This class is the native implementation of the JS PenButtonEvents.
 ### IDL file:
 `pen_button_event_init.idl`:
 
+```javascript
 [Exposed=Window]
 dictionary PenButtonEventInit : UIEventInit {
     long pointerId;
     long button;
 };
+```
  
 `pen_button_event.idl`:
 
+```javascript
 [Exposed=Window]
 [Constructor(DOMString type, optional PenButtonEventInit eventInitDict)]
 interface PenButtonEvent : UIEvent {
     readonly attribute long pointerId;
     readonly attribute long button;
 };
+```
  
 ### PenButton event details:
 PenButtonEvent listeners have side-effects, in that they override OS behavior in Windows and replace it with some app specific behavior. The signal for whether the web app wants to override the OS behavior is whether a PenButtonEvent listener is registered. Additionally, the registered listeners only have an impact when the document is the active document. When an active document/frame loses focus in the renderer process, this will trigger a message to browser process to unregister the pen button event in the OS if the current active Frame’s PenButtonEventManager doesn’t have any PenButtonEvent listeners registered
