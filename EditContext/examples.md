@@ -8,7 +8,7 @@ Create an EditContext and have it start receiving events when its associated con
 let editContainer = document.querySelector("#editContainer");
 
 let editContextDict = {
-    mode: "text",
+    inputmode: "text",
     text: "Hello world",
     selection: { start: 11, end: 11 }
 };
