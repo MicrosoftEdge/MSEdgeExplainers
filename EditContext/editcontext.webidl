@@ -23,15 +23,14 @@ interface TextFormatUpdateEvent : Event {
 };
 
 enum EditContextInputMode { 
-    "text", 
-    "password", 
-    "search", 
-    "email", 
-    "number", 
-    "telephone", 
-    "url", 
-    "date", 
-    "datetime" 
+    "text",
+    "decimal",
+    "password",
+    "search",
+    "email",
+    "numeric",
+    "tel",
+    "url"
 };
 
 enum EditContextInputAction { 
