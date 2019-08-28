@@ -70,7 +70,7 @@ enum EditContextInputAction { "enter", "done", "go", "next", "previous", "search
 ```
 
 ### Renderer process IME components:
-![Renderer process communication](renderer_process_communication.png)
+![Renderer process communication](renderer_process_comm.png)
 
 1. WidgetInputHandlerImpl: Receives the IME messages in the IO thread and posts it to the main thread of the renderer process. 
 2. It is then received by the RenderWidget that sends it to the WebInputMethodControllerImpl to decide which component should handle the IME event and fire the corresponding JS event.
