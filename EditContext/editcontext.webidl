@@ -21,16 +21,15 @@ interface TextFormatUpdateEvent : Event {
     readonly attribute DOMString textUnderlineStyle;
 };
 
-enum EditContextInputType { 
-    "text", 
-    "password", 
-    "search", 
-    "email", 
-    "number", 
-    "telephone", 
-    "url", 
-    "date", 
-    "datetime" 
+enum EditContextInputMode { 
+    "text",
+    "decimal",
+    "password",
+    "search",
+    "email",
+    "numeric",
+    "tel",
+    "url" 
 };
 
 enum EditContextInputAction { 
@@ -43,10 +42,16 @@ enum EditContextInputAction {
     "send" 
 };
 
+enum EditContextInputPolicy { 
+    "auto",
+    "manual" 
+};
+
 dictionary EditContextInit {
-    EditContextInputType type;
     DOMString text;
     EditContextTextRange selection;
+    EditContextInputMode inputMode;
+    EditContextInputPolicy inputPolicy;
     EditContextInputAction action;
 };
 
@@ -67,7 +72,8 @@ interface EditContext : EventTarget {
 
     readonly attribute DOMString text;
     readonly attribute EditContextTextRange selection;
-    readonly attribute EditContextInputType type;
+    readonly attribute EditContextInputMode inputMode;
+    readonly attribute EditContextInputPolicy inputPolicy
     readonly attribute EditContextInputAction action;
 
     // Event handler attributes
