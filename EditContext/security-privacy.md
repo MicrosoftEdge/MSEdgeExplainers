@@ -52,7 +52,7 @@ EditContext does not create any temporary identifiers.
 
 ## 2.13. How does this specification distinguish between behavior in first-party and third-party contexts?
 
-A user agent may decline to grant permissions requested by third-party contexts. EditContext does not expose any information to third-party contexts. A focused EditContext is limited to the active document, so browser's existing limits on third-party context stealing focus should be applicable to the EditContext too.
+Use of the EditContext is limited to the active document.
 
 ## 2.14. How does this specification work in the context of a user agent’s Private Browsing or "incognito" mode?
 
@@ -86,5 +86,5 @@ Not applicable (no network requests are made by the EditContext).
 
 ## 3.5 Legitimate Misuse
 
-Not applicable as no new information is being made available to authors. The purpose of the EditContext is to expose the functionality bundled into editable elements in a way that is decoupled from the HTML DOM view .
+Not applicable as no new information is being made available to authors. The purpose of the EditContext is to expose the functionality bundled into editable elements in a way that is decoupled from the HTML DOM view.
 
