@@ -1,11 +1,11 @@
 # EditContext API Explainer
 ## Introduction
-The EditContext is a new API that simplifies the process of integrating a web app with advanced text input methods, improves accessibility and performance, and unlocks new capabilities for web-based editors.
+The EditContext is a new API that simplifies the process of integrating a web app with advanced text input methods (such as VK shape-writing, Handwriting panels, speech recognition, IME Compositions etc), improves accessibility and performance, and unlocks new capabilities for web-based editors.
 
 ## Motivation
-The web platform provides out-of-the-box editing experiences for single lines of plain-text (input), small amounts of multi-line plain-text (textarea) and a starting point for building an HTML document editing experience (contenteditable elements).  
+Today the web platform provides editing experience for single/multi line plain text (input element/ textarea) and support HTML editing through contenteditable elements.
 
-Each of the editable elements provided by the web platform comes with built-in editing behaviors that are often inadequate to power the desired editing experience. As a result, web-based editors don't incorporate the web platform's editable elements into their view. Unfortunately, the only API provided by the web platform today to enable advanced text input experiences is to place an editable element in the DOM and focus it.
+Each of the editable elements provided by the web platform comes with built-in editing behaviors that are often inadequate to power the desired rich editing experience. As a result, web-based editors don't incorporate the web platform's editable elements into their view. Unfortunately, the only API provided by the web platform today to enable advanced text input experiences (like IME compositions, VK shape-writing etc) is to place an editable element in the DOM and focus it.
 
 This contradiction of needing an editable element, but not wanting it to be visible, leads web-based editors to create hidden editable elements to facilitate text input.  This approach negatively impacts accessibility and increases complexity, leading to buggy behavior.
 
@@ -13,7 +13,7 @@ An alternative is to incorporate a contenteditable element into the view of the 
 
 ## Real-world Examples of Text Input Issues in Top Sites and Frameworks
 ### Accessibility Issues in the Monaco Editor
-[This video](https://www.youtube.com/watch?v=xzC86EG9lPo) demos Windows Narrator reading from a hidden textarea element in the Monaco editor and compares it with the intended experience by showing Narrator reading text from CKEditor, which uses a contenteditable element as part of its view.
+As an example, consider the case of the windows narrator reading from Monaco editor which uses a hidden textarea element versus CKEditor which uses a contenteditable element directly as a part of its view ([Video link](https://www.youtube.com/watch?v=xzC86EG9lPo)).
 
 Monaco edits plain text - it's a code editor. The plain text document is presented using a rich view created from HTML, but a hidden textarea is used to integrate with the text input services of the OS.  This approach makes the hidden textarea the accessibile surface for the editable content being edited.
 
@@ -22,7 +22,7 @@ Two aspects of accessibility suffer as a result:
   2. Unless Monaco duplicates the whole document into the textarea element, only a fraction of the content can be read before Narrator moves prematurely out of the document content and starts reading elsewhere on the page.
 
 ### Trouble Collaborating in Word Online while Composing Text
-[This video](https://www.youtube.com/watch?v=s7Ga2VYFiGo) shows a Word Online collaboration feature where two users can see each other's edits and caret positions. Collaboration is suspended though while composition is in progress. When composition is active, updates to the view (especially nearby the composition) may cancel the composition and prevent text input.
+[This video](https://www.youtube.com/watch?v=s7Ga2VYFiGo) shows a Word Online's collaboration feature where two users can see each other's edits and caret positions. Collaboration is suspended though while composition is in progress. When composition is active, updates to the view (especially nearby the composition) may cancel the composition and prevent text input.
 
 To work around this problem, Word Online waits until the composition finishes before updating the view. Some Chinese IMEs don't auto commit their composition; it just keeps going until the user types Enter. As a result, collaboration may be blocked for some time.
 
@@ -34,7 +34,7 @@ Google Docs is listening for events to ensure the contenteditable element is foc
 ### Trouble Composing Across Page Boundaries
 [In this video](https://www.youtube.com/watch?v=iXgttLgJY_I) Native Word on Windows is shown updating its view while in an active composition. The scenario demonstrated requires Word to relocate the active composition into a different page based on layout constraints.  
 
-Because the web platform integrates with the OS text input services through its HTML DOM view, updating the view while composition is in progress may cancel the composition and prevent text input.  Using the EditContext, however, the view can be updated and new locations for where composition is occuring can be reported without canceling the composition.
+Because the web platform integrates with the OS text input services through its HTML DOM view, updating the view while composition is in progress may cancel the composition and prevent text input.  Using the EditContext, however, the view can be updated and new locations for where composition is occurring can be reported without canceling the composition.
 
 ### No Support for Type-to-search in Custom Controls with Chinese Characters
 [This video](https://www.youtube.com/watch?v=rHEPdi1Rw34) demonstrates an IE feature that automatically selected an option in a select element based on the text typed by the user - even when that text is being composed.
@@ -59,22 +59,67 @@ Additionally, the EditContext communicates events driven from text input UI to J
   * Composition start and end events.
   * Text formatting requests that indicate where activity relating to text input, e.g. composition, is taking place.
 
+## EditContext Event flow:
+
+This section describes the sequences of events that get fired on the EditContext and focused element when EditContext has focus and IME is active. In this event sequence, the user types in two characters, then commits to the first IME candidate by hitting 'Space'.
+
+|  Event                | EventTarget        |  Related key in sequence
+| -------------         | -----------------  | -------------------
+|  keydown              | focused element    |  Key 1
+|  compositionstart     | active EditContext |  ...
+|  textupdate           | active EditContext |  ...
+|  textformatupdate     | active EditContext |  ...
+|  keyup                | focused element    |  ...
+|  keydown              | focused element    |  Key 2
+|  textupdate           | active EditContext |  ...
+|  textformatupdate     | active EditContext |  ...
+|  keyup                | focused element    |  ...
+|  keydown              | focused element    |  Space
+|  textupdate           | active EditContext |  (committed IME characters available in event.updateText)
+|  keyup                | focused element    |  ...
+|  compositionend       | active EditContext |
+
+Note that the composition events are also not fired on the focused element as the composition is operating on the shared buffer that is represented by the EditContext.
+
 ### EditContext WebIDL
 ```javascript
-[Exposed=Window]
-interface EditContextTextRange {
-    attribute long start;
-    attribute long end;
+
+dictionary EditContextTextRangeInit {
+    long start;
+    long end;
 };
 
 [Exposed=Window]
+[Constructor(optional EditContextTextRangeInit eventInitDict)]
+interface EditContextTextRange {
+    readonly attribute long start;
+    readonly attribute long end;
+};
+
+dictionary TextUpdateEventInit {
+    EditContextTextRange updateRange;
+    DOMString updateText;
+    EditContextTextRange newSelection;
+};
+
+[Exposed=Window]
+[Constructor(optional TextUpdateEventInit eventInitDict)]
 interface TextUpdateEvent : Event {
     readonly attribute EditContextTextRange updateRange;
     readonly attribute DOMString updateText;
     readonly attribute EditContextTextRange newSelection;
 };
 
+dictionary TextFormatUpdateEventInit {
+    EditContextTextRange formatRange;
+    DOMString underlineColor;
+    DOMString backgroundColor;
+    DOMString textDecorationColor;
+    DOMString textUnderlineStyle;
+};
+
 [Exposed=Window]
+[Constructor(optional TextFormatUpdateEventInit eventInitDict)] 
 interface TextFormatUpdateEvent : Event {
     readonly attribute EditContextTextRange formatRange;
     readonly attribute DOMString underlineColor;
@@ -145,6 +190,7 @@ interface EditContext : EventTarget {
     attribute EventHandler oncompositionend;
 };
 ```
+
 ## EditContext Usage
 ### Example 1
 Create an EditContext and have it start receiving events when its associated container gets focus. After creating an EditContext, the web application should initialize the text and selection (unless the state of the web application is correctly represented by the empty defaults) via a dictionary passed to the constructor.  Additionally, the layout bounds of selection and conceptual location of the EditContext in the view should be provided by calling `updateLayout`.
@@ -319,7 +365,7 @@ class EditableView {
 This [example application](edit_context_demo.html) shows how an author might build a simple editor that leverages the EditContext in a more holistic way.
 
 ## Interaction with Other Browser Editing Features
-By decoupling the view from text input, the EditContext gives up other DOM features that relate to editing.  An inventory of features related to editing in the web platform and their interaction with the EditContext follows:
+By decoupling the view from text input, the EditContext exposes other DOM features that relate to editing.  An inventory of features related to editing in the web platform and their interaction with the EditContext follows:
 
  * Spellcheck
  * Undo
@@ -336,7 +382,7 @@ Web apps have no way today to integrate with spellcheck from the browser except 
 For web apps or editing frameworks relying on editable elements to provide this behavior, it may be a barrier to adoption of the EditContext. Note, however, there are heavily used web editing experiences (Office Online apps, Google docs) that have replaced spell checking with a custom solution who will not be blocked from adopting a better text input integration story, even in the absence of a separate spellcheck API.  Similarly, there are also editing experiences, e.g. Monaco, that don't use spell checking from the browser because an element like a contenteditable won't understand what's a string and what's a class name leading to a lot of extra innappropriate squiggles in the code editing experience.
 
 ### Undo
-Web-based editors rarely want the DOM undo stack. Undo reverses the affect of DOM operations in an editable element that were initiated in response to user input.  Since many editors use the editable element to capture text input from the user, but use JavaScript operations to update the view in response to that input, undoing only the DOM changes from user input rarely makes sense.
+Web-based editors rarely want the DOM undo stack. Undo reverses the effect of DOM operations in an editable element that were initiated in response to user input.  Since many editors use the editable element to capture text input from the user, but use JavaScript operations to update the view in response to that input, undoing only the DOM changes from user input rarely makes sense.
 
 It is expected that web-based editors using the EditContext will provide their own undo operations.  Some performance benefit should be realized as DOM operations will no longer incur the overhead of maintaining a valid undo stack as DOM mutations mix with user-initiated (undoable) actions.
 
