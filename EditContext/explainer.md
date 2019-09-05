@@ -59,7 +59,7 @@ Additionally, the EditContext communicates events driven from text input UI to J
   * Composition start and end events.
   * Text formatting requests that indicate where activity relating to text input, e.g. composition, is taking place.
 
-## EditContext Event Sequence:
+### EditContext Event Sequence:
 
 This section describes the sequences of events that get fired on the EditContext and focused element when the EditContext has focus and IME is active. In this event sequence, the user types in two characters, then commits to the first IME candidate by hitting 'Space'.
 
