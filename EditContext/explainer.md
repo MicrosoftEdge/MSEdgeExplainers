@@ -49,7 +49,7 @@ Specifically, the EditContext allows the author to provide:
   * Contextual text nearby the selection enabling suggestions for input methods that support generating them.
   * The location (expressed as offsets into the contextual text) of selection to enable text input to be inserted at the right location.
   * The inputMode to specialize software keyboard layouts.
-  * The inputAction to specialize the display of the Enter key on software keyboards.
+  * The EnterKeyHint to specialize the display of the Enter key on software keyboards.
   * The inputPolicy to control whether a software keyboard should automatically appear or needs to be requested explicitly by the user.
   * More than one EditContext to convey the information listed above for multiple editable regions of a web application.
   * An ability to specify which of those multiple EditContexts is currently the target of text input.
@@ -125,15 +125,15 @@ interface TextFormatUpdateEvent : Event {
 enum EditContextInputMode { 
     "text",
     "decimal",
-    "password",
     "search",
     "email",
     "numeric",
     "tel",
-    "url" 
+    "url",
+    "password"
 };
 
-enum EditContextInputAction { 
+enum EditContextEnterKeyHint { 
     "enter", 
     "done", 
     "go", 
@@ -154,13 +154,11 @@ dictionary EditContextInit {
     unsigned long selectionEnd;
     EditContextInputMode inputMode;
     EditContextInputPolicy inputPolicy;
-    EditContextInputAction action;
+    EditContextEnterKeyHint enterKeyHint;
 };
 
 /// @event name="textupdate", type="TextUpdateEvent"
 /// @event name="textformatupdate", type="TextFormatUpdateEvent"
-/// @event name="focus", type="FocusEvent"
-/// @event name="blur", type="FocusEvent"
 /// @event name="compositionstart", type="CompositionEvent"
 /// @event name="compositionend", type="CompositionEvent"
 [Exposed=Window]
@@ -177,7 +175,7 @@ interface EditContext : EventTarget {
     readonly attribute unsigned long selectionEnd;
     readonly attribute EditContextInputMode inputMode;
     readonly attribute EditContextInputPolicy inputPolicy
-    readonly attribute EditContextInputAction action;
+    readonly attribute EditContextEnterKeyHint action;
 
     // Event handler attributes
     attribute EventHandler ontextupdate;
@@ -200,7 +198,7 @@ let editContextInit = {
     selectionEnd : 11,
     inputMode: "text",
     inputPolicy: "auto",
-    action: "enter"
+    enterKeyHint: "enter"
 };
 let editContext = new EditContext(editContextInit);
 
@@ -433,4 +431,4 @@ Multiple approaches have been discussed during F2F editing meetings and through 
 * As an alternative to `beforeInput` Google has proposed a roadmap in [Google Chrome Roadmap Proposal](https://docs.google.com/document/d/10qltJUVg1-Rlnbjc6RH8WnngpJptMEj-tyrvIZBPSfY/edit) that suggests some potential subprojects to improve editing and textinput in the browser.  One concept in particular was described as a something like a hidden textarea that is decoupled from the view.  This proposal aligns well with that thinking.
 
 ## Appendix
-1. Advanced text input methods such as VK shape-writing, Handwriting panels, speech recognition, IME Compositions etc.
+1. Advanced text input methods such as [VK shape-writing](Shape-writing.gif), [Handwriting panels](Handwriting-recognition.gif), [Emoji Picker](Emoji-picker.gif), [IME Compositions](Composition.gif) etc.
