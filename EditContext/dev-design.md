@@ -8,25 +8,19 @@
 4. These modifications are typically performed based on the current selection, which is also communicated through the text services framework. 
 5. When the shared buffer is updated, the web application will be notified of this via the ```textupdate``` event.
 
-When an EditContext has focus, this sequence of events is fired when a key is pressed and an IME is not active:
 
-|  Event        | EventTarget        |
-| ------------- | ------------------ |
-|  keydown      | focused element    |
-|  textupdate   | active EditContext |
-|  keyup        | focused element    |
-
-
-Now consider the scenario where an IME is active, the user types in two characters, then commits to the first IME candidate by hitting 'Space'.
+This section describes the sequences of events that get fired on the EditContext and focused element when EditContext has focus and IME is active. In this event sequence, the user types in two characters, then commits to the first IME candidate by hitting 'Space'.
 
 |  Event                | EventTarget        |  Related key in sequence
 | -------------         | -----------------  | -------------------
 |  keydown              | focused element    |  Key 1
 |  compositionstart     | active EditContext |  ...
 |  textupdate           | active EditContext |  ...
+|  textformatupdate     | active EditContext |  ...
 |  keyup                | focused element    |  ...
 |  keydown              | focused element    |  Key 2
 |  textupdate           | active EditContext |  ...
+|  textformatupdate     | active EditContext |  ...
 |  keyup                | focused element    |  ...
 |  keydown              | focused element    |  Space
 |  textupdate           | active EditContext |  (committed IME characters available in event.updateText)
