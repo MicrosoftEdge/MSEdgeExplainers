@@ -51,7 +51,7 @@ For first parties, we believe that being certified under an auditing program for
 1. It would allow browsers to change the user experience in some fashion in response to a site that has been certified to uphold user privacy
 
 ### Helping users manage their online data
-A certification program would also allow for the validation of standardized transparency and delete signals between the web browser and data collection entities. This would allow web browser to build views that let their users more easily manage their online data in a one stop shop, including viewing and deleting data that certified entities have on them. Examples of features could include:
+A certification program would also allow for the validation of standardized transparency and delete signals between the web browser and data collection entities. This would allow browsers to build views that let their users more easily manage their online data in a one stop shop, including viewing and deleting the data that certified entities have on them. Examples of features could include:
 * Dashboards where users could easily view the data that's been collected on them and understand how it's been shared or used to tailor the web content they're experiencing
 * Clear browsing data experiences whereby users could clear both client-side browser data in addition to data that's been collected on them by various first and third parties as they browse the web
 
