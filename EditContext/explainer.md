@@ -1,6 +1,6 @@
 # EditContext API Explainer
 ## Introduction
-The EditContext is a new API that simplifies the process of integrating a web app with [advanced text input methods](#Appendix), improves accessibility and performance, and unlocks new capabilities for web-based editors.
+The EditContext is a new API that simplifies the process of integrating a web app with [advanced text input methods](#Example%20Text%20Input%20Methods), improves accessibility and performance, and unlocks new capabilities for web-based editors.
 
 ## Motivation
 The web platform provides out-of-the-box editing experiences for single lines of plain-text (input), small amounts of multi-line plain-text (textarea) and a starting point for building an HTML document editing experience (contenteditable elements).  
@@ -430,5 +430,16 @@ Multiple approaches have been discussed during F2F editing meetings and through 
 
 * As an alternative to `beforeInput` Google has proposed a roadmap in [Google Chrome Roadmap Proposal](https://docs.google.com/document/d/10qltJUVg1-Rlnbjc6RH8WnngpJptMEj-tyrvIZBPSfY/edit) that suggests some potential subprojects to improve editing and textinput in the browser.  One concept in particular was described as a something like a hidden textarea that is decoupled from the view.  This proposal aligns well with that thinking.
 
-## Appendix
-1. Advanced text input methods such as [VK shape-writing](Shape-writing.gif), [Handwriting panels](Handwriting-recognition.gif), [Emoji Picker](Emoji-picker.gif), [IME Compositions](Composition.gif) etc.
+# Appendix
+## Example Text Input Methods
+### Virtual Keyboard Shape-writing
+![VK shape-writing](Shape-writing.gif)
+
+### Handwriting Recognition
+![Handwriting Recognition](Handwriting-recognition.gif)
+
+### Emoji Picker
+![Emoji Picker](Emoji-picker.gif)
+
+### IME Composition
+![IME Compositions](Composition.gif)
