@@ -1,11 +1,11 @@
 # EditContext API Explainer
 ## Introduction
-The EditContext is a new API that simplifies the process of integrating a web app with [advanced text input methods](#Example%20Text%20Input%20Methods), improves accessibility and performance, and unlocks new capabilities for web-based editors.
+The EditContext is a new API that simplifies the process of integrating a web app with [advanced text input methods](#example-text-input-methods), improves accessibility and performance, and unlocks new capabilities for web-based editors.
 
 ## Motivation
 The web platform provides out-of-the-box editing experiences for single lines of plain-text (input), small amounts of multi-line plain-text (textarea) and a starting point for building an HTML document editing experience (contenteditable elements).  
 
-Each of the editable elements provided by the web platform comes with built-in editing behaviors that are often inadequate to power the desired editing experience. As a result, web-based editors don't incorporate the web platform's editable elements into their view. Unfortunately, the only API provided by the web platform today to enable [advanced text input](#Appendix) experiences is to place an editable element in the DOM and focus it.
+Each of the editable elements provided by the web platform comes with built-in editing behaviors that are often inadequate to power the desired editing experience. As a result, web-based editors don't incorporate the web platform's editable elements into their view. Unfortunately, the only API provided by the web platform today to enable [advanced text input](#example-text-input-methods) experiences is to place an editable element in the DOM and focus it.
 
 This contradiction of needing an editable element, but not wanting it to be visible, leads web-based editors to create hidden editable elements to facilitate text input.  This approach negatively impacts accessibility and increases complexity, leading to buggy behavior.
 
@@ -27,7 +27,7 @@ Two aspects of accessibility suffer as a result:
 To work around this problem, Word Online waits until the composition finishes before updating the view. Some Chinese IMEs don't auto commit their composition; it just keeps going until the user types Enter. As a result, collaboration may be blocked for some time.
 
 ### Can't Use the Windows Emoji Picker in Google Docs
-[In this video](https://www.youtube.com/watch?v=iVclyPE55Js) Google Docs is using an off screen contenteditable element to enable text input.  This approach gives Google Docs access to text input features like an IME for composition, as well as enabling the emoji picker and other [advanced text input](#Appendix) options.
+[In this video](https://www.youtube.com/watch?v=iVclyPE55Js) Google Docs is using an off screen contenteditable element to enable text input.  This approach gives Google Docs access to text input features like an IME for composition, as well as enabling the emoji picker and other [advanced text input](#example-text-input-methods) options.
 
 Google Docs is listening for events to ensure the contenteditable element is focused and positioned appropriately near the insertion point before composition starts.  It isn't aware of all events, or in some cases doesn't receive any events, when other text input UI like the emoji picker is displayed.  As a result, the emoji window is positioned near the top of the app (not near the insertion point) and input isn't received since focus isn't currently in an editable element.
 
