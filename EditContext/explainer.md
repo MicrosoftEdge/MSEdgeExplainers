@@ -76,6 +76,7 @@ This section describes the sequences of events that get fired on the EditContext
 |  keyup                | focused element    |  ...
 |  keydown              | focused element    |  Space
 |  textupdate           | active EditContext |  (committed IME characters available in event.updateText)
+|  textformatupdate     | active EditContext |  ...
 |  keyup                | focused element    |  ...
 |  compositionend       | active EditContext |
 
@@ -149,12 +150,12 @@ enum EditContextInputPolicy {
 };
 
 dictionary EditContextInit {
-    DOMString text;
-    unsigned long selectionStart;
-    unsigned long selectionEnd;
-    EditContextInputMode inputMode;
-    EditContextInputPolicy inputPolicy;
-    EditContextEnterKeyHint enterKeyHint;
+    attribute DOMString text;
+    attribute unsigned long selectionStart;
+    attribute unsigned long selectionEnd;
+    attribute EditContextInputMode inputMode;
+    attribute EditContextInputPolicy inputPolicy;
+    attribute EditContextEnterKeyHint enterKeyHint;
 };
 
 /// @event name="textupdate", type="TextUpdateEvent"
@@ -168,14 +169,14 @@ interface EditContext : EventTarget {
     void blur();
     void updateSelection(unsigned long start, unsigned long end);
     void updateLayout(DOMRect controlBounds, DOMRect selectionBounds);
-    void updateText(unsigned long start, unsigned long end, DOMString updateText);
+    void updateText(unsigned long start, unsigned long end, DOMString newText);
 
-    readonly attribute DOMString text;
-    readonly attribute unsigned long selectionStart;
-    readonly attribute unsigned long selectionEnd;
-    readonly attribute EditContextInputMode inputMode;
-    readonly attribute EditContextInputPolicy inputPolicy
-    readonly attribute EditContextEnterKeyHint action;
+    DOMString text;
+    unsigned long selectionStart;
+    unsigned long selectionEnd;
+    EditContextInputMode inputMode;
+    EditContextInputPolicy inputPolicy
+    EditContextEnterKeyHint enterKeyHint;
 
     // Event handler attributes
     attribute EventHandler ontextupdate;
