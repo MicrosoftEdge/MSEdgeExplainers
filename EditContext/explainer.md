@@ -150,12 +150,12 @@ enum EditContextInputPolicy {
 };
 
 dictionary EditContextInit {
-    attribute DOMString text;
-    attribute unsigned long selectionStart;
-    attribute unsigned long selectionEnd;
-    attribute EditContextInputMode inputMode;
-    attribute EditContextInputPolicy inputPolicy;
-    attribute EditContextEnterKeyHint enterKeyHint;
+    DOMString text;
+    unsigned long selectionStart;
+    unsigned long selectionEnd;
+    EditContextInputMode inputMode;
+    EditContextInputPolicy inputPolicy;
+    EditContextEnterKeyHint enterKeyHint;
 };
 
 /// @event name="textupdate", type="TextUpdateEvent"
@@ -171,12 +171,12 @@ interface EditContext : EventTarget {
     void updateLayout(DOMRect controlBounds, DOMRect selectionBounds);
     void updateText(unsigned long start, unsigned long end, DOMString newText);
 
-    DOMString text;
-    unsigned long selectionStart;
-    unsigned long selectionEnd;
-    EditContextInputMode inputMode;
-    EditContextInputPolicy inputPolicy
-    EditContextEnterKeyHint enterKeyHint;
+    attribute DOMString text;
+    attribute unsigned long selectionStart;
+    attribute unsigned long selectionEnd;
+    attribute EditContextInputMode inputMode;
+    attribute EditContextInputPolicy inputPolicy;
+    attribute EditContextEnterKeyHint enterKeyHint;
 
     // Event handler attributes
     attribute EventHandler ontextupdate;
