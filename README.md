@@ -15,6 +15,10 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 ## Audio
 * [Hardware-offloaded Audio Processing explainer](AudioOffload/explainer.md)
 
+## Controls
+* [Password Reveal Explainer](PasswordReveal/explainer.md)
+* [Standardized Form Controls](https://github.com/WICG/form-controls-components)
+
 ## Editing
 * [EditContext API Explainer](EditContext/explainer.md)
 * [Highlight API Explainer](highlight/explainer.md)
@@ -31,10 +35,6 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
 * [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
 * [Media Cache Reduction Explainer](MediaCacheReduction/explainer.md)
-
-## Controls
-* [Password Reveal Explainer](PasswordReveal/explainer.md)
-* [Standardized Form Controls](https://github.com/WICG/form-controls-components)
 
 ## Navigation
 * [Arbitrary Text Fragments Explainer](Fragments/explainer.md)
