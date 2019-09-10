@@ -50,7 +50,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Storage Access API Explainer](StorageAccessAPI/explainer.md)
 
 ## UI
-* [Window segments enumeration API](Foldables/explainer.md)
+* [Window segments enumeration API Explainer](Foldables/explainer.md)
 
 ## Web App Manifest
 * [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
