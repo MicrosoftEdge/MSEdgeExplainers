@@ -50,7 +50,7 @@ When building web applications, it is a common practice to build KPIs based on R
 ### Use case 3: Identify regressions related to JavaScript and rendering
 When an engineer builds a feature or fixes a bug in a web app, they want to know if they introduced UX regressions by increasing JavaScript execution time or rendering overhead, such as layout thrashing. It is possible to measure long tasks (long JS execution time) using [Long Tasks API](https://w3c.github.io/longtasks/) but not the length of entire frames and the rendering time within those frames. This is a blind spot in the ability to detect performance regressions.
 
-## Use case 4 – identify regressions in asynchronous animations
+### Use case 4 – identify regressions in asynchronous animations
 In modern browsers, part of the rendering pipeline is executed in parallel with JS execution, for example, threaded scrolling, or slow composited effects like blurs. It should be possible to use this API to identify when asynchronous animations are slow.
 
 ## Conclusion
