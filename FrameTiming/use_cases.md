@@ -6,7 +6,6 @@ Authors:
 * [Amiya Gupta](https://github.com/amiyagupta) - Engineer at Microsoft News (MSN.com)
 
 
-=======
 ## Introduction
 Many complex web apps suffer from poor responsiveness and animation rate (also known as "jank"). This causes a poor user experience and users may complain about the UI being "slow", "stuck" or "not smooth". The common symptom for these poor experiences is the occurrence of long frames. In many cases the UI response to the user takes longer than 100ms or an animation’s frame rate drops below 60 FPS - which indicates frames longer than 16.5ms have occurred. See [RAIL guidelines](https://developers.google.com/web/fundamentals/performance/rail) for more details.
 
