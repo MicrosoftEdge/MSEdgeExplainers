@@ -93,11 +93,11 @@ CSS.highlights.set("bar", rangeGroup2);
 ```
 Where (1) shows that ```range1``` covers ```"Some t"``` and (2) denotes ```range2``` covers ```"e text"```.
 
-Because there are no priorities set (i.e. there is a tie between ```rangeGroup1``` and ```rangeGroup2```, the HighlightRangeGroups' styles are applied in timestamp order. The rendered results will have ```"Som"``` with blue text on yellow background, ```"e t"``` with blue text on orange background, and ```"ext"``` with the default color on orange background.
+Because there are no priorities set (i.e. there is a tie between ```rangeGroup1``` and ```rangeGroup2```), the HighlightRangeGroups' styles are applied in timestamp order. The rendered results will have ```"Som"``` with blue text on yellow background, ```"e t"``` with blue text on orange background, and ```"ext"``` with the default color on orange background.
 
 ![overlap example1](overlap_example1.png)
 
-Setting ```rangeGroup1.priority = 1;``` would cause ```rangeGroup1``` to apply on top of ```rangeGroup1```, which results in ```"Some t"``` being blue on yellow, and ```"ext"``` being default color on orange.
+Setting ```rangeGroup1.priority = 1;``` would cause ```rangeGroup1``` to apply on top of ```rangeGroup2```, which results in ```"Some t"``` being blue on yellow, and ```"ext"``` being default color on orange.
 
 ![overlap example2](overlap_example2.png)
 
