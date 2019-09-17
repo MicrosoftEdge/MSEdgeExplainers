@@ -41,6 +41,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Arbitrary Text Fragments Explainer](Fragments/explainer.md)
 
 ## Privacy
+* [Autofill Reauthentication](AutofillReauthentication/explainer.md)
 * [Time-limited Permissions Explainer](TimeLimitedPermissions/Explainer.md)
 * [Principles: Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md)
 
