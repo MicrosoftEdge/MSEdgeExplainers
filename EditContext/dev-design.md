@@ -37,6 +37,10 @@ Changes to the editable contents can also come from external events, such as col
 
 ## API Details
 
+```focus``` is used to activate an EditContext and a way to tell the OS that the author wants advanced text input methods enabled and that the metadata required for suggestions, where text input UI should appear, what the input mode is, etc. should all come from this particular editContext instance. This will create a strong reference (internally) from document to that editContext. The typical owner of an editContext instance will be the web app or widget that needs to enable text input.
+
+```blur``` is used to deactivate an EditContext and it will also release the strong-ref by the Document. After calling blur, the EditContext instance won't receive any text input events from text input services.
+
 The ```textupdate``` event will be fired on the EditContext when user input has resulted in characters being applied to the editable region. The event signals the fact that the software keyboard or IME updated the text (and as such that state is reflected in the shared buffer at the time the event is fired). This can be a single character update, in the case of typical typing scenarios, or multiple-character insertion based on the user changing composition candidates. Even though text updates are the results of the software keyboard modifying the buffer, the creator of the EditContext is ultimately responsible for keeping its underlying model up-to-date with the content that is being edited as well as telling the EditContext about such changes. These could get out of sync, for example, when updates to the editable content come in through other means (the backspace key is a canonical example &mdash; no ```textupdate``` is fired in this case, and the consumer of the EditContext should detect the keydown event and remove characters as appropriate).
 
 Updates to the shared buffer driven by the webpage/javascript are performed by calling the ```updateText()``` method on the EditContext. ```updateText()``` accepts a range (start and end offsets over the underlying buffer) and the characters to insert at that range. ```updateText()``` should be called anytime the editable contents have been updated. However, in general this should be avoided during the firing of ```textupdate``` as it will result in a canceled composition.
@@ -57,10 +61,10 @@ The ```inputMode``` property on the EditContext (also can be passed in a diction
 enum EditContextInputMode { "text", "decimal", "password", "search", "email", "numeric", "tel", "url" }
 ```
 
-The ```action``` property on the EditContext (also can be passed in a dictionary to the constructor) denotes what type of Enter key action the EditContext is associated with. This information indicates to the text input services to display different glyphs for the enter key on the software input panel which also changes the functionality of the enter key such as enter to search, enter to send etc.
+The ```enterKeyHint``` property on the EditContext (also can be passed in a dictionary to the constructor) denotes what type of Enter key action the EditContext is associated with. This information indicates to the text input services to display different glyphs for the enter key on the software input panel which also changes the functionality of the enter key such as enter to search, enter to send etc.
 
 ```javascript
-enum EditContextInputAction { "enter", "done", "go", "next", "previous", "search", "send" }
+enum EditContextEnterKeyHint { "enter", "done", "go", "next", "previous", "search", "send" }
 ```
 
 The ```inputPolicy``` property on the EditContext (also can be passed in a dictionary to the constructor) denotes whether the virtual keyboard should be raised automatically or not when an EditContext is focused. It enables web authors to control the visibility of the VKs.

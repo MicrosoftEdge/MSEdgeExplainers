@@ -442,12 +442,12 @@ class EditController {
         editableviewholder.addEventListener("keypress", e => {
             console.log("keypress "+e.key);
             if (e.key === "Enter"){
-                this.editContext.updateText(this.editContext.selection.start, this.editContext.selection.end, "\n");
-                this.editContext.updateSelection(this.editContext.selection.start + 1, this.editContext.selection.start + 1);
+                this.editContext.updateText(this.editContext.selectionStart, this.editContext.selectionEnd, "\n");
+                this.editContext.updateSelection(this.editContext.selectionStart + 1, this.editContext.selectionStart + 1);
             } else {
-                this.model.updateText(e.key, this.editContext.selection.start, this.editContext.selection.end);
-                this.editContext.updateText(this.editContext.selection.start, this.editContext.selection.end, e.key);
-                this.editContext.updateSelection(this.editContext.selection.start + e.key.length, this.editContext.selection.start + e.key.length);
+                this.model.updateText(e.key, this.editContext.selectionStart, this.editContext.selectionEnd);
+                this.editContext.updateText(this.editContext.selectionStart, this.editContext.selectionEnd, e.key);
+                this.editContext.updateSelection(this.editContext.selectionStart + e.key.length, this.editContext.selectionStart + e.key.length);
                 this.view.queueUpdate();
             }
         });
@@ -484,15 +484,15 @@ class EditController {
                     this.view.queueUpdate();
                     break;
                 case " ":
-                    this.editContext.updateText(this.editContext.selection.start, this.editContext.selection.end, " ");
-                    this.editContext.updateSelection(this.editContext.selection.start + 1, this.editContext.selection.start + 1);
-                    this.model.updateText(" ", this.editContext.selection.start, this.editContext.selection.end);
+                    this.editContext.updateText(this.editContext.selectionStart, this.editContext.selectionEnd, " ");
+                    this.editContext.updateSelection(this.editContext.selectionStart + 1, this.editContext.selectionStart + 1);
+                    this.model.updateText(" ", this.editContext.selectionStart, this.editContext.selectionEnd);
                     this.view.queueUpdate();
                     e.preventDefault();
                     break;
                 case "Backspace":
-                    this.editContext.updateText(this.editContext.selection.start - 1, this.editContext.selection.end, "");
-                    this.editContext.updateSelection(this.editContext.selection.start - 1, this.editContext.selection.start - 1);
+                    this.editContext.updateText(this.editContext.selectionStart - 1, this.editContext.selectionEnd, "");
+                    this.editContext.updateSelection(this.editContext.selectionStart - 1, this.editContext.selectionStart - 1);
                     this.model.backspace(this.shiftPressed, this.controlPressed);
                     this.view.queueUpdate();
                     break;
@@ -521,8 +521,8 @@ class EditController {
         });
 
         this.editContext.addEventListener("textupdate", (e => {
-            console.log("update text " + "Selection offsets are " + "start " + e.newSelection.start + "end " + e.newSelection.end);
-            this.model.updateText(e.updateText, e.updateRange.start, e.updateRange.end);
+            console.log("update text " + "Selection offsets are " + "start " + e.newSelectionStart + "end " + e.newSelectionEnd);
+            this.model.updateText(e.updateText, e.updateRangeStart, e.updateRangeEnd);
             this.view.queueUpdate();
         }).bind(this));
         editContext.addEventListener("textformatupdate", e => { console.log("formatupdating") });
@@ -539,15 +539,13 @@ window.addEventListener("load", () => {
 
     let select = document.querySelector("#input-type")
     let contextTypes = {
-        text: new EditContext({editContextType: "text" }),
-        password: new EditContext({editContextType: "password" }),
-        search: new EditContext({editContextType: "search" }),
-        email: new EditContext({editContextType: "email" }),
-        number: new EditContext({editContextType: "number" }),
-        telephone: new EditContext({editContextType: "telephone" }),
-        url: new EditContext({editContextType: "url" }),
-        date: new EditContext({editContextType: "date" }),
-        datetime: new EditContext({editContextType: "datetime" })
+        text: new EditContext({inputMode: "text" }),
+        password: new EditContext({inputMode: "password" }),
+        search: new EditContext({inputMode: "search" }),
+        email: new EditContext({inputMode: "email" }),
+        number: new EditContext({inputMode: "numeric" }),
+        telephone: new EditContext({inputMode: "tel" }),
+        url: new EditContext({inputMode: "url" })
     }
     select.addEventListener("focus", () => {
         let type = select.options[select.selectedIndex].value
@@ -568,8 +566,6 @@ window.addEventListener("load", () => {
     <option>number</option>
     <option>telephone</option>
     <option>url</option>
-    <option>date</option>
-    <option>datetime</option>
 </select>
 <p> This is an editable region, based on EditContext:<br>
     <b>usage:</b> new EditContext()
