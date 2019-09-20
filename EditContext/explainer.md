@@ -166,7 +166,7 @@ dictionary EditContextInit {
 /// @event name="compositionend", type="CompositionEvent"
 [Exposed=Window]
 interface EditContext : EventTarget {
-    constructor(optional EditContextInit options);
+    constructor(optional EditContextInit options = {});
 
     void focus();
     void blur();
