@@ -12,7 +12,7 @@ This contradiction of needing an editable element, but not wanting it to be visi
 An alternative is to incorporate a contenteditable element into the view of the editor, regardless of whether the editor is editing an HTML document.  This approach limits the editor's flexibilty in modifying the view, since the view is also powering the text input experience.
 
 ## Real-world Examples of Text Input Issues in Top Sites and Frameworks
-### Accessibility Issues in the Monaco Edito
+### Accessibility Issues in the Monaco Editor
 [This video](https://www.youtube.com/watch?v=xzC86EG9lPo) demos Windows Narrator reading from a hidden textarea element in the Monaco editor and compares it with the intended experience by showing Narrator reading text from CKEditor, which uses a contenteditable element as part of its view.
 
 Monaco edits plain text - it's a code editor. The plain text document is presented using a rich view created from HTML, but a hidden textarea is used to integrate with the text input services of the OS.  This approach makes the hidden textarea the accessibile surface for the editable content being edited.
