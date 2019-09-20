@@ -35,6 +35,20 @@ Operating system compositors typically introduce a frame of latency in order to 
 
 In order for the system to be able to draw the subsequent points with enough fidelity that the user does not see the difference, the application needs to describe the last rendered point with sufficient details. If the system knows the last rendered point, it can produce the tip segments for input that has been delievered, but not yet rendered (or at least has not hit the end of the rendering pipenline).
 
+### Sample app flow
+
+![Application canvas with some application rendered ink and visualized continued user input, that has not been delivered to an app](enhanced-ink-flow-1.png)
+
+An app renders complex ink using delivered Pointer events, while user continues interaction and OS is working on delivering input to an app.
+
+![Application canvas with some application rendered ink and OS rendered ink](enhanced-ink-flow-2.png)
+
+OS can render ink stroke based on incoming user input using last rendered point information and stroke styles set by an app, at the same time as delivering input to an app.
+
+![Application canvas with some application rendered ink, that replaced OS rendered ink](enhanced-ink-flow-3.png)
+
+As Pointer events gets delivered to an app, application continues rendering ink, seamlessly replacing OS ink with application rendered strokes.
+
 ## Goals
 - Provide a progressive enhancement over other latency improvements.
 - Allow web applications to improve latency without delegating full input / output stack to the OS.
