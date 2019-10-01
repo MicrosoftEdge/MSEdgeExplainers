@@ -87,17 +87,18 @@ class InkRenderer {
         let events = evt.getCoalescedEvents();
         events.push(evt);
         events.forEach(event => {
-            this.renderStrokeSegment(evt.x, evt.y);
+            this.renderStrokeSegment(event.x, event.y);
         });
 
         if (this.presenter)
             this.presenter.setLastRenderedPoint(evt.x, evt.y);
-        }
     }
 
     void setPresenter(presenter) {
-        this.presenterStyle = { color: "rgba(0, 0, 255, 0.5)", radius: 2 };
+        this.presenter = presenter;
         this.presenter.setPenStrokeStyle(this.presenterStyle);
+        
+        this.presenterStyle = { color: "rgba(0, 0, 255, 0.5)", radius: 2 };
     }
 
     renderStrokeSegment(x, y) {
