@@ -95,10 +95,10 @@ class InkRenderer {
     }
 
     void setPresenter(presenter) {
+        this.presenterStyle = { color: "rgba(0, 0, 255, 0.5)", radius: 2 };
+
         this.presenter = presenter;
         this.presenter.setPenStrokeStyle(this.presenterStyle);
-        
-        this.presenterStyle = { color: "rgba(0, 0, 255, 0.5)", radius: 2 };
     }
 
     renderStrokeSegment(x, y) {
