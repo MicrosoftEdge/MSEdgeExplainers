@@ -15,7 +15,7 @@ Developers might solve those problems by taking a hard dependency on a specific 
 ### Some of the current problems:
 More specific challenges we've heard from our internal product teams that were exploring building experiences for this emerging classes of devices include:
 
-- *Hardware differences*: Devices could be seamless (e.g. Samsung Galaxy Fold) or have a seam (ZTE Axon M), in the latter case developers might want to take it into account or intentionally ignore depending on scenario;
+- *Hardware differences*: Devices could be seamless (e.g. Samsung Galaxy Fold) or have a seam (e.g. [Microsoft Surface Neo](https://www.microsoft.com/en-us/surface/devices/surface-neo) or ZTE Axon M), in the latter case developers might want to take it into account or intentionally ignore depending on scenario;
 - *Folding capabilities, state*: the fold area could be safe or unsafe region to present content;
 - *Software occlusion*: Parts of the individual window segments could be occluded by software keyboard, notifications or other transient pieces of UI, permanently or temporarily. Application might decide to react or ignore depending on the current content and occlusion area;
 - *Future-proofing*: Ideally developers would want a somewhat stable way to target this class of devices that won't require updates for every new device.
