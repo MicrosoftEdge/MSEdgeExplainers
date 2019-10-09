@@ -75,7 +75,7 @@ base::Optional<CaptionStyle> NativeTheme::GetSystemCaptionStyle() const {
 For web video content that uses the WebVTT standard to include a caption payload for HTML5 content, this change will apply the caption styling preferences the user explicitly sets in the OS Settings app on Windows 10 or macOS.<br><br>
 For videos that don’t use the WebVTT standard for closed captioning, no change in behavior should be observed with this change.
 ### Feature Flag
-This change is behind a ui::base feature flag.
+This change is behind a ui::base feature flag. This flag is enabled by default in Chromium.
 ```C++
 COMPONENT_EXPORT(UI_BASE_FEATURES) 
 extern const base::Feature kSystemCaptionStyle;
@@ -84,3 +84,4 @@ extern const base::Feature kSystemCaptionStyle;
 const base::Feature kSystemCaptionStyle{
     "SystemCaptionStyle", base::FEATURE_ENABLED_BY_DEFAULT};
 ```
+<br>Lastly, you can find details about Native Styling Support for WebVTT Captions on other platforms in the Chromium design doc [here](https://docs.google.com/document/d/1NkqsqueGufe4TyicvsFtfGBLSpLSln6Xwl7khLkTTgU/edit#heading=h.7srs4jpejfgj).
