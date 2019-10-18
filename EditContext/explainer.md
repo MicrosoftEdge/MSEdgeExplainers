@@ -83,7 +83,7 @@ This section describes the sequences of events that get fired on the EditContext
 Note that the composition events are also not fired on the focused element as the composition is operating on the shared buffer that is represented by the EditContext.
 
 ### EditContext WebIDL
-```javascript
+```webidl
 
 dictionary TextUpdateEventInit {
     unsigned long updateRangeStart;
@@ -94,8 +94,9 @@ dictionary TextUpdateEventInit {
 };
 
 [Exposed=Window]
-[Constructor(optional TextUpdateEventInit eventInitDict)]
 interface TextUpdateEvent : Event {
+    constructor(optional TextUpdateEventInit eventInitDict = {});
+
     readonly attribute unsigned long updateRangeStart;
     readonly attribute unsigned long updateRangeEnd;
     readonly attribute DOMString updateText;
@@ -113,8 +114,9 @@ dictionary TextFormatUpdateEventInit {
 };
 
 [Exposed=Window]
-[Constructor(optional TextFormatUpdateEventInit eventInitDict)] 
 interface TextFormatUpdateEvent : Event {
+    constructor(optional TextFormatUpdateEventInit eventInitDict = {});
+
     readonly attribute unsigned long formatRangeStart;
     readonly attribute unsigned long formatRangeEnd;
     readonly attribute DOMString underlineColor;
@@ -163,8 +165,9 @@ dictionary EditContextInit {
 /// @event name="compositionstart", type="CompositionEvent"
 /// @event name="compositionend", type="CompositionEvent"
 [Exposed=Window]
-[Constructor(optional EditContextInit options)]
 interface EditContext : EventTarget {
+    constructor(optional EditContextInit options = {});
+
     void focus();
     void blur();
     void updateSelection(unsigned long start, unsigned long end);
