@@ -134,15 +134,17 @@ This will allow authors to provide different styles when the password is either 
 
 Here is an example of an author that wants to show an eye image to reveal and a closed eye image to hide the password again.
 
-    <input type="password" />
-    <style>
-    input[type=password]:revealed::reveal {
-        background-image: url(my-eye-image.png);
-    }
-    input[type=password]:revealed::reveal {
-        background-image: url(my-eye-image-revealed.png);
-    }
-    </style>
+```HTML
+<input type="password">
+<style>
+input[type=password]::reveal {
+    background-image: url(my-eye-image.png);
+}
+input[type=password]:revealed::reveal {
+    background-image: url(my-eye-image-revealed.png);
+}
+</style>
+```
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Password%20Reveal) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BPassword%20Reveal%5D)
