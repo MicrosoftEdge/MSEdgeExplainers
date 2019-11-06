@@ -73,3 +73,6 @@ Without a defined `color_scheme`, the value of "no-preference" would be assigned
 1. Would it make sense to use the existing [`purpose` member of an <code>ImageResource</code>](https://w3c.github.io/manifest/#dom-imageresource-purpose)?
 2. With SVGs, might it be possible to pick up foreground and background colors directly from the OS (along the lines of `currentColor`)?
 3. If an author specifies that they have "no preference" for an icon, does that indicate than an OS should feel empowered to automatically mutate the colors to try to provide the most readable image? (For example: the white shortcut icons being automagically reversed in Windows.)
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/ImageResource%20Color%20Scheme) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BImageResource%20Color%20Scheme%5D)

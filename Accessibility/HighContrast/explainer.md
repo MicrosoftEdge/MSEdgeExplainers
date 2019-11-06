@@ -32,7 +32,7 @@ In order to allow developer defined high contrast rules for webpages, a [high co
 #### Possible values
 
 Value | Description
---- | --- 
+--- | ---
 **active** | The subsequent style rules will be applied when high contrast is enabled under any theme, custom or not.
 **black-on-white** | The subsequent style rules will be applied when high contrast is enabled under the black-on-white color theme.
 **white-on-black** | The subsequent style rules will be applied when high contrast is enabled under the white-on-black color theme.
@@ -82,7 +82,7 @@ To allow for further developer customization of the high contrast feature, a [CS
 #### Possible values
 
 Value | Description
---- | --- 
+--- | ---
 **auto** | Indicates that the applicable CSS styles *will* be overridden when high contrast is enabled.
 **none** | Indicates that the applicable CSS styles will *not* be overridden when high contrast is enabled.
 
@@ -106,7 +106,7 @@ As mentioned previously, high contrast color schemes work by overriding user def
 
 Given an element and a declaration from a CSS rule whose selector matches that element, the application of that declaration will be suppressed if all of the following conditions are met:
 
-1. The declaration is for a CSS property in the set of properties that are adjusted for high contrast (as defined in 
+1. The declaration is for a CSS property in the set of properties that are adjusted for high contrast (as defined in
 [CSS Properties](#css-properties))
 
 2. High contrast mode is enabled in the host environment
@@ -122,7 +122,7 @@ If all of the above conditions are met, the computed color value of the CSS prop
 ## System Colors
 High contrast relies on system color keywords to fetch the appropriate theme colors, which are deprecated from the CSS Color standard in both [Level 3](https://drafts.csswg.org/css-color-3/#css2-system) and [Level 4](https://drafts.csswg.org/css-color-4/#system-colors). Blink currently does have support for these keywords, but they're currently mapped to hard-coded values instead of being plumbed through to the system color API. There is a derived class ```LayoutThemeWin```, but it currently doesn't add any functionality for this. Functionality can be added here to support the required system color keywords.
 
-In addition to existing CSS system color keywords, a new system color keyword would be added called ```hotlight``` that defines the system color for hyperlinks. It is important to track and store this system color because a developer might choose to unset high contrast styles for an ancestor of a link, but the high contrast link styles for descendent links must be preserved. 
+In addition to existing CSS system color keywords, a new system color keyword would be added called ```hotlight``` that defines the system color for hyperlinks. It is important to track and store this system color because a developer might choose to unset high contrast styles for an ancestor of a link, but the high contrast link styles for descendent links must be preserved.
 
 This system color keyword is currently supported by Microsoft Edge and IE. On Windows, the value for ```hotlight``` should map to the ```COLOR_HOTLIGHT``` system color. On other platforms, it should map to the default color used for links.
 
@@ -157,3 +157,6 @@ Should the high contrast readability backplate be customizable for developers? I
 In order to support existing content, we will need to add an alias for ```-ms-``` properties and values to our implementation. Is this an acceptable solution?
 
 Is ```hotlight``` an appropriate name for the system color keyword for hyperlinks, or would a more neutral name such as ```link``` be preferred?
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/High%20Contrast) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BHigh%20Contrast%5D)

@@ -55,7 +55,7 @@ Specifically, the EditContext allows the author to provide:
   * An ability to specify which of those multiple EditContexts is currently the target of text input.
 
 Additionally, the EditContext communicates events driven from text input UI to JavaScript:
-  * Text and selection update events; these represent requests for the web app to update their text and selection model given some text input from the user. 
+  * Text and selection update events; these represent requests for the web app to update their text and selection model given some text input from the user.
   * Composition start and end events.
   * Text formatting requests that indicate where activity relating to text input, e.g. composition, is taking place.
 
@@ -125,7 +125,7 @@ interface TextFormatUpdateEvent : Event {
     readonly attribute DOMString textUnderlineStyle;
 };
 
-enum EditContextInputMode { 
+enum EditContextInputMode {
     "text",
     "decimal",
     "search",
@@ -136,19 +136,19 @@ enum EditContextInputMode {
     "password"
 };
 
-enum EditContextEnterKeyHint { 
-    "enter", 
-    "done", 
-    "go", 
-    "next", 
-    "previous", 
-    "search", 
-    "send" 
+enum EditContextEnterKeyHint {
+    "enter",
+    "done",
+    "go",
+    "next",
+    "previous",
+    "search",
+    "send"
 };
 
-enum EditContextInputPolicy { 
+enum EditContextInputPolicy {
     "auto",
-    "manual" 
+    "manual"
 };
 
 dictionary EditContextInit {
@@ -210,7 +210,7 @@ let editContext = new EditContext(editContextInit);
 let model = new EditModel(editContext, editContextInit.text, editContextInit.selectionStart, editContextInit.selectionEnd);
 let view = new EditView(editContext, model, editContainer);
 
-// Delegate focus to an EditContext when an "editable" part of the view is focused in the web app. 
+// Delegate focus to an EditContext when an "editable" part of the view is focused in the web app.
 editContainer.addEventListener("focus", () => editContext.focus());
 window.requestAnimationFrame(() => {
     editContext.updateLayout(editContainer.getBoundingClientRect(), computeSelectionBoundingRect());
@@ -255,7 +255,7 @@ editContext.addEventListener("textformatupdate", e => {
 
 Example of a user-defined EditModel class that contains the underlying model for the editable content
 ```javascript
-// User defined class 
+// User defined class
 class EditModel {
     constructor(editContext, text, selectionStart, selectionEnd) {
         // This specific model uses the underlying buffer of the editContext directly
@@ -400,7 +400,7 @@ The current thinking is that a more minimal approach is a better place to start.
 ### Default Key Event Behavior Adaptations for Editing
 Some KeyboardEvents are associated with different default behaviors when an editable element is focused than when a read-only element is focused.  As an example, the spacebar inserts a space in editable elements, but scrolls when a read-only element is focused.
 
-When an EditContext is active, the web platform will treat the set of KeyboardEvents with special editing behaviors as though the default behavior has been prevented, i.e. there will be no need for the author to call preventDefault to prevent scrolling when a Space key is pressed. 
+When an EditContext is active, the web platform will treat the set of KeyboardEvents with special editing behaviors as though the default behavior has been prevented, i.e. there will be no need for the author to call preventDefault to prevent scrolling when a Space key is pressed.
 
 ### Touch-specific Editing Behaviors
 Some browsers may support double-tap to zoom.  When double tap occurs on editable text, however, it is commonly used to select the word under the double tap.  Editors using read-only elements in conjunction with an EditContext can employ the touch-action CSS property to eliminate unwanted touch behavior.
@@ -447,3 +447,6 @@ Multiple approaches have been discussed during F2F editing meetings and through 
 
 ### IME Composition
 ![IME Compositions](Composition.gif)
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/EditContext) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BEditContext%5D)

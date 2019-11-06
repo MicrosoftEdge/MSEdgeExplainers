@@ -209,3 +209,6 @@ imagine virtualizing portions of a spreadsheet whose role is best defined as `ta
 * There is no explicit indication that virtualized content exists; in other words it does not allow the AT to distinguish between
 the end of realized content and the actual end of content. This can result in the AT giving incorrect cues to the user as described
 in the introduction.
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Content) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BVirtual%20Content%5D)

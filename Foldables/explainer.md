@@ -10,7 +10,7 @@ Developers are trying to achieve at least the following:
 - Effectively lay out the content in a window that spans multiple displays;
 - React when areas of that window are occluded by the OS, for example when soft keyboard pops up.
 
-Developers might solve those problems by taking a hard dependency on a specific device hardware parameters - an approach that is not scalable, fragile and requires work duplication for each new device. 
+Developers might solve those problems by taking a hard dependency on a specific device hardware parameters - an approach that is not scalable, fragile and requires work duplication for each new device.
 
 ### Some of the current problems:
 More specific challenges we've heard from our internal product teams that were exploring building experiences for this emerging classes of devices include:
@@ -21,7 +21,7 @@ More specific challenges we've heard from our internal product teams that were e
 - *Future-proofing*: Ideally developers would want a somewhat stable way to target this class of devices that won't require updates for every new device.
 
 ### Complementary existing proposals:
-Before discussing the solution proposal - let's overview existing proposals that are relevant and applicable to the problem space. 
+Before discussing the solution proposal - let's overview existing proposals that are relevant and applicable to the problem space.
 As matter of principle we should generally avoid creating redundant concepts if we can reuse existing platform APIs and capabilities.
 
 - [Presentation API](https://w3c.github.io/presentation-api/) is solving the problem of a effective use of a _secondary_ screen and likely won't attempt to solve challenges outlined above that are specific to devices where a window can span separate physical displays. This would likely still be a separate problem for foldables
@@ -30,18 +30,18 @@ As matter of principle we should generally avoid creating redundant concepts if 
 	- Getting adjacency information about spanning window regions to lay out content in several areas in logical way for a device;
 	- Getting inner window dimensions that account for application frame, OS UI elements, etc.
 - [Window Placement API Explainer](https://github.com/spark008/window-placement/blob/master/EXPLAINER.md) is useful in multi-window scenarios on multiple screen devices, but does not target scenarios in which the hosting application (i.e. browser) has a single window which spans multiple displays. In this case, the developer may not wish to open new windows - just hints to help lay out things properly and take advantage of the physical partitioning of the available layout space.
- 
+
 Additionally, while not a solution in the same sense, a ["[css-media-queries] Foldables support and enablement"](https://github.com/w3c/csswg-drafts/issues/4141) issue discusses the problem space and outlines some details and touches upon outlined issues. Longer term we might want to rethink some of the fundamental assumptions (i.e. a single contiguous rectangular space for laying out content) making it hard to use current layout queries - but in the short term we have a chance to improve developer experience by solving specific problems.
 
-## Proposal: 
+## Proposal:
 
 A summary of the concepts from the other proposals:
 * Display - the logical representation of an physical monitor.
 * Screen - the aggregate 2D space occupied by all the connected displays.
 
-We propose a new concept of Window Segments that represent the regions (and their dimensions) of the window that reside on separate (adjacent) displays. Window Segment dimensions are expressed in CSS pixels and will be exposed via a JavaScript API that allows developers to enumerate segments, including about regions that are occluded. 
+We propose a new concept of Window Segments that represent the regions (and their dimensions) of the window that reside on separate (adjacent) displays. Window Segment dimensions are expressed in CSS pixels and will be exposed via a JavaScript API that allows developers to enumerate segments, including about regions that are occluded.
 
-This proposal is primarily aimed at reactive scenarios, where an application wants to take advantage of the fact that it spans multiple displays, by virtue of the user/window manager placing it in that state. It is not designed for scenarios of proactively placing content on the various displays available (this would fall under the [Window Placement API](https://github.com/spark008/window-placement/blob/master/EXPLAINER.md) or [Presentation API](https://w3c.github.io/presentation-api/)). Note that given the [Screen Enumeration API](https://github.com/spark008/screen-enumeration/blob/master/EXPLAINER.md) and existing primitives on the Web, it is possible to write JavaScript code that intersects the rectangles of the Display and window, while taking into account devicePixelRatio in order to compute the interesting layout regions of a window spanned across displays. However this may not correctly handle corner cases of future device form factors, and thus this proposal tries to centralize access to "here are the interesting parts of the screen a developer can target or consider for presenting content" as a practical starting point. 
+This proposal is primarily aimed at reactive scenarios, where an application wants to take advantage of the fact that it spans multiple displays, by virtue of the user/window manager placing it in that state. It is not designed for scenarios of proactively placing content on the various displays available (this would fall under the [Window Placement API](https://github.com/spark008/window-placement/blob/master/EXPLAINER.md) or [Presentation API](https://w3c.github.io/presentation-api/)). Note that given the [Screen Enumeration API](https://github.com/spark008/screen-enumeration/blob/master/EXPLAINER.md) and existing primitives on the Web, it is possible to write JavaScript code that intersects the rectangles of the Display and window, while taking into account devicePixelRatio in order to compute the interesting layout regions of a window spanned across displays. However this may not correctly handle corner cases of future device form factors, and thus this proposal tries to centralize access to "here are the interesting parts of the screen a developer can target or consider for presenting content" as a practical starting point.
 
 ```
 partial interface Window {
@@ -80,7 +80,7 @@ const screenSegments = window.getWindowSegments().filter( segment => segment.isO
 
 if( screenSegments.length > 1 ) {
 	// now we know the device is a foldable
-	// and we can update CSS classes in our layout as appropriate 
+	// and we can update CSS classes in our layout as appropriate
 	document.body.classList.add('is-foldable');
 	document.querySelector('.map').classList.add('flex-one-half');
 	document.querySelector('.locations-list').classList.add('flex-one-half');
@@ -113,7 +113,7 @@ const screenSegments = window.getWindowSegments().filter( segment => segment.isO
 
 if( screenSegments.length > 1 ) {
 	// now we know the device is a foldable
-	// and we can update CSS classes in our layout as appropriate 
+	// and we can update CSS classes in our layout as appropriate
 	document.body.classList.add('is-foldable');
 	document.querySelector('.message-list').classList.add('flex-one-half');
 	document.querySelector('.message-preview').classList.add('flex-one-half');
@@ -136,3 +136,6 @@ window.onsegmentschange = function() {
 	})
 }
 ```
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Window%20Segments%20API) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWindow%20Segments%20API%5D)

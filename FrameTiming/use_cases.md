@@ -1,4 +1,4 @@
-# Frame Timing Use Cases 
+# Frame Timing Use Cases
 The purpose of this document is to describe use cases which may be relevant to the [Frame Timing API](https://wicg.github.io/frame-timing/).
 
 Authors:
@@ -31,7 +31,7 @@ This approach has several downsides:
 * Missing long frames - it is possible to have many “short” tasks execute consecutively, resulting in a long frame. These long frames may go undetected when looking at long tasks in isolation.
 
 ### Detecting long idle callbacks
-Similar to long task measuring methods, idle callbacks are essentially JavaScript code running when the callback queue is empty. Therefore, it can be tracked using techniques similar to the aforementioned methods. Understanding the duration of tasks scheduled during idle callbacks is important to understand the user response time when interacting with the UI using input devices. 
+Similar to long task measuring methods, idle callbacks are essentially JavaScript code running when the callback queue is empty. Therefore, it can be tracked using techniques similar to the aforementioned methods. Understanding the duration of tasks scheduled during idle callbacks is important to understand the user response time when interacting with the UI using input devices.
 
 ### Detecting rendering bottlenecks
 Browser do not provide any Web API to directly understand rendering related bottlenecks. Long rendering operations could be caused by a complex page layout or frequent repetitive layout calculations (known as layout thrashing). In addition, there are cases where the compositor render phase can take extensive time to complete (although running on a separate thread in modern browsers). Since no relevant Web API exist to observe these operations, engineers are left with relatively narrow options.
@@ -55,3 +55,6 @@ In modern browsers, part of the rendering pipeline is executed in parallel with 
 
 ## Conclusion
 As outlined in this document, it is very challenging for engineers of complex web apps to track and detect long frames and identify their root causes. A new Web API is required to provide the ability to natively track long frames and provide a breakdown into phases for more effective root cause analysis. Such an API would give engineers the ability to develop and build more responsive and interactive web applications with smooth and rich animations which will benefit the web apps ecosystem.
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Frame%20Timing) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BFrame%20Timing%5D)
