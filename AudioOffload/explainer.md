@@ -36,7 +36,7 @@ A high level overview of chromium's audio architecture with a newly proposed WAS
 
 ## Audio Process
 On Windows OS's that support audio offload for classic (Win32) applications through the Windows Audio Service API (WASAPI), the calling process must meet **one** of the following requirements:
-1. The process is running within a Windows Universal Application Package (UAP) 
+1. The process is running within a Windows Universal Application Package (UAP)
 2. The process is running as a Low Privilege App Container (LPAC)
 3. The process is running with an integrity level at or below Low
 
@@ -152,7 +152,7 @@ if (CoreAudioUtil::IsFormatSupported(audio_client_offload.Get(),
 ```
 At this point we've determined whether audio offload & our audio format are supported by the current audio client. However we have not yet successfully initialized the audio client and obtained an audio offload resource.
 
-### Late Binding 
+### Late Binding
 An audio client utilizing audio offload requires binding to one of the limited hardware resources - once bound that resource will be unavailable to other clients until it is released. The act of binding to this resource occurs as part of calling IAudioClient::Initialize. To responsibly use these resources we don't want to bind to them unless they are actively being used, so we delay initializing our audio client until absolutely necessary - this is called Late Binding.
 
 In order to facilitate Late Binding, we won't initialize our IAudioClient when WASAPIAudioOffloadOutputStream::Open is called (compare this behavior with WASAPIAudioOutputStream which does call IAudioClient::Initialize during Open).
@@ -324,7 +324,7 @@ if (using_audio_offload_) {
     hr = audio_render_client_->ReleaseBuffer(num_available_frames, 0);
 ```
 ## Pausing
-The current Chromium architecture facilitates a pause by removing the paused source as a mixer input (see AudioRendererMixer::RemoveMixerInput); any queued output buffers are allowed to finish rendering. This works well when the queued output is on the order of tens of milliseconds, but will break down for audio offload where the queued output can be on the order of seconds. 
+The current Chromium architecture facilitates a pause by removing the paused source as a mixer input (see AudioRendererMixer::RemoveMixerInput); any queued output buffers are allowed to finish rendering. This works well when the queued output is on the order of tens of milliseconds, but will break down for audio offload where the queued output can be on the order of seconds.
 
 In order to respond to Pause events with limited delay when using audio offload, we'll issue a Pause command in conjunction with removing the mixer input.
 
@@ -549,7 +549,7 @@ High level metrics
 <pre>
 | Buffer           | Average Power Utilization (mW)   |
 |------------------|----------------------------------|
-| No Audio Offload | 6691.7                           | 
+| No Audio Offload | 6691.7                           |
 | 20 ms            | 6545.7                           |
 | 100 ms           | 6100.7                           |
 | 1000 ms          | 6056.6                           |
@@ -700,3 +700,6 @@ void AudioRendererAlgorithm::Initialize(const AudioParameters& params,
 
 2. Introduce the concept of pre-rolling into the Chromium audio pipeline. Similar to how we have introduced pre-rolling to the WASAPIAudioOffloadOutputStream where we ensure that IAudioRendererClient has sufficient initial data before calling IAudioClient::Start, we could similarly ensure that our audio renderer has buffered sufficient data before initializing playback
 > OPEN QUESTION: What would the architecture for Audio Renderer Pre-Rolling look like? How does it differ from changing the Audio Renderer Algorithm starting capacity?
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Audio%20Offload) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BAudio%20Offload%5D)

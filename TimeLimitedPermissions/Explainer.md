@@ -4,7 +4,7 @@ Authors: [Aaron Gustafson](https://github.com/aarongustafson)
 
 ## Introduction
 
-At present, permissions on the web are binary. A user either grants you permission to their sensitive data (e.g., location, clipboard) or they don’t. When a user does grant a site permission to access that information, that permission persists until the user revokes it. This creates an imbalance of power. Users forget who they’ve granted permission to and seldom audit site permissions. 
+At present, permissions on the web are binary. A user either grants you permission to their sensitive data (e.g., location, clipboard) or they don’t. When a user does grant a site permission to access that information, that permission persists until the user revokes it. This creates an imbalance of power. Users forget who they’ve granted permission to and seldom audit site permissions.
 
 If we were to allow users to control the duration of a permission grant at the same time as they are granting it, we put them back in control and reduce/remove the need for them to audit permissions.
 
@@ -130,3 +130,6 @@ Any permissions granted or denited prior to implementation of this API would rem
 1. Do we even need an explicit "expired" state? Would it be more sensible (and less of a privacy risk) to reset the permission `state` to "prompt" instead?
 2. Would there be value in enabling authors to get information about the amount of time remaining in a permissions grant via `permission.query()`?
 3. Are up to four options too many? Would three options be enough? Maybe "Block", "Allow Once" (effectively for the session), and "Always Allow"?
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Time-limited%20Permissions) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BTime-limited%20Permissions%5D)

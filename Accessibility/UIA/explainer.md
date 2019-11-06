@@ -4,7 +4,7 @@ Authors: [Rossen Atanassov](https://github.com/atanassov), [Melanie Richards](ht
 
 ## Introduction
 
-[Microsoft UI Automation (UIA)](https://docs.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-overview) provides programmatic access to most user interface (UI) elements of desktop applications, as well as web content and web applications. This API enables assistive technology (AT) products, such as screen readers, to provide information about applications, their UI and contents to end users. With this information, ATs can allow the user to manipulate applications by means other than standard input. 
+[Microsoft UI Automation (UIA)](https://docs.microsoft.com/en-us/dotnet/framework/ui-automation/ui-automation-overview) provides programmatic access to most user interface (UI) elements of desktop applications, as well as web content and web applications. This API enables assistive technology (AT) products, such as screen readers, to provide information about applications, their UI and contents to end users. With this information, ATs can allow the user to manipulate applications by means other than standard input.
 
 At a high level, UIA exposes two sets of APIs, *provider APIs*, those implemented by a web browser for example, and *client APIs*, those implemented by an AT. This document’s focus is on implementing the *provider* APIs inside Chromium. These APIs are not exposed to web developers, and it is not expected that web developers should change the way they build sites and web apps—these APIs are meant to map web content into a format useful to C/C++ programmers.
 
@@ -41,7 +41,7 @@ For an example of how these APIs work in conjunction to provide complete interac
 
 ## Current workarounds
 
-Providing UI and text information for the purposes of accessibility technologies is already possible today, even without UI Automation. Existing technologies such as MSAA and IA2 are examples of platform APIs that allow ATs to observe and interact with the browser and its web contents. 
+Providing UI and text information for the purposes of accessibility technologies is already possible today, even without UI Automation. Existing technologies such as MSAA and IA2 are examples of platform APIs that allow ATs to observe and interact with the browser and its web contents.
 
 Implementing UI Automation support on the Windows platform is not intended to replace any existing platform API support, but to offer a mature and evolving API choice to assistive technologies and their users.
 
@@ -49,3 +49,6 @@ Implementing UI Automation support on the Windows platform is not intended to re
 
 * For detailed information on UI Automation provider APIs, please refer to [UI Automation Providers Overview](https://docs.microsoft.com/en-us/windows/desktop/winauto/uiauto-providersoverview).
 * Each accessibility API has its own nomenclature. For a quick sense of the differences between API mappings, refer to the tables in mapping specifications such as [Core-AAM](https://w3c.github.io/core-aam/), [HTML-AAM](https://w3c.github.io/html-aam/), [Graphics-AAM](https://w3c.github.io/graphics-aam/), and [SVG-AAM](https://w3c.github.io/svg-aam/).
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/UI%20Automation) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BUI%20Automation%5D)

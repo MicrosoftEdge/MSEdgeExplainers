@@ -144,3 +144,6 @@ p1 pointerup
   5. Should HighlightRangeGroups be able to receive pointer capture?
 
   6. Should we fire the pointer event on the Range that was hit, instead of the containing HighlightRangeGroup? It seems more developer friendly to create a single event listener on a HighlightRangeGroup than to create one listener per Range in the group.
+
+  ---
+  [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HighlightEvents) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BHighlightEvents%5D)

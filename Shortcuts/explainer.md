@@ -259,3 +259,6 @@ Electron enables shortcuts for macOS and Windows app icons as well. ([Documentat
 <hr>
 
 <b id="f1">1</b> In a survey of Android applications, static items are by far the most common. [↩](#a1)
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Shortcuts) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BShortcuts%5D)

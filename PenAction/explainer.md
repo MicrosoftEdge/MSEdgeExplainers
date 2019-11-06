@@ -30,7 +30,7 @@ Note with this proposal that there is no mode enabling some manipulations with a
 ## Sample Code
 This sample renders one highlight for each range selected by a pen.  Panning and zooming is still possible using touch, but a separate property (pen-action) is used to disable all the manipulations that could be initiated by using the pen.
 
-To simplify the code that draws the highlight, the example leverages the proposed [Highlights API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/highlight/explainer.md). 
+To simplify the code that draws the highlight, the example leverages the proposed [Highlights API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/highlight/explainer.md).
 ```html
 <style>
     :root::highlight(yellow-highlighter) {
@@ -80,7 +80,7 @@ events for pen input and create highlights over the text.
         // Takes into account that the highlight may be reversed
         // even though range boundary points are forced to follow document order
         //
-        // implementation omitted for brevity 
+        // implementation omitted for brevity
         updateRangeFocus(range, extension)
     }
 
@@ -91,16 +91,18 @@ events for pen input and create highlights over the text.
 
         delete pointerIdToRangeMap[e.pointerId]
     }
-</script> 
+</script>
 </body>
 ```
 
 ## Existing Implementations
-Edgehtml-based Edge shipped an implementation of pen-action that is consistent with this proposal. 
+Edgehtml-based Edge shipped an implementation of pen-action that is consistent with this proposal.
 
 ## References
 [Informative Discussion on pen-action](https://github.com/w3c/pointerevents/issues/203)
 
 ## Open questions
- 1. Alternative syntaxes that retire touch-action and instead define a pointer-action could be considered.  Current thinking is that pen-action is a better fit as there are no known scenarios where a pen should do something other than behave exactly like the finger or just generate pointer events. 
- 
+ 1. Alternative syntaxes that retire touch-action and instead define a pointer-action could be considered.  Current thinking is that pen-action is a better fit as there are no known scenarios where a pen should do something other than behave exactly like the finger or just generate pointer events.
+
+ ---
+ [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Action) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BPen%20Action%5D)

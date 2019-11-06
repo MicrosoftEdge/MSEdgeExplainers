@@ -2,7 +2,7 @@
 
 Author: [Daniel Libby](https://github.com/dlibby-)
 
-## Introduction 
+## Introduction
 Achieving low latency is critical for delivering great inking experiences on the Web. Ink on the Web is generally produced by consuming PointerEvents and rendering strokes to the application view, whether that be 2D or WebGL canvas, or less commonly, SVG or even HTML.
 
 There are a number of progressive enhancements to this programming model that are aimed at reducing latency.
@@ -106,7 +106,7 @@ class InkRenderer {
     }
 
     renderStrokeSegment(x, y) {
-        // application specific code to draw 
+        // application specific code to draw
         // the stroke on 2d canvas for example
     }
 }
@@ -149,3 +149,6 @@ We considered a few different locations for where the method `setLastRenderedPoi
   This seemed a bit too generic and scoping to a new namespace seemed appropriate.
 
 Instead of a concrete type, perhaps the `PenStrokeStyle` should be more generic in such a way that presenters can describe their capabilities via a dictionary. I'm not quite sure what the most ergonomic way of exposing this would be.
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WebInkEnhancement) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWebInkEnhancement%5D)

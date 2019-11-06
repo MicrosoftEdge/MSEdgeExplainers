@@ -59,3 +59,6 @@ The initialization of the system can be visualized by the following sequence flo
 * Might want to merge the MF CDM Adapter plugin with the CDM Adapter.
 * Remove MFCdmSwitchingRenderer and move its switching logic within WebMediaPlayerImpl.
 * Evaluate the possibility of leveraging SharedImage mailboxes to share DCOMP Surface handle across processes per [Chromium review](https://chromium-review.googlesource.com/c/chromium/src/+/1779403).
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Media%20CDMs) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BMedia%20CDMs%5D)

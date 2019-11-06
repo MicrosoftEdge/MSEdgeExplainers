@@ -15,12 +15,14 @@ The EUDC font is distrubted via either a TTF or TTE file ([read more here](https
 ## Goals
   - Enable access to the EUDC unicode codepoints on Windows
   - PUA characters in a font file will continue to be ignored as per [spec](https://www.w3.org/TR/css-fonts-3/#char-handling-issues) – only PUA characters registered via the windows EUDC mechanism will light up
-	
+
 ## Use-cases
-  - When a user utilizes this character it is rendered correctly rather than U+FFFD which is usually utilized when 
+  - When a user utilizes this character it is rendered correctly rather than U+FFFD which is usually utilized when
      rendering an unknown or unpresentable character.
   - A common scenario is a user in Chinese or Japanese whose name is not representable utilizing the base font character set, EUDC allows the user to represent their name in text format. The example in the image provided is actually a colleague who, until fonts began supporting the final character correctly utilized EUDC to write his name.
-	
-## Proposed Solution
- - The proposed solution hooks into the font fallback loop. On Windows, the fallback loop will look at CSS 'font-family' specified fonts  before resorting to system fonts. This solution enables a check for EUDC fonts after system fonts have been considered. If we arrive at this stage and we are requesting a character in the PUA, a call to the browser process will be made. In the browser process, Skia will be updated to call the DWrite function that returns the system EUDC collection. 
 
+## Proposed Solution
+ - The proposed solution hooks into the font fallback loop. On Windows, the fallback loop will look at CSS 'font-family' specified fonts  before resorting to system fonts. This solution enables a check for EUDC fonts after system fonts have been considered. If we arrive at this stage and we are requesting a character in the PUA, a call to the browser process will be made. In the browser process, Skia will be updated to call the DWrite function that returns the system EUDC collection.
+
+ ---
+ [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/EUDC) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BEUDC%5D)

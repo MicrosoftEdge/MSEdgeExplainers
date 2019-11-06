@@ -3,11 +3,11 @@
 ## Motivation:
 Some digital pens and pencils can not only provide input through their interaction with a digitizer but can also pair with a device so that additional signals can be received when a button is pressed. In some cases, the signal may relate to the pen or pencil but come from another source, e.g. a charger may send a signal that the pen or pencil has been docked or undocked.  Native applications can use these signals to customize their behavior, but no corresponding events are available to web applications.
 
-Native applications use these signals in a variety of ways; here are some inspirational use cases: 
+Native applications use these signals in a variety of ways; here are some inspirational use cases:
 
- * Clicking the button on a Surface Pro pen can advance to the next slide in a slide show 
- * Double tapping the side of an Apple Pencil can switch drawing tools 
- * Removing a pen from the dock on a Surface Hub prompts the user to enter the whiteboard app 
+ * Clicking the button on a Surface Pro pen can advance to the next slide in a slide show
+ * Double tapping the side of an Apple Pencil can switch drawing tools
+ * Removing a pen from the dock on a Surface Hub prompts the user to enter the whiteboard app
 
 Providing these new pen event primitives would enable web applications to achieve parity with native applications.
 
@@ -30,7 +30,7 @@ dictionary PenButtonEventInit {
 [
     Constructor(DOMString type, optional PenButtonEventInit eventInitDict),
     Exposed=Window
-] 
+]
 interface PenButtonEvent : UIEvent {
     readonly attribute long pointerId;
     readonly attribute long button;
@@ -53,7 +53,7 @@ dictionary PenDockChangeEventInit {
 [
     Constructor(DOMString type, optional PenDockChangeEventInit eventInitDict),
     Exposed=Window
-] 
+]
 interface PenDockChangeEvent : UIEvent {
     readonly attribute long pointerId;
     readonly bool docked;
@@ -121,3 +121,5 @@ Because the actions represented by the proposed events don't occur when the pen 
 1. Should penbuttonup/down events be defined and synthesized for devices that don't support that fidelity?
 1. Degree of cross-platform compatibility: According to [Apple documentation](https://developer.apple.com/documentation/uikit/pencil_interactions/handling_double_taps_from_apple_pencil) a double-tap on the pencil barrel is delivered in a way that would make it compatible with the penbuttondblclick event in this proposal.  Investigation is still pending for Android and Chrome OS devices.
 
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Events) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BPen%20Events%5D)
