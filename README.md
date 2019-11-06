@@ -37,7 +37,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
 * [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
 * [Media Cache Reduction Explainer](MediaCacheReduction/explainer.md)
-* [Media Blob Explainer[(MediaBlob/explainer.md)
+* [Media Blob Explainer](MediaBlob/explainer.md)
 
 ## Navigation
 * [Arbitrary Text Fragments Explainer](Fragments/explainer.md)
