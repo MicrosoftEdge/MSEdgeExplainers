@@ -1,8 +1,8 @@
 # ARIA Virtual Content
 
-Author: [Kevin Babbitt](https://github.com/kbabbitt)
+Author: [Kevin Babbitt](https://github.com/kbabbitt), [Melanie Richards](https://github.com/melanierichards)
 
-Last updated: 2019-05-09
+Last updated: 2019-08-01
 
 ## Introduction
 
@@ -32,7 +32,8 @@ A **virtual content container** is any element that has a non-default value for 
 A **virtual content edge** is an edge of a virtual content container where the webpage can realize content.
 
 The `aria-virtualcontent` attribute can have one of several keyword values, or multiple values separated by spaces, establishing which edges of the container are virtual content edges: `block-end`, `block-start`, `inline-end`, `inline-start`.
-*(Future expansion of the attribute value may provide hint(s) about the nature of the virtualized content. ATs could use this information when implementing features such as "navigate to next heading" or "next table" etc.)*
+
+*For potential future expansions of this API, such as hint(s) about the nature of the virtualized content, please refer to [Potential additions to proposed API](#potential-additions-to-proposed-api).*
 
 Marking an element as a virtual content container establishes a contract between the web page and ATs. Specifically:
 * If the virtual content container is also a [scroll container](https://www.w3.org/TR/css-overflow-3/#scroll-container), the web page ***MUST*** begin steps to realize content no later than when the virtual content container is scrolled to a limit where a virtual content edge exists.
@@ -196,6 +197,23 @@ An AT navigating the above content by table cells might result in the following 
 14. After reading the last cell in the row for bug 342, the AT discovers that the table no longer contains virtualized content in the inline-end direction. It looks for another row in the table and finds there are no more realized rows.
 15. However, the AT also discovers that the table has virtualized content in the block-end direction. The AT issues two scroll requests: first in the inline-start direction to return to the first columns in the table, then in the block-end direction to load additional rows.
 16. Backing script realizes the next few rows in the table, and the AT continues reading.
+
+## Potential additions to proposed API
+
+The proposed API aims for flexibility in assistive technologies’ user experiences. 
+If deemed useful by the community, 
+the API could potentially be extended to provide more precise hints.
+
+### Virtualized content type hints
+
+The `aria-virtualcontent` attribute or a related attribute (e.g. `aria-virtualcontenttypes`) 
+could provide a hint to assistive technologies as to important types of content that are currently virtualized. 
+Such a hint could take space-separated keywords as its value (e.g. `headings`, `tables`), 
+and a default, implicit value of `any`.
+Assistive technologies could use this hint when implementing various navigational modes,
+such as "move by heading".
+This token list would necessarily need to be scoped to a limited subset of keywords, 
+to avoid introducing extensive microformats.
 
 ## Alternate solutions
 
