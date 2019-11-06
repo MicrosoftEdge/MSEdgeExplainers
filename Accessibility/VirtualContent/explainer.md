@@ -49,7 +49,7 @@ The following simplified example shows one potential usage pattern for `aria-vir
   <script src="virtualcontent.js"></script>
 </head>
 <body>
-  <main id="main" aria-virtualcontent="block-end">
+  <main id="main" aria-virtualcontent="block-end" aria-busy="false">
     <h1>Section 1</h1>
       ...
     <h1>Section 2</h1>
@@ -75,8 +75,14 @@ function begin_load_next_section() {
 
 // Callback triggered when the server responds with next section of content.
 function end_load_next_section(response) {
+  // Signal to the AT that we're loading more content.
+    document.getElementById("main").setAttribute("aria-busy", "true");
+
   // Insert response payload into the DOM.
   document.getElementById("main").appendChild(...);
+
+  // Signal to the AT that we're done loading.
+  document.getElementById("main").setAttribute("aria-busy", "false");
 
   // Signal to the user that we're done loading.
   document.getElementById("loading_spinner").style.visibility = "hidden";
@@ -139,7 +145,7 @@ In a fully-realized table, a typical AT would walk the table in row-major order,
 ```
 <html>
 <body>
-<table aria-virtualcontent="block-end inline-end" aria-colcount="7">
+<table aria-virtualcontent="block-end inline-end" aria-colcount="7" aria-busy="false">
   <thead>
     <tr>
       <th>ID</th>
