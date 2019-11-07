@@ -24,7 +24,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [EditContext API Explainer](EditContext/explainer.md)
 * [Highlight API Explainer](highlight/explainer.md)
 * [Highlight Events Explainer](highlight/events-explainer.md)
-* [PenEvents Explainer](PenEvents/explainer.md)
+* [PenEvents Explainer](PenEvents/explainer.md) and [Design Doc](PenEvents/dev-design.md)
 * [TSF1 Explainer](TSF1/explainer.md)
 * [pen-action Explainer](PenAction/explainer.md)
 
