@@ -215,3 +215,6 @@ To determine if the mime-type is supported, do the following:
 
 <p class="note">mimeType specifies the media type and container format for the recording via a type/subtype combination, with the codecs and/or profiles parameters [<a href="https://tools.ietf.org/html/rfc6381" target="_blank">RFC6381</a>] 
 specified where ambiguity might arise. Individual codecs might have further optional specific parameters.</p>
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/MediaBlob) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BMediaBlob%5D)
