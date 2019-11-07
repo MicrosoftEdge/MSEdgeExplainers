@@ -23,15 +23,15 @@ The protocol is designed with the following goals in mind:
 - **Interoperability with classical WebDriver commands**
     - Allow existing test/automation code to be upgraded gradually.
 - **Feature parity with existing WebDriver commands**
-    - New test/automation code can be written entirely in the new protocol.
+    - Existing commands can be sent over the new protocol so that new test/automation code can be written entirely in the new protocol.
+    - Update features to take advantage of bidi communication where appropriate. Useful for unhandled prompts and scenarios where polling is common.
 - **A machine and human-readable API specification**
     - Makes it easier to generate up-to-date language bindings, documentation, and test cases.
 - **Easily mappable to/from native devtools protocols**
     - Simple for browser vendors to implement and maintain.
     - Possible for clients to enhance their WebDriver automation with browser-specific devtools protocol features.
 
-
-This document doesn't attempt to dive into the any of the new feature scenarios identified above, but rather tries to provide a solid foundation and the necessary primitives to build these features on.
+This document doesn't attempt to dive into the any of the new feature scenarios identified above, but rather tries to provide a solid foundation and the necessary primitives to build these features on. The document does walk through an example of an existing WebDriver feature (unhandled prompts) being updated for a bidirectional world.
 
 ## Protocol
 
@@ -51,7 +51,9 @@ The protocol should also be:
 
 [JSON-RPC 2.0](https://www.jsonrpc.org/specification) is recommended as the message protocol. JSON-RPC is an open specification which supports the command/response pattern as well as async notifications. The message packets are JSON, so existing WebDriver clients should have no trouble encoding and parsing them. It should also be straightforward for users to share JSON data between the new bidirectional WebDriver API and the existing REST-style API if needed. Off-the-shelf JSON-RPC libraries are available for multiple languages.
 
-The spec covers both "Request" messages, which are RPC calls for which the Client expects a response; and "Notification" messages, which are fire-and-forget messages that the Server does not need to reply to. The spec itself doesn't have any actual provisions for server-to-client messaging. In fact, it explicitly defines the Server as the origin of Response objects and the handler of Request objects. However, an implementation can easily add bidirectional support by letting the Server act as a Client as well.
+The spec describes communication between a JSON-RPC Client and a JSON-RPC Server. In WebDriver's case, the Server would be the WebDriver implementation, and the Client would be some test/automation code. The Client may send either "Request" messages, which are RPC calls for which the Client expects a response; or "Notification" messages, which are fire-and-forget messages that the Server does not need to reply to. For full details, see the spec.
+
+The spec itself doesn't have any actual provisions for Server-to-Client messaging. However, an implementation can easily add bidirectional support by treating the Server as a Client and vice-versa so that messages may be sent in the opposite direction.
 
 >[RESOLUTION](https://www.w3.org/2019/09/20-webdriver-minutes.html#resolution04): research having a more formalized schema for defining the transport layer
 
@@ -59,15 +61,19 @@ JSON-RPC is also accompanied by the [OpenRPC](https://open-rpc.org/) spec; an in
 
 The JSON-RPC spec is transport-agnostic and covers only the message data format. WebSockets are the recommended transport mechanism. They support the full-duplex communication that we'll need for bidirectional WebDriver scenarios, and have broad library support in multiple languages. Adopting a technology other than HTTP and WebSockets is not recommended since this would likely require WebDriver implementers and users to take on new library dependencies on both the client and server sides.
 
-### Interface
+### High-Level Interface
 
 A simple approach for adding bidirectional communication is to keep using the existing endpoints for command/response calls, and use the WebSocket transport only for browser-to-client notications. This requires the fewest changes to existing WebDriver implementations, but it requires the client to speak both HTTP and WebSocket. Naturally, there will be lots of existing HTTP-based automation that may want to adopt some new bidi features, so WebDriver should at least allow mixing HTTP and WebSocket messages to support this scenario. However, we should offer clients the ability to do everything using the JSON-RPC dialect if they are able.
 
 Exposing all of WebDriver's functionality via JSON-RPC has a few advantages. The API is more consistent, the client only needs to speak one dialect, and it is easier to reason about the order or messages when they are all going over the same transport. There may be potential performance advantages too. Multiple JSON-RPC commands may be sent as a batch, compared to HTTP which requires a new HTTP request for every command the client wants to send.
 
-An OpenRPC JSON specification is included alongside this document. It describes a JSON-RPC interpretation of the current WebDriver command set. Below are some sample messages that illustrate what the JSON-RPC-based WebDriver protocol might look like:
+The interface for the new protocol would be a set of client-to-server commands, and a set of server-to-client notifications. Clients can send commands and subscribe to notifications. An OpenRPC JSON specification is included alongside this document. It describes a JSON-RPC interpretation of the current WebDriver feature set and adds some useful notifications.
 
-*Command*
+#### Commands
+
+ Below are some sample messages that illustrate what commands in the JSON-RPC-based WebDriver protocol might look like:
+
+*Sample command*
 
 ```json
 {
@@ -80,7 +86,7 @@ An OpenRPC JSON specification is included alongside this document. It describes 
 
 Commands include a "method" name and optional "params". Positional parameters in an array are supported, but named parameters in an object are more descriptive and map more closely to how WebDriver commands currently work.
 
-*Success Response*
+*Sample success response*
 
 ```json
 {
@@ -92,7 +98,7 @@ Commands include a "method" name and optional "params". Positional parameters in
 
 Responses from the server include the "id" of the command they are responding to.
 
-*Error Response*
+*Sample error response*
 
 ```json
 {
@@ -104,7 +110,30 @@ Responses from the server include the "id" of the command they are responding to
 
 Note that in this example, "stacktrace" is embedded in the "data" property instead of alongside it (like in an WebDriver HTTP error response). This is to comply with the JSON-RPC spec for Error messages. All custom data needs to be in the "data" field.
 
-*Notification*
+#### Notifications
+
+Since notifications may generate a large amount of traffic over the WebSocket, and may have a runtime cost in the browser, these should be opt-in. Commands should be provided so that a client can subscribe and unsubscribe. The first step to receive notifications on the client side would be to send a "subscribe" command:
+
+*Subscribing for a notification*
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 0,
+    "method": "subscribe",
+    "params": { "event": "scriptContextCreated" }
+}
+```
+
+Sending this command would tell the server to start firing an event (i.e. "scriptContextCreated") to the client. The client would send a matching "unsubscribe" command when they no longer want to receive that event.
+
+Subscriptions for each event should be ref-counted on the server side. Calling subscribe would increment the ref count for an event and calling unsubscribe would decrement the ref count. The first time the client calls subscribe, the ref count goes from 0 to 1, and the WebDriver implementation would perform whatever browser-specific steps are needed to begin generating the event. When the ref count falls back to 0, the WebDriver implementation would stop generating the event.
+
+Ref counting is useful here because it would allow multiple consumers on the client side to call "subscribe". For example, some test code might want to subscribe for an event, and the code might use some third-party helper library that also wants to subscribe for the event. Ref counting allows the test code and helper library to subscribe and unsubscribe independently. Otherwise, the first one to call "unsubscribe" would inadvertently shut down events for both consumers.
+
+*Sample notification*
+
+Notification messages don't have an "id" property since they are fire-and-forget.
 
 ```json
 {
@@ -113,8 +142,6 @@ Note that in this example, "stacktrace" is embedded in the "data" property inste
     "params": { "scriptContextId": "<ID>" }
 }
 ```
-
-Since notifications may generate a large amount of traffic over the WebSocket, and may have a runtime cost in the browser, these should be opt-in. Commands should be provided so that a client can register and unregister.
 
 To use the new bidirectional protocol, the client must first establish a WebSocket connection to the WebDriver server. This is discussed below.
 
@@ -293,31 +320,9 @@ The simplest way to discover targets would be to send a command that replies wit
 } }
 ```
 
-Using an optional parameter, the client could specify that they want to receive bidi notifications if the target list changes. After receiving the initial list of targets, the client would start receiving updates any time the list changes. This makes it possible to do things like wait for new windows without the need for polling.
-
-*Command*
-
-```json
-{
-    "jsonrpc": "2.0", "id": 0, "method": "getTargets", "params": {
-        "enableNotifications": true
-    }
-}
-```
-
-*Response*
-
-```json
-{
-    "jsonrpc": "2.0", "id": 0, "result": {
-        "targets": [ /* Initial target list ... */ ]
-    }
-}
-```
+The API could provide "targetCreated" and "targetClosed" notifications to let the client know when the target list changes. The client could subscribe to these events and then send an initial getTargets command. After receiving the initial list of targets, the client would start receiving updates any time the list changes. This makes it possible to do things like wait for new windows without the need for polling.
 
 *Notifications*
-
-Notifications arrive later whenever the set of targets changes:
 
 ```json
 {
@@ -335,7 +340,7 @@ Notifications arrive later whenever the set of targets changes:
 }
 ```
 
-### Browsing Contexts
+### Discovering browsing contexts
 
 We need a similar means to discover what browsing contexts exist for a target, but these are a little different since browsing contexts exist as a tree instead of a flat list. Nested browsing contexts should provide a reference to their parent so the client knows what the tree looks like.
 
@@ -346,7 +351,6 @@ Returns the tree of browser contexts for a given target:
 {
     "jsonrpc": "2.0", "id": 0, "method": "getBrowsingContexts", "params": {
         "targetId": "<ID>",
-        "enableNotifications": true
     }
 }
 ```
@@ -388,7 +392,7 @@ Updates are sent to the client whenever a browsing context is added or removed f
 
 Once the client has a browsing context's ID, it can send additional commands to get further info about that browsing context such as its title or current URL. These commands can also offer a similar ability to register for updates (e.g. if the client wants to know when a frame's title changes or a navigation occurs).
 
-### Script Contexts
+### Discovering script contexts
 
 Unlike browsing contexts which have parent-child relationships to each other, and form a tree; there is no inherent relationship between two given script contexts, so these are represented as a flat list. Script contexts that happen to be associated with a browsing context (document scripts) should have a reference back to their browsing context though.
 
@@ -397,8 +401,7 @@ Unlike browsing contexts which have parent-child relationships to each other, an
 ```json
 {
     "jsonrpc": "2.0", "id": 0, "method": "getScriptContexts", "params": {
-        "targetId": "<ID>",
-        "enableNotifications": true
+        "targetId": "<ID>"
     }
 }
 ```
@@ -413,6 +416,50 @@ Unlike browsing contexts which have parent-child relationships to each other, an
         ]
     }
 }
+```
+
+As with browsing contexts, there should be similar "scriptContextCreated" and "scriptContextClosed" events to let the client know if the list of script contexts changes.
+
+## Examples
+
+Below is some sample code using a hypothetical library built on bidi WebDriver that provides async/await wrappers for the raw JSON-RPC messages.
+
+### Example: User Prompts
+
+User prompts are an interesting example since they are a pre-existing WebDriver features that could benefit from bidirectional messaging.
+
+```javascript
+// Enable the alertOpened event and add a listener.
+driver.on("alertOpened", params => {
+    // Get alert message from event params and handle the alert.
+    assert(params.message === "Please enter your name");
+    await driver.sendAlertText("Joe");
+    await driver.acceptAlert();
+});
+```
+
+With traditional WebDriver, the client finds out about user prompts through polling. There is a limited ability to handle prompts proactively by using the unhandled prompt behavior capability. With an "alertOpened" event in the new protocol, the client can find out about a prompt right away, and handle it. This is more powerful than the unhandled prompt behavior capability, because the client can run arbitrary logic to decide how the prompt should be handled, including sending alert text.
+
+### Example: New Windows
+
+Using the targetCreated event, the client can find out about a new window without the need for polling. This example shows our hypothetical library using a Promise to await a one-time event.
+
+```javascript
+const element = await driver.findElement({
+    browsingContext: "<ID>", using: "css selector", value: "#openWindow"
+});
+
+// Starts listening for the targetCreated event and returns a Promise that resolves once the event is fired.
+const promise = driver.onceTargetCreated();
+
+// Click the button to open a new window.
+await element.click();
+
+// Await the promise which will return the newly created window target.
+const target = await promise;
+
+// Send a command to the new target.
+const browsingContexts = await driver.getBrowsingContexts({ target: target.id });
 ```
 
 ## Bidirectional WebDriver API Reference

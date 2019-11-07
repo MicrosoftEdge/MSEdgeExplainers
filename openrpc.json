@@ -11,6 +11,32 @@
     },
     "methods": [
         {
+            "name": "subscribe",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "event",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "unsubscribe",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "event",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
             "name": "closeSession",
             "tags": [{ "$ref": "#/components/tags/Command" }],
             "paramStructure": "by-name",
@@ -203,13 +229,7 @@
             "name": "getTargets",
             "tags": [{ "$ref": "#/components/tags/Command" }],
             "paramStructure": "by-name",
-            "params": [
-                {
-                    "name": "enableNotifications",
-                    "required": false,
-                    "schema": { "type": "boolean" }
-                }
-            ],
+            "params": [],
             "result": {
                 "name": "GetTargetsResult",
                 "schema": {
@@ -258,11 +278,6 @@
                     "name": "target",
                     "required": true,
                     "schema": { "$ref": "#/components/schemas/TargetId" }
-                },
-                {
-                    "name": "enableNotifications",
-                    "required": false,
-                    "schema": { "type": "boolean" }
                 }
             ],
             "result": {
@@ -914,11 +929,6 @@
                     "name": "target",
                     "required": true,
                     "schema": { "$ref": "#/components/schemas/TargetId" }
-                },
-                {
-                    "name": "enableNotifications",
-                    "required": false,
-                    "schema": { "type": "boolean" }
                 }
             ],
             "result": {
@@ -1249,6 +1259,84 @@
                     }
                 }
             }
+        },
+        {
+            "name": "targetCreated",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetInfo" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "targetClosed",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "scriptContextCreated",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextInfo" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "scriptContextClosed",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "browsingContextAttached",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextInfo" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "browsingContextDetached",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
         }
     ],
     "components": {
@@ -1351,6 +1439,7 @@
                 "type": "object",
                 "properties": {
                     "id": { "$ref": "#/components/schemas/BrowsingContextId" },
+                    "parentId": { "$ref": "#/components/schemas/BrowsingContextId" },
                     "title": { "type": "string" },
                     "url": { "type": "string" }
                 },
