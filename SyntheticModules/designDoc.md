@@ -2,7 +2,7 @@
 
 ## Contact emails
 
-daniec@microsoft.com, sasebree@microsoft.com, travil@microsoft.com, pcupp@microsoft.com, gwhit@microsoft.com 
+daniec@microsoft.com, sasebree@microsoft.com, travil@microsoft.com, pcupp@microsoft.com, gwhit@microsoft.com
 
 ## Introduction
 
@@ -37,7 +37,7 @@ All existing fields on `Module` that are specific to JS or other Cyclic Module t
 
   // Hash for this object (a random non-zero Smi).
   DECL_INT_ACCESSORS(hash)
-  
+
   // Status.
   DECL_INT_ACCESSORS(status)
 
@@ -159,7 +159,7 @@ Existing code in `Modulator`, `ModuleMap`, and `ModuleTreeLinker` will continue 
 
 The new `ValueWrapperSyntheticModuleScript` class is a `ModuleScript` that exports a single `v8::Value` as the default export via a V8 Synthetic Module.
 
-It is worth noting that Synthetic Module Record is capable of supporting more sophisticated kinds of behavior, but current module proposals (JSON and CSS) only require this relatively simple functionality.  Additional types of `ModuleScript` with more varied and complex uses of Synthetic Modules could be introduced in the future. 
+It is worth noting that Synthetic Module Record is capable of supporting more sophisticated kinds of behavior, but current module proposals (JSON and CSS) only require this relatively simple functionality.  Additional types of `ModuleScript` with more varied and complex uses of Synthetic Modules could be introduced in the future.
 
 `ValueWrapperSyntheticModuleScript` has the following members in addition to those inherited from `ModuleScript`:
 
@@ -216,3 +216,6 @@ limited to JavaScript.
 Thus, as we add additional module types we must be exceedingly wary of any changes
 to the security properties of the module infrastructure overall as there are now security
 implications for more than just JavaScript resources.
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Synthetic%20Modules) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BSynthetic%20Modules%5D)

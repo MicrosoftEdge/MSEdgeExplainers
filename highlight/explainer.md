@@ -126,3 +126,6 @@ Some scenarios like highlighting the location of comments in a document require 
 Static ranges have improved performance compared to live ranges.  Could static ranges be used instead?
 
 Obtaining a range from built-in elements and closed shadow roots may be important for extensions like Grammarly.  Should we define a mechanism to obtain a range that refers to the contents of built-in elements?  How would that be done for close shadow roots?
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Highlight%20API) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BHighlight%20API%5D)

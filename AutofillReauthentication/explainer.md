@@ -24,8 +24,11 @@ Based on user research/feedback, we believe that the shared device scenario is c
 ## Proposal
 As outlined above, this explainer proposes the addition of an off by default, OS reauthentication hook in the Chromium autofill code path. This will reuse the existing OS reauthentication logic used in Chromium’s password manager when previewing or exporting saved passwords and will add a content setting to configure how long a successful reauthentication should remain valid. By default, this content setting will be set to never require authentication, meaning that even if the build flag that controls this functionality is enabled, the reauthentication hook will not be functional until the user agent adjusts the default value (most likely by exposing UX for this to users).
 
-Enabling this reauthentication hook and changing its off by default content setting will also enable the same behavior controlled by the [Chromium fill-on-account-select feature flag](https://codereview.chromium.org/773573004/). This decision was made to ensure that users are not prompted for authentication until they indicate they want to access their saved credentials. 
+Enabling this reauthentication hook and changing its off by default content setting will also enable the same behavior controlled by the [Chromium fill-on-account-select feature flag](https://codereview.chromium.org/773573004/). This decision was made to ensure that users are not prompted for authentication until they indicate they want to access their saved credentials.
 
 ## Future Considerations
 
 We believe that per-credential/complete credential store encryption to further harden the security model of browser autofill is a worthwhile investment. While this explainer only targets the shared device use case to begin with, it lays the foundation for future improvements. We are open to exploring further investments in this space with other implementors to bring additional value to users.
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Autofill%20Reauthentication) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BAutofill%20Reauthentication%5D)

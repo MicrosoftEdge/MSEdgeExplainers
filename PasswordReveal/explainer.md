@@ -29,7 +29,7 @@ Overwhelmingly, 4 out of 5 users chose Option 2, with the reveal capability. The
 * "Sometimes I have to view what I type since I use the same letters a lot. like 3 s's in the same place."
 * "I'm able to see what I typed, in case of a typo it's helpful"
 
-There is evidence that suggests that top web sites or apps may offer this functionality, and also that most smaller properties might not do the work required. Users would prefer a universal approach that would work on all of the sites they use. 
+There is evidence that suggests that top web sites or apps may offer this functionality, and also that most smaller properties might not do the work required. Users would prefer a universal approach that would work on all of the sites they use.
 
 Finally, we uncovered a scenario that we didn't consider originally – (likely one of many) a site that presents just one password input field during registration - hopefully you typed it right on the first try!
 
@@ -65,7 +65,7 @@ Following events would show a password reveal element:
 
 * User is typing password into an initially empty password input
 
-Following events would prevent password reveal element from appearing: 
+Following events would prevent password reveal element from appearing:
 
   * An empty password input has been focused
   * Password input is pre-filled programmatically
@@ -133,6 +133,7 @@ This will allow authors to provide different styles when the password is either 
 **Example**
 
 Here is an example of an author that wants to show an eye image to reveal and a closed eye image to hide the password again.
+
 ```HTML
 <input type="password">
 <style>
@@ -144,3 +145,6 @@ input[type=password]:revealed::reveal {
 }
 </style>
 ```
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Password%20Reveal) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BPassword%20Reveal%5D)

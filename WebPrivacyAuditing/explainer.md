@@ -13,7 +13,7 @@ We believe that users should feel safe, confident, and empowered when it comes t
 
 Beyond these privacy-centric principles, we also want to ensure our users have a great experience when browsing the web. This means that we are dedicated to delivering high levels of compatibility, performance, and reliability for all.
 
-Microsoft Edge, and other web browsers like Apple Safari, Mozilla Firefox, and others, have started laying the foundation to give users more control of their privacy while browsing, investing in tracking prevention features to protect them from third party sites tracking and collecting their browsing activity on the web. While these approaches protect user privacy, they affect advertisers and publishers by reducing the relevance of the ads they can serve. This has a non-negligible impact on their bottom line and may hurt the vibrancy of the web. 
+Microsoft Edge, and other web browsers like Apple Safari, Mozilla Firefox, and others, have started laying the foundation to give users more control of their privacy while browsing, investing in tracking prevention features to protect them from third party sites tracking and collecting their browsing activity on the web. While these approaches protect user privacy, they affect advertisers and publishers by reducing the relevance of the ads they can serve. This has a non-negligible impact on their bottom line and may hurt the vibrancy of the web.
 
 While [Microsoft Edge's Balanced mode](https://blogs.windows.com/msedgedev/2019/06/27/tracking-prevention-microsoft-edge-preview/) for tracking prevention attempts to limit compatibility impact, stricter modes of tracking prevention can have unintended impact on legitimate web functionality like third-party authentication and measuring the impact of new features. Furthermore, they can break features implemented in such a way that they may be indistinguishable from tracking from a browser's perspective. We are supportive of new web standards, like the [Storage Access API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/StorageAccessAPI/explainer.md), that attempt to address some of these issues, but also recognize that such APIs require additional user interactions and hence aren't applicable in all use-cases. Ultimately, given their capabilities today, it's difficult for web browsers to technically validate whether companies are giving users the right level of privacy controls in all cases; as a result, if web browsers want to prioritize user privacy, they are forced to treat all companies with the capacity to track users alike.
 
@@ -26,7 +26,7 @@ The main goals of this proposal are as follows:
 * To start an industry-wide discussion on whether an auditing program that certifies first and third parties is a useful tool to boost the effectiveness of current and future-looking technological mechanisms for preserving user privacy
 * To start an industry-wide discussion on defining a set of privacy principles for the web
 * To propose a potential privacy-preserving min-bar for first and third parties to be audited against. This min-bar would focus on driving the following user-centric outcomes:
-    * Users can clearly understand what information is being collected on them by companies as they browse the web, how this information is being shared, and how it is being used to tailor the web content they experience 
+    * Users can clearly understand what information is being collected on them by companies as they browse the web, how this information is being shared, and how it is being used to tailor the web content they experience
     * Users can delete data that has been collected on them by companies, including any data that has been shared with other entities
     * Companies honor users' preferences for control and do not use privacy infringing techniques such as fingerprinting to collect information on them
 
@@ -91,3 +91,6 @@ There are several open issues that we invite folks from across the industry to w
 1. Where should the view/delete experience live? (In the browser? Behind 2FA?)
 1. How should we be thinking about governance/regulation as we continue to discuss this proposal?
 1. How should attestation without creating a new, persistent user identifier be handled?
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Web%20Privacy%20Auditing) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWeb%20Privacy%20Auditing%5D)

@@ -57,7 +57,7 @@ struct NATIVE_THEME_EXPORT CaptionStyle {
 5.	We map the returned non-Default property values to their equivalent CSS Strings and set these in the CaptionStyle struct. We then return the now populated CaptionStyle.
 ```C++
 if (background_color != ClosedCaptionColor_Default) {
-  caption_style.background_color = 
+  caption_style.background_color =
       AddCSSImportant(GetCssColor(background_color));
 }
 ```
@@ -77,7 +77,7 @@ For videos that don’t use the WebVTT standard for closed captioning, no change
 ### Feature Flag
 This change is behind a ui::base feature flag. This flag is enabled by default in Chromium.
 ```C++
-COMPONENT_EXPORT(UI_BASE_FEATURES) 
+COMPONENT_EXPORT(UI_BASE_FEATURES)
 extern const base::Feature kSystemCaptionStyle;
 
 // Allows system caption style for WebVTT Captions.
@@ -85,3 +85,6 @@ const base::Feature kSystemCaptionStyle{
     "SystemCaptionStyle", base::FEATURE_ENABLED_BY_DEFAULT};
 ```
 <br>Lastly, you can find details about Native Styling Support for WebVTT Captions on other platforms in the Chromium design doc [here](https://docs.google.com/document/d/1NkqsqueGufe4TyicvsFtfGBLSpLSln6Xwl7khLkTTgU/edit#heading=h.7srs4jpejfgj).
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WebVTT%20Caption%20Styling) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWebVTT%20Caption%20Styling%5D)

@@ -2,7 +2,7 @@
 ## Motivation
 As privacy is becoming increasingly important to users, requests for stricter browser defaults and user opt-in settings like blocking all third-party storage access are increasingly common. While these settings help improve privacy and block unwanted access by unknown or untrusted parties, they can have unwanted side effects such as blocking access to content the user may want to view (e.g. social media and embedded media content).
 
-Users shouldn't have to compromise between privacy protections and enabling sites' embedded content to function correctly. The Storage Access API is a JavaScript API that allows fine-grained control of storage access permissions when access would otherwise be denied by the browser's current settings. Sites with meaningful scenarios that depend on loading third-party resources will be able to leverage the API to allow the user to explicitly choose, on an as-needed basis, when to allow more permissive access. 
+Users shouldn't have to compromise between privacy protections and enabling sites' embedded content to function correctly. The Storage Access API is a JavaScript API that allows fine-grained control of storage access permissions when access would otherwise be denied by the browser's current settings. Sites with meaningful scenarios that depend on loading third-party resources will be able to leverage the API to allow the user to explicitly choose, on an as-needed basis, when to allow more permissive access.
 
 ## Goals
 - To provide an interoperable, standardized, mechanism for web content to request access to storage resources that would otherwise be blocked by the browser.
@@ -91,3 +91,5 @@ A root document, https://example.site, embeds an iframe from https://socialmedia
 There are two existing similar implementations with minor differences (Firefox, and Safari), documented at https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API#Safari_implementation_differences.
 The intent is to follow common implementation patterns between the two implementations. Where differences exist or more favorable Chromium mechanisms exist (e.g. site-engagement scores) a preference towards being minimally invasive for the user (e.g. few, or no prompts) and maintaining functional web experiences will be taken. There are a number of considerations discussed by various Chromium implementors and browser vendors in the WHATWG discussion (https://github.com/whatwg/html/issues/3338). The intent is to take these concerns, feedback, and considerations into account when making design decisions in areas that differ between implementations.
 
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Storage%20Access%20API) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BStorage%20Access%20API%5D)
