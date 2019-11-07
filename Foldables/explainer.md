@@ -200,7 +200,7 @@ window.onresize = function() {
 
 This is an illustrative example that demonstrates how to use the new enviroment variables to position content relative to the fold.
 
-Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however, the requirement for Box 2 `.yellow` and Box 3 `.green` is to *fill the screen segment width* and have a height of *100px*
+Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however, the requirement for Box 2 `.yellow` and Box 3 `.pink` is to *fill the screen segment width* and have a height of *100px*
 
 #### CSS solution outline:
 
@@ -218,7 +218,7 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 		height: 100px;
 		width: calc(100vw - env(fold-left) + env(fold-width));
 		position: absolute;
-		left: calc(env(fold-left) +  env(fold-width) );
+		left: calc(env(fold-left) + env(fold-width) );
 		top: 0;
 	}
 
@@ -234,7 +234,7 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 		height: 100px;
 		width: 100px;
 		position: absolute;
-		left: calc(env(fold-left) - env(fold-width));
+		left: calc(env(fold-left) + env(fold-width));
 		bottom: 0;
 	}
 }
