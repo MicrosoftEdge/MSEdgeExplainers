@@ -27,6 +27,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [PenEvents Explainer](PenEvents/explainer.md) and [Design Doc](PenEvents/dev-design.md)
 * [TSF1 Explainer](TSF1/explainer.md)
 * [pen-action Explainer](PenAction/explainer.md)
+* [Web Ink Enhancement Explainer](WebInkEnhancement/explainer.md)
 
 ## Fonts
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
