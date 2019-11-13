@@ -170,7 +170,7 @@ Below are some end-to-end WebDriver example using bootstrap scripts with messagi
 This example creates a PerformanceObserver before a page starts loading, and uses the message port to continuosly send performance entries to the WebDriver client as they happen.
 
 ```javascript
-// Bootstrap strip that observer navigation performance entries and forwards them to the client.
+// Bootstrap strip that observes navigation performance entries and forwards them to the client.
 function bootstrapScript(port) {
     const observer = new PerformanceObserver((list, obj) => {
         for (let entry of list.getEntries()) {

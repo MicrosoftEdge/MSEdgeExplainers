@@ -350,7 +350,7 @@ Returns the tree of browser contexts for a given target:
 ```json
 {
     "jsonrpc": "2.0", "id": 0, "method": "getBrowsingContexts", "params": {
-        "targetId": "<ID>",
+        "targetId": "<ID>"
     }
 }
 ```
