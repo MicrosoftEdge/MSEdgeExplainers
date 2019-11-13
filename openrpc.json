@@ -13,10 +13,12 @@
         {
             "name": "subscribe",
             "tags": [{ "$ref": "#/components/tags/Command" }],
+            "summary": "Enable notifications for an event.",
             "paramStructure": "by-name",
             "params": [
                 {
                     "name": "event",
+                    "summary": "The name of the event to subscribe to. See Events for a full listing.",
                     "required": true,
                     "schema": { "type": "string" }
                 }
@@ -26,10 +28,12 @@
         {
             "name": "unsubscribe",
             "tags": [{ "$ref": "#/components/tags/Command" }],
+            "summary": "Disable notifications for an event.",
             "paramStructure": "by-name",
             "params": [
                 {
                     "name": "event",
+                    "summary": "The name of the event to unsubscribe from. See Events for a full listing.",
                     "required": true,
                     "schema": { "type": "string" }
                 }
@@ -314,7 +318,7 @@
                     "title": "GetWindowRectResult",
                     "type": "object",
                     "properties": {
-                        "rect": { "$ref": "#/components/schemas/WindowRect" }
+                        "rect": { "$ref": "#/components/schemas/Rect" }
                     },
                     "required": ["rect"]
                 }
@@ -335,6 +339,7 @@
                     "required": true,
                     "schema": {
                         "type": "object",
+                        "title": "Rect",
                         "properties": {
                             "x": { "type": "integer" },
                             "y": { "type": "integer" },
@@ -351,7 +356,7 @@
                     "title": "SetWindowRectResult",
                     "type": "object",
                     "properties": {
-                        "rect": { "$ref": "#/components/schemas/WindowRect" }
+                        "rect": { "$ref": "#/components/schemas/Rect" }
                     },
                     "required": ["rect"]
                 }
@@ -375,7 +380,7 @@
                     "title": "MaximizeWindowResult",
                     "type": "object",
                     "properties": {
-                        "rect": { "$ref": "#/components/schemas/WindowRect" }
+                        "rect": { "$ref": "#/components/schemas/Rect" }
                     },
                     "required": ["rect"]
                 }
@@ -399,7 +404,7 @@
                     "title": "MinimizeWindowResult",
                     "type": "object",
                     "properties": {
-                        "rect": { "$ref": "#/components/schemas/WindowRect" }
+                        "rect": { "$ref": "#/components/schemas/Rect" }
                     },
                     "required": ["rect"]
                 }
@@ -423,7 +428,7 @@
                     "title": "FullScreenWindowResult",
                     "type": "object",
                     "properties": {
-                        "rect": { "$ref": "#/components/schemas/WindowRect" }
+                        "rect": { "$ref": "#/components/schemas/Rect" }
                     },
                     "required": ["rect"]
                 }
@@ -802,7 +807,7 @@
                     "title": "GetElementRectResult",
                     "type": "object",
                     "properties": {
-                        "rect": { "$ref": "#/components/schemas/WindowRect" }
+                        "rect": { "$ref": "#/components/schemas/Rect" }
                     },
                     "required": ["rect"]
                 }
@@ -1130,7 +1135,10 @@
                 {
                     "name": "actions",
                     "required": true,
-                    "schema": { "$ref": "#/components/schemas/ActionSequence" }
+                    "schema": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/ActionSequence" }
+                    }
                 }
             ],
             "result": { "$ref": "#/components/contentDescriptors/NullResult" }
@@ -1358,55 +1366,34 @@
         },
         "schemas": {
             "ActionSequence": {
-                "oneOf": [
-                    { "$ref": "#/components/schemas/KeyActionSequence" },
-                    { "$ref": "#/components/schemas/PointerActionSequence" },
-                    { "$ref": "#/components/schemas/NoneActionSequence" }
-                ]
-            },
-            "KeyAction": {
                 "type": "object",
+                "title": "ActionSequence",
                 "properties": {
-                    "type": { "type": "string", "enum": ["keyUp", "keyDown", "pause"] },
-                    "value": { "type": "string" }
-                },
-                "required": ["type"]
-            },
-            "KeyActionSequence": {
-                "type": "object",
-                "properties": {
-                    "type": { "type": "string", "pattern": "key" },
+                    "type": { "type": "string", "enum": ["key", "pointer", "none"] },
                     "id": { "type": "string" },
-                    "actions": { "type": "array", "items": { "$ref": "#/components/schemas/KeyAction" } }
+                    "parameters": { "$ref": "#/components/schemas/ActionSequenceParameters" },
+                    "actions": { "type": "array", "items": { "$ref": "#/components/schemas/Action" } }
                 },
                 "required": ["type", "id", "actions"]
             },
-            "NoneActionSequence": {
+            "ActionSequenceParameters": {
                 "type": "object",
+                "title": "ActionSequenceParameters",
                 "properties": {
-                    "type": { "type": "string", "pattern": "none" },
-                    "id": { "type": "string" },
-                    "actions": { "type": "array", "items": { "$ref": "#/components/schemas/PauseAction" } }
-                },
-                "required": ["type", "id", "actions"]
+                    "pointerType": { "type": "string", "enum": ["mouse", "pen", "touch"] }
+                }
             },
-            "PauseAction": {
+            "Action": {
                 "type": "object",
+                "title": "Action",
                 "properties": {
-                    "type": { "type": "string", "pattern": "pause" }
-                },
-                "required": ["type"]
-            },
-            "PointerAction": {
-                "type": "object",
-                "properties": {
-                    "type": { "type": "string", "enum": ["pointerUp", "pointerDown", "pointerMove", "pointerCancel", "pause"] },
+                    "type": { "type": "string", "enum": ["keyUp", "keyDown", "pointerUp", "pointerDown", "pointerMove", "pointerCancel", "pause"] },
+                    "value": { "type": "string" },
                     "button": { "type": "integer" },
                     "duration": { "type": "number" },
                     "origin": {
                         "oneOf": [
-                            { "type": "string", "pattern": "viewport" },
-                            { "type": "string", "pattern": "pointer" },
+                            { "type": "string", "enum": ["viewport", "pointer"] },
                             { "$ref": "#/components/schemas/WebElementReference" }
                         ]
                     },
@@ -1414,21 +1401,6 @@
                     "y": { "type": "number" }
                 },
                 "required": ["type"]
-            },
-            "PointerActionSequence": {
-                "type": "object",
-                "properties": {
-                    "type": { "type": "string", "pattern": "pointer" },
-                    "id": { "type": "string" },
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "pointerType": { "type": "string", "enum": ["mouse", "pen", "touch"] }
-                        }
-                    },
-                    "actions": { "type": "array", "items": { "$ref": "#/components/schemas/PointerAction" } }
-                },
-                "required": ["type", "id", "actions"]
             },
             "BrowsingContextId": {
                 "title": "BrowsingContextId",
@@ -1523,8 +1495,8 @@
                 },
                 "required": ["element-6066-11e4-a52e-4f735466cecf"]
             },
-            "WindowRect": {
-                "title": "WindowRect",
+            "Rect": {
+                "title": "Rect",
                 "type": "object",
                 "properties": {
                     "x": { "type": "integer" },
