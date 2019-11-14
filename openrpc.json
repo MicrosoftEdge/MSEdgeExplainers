@@ -301,6 +301,31 @@
             }
         },
         {
+            "name": "getFrameOwnerElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": {
+                "name": "GetFrameOwnerElementResult",
+                "required": true,
+                "schema": {
+                    "title": "GetFrameOwnerElementResult",
+                    "type": "object",
+                    "properties": {
+                        "element": { "$ref": "#/components/schemas/WebElementReference" },
+                        "browsingContext": { "$ref": "#/components/schemas/BrowsingContextId" }
+                    },
+                    "required": ["element", "browsingContext"]
+                }
+            }
+        },
+        {
             "name": "getWindowRect",
             "tags": [{ "$ref": "#/components/tags/Command" }],
             "paramStructure": "by-name",
@@ -1345,6 +1370,111 @@
                 }
             ],
             "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "registerBootstrapScript",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "match",
+                    "required": true,
+                    "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BootstrapScriptMatchRule" } }
+                },
+                {
+                    "name": "script",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": {
+                "name": "RegisterBootstrapScriptResult",
+                "required": true,
+                "schema": {
+                    "title": "RegisterBootstrapScriptResult",
+                    "type": "object",
+                    "properties": {
+                        "bootstrapScriptId": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                    }
+                }
+            }
+        },
+        {
+            "name": "unregisterBootstrapScript",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "bootstrapScript",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "postMessageToBootstrapScript",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "bootstrapScript",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                },
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                },
+                {
+                    "name": "data",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/JavaScriptValue" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "messageReceivedFromBootstrapScript",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "bootstrapScript",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                },
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                },
+                {
+                    "name": "data",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/JavaScriptValue" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "bootstrapScriptExecuted",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "bootstrapScript",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                },
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
         }
     ],
     "components": {
@@ -1399,6 +1529,19 @@
                     },
                     "x": { "type": "number" },
                     "y": { "type": "number" }
+                },
+                "required": ["type"]
+            },
+            "BootstrapScriptId": {
+                "title": "BootstrapScriptId",
+                "type": "string"
+            },
+            "BootstrapScriptMatchRule": {
+                "title": "BootstrapScriptMatchRule",
+                "type": "object",
+                "properties": {
+                    "type": { "$ref": "#/components/schemas/ScriptContextType" },
+                    "urlPattern": { "type": "string" }
                 },
                 "required": ["type"]
             },

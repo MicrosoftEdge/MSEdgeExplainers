@@ -83,6 +83,10 @@
                             
                         
                             
+                            <li class="item"><a href="#getFrameOwnerElement">getFrameOwnerElement</a></li>
+                            
+                        
+                            
                             <li class="item"><a href="#getWindowRect">getWindowRect</a></li>
                             
                         
@@ -244,11 +248,29 @@
                         
                             
                         
+                            
+                            <li class="item"><a href="#registerBootstrapScript">registerBootstrapScript</a></li>
+                            
+                        
+                            
+                            <li class="item"><a href="#unregisterBootstrapScript">unregisterBootstrapScript</a></li>
+                            
+                        
+                            
+                            <li class="item"><a href="#postMessageToBootstrapScript">postMessageToBootstrapScript</a></li>
+                            
+                        
+                            
+                        
+                            
+                        
                     </ul>
                 </li>
                 <li class="category">
                     <span class="category-name">Events</span>
                     <ul>
+                        
+                            
                         
                             
                         
@@ -384,6 +406,20 @@
                             <li class="item"><a href="#browsingContextDetached">browsingContextDetached</a></li>
                             
                         
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                            <li class="item"><a href="#messageReceivedFromBootstrapScript">messageReceivedFromBootstrapScript</a></li>
+                            
+                        
+                            
+                            <li class="item"><a href="#bootstrapScriptExecuted">bootstrapScriptExecuted</a></li>
+                            
+                        
                     </ul>
                 </li>
                 <li class="category">
@@ -395,6 +431,10 @@
                             <li class="item"><a href="#ActionSequenceParameters">ActionSequenceParameters</a></li>
                         
                             <li class="item"><a href="#Action">Action</a></li>
+                        
+                            <li class="item"><a href="#BootstrapScriptId">BootstrapScriptId</a></li>
+                        
+                            <li class="item"><a href="#BootstrapScriptMatchRule">BootstrapScriptMatchRule</a></li>
                         
                             <li class="item"><a href="#BrowsingContextId">BrowsingContextId</a></li>
                         
@@ -1079,6 +1119,73 @@
             <strong><a href="#BrowsingContextInfo">BrowsingContextInfo</a>[]</strong>
         
     
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+            </div>
+            
+            
+            
+            <div class="entry">
+                <h3 class="method-name"><a name="getFrameOwnerElement" href="#getFrameOwnerElement">getFrameOwnerElement</a></h3>
+                <p></p>
+                
+                <h4>Parameters</h4>
+                <table>
+    
+    <tr>
+        <td class="param-name">
+            browsingContext
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#BrowsingContextId">BrowsingContextId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+                
+                <h4>Returns</h4>
+                <table>
+    
+    <tr>
+        <td class="param-name">
+            element
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#WebElementReference">WebElementReference</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="param-name">
+            browsingContext
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#BrowsingContextId">BrowsingContextId</a></strong>
 
         </td>
         <td class="description">
@@ -3353,6 +3460,177 @@
             
             
             
+            
+            <div class="entry">
+                <h3 class="method-name"><a name="registerBootstrapScript" href="#registerBootstrapScript">registerBootstrapScript</a></h3>
+                <p></p>
+                
+                <h4>Parameters</h4>
+                <table>
+    
+    <tr>
+        <td class="param-name">
+            match
+            
+        </td>
+        <td class="type">
+            
+    
+        
+            <strong><a href="#BootstrapScriptMatchRule">BootstrapScriptMatchRule</a>[]</strong>
+        
+    
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="param-name">
+            script
+            
+        </td>
+        <td class="type">
+            
+    
+        <strong>string</strong>
+    
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+                
+                <h4>Returns</h4>
+                <table>
+    
+    <tr>
+        <td class="param-name">
+            bootstrapScriptId
+            
+            <em class="optional">optional</em>
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#BootstrapScriptId">BootstrapScriptId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+            </div>
+            
+            
+            
+            <div class="entry">
+                <h3 class="method-name"><a name="unregisterBootstrapScript" href="#unregisterBootstrapScript">unregisterBootstrapScript</a></h3>
+                <p></p>
+                
+                <h4>Parameters</h4>
+                <table>
+    
+    <tr>
+        <td class="param-name">
+            bootstrapScript
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#BootstrapScriptId">BootstrapScriptId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+                
+            </div>
+            
+            
+            
+            <div class="entry">
+                <h3 class="method-name"><a name="postMessageToBootstrapScript" href="#postMessageToBootstrapScript">postMessageToBootstrapScript</a></h3>
+                <p></p>
+                
+                <h4>Parameters</h4>
+                <table>
+    
+    <tr>
+        <td class="param-name">
+            bootstrapScript
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#BootstrapScriptId">BootstrapScriptId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="param-name">
+            scriptContext
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#ScriptContextId">ScriptContextId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="param-name">
+            data
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#JavaScriptValue">JavaScriptValue</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+                
+            </div>
+            
+            
+            
+            
+            
+            
             <h2>Events</h2>
             
             
@@ -3452,8 +3730,10 @@
             
             
             
+            
+            
             <div class="entry">
-                <h3><a name="alertOpened">alertOpened</a></h3>
+                <h3 class="method-name"><a name="alertOpened" href="#alertOpened">alertOpened</a></h3>
                 <p></p>
                 
                 <h4>Parameters</h4>
@@ -3528,7 +3808,7 @@
             
             
             <div class="entry">
-                <h3><a name="targetCreated">targetCreated</a></h3>
+                <h3 class="method-name"><a name="targetCreated" href="#targetCreated">targetCreated</a></h3>
                 <p></p>
                 
                 <h4>Parameters</h4>
@@ -3557,7 +3837,7 @@
             
             
             <div class="entry">
-                <h3><a name="targetClosed">targetClosed</a></h3>
+                <h3 class="method-name"><a name="targetClosed" href="#targetClosed">targetClosed</a></h3>
                 <p></p>
                 
                 <h4>Parameters</h4>
@@ -3586,7 +3866,7 @@
             
             
             <div class="entry">
-                <h3><a name="scriptContextCreated">scriptContextCreated</a></h3>
+                <h3 class="method-name"><a name="scriptContextCreated" href="#scriptContextCreated">scriptContextCreated</a></h3>
                 <p></p>
                 
                 <h4>Parameters</h4>
@@ -3615,7 +3895,7 @@
             
             
             <div class="entry">
-                <h3><a name="scriptContextClosed">scriptContextClosed</a></h3>
+                <h3 class="method-name"><a name="scriptContextClosed" href="#scriptContextClosed">scriptContextClosed</a></h3>
                 <p></p>
                 
                 <h4>Parameters</h4>
@@ -3644,7 +3924,7 @@
             
             
             <div class="entry">
-                <h3><a name="browsingContextAttached">browsingContextAttached</a></h3>
+                <h3 class="method-name"><a name="browsingContextAttached" href="#browsingContextAttached">browsingContextAttached</a></h3>
                 <p></p>
                 
                 <h4>Parameters</h4>
@@ -3673,7 +3953,7 @@
             
             
             <div class="entry">
-                <h3><a name="browsingContextDetached">browsingContextDetached</a></h3>
+                <h3 class="method-name"><a name="browsingContextDetached" href="#browsingContextDetached">browsingContextDetached</a></h3>
                 <p></p>
                 
                 <h4>Parameters</h4>
@@ -3700,10 +3980,122 @@
             </div>
             
             
+            
+            
+            
+            
+            
+            
+            
+            <div class="entry">
+                <h3 class="method-name"><a name="messageReceivedFromBootstrapScript" href="#messageReceivedFromBootstrapScript">messageReceivedFromBootstrapScript</a></h3>
+                <p></p>
+                
+                <h4>Parameters</h4>
+                <table>
+    
+    <tr>
+        <td class="param-name">
+            bootstrapScript
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#BootstrapScriptId">BootstrapScriptId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="param-name">
+            scriptContext
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#ScriptContextId">ScriptContextId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="param-name">
+            data
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#JavaScriptValue">JavaScriptValue</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+            </div>
+            
+            
+            
+            <div class="entry">
+                <h3 class="method-name"><a name="bootstrapScriptExecuted" href="#bootstrapScriptExecuted">bootstrapScriptExecuted</a></h3>
+                <p></p>
+                
+                <h4>Parameters</h4>
+                <table>
+    
+    <tr>
+        <td class="param-name">
+            bootstrapScript
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#BootstrapScriptId">BootstrapScriptId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="param-name">
+            scriptContext
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#ScriptContextId">ScriptContextId</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+            </div>
+            
+            
             <h2>Types</h2>
             
             <div class="entry">
-                <h3><a name="ActionSequence">ActionSequence</a></h3>
+                <h3 class="method-name"><a name="ActionSequence" href="#ActionSequence">ActionSequence</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
@@ -3787,7 +4179,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="ActionSequenceParameters">ActionSequenceParameters</a></h3>
+                <h3 class="method-name"><a name="ActionSequenceParameters" href="#ActionSequenceParameters">ActionSequenceParameters</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
@@ -3817,7 +4209,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="Action">Action</a></h3>
+                <h3 class="method-name"><a name="Action" href="#Action">Action</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
@@ -3969,7 +4361,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="BrowsingContextId">BrowsingContextId</a></h3>
+                <h3 class="method-name"><a name="BootstrapScriptId" href="#BootstrapScriptId">BootstrapScriptId</a></h3>
                 
                     
     
@@ -3980,7 +4372,64 @@
             </div>
             
             <div class="entry">
-                <h3><a name="BrowsingContextInfo">BrowsingContextInfo</a></h3>
+                <h3 class="method-name"><a name="BootstrapScriptMatchRule" href="#BootstrapScriptMatchRule">BootstrapScriptMatchRule</a></h3>
+                
+                    <p><strong>object</strong></p>
+                    <table>
+    
+    <tr>
+        <td class="param-name">
+            type
+            
+        </td>
+        <td class="type">
+            
+    <strong><a href="#ScriptContextType">ScriptContextType</a></strong>
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="param-name">
+            urlPattern
+            
+            <em class="optional">optional</em>
+            
+        </td>
+        <td class="type">
+            
+    
+        <strong>string</strong>
+    
+
+        </td>
+        <td class="description">
+            <p></p>
+            <p></p>
+        </td>
+    </tr>
+    
+</table>
+                
+            </div>
+            
+            <div class="entry">
+                <h3 class="method-name"><a name="BrowsingContextId" href="#BrowsingContextId">BrowsingContextId</a></h3>
+                
+                    
+    
+        <strong>string</strong>
+    
+
+                
+            </div>
+            
+            <div class="entry">
+                <h3 class="method-name"><a name="BrowsingContextInfo" href="#BrowsingContextInfo">BrowsingContextInfo</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
@@ -4060,7 +4509,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="Cookie">Cookie</a></h3>
+                <h3 class="method-name"><a name="Cookie" href="#Cookie">Cookie</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
@@ -4206,7 +4655,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="JavaScriptValue">JavaScriptValue</a></h3>
+                <h3 class="method-name"><a name="JavaScriptValue" href="#JavaScriptValue">JavaScriptValue</a></h3>
                 
                     
     <strong>one of</strong> [
@@ -4241,7 +4690,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="ScriptContextId">ScriptContextId</a></h3>
+                <h3 class="method-name"><a name="ScriptContextId" href="#ScriptContextId">ScriptContextId</a></h3>
                 
                     
     
@@ -4252,7 +4701,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="ScriptContextInfo">ScriptContextInfo</a></h3>
+                <h3 class="method-name"><a name="ScriptContextInfo" href="#ScriptContextInfo">ScriptContextInfo</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
@@ -4330,7 +4779,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="ScriptContextType">ScriptContextType</a></h3>
+                <h3 class="method-name"><a name="ScriptContextType" href="#ScriptContextType">ScriptContextType</a></h3>
                 
                     
     
@@ -4341,7 +4790,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="TargetId">TargetId</a></h3>
+                <h3 class="method-name"><a name="TargetId" href="#TargetId">TargetId</a></h3>
                 
                     
     
@@ -4352,7 +4801,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="TargetInfo">TargetInfo</a></h3>
+                <h3 class="method-name"><a name="TargetInfo" href="#TargetInfo">TargetInfo</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
@@ -4430,7 +4879,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="TargetType">TargetType</a></h3>
+                <h3 class="method-name"><a name="TargetType" href="#TargetType">TargetType</a></h3>
                 
                     
     
@@ -4441,7 +4890,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="TargetTypeHint">TargetTypeHint</a></h3>
+                <h3 class="method-name"><a name="TargetTypeHint" href="#TargetTypeHint">TargetTypeHint</a></h3>
                 
                     
     
@@ -4452,7 +4901,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="WebElementReference">WebElementReference</a></h3>
+                <h3 class="method-name"><a name="WebElementReference" href="#WebElementReference">WebElementReference</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
@@ -4480,7 +4929,7 @@
             </div>
             
             <div class="entry">
-                <h3><a name="Rect">Rect</a></h3>
+                <h3 class="method-name"><a name="Rect" href="#Rect">Rect</a></h3>
                 
                     <p><strong>object</strong></p>
                     <table>
