@@ -22,7 +22,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## Editing
 * [EditContext API Explainer](EditContext/explainer.md)
-* [Highlight API Explainer](highlight/explainer.md)
+* [Highlight API Editor's Draft](https://drafts.csswg.org/css-highlight-api-1/) ~~[Highlight API Explainer](highlight/explainer.md)~~
 * [Highlight Events Explainer](highlight/events-explainer.md)
 * [PenEvents Explainer](PenEvents/explainer.md) and [Design Doc](PenEvents/dev-design.md)
 * [TSF1 Explainer](TSF1/explainer.md)
