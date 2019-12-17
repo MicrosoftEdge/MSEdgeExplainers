@@ -1,3 +1,5 @@
+# MOVED. This doc is now maintained at https://drafts.csswg.org/css-highlight-api-1/. Please refer to that link for the latest content.
+
 # Highlight API Explained
 
 ## Overview
