@@ -87,6 +87,7 @@ While this feature fills a gap in the platform that will improve the end user ex
    - A second attempt to close the tab, via clicking the "x" or ctrl+w, should immediately close the tab.
  - A website displays alarming text, to try and convince the user to stay on the site or perform some harmful action.
    - This capability should only be available to installed PWAs, and not arbitrary websites.
+   - The UI should make it clear that the message is coming from the site, and not from the browser. Similar to how the `alert()` dialog says "This site says..."
    - The text that the website can display should be limited in length and not allow formatting.
    - Always display "Leave" and "Cancel" buttons on the dialog, and only allow websites to add a third option which could be customizable.
 
@@ -122,4 +123,4 @@ We considered allowing the developer to design and show a fully customizable dia
 This extension of the beforeunload event would increase browser fingerprinting capabilities by adding a feature-detectable API. However, as this API holds no user preferences, fingerprinting capabilities are limited to detecting large cohorts of users of particular browsers.
 
 ## Security
-This capability may have some security concerns by allowing malicious websites to trick users, as well as accepting untrusted input from web developers. Discussion is ongoing about how to mitigate the former, and a thorough security review of the code will be performed to ensure the latter is handled appropriately.
+This capability may have some security concerns by allowing malicious websites to trick users, as well as accepting untrusted input from web developers and running code during shutdown. Discussion is ongoing about how to mitigate the former and should consider UI design as well as code. To ensure the latter is handled appropriately, a thorough security review of the code will be performed once a design is agreed upon.
