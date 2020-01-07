@@ -119,7 +119,7 @@ However, this proposal brings confusion because window.confirm() would behave di
 We considered allowing the developer to design and show a fully customizable dialog, perhaps via the proposed [modal-window](https://github.com/adrianhopebailie/modal-window/blob/master/explainer.md), but this was not chosen due to it's additional complexity and the increased potential for abuse. For example, the site could choose to show only an "Accept" option, and no option to cancel. While mitigations for problems like this exist, the user experience would be worse than the proposed solution, where it is guaranteed that the user is given the option to leave a site immediately.
 
 ## Privacy
-This capability does not have any meaningful privacy implications. It marginally increases the user's browser fingerprint by adding a feature detectable API, but this is minimal and is not a blocking issue.
+This extension of the beforeunload event would increase browser fingerprinting capabilities by adding a feature-detectable API. However, as this API holds no user preferences, fingerprinting capabilities are limited to detecting large cohorts of users of particular browsers.
 
 ## Security
 This capability may have some security concerns by allowing malicious websites to trick users, as well as accepting untrusted input from web developers. Discussion is ongoing about how to mitigate the former, and a thorough security review of the code will be performed to ensure the latter is handled appropriately.
