@@ -80,16 +80,12 @@ App closes
 ## Avoiding Misuse
 
 While this feature fills a gap in the platform that will improve the end user experience when used responsibly; it, like many other APIs, does introduce the potential for abuse if not mitigated by the UA. Some examples of abuse that we have identified, and recommended mitigations, follow:
- - The user accidentally clicks an ad, or otherwise has an unwanted tab appear. They try to close the tab as quickly as possible, but are unable to due to a confirmation dialog.
-   - The user must have interacted with the page to allow the site to prompt the user or perform asynchronous actions on tab close.
- - The user attempts to navigate away from a tab, but is convinced to wait for the site to perform some action before they leave. The site intentionally takes an excessively long time, perhaps displaying ads while the user is waiting for the tab to close itself.
-   - There should be a time limit on how long the asynchronous code can run for, at the end of the time limit there should be a "leave anyway" dialog, or some other mechanism that allows the user to cancel the async task and leave immediately.
-   - A second attempt to close the tab, via clicking the "x" or ctrl+w, should immediately close the tab.
- - A website displays alarming text, to try and convince the user to stay on the site or perform some harmful action.
-   - This capability should only be available to installed PWAs, and not arbitrary websites.
-   - The UI should make it clear that the message is coming from the site, and not from the browser. Similar to how the `alert()` dialog says "This site says..."
-   - The text that the website can display should be limited in length and not allow formatting.
-   - Always display "Leave" and "Cancel" buttons on the dialog, and only allow websites to add a third option which could be customizable.
+
+| Risk | Mitigations |
+| ---- | ----------- |
+| The user accidentally clicks an ad, or otherwise has an unwanted tab appear. They try to close the tab as quickly as possible, but are unable to due to a confirmation dialog. | The user must have interacted with the page to allow the site to prompt the user or perform asynchronous actions on tab close. |
+| The user attempts to navigate away from a tab, but is convinced to wait for the site to perform some action before they leave. The site intentionally takes an excessively long time, perhaps displaying ads while the user is waiting for the tab to close itself. | <ul><li>There should be a time limit on how long the asynchronous code can run for, at the end of the time limit there should be a "leave anyway" dialog, or some other mechanism that allows the user to cancel the async task and leave immediately.</li><li>A second attempt to close the tab, via clicking the "x" or ctrl+w, should immediately close the tab.</li></ul> |
+| A website displays alarming text, to try and convince the user to stay on the site or perform some harmful action. | <ul><li>This capability should only be available to installed PWAs, and not arbitrary websites. </li><li>The UI should make it clear that the message is coming from the site, and not from the browser. Similar to how the `alert()` dialog says "This site says..." </li><li>The text that the website can display should be limited in length and not allow formatting.</li><li>Always display "Leave" and "Cancel" buttons on the dialog, and only allow websites to add a third option which could be customizable.</li></ul> |
 
 ## Considered Alternatives
 ### Extend window.confirm()
