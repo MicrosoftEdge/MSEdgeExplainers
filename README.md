@@ -48,6 +48,9 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Time-limited Permissions Explainer](TimeLimitedPermissions/Explainer.md)
 * [Principles: Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md)
 
+## Progressive Web Applications
+* [Run on OS Login Explainer](RunOnLogin/Explainer.md)
+
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
 
