@@ -80,7 +80,7 @@ CSS currently supports the `:target` pseudo-class selector, which may seem appli
 
 ## Appendix A: Document or Client?
 
-Exploration within the IndieWeb community (which refers to these as ["fragmentations"](https://indieweb.org/fragmentations)) and elsewhere have demonstrated what is possible with client-side implementations of arbitrary text fragments using JavaScript. Some argue that this sort of functionality should exist at the discretion of each site owner, but a strong counterargument is that universal applicability of this functionality would benefit all users and seems in alignment with the [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies).
+Exploration within the IndieWeb community (which refers to these as ["fragmentions"](https://indieweb.org/fragmentions)) and elsewhere have demonstrated what is possible with client-side implementations of arbitrary text fragments using JavaScript. Some argue that this sort of functionality should exist at the discretion of each site owner, but a strong counterargument is that universal applicability of this functionality would benefit all users and seems in alignment with the [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies).
 
 It’s worth pointing out that there are pros and cons to both approaches:
 
