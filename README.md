@@ -51,6 +51,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 ## Progressive Web Applications
 * [Run on OS Login Explainer](RunOnLogin/Explainer.md)
 * [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
+* [Custom Dialog on Close Explainer](CustomDialogOnClose/explainer.md)
 
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
