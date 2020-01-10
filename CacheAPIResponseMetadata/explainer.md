@@ -4,7 +4,7 @@ Authors: [Aaron Gustafson](https://github.com/aarongustafson), [Jungkee Song](ht
 
 ## Introduction
 
-Currently, many sites are using Service Workers and the Cache API to store absolutely everything they can, often relying on the browser to evict content when there is storage pressure. Sites that want to be more proactive in managing their caches are limited to pruning responses solely based on when they were cached, typically iterating over the keys of a given cache and deleting the first item until they reduce the quantity of cached responses below a predefined threshold. That might be a good strategy if all responses were equal, but they aren’t. Some payloads are large, others are small. Some resources are computationaly-intensive to produce, others are static files served by a CDN. Some are only accessed once, others are accessed with great frequency, often depending on both the site itself and the particular user interacting with it.
+Currently, many sites are using Service Workers and the Cache API to store absolutely everything they can, often relying on the browser to evict content when there is storage pressure. Sites that want to be more proactive in managing their caches are limited to pruning responses solely based on when they were cached, typically iterating over the keys of a given cache and deleting the first item until they reduce the quantity of cached responses below a predefined threshold. That might be a good strategy if all responses were equal, but they aren’t. Some payloads are large, others are small. Some resources are computationally-intensive to produce, others are static files served by a CDN. Some are only accessed once, others are accessed with great frequency, often depending on both the site itself and the particular user interacting with it.
 
 Having a little more clarity on the shape and form of cached responses would enable developers to be more intentional about what they do with cached content.
 
@@ -17,7 +17,7 @@ It would be quite useful to have access to metadata about each cached item. Much
 - How many times a given `Response` has been retrieved from the cache
 - The amount of space the cached `Response` occupies on disk
 
-It’s worth noting that the size on disk could be inferred from the `Respose`’s "Content-Length" header (or "Transfer-Encoding"), but these methods are unreliable. A better approach is to have the browser actually fill in this data so it is available even if these headers are ommitted.
+It’s worth noting that the size on disk could be inferred from the `Response`’s "Content-Length" header (or "Transfer-Encoding"), but these methods are unreliable. A better approach is to have the browser actually fill in this data so it is available even if these headers are omitted.
 
 Taken together, this Explainer proposes adding the following read-only attributes to the `Response` class, as [defined by the Fetch API](https://fetch.spec.whatwg.org/#response):
 
@@ -26,7 +26,7 @@ Taken together, this Explainer proposes adding the following read-only attribute
 - `responseCount`: a number that increments [each time a cached Response is returned by the Service Worker](#observing-responses)
 - `size`: computed disk size of the Request/Response object pair
 
-If adding these directly to the `Response` is not feasible, these could be added as properties of an object assigned to a single key, such as `Response.cacheData`. Ideally, however, these could be added to a subclass of the `Response` inferface used in the `Cache API` context specifically:
+If adding these directly to the `Response` is not feasible, these could be added as properties of an object assigned to a single key, such as `Response.cacheData`. Ideally, however, these could be added to a subclass of the `Response` interface used in the `Cache API` context specifically:
 
 ```idl
 interface CachedResponse : Response {
