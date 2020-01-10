@@ -22,8 +22,8 @@ It’s worth noting that the size on disk could be inferred from the `Respose`�
 Taken together, this Explainer proposes adding the following read-only attributes to the `Response` class, as [defined by the Fetch API](https://fetch.spec.whatwg.org/#response):
 
 - `cachedAt`: timestamp added when the Response is cached
-- `lastAccessedAt`: timestamp updated each time a cached Response is returned by the Service Worker (*not* when the cached item is inspected)
-- `retrievalCount`: a number that increments each time each time a cached Response is returned by the Service Worker
+- `lastResponseAt`: timestamp updated [each time a cached Response is returned by the Service Worker](#observing-responses)
+- `responseCount`: a number that increments [each time a cached Response is returned by the Service Worker](#observing-responses)
 - `size`: computed disk size of the Request/Response object pair
 
 If adding these directly to the `Response` is not feasible, these could be added as properties of an object assigned to a single key, such as `Response.cacheData`. Ideally, however, these could be added to a subclass of the `Response` inferface used in the `Cache API` context specifically:
@@ -31,8 +31,8 @@ If adding these directly to the `Response` is not feasible, these could be added
 ```idl
 interface CachedResponse : Response {
   readonly attribute DOMTimeStamp cachedAt;
-  readonly attribute DOMTimeStamp lastAccessedAt;
-  readonly attribute unsigned long long retrievalCount;
+  readonly attribute DOMTimeStamp lastResponseAt;
+  readonly attribute unsigned long long responseCount;
   readonly attribute unsigned long long size;
 };
 ```
@@ -91,7 +91,7 @@ async function trimCache( cacheName ) {
       .match(request)
       .then(response => {
         if ( response.size > large &&
-             response.lastAccessedAt < old )
+             response.lastResponseAt < old )
         {
           cache.delete( request );
         }
@@ -112,8 +112,8 @@ async function trimCache( cacheName ) {
     cache
       .match(request)
       .then(response => {
-        if ( response.retrievalCount < 5 &&
-             response.lastAccessedAt < old  )
+        if ( response.responseCount < 5 &&
+             response.lastResponseAt < old  )
         {
           cache.delete( request );
         }
@@ -135,7 +135,7 @@ async function trimCache( cacheName ) {
       .match(request)
       .then(response => {
         let cached_at = new Date( response.cachedAt ),
-            accessed_at = new Date( response.lastAccessedAt );
+            accessed_at = new Date( response.lastResponseAt );
         // If year, month, and day match + old
         if ( cached_at.getFullYear() === accessed_at.getFullYear() &&
              cached_at.getMonth() === accessed_at.getMonth() &&
@@ -149,11 +149,17 @@ async function trimCache( cacheName ) {
 }
 ```
 
+## Observing Responses
+
+This spec draws a distinction between accessing a cached resource and actually responding with that resource. The act of merely reading a cached resource via the Cache API would not update its `lastResponseAt` timestamp or increment its `responseCount`. For these values to be updated, the cached response would actually need to be sent to the browser using [`FetchEvent.respondWith()`](https://w3c.github.io/ServiceWorker/#dom-fetchevent-respondwith).
+
+As an example of why this matters, consider [this scenario](https://remysharp.com/2019/09/05/offline-listings): an author builds functionality into their offline page that exposes all web pages that have been cached, so a user can see what content they have access to offline. As part of that JavaScript program, they read the contents of the cache looking for HTML pages and extract the contents of the `title` and `meta[name=description]` elements and then present that content (along with a link to the resource) in the `body` of the document. In this scenario, the resource has been used, but it was not provided as a response, so it would not trigger an update of `lastResponseAt` or `responseCount`. Following the link, however, results in the Service Worker responding to the `FetchEvent` with the cached response and that *would* trigger an update of `lastResponseAt` and `responseCount`.
+
 ## Privacy Considerations
 
-It is possible that the timestamps stored in the `cachedAt` and `lastAccessedAt` properties could be used for fingerprinting, especially when used in conjunction with `retrievalCount`. For this reason, [user agents should never return an exact millisecond match of the timestamp](https://www.w3.org/TR/fingerprinting-guidance/#narrow-scope-availability). Developers do not need millisecond-level accuracy in these values and, in most cases, will only really care about the year, month, and day. As such, a user agent should prevent the use of these fields as a fingerprinting vector by always returning timestamp values that **report the date accurately, but always report the time as one second past midnight**. If the user agent chooses to expose the true value of these properties in Developer Tooling, which could be useful, they should store the correct value, but alter the value provided via the getter.
+It is possible that the timestamps stored in the `cachedAt` and `lastResponseAt` properties could be used for fingerprinting, especially when used in conjunction with `responseCount`. For this reason, [user agents should never return an exact millisecond match of the timestamp](https://www.w3.org/TR/fingerprinting-guidance/#narrow-scope-availability). Developers do not need millisecond-level accuracy in these values and, in most cases, will only really care about the year, month, and day. As such, a user agent should prevent the use of these fields as a fingerprinting vector by always returning timestamp values that **report the date accurately, but always report the time as one second past midnight**. If the user agent chooses to expose the true value of these properties in Developer Tooling, which could be useful, they should store the correct value, but alter the value provided via the getter.
 
-It is possible that `retrievalCount` could be used for fingerprinting (leveraging the [User Behavior fingerprinting vector](https://2019.www.torproject.org/projects/torbrowser/design/#fingerprinting-linkability)), but the `retrievalCount` property does not introduce any fingerprinting surface not already exposed via the Cache API.
+It is possible that `responseCount` could be used for fingerprinting (leveraging the [User Behavior fingerprinting vector](https://2019.www.torproject.org/projects/torbrowser/design/#fingerprinting-linkability)), but the `responseCount` property does not introduce any fingerprinting surface not already exposed via the Cache API.
 
 Limiting these new properties to same-origin `Response`s eliminates the possibility that the first-party website could use this new functionality to snoop on a user’s engagement with third-party services. User Agents would be instructed to report zero values for all of these properties on any opaque `Response`s.
 
@@ -161,3 +167,4 @@ Limiting these new properties to same-origin `Response`s eliminates the possibil
 
 1. Are there any additional vectors for fingerprinting or other abuse we haven’t considered?
 2. Is subclassing `Response` the best approach?
+3. Would developers be interested in getting information about how many times or when a resource was accessed in addition to the last time it was [used in a response](#observing-responses)?
