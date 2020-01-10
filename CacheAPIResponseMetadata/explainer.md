@@ -22,7 +22,7 @@ Itâ€™s worth noting that the size on disk could be inferred from the `Respose`â€
 Taken together, this Explainer proposes adding the following read-only attributes to the `Response` class, as [defined by the Fetch API](https://fetch.spec.whatwg.org/#response):
 
 - `cachedAt`: timestamp added when the Response is cached
-- `lastResponseAt`: timestamp updated [each time a cached Response is returned by the Service Worker](#observing-responses)
+- `lastResponseAt`: timestamp updated [each time a cached Response is returned by the Service Worker](#observing-responses); must be at least as new as `cachedAt`
 - `responseCount`: a number that increments [each time a cached Response is returned by the Service Worker](#observing-responses)
 - `size`: computed disk size of the Request/Response object pair
 
@@ -154,6 +154,10 @@ async function trimCache( cacheName ) {
 This spec draws a distinction between accessing a cached resource and actually responding with that resource. The act of merely reading a cached resource via the Cache API would not update its `lastResponseAt` timestamp or increment its `responseCount`. For these values to be updated, the cached response would actually need to be sent to the browser using [`FetchEvent.respondWith()`](https://w3c.github.io/ServiceWorker/#dom-fetchevent-respondwith).
 
 As an example of why this matters, consider [this scenario](https://remysharp.com/2019/09/05/offline-listings): an author builds functionality into their offline page that exposes all web pages that have been cached, so a user can see what content they have access to offline. As part of that JavaScript program, they read the contents of the cache looking for HTML pages and extract the contents of the `title` and `meta[name=description]` elements and then present that content (along with a link to the resource) in the `body` of the document. In this scenario, the resource has been used, but it was not provided as a response, so it would not trigger an update of `lastResponseAt` or `responseCount`. Following the link, however, results in the Service Worker responding to the `FetchEvent` with the cached response and that *would* trigger an update of `lastResponseAt` and `responseCount`.
+
+## Implementation Notes
+
+* We should test for potential performance issues with respect to updating `lastResponseAt` and `responseCount` ([Issue #148](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/148))
 
 ## Privacy Considerations
 
