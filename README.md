@@ -53,6 +53,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
 * [Custom Dialog on Close Explainer](CustomDialogOnClose/explainer.md)
 * [Title Bar Customization Explainer](TitleBarCustomization/explainer.md)
+* [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
 
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
