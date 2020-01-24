@@ -95,7 +95,7 @@ class InkRenderer {
         });
 
         if (this.presenter)
-            this.presenter.setLastRenderedPoint(evt.x, evt.y);
+            this.presenter.setLastRenderedPoint(evt);
     }
 
     void setPresenter(presenter) {
@@ -131,7 +131,7 @@ interface InkPresenter {
 
 interface PenStrokeTipPresenter : InkPresenter {
     void setPenStrokeStyle(PenStrokeStyle style);
-    void setLastRenderedPoint(Number x, Number y);
+    void setLastRenderedPoint(PointerEvent evt);
 }
 ```
 
@@ -149,6 +149,8 @@ We considered a few different locations for where the method `setLastRenderedPoi
   This seemed a bit too generic and scoping to a new namespace seemed appropriate.
 
 Instead of a concrete type, perhaps the `PenStrokeStyle` should be more generic in such a way that presenters can describe their capabilities via a dictionary. I'm not quite sure what the most ergonomic way of exposing this would be.
+
+Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing x and y values is also an option. It was decided that a trusted pointer event would likely be the better option though, as then we can have easier access to the pointer ID and the web developer doesn't have to put extra thought into the position of the ink.
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WebInkEnhancement) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWebInkEnhancement%5D)
