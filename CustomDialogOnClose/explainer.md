@@ -29,8 +29,19 @@ There are many scenarios in which the web developer may want to invoke this dial
 ![The default "leave site" dialog is being displayed over a website that shows a file is being uploaded.](./images/YoutubeCancelUpload.PNG)
 
 ## Proposed Solution
+### A Declarative Site State
+Sites will indicate that they are in a dirty state by calling `window.setDirty = true`. When the user makes a change or begins an operation that would be lost or cancelled on tab close, the site enters a dirty state. If the tab is closed or navigated away from while the site is in a dirty state, a dialog may be shown, and some JavaScript code may be run. The site may customize the dialog by calling the setDialogProperties API, currently we offer customization of the message text and the presence and label of a button. If the developer can specify that the dialog not show, and only the dirtyHandler code should run. They can also not specify a dirty state handler, and only show a dialog so that the user can resolve the situation manually.
+```javascript
+window.setDialogProperties({
+  message: "You have unsaved changes, would you like to save them?",
+  buttonLabel: "Save"
+});
+window.setDirtyStateHandler(cleanUpUnsavedChanges);
+window.setDirtyState(true);
+```
+
 ### Extend the beforeunload event
-A familiar way to interrupt the leaving flow is to use the beforeunload event's properties, either calling `preventDefault()` or assigning a value to `returnValue`. In line with this pattern, we are proposing the addition of a new property to the beforeunload event: `dialog`. The `dialog` property would have several methods `setMessage()`, `setButtonLabel()`, and `show()`. These functions are how the developer will customize the dialog, and provide code that will run based on the user's selection.
+A familiar way to interrupt the leaving flow is to use the beforeunload event's properties, eitbher calling `preventDefault()` or assigning a value to `returnValue`. In line with this pattern, we are proposing the addition of a new property to the beforeunload event: `dialog`. The `dialog` property would have several methods `setMessage()`, `setButtonLabel()`, and `show()`. These functions are how the developer will customize the dialog, and provide code that will run based on the user's selection.
 ```javascript
 window.addEventListener("beforeunload", (event) => {
     if (event.dialog) {
