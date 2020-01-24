@@ -133,7 +133,7 @@ Alternatively, it may be desirable to supply the URL as part of the [Launch Even
 
 As mentioned before, the Navigator interface from WebAPI has the method `registerProtocolHandler` that allows web sites register as handlers of particular URL schemes.
 
-<https://www.w3.org/TR/2011/WD-html5-20110525/timers.html#custom-handlers>
+<https://html.spec.whatwg.org/multipage/system-state.html#custom-handlers>
 
 <https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerProtocolHandler>
 
