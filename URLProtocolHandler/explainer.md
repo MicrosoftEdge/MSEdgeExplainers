@@ -10,7 +10,7 @@ Eric Lawrence (<ericlaw@microsoft.com>)
 
 Developers can create a more engaging native-like experience if we allow Progressive Web Apps to be registered as handlers for URL protocols. Today, native applications can register themselves as protocol handlers, and HTML5 exposes a JavaScript API `registerProtocolHandler` for web sites to do the same, but it is desirable to offer registration as part of a PWA installation through its manifest.
 
-After registering a PWA as a protocol handler, when a user clicks on a hyperlink with a specific scheme such as `mailto://` , `ms-word://` or `music://` from a browser or a native app, the registered PWA would open and receive the URL.
+After registering a PWA as a protocol handler, when a user clicks on a hyperlink with a specific scheme such as `mailto://` , `ms-word://` or `web+music://` from a browser or a native app, the registered PWA would open and receive the URL.
 
 It is important to note that both the manifest-based registration proposed in this explainer and `registerProtocolHandler` play very similar roles in practice, while still allowing the possibility for subtle but complementary user-experiences.
 
@@ -24,7 +24,7 @@ There are subtle differences in the manifest-based registration, however, that m
 
 - In a native chat app, the user receives a link to some `magnet://` URL. When she clicks the link, an installed torrent PWA is launched.
 
-- A user has installed a PWA for a music app. When a friend shares a link to a song and she clicks on it (`music://songid=1234&time=0:13`) the PWA will automatically launch instead of opening a new tab in the browser.
+- A user has installed a PWA for a music app. When a friend shares a link to a song and she clicks on it (`web+music://songid=1234&time=0:13`) the PWA will automatically launch instead of opening a new tab in the browser.
 
 ## Manifest Example
 
