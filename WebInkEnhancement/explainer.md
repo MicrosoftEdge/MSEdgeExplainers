@@ -70,7 +70,6 @@ const renderer = new InkRenderer();
 
 try {
     let presenter = await navigator.ink.requestPresenter('pen-stroke-tip');
-    renderer.setPresenter(presenter);
     window.addEventListener("pointermove", evt => {
         renderer.renderInkPoint(evt);
     });
@@ -95,14 +94,11 @@ class InkRenderer {
         });
 
         if (this.presenter)
-            this.presenter.setLastRenderedPoint(evt);
+            this.presenter.setLastRenderedPoint(evt, rgba(0, 0, 255, 0.5), 2);
     }
 
     void setPresenter(presenter) {
-        this.presenterStyle = { color: "rgba(0, 0, 255, 0.5)", radius: 2 };
-
         this.presenter = presenter;
-        this.presenter.setPenStrokeStyle(this.presenterStyle);
     }
 
     renderStrokeSegment(x, y) {
@@ -121,17 +117,11 @@ interface Ink {
     Promise<InkPresenter> requestPresenter(DOMString type);
 }
 
-dictionary PenStrokeStyle {
-    DOMString color;
-    unsigned long radius;
-}
-
 interface InkPresenter {
 }
 
 interface PenStrokeTipPresenter : InkPresenter {
-    void setPenStrokeStyle(PenStrokeStyle style);
-    void setLastRenderedPoint(PointerEvent evt);
+    void setLastRenderedPoint(PointerEvent evt, DOMString color, unsigned long radius);
 }
 ```
 
@@ -148,7 +138,7 @@ We considered a few different locations for where the method `setLastRenderedPoi
 
   This seemed a bit too generic and scoping to a new namespace seemed appropriate.
 
-Instead of a concrete type, perhaps the `PenStrokeStyle` should be more generic in such a way that presenters can describe their capabilities via a dictionary. I'm not quite sure what the most ergonomic way of exposing this would be.
+Due to uncertainty around the correct execution when `setLastRenderedPoint` is called before setting the stroke style, and it being likely that the radius could change frequently, we decided it may be best to require all 3 arguments (event, color, radius) in every call to `setLastRenderedPoint`.
 
 Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing x and y values is also an option. It was decided that a trusted pointer event would likely be the better option though, as then we can have easier access to the pointer ID and the web developer doesn't have to put extra thought into the position of the ink.
 
