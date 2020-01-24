@@ -141,7 +141,7 @@ As mentioned before, the Navigator interface from WebAPI has the method `registe
 
 Registering a protocol handler represents an important state change in the user's operating environment, and we must work to ensure that it is not abused.
 
-The `registerProtocolHandler` API implements an allow list of schemes that may be registered; we should start with that same restriction and evaluate whether it meets the needs.
+The `registerProtocolHandler` API implements an allow list of schemes that may be registered; we should start with that same restriction and evaluate whether it meets the needs, but possibly adding a few schemes to the list.
 
 URLs may contain sensitive user data; because PWAs require a secure context (HTTPS), invocation of a protocol handler will take place in a secure context. However, PWAs that implement protocol handlers must still take care to avoid sending potentially-sensitive URL data over insecure channels.
 
