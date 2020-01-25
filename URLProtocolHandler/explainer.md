@@ -10,7 +10,7 @@ Eric Lawrence (<ericlaw@microsoft.com>)
 
 Developers can create a more engaging native-like experience if we allow Progressive Web Apps to be registered as handlers for URL protocols. Today, native applications can register themselves as protocol handlers, and HTML5 exposes a JavaScript API `registerProtocolHandler` for web sites to do the same, but it is desirable to offer registration as part of a PWA installation through its manifest.
 
-After registering a PWA as a protocol handler, when a user clicks on a hyperlink with a specific scheme such as `mailto://` , `ms-word://` or `music://` from a browser or a native app, the registered PWA would open and receive the URL.
+After registering a PWA as a protocol handler, when a user clicks on a hyperlink with a specific scheme such as `mailto://` , `ms-word://` or `web+music://` from a browser or a native app, the registered PWA would open and receive the URL.
 
 It is important to note that both the manifest-based registration proposed in this explainer and `registerProtocolHandler` play very similar roles in practice, while still allowing the possibility for subtle but complementary user-experiences.
 
@@ -24,7 +24,7 @@ There are subtle differences in the manifest-based registration, however, that m
 
 - In a native chat app, the user receives a link to some `magnet://` URL. When she clicks the link, an installed torrent PWA is launched.
 
-- A user has installed a PWA for a music app. When a friend shares a link to a song and she clicks on it (`music://songid=1234&time=0:13`) the PWA will automatically launch instead of opening a new tab in the browser.
+- A user has installed a PWA for a music app. When a friend shares a link to a song and she clicks on it (`web+music://songid=1234&time=0:13`) the PWA will automatically launch instead of opening a new tab in the browser.
 
 ## Manifest Example
 
@@ -133,7 +133,7 @@ Alternatively, it may be desirable to supply the URL as part of the [Launch Even
 
 As mentioned before, the Navigator interface from WebAPI has the method `registerProtocolHandler` that allows web sites register as handlers of particular URL schemes.
 
-<https://www.w3.org/TR/2011/WD-html5-20110525/timers.html#custom-handlers>
+<https://html.spec.whatwg.org/multipage/system-state.html#custom-handlers>
 
 <https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerProtocolHandler>
 
@@ -141,7 +141,7 @@ As mentioned before, the Navigator interface from WebAPI has the method `registe
 
 Registering a protocol handler represents an important state change in the user's operating environment, and we must work to ensure that it is not abused.
 
-The `registerProtocolHandler` API implements an allow list of schemes that may be registered; we should start with that same restriction and evaluate whether it meets the needs.
+The `registerProtocolHandler` API implements an allow list of schemes that may be registered; we should start with that same restriction and evaluate whether it meets the needs, but possibly adding a few schemes to the list.
 
 URLs may contain sensitive user data; because PWAs require a secure context (HTTPS), invocation of a protocol handler will take place in a secure context. However, PWAs that implement protocol handlers must still take care to avoid sending potentially-sensitive URL data over insecure channels.
 
