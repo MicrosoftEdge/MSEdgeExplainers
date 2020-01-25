@@ -17,14 +17,6 @@ Currently, the only way a site can prompt a user before they leave is by adding 
 
 The problem is that the website can't communicate to users why they are being prompted, and the site can't offer the user a quick way to resolve the situation and then let them leave.
 
-Additionally, there is no way to run asynchronous code before tab exit, and the other options available to developers are insufficient.
-
-| Alternative | Limitations |
-| ----------- | ---------- |
-| Service Workers | <ul><li>Only one service work can be registered per origin.</li><li>Communicating with the service worker is limited to synchronous communication via `postMessage()`.</li></ul> |
-| Session Storage | |
-| Local Storage | |
-
 ## Use Cases
 There are many scenarios in which the web developer may want to invoke this dialog before the end user leaves the site, but some of the most common ones we've seen during our investigations are:
 
@@ -42,10 +34,10 @@ In order to prevent user data loss and provide more context about potentially un
 
 When the user enters data or begins an operation that would be cancelled on tab close, the site can enter a dirty state by calling `window.setDirtyState(true)`. When the operation is finished or the data is saved, the site can exit the dirty state by calling `window.setDirtyState(false)`. When the tab is closed or navigated away from while the site is in a dirty state, a dialog may be shown and/or some JavaScript code may be run.
 
-The site opts-in to having a dialog show by calling `window.setDialogProperties()`. The site can customize this dialog by passing in a JSON object with optional `message` and `buttonLabel` properties. If the message property is missing, a default message will be displayed. If the buttonLabel property is missing, only the two default buttons will be displayed. If no object or an invalid object is passed, a default dialog will be shown instead. A well formed object might look like this:
+The site opts-in to having a dialog show by calling `window.setExitDialog()`. The site can customize this dialog by passing in a JSON object with optional `message` and `buttonLabel` properties. If the message property is missing, a default message will be displayed. If the buttonLabel property is missing, only the two default buttons will be displayed. If no object or an invalid object is passed, a default dialog will be shown instead. A well formed object might look like this:
 
 ```javascript
-window.setDialogProperties({
+window.setExitDialog({
   message: "You have unsaved changes, would you like to save them?",
   buttonLabel: "Save"
 });
