@@ -17,6 +17,14 @@ Currently, the only way a site can prompt a user before they leave is by adding 
 
 The problem is that the website can't communicate to users why they are being prompted, and the site can't offer the user a quick way to resolve the situation and then let them leave.
 
+Additionally, there is no way to run asynchronous code before tab exit, and the other options available to developers are insufficient.
+
+| Alternative | Limitations |
+| ----------- | ---------- |
+| Service Workers | <ul><li>Only one service work can be registered per origin.</li><li>Communicating with the service worker is limited to synchronous communication via `postMessage()`.</li></ul> |
+| Session Storage | |
+| Local Storage | |
+
 ## Use Cases
 There are many scenarios in which the web developer may want to invoke this dialog before the end user leaves the site, but some of the most common ones we've seen during our investigations are:
 
@@ -30,16 +38,66 @@ There are many scenarios in which the web developer may want to invoke this dial
 
 ## Proposed Solution
 ### A Declarative Site State
-Sites will indicate that they are in a dirty state by calling `window.setDirty = true`. When the user makes a change or begins an operation that would be lost or cancelled on tab close, the site enters a dirty state. If the tab is closed or navigated away from while the site is in a dirty state, a dialog may be shown, and some JavaScript code may be run. The site may customize the dialog by calling the setDialogProperties API, currently we offer customization of the message text and the presence and label of a button. If the developer can specify that the dialog not show, and only the dirtyHandler code should run. They can also not specify a dirty state handler, and only show a dialog so that the user can resolve the situation manually.
+In order to prevent user data loss and provide more context about potentially undesired behaviors on application exit, we propose that sites should be able to indicate when they are in a dirty state and opt-in to showing a customizeable dialog and/or have some asynchronous Javascript code run on exit.
+
+When the user enters data or begins an operation that would be cancelled on tab close, the site can enter a dirty state by calling `window.setDirtyState(true)`. When the operation is finished or the data is saved, the site can exit the dirty state by calling `window.setDirtyState(false)`. When the tab is closed or navigated away from while the site is in a dirty state, a dialog may be shown and/or some JavaScript code may be run.
+
+The site opts-in to having a dialog show by calling `window.setDialogProperties()`. The site can customize this dialog by passing in a JSON object with optional `message` and `buttonLabel` properties. If the message property is missing, a default message will be displayed. If the buttonLabel property is missing, only the two default buttons will be displayed. If no object or an invalid object is passed, a default dialog will be shown instead. A well formed object might look like this:
+
 ```javascript
 window.setDialogProperties({
   message: "You have unsaved changes, would you like to save them?",
   buttonLabel: "Save"
 });
-window.setDirtyStateHandler(cleanUpUnsavedChanges);
-window.setDirtyState(true);
 ```
 
+And that would prompt a dialog that looks like this to be displayed:
+
+![A dialog alerting the user that they have unsaved changes. Three options are presented "Save", "Leave", and "Cancel".](./images/CustomLeaveSiteExample.png)
+
+Additionally, the site can provide a Javascript function to be run via the `window.setDirtyStateHandler()` API. This code will be run conditionally if a dialog is shown, only if the user selects the custom button on the dialog, or unconditionally if no dialog is shown. While this code is running, tab close should be delayed. To help communicate why this is happening to the user, we propose a second dialog should be displayed explaining that the site is cleaning up, and offering an option to leave now.
+
+![A dialog with the title "Cleaning up" and the text "This page is cleaning up before it closes. You may close the page now, but you may experience data loss." There is also a button that says "Leave Now".](./images/CleaningUpExample.png)
+
+
+#### Time limit
+To avoid a poor user experience from websites that take a long time to complete their task, we propose that there should be a time limit on how long the operation can run for. Currently, Chromium based browser display a warning if the synchronous code in the beforeunload event handler takes a long time.
+
+`[Violation] 'beforeunload' handler took 53921ms`
+
+However, no time limit is actually enforced. We propose strictly enforcing a time limit that starts as soon as the user makes a selection on the "Leave Site?" dialog. What that limit should be will need to be researched further. An error message such as this should be displayed if the limit is reached:
+`The beforeunload promise did not resolve within the X second time limit. The operation has been cancelled.`
+
+#### Sequence Diagram
+Below is a sequence diagram to illustrate the flow when this new capability is used.
+```
+App         "Leave Site?" Dialog     "Cleaning up" Dialog     Dirty State Handler
+ |
+ | User attempts to close app
+ | ----------------->| User selects "Save" option
+ | <---------------- |
+ | --------------------------------------> |
+ |                                         |-------------------> |                     
+ |                                         |                     | Unsaved changes are saved
+ |                                         | <------------------ |
+ | <-------------------------------------- | Promise resolves, times out, or user force exits
+ |  "Cleaning up" Dialog closes
+App closes
+```
+
+### Interacting With Legacy Events
+We propose that if a site sets the dirty state to true, or provides a dirty state handler, then the UA should not send a beforeunload event.
+
+## Avoiding Misuse
+While this feature fills a gap in the platform that will improve the end user experience when used responsibly; it, like many other APIs, does introduce the potential for abuse if not mitigated by the UA. Some examples of abuse that we have identified, and recommended mitigations, follow:
+
+| Risk | Mitigations |
+| ---- | ----------- |
+| The user accidentally clicks an ad, or otherwise has an unwanted tab appear. They try to close the tab as quickly as possible, but are unable to due to a confirmation dialog. | The user must have interacted with the page to allow the site to prompt the user or perform asynchronous actions on tab close. |
+| The user attempts to navigate away from a tab, but is convinced to wait for the site to perform some action before they leave. The site intentionally takes an excessively long time, perhaps displaying ads while the user is waiting for the tab to close itself. | <ul><li>There should be a time limit on how long the asynchronous code can run for, at the end of the time limit there should be a "leave anyway" dialog, or some other mechanism that allows the user to cancel the async task and leave immediately.</li><li>A second attempt to close the tab, via clicking the "x" or ctrl+w, should immediately close the tab.</li><li>The DOM should be frozen while the dirty state handler code is run, preventing the site from displaying new alarming text or advertisements.</ul> |
+| A website displays alarming text, to try and convince the user to stay on the site or perform some harmful action. | <ul><li>This capability should only be available to installed PWAs, and not arbitrary websites. </li><li>The UI should make it clear that the message is coming from the site, and not from the browser. Similar to how the `alert()` dialog says "This site says..." </li><li>The text that the website can display should be limited in length and not allow formatting.</li><li>Always display "Leave" and "Cancel" buttons on the dialog, and only allow websites to add a third option which could be customizable.</li></ul> |
+
+## Considered Alternatives
 ### Extend the beforeunload event
 A familiar way to interrupt the leaving flow is to use the beforeunload event's properties, eitbher calling `preventDefault()` or assigning a value to `returnValue`. In line with this pattern, we are proposing the addition of a new property to the beforeunload event: `dialog`. The `dialog` property would have several methods `setMessage()`, `setButtonLabel()`, and `show()`. These functions are how the developer will customize the dialog, and provide code that will run based on the user's selection.
 ```javascript
@@ -56,49 +114,12 @@ window.addEventListener("beforeunload", (event) => {
 });
 ```
 
-![A dialog alerting the user that they have unsaved changes. Three options are presented "Save", "Leave", and "Cancel".](./images/CustomLeaveSiteExample.png)
-
 `show()` returns a promise that will resolve with the user's selection. Once it resolves, the code provided by the developer will run, and the tab will close when it is finished. While the developer's code is running, we should display a dialog indicating that some work is being done, and present an option to the user that let's them cancel the work and leave immediately. Here is an example of how this "Cleaning up" dialog may look:
 
-![A dialog with the title "Cleaning up" and the text "This page is cleaning up before it closes. You may close the page now, but you may experience data loss." There is also a button that says "Leave Now".](./images/CleaningUpExample.png)
+This option will not be pursued, in favor of the declarative approach. The two approaches are very similar, offering the same capability, but the declarative approach has several clear benefits over this proposal such as: 
+- The UA can prepare the dialog ahead of time, and display it on behalf of a suspended tab without unsuspending it.
+- Having a beforeunload handler can harm the performance of the browser by preventing optimizations like BFCache. A declarative approach should lessen the frequency with which this optimization is missed.
 
-
-#### Time limit
-To avoid a poor user experience from websites that take a long time to complete their task, we propose that there should be a time limit on how long the operation can run for. Currently, Chromium based browser display a warning if the synchronous code in the beforeunload event handler takes a long time.
-
-`[Violation] 'beforeunload' handler took 53921ms`
-
-However, no time limit is actually enforced. We propose strictly enforcing a time limit that starts as soon as the user makes a selection on the "Leave Site?" dialog. What that limit should be will need to be researched further. An error message such as this should be displayed if the limit is reached:
-`The beforeunload promise did not resolve within the X second time limit. The operation has been cancelled.`
-
-#### Sequence Diagram
-Below is a sequence diagram to illustrate the flow when this new capability is used.
-```
-App         "Leave Site?" Dialog     "Cleaning up" Dialog     Developer's Promise
- |
- | User attempts to close app
- | ----------------->| User selects "Save" option
- | <---------------- |
- | --------------------------------------> |
- |                                         |-------------------> |                     
- |                                         |                     | Unsaved changes are saved
- |                                         | <------------------ |
- | <-------------------------------------- | Promise resolves, times out, or user force exits
- |  "Cleaning up" Dialog closes
-App closes
-```
-
-## Avoiding Misuse
-
-While this feature fills a gap in the platform that will improve the end user experience when used responsibly; it, like many other APIs, does introduce the potential for abuse if not mitigated by the UA. Some examples of abuse that we have identified, and recommended mitigations, follow:
-
-| Risk | Mitigations |
-| ---- | ----------- |
-| The user accidentally clicks an ad, or otherwise has an unwanted tab appear. They try to close the tab as quickly as possible, but are unable to due to a confirmation dialog. | The user must have interacted with the page to allow the site to prompt the user or perform asynchronous actions on tab close. |
-| The user attempts to navigate away from a tab, but is convinced to wait for the site to perform some action before they leave. The site intentionally takes an excessively long time, perhaps displaying ads while the user is waiting for the tab to close itself. | <ul><li>There should be a time limit on how long the asynchronous code can run for, at the end of the time limit there should be a "leave anyway" dialog, or some other mechanism that allows the user to cancel the async task and leave immediately.</li><li>A second attempt to close the tab, via clicking the "x" or ctrl+w, should immediately close the tab.</li></ul> |
-| A website displays alarming text, to try and convince the user to stay on the site or perform some harmful action. | <ul><li>This capability should only be available to installed PWAs, and not arbitrary websites. </li><li>The UI should make it clear that the message is coming from the site, and not from the browser. Similar to how the `alert()` dialog says "This site says..." </li><li>The text that the website can display should be limited in length and not allow formatting.</li><li>Always display "Leave" and "Cancel" buttons on the dialog, and only allow websites to add a third option which could be customizable.</li></ul> |
-
-## Considered Alternatives
 ### Extend window.confirm()
 [`window.confirm()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm) is a familiar API that lets websites query the user and act based on their response.
 
