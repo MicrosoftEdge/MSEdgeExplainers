@@ -4,7 +4,7 @@
 
 This repo is intended to be a starting place for explainers originating from the Microsoft Edge team (and an archive of the same explainers if/when they migrate to longer-term homes in other repositories such as W3C Community Group/ Working Group or WHATWG workstream repositories).
 
-We welcome public discussion in issues on these explainers. Thanks for your interest! 
+We welcome public discussion in issues on these explainers. Thanks for your interest! Please [file an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new) or submit a PR with your feedback. Note that we try to label issues with the explainer they relate to for easy filtering.
 
 ## Accessibility
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
