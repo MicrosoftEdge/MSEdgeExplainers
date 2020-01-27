@@ -177,7 +177,13 @@ The draggable regions are set using `app-region: drag` and `app-region: no-drag`
 The title bar is fixed in place with `position: absolute` so that it doesn't scroll out of view. Its background color is the same as the `theme_color` from the manifest to create one seamless title bar. It also sets `user-select: none` to prevent any attempts at dragging the window to be consumed instead by highlighting text inside of the div.
 
 The container for the `mainContent` of the webpage is also fixed in place with `position: absolute`. It sets `overflow-y: scroll` to allow its contents to scroll vertically within the container.
+
+For cases where the browser does not support the caption control overlay, a CSS variable is added to set a fallback title bar height. The bounds of the `titleBarContainer` and `mainContent` are initially set to fill the entire client area, and do not need to be changed if the overlay is not supported.
 ```css
+:root {
+  --fallback-title-bar-height: 35px;
+}
+
 .draggable {
   app-region: drag;
 }
@@ -188,6 +194,10 @@ The container for the `mainContent` of the webpage is also fixed in place with `
 
 .titleBarContainer {
   position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: calc(100% - var(--fallback-title-bar-height));
   display: flex;
   user-select: none;
   background-color:#254B85;
@@ -214,18 +224,25 @@ The container for the `mainContent` of the webpage is also fixed in place with `
   left: 0;
   right: 0;
   bottom: 0;
+  top: var(--fallback-title-bar-height, 50px);
   overflow-y: scroll;
 }
 ```
 
 ### app.js
-The new Javascript APIs are used to get the bounds of the caption controls overlay and determine the layout of the `titleBar` element. Since the overlay could live either in the upper-left or upper-right corner of the viewport, the layout calculations must take into consideration both configurations. If the overlay is in the upper-right corner, the `x` coordinate of overlay will be non-zero, so `overlay.x` is used to determine whether the left and right insets should be `0` or `overlay.width`. 
+The new Javascript APIs are used to get the bounds of the caption controls overlay and determine the layout of the `titleBar` element. Verify that the `controlsOverlay` APIs are supported in the browser, and return early if they are not. In CSS, the title bar was already laid out to fill the full width of the client view, so nothing more needs to be done if no overlay is displayed. If the `controlsOverlay` API is supported, then continue to lay out the UI.
+
+Since the overlay could live either in the upper-left or upper-right corner of the viewport, the layout calculations must take into consideration both configurations. If the overlay is in the upper-right corner, the `x` coordinate of overlay will be non-zero, so `overlay.x` is used to determine whether the left and right insets should be `0` or `overlay.width`. 
 
 After styling the `titleBar`, the top inset of the `mainContent` needs to be set as well (the rest of the insets are `0` and were already set in `style.css`). Fortunately, this just requires knowing the height of the overlay.
 
 Since these position values are scaled when resizing the browser window--but the caption control overlay will not--each of these values will need to be reset each time the window is resized. 
 ```javascript
 const resizeTitleBar = () => {
+  if (!window.menubar.controlOverlay) {
+    return;
+  }
+  
   const overlay = window.menubar.controlOverlay.getBoundingRect();
 
   const titleBar = document.getElementById('titleBar');
