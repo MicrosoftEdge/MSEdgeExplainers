@@ -93,8 +93,10 @@ class InkRenderer {
             this.renderStrokeSegment(event.x, event.y);
         });
 
-        if (this.presenter)
-            this.presenter.setLastRenderedPoint(evt, rgba(0, 0, 255, 0.5), 2);
+        if (this.presenter) {
+            this.presenterStyle = { color: "rgba(0, 0, 255, 0.5)", radius: 4 * evt.pressure };
+            this.presenter.setLastRenderedPoint(evt, this.presenterStyle);
+        }
     }
 
     void setPresenter(presenter) {
@@ -117,11 +119,16 @@ interface Ink {
     Promise<InkPresenter> requestPresenter(DOMString type);
 }
 
+dictionary PenStrokeStyle {
+    DOMString color;
+    unsigned long radius;
+}
+
 interface InkPresenter {
 }
 
 interface PenStrokeTipPresenter : InkPresenter {
-    void setLastRenderedPoint(PointerEvent evt, DOMString color, unsigned long radius);
+    void setLastRenderedPoint(PointerEvent evt, PenStrokeStyle style);
 }
 ```
 
