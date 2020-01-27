@@ -70,6 +70,7 @@ const renderer = new InkRenderer();
 
 try {
     let presenter = await navigator.ink.requestPresenter('pen-stroke-tip');
+    renderer.setPresenter(presenter);
     window.addEventListener("pointermove", evt => {
         renderer.renderInkPoint(evt);
     });
