@@ -97,8 +97,10 @@ This proposal is primarily aimed at reactive scenarios, where an application wan
 ```
 [Exposed=Window]
 interface WindowSegment {
-	readonly attribute long left;
 	readonly attribute long top;
+	readonly attribute long left;
+	readonly attribute long bottom;
+	readonly attribute long right;
 	readonly attribute long width;
 	readonly attribute long height;
 }
