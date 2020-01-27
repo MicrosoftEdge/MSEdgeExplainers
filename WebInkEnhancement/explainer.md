@@ -146,7 +146,7 @@ We considered a few different locations for where the method `setLastRenderedPoi
 
   This seemed a bit too generic and scoping to a new namespace seemed appropriate.
 
-Due to uncertainty around the correct execution when `setLastRenderedPoint` is called before setting the stroke style, and it being likely that the radius could change frequently, we decided it may be best to require all 3 arguments (event, color, radius) in every call to `setLastRenderedPoint`.
+Due to uncertainty around the correct execution when `setLastRenderedPoint` is called before setting the stroke style, and it being likely that the radius could change frequently, we decided it may be best to require all relevant properties of rendering the ink stroke in every call to `setLastRenderedPoint`.
 
 Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing x and y values is also an option. It was decided that a trusted pointer event would likely be the better option though, as then we can have easier access to the pointer ID and the web developer doesn't have to put extra thought into the position of the ink.
 
