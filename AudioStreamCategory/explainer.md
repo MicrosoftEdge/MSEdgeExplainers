@@ -1,4 +1,5 @@
 # Audio Stream Category
+Authors: [Sam Dallstream](https://github.com/sjdallst), [Greg Whitworth](https://github.com/gregwhitworth), [Rahul Singh](https://github.com/rahulsingh-msft)
 
 ## Introduction
 
