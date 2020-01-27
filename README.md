@@ -15,6 +15,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## Audio
 * [Hardware-offloaded Audio Processing explainer](AudioOffload/explainer.md)
+* [Audio Stream Category](AudioStreamCategory/explainer.md)
 
 ## Controls
 * [Password Reveal Explainer](PasswordReveal/explainer.md)
