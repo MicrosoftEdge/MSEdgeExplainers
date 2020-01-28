@@ -108,7 +108,7 @@ partial interface Window {
 }
 ```
 
-The value returned from the `getWindowSegments()` API will be a grid of segments, based on the logical orientation of the segments, relative to the orientation of ths OS/window manager. Following the above examples, when in the `single-fold-vertical` state, getWindowSegments will return a structure like the following: `[ [ segment1, segment2] ]`, whereas `single-fold-vertical` will return `[ [segment1] , [segment2] ]`.
+The value returned from the `getWindowSegments()` API will be an array of WindowSegment objects, based on the data returned for each WindowSegment, developers will be able to infer the number of hinges available as well as the hinge orientation. Following the above examples, when in the `single-fold-vertical` state, getWindowSegments will return an array of 2 WindowSegments where the `top` property for each one is identical and equals 0, whereas `single-fold-horizontal` will return 2 WindowSegments with the `left` property being the identical one.
 
 A user may at any point take the browser window out of spanning mode and place it on one of the screens or vice-versa, in those cases the window resize event will fire and authors can query and get the number of available screen segments.
 
