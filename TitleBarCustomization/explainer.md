@@ -259,6 +259,16 @@ resizeTitleBar();
 window.addEventListener('resize', resizeTitleBar);
 ```
 
+## Security Considerations
+
+Giving sites partial control of the title bar leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
+
+Currently in Chromium browsers, `standalone` mode includes a title bar which on initial launch displays the `title` of the webpage on the left, and the origin of the page on the right (followed by the "settings and more" button and the caption controls). After a few seconds, the origin text disappears. 
+
+In RTL configured browsers, this layout is flipped such that the origin text is on the left. This open the caption controls overlay to spoofing the origin if there is insufficient padding between the origin and the right edge of the overlay. For example, the origin "evil.ltd" could be appended with a trusted site "google.com", leading users to believe that the source is trustworthy.  
+
+![Standalone PWA in RTL format](RTL-standalone-titlebar.png) 
+
 ## Privacy Considerations
 
 Enabling the caption control overlay and draggable regions do not pose considerable privacy concerns other than feature detection. However, due to differing sizes and positions of the caption control buttons across operating systems, the JavaScript API for `window.menubar.controlsOverlay.getBoundingRect()` will return a rect whose position and dimensions will reveal information about the operating system upon which the browser is running. Currently, developers can already discover the OS from the user agent string, but due to fingerprinting concerns there is discussion about [freezing the UA string and unifying OS versions](https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ). We would like to work with the community to understand how frequently the size of the caption controls overlay changes across platforms, as we believe that these are fairly stable across OS versions and thus would not be useful for observing minor OS versions.
