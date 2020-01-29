@@ -101,7 +101,7 @@ The coordinate system will not be affected by the overlay, although content my b
 - `window.innerHeight` will return the full height of the client area including the area under the overlay. On operating systems which do not include borders around the window, `window.innerHeight === window.outerHeight`
 - `vh` and `vw` units would be unaffected. They would still represent 1/100th of the height/width of the viewport which is also not affected by the overlay.
 
-The caption controls overlay would use the `"theme_color"` from the manifest as the background color. When hovered over and clicked, the controls should honor the operating system design behavior.
+If the OS and browser support a colored title bar, the caption controls overlay would use the `"theme_color"` from the manifest as the background color. When hovered over and clicked, the controls should honor the operating system design behavior. If a colored title bar is not supported, the caption controls overlay will be drawn in the theme supported by the OS and browser.
 
 The desire to place content into the title bar area and use an overlay for the caption controls will be declared within the web app manifest through a new member called `caption_controls_only`. An optional member of boolean type which is false by default and could be used in conjunction with display mode `standalone`. This member will be ignored on Android and iOS, and when used in conjunction with any other `display` modes.
 
