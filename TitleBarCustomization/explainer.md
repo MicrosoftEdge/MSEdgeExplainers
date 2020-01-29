@@ -77,9 +77,22 @@ The solution proposed in this explainer is in multiple parts
 ### Overlaying Caption Controls
 To provide the maximum addressable area for web content, the User Agent (UA) will create a frameless window removing all UA provided chrome except for a caption controls overlay.
 
-The caption controls overlay ensures users can minimize, maximize or restore, and close the application. In addition, it will hold the web app menu button which opens a menu similar to the settings menu in a normal Chromium webpage. To the interior of the web app menu button, there will be a small region the same width and height as one of the caption control buttons and will serve as a draggable region to ensure that the window is draggable in the case where the web content doesn't provide any draggable area.
+The caption controls overlay ensures users can minimize, maximize or restore, and close the application, and also provides access to relevant browser controls via the web app menu. For Chromium browsers displayed in left-to-right (LTR) languages, the content will flow as follows, starting from the left/inner edge of the overlay:
+- A draggable region that is the same width and height of each of the caption buttons
+- The "Settings and more" three-dot button which gives users access to extensions, security information about the page, access to cookies, etc.
+- The caption control buttons minimize, maximize/restore, and close. On operating systems that only support full screen windows, the maximize/restore button will be omitted.
 
 ![Caption Controls Overlay on an empty PWA](CaptionControlsOnly.png)
+
+Additionally, there are two scenarios where other content will appear in the caption controls overlay. When these show or hide, the overlay will resize to fit, and a `resize` event will be fired on the `window` object. 
+- When a PWA is launched, the origin of the page will display to the left of the three-dot button for a few seconds, then disappear.
+- If a user interacts with an extension via the "Settings and more" menu, the icon of the extension will appear in the overlay to the left of the three-dot button. After clicking out of the modal dialog, the icon is removed from the overlay.
+
+![Caption Controls Overlay with origin text displayed](CaptionControlsWithOrigin.png)
+
+![Caption Controls Overlay with extension visible](CaptionControlsWithExtension.png)
+
+For Chromium browsers displayed in right-to-left (RTL) languages, the order within the caption controls overlay will be flipped, and the overlay will appear in the upper-left corner of the client area. 
 
 The caption controls overlay will always be on top of the web content's Z order and will accept all user input without flowing it through to the web content.
 
@@ -115,6 +128,8 @@ To accommodate these requirements, this explainer proposes a new object on the `
 * `visible` a boolean to determine if the caption controls overlay has been rendered
 
 For privacy, the `controlsOverlay` will not be accessible to iframes inside of a webpage. See [Privacy Considerations](#privacy-considerations) below
+
+Whenever the overlay is resized, a `resize` event will be fired on the `window` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
 
 ### Defining Draggable Regions in Web Content
 Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. 
