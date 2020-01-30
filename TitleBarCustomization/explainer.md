@@ -94,12 +94,7 @@ Additionally, there are two scenarios where other content will appear in the cap
 
 For Chromium browsers displayed in right-to-left (RTL) languages, the order within the caption controls overlay will be flipped, and the overlay will appear in the upper-left corner of the client area. 
 
-The caption controls overlay will always be on top of the web content's Z order and will accept all user input without flowing it through to the web content.
-
-The coordinate system will not be affected by the overlay, although content my be covered by the overlay.
-- The point (0,0) will be the top left corner of the viewport. This point will fall _under_ the overlay if the overlay is in the top-left corner.
-- `window.innerHeight` will return the full height of the client area including the area under the overlay. On operating systems which do not include borders around the window, `window.innerHeight === window.outerHeight`
-- `vh` and `vw` units would be unaffected. They would still represent 1/100th of the height/width of the viewport which is also not affected by the overlay.
+The caption controls overlay will always be on top of the web content's Z order and will accept all user input without flowing it through to the web content. See [Coordinate System](#coordinate-system).
 
 If the OS and browser support a colored title bar, the caption controls overlay would use the `"theme_color"` from the manifest as the background color. When hovered over and clicked, the controls should honor the operating system design behavior. If a colored title bar is not supported, the caption controls overlay will be drawn in the theme supported by the OS and browser.
 
@@ -145,6 +140,23 @@ Both of these webkit prefixed properties have been shipping in Chromium for some
 Within the app manifest file, the developer could declare two selectors that the UA could then use to identify areas that should be treated as a drag and no-drag regions - `DragSelector: dragMe` and `NoDragSelector: dontDragMe`. 
 
 Classes with the `dragMe` selector would then be treated as draggable and have pointer events handled by the host operating environment as drag events on the window itself. Classes with `dontDragMe` will not be draggable, even if they're nested inside of an element with the `dragMe` class.
+
+### Resulting Changes in Browser
+
+#### Coordinate System
+The coordinate system will not be affected by the overlay, although content my be covered by the overlay.
+- The point (0,0) will be the top left corner of the viewport. This point will fall _under_ the overlay if the overlay is in the top-left corner.
+- `window.innerHeight` will return the full height of the client area including the area under the overlay. On operating systems which do not include borders around the window, `window.innerHeight === window.outerHeight`
+- `vh` and `vw` units would be unaffected. They would still represent 1/100th of the height/width of the viewport which is also not affected by the overlay.
+
+#### Omnibox-anchored Dialogs
+Dialogs like print `[Ctrl+P]` and find in page `[Ctrl + F]` are typically anchored to the omnibox. 
+
+![Search in a standard Chromisum window](searchBrowser.png)
+
+With the omnibox hidden, PWAs anchor these elements to an icon to the left of the three-dot "Settings and more" button. To maintain consistency across all PWAs, the caption controls overlay will use this pattern as well.
+
+![Search in a Chromium PWA](searchPWA.png)
 
 ## Example
 
