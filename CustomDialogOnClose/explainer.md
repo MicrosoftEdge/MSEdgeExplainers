@@ -47,7 +47,9 @@ And that would prompt a dialog that looks like this to be displayed:
 
 ![A dialog alerting the user that they have unsaved changes. Three options are presented "Save", "Leave", and "Cancel".](./images/CustomLeaveSiteExample.png)
 
-Additionally, the site can provide a Javascript function to be run via the `window.setDirtyStateHandler()` API. This code will be run conditionally if a dialog is shown, only if the user selects the custom button on the dialog, or unconditionally if no dialog is shown. While this code is running, tab close should be delayed. To help communicate why this is happening to the user, we propose a second dialog should be displayed explaining that the site is cleaning up, and offering an option to leave now.
+Additionally, the site can provide a Javascript function to be run via the `window.setDirtyStateHandler()` API. This code will be run conditionally if a dialog is shown, only if the user selects the custom button on the dialog, or unconditionally if no dialog is shown. While this code is running, tab close should be delayed.
+
+To help communicate why this delay in tab close is happening to the user, we propose that a second dialog should be displayed after a short timeout (perhaps 500 ms) explaining that the site is cleaning up, and offering an option to leave now.
 
 ![A dialog with the title "Cleaning up" and the text "This page is cleaning up before it closes. You may close the page now, but you may experience data loss." There is also a button that says "Leave Now".](./images/CleaningUpExample.png)
 
@@ -63,18 +65,16 @@ However, no time limit is actually enforced. We propose strictly enforcing a tim
 #### Sequence Diagram
 Below is a sequence diagram to illustrate the flow when this new capability is used.
 ```
-App         "Leave Site?" Dialog     "Cleaning up" Dialog     Dirty State Handler
+App         "Leave Site?" Dialog      Dirty State Handler    "Cleaning up" Dialog 
  |
  | User attempts to close app
  | ----------------->| User selects "Save" option
  | <---------------- |
- | --------------------------------------> |
- |                                         |-------------------> |                     
- |                                         |                     | Unsaved changes are saved
- |                                         | <------------------ |
- | <-------------------------------------- | Promise resolves, times out, or user force exits
- |  "Cleaning up" Dialog closes
-App closes
+ | --------------------------------------> | short delay before dialog appears
+ |                                         |-------------------> | 
+ |                                         |                     | 
+ | <-------------------------------------- | <------------------ | Code handler resolves, times out, or user force exits
+ |  
 ```
 
 ### Interacting With Legacy Events
