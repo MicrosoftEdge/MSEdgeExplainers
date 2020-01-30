@@ -17,6 +17,29 @@ Currently, the only way a site can prompt a user before they leave is by adding 
 
 The problem is that the website can't communicate to users why they are being prompted, and the site can't offer the user a quick way to resolve the situation and then let them leave.
 
+There are some options that solve some of these issues, but they often have limitations that make them difficult or impossible to implement.
+
+| Alternative | Limitations |
+| ----------- | ---------- |
+| Service Workers | <ul>
+<li>Service workers can't access local storage or the DOM, and serializing and passing this data via `postMessage()` takes too long to run on tab close.</li>
+<li>Still requires a fallback solution in the case that the service woker isn't installed before the app is unloaded.</li>
+<li>Only one service work can be registered per origin, library apps can't use service workers if their host is as well.</li>
+</ul> |
+| Local Storage | <ul>
+<li>Does not work for users that use multiple browsers or devices.</li>
+<li>The local storage API is not well suited to storing application state data.</li>
+</ul> |
+| XHR and sendBeacon | <ul>
+<li>Doesn't work in an offline scenario.</li>
+<li>Requires the developer to maintain a public endpoint and data storage for clients.</li>
+<li>If the app is used a library, the host needs to have the public endpoint accessible.</li>
+</ul> |
+| IndexedDB | <ul>
+<li>Does not work for users with multiple browsers or devices.</li>
+<li>API is asynchronous, so it can't be used in the beforeunload handler.</li>
+</ul> |
+
 ## Use Cases
 There are many scenarios in which the web developer may want to invoke this dialog before the end user leaves the site, but some of the most common ones we've seen during our investigations are:
 
