@@ -21,7 +21,7 @@ There are some options that seem to solve the saving state on tab close issue, b
 
 | Alternative | Limitations |
 | ----------- | ---------- |
-| Service Workers | <ul><li>Service workers can't access local storage or the DOM, and serializing and passing this data via `postMessage()` can take too long to run on tab close.</li><li>Still requires a fallback solution in the case that the service woker isn't installed before the app is unloaded.</li></ul> |
+| Service Workers | <ul><li>Service workers can't access the DOM, and serializing then passing this data via `postMessage()` can take too long to run on tab close.</li></ul> |
 | XHR and sendBeacon | <ul><li>Doesn't work in an offline scenario.</li><li>Requires a public endpoint to send data to, if the application is used as a library the host needs to have this endpoint accessible.</li></ul> |
 | IndexedDB | <ul><li>Does not work for users with multiple browsers or devices.</li><li>API is asynchronous, so it can't be used in the beforeunload handler.</li></ul> |
 | Local Storage | <ul><li>Does not work for users that use multiple browsers or devices.</li><li>The local storage API is not well suited to storing application state data.</li></ul> |
