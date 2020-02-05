@@ -5,7 +5,7 @@
 -   Austin Orion
 
 ## Introduction
-Installed PWAs need a way to prompt the user and conditionally perform asynchronous operations (such as saving a file) before the user leaves the page and their state is lost.
+Installed PWAs need a way to allow developers to perform asynchronous operations (such as saving a file) and optionally show a customizable dialog before the user closes the app and their state is lost.
 
 ## Scope
 This capability should only be exposed to installed PWAs. Allowing arbitrary websites the ability to interrupt the leaving flow with a custom dialog would be a regression in browser security. This capability is important to a complete user experience, but can also be harmful and thus should only be available to sites the user has signaled that they trust via installation as a PWA.
@@ -21,7 +21,7 @@ There are some options that seem to solve the saving state on tab close issue, b
 
 | Alternative | Limitations |
 | ----------- | ---------- |
-| Service Workers | <ul><li>Service workers can't access local storage or the DOM, and serializing and passing this data via `postMessage()` can take too long to run on tab close.</li><li>Still requires a fallback solution in the case that the service woker isn't installed before the app is unloaded.</li><li>Only one service work can be registered per origin, library apps can't use service workers if the host page does.</li></ul> |
+| Service Workers | <ul><li>Service workers can't access local storage or the DOM, and serializing and passing this data via `postMessage()` can take too long to run on tab close.</li><li>Still requires a fallback solution in the case that the service woker isn't installed before the app is unloaded.</li></ul> |
 | XHR and sendBeacon | <ul><li>Doesn't work in an offline scenario.</li><li>Requires a public endpoint to send data to, if the application is used as a library the host needs to have this endpoint accessible.</li></ul> |
 | IndexedDB | <ul><li>Does not work for users with multiple browsers or devices.</li><li>API is asynchronous, so it can't be used in the beforeunload handler.</li></ul> |
 | Local Storage | <ul><li>Does not work for users that use multiple browsers or devices.</li><li>The local storage API is not well suited to storing application state data.</li></ul> |
