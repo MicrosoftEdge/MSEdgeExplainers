@@ -304,14 +304,9 @@ Although this is a potential fingerprinting issue, it only applies to installed 
 
 ## Open Questions
 
-### General
-- Would this approach negatively impact coordinate systems? Elements positioned absolutely or fixed? Coordinates returned when querying element or mouse positions via DOM APIs?
-
 ### Open Questions: Overlaying Caption Controls
-- Dialogs (e.g. permission prompts or `window.alert()`) and overlays (e.g. print or search) that are usually anchored to the top of the client area will be shifted down so that they are vertically anchored to the bottom edge of the caption controls overlay.
-  * Where should dialogs (e.g. permission prompts or `window.alert()`) and overlays (e.g. print or search) be anchored? Should they be anchored the top of the window such that they might overlay the caption controls? Or should they be anchored to the bottom of the caption controls overlay so that there is no overlap (this comes with the risk of easy spoofing)?
-  * Should the height of the title bar be customizable too?
-  * If so, a fixed set of sizes (small, medium, large) or a pixel value that is constrained by the UA?
+- Should the height of the title bar be customizable?
+- If so, a fixed set of sizes (small, medium, large) or a pixel value that is constrained by the UA?
 
 ### Open Questions: Working Around the Caption Control Overlay
 - Would it be valuable to an additional member,`window.menubar.controlsOverlay.controls` which has boolean member properties to provide information on which of the caption controls are currently being rendered? This would include `maximize`, `minimize`, `restore`, `close` among other values that are implementation specific, for example a small `dragRegion` area and `settings` menu.  
