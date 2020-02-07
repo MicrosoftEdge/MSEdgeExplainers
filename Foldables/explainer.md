@@ -14,7 +14,8 @@ Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https:
 
 - [Proposal: Window Segments Enumeration JavaScript API](#proposal-window-segments-enumeration-javascript-api)
 
-- [APIs avalibility in iframe context](#apis-avalibility-in-iframe-context)
+- [Security and Privacy](#security-and-privacy)
+	* [APIs avalibility in iframe context](#apis-avalibility-in-iframe-context)
 
 - [Examples of user experiences and solution outlines that can leverage two screens](#examples-of-user-experiences-and-solution-outlines-that-can-leverage-two-screens)
 
@@ -114,7 +115,9 @@ A user may at any point take the browser window out of spanning mode and place i
 
 This proposal doesn't aim to substitute existing APIs &mdash; the proposed development model can be summarized as requesting current window segments on interesting events and adjusting to the new presentation environment. There are no additional lifecycle proposals - the window segments are immutable and developers would request them upon common sense events (e.g. orientationchange, resize). It also  doesn't suggest how developers would use window segments to position, scale and orient content - in practical explorations developers used window segments to select the best declarative layout, not to modify layouts in script, but either would be possible.
 
-## APIs avalibility in iframe context
+## Security and Privacy
+
+### APIs avalibility in iframe context
 
 The CSS constructs and the JavaScript API will be available in `iframe` context but disabled by default for privacy and security considerations. An author may enable them using the `screen-spanning` policy; a new feature policy we are proposing that will enable authors to selectively enable the previously mentioned CSS and JavaScript constructs in iframe context. When disabled, getWindowSegments will return a single segment the size of the iframe's viewport, and the CSS environment variables will be treated as unset, and use the fallback values.
 
