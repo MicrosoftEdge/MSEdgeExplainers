@@ -72,7 +72,7 @@ try {
     let presenter = await navigator.ink.requestPresenter('pen-stroke-tip');
     let ctx = canvas.getContext('2d');
     renderer.setPresenter(presenter);
-    renderer.setCanvasContext(ctx);
+    renderer.setPresentationArea(canvas);
     window.addEventListener("pointermove", evt => {
         renderer.renderInkPoint(evt);
     });
@@ -106,8 +106,8 @@ class InkRenderer {
         this.presenter = presenter;
     }
     
-    void setCanvasContext(canvasContext) {
-        this.presenter.setPresentationArea(canvasContext);
+    void setPresentationArea(canvas) {
+        this.presenter.presentationArea = canvas;
     }
 
     renderStrokeSegment(x, y) {
@@ -136,7 +136,9 @@ interface InkPresenter {
 
 interface PenStrokeTipPresenter : InkPresenter {
     void setLastRenderedPoint(PointerEvent evt, PenStrokeStyle style);
-    void setPresentationArea(Element area);
+    
+    attribute Element presentationArea;
+    readonly attribute unsigned long expectedImprovement;
 }
 ```
 
@@ -157,7 +159,9 @@ Due to uncertainty around the correct execution when `setLastRenderedPoint` is c
 
 Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing x and y values is also an option. It was decided that a trusted pointer event would likely be the better option though, as then we can have easier access to the pointer ID and the web developer doesn't have to put extra thought into the position of the ink.
 
-Providing the presenter with the canvas context allows the boundaries of the drawing area to be determined. This is necessary so that points and ink outside of the desired area aren't drawn when points are being forwarded.
+Providing the presenter with the canvas allows the boundaries of the drawing area to be determined. This is necessary so that points and ink outside of the desired area aren't drawn when points are being forwarded. If no canvas is provided, then the root layer size will be used.
+
+The `expectedImprovement` attribute exists to provide site authors with information regarding the perceived latency improvements they can expect by using this API. The attribute will return the expected average number of milliseconds that latency will be improved by using the API, including prediction.
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WebInkEnhancement) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWebInkEnhancement%5D)
