@@ -14,6 +14,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [WebVTT Caption Styling Explainer](WebVTTCaptionStyling/explainer.md)
 
 ## Audio
+* [Audio Stream Category](AudioStreamCategory/explainer.md)
 * [Hardware-offloaded Audio Processing explainer](AudioOffload/explainer.md)
 
 ## Controls
