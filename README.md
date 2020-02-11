@@ -29,6 +29,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [TSF1 Explainer](TSF1/explainer.md)
 * [pen-action Explainer](PenAction/explainer.md)
 * [Web Ink Enhancement Explainer](WebInkEnhancement/explainer.md)
+* [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
 
 ## Fonts
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
