@@ -69,10 +69,8 @@ As Pointer events gets delivered to an app, application continues rendering ink,
 const renderer = new InkRenderer();
 
 try {
-    let presenter = await navigator.ink.requestPresenter('pen-stroke-tip');
-    let ctx = canvas.getContext('2d');
+    let presenter = await navigator.ink.requestPresenter('pen-stroke-tip', canvas);
     renderer.setPresenter(presenter);
-    renderer.setPresentationArea(canvas);
     window.addEventListener("pointermove", evt => {
         renderer.renderInkPoint(evt);
     });
@@ -105,10 +103,6 @@ class InkRenderer {
     void setPresenter(presenter) {
         this.presenter = presenter;
     }
-    
-    void setPresentationArea(canvas) {
-        this.presenter.presentationArea = canvas;
-    }
 
     renderStrokeSegment(x, y) {
         // application specific code to draw
@@ -132,9 +126,11 @@ dictionary PenStrokeStyle {
 }
 
 interface InkPresenter {
+    constructor(DOMString type, optional Element presentationArea);
 }
 
 interface PenStrokeTipPresenter : InkPresenter {
+    constructor(DOMString type, optional Element presentationArea);
     void setLastRenderedPoint(PointerEvent evt, PenStrokeStyle style);
     
     attribute Element presentationArea;
