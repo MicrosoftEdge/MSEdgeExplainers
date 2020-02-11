@@ -19,6 +19,11 @@ Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https:
 
 - [Examples of user experiences and solution outlines that can leverage two screens](#examples-of-user-experiences-and-solution-outlines-that-can-leverage-two-screens)
 
+- [Additional Links](#additional-links)
+	* [CSS Spanning media feature polyfill](https://github.com/zouhir/spanning-css-polyfill)
+	* [Window Segments Enumeration API polyfill](https://github.com/zouhir/windowsegments-polyfill)
+	* [Demo](https://foldables-emulator.netlify.com/?url=https://css-spanning.netlify.com/demo/basic/)
+
 ## Motivation:
 Web developers targeting foldable devices want to be able to effectively lay out the content in a window that spans multiple displays. However, the web platform does not yet provide the necessary primitives for building layouts that are optimized for foldable experiences.
 Developers may be able to solve this by taking a hard dependency on a specific device hardware parameters - an approach that is fragile, not scalable, and requires work duplication for each new device.
@@ -234,3 +239,11 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 	}
 }
 ```
+
+## Additional Links
+
+- [CSS Spanning media feature polyfill & example](https://github.com/zouhir/spanning-css-polyfill)
+
+- [Window Segments Enumeration API polyfill & example](https://github.com/zouhir/windowsegments-polyfill)
+
+- [Demo](https://foldables-emulator.netlify.com/?url=https://css-spanning.netlify.com/demo/basic/)
