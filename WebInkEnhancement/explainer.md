@@ -70,7 +70,9 @@ const renderer = new InkRenderer();
 
 try {
     let presenter = await navigator.ink.requestPresenter('pen-stroke-tip');
+    let ctx = canvas.getContext('2d');
     renderer.setPresenter(presenter);
+    renderer.setCanvasContext(ctx);
     window.addEventListener("pointermove", evt => {
         renderer.renderInkPoint(evt);
     });
@@ -103,6 +105,10 @@ class InkRenderer {
     void setPresenter(presenter) {
         this.presenter = presenter;
     }
+    
+    void setCanvasContext(canvasContext) {
+        this.presenter.setPresentationArea(canvasContext);
+    }
 
     renderStrokeSegment(x, y) {
         // application specific code to draw
@@ -130,6 +136,7 @@ interface InkPresenter {
 
 interface PenStrokeTipPresenter : InkPresenter {
     void setLastRenderedPoint(PointerEvent evt, PenStrokeStyle style);
+    void setPresentationArea(Element area);
 }
 ```
 
@@ -149,6 +156,8 @@ We considered a few different locations for where the method `setLastRenderedPoi
 Due to uncertainty around the correct execution when `setLastRenderedPoint` is called before setting the stroke style, and it being likely that the radius could change frequently, we decided it may be best to require all relevant properties of rendering the ink stroke in every call to `setLastRenderedPoint`.
 
 Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing x and y values is also an option. It was decided that a trusted pointer event would likely be the better option though, as then we can have easier access to the pointer ID and the web developer doesn't have to put extra thought into the position of the ink.
+
+Providing the presenter with the canvas context allows the boundaries of the drawing area to be determined. This is necessary so that points and ink outside of the desired area aren't drawn when points are being forwarded.
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WebInkEnhancement) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWebInkEnhancement%5D)
