@@ -96,16 +96,8 @@ We propose a new concept of Window Segments that represent the regions (and thei
 This proposal is primarily aimed at reactive scenarios, where an application wants to take advantage of the fact that it spans multiple displays, by virtue of the user/window manager placing it in that state. It is not designed for scenarios of proactively placing content in a separate top-level browsing context on the various displays available (this would fall under the [Window Placement API](https://github.com/spark008/window-placement/blob/master/EXPLAINER.md) or [Presentation API](https://w3c.github.io/presentation-api/)). Note that given the [Screen Enumeration API](https://github.com/spark008/screen-enumeration/blob/master/EXPLAINER.md) and existing primitives on the Web, it is possible to write JavaScript code that intersects the rectangles of the Display and window, while taking into account devicePixelRatio in order to compute the interesting layout regions of a window spanned across displays. However this may not correctly handle corner cases of future device form factors, and thus this proposal tries to centralize access to "here are the interesting parts of the screen a developer can target or consider for presenting content" as a practical starting point. 
 
 ```
-[Exposed=Window]
-interface WindowSegment {
-	readonly attribute long left;
-	readonly attribute long top;
-	readonly attribute long width;
-	readonly attribute long height;
-}
-
 partial interface Window {
-	sequence<sequence<WindowSegment>> getWindowSegments();
+	sequence<DOMRect> getWindowSegments();
 }
 ```
 
