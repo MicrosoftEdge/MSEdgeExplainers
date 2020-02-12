@@ -1,4 +1,4 @@
-# Web Ink Enhancement: Pen Stroke Tip Presentation Aided By The OS
+# Web Ink Enhancement: Delegated Ink Trail Presentation Aided By The OS
 
 Author: [Daniel Libby](https://github.com/dlibby-)
 
@@ -37,7 +37,7 @@ Desynchronized canvas is inherently unable to synchronize with other HTML conten
 ## Solution
 Operating system compositors typically introduce a frame of latency in order to compose all of the windows together. During this frame of latency, input may be delivered to an application, but that input has no chance of being displayed to the user until the next frame that the system composes, due to this pipelining. System compositors may have the capability to provide an earlier rendering of this input on behalf of the application. We propose exposing this functionality to the Web so that web applications can achieve latency parity with native applications on supported systems. This would also be a progressive enhancement in the same vein as others covered previously.
 
-In order for the system to be able to draw the subsequent points with enough fidelity that the user does not see the difference, the application needs to describe the last rendered point with sufficient details. If the system knows the last rendered point, it can produce the tip segments for input that has been delievered, but not yet rendered (or at least has not hit the end of the rendering pipenline).
+In order for the system to be able to draw the subsequent points with enough fidelity that the user does not see the difference, the application needs to describe the last rendered point with sufficient details. If the system knows the last rendered point, it can produce the segments of the ink trail for input that has been delievered, but not yet rendered (or at least has not hit the end of the rendering pipeline).
 
 ### Sample app flow
 
@@ -70,7 +70,7 @@ const renderer = new InkRenderer();
 const minExpectedImprovement = 8;
 
 try {
-    let presenter = await navigator.ink.requestPresenter('pen-stroke-tip', canvas);
+    let presenter = await navigator.ink.requestPresenter('delegated-ink-trail', canvas);
     
     // With pointerraw events and javascript prediction, we can reduce latency
     // by 16+ ms, so fallback if the InkPresenter is not capable enough to
@@ -128,7 +128,7 @@ interface Ink {
     Promise<InkPresenter> requestPresenter(DOMString type, optional Element presentationArea);
 }
 
-dictionary PenStrokeStyle {
+dictionary InkTrailStyle {
     DOMString color;
     unsigned long radius;
 }
@@ -136,8 +136,8 @@ dictionary PenStrokeStyle {
 interface InkPresenter {
 }
 
-interface PenStrokeTipPresenter : InkPresenter {
-    void setLastRenderedPoint(PointerEvent evt, PenStrokeStyle style);
+interface DelegatedInkTrailPresenter : InkPresenter {
+    void setLastRenderedPoint(PointerEvent evt, InkTrailStyle style);
     
     attribute Element presentationArea;
     readonly attribute unsigned long expectedImprovement;
