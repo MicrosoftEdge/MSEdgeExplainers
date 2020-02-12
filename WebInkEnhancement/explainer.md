@@ -67,11 +67,17 @@ As Pointer events gets delivered to an app, application continues rendering ink,
 ## Code example
 ```javascript
 const renderer = new InkRenderer();
+const minExpectedImprovement = 8;
 
 try {
     let presenter = await navigator.ink.requestPresenter('pen-stroke-tip', canvas);
-    if (presenter.expectedImprovement < 3)
+    
+    // With pointerraw events and javascript prediction, we can reduce latency
+    // by 16+ ms, so fallback if the InkPresenter is not capable enough to
+    // provide benefit
+    if (presenter.expectedImprovement < minExpectedImprovement)
         throw new Error("Little to no expected improvement, falling back");
+
     renderer.setPresenter(presenter);
     window.addEventListener("pointermove", evt => {
         renderer.renderInkPoint(evt);
@@ -146,7 +152,7 @@ Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing 
 
 Providing the presenter with the canvas allows the boundaries of the drawing area to be determined. This is necessary so that points and ink outside of the desired area aren't drawn when points are being forwarded. If no canvas is provided, then the containing viewport size will be used.
 
-The `expectedImprovement` attribute exists to provide site authors with information regarding the perceived latency improvements they can expect by using this API. The attribute will return the expected average number of milliseconds that latency will be improved by using the API, including prediction.
+The `expectedImprovement` attribute exists to provide site authors with information regarding the perceived latency improvements they can expect by using this API. The attribute will return the expected average number of milliseconds that perceived latency will be improved by using the API, including prediction.
 
 
 ## Other options
