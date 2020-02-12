@@ -67,9 +67,17 @@ As Pointer events gets delivered to an app, application continues rendering ink,
 ## Code example
 ```javascript
 const renderer = new InkRenderer();
+const minExpectedImprovement = 8;
 
 try {
-    let presenter = await navigator.ink.requestPresenter('pen-stroke-tip');
+    let presenter = await navigator.ink.requestPresenter('pen-stroke-tip', canvas);
+    
+    // With pointerraw events and javascript prediction, we can reduce latency
+    // by 16+ ms, so fallback if the InkPresenter is not capable enough to
+    // provide benefit
+    if (presenter.expectedImprovement < minExpectedImprovement)
+        throw new Error("Little to no expected improvement, falling back");
+
     renderer.setPresenter(presenter);
     window.addEventListener("pointermove", evt => {
         renderer.renderInkPoint(evt);
@@ -117,7 +125,7 @@ partial interface Navigator {
 };
 
 interface Ink {
-    Promise<InkPresenter> requestPresenter(DOMString type);
+    Promise<InkPresenter> requestPresenter(DOMString type, optional Element presentationArea);
 }
 
 dictionary PenStrokeStyle {
@@ -130,8 +138,22 @@ interface InkPresenter {
 
 interface PenStrokeTipPresenter : InkPresenter {
     void setLastRenderedPoint(PointerEvent evt, PenStrokeStyle style);
+    
+    attribute Element presentationArea;
+    readonly attribute unsigned long expectedImprovement;
 }
 ```
+
+## Interface Details
+
+Due to uncertainty around the correct execution when `setLastRenderedPoint` is called before setting the stroke style, and it being likely that the radius could change frequently, we decided it may be best to require all relevant properties of rendering the ink stroke in every call to `setLastRenderedPoint`.
+
+Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing x and y values is also an option. It was decided that a trusted pointer event would likely be the better option though, as then we can have easier access to the pointer ID and the site author doesn't have to put extra thought into the position of the ink.
+
+Providing the presenter with the canvas allows the boundaries of the drawing area to be determined. This is necessary so that points and ink outside of the desired area aren't drawn when points are being forwarded. If no canvas is provided, then the containing viewport size will be used.
+
+The `expectedImprovement` attribute exists to provide site authors with information regarding the perceived latency improvements they can expect by using this API. The attribute will return the expected average number of milliseconds that perceived latency will be improved by using the API, including prediction.
+
 
 ## Other options
 We considered a few different locations for where the method `setLastRenderedPoint` should live, but each had drawbacks:
@@ -146,9 +168,6 @@ We considered a few different locations for where the method `setLastRenderedPoi
 
   This seemed a bit too generic and scoping to a new namespace seemed appropriate.
 
-Due to uncertainty around the correct execution when `setLastRenderedPoint` is called before setting the stroke style, and it being likely that the radius could change frequently, we decided it may be best to require all relevant properties of rendering the ink stroke in every call to `setLastRenderedPoint`.
-
-Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing x and y values is also an option. It was decided that a trusted pointer event would likely be the better option though, as then we can have easier access to the pointer ID and the web developer doesn't have to put extra thought into the position of the ink.
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WebInkEnhancement) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWebInkEnhancement%5D)
