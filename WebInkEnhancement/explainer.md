@@ -1,4 +1,4 @@
-# Web Ink Enhancement: Pen Stroke Tip Presentation Aided By The OS
+# Web Ink Enhancement: Delegated Ink Trail Presentation Aided By The OS
 
 Author: [Daniel Libby](https://github.com/dlibby-)
 
@@ -37,7 +37,7 @@ Desynchronized canvas is inherently unable to synchronize with other HTML conten
 ## Solution
 Operating system compositors typically introduce a frame of latency in order to compose all of the windows together. During this frame of latency, input may be delivered to an application, but that input has no chance of being displayed to the user until the next frame that the system composes, due to this pipelining. System compositors may have the capability to provide an earlier rendering of this input on behalf of the application. We propose exposing this functionality to the Web so that web applications can achieve latency parity with native applications on supported systems. This would also be a progressive enhancement in the same vein as others covered previously.
 
-In order for the system to be able to draw the subsequent points with enough fidelity that the user does not see the difference, the application needs to describe the last rendered point with sufficient details. If the system knows the last rendered point, it can produce the tip segments for input that has been delievered, but not yet rendered (or at least has not hit the end of the rendering pipenline).
+In order for the system to be able to draw the subsequent points with enough fidelity that the user does not see the difference, the application needs to describe the last rendered point with sufficient details. If the system knows the last rendered point, it can produce the segments of the ink trail for input that has been delievered, but not yet rendered (or at least has not hit the end of the rendering pipeline).
 
 ### Sample app flow
 
@@ -67,9 +67,17 @@ As Pointer events gets delivered to an app, application continues rendering ink,
 ## Code example
 ```javascript
 const renderer = new InkRenderer();
+const minExpectedImprovement = 8;
 
 try {
-    let presenter = await navigator.ink.requestPresenter('pen-stroke-tip');
+    let presenter = await navigator.ink.requestPresenter('delegated-ink-trail', canvas);
+    
+    // With pointerraw events and javascript prediction, we can reduce latency
+    // by 16+ ms, so fallback if the InkPresenter is not capable enough to
+    // provide benefit
+    if (presenter.expectedImprovement < minExpectedImprovement)
+        throw new Error("Little to no expected improvement, falling back");
+
     renderer.setPresenter(presenter);
     window.addEventListener("pointermove", evt => {
         renderer.renderInkPoint(evt);
@@ -94,15 +102,14 @@ class InkRenderer {
             this.renderStrokeSegment(event.x, event.y);
         });
 
-        if (this.presenter)
-            this.presenter.setLastRenderedPoint(evt.x, evt.y);
+        if (this.presenter) {
+            this.presenterStyle = { color: "rgba(0, 0, 255, 0.5)", radius: 4 * evt.pressure };
+            this.presenter.setLastRenderedPoint(evt, this.presenterStyle);
+        }
     }
 
     void setPresenter(presenter) {
-        this.presenterStyle = { color: "rgba(0, 0, 255, 0.5)", radius: 2 };
-
         this.presenter = presenter;
-        this.presenter.setPenStrokeStyle(this.presenterStyle);
     }
 
     renderStrokeSegment(x, y) {
@@ -118,10 +125,10 @@ partial interface Navigator {
 };
 
 interface Ink {
-    Promise<InkPresenter> requestPresenter(DOMString type);
+    Promise<InkPresenter> requestPresenter(DOMString type, optional Element presentationArea);
 }
 
-dictionary PenStrokeStyle {
+dictionary InkTrailStyle {
     DOMString color;
     unsigned long radius;
 }
@@ -129,11 +136,24 @@ dictionary PenStrokeStyle {
 interface InkPresenter {
 }
 
-interface PenStrokeTipPresenter : InkPresenter {
-    void setPenStrokeStyle(PenStrokeStyle style);
-    void setLastRenderedPoint(Number x, Number y);
+interface DelegatedInkTrailPresenter : InkPresenter {
+    void setLastRenderedPoint(PointerEvent evt, InkTrailStyle style);
+    
+    attribute Element presentationArea;
+    readonly attribute unsigned long expectedImprovement;
 }
 ```
+
+## Interface Details
+
+Due to uncertainty around the correct execution when `setLastRenderedPoint` is called before setting the stroke style, and it being likely that the radius could change frequently, we decided it may be best to require all relevant properties of rendering the ink stroke in every call to `setLastRenderedPoint`.
+
+Instead of providing `setLastRenderedPoint` with a PointerEvent, just providing x and y values is also an option. It was decided that a trusted pointer event would likely be the better option though, as then we can have easier access to the pointer ID and the site author doesn't have to put extra thought into the position of the ink.
+
+Providing the presenter with the canvas allows the boundaries of the drawing area to be determined. This is necessary so that points and ink outside of the desired area aren't drawn when points are being forwarded. If no canvas is provided, then the containing viewport size will be used.
+
+The `expectedImprovement` attribute exists to provide site authors with information regarding the perceived latency improvements they can expect by using this API. The attribute will return the expected average number of milliseconds that perceived latency will be improved by using the API, including prediction.
+
 
 ## Other options
 We considered a few different locations for where the method `setLastRenderedPoint` should live, but each had drawbacks:
@@ -148,7 +168,6 @@ We considered a few different locations for where the method `setLastRenderedPoi
 
   This seemed a bit too generic and scoping to a new namespace seemed appropriate.
 
-Instead of a concrete type, perhaps the `PenStrokeStyle` should be more generic in such a way that presenters can describe their capabilities via a dictionary. I'm not quite sure what the most ergonomic way of exposing this would be.
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WebInkEnhancement) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BWebInkEnhancement%5D)

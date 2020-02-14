@@ -4,7 +4,7 @@
 
 This repo is intended to be a starting place for explainers originating from the Microsoft Edge team (and an archive of the same explainers if/when they migrate to longer-term homes in other repositories such as W3C Community Group/ Working Group or WHATWG workstream repositories).
 
-We welcome public discussion in issues on these explainers. Thanks for your interest! 
+We welcome public discussion in issues on these explainers. Thanks for your interest! Please [file an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new) or submit a PR with your feedback. Note that we try to label issues with the explainer they relate to for easy filtering.
 
 ## Accessibility
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
@@ -14,6 +14,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [WebVTT Caption Styling Explainer](WebVTTCaptionStyling/explainer.md)
 
 ## Audio
+* [Audio Stream Category](AudioStreamCategory/explainer.md)
 * [Hardware-offloaded Audio Processing explainer](AudioOffload/explainer.md)
 
 ## Controls
@@ -28,6 +29,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [TSF1 Explainer](TSF1/explainer.md)
 * [pen-action Explainer](PenAction/explainer.md)
 * [Web Ink Enhancement Explainer](WebInkEnhancement/explainer.md)
+* [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
 
 ## Fonts
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
@@ -53,6 +55,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
 * [Custom Dialog on Close Explainer](CustomDialogOnClose/explainer.md)
 * [Title Bar Customization Explainer](TitleBarCustomization/explainer.md)
+* [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
 
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)

@@ -14,9 +14,15 @@ Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https:
 
 - [Proposal: Window Segments Enumeration JavaScript API](#proposal-window-segments-enumeration-javascript-api)
 
-- [APIs avalibility in iframe context](#apis-avalibility-in-iframe-context)
+- [Security and Privacy](#security-and-privacy)
+	* [APIs avalibility in iframe context](#apis-avalibility-in-iframe-context)
 
 - [Examples of user experiences and solution outlines that can leverage two screens](#examples-of-user-experiences-and-solution-outlines-that-can-leverage-two-screens)
+
+- [Additional Links](#additional-links)
+	* [CSS Spanning media feature polyfill & example](https://github.com/zouhir/spanning-css-polyfill)
+	* [Window Segments Enumeration API polyfill & example](https://github.com/zouhir/windowsegments-polyfill)
+	* [Simple CSS spanning media feature demo in a web-based device emulator](https://foldables-emulator.netlify.com/?url=https://css-spanning.netlify.com/demo/basic/)
 
 ## Motivation:
 Web developers targeting foldable devices want to be able to effectively lay out the content in a window that spans multiple displays. However, the web platform does not yet provide the necessary primitives for building layouts that are optimized for foldable experiences.
@@ -95,26 +101,20 @@ We propose a new concept of Window Segments that represent the regions (and thei
 This proposal is primarily aimed at reactive scenarios, where an application wants to take advantage of the fact that it spans multiple displays, by virtue of the user/window manager placing it in that state. It is not designed for scenarios of proactively placing content in a separate top-level browsing context on the various displays available (this would fall under the [Window Placement API](https://github.com/spark008/window-placement/blob/master/EXPLAINER.md) or [Presentation API](https://w3c.github.io/presentation-api/)). Note that given the [Screen Enumeration API](https://github.com/spark008/screen-enumeration/blob/master/EXPLAINER.md) and existing primitives on the Web, it is possible to write JavaScript code that intersects the rectangles of the Display and window, while taking into account devicePixelRatio in order to compute the interesting layout regions of a window spanned across displays. However this may not correctly handle corner cases of future device form factors, and thus this proposal tries to centralize access to "here are the interesting parts of the screen a developer can target or consider for presenting content" as a practical starting point. 
 
 ```
-[Exposed=Window]
-interface WindowSegment {
-	readonly attribute long left;
-	readonly attribute long top;
-	readonly attribute long width;
-	readonly attribute long height;
-}
-
 partial interface Window {
-	sequence<sequence<WindowSegment>> getWindowSegments();
+	sequence<DOMRect> getWindowSegments();
 }
 ```
 
-The value returned from the `getWindowSegments()` API will be a grid of segments, based on the logical orientation of the segments, relative to the orientation of ths OS/window manager. Following the above examples, when in the `single-fold-vertical` state, getWindowSegments will return a structure like the following: `[ [ segment1, segment2] ]`, whereas `single-fold-vertical` will return `[ [segment1] , [segment2] ]`.
+The value returned from the `getWindowSegments()` API will be an array of WindowSegment objects, based on the data returned for each WindowSegment, developers will be able to infer the number of hinges available as well as the hinge orientation. Following the above examples, when in the `single-fold-vertical` state, getWindowSegments will return an array of 2 WindowSegments where the `top` property for each one is identical and equals 0, whereas `single-fold-horizontal` will return 2 WindowSegments with the `left` property being the identical one.
 
 A user may at any point take the browser window out of spanning mode and place it on one of the screens or vice-versa, in those cases the window resize event will fire and authors can query and get the number of available screen segments.
 
 This proposal doesn't aim to substitute existing APIs &mdash; the proposed development model can be summarized as requesting current window segments on interesting events and adjusting to the new presentation environment. There are no additional lifecycle proposals - the window segments are immutable and developers would request them upon common sense events (e.g. orientationchange, resize). It also  doesn't suggest how developers would use window segments to position, scale and orient content - in practical explorations developers used window segments to select the best declarative layout, not to modify layouts in script, but either would be possible.
 
-## APIs avalibility in iframe context
+## Security and Privacy
+
+### APIs avalibility in iframe context
 
 The CSS constructs and the JavaScript API will be available in `iframe` context but disabled by default for privacy and security considerations. An author may enable them using the `screen-spanning` policy; a new feature policy we are proposing that will enable authors to selectively enable the previously mentioned CSS and JavaScript constructs in iframe context. When disabled, getWindowSegments will return a single segment the size of the iframe's viewport, and the CSS environment variables will be treated as unset, and use the fallback values.
 
@@ -239,3 +239,11 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 	}
 }
 ```
+
+## Additional Links
+
+- [CSS Spanning media feature polyfill & example](https://github.com/zouhir/spanning-css-polyfill)
+
+- [Window Segments Enumeration API polyfill & example](https://github.com/zouhir/windowsegments-polyfill)
+
+- [Simple CSS spanning media feature demo in a web-based device emulator](https://foldables-emulator.netlify.com/?url=https://css-spanning.netlify.com/demo/basic/)
