@@ -127,19 +127,13 @@ For privacy, the `controlsOverlay` will not be accessible to iframes inside of a
 Whenever the overlay is resized, a `resize` event will be fired on the `window` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
 
 ### Defining Draggable Regions in Web Content
-Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. 
+Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. The proposed solution is to standardize the existing CSS property: `-webkit-app-region`. 
 
-#### Possible Solutions: Standardizing CSS app-region
 Chromium based browsers have a prefixed, non-standard CSS property `-webkit-app-region: drag` and `-webkit-app-region: no-drag` that allows developers to markup rectangular regions of their content as draggable. This property is used for full customization of the title bar for Electron based applications [referenced here](https://electronjs.org/docs/api/frameless-window#draggable-region).
 
 Per the Electron documentation, text selection can accidentally occur within draggable regions, so it's recommended to also use the CSS property `user-select: none` on the element to avoid accidental text selection. 
 
 Both of these webkit prefixed properties have been shipping in Chromium for some years and could be leveraged by the UA to provide a solution to this problem. This would require standardizing the app-region property through the CSS working group. 
-
-#### Possible Solutions: Declare a CSS Selector for draggable regions
-Within the app manifest file, the developer could declare two selectors that the UA could then use to identify areas that should be treated as a drag and no-drag regions - `DragSelector: dragMe` and `NoDragSelector: dontDragMe`. 
-
-Classes with the `dragMe` selector would then be treated as draggable and have pointer events handled by the host operating environment as drag events on the window itself. Classes with `dontDragMe` will not be draggable, even if they're nested inside of an element with the `dragMe` class.
 
 ### Resulting Changes in Browser
 
