@@ -71,7 +71,7 @@ None of this area is available to application developers. This is a problem wher
 
 The solution proposed in this explainer is in multiple parts
 1. A new member for the web app manifest - `caption_controls_only`
-2. New APIs for developers to query the bounding rects and other states of the UA provided caption controls overlay which will overlay into the web content area through a new object on the `Window.menubar` property called `controlsOverlay`
+2. New APIs for developers to query the bounding rects and other states of the UA provided caption controls overlay which will overlay into the web content area through a new object on the `window.navigator` property called `controlsOverlay`
 3. A standards-based way for developers to define system drag regions on their content
 
 ### Overlaying Caption Controls
@@ -116,7 +116,7 @@ In the example of Windows operating systems, caption controls are either drawn o
 
 The bounding rectangle of the caption controls overlay will need to be made available to the web content, as well as a property that describes the visibility of the overlay.
 
-To accommodate these requirements, this explainer proposes a new object on the `Window.menubar` property called `controlsOverlay`.
+To accommodate these requirements, this explainer proposes a new object on the `window.navigator` property called `controlsOverlay`.
 
 `controlsOverlay` would make available the following objects:
 * `getBoundingRect()` which would return a [`DOMRectReadOnly`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly) that represents the area under the caption controls overlay. Interactive web content should not be displayed beneath the overlay.
@@ -127,19 +127,13 @@ For privacy, the `controlsOverlay` will not be accessible to iframes inside of a
 Whenever the overlay is resized, a `resize` event will be fired on the `window` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
 
 ### Defining Draggable Regions in Web Content
-Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. 
+Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. The proposed solution is to standardize the existing CSS property: `-webkit-app-region`. 
 
-#### Possible Solutions: Standardizing CSS app-region
 Chromium based browsers have a prefixed, non-standard CSS property `-webkit-app-region: drag` and `-webkit-app-region: no-drag` that allows developers to markup rectangular regions of their content as draggable. This property is used for full customization of the title bar for Electron based applications [referenced here](https://electronjs.org/docs/api/frameless-window#draggable-region).
 
 Per the Electron documentation, text selection can accidentally occur within draggable regions, so it's recommended to also use the CSS property `user-select: none` on the element to avoid accidental text selection. 
 
 Both of these webkit prefixed properties have been shipping in Chromium for some years and could be leveraged by the UA to provide a solution to this problem. This would require standardizing the app-region property through the CSS working group. 
-
-#### Possible Solutions: Declare a CSS Selector for draggable regions
-Within the app manifest file, the developer could declare two selectors that the UA could then use to identify areas that should be treated as a drag and no-drag regions - `DragSelector: dragMe` and `NoDragSelector: dontDragMe`. 
-
-Classes with the `dragMe` selector would then be treated as draggable and have pointer events handled by the host operating environment as drag events on the window itself. Classes with `dontDragMe` will not be draggable, even if they're nested inside of an element with the `dragMe` class.
 
 ### Resulting Changes in Browser
 
@@ -266,11 +260,11 @@ After styling the `titleBar`, the top inset of the `mainContent` needs to be set
 Since these position values are scaled when resizing the browser window--but the caption control overlay will not--each of these values will need to be reset each time the window is resized. 
 ```javascript
 const resizeTitleBar = () => {
-  if (!window.menubar.controlOverlay) {
+  if (!window.navigator.controlsOverlay) {
     return;
   }
   
-  const overlay = window.menubar.controlOverlay.getBoundingRect();
+  const overlay = window.navigator.controlsOverlay.getBoundingRect();
 
   const titleBar = document.getElementById('titleBar');
   titleBar.style.left = `${overlay.x ? 0 : overlay.width}px`;
@@ -298,7 +292,7 @@ In RTL configured browsers, this layout is flipped such that the origin text is 
 
 ## Privacy Considerations
 
-Enabling the caption control overlay and draggable regions do not pose considerable privacy concerns other than feature detection. However, due to differing sizes and positions of the caption control buttons across operating systems, the JavaScript API for `window.menubar.controlsOverlay.getBoundingRect()` will return a rect whose position and dimensions will reveal information about the operating system upon which the browser is running. Currently, developers can already discover the OS from the user agent string, but due to fingerprinting concerns there is discussion about [freezing the UA string and unifying OS versions](https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ). We would like to work with the community to understand how frequently the size of the caption controls overlay changes across platforms, as we believe that these are fairly stable across OS versions and thus would not be useful for observing minor OS versions.
+Enabling the caption control overlay and draggable regions do not pose considerable privacy concerns other than feature detection. However, due to differing sizes and positions of the caption control buttons across operating systems, the JavaScript API for `window.navigator.controlsOverlay.getBoundingRect()` will return a rect whose position and dimensions will reveal information about the operating system upon which the browser is running. Currently, developers can already discover the OS from the user agent string, but due to fingerprinting concerns there is discussion about [freezing the UA string and unifying OS versions](https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ). We would like to work with the community to understand how frequently the size of the caption controls overlay changes across platforms, as we believe that these are fairly stable across OS versions and thus would not be useful for observing minor OS versions.
 
 Although this is a potential fingerprinting issue, it only applies to installed PWAs that use the custom title bar feature and does not apply to general browser usage. Additionally, the `controlsOverlay` API will not be available to iframes embedded inside of a PWA.
 
@@ -309,7 +303,7 @@ Although this is a potential fingerprinting issue, it only applies to installed 
 - If so, a fixed set of sizes (small, medium, large) or a pixel value that is constrained by the UA?
 
 ### Open Questions: Working Around the Caption Control Overlay
-- Would it be valuable to an additional member,`window.menubar.controlsOverlay.controls` which has boolean member properties to provide information on which of the caption controls are currently being rendered? This would include `maximize`, `minimize`, `restore`, `close` among other values that are implementation specific, for example a small `dragRegion` area and `settings` menu.  
+- Would it be valuable to an additional member,`window.navigator.controlsOverlay.controls` which has boolean member properties to provide information on which of the caption controls are currently being rendered? This would include `maximize`, `minimize`, `restore`, `close` among other values that are implementation specific, for example a small `dragRegion` area and `settings` menu.  
 
 ### Open Questions: Defining Draggable Regions in Web Content
 - Different operating systems could have requirements for draggable regions. One approach could be to have a drag region that runs 100% width but only comes down a small number of pixels from the top of the frame. This could provide a consistent area for end users to grab and drag at the cost of reducing the addressable real estate for web content. Is this desirable?
