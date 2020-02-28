@@ -54,6 +54,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Run on OS Login Explainer](RunOnLogin/Explainer.md)
 * [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
 * [Custom Dialog on Close Explainer](CustomDialogOnClose/explainer.md)
+* [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md)
 * [Title Bar Customization Explainer](TitleBarCustomization/explainer.md)
 * [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
 
