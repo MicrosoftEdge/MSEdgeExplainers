@@ -1,3 +1,8 @@
+
+# MOVED: This Explainer is no longer maintained in this repo. Please follow: https://github.com/WICG/ink-enhancement/blob/master/README.md to find the current version. Thanks!
+
+---
+
 # Web Ink Enhancement: Delegated Ink Trail Presentation Aided By The OS
 
 Author: [Daniel Libby](https://github.com/dlibby-)
