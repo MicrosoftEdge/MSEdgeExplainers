@@ -1,0 +1,1654 @@
+{
+    "openrpc": "1.1.10",
+    "info": {
+        "title": "WebDriver",
+        "version": "2.0",
+        "contact": {
+            "name": "Browser Testing and Tools Working Group",
+            "url": "https://w3c.github.io/webdriver/",
+            "email": "public-browser-tools-testing@w3.org"
+        }
+    },
+    "methods": [
+        {
+            "name": "subscribe",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "summary": "Enable notifications for an event.",
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "event",
+                    "summary": "The name of the event to subscribe to. See Events for a full listing.",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "unsubscribe",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "summary": "Disable notifications for an event.",
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "event",
+                    "summary": "The name of the event to unsubscribe from. See Events for a full listing.",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "closeSession",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "getTimeouts",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [],
+            "result": {
+                "name": "GetTimeoutsResult",
+                "required": true,
+                "schema": {
+                    "title": "GetTimeoutsResult",
+                    "type": "object",
+                    "properties": {
+                        "script": { "oneOf": [{ "type": "number" }, { "type": "null" }] },
+                        "pageLoad": { "type": "number" },
+                        "timeout": { "type": "number" }
+                    },
+                    "required": ["script", "pageLoad", "timeout"]
+                }
+            }
+        },
+        {
+            "name": "setTimeouts",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "timeouts",
+                    "required": true,
+                    "schema": {
+                        "title": "Timeouts",
+                        "type": "object",
+                        "properties": {
+                            "script": { "oneOf": [{ "type": "number" }, { "type": "null" }] },
+                            "pageLoad": { "type": "number" },
+                            "timeout": { "type": "number" }
+                        }
+                    }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "navigateTo",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "url",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "getCurrentUrl",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": {
+                "name": "GetCurrentUrlResult",
+                "required": true,
+                "schema": {
+                    "title": "GetCurrentUrlResult",
+                    "type": "object",
+                    "properties": {
+                        "url": { "type": "string" }
+                    },
+                    "required": ["url"]
+                }
+            }
+        },
+        {
+            "name": "back",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "forward",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "refresh",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "getTitle",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": {
+                "name": "GetTitleResult",
+                "required": true,
+                "schema": {
+                    "title": "GetTitleResult",
+                    "type": "object",
+                    "properties": {
+                        "title": { "type": "string" }
+                    },
+                    "required": ["title"]
+                }
+            }
+        },
+        {
+            "name": "getTargetInfo",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": {
+                "name": "GetTargetInfoResult",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "info": { "$ref": "#/components/schemas/TargetInfo" }
+                    },
+                    "required": ["targetInfo"]
+                }
+            }
+        },
+        {
+            "name": "closeTarget",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "getTargets",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [],
+            "result": {
+                "name": "GetTargetsResult",
+                "schema": {
+                    "title": "GetTargetsResult",
+                    "type": "object",
+                    "properties": {
+                        "targets": {
+                            "type": "array",
+                            "items": { "$ref": "#/components/schemas/TargetInfo" }
+                        }
+                    },
+                    "required": ["targets"]
+                }
+            }
+        },
+        {
+            "name": "createTarget",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "type",
+                    "required": false,
+                    "schema": { "$ref": "#/components/schemas/TargetTypeHint" }
+                }
+            ],
+            "result": {
+                "name": "CreateTargetResult",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "target": { "$ref": "#/components/schemas/TargetId" },
+                        "type": { "$ref": "#/components/schemas/TargetTypeHint" }
+                    },
+                    "required": ["target", "type"]
+                }
+            }
+        },
+        {
+            "name": "getBrowsingContexts",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": {
+                "name": "GetBrowsingContextsResult",
+                "required": true,
+                "schema": {
+                    "title": "GetBrowsingContextsResult",
+                    "type": "object",
+                    "properties": {
+                        "browsingContexts": {
+                            "type": "array",
+                            "items": { "$ref": "#/components/schemas/BrowsingContextInfo" }
+                        }
+                    },
+                    "required": ["browsingContexts"]
+                }
+            }
+        },
+        {
+            "name": "getFrameOwnerElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": {
+                "name": "GetFrameOwnerElementResult",
+                "required": true,
+                "schema": {
+                    "title": "GetFrameOwnerElementResult",
+                    "type": "object",
+                    "properties": {
+                        "element": { "$ref": "#/components/schemas/WebElementReference" },
+                        "browsingContext": { "$ref": "#/components/schemas/BrowsingContextId" }
+                    },
+                    "required": ["element", "browsingContext"]
+                }
+            }
+        },
+        {
+            "name": "getWindowRect",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": {
+                "name": "GetWindowRectResult",
+                "required": true,
+                "schema": {
+                    "title": "GetWindowRectResult",
+                    "type": "object",
+                    "properties": {
+                        "rect": { "$ref": "#/components/schemas/Rect" }
+                    },
+                    "required": ["rect"]
+                }
+            }
+        },
+        {
+            "name": "setWindowRect",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                },
+                {
+                    "name": "rect",
+                    "required": true,
+                    "schema": {
+                        "type": "object",
+                        "title": "Rect",
+                        "properties": {
+                            "x": { "type": "integer" },
+                            "y": { "type": "integer" },
+                            "width": { "type": "integer" },
+                            "height": { "type": "integer" }
+                        }
+                    }
+                }
+            ],
+            "result": {
+                "name": "SetWindowRectResult",
+                "required": true,
+                "schema": {
+                    "title": "SetWindowRectResult",
+                    "type": "object",
+                    "properties": {
+                        "rect": { "$ref": "#/components/schemas/Rect" }
+                    },
+                    "required": ["rect"]
+                }
+            }
+        },
+        {
+            "name": "maximizeWindow",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": {
+                "name": "MaximizeWindowResult",
+                "required": true,
+                "schema": {
+                    "title": "MaximizeWindowResult",
+                    "type": "object",
+                    "properties": {
+                        "rect": { "$ref": "#/components/schemas/Rect" }
+                    },
+                    "required": ["rect"]
+                }
+            }
+        },
+        {
+            "name": "minimizeWindow",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": {
+                "name": "MinimizeWindowResult",
+                "required": true,
+                "schema": {
+                    "title": "MinimizeWindowResult",
+                    "type": "object",
+                    "properties": {
+                        "rect": { "$ref": "#/components/schemas/Rect" }
+                    },
+                    "required": ["rect"]
+                }
+            }
+        },
+        {
+            "name": "fullscreenWindow",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": {
+                "name": "FullScreenWindowResult",
+                "required": true,
+                "schema": {
+                    "title": "FullScreenWindowResult",
+                    "type": "object",
+                    "properties": {
+                        "rect": { "$ref": "#/components/schemas/Rect" }
+                    },
+                    "required": ["rect"]
+                }
+            }
+        },
+        {
+            "name": "getActiveElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": {
+                "name": "GetActiveElementResult",
+                "required": true,
+                "schema": {
+                    "title": "GetActiveElementResult",
+                    "type": "object",
+                    "properties": {
+                        "element": { "$ref": "#/components/schemas/WebElementReference" }
+                    },
+                    "required": ["element"]
+                }
+            }
+        },
+        {
+            "name": "findElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "using",
+                    "required": true,
+                    "schema": { "type": "string" }
+                },
+                {
+                    "name": "value",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": {
+                "name": "FindElementResult",
+                "required": true,
+                "schema": {
+                    "title": "FindElementResult",
+                    "type": "object",
+                    "properties": {
+                        "element": { "$ref": "#/components/schemas/WebElementReference" }
+                    },
+                    "required": ["element"]
+                }
+            }
+        },
+        {
+            "name": "findElements",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "using",
+                    "required": true,
+                    "schema": { "type": "string" }
+                },
+                {
+                    "name": "value",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": {
+                "name": "FindElementsResult",
+                "required": true,
+                "schema": {
+                    "title": "FindElementsResult",
+                    "type": "object",
+                    "properties": {
+                        "elements": {
+                            "type": "array",
+                            "items": { "$ref": "#/components/schemas/WebElementReference" }
+                        }
+                    },
+                    "required": ["elements"]
+                }
+            }
+        },
+        {
+            "name": "findElementFromElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                },
+                {
+                    "name": "using",
+                    "required": true,
+                    "schema": { "type": "string" }
+                },
+                {
+                    "name": "value",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": {
+                "name": "FindElementFromElementResult",
+                "required": true,
+                "schema": {
+                    "title": "FindElementFromElementResult",
+                    "type": "object",
+                    "properties": {
+                        "element": { "$ref": "#/components/schemas/WebElementReference" }
+                    },
+                    "required": ["element"]
+                }
+            }
+        },
+        {
+            "name": "findElementsFromElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                },
+                {
+                    "name": "using",
+                    "required": true,
+                    "schema": { "type": "string" }
+                },
+                {
+                    "name": "value",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": {
+                "name": "FindElementsFromElementResult",
+                "required": true,
+                "schema": {
+                    "title": "FindElementsFromElementResult",
+                    "type": "object",
+                    "properties": {
+                        "elements": {
+                            "type": "array",
+                            "items": { "$ref": "#/components/schemas/WebElementReference" }
+                        }
+                    },
+                    "required": ["elements"]
+                }
+            }
+        },
+        {
+            "name": "isElementSelected",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "IsElementSelectedResult",
+                "required": true,
+                "schema": {
+                    "title": "IsElementSelectedResult",
+                    "type": "object",
+                    "properties": {
+                        "selected": { "type": "boolean" }
+                    },
+                    "required": ["selected"]
+                }
+            }
+        },
+        {
+            "name": "getElementAttribute",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "GetElementAttributeResult",
+                "required": true,
+                "schema": {
+                    "title": "GetElementAttributeResult",
+                    "type": "object",
+                    "properties": {
+                        "value": { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+                    },
+                    "required": ["value"]
+                }
+            }
+        },
+        {
+            "name": "getElementProperty",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "GetElementPropertyResult",
+                "required": true,
+                "schema": {
+                    "title": "GetElementPropertyResult",
+                    "type": "object",
+                    "properties": {
+                        "value": { "$ref": "#/components/schemas/JavaScriptValue" }
+                    },
+                    "required": ["value"]
+                }
+            }
+        },
+        {
+            "name": "getElementCssValue",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "GetElementCssValueResult",
+                "required": true,
+                "schema": {
+                    "title": "GetElementCssValueResult",
+                    "type": "object",
+                    "properties": {
+                        "value": { "type": "string" }
+                    },
+                    "required": ["value"]
+                }
+            }
+        },
+        {
+            "name": "getElementText",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "GetElementTextResult",
+                "required": true,
+                "schema": {
+                    "title": "GetElementTextResult",
+                    "type": "object",
+                    "properties": {
+                        "text": { "type": "string" }
+                    },
+                    "required": ["text"]
+                }
+            }
+        },
+        {
+            "name": "getElementTagName",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "GetElementTextResult",
+                "required": true,
+                "schema": {
+                    "title": "GetElementTextResult",
+                    "type": "object",
+                    "properties": {
+                        "tagName": { "type": "string" }
+                    },
+                    "required": ["tagName"]
+                }
+            }
+        },
+        {
+            "name": "getElementRect",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "GetElementRectResult",
+                "required": true,
+                "schema": {
+                    "title": "GetElementRectResult",
+                    "type": "object",
+                    "properties": {
+                        "rect": { "$ref": "#/components/schemas/Rect" }
+                    },
+                    "required": ["rect"]
+                }
+            }
+        },
+        {
+            "name": "isElementEnabled",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "IsElementEnabledResult",
+                "required": true,
+                "schema": {
+                    "title": "IsElementEnabledResult",
+                    "type": "object",
+                    "properties": {
+                        "enabled": { "type": "boolean" }
+                    },
+                    "required": ["enabled"]
+                }
+            }
+        },
+        {
+            "name": "clickElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "clearElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "sendKeysToElement",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                },
+                {
+                    "name": "text",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "getPageSource",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": {
+                "name": "GetPageSourceResult",
+                "required": true,
+                "schema": {
+                    "title": "GetPageSourceResult",
+                    "type": "object",
+                    "properties": {
+                        "source": { "type": "string" }
+                    },
+                    "required": ["source"]
+                }
+            }
+        },
+        {
+            "name": "getScriptContexts",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": {
+                "name": "GetScriptContextsResult",
+                "required": true,
+                "schema": {
+                    "title": "GetScriptContextsResult",
+                    "type": "object",
+                    "properties": {
+                        "scriptContexts": {
+                            "type": "array",
+                            "items": { "$ref": "#/components/schemas/ScriptContextInfo" }
+                        }
+                    },
+                    "required": ["scriptContexts"]
+                }
+            }
+        },
+        {
+            "name": "executeScript",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                },
+                {
+                    "name": "script",
+                    "required": true,
+                    "schema": { "type": "string" }
+                },
+                {
+                    "name": "args",
+                    "required": true,
+                    "schema": { "type": "array", "items": { "$ref": "#/components/schemas/JavaScriptValue" } }
+                }
+            ],
+            "result": {
+                "name": "ExecuteScriptResult",
+                "required": true,
+                "schema": {
+                    "title": "ExecuteScriptResult",
+                    "type": "object",
+                    "properties": {
+                        "result": { "$ref": "#/components/schemas/JavaScriptValue" }
+                    },
+                    "required": ["result"]
+                }
+            }
+        },
+        {
+            "name": "executeAsyncScript",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                },
+                {
+                    "name": "script",
+                    "required": true,
+                    "schema": { "type": "string" }
+                },
+                {
+                    "name": "args",
+                    "required": true,
+                    "schema": { "type": "array", "items": { "$ref": "#/components/schemas/JavaScriptValue" } }
+                }
+            ],
+            "result": {
+                "name": "ExecuteAsyncScriptResult",
+                "required": true,
+                "schema": {
+                    "title": "ExecuteAsyncScriptResult",
+                    "type": "object",
+                    "properties": {
+                        "result": { "$ref": "#/components/schemas/JavaScriptValue" }
+                    },
+                    "required": ["result"]
+                }
+            }
+        },
+        {
+            "name": "getAllCookies",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": {
+                "name": "GetAllCookiesResult",
+                "required": true,
+                "schema": {
+                    "title": "GetAllCookiesResult",
+                    "type": "object",
+                    "properties": {
+                        "cookies": { "type": "array", "items": { "$ref": "#/components/schemas/Cookie" } }
+                    },
+                    "required": ["cookies"]
+                }
+            }
+        },
+        {
+            "name": "getNamedCookie",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "name",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": {
+                "name": "GetNamedCookieResult",
+                "required": true,
+                "schema": {
+                    "title": "GetNamedCookieResult",
+                    "type": "object",
+                    "properties": {
+                        "cookie": { "$ref": "#/components/schemas/Cookie" }
+                    },
+                    "required": ["cookie"]
+                }
+            }
+        },
+        {
+            "name": "addCookie",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "cookie",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/Cookie" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "deleteCookie",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "name",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "deleteAllCookies",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "performActions",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "actions",
+                    "required": true,
+                    "schema": {
+                        "type": "array",
+                        "items": { "$ref": "#/components/schemas/ActionSequence" }
+                    }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "releaseActions",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "alertOpened",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "type",
+                    "required": true,
+                    "schema": { "type": "string", "enum": ["alert", "confirm", "prompt"] }
+                },
+                {
+                    "name": "message",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "dismissAlert",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "acceptAlert",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "sendAlertText",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "text",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "takeScreenshot",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": {
+                "name": "TakeScreenshotResult",
+                "required": true,
+                "schema": {
+                    "title": "TakeScreenshotResult",
+                    "type": "object",
+                    "properties": {
+                        "screenshot": { "type": "string" }
+                    }
+                }
+            }
+        },
+        {
+            "name": "takeElementScreenshot",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                {
+                    "name": "element",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/WebElementReference" }
+                }
+            ],
+            "result": {
+                "name": "TakeElementScreenshotResult",
+                "required": true,
+                "schema": {
+                    "title": "TakeElementScreenshotResult",
+                    "type": "object",
+                    "properties": {
+                        "screenshot": { "type": "string" }
+                    }
+                }
+            }
+        },
+        {
+            "name": "targetCreated",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetInfo" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "targetClosed",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "target",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/TargetId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "scriptContextCreated",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextInfo" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "scriptContextClosed",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "browsingContextAttached",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextInfo" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "browsingContextDetached",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "browsingContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BrowsingContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "registerBootstrapScript",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "match",
+                    "required": true,
+                    "schema": { "type": "array", "items": { "$ref": "#/components/schemas/BootstrapScriptMatchRule" } }
+                },
+                {
+                    "name": "script",
+                    "required": true,
+                    "schema": { "type": "string" }
+                }
+            ],
+            "result": {
+                "name": "RegisterBootstrapScriptResult",
+                "required": true,
+                "schema": {
+                    "title": "RegisterBootstrapScriptResult",
+                    "type": "object",
+                    "properties": {
+                        "bootstrapScriptId": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                    }
+                }
+            }
+        },
+        {
+            "name": "unregisterBootstrapScript",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "bootstrapScript",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "postMessageToBootstrapScript",
+            "tags": [{ "$ref": "#/components/tags/Command" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "bootstrapScript",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                },
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                },
+                {
+                    "name": "data",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/JavaScriptValue" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "messageReceivedFromBootstrapScript",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "bootstrapScript",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                },
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                },
+                {
+                    "name": "data",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/JavaScriptValue" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        },
+        {
+            "name": "bootstrapScriptExecuted",
+            "tags": [{ "$ref": "#/components/tags/Event" }],
+            "paramStructure": "by-name",
+            "params": [
+                {
+                    "name": "bootstrapScript",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/BootstrapScriptId" }
+                },
+                {
+                    "name": "scriptContext",
+                    "required": true,
+                    "schema": { "$ref": "#/components/schemas/ScriptContextId" }
+                }
+            ],
+            "result": { "$ref": "#/components/contentDescriptors/NullResult" }
+        }
+    ],
+    "components": {
+        "contentDescriptors": {
+            "NullResult": {
+                "name": "NullResult",
+                "schema": { "type": "object", "maxProperties": 0 }
+            }
+        },
+        "tags": {
+            "Command": {
+                "name": "Command",
+                "description": "A client request to the server to perform a remote operation or return a result."
+            },
+            "Event": {
+                "name": "Event",
+                "description": "A notification sent from the server to the client."
+            }
+        },
+        "schemas": {
+            "ActionSequence": {
+                "type": "object",
+                "title": "ActionSequence",
+                "properties": {
+                    "type": { "type": "string", "enum": ["key", "pointer", "none"] },
+                    "id": { "type": "string" },
+                    "parameters": { "$ref": "#/components/schemas/ActionSequenceParameters" },
+                    "actions": { "type": "array", "items": { "$ref": "#/components/schemas/Action" } }
+                },
+                "required": ["type", "id", "actions"]
+            },
+            "ActionSequenceParameters": {
+                "type": "object",
+                "title": "ActionSequenceParameters",
+                "properties": {
+                    "pointerType": { "type": "string", "enum": ["mouse", "pen", "touch"] }
+                }
+            },
+            "Action": {
+                "type": "object",
+                "title": "Action",
+                "properties": {
+                    "type": { "type": "string", "enum": ["keyUp", "keyDown", "pointerUp", "pointerDown", "pointerMove", "pointerCancel", "pause"] },
+                    "value": { "type": "string" },
+                    "button": { "type": "integer" },
+                    "duration": { "type": "number" },
+                    "origin": {
+                        "oneOf": [
+                            { "type": "string", "enum": ["viewport", "pointer"] },
+                            { "$ref": "#/components/schemas/WebElementReference" }
+                        ]
+                    },
+                    "x": { "type": "number" },
+                    "y": { "type": "number" }
+                },
+                "required": ["type"]
+            },
+            "BootstrapScriptId": {
+                "title": "BootstrapScriptId",
+                "type": "string"
+            },
+            "BootstrapScriptMatchRule": {
+                "title": "BootstrapScriptMatchRule",
+                "type": "object",
+                "properties": {
+                    "type": { "$ref": "#/components/schemas/ScriptContextType" },
+                    "urlPattern": { "type": "string" }
+                },
+                "required": ["type"]
+            },
+            "BrowsingContextId": {
+                "title": "BrowsingContextId",
+                "type": "string"
+            },
+            "BrowsingContextInfo": {
+                "title": "BrowsingContextInfo",
+                "type": "object",
+                "properties": {
+                    "id": { "$ref": "#/components/schemas/BrowsingContextId" },
+                    "parentId": { "$ref": "#/components/schemas/BrowsingContextId" },
+                    "title": { "type": "string" },
+                    "url": { "type": "string" }
+                },
+                "required": ["id", "title", "url"]
+            },
+            "Cookie": {
+                "title": "Cookie",
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" },
+                    "value": { "type": "string" },
+                    "path": { "type": "string" },
+                    "domain": { "type": "string" },
+                    "secure": { "type": "boolean" },
+                    "httpOnly": { "type": "boolean" },
+                    "expiry": { "type": "integer" }
+                },
+                "required": ["name", "value"]
+            },
+            "JavaScriptValue": {
+                "title": "JavaScriptValue",
+                "oneOf": [
+                    { "type": "null" },
+                    { "type": "boolean" },
+                    { "type": "number" },
+                    { "type": "string" },
+                    { "type": "object", "additionalProperties": { "$ref": "#/components/schemas/JavaScriptValue" } },
+                    { "type": "array", "items": { "$ref": "#/components/schemas/JavaScriptValue" } }
+                ]
+            },
+            "ScriptContextId": {
+                "title": "ScriptContextId",
+                "type": "string"
+            },
+            "ScriptContextInfo": {
+                "title": "ScriptContextInfo",
+                "type": "object",
+                "properties": {
+                    "id": { "$ref": "#/components/schemas/ScriptContextId" },
+                    "type": { "$ref": "#/components/schemas/ScriptContextType" },
+                    "title": { "type": "string" },
+                    "browsingContext": { "$ref": "#/components/schemas/BrowsingContextId" }
+                },
+                "required": ["id", "type", "title"]
+            },
+            "ScriptContextType": {
+                "title": "ScriptContextType",
+                "type": "string",
+                "enum": ["document", "serviceWorker", "webWorker"]
+            },
+            "TargetId": {
+                "title": "TargetId",
+                "type": "string"
+            },
+            "TargetInfo": {
+                "title": "TargetInfo",
+                "type": "object",
+                "properties": {
+                    "id": { "$ref": "#/components/schemas/TargetId" },
+                    "type": { "$ref": "#/components/schemas/TargetType" },
+                    "title": { "type": "string" },
+                    "url": { "type": "string" }
+                },
+                "required": ["id", "type", "title", "url"]
+            },
+            "TargetType": {
+                "title": "TargetType",
+                "type": "string",
+                "enum": ["page", "serviceWorker"]
+            },
+            "TargetTypeHint": {
+                "title": "TargetTypeHint",
+                "type": "string",
+                "enum": ["tab", "window"]
+            },
+            "WebElementReference": {
+                "title": "WebElementReference",
+                "type": "object",
+                "properties": {
+                    "element-6066-11e4-a52e-4f735466cecf": { "type": "string" }
+                },
+                "required": ["element-6066-11e4-a52e-4f735466cecf"]
+            },
+            "Rect": {
+                "title": "Rect",
+                "type": "object",
+                "properties": {
+                    "x": { "type": "integer" },
+                    "y": { "type": "integer" },
+                    "width": { "type": "integer" },
+                    "height": { "type": "integer" }
+                },
+                "required": ["x", "y", "width", "height"]
+            }
+        }
+    }
+}
