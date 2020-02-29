@@ -3,19 +3,11 @@
 ## Motivation:
 Some digital pens and pencils can not only provide input through their interaction with a digitizer but can also pair with a device so that additional signals can be received when a button is pressed. In some cases, the signal may relate to the pen or pencil but come from another source, e.g. a charger may send a signal that the pen or pencil has been docked or undocked.  Native applications can use these signals to customize their behavior, but no corresponding events are available to web applications.
 
-<<<<<<< HEAD
-Native applications use these signals in a variety of ways; here are some inspirational use cases: 
-
- * Clicking the button on a Surface Pro pen can advance to the next slide in a slide show 
- * Double tapping the side of an Apple Pencil can switch drawing tools 
- * Removing a pen from the dock on a Surface Hub prompts the user to enter the whiteboard app 
-=======
 Native applications use these signals in a variety of ways; here are some inspirational use cases:
 
  * Clicking the button on a Surface Pro pen can advance to the next slide in a slide show
  * Double tapping the side of an Apple Pencil can switch drawing tools
  * Removing a pen from the dock on a Surface Hub prompts the user to enter the whiteboard app
->>>>>>> upstream/master
 
 Providing these new pen event primitives would enable web applications to achieve parity with native applications.
 
@@ -38,11 +30,7 @@ dictionary PenButtonEventInit {
 [
     Constructor(DOMString type, optional PenButtonEventInit eventInitDict),
     Exposed=Window
-<<<<<<< HEAD
-] 
-=======
 ]
->>>>>>> upstream/master
 interface PenButtonEvent : UIEvent {
     readonly attribute long pointerId;
     readonly attribute long button;
@@ -65,11 +53,7 @@ dictionary PenDockChangeEventInit {
 [
     Constructor(DOMString type, optional PenDockChangeEventInit eventInitDict),
     Exposed=Window
-<<<<<<< HEAD
-] 
-=======
 ]
->>>>>>> upstream/master
 interface PenDockChangeEvent : UIEvent {
     readonly attribute long pointerId;
     readonly bool docked;
@@ -86,12 +70,9 @@ The docked property identifies whether the pen has transitioned to a docked stat
 ## System Interactions
 Note on some operating systems, adding or removing the event listener may cause side-effects.  For example, on Windows, the shell provides configurable behavior for launching frequently used inking applications when pen button interactions are detected. Applications may register with the system to provide alternative behaviors and suppress the default behavior from the OS.  For web applications, it is expected that only active documents that have a registered event listener can override the system behavior.
 
-<<<<<<< HEAD
-=======
 These side effects are one reason why new events are proposed instead of reusing existing events like `pointerdown`, `pointerup` and `click`.  Listening to these existing events doesn't imply that the user specifically wants to override system behavior, while listening to a `penbuttonclick` serves as a clear signal that the web app has specialized behavior.
 
 
->>>>>>> upstream/master
 ## Sample Code
 
 ### PenButtonEvent Example
@@ -119,15 +100,6 @@ document.addEventListener('pendockchange', event => {
   }
 });
 ```
-<<<<<<< HEAD
-
-## Open Questions:
-1. Microsoft Surface Hubs have more than one pen and more than one dock to hold those pens.  Should a dock identifier be considered so that web apps could, for example, position drawing UI nearby the location of the dock which generated the event?
-1. Is an API needed to query the docked state of a pen, or is it sufficient to wait for the event to signal a transition?
-1. Should the API be more generic and not pen specific?
-1. Should penbuttonup/down events be defined and synthesized for devices that don't support that fidelity?
-1. Cross-platform compatibility: Does the Apple Pencil support detecting the double-tap gesture or is that only handled by the OS?  Same question for the Chromebook Pen...
-=======
 ## Alternatives Considered
 ### Dispatching a KeyboardEvent
 On Windows, the click, dblclick and pressandhold actions on the pen are sent as hotkeys from the OS to the active app.  One option would be to dispatch this OS-specific representation of the event as a KeyboardEvent to the activeElement.
@@ -151,4 +123,3 @@ Because the actions represented by the proposed events don't occur when the pen 
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Events) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BPen%20Events%5D)
->>>>>>> upstream/master
