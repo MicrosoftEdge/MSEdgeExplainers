@@ -1,0 +1,574 @@
+<html>
+<head>
+<style>
+#realinputcontext {
+    position:absolute;
+    top:20px;
+    right:20px;
+}
+#editview {
+    white-space:pre
+}
+
+.selection {
+    background:blue;
+    color:white;
+}
+.caret {
+    outline: 1px solid black;
+}
+</style>
+<script>
+
+function assert(condition, message) {
+    if (!condition) {
+        throw message;
+    }
+}
+
+class EditableView {
+    constructor(editContext, editModel) {
+        this.editContext = editContext;
+        this.editModel = editModel;
+
+        this.caret = document.createElement('span');
+        this.caretOn = true;
+        this.caretInterval = -1;
+        this.caret.style = "outline:1px solid black";
+
+        this.viewElement = document.createElement('code');
+        this.viewElement.appendChild(this.caret);
+        this.viewElement.style = "position:relative; white-space:pre; width:300px; height:300px";
+
+        // TODO: Belong on controller?
+        editableviewholder.addEventListener("mouseup", (function () {
+            console.log("view got mouseup");
+            this.focus();
+            this.updateView();
+        }).bind(this));
+
+        editableviewholder.appendChild(this.viewElement);
+
+        this.updateQueued = false;
+
+        this.caretRange = document.createRange();
+    }
+
+    queueUpdate() {
+        if (!this.updateQueued) {
+            window.requestAnimationFrame((() => {
+                this.updateView();
+                // Turn caret on while the view is actively being updated
+                this.caretOn = true;
+                this.updateQueued = false;
+            }).bind(this));
+            this.updateQueued = true;
+        }
+    }
+
+    updateView() {
+        let html = this.editModel.asHtml();
+        if (html !== "") {
+            this.viewElement.innerHTML = html;
+        } else {
+            this.viewElement.innerHTML = "";
+            this.viewElement.appendChild(this.caret);
+        }
+        var viewRect = this.viewElement.getBoundingClientRect();
+        viewRect.x = viewRect.left;
+        viewRect.y = viewRect.top;
+        var caretRect = this.viewElement.getBoundingClientRect();
+        // TODO: get the actual caret's range
+        caretRect.x = caretRect.left + this.editModel.desiredCaretX;
+        caretRect.y = 2.2 * caretRect.top;
+        caretRect.width = 1;
+        this.editContext.updateLayout(viewRect, caretRect);
+    }
+
+    updateCaret() {
+        if (this.editContext !== undefined) {
+            this.caret.style.visibility = this.caretOn ? "visible" : "hidden";
+            this.caretOn = !this.caretOn;
+            if (this.caretInterval === -1) {
+                const CARET_UPDATE_MS = 500;
+                this.caretInterval = window.setInterval((() => this.updateCaret()).bind(this), CARET_UPDATE_MS);
+            }
+        } else if (this.caretInterval !== -1) {
+            this.caret.style.visibility = "hidden";
+            window.clearInterval(this.caretInterval);
+            this.caretInterval = -1;
+        }
+    }
+    focus() {
+        this.editContext.focus();
+        this.caretOn = true;
+        this.updateCaret();
+    }
+
+    blur() {
+        //this.editContext.blur();
+        this.updateCaret();
+    }
+}
+
+class Position {
+    constructor(x, y) {
+        x = (x !== undefined) ? x : -1;
+        y = (y !== undefined) ? y : -1;
+        this.set(x, y);
+    }
+
+    unposition() {
+        this.set(-1, -1);
+    }
+
+    isPositioned() {
+        assert((this.y === -1) === (this.x === -1), "x and y positioning must be in sync");
+        return (this.y !== -1 && this.x !== -1);
+    }
+
+    equals(other) {
+        assert(other.__proto__ === Position.prototype, "Can only test equality against another Position object");
+        return (this.y === other.y && this.x === other.x);
+    }
+
+    assign(other) {
+        assert(other.__proto__ === Position.prototype, "Can only assign positions to another Position object");
+        this.x = other.x;
+        this.y = other.y;
+    }
+
+    set(x, y) {
+        assert(typeof x === "number", "Position.x must be a number");
+        assert(typeof y === "number", "Position.y must be a number");
+        assert(x !== NaN, "Position.x must not be NaN");
+        assert(y !== NaN, "Position.y must not be NaN");
+        this.x = x;
+        this.y = y;
+    }
+}
+
+class Selection {
+    constructor() {
+        this.anchor = new Position();
+        this.focus = new Position();
+    }
+
+    unposition() {
+        this.anchor.unposition();
+        this.focus.unposition();
+    }
+
+    isEmpty() {
+        return this.anchor.equals(this.focus);
+    }
+
+    isPositioned() {
+        return this.anchor.isPositioned();
+    }
+
+    ensureSelection(x, y) {
+        if (!this.anchor.isPositioned()) {
+            this.anchor.set(x, y);
+            this.focus.set(x, y);
+        }
+    }
+
+    // start() and end() are based on document position, and doesn't provide
+    // information about the anchor or focus.
+    start() {
+        if (this.anchor.isPositioned()) {
+            if (this.focus.y < this.anchor.y) {
+                return this.focus;
+            } else if (this.focus.y > this.anchor.y) {
+                return this.anchor;
+            } else {
+                return (this.focus.x < this.anchor.x) ? this.focus : this.anchor;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    end() {
+        let startPosition = this.start();
+        if (startPosition === null) {
+            return null;
+        }
+        return startPosition === this.anchor ? this.focus : this.anchor;
+    }
+}
+
+class EditModel {
+    constructor(editContext) {
+        this.textRows = [];
+        this.caretPosition = new Position(0, 0);
+        this.textRows[this.caretPosition.y] = [];
+        this.desiredCaretX = 0;
+        this.selection = new Selection();
+        this.CaretMovement = { LEFT:0, RIGHT:1, WORDLEFT:2, WORDRIGHT:3, HOME:4, END:5, UP: 6, DOWN: 7};
+    }
+
+    asHtml() {
+        let html = "";
+        let selectionStart = this.selection.start();
+        let selectionEnd = this.selection.end();
+        this.textRows.forEach((row, index) => {
+
+            let selectionStartX = (selectionStart && selectionStart.y === index) ? selectionStart.x : -1;
+            let selectionEndX = (selectionEnd && selectionEnd.y === index) ? selectionEnd.x : -1;
+            let offsetRealized = 0;
+            if (selectionStart) {
+                if (selectionStartX !== -1) {
+                    // Lay down start selection element
+                    html += row.slice(0, selectionStartX).join('');
+                    if (selectionStart === this.selection.focus) {
+                        html += "<span class='caret'></span>";
+                    }
+                    html += "<span class='selection'>";
+                    offsetRealized = selectionStartX;
+                }
+                if (selectionEndX !== -1) {
+                    html += row.slice(offsetRealized, selectionEndX).join('');
+                    html += "</span>";
+                    if (selectionEnd === this.selection.focus) {
+                        html += "<span class='caret'></span>";
+                    }
+                    offsetRealized = selectionEndX;
+                }
+            } else {
+                if (this.caretPosition.y === index) {
+                    html += row.slice(0, this.caretPosition.x).join('');
+                    html += "<span class='caret'></span>";
+                    offsetRealized = this.caretPosition.x;
+
+                }
+            }
+
+            if (offsetRealized != row.length) {
+                html += row.slice(offsetRealized, row.length).join('');
+            }
+
+            html += "<br>";
+        })
+
+        return html;
+    }
+
+    updateText(text, start, end) {
+        console.log(`text:${text}, start:${start}, end:${end}`)
+        console.log(`line: ${this.textRows[this.caretPosition.y].join("")}`)
+        this.textRows[this.caretPosition.y].splice(start, end - start, ...text.split(""));
+        this.caretPosition.set(this.caretPosition.x - (end - start) + text.length, this.caretPosition.y);
+        this.desiredCaretX = this.caretPosition.x;
+    }
+
+    getCaretPosition() {
+        return this.caretPosition;
+    }
+
+    currentRow() {
+        return this.textRows[this.caretPosition.y];
+    }
+
+    movePosition(position, movement) {
+        switch (movement) {
+            case this.CaretMovement.LEFT:
+                if (position.x !== 0) {
+                    position.set(position.x - 1, position.y);
+                } else if (position.y !== 0) {
+                    let previousRow = position.y - 1;
+                    position.set(this.textRows[previousRow].length, previousRow);
+                }
+                break;
+            case this.CaretMovement.RIGHT:
+                if (position.x !== this.currentRow().length) {
+                    position.set(position.x + 1, position.y);
+                } else if (position.y !== this.textRows.length - 1) {
+                    position.set(0, position.y + 1);
+                }
+                break;
+            case this.CaretMovement.UP:
+                if (position.y !== 0) {
+                    let previousRow = position.y - 1;
+                    position.set(Math.min(this.textRows[previousRow].length, this.desiredCaretX), previousRow);
+                }
+                break;
+            case this.CaretMovement.DOWN:
+                if (position.y !== this.textRows.length - 1) {
+                    let nextRow = position.y + 1;
+                    position.set(Math.min(this.textRows[nextRow].length, this.desiredCaretX), nextRow);
+                }
+                break;
+            case this.CaretMovement.WORDLEFT:
+                break;
+            case this.CaretMovement.WORDRIGHT:
+                break;
+            case this.CaretMovement.HOME:
+                position.set(0, position.y);
+                break;
+            case this.CaretMovement.END:
+                let selectionRow = position.y;
+                position.set(this.textRows[selectionRow].length, selectionRow);
+                break;
+
+            default:
+                assert(false, "Invalid position movement");
+        }
+
+    }
+
+    isHorizontalMovement(movement) {
+        return movement === this.CaretMovement.LEFT ||
+            movement === this.CaretMovement.RIGHT ||
+            movement === this.CaretMovement.HOME ||
+            movement === this.CaretMovement.END;
+    }
+
+    updateSelection(movement) {
+        this.selection.ensureSelection(this.caretPosition.x, this.caretPosition.y);
+        this.movePosition(this.selection.focus, movement);
+
+        if (this.selection.isEmpty()) {
+            this.clearSelection();
+        }
+    }
+
+    clearSelection() {
+        this.selection.unposition();
+    }
+
+    moveCaret(movement, shift) {
+        if (shift) {
+            this.updateSelection(movement);
+            this.movePosition(this.caretPosition, movement);
+        } else {
+            if (this.selection.anchor.isPositioned()) {
+                this.clearSelection();
+            }
+            this.movePosition(this.caretPosition, movement);
+        }
+
+        if (this.isHorizontalMovement(movement)) {
+            this.desiredCaretX = this.caretPosition.x;
+        }
+    }
+
+    backspace(shift, control) {
+        if (!this.selection.isPositioned()) {
+            if (this.caretPosition.x !== 0) {
+                this.currentRow().splice(this.caretPosition.x - 1, 1);
+                this.caretPosition.x--;
+                this.desiredCaretX = this.caretPosition.x;
+            } else if (this.caretPosition.y !== 0) {
+                let currentRow = this.currentRow();
+                let endOfPrevRow = this.textRows[this.caretPosition.y - 1].length;
+                this.textRows.splice(this.caretPosition.y, 1);
+                this.caretPosition.y--;
+                this.textRows[this.caretPosition.y] = this.currentRow().concat(currentRow);
+
+                this.caretPosition.x = endOfPrevRow;
+                this.desiredCaretX = this.caretPosition.x;
+            }
+        } else {
+            this.caretPosition.assign(this.selection.start());
+            this.clearSelection();
+        }
+    }
+
+    delete(shift, control) {
+        if (!this.selection.isPositioned()) {
+            if (shift) {
+                this.textRows.splice(this.caretPosition.y, 1);
+                if (this.caretPosition.y === this.textRows.length) {
+                    this.textRows.push([]);
+                }
+                this.caretPosition.set(0, this.caretPosition.y);
+            } else {
+                if (this.caretPosition.x !== this.currentRow().length) {
+                    this.currentRow().splice(this.caretPosition.x, 1);
+                } else if (this.caretPosition.y < this.textRows.length - 1) {
+                    let nextRow = this.textRows[this.caretPosition.y + 1];
+                    this.textRows.splice(this.caretPosition.y + 1, 1);
+                    this.textRows[this.caretPosition.y] = this.currentRow().concat(nextRow);
+                }
+            }
+        } else {
+            this.replaceSelection("");
+            this.caretPosition.assign(this.selection.start());
+            this.clearSelection();
+        }
+    }
+
+    replaceSelection(replacementText) {
+        let start = this.selection.start();
+        let end = this.selection.end();
+        let endRow = this.textRows[end.y];
+        let sequenceAfterEnd = endRow.splice(end.x, endRow.length - end.x);
+        let startRow = this.textRows[start.y];
+        startRow.splice(start.x, startRow.length - start.x);
+        this.textRows[start.y] = startRow.concat(sequenceAfterEnd);
+        this.textRows.splice(start.y + 1, end.y);
+    }
+
+    addRow() {
+        // Add a new row at caret y + 1
+        let currentRow = this.currentRow();
+        let tailCurrentRow = currentRow.splice(this.caretPosition.x, currentRow.length);
+
+        this.caretPosition.set(0, this.caretPosition.y + 1);
+        this.desiredCaretX = this.caretPosition.x;
+        this.textRows.splice(this.caretPosition.y, 0, tailCurrentRow);
+    }
+}
+
+class EditController {
+    constructor(editContext, model, view) {
+        this.editContext = editContext;
+        this.model = model;
+        this.view = view;
+        this.controlPressed = false;
+
+        editableviewholder.addEventListener("focus", (e => {
+            console.log("focus");
+            this.view.focus();
+        }).bind(this));
+
+        editableviewholder.addEventListener("blur", (e => {
+            console.log("blur");
+            this.view.blur();
+        }).bind(this));
+
+        editableviewholder.addEventListener("keypress", e => {
+            console.log("keypress "+e.key);
+            if (e.key === "Enter"){
+                this.editContext.updateText(this.editContext.selectionStart, this.editContext.selectionEnd, "\n");
+                this.editContext.updateSelection(this.editContext.selectionStart + 1, this.editContext.selectionStart + 1);
+            } else {
+                this.model.updateText(e.key, this.editContext.selectionStart, this.editContext.selectionEnd);
+                this.editContext.updateText(this.editContext.selectionStart, this.editContext.selectionEnd, e.key);
+                this.editContext.updateSelection(this.editContext.selectionStart + e.key.length, this.editContext.selectionStart + e.key.length);
+                this.view.queueUpdate();
+            }
+        });
+
+        editableviewholder.addEventListener("keydown", e => {
+            console.log(`keydown: ${e.key}`)
+            switch (e.key) {
+                case "ArrowLeft":
+                    this.model.moveCaret(this.model.CaretMovement.LEFT, this.shiftPressed);
+                    this.view.queueUpdate();
+                    break;
+                case "ArrowRight":
+                    this.model.moveCaret(this.model.CaretMovement.RIGHT, this.shiftPressed);
+                    this.view.queueUpdate();
+                    break;
+                case "ArrowUp":
+                    this.model.moveCaret(this.model.CaretMovement.UP, this.shiftPressed);
+                    this.view.queueUpdate();
+                    break;
+                case "ArrowDown":
+                    this.model.moveCaret(this.model.CaretMovement.DOWN, this.shiftPressed);
+                    this.view.queueUpdate();
+                    break;
+                case "Home":
+                    this.model.moveCaret(this.model.CaretMovement.HOME, this.shiftPressed);
+                    this.view.queueUpdate();
+                    break;
+                case "End":
+                    this.model.moveCaret(this.model.CaretMovement.END, this.shiftPressed);
+                    this.view.queueUpdate();
+                    break;
+                case "Enter":
+                    this.model.addRow();
+                    this.view.queueUpdate();
+                    break;
+                case " ":
+                    this.editContext.updateText(this.editContext.selectionStart, this.editContext.selectionEnd, " ");
+                    this.editContext.updateSelection(this.editContext.selectionStart + 1, this.editContext.selectionStart + 1);
+                    this.model.updateText(" ", this.editContext.selectionStart, this.editContext.selectionEnd);
+                    this.view.queueUpdate();
+                    e.preventDefault();
+                    break;
+                case "Backspace":
+                    this.editContext.updateText(this.editContext.selectionStart - 1, this.editContext.selectionEnd, "");
+                    this.editContext.updateSelection(this.editContext.selectionStart - 1, this.editContext.selectionStart - 1);
+                    this.model.backspace(this.shiftPressed, this.controlPressed);
+                    this.view.queueUpdate();
+                    break;
+                case "Delete":
+                    this.model.delete(this.shiftPressed, this.controlPressed);
+                    this.view.queueUpdate();
+                    break;
+                case "Control":
+                    this.controlPressed = true;
+                    break;
+                case "Shift":
+                    this.shiftPressed = true;
+                    break;
+            }
+        });
+        editableviewholder.addEventListener("keyup", e => {
+            console.log(`keyup: ${e.key}`)
+            switch (e.key) {
+                case "Control":
+                    this.controlPressed = false;
+                    break;
+                case "Shift":
+                    this.shiftPressed = false;
+                    break;
+            }
+        });
+
+        this.editContext.addEventListener("textupdate", (e => {
+            console.log("update text " + "Selection offsets are " + "start " + e.newSelectionStart + "end " + e.newSelectionEnd);
+            this.model.updateText(e.updateText, e.updateRangeStart, e.updateRangeEnd);
+            this.view.queueUpdate();
+        }).bind(this));
+        editContext.addEventListener("textformatupdate", e => { console.log("formatupdating") });
+    }
+}
+
+window.addEventListener("load", () => {
+    let editContext = new EditContext();
+    let model = new EditModel(editContext);
+    let view = new EditableView(editContext, model);
+    let controller = new EditController(editContext, model, view);
+    // Render the initial view, so that you see the first blinking caret
+    view.queueUpdate();
+
+    let select = document.querySelector("#input-type")
+    let contextTypes = {
+        text: new EditContext({inputMode: "text" }),
+        password: new EditContext({inputMode: "password" }),
+        search: new EditContext({inputMode: "search" }),
+        email: new EditContext({inputMode: "email" }),
+        number: new EditContext({inputMode: "numeric" }),
+        telephone: new EditContext({inputMode: "tel" }),
+        url: new EditContext({inputMode: "url" })
+    }
+    select.addEventListener("focus", () => {
+        let type = select.options[select.selectedIndex].value
+        contextTypes[type].focus()
+    })
+    select.addEventListener("change", () => {
+        let type = select.options[select.selectedIndex].value
+        contextTypes[type].focus()
+    })
+})
+</script>
+<body>
+<select style="position:fixed; right: 50px; top: 8px; width: 100px;" id="input-type">
+    <option>text</option>
+    <option>password</option>
+    <option>search</option>
+    <option>email</option>
+    <option>number</option>
+    <option>telephone</option>
+    <option>url</option>
+</select>
+<p> This is an editable region, based on EditContext:<br>
+    <b>usage:</b> new EditContext()
+</p>
+<div id="editableviewholder" style="width:300px; height:300px; border:blue 1px dashed" tabindex="-1"></div>
+<p> Some footer where other content might live </p>

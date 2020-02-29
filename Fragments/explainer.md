@@ -80,7 +80,7 @@ CSS currently supports the `:target` pseudo-class selector, which may seem appli
 
 ## Appendix A: Document or Client?
 
-Exploration within the IndieWeb community (which refers to these as ["fragmentations"](https://indieweb.org/fragmentations)) and elsewhere have demonstrated what is possible with client-side implementations of arbitrary text fragments using JavaScript. Some argue that this sort of functionality should exist at the discretion of each site owner, but a strong counterargument is that universal applicability of this functionality would benefit all users and seems in alignment with the [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies).
+Exploration within the IndieWeb community (which refers to these as ["fragmentions"](https://indieweb.org/fragmentions)) and elsewhere have demonstrated what is possible with client-side implementations of arbitrary text fragments using JavaScript. Some argue that this sort of functionality should exist at the discretion of each site owner, but a strong counterargument is that universal applicability of this functionality would benefit all users and seems in alignment with the [Priority of Constituencies](https://www.w3.org/TR/html-design-principles/#priority-of-constituencies).
 
 It’s worth pointing out that there are pros and cons to both approaches:
 
@@ -115,17 +115,20 @@ There has been some discussion over whether white space should be represented as
 * [Save Publishing](http://www.savepublishing.com/)
 * [Business Insider](http://www.businessinsider.com/the-inside-story-of-how-rap-genius-fired-a-cofounder--and-just-raised-40-million-annotated-2014-7#annotations/3411037)
 * [The Guardian](https://twitter.com/wblau/status/529713139961827329)
-* [Addressable](https://github.com/mhausenblas/addrable) 
+* [Addressable](https://github.com/mhausenblas/addrable)
 
 ## Appendix D: Related Specifications & Concepts
 
-* Media Fragments - [https://www.w3.org/TR/media-frags/](https://www.w3.org/TR/media-frags/) 
-* CSS Selectors (only to elements though) - [https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) 
-* XPath (only to elements though) - [https://developer.mozilla.org/docs/Web/XPath](https://developer.mozilla.org/en-US/docs/Web/XPath) 
-* DOM Range - [https://developer.mozilla.org/docs/Web/API/Range](https://developer.mozilla.org/en/docs/Web/API/Range) 
-* EPUB Canonical Fragment Identifiers - [http://www.idpf.org/epub/linking/cfi/epub-cfi.html](http://www.idpf.org/epub/linking/cfi/epub-cfi.html) 
-* SVG IRI fragments - [https://www.w3.org/TR/SVG/linking.html#LinksIntoSVG](https://www.w3.org/TR/SVG/linking.html#LinksIntoSVG) 
+* Media Fragments - [https://www.w3.org/TR/media-frags/](https://www.w3.org/TR/media-frags/)
+* CSS Selectors (only to elements though) - [https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)
+* XPath (only to elements though) - [https://developer.mozilla.org/docs/Web/XPath](https://developer.mozilla.org/en-US/docs/Web/XPath)
+* DOM Range - [https://developer.mozilla.org/docs/Web/API/Range](https://developer.mozilla.org/en/docs/Web/API/Range)
+* EPUB Canonical Fragment Identifiers - [http://www.idpf.org/epub/linking/cfi/epub-cfi.html](http://www.idpf.org/epub/linking/cfi/epub-cfi.html)
+* SVG IRI fragments - [https://www.w3.org/TR/SVG/linking.html#LinksIntoSVG](https://www.w3.org/TR/SVG/linking.html#LinksIntoSVG)
 * Web Annotations Selectors - [https://www.w3.org/TR/2017/NOTE-selectors-states-20170223/#frags](https://www.w3.org/TR/2017/NOTE-selectors-states-20170223/#frags)
-* Fragment identifiers for plain text files [PDF] - [http://dret.net/netdret/docs/wilde-ht2005-textfrag.pdf](http://dret.net/netdret/docs/wilde-ht2005-textfrag.pdf) 
-* Using URLs to pass parameters to web applications, widgets and gadgets - [http://internet-apps.blogspot.in/2007/11/using-urls-to-pass-parameters-to-web.html](http://internet-apps.blogspot.in/2007/11/using-urls-to-pass-parameters-to-web.html) 
+* Fragment identifiers for plain text files [PDF] - [http://dret.net/netdret/docs/wilde-ht2005-textfrag.pdf](http://dret.net/netdret/docs/wilde-ht2005-textfrag.pdf)
+* Using URLs to pass parameters to web applications, widgets and gadgets - [http://internet-apps.blogspot.in/2007/11/using-urls-to-pass-parameters-to-web.html](http://internet-apps.blogspot.in/2007/11/using-urls-to-pass-parameters-to-web.html)
 * [Scroll to Text Fragment](https://github.com/bokand/ScrollToTextFragment)
+
+---
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Text%20Fragments) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BText%20Fragments%5D)
