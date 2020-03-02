@@ -70,7 +70,7 @@ None of this area is available to application developers. This is a problem wher
 ## Proposal
 
 The solution proposed in this explainer is in multiple parts
-1. A new member for the web app manifest - `caption_controls_only`
+1. A new display modifier option for the web app manifest - `"caption-controls-overlay"`
 2. New APIs for developers to query the bounding rects and other states of the UA provided caption controls overlay which will overlay into the web content area through a new object on the `window.navigator` property called `controlsOverlay`
 3. A standards-based way for developers to define system drag regions on their content
 
@@ -98,12 +98,12 @@ The caption controls overlay will always be on top of the web content's Z order 
 
 If the OS and browser support a colored title bar, the caption controls overlay would use the `"theme_color"` from the manifest as the background color. When hovered over and clicked, the controls should honor the operating system design behavior. If a colored title bar is not supported, the caption controls overlay will be drawn in the theme supported by the OS and browser.
 
-The desire to place content into the title bar area and use an overlay for the caption controls will be declared within the web app manifest through a new member called `caption_controls_only`. An optional member of boolean type which is false by default and could be used in conjunction with display mode `standalone`. This member will be ignored on Android and iOS, and when used in conjunction with any other `display` modes.
+The desire to place content into the title bar area and use an overlay for the caption controls will be declared within the web app manifest by adding the `caption-controls-overlay` display modifier and setting display mode to `standalone`. This display modifier will be ignored on Android and iOS or when used in conjunction with any other `display` modes.
 
 ```json
 {
   "display": "standalone",
-  "caption_controls_only": "true"
+  "display_modifiers": ["caption-controls-overlay"]
 }
 ```
 
@@ -159,12 +159,14 @@ Below is an example of how these new features could be used to create a web appl
 ![Example code as a PWA](CustomTitleBarExample.png)
 
 ### manifest.webmanifest
-In the manifest, set `display: standalone` and `caption_controls_only: true`. Set the `theme_color` to be the desired color of the title bar.
+In the manifest, set `"display": "standalone"` and `"display_modifiers": ["caption-controls-overlay"]`. Set the `theme_color` to be the desired color of the title bar.
 ```JSON
 {
   "name": "Example PWA",
   "display": "standalone",
-  "caption_controls_only": "true",
+  "display_modifiers": [ 
+    "caption-controls-overlay" 
+  ],
   "theme_color": "#254B85"
 }
 ```
