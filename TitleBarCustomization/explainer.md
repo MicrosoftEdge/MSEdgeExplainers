@@ -8,6 +8,8 @@
  - [Proposal](#proposal)
    - [Overlaying Caption Controls](#overlaying-caption-controls)
    - [Working Around the Caption Control Overlay](#working-around-the-caption-control-overlay)
+     - [JavaScript APIs](#javascript-apis)
+     - [CSS Environment Variables](#css-environment-variables) 
    - [Defining Draggable Regions in Web Content](#defining-draggable-regions-in-web-content)
  - [Example](#example)
  - [Privacy Considerations](#privacy-considerations)
@@ -129,13 +131,13 @@ For privacy, the `controlsOverlay` will not be accessible to iframes inside of a
 Whenever the overlay is resized, a `resize` event will be fired on the `window` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
 
 #### CSS Environment Variables
-Although it's possible to layout the content of the title bar and web page with just the JavaScript APIs provided above, they are not as responsive as a CSS solution. This is problematic either when the window resizes or when the overlay resizes to accommodate the origin text or a new extension icon populates the overlay.
+Although it's possible to layout the content of the title bar and web page with just the JavaScript APIs provided above, they are not as responsive as a CSS solution. This is problematic either when the overlay resizes to accommodate the origin text or a new extension icon populates the overlay, or when the window resizes.
 
 The approach is to treat the overlay like a notch in a phone screen. Currently developers can work around notches using the [`safe-area-inset-[top/left/bottom/right]`](https://developer.mozilla.org/en-US/docs/Web/CSS/env) CSS environment variables. For the custom title bar scenario, we can use `safe-area-inset-top` to describe the height of the title bar area. 
 
 Following this pattern, we propose new CSS environment variables to define the insets of the unsafe notch area in more detail: 
 - Describes horizontal insets of the notch on the **top** edge of the screen
-   -`unsafe-area-top-inset-left`
+  - `unsafe-area-top-inset-left`
   - `unsafe-area-top-inset-right`
 - Describes horizontal insets of the notch on the **bottom** edge of the screen
   - `unsafe-area-bottom-inset-left`
