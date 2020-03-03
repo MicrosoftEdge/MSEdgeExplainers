@@ -72,7 +72,8 @@ None of this area is available to application developers. This is a problem wher
 The solution proposed in this explainer is in multiple parts
 1. A new display modifier option for the web app manifest - `"caption-controls-overlay"`
 2. New APIs for developers to query the bounding rects and other states of the UA provided caption controls overlay which will overlay into the web content area through a new object on the `window.navigator` property called `controlsOverlay`
-3. A standards-based way for developers to define system drag regions on their content
+3. New CSS environment variables to define the left and right insets from the edges of the window: `unsafe-area-top-inset-left` and `unsafe-area-top-inset-right`
+4. A standards-based way for developers to define system drag regions on their content
 
 ### Overlaying Caption Controls
 To provide the maximum addressable area for web content, the User Agent (UA) will create a frameless window removing all UA provided chrome except for a caption controls overlay.
@@ -114,9 +115,10 @@ In the example of Windows operating systems, caption controls are either drawn o
 - Left to right languages - close button shown on the upper right of the frame
 - Right to left languages - close button shown on the upper left of the frame
 
-The bounding rectangle of the caption controls overlay will need to be made available to the web content, as well as a property that describes the visibility of the overlay.
+The bounding rectangle and the visibility of the caption controls overlay will need to be made available to the web content. This information is provided to the developer through a combination of JavaScript APIs and CSS environment variables.
 
-To accommodate these requirements, this explainer proposes a new object on the `window.navigator` property called `controlsOverlay`.
+#### JavaScript APIs
+To provide the visibility and bounding rectangle of the overlay, this explainer proposes a new object on the `window.navigator` property called `controlsOverlay`.
 
 `controlsOverlay` would make available the following objects:
 * `getBoundingRect()` which would return a [`DOMRectReadOnly`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly) that represents the area under the caption controls overlay. Interactive web content should not be displayed beneath the overlay.
@@ -125,6 +127,33 @@ To accommodate these requirements, this explainer proposes a new object on the `
 For privacy, the `controlsOverlay` will not be accessible to iframes inside of a webpage. See [Privacy Considerations](#privacy-considerations) below
 
 Whenever the overlay is resized, a `resize` event will be fired on the `window` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
+
+#### CSS Environment Variables
+Although it's possible to layout the content of the title bar and web page with just the JavaScript APIs provided above, they are not as responsive as a CSS solution. This is problematic either when the window resizes or when the overlay resizes to accommodate the origin text or a new extension icon populates the overlay.
+
+The approach is to treat the overlay like a notch in a phone screen. Currently developers can work around notches using the [`safe-area-inset-[top/left/bottom/right]`](https://developer.mozilla.org/en-US/docs/Web/CSS/env) CSS environment variables. For the custom title bar scenario, we can use `safe-area-inset-top` to describe the height of the title bar area. 
+
+Following this pattern, we propose new CSS environment variables to define the insets of the unsafe notch area in more detail: 
+- Describes horizontal insets of the notch on the **top** edge of the screen
+   -`unsafe-area-top-inset-left`
+  - `unsafe-area-top-inset-right`
+- Describes horizontal insets of the notch on the **bottom** edge of the screen
+  - `unsafe-area-bottom-inset-left`
+  - `unsafe-area-bottom-inset-right`
+- Describes vertical insets of the notch on the **left** edge of the screen
+  - `unsafe-area-left-inset-top`
+  - `unsafe-area-left-inset-bottom`
+- Describes vertical insets of the notch on the **right** edge of the screen
+  - `unsafe-area-right-inset-top`
+  - `unsafe-area-right-inset-bottom`
+
+For example, when defining a notch on the top of the screen, you can define its position via the insets from the edges of the window:
+  - top inset: `0`
+  - left inset: `env(unsafe-area-top-inset-left)`
+  - bottom inset: `env(safe-area-inset-top)`
+  - right inset: `env(unsafe-area-top-inset-right)`
+
+The caption controls overlay can be treated like a notch in the top of the screen in which one of the insets (left or right) is always `0`. See the [sample code](#example) below on one method of laying out the title bar using these CSS environment variables. 
 
 ### Defining Draggable Regions in Web Content
 Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. The proposed solution is to standardize the existing CSS property: `-webkit-app-region`. 
