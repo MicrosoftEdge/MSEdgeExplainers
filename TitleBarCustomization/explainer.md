@@ -172,7 +172,10 @@ In the manifest, set `"display": "standalone"` and `"display_modifiers": ["capti
 ```
 
 ### index.html
-There are two main regions below: the `titleBar` and the `mainContent`. The `titleBar` is set to be `draggable` and the search box inside is set to be `nonDraggable`. 
+There are two main regions below: the `titleBarContainer` and the `mainContent`. The `titleBar` is set to be `draggable` and the search box inside is set to be `nonDraggable`. 
+
+Inside of the `titleBarContainer`, there is a `titleBar` element representing the visible portion of the title bar area.
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -184,27 +187,36 @@ There are two main regions below: the `titleBar` and the `mainContent`. The `tit
     <link rel="manifest" href="./manifest.webmanifest">
   </head>
   <body>
-    <div id="titleBar" class="titleBarContainer draggable">
-      <span>Example PWA</span>
-      <input class="nonDraggable" type="text" placeholder="Search"></input>
+    <div id="titleBarContainer">
+      <div id="titleBar" class=" draggable">
+        <span class="draggable">Example PWA</span>
+        <input class="nonDraggable" type="text" placeholder="Search"></input>
+      </div>
     </div>
     <div id="mainContent"><!-- The rest of the webpage --></div>
   </body>
-  <script src="app.js"></script>
 </html>
 ```
 
 ### style.css
 The draggable regions are set using `app-region: drag` and `app-region: no-drag`. 
 
-The title bar is fixed in place with `position: absolute` so that it doesn't scroll out of view. Its background color is the same as the `theme_color` from the manifest to create one seamless title bar. It also sets `user-select: none` to prevent any attempts at dragging the window to be consumed instead by highlighting text inside of the div.
+On the `body`, margins are set to 0 to ensure the title bar reaches to the edges of the window.
+
+The `titleBarContainer` uses `position: absolute` and `top: 0` to fix itself to the top of the page. The height is set to `safe-area-inset-top` or to fall back to `--fallback-title-bar-height` if the caption controls overlay is not visible. The background color of the `titleBarContainer` is the same as the `theme_color`. 
+
+The visible `titleBar` also uses `position: absolute` and `top: 0` to pin it to the top of the window. By default, it consumes the full width of the window. It also sets `user-select: none` to prevent any attempts at dragging the window to be consumed instead by highlighting text inside of the div.
+
+If the caption controls overlay is on the right, then the `rightOverlay` class is added to the `titleBar`. This fixes the `titleBar` to the left side of the window and sets the `width` to be equal to the inset of the overlay from the left side of the window, `env(unsafe-area-top-inset-left)`. 
+
+If the caption controls overlay is on the left, then the `leftOverlay` class is added to the `titleBar`. This fixes the `titleBar` to the right side of the window and sets the `width` to be equal to the inset of the overlay from the right side of the window, `env(unsafe-area-top-inset-right)`. 
 
 The container for the `mainContent` of the webpage is also fixed in place with `position: absolute`. It sets `overflow-y: scroll` to allow its contents to scroll vertically within the container.
 
 For cases where the browser does not support the caption control overlay, a CSS variable is added to set a fallback title bar height. The bounds of the `titleBarContainer` and `mainContent` are initially set to fill the entire client area, and do not need to be changed if the overlay is not supported.
 ```css
 :root {
-  --fallback-title-bar-height: 35px;
+  --fallback-title-bar-height: 40px;
 }
 
 .draggable {
@@ -215,21 +227,48 @@ For cases where the browser does not support the caption control overlay, a CSS 
   app-region: no-drag;
 }
 
-.titleBarContainer {
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+}
+
+#titleBarContainer {
   position: absolute;
-  left: 0;
-  right: 0;
   top: 0;
-  bottom: calc(100% - var(--fallback-title-bar-height));
+  height: var(--safe-area-inset-top, var(--fallback-title-bar-height));
+  width: 100%;
+  background-color:#254B85;
+}
+
+#titleBar {
+  position: absolute;
+  top: 0;
   display: flex;
   user-select: none;
-  background-color:#254B85;
+  height: 100%;
+  width: 100%;
+
   color: #FFFFFF;
   font-weight: bold;
   text-align: center;
 }
 
-.titleBarContainer > input {
+#titleBar.rightOverlay {
+  left: 0;
+  width: var(--unsafe-area-top-inset-left);
+}
+
+#titleBar.leftOverlay {
+  right: 0;
+  width: var(--unsafe-area-top-inset-right);
+}
+
+#titleBar > span {
+  margin: auto;
+  padding: 0px 16px 0px 16px;
+}
+
+#titleBar > input {
   flex: 1;
   margin: 8px;
   border-radius: 5px;
@@ -237,17 +276,12 @@ For cases where the browser does not support the caption control overlay, a CSS 
   padding: 8px;
 }
 
-.titleBarContainer > span {
-  margin: auto;
-  padding: 0px 16px 0px 16px;
-}
-
 #mainContent {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  top: var(--fallback-title-bar-height, 50px);
+  top: env(safe-area-inset-top, var(--fallback-title-bar-height));
   overflow-y: scroll;
 }
 ```
@@ -261,25 +295,23 @@ After styling the `titleBar`, the top inset of the `mainContent` needs to be set
 
 Since these position values are scaled when resizing the browser window--but the caption control overlay will not--each of these values will need to be reset each time the window is resized. 
 ```javascript
-const resizeTitleBar = () => {
-  if (!window.navigator.controlsOverlay) {
-    return;
+// initialize the title bar to avoid the caption control overlay which
+// could be in either the top right or top left corner
+const initializeTitleBar = () => {
+  const titleBar = document.getElementById("titleBar");
+  const rect = window.navigator.controlsOverlay.getBoundingRect();
+
+  // rect.x will be 0 if the overlay is on the left
+  if (rect.x === 0) {
+    titleBar.classList.add("leftOverlay");
+  } else {
+    titleBar.classList.add("rightOverlay");
   }
-  
-  const overlay = window.navigator.controlsOverlay.getBoundingRect();
+};
 
-  const titleBar = document.getElementById('titleBar');
-  titleBar.style.left = `${overlay.x ? 0 : overlay.width}px`;
-  titleBar.style.right = `${overlay.x ? overlay.width : 0}px`;
-  titleBar.style.top = '0px';
-  titleBar.style.bottom = `${window.innerHeight - overlay.bottom}px`;
-
-  const mainContent = document.getElementById('mainContent');
-  mainContent.style.top = `${overlay.height}px`;
+if (window.navigator.controlsOverlay && window.navigator.controlsOverlay.visible) {
+  initializeTitleBar();
 }
-
-resizeTitleBar();
-window.addEventListener('resize', resizeTitleBar);
 ```
 
 ## Security Considerations
