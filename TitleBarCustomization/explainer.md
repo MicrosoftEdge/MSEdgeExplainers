@@ -8,6 +8,8 @@
  - [Proposal](#proposal)
    - [Overlaying Caption Controls](#overlaying-caption-controls)
    - [Working Around the Caption Control Overlay](#working-around-the-caption-control-overlay)
+     - [JavaScript APIs](#javascript-apis)
+     - [CSS Environment Variables](#css-environment-variables) 
    - [Defining Draggable Regions in Web Content](#defining-draggable-regions-in-web-content)
  - [Example](#example)
  - [Privacy Considerations](#privacy-considerations)
@@ -72,7 +74,8 @@ None of this area is available to application developers. This is a problem wher
 The solution proposed in this explainer is in multiple parts
 1. A new display modifier option for the web app manifest - `"caption-controls-overlay"`
 2. New APIs for developers to query the bounding rects and other states of the UA provided caption controls overlay which will overlay into the web content area through a new object on the `window.navigator` property called `controlsOverlay`
-3. A standards-based way for developers to define system drag regions on their content
+3. New CSS environment variables to define the left and right insets from the edges of the window: `unsafe-area-top-inset-left` and `unsafe-area-top-inset-right`
+4. A standards-based way for developers to define system drag regions on their content
 
 ### Overlaying Caption Controls
 To provide the maximum addressable area for web content, the User Agent (UA) will create a frameless window removing all UA provided chrome except for a caption controls overlay.
@@ -114,9 +117,10 @@ In the example of Windows operating systems, caption controls are either drawn o
 - Left to right languages - close button shown on the upper right of the frame
 - Right to left languages - close button shown on the upper left of the frame
 
-The bounding rectangle of the caption controls overlay will need to be made available to the web content, as well as a property that describes the visibility of the overlay.
+The bounding rectangle and the visibility of the caption controls overlay will need to be made available to the web content. This information is provided to the developer through JavaScript APIs and CSS environment variables.
 
-To accommodate these requirements, this explainer proposes a new object on the `window.navigator` property called `controlsOverlay`.
+#### JavaScript APIs
+To provide the visibility and bounding rectangle of the overlay, this explainer proposes a new object on the `window.navigator` property called `controlsOverlay`.
 
 `controlsOverlay` would make available the following objects:
 * `getBoundingRect()` which would return a [`DOMRectReadOnly`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly) that represents the area under the caption controls overlay. Interactive web content should not be displayed beneath the overlay.
@@ -125,6 +129,13 @@ To accommodate these requirements, this explainer proposes a new object on the `
 For privacy, the `controlsOverlay` will not be accessible to iframes inside of a webpage. See [Privacy Considerations](#privacy-considerations) below
 
 Whenever the overlay is resized, a `resize` event will be fired on the `window` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
+
+#### CSS Environment Variables
+Although it's possible to layout the content of the title bar and web page with just the JavaScript APIs provided above, they are not as responsive as a CSS solution. This is problematic either when the overlay resizes to accommodate the origin text or a new extension icon populates the overlay, or when the window resizes.
+
+The solution is to treat the overlay like a notch in a phone screen and layout the title bar area next to the caption controls overlay "notch". The position of the overlay can be defined using the existing [`safe-area-inset-top`](https://developer.mozilla.org/en-US/docs/Web/CSS/env) CSS environment variable to determine the height, and two new CSS environment variables describing the left and right insets of the overlay: [`unsafe-area-top-inset-left/right`](https://github.com/w3c/csswg-drafts/issues/4721). See the [sample code](#example) below on one method of laying out the title bar using these CSS environment variables. 
+
+We explored and rejected an alternative approach which instead uses CSS environment variables to describe the safe area of the title bar, `title-bar-area-[top/left/bottom/right]`. Although this "safe area" approach would be easier for developers to use than the "unsafe area" approach, it would be difficult to standardize given that it is such a niche use case (only available on desktop PWAs). 
 
 ### Defining Draggable Regions in Web Content
 Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. The proposed solution is to standardize the existing CSS property: `-webkit-app-region`. 
@@ -172,7 +183,10 @@ In the manifest, set `"display": "standalone"` and `"display_modifiers": ["capti
 ```
 
 ### index.html
-There are two main regions below: the `titleBar` and the `mainContent`. The `titleBar` is set to be `draggable` and the search box inside is set to be `nonDraggable`. 
+There are two main regions below: the `titleBarContainer` and the `mainContent`. The `titleBar` is set to be `draggable` and the search box inside is set to be `nonDraggable`. 
+
+Inside of the `titleBarContainer`, there is a `titleBar` element representing the visible portion of the title bar area.
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -184,27 +198,36 @@ There are two main regions below: the `titleBar` and the `mainContent`. The `tit
     <link rel="manifest" href="./manifest.webmanifest">
   </head>
   <body>
-    <div id="titleBar" class="titleBarContainer draggable">
-      <span>Example PWA</span>
-      <input class="nonDraggable" type="text" placeholder="Search"></input>
+    <div id="titleBarContainer">
+      <div id="titleBar" class=" draggable">
+        <span class="draggable">Example PWA</span>
+        <input class="nonDraggable" type="text" placeholder="Search"></input>
+      </div>
     </div>
     <div id="mainContent"><!-- The rest of the webpage --></div>
   </body>
-  <script src="app.js"></script>
 </html>
 ```
 
 ### style.css
 The draggable regions are set using `app-region: drag` and `app-region: no-drag`. 
 
-The title bar is fixed in place with `position: absolute` so that it doesn't scroll out of view. Its background color is the same as the `theme_color` from the manifest to create one seamless title bar. It also sets `user-select: none` to prevent any attempts at dragging the window to be consumed instead by highlighting text inside of the div.
+On the `body`, margins are set to 0 to ensure the title bar reaches to the edges of the window.
+
+The `titleBarContainer` uses `position: absolute` and `top: 0` to fix itself to the top of the page. The height is set to `safe-area-inset-top` or to fall back to `--fallback-title-bar-height` if the caption controls overlay is not visible. The background color of the `titleBarContainer` is the same as the `theme_color`. 
+
+The visible `titleBar` also uses `position: absolute` and `top: 0` to pin it to the top of the window. By default, it consumes the full width of the window. It also sets `user-select: none` to prevent any attempts at dragging the window to be consumed instead by highlighting text inside of the div.
+
+If the caption controls overlay is on the right, then the `rightOverlay` class is added to the `titleBar`. This fixes the `titleBar` to the left side of the window and sets the `width` to be equal to the inset of the overlay from the left side of the window, `env(unsafe-area-top-inset-left)`. 
+
+If the caption controls overlay is on the left, then the `leftOverlay` class is added to the `titleBar`. This fixes the `titleBar` to the right side of the window and sets the `width` to be equal to the inset of the overlay from the right side of the window, `env(unsafe-area-top-inset-right)`. 
 
 The container for the `mainContent` of the webpage is also fixed in place with `position: absolute`. It sets `overflow-y: scroll` to allow its contents to scroll vertically within the container.
 
 For cases where the browser does not support the caption control overlay, a CSS variable is added to set a fallback title bar height. The bounds of the `titleBarContainer` and `mainContent` are initially set to fill the entire client area, and do not need to be changed if the overlay is not supported.
 ```css
 :root {
-  --fallback-title-bar-height: 35px;
+  --fallback-title-bar-height: 40px;
 }
 
 .draggable {
@@ -215,21 +238,48 @@ For cases where the browser does not support the caption control overlay, a CSS 
   app-region: no-drag;
 }
 
-.titleBarContainer {
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+}
+
+#titleBarContainer {
   position: absolute;
-  left: 0;
-  right: 0;
   top: 0;
-  bottom: calc(100% - var(--fallback-title-bar-height));
+  height: var(--safe-area-inset-top, var(--fallback-title-bar-height));
+  width: 100%;
+  background-color:#254B85;
+}
+
+#titleBar {
+  position: absolute;
+  top: 0;
   display: flex;
   user-select: none;
-  background-color:#254B85;
+  height: 100%;
+  width: 100%;
+
   color: #FFFFFF;
   font-weight: bold;
   text-align: center;
 }
 
-.titleBarContainer > input {
+#titleBar.rightOverlay {
+  left: 0;
+  width: var(--unsafe-area-top-inset-left);
+}
+
+#titleBar.leftOverlay {
+  right: 0;
+  width: var(--unsafe-area-top-inset-right);
+}
+
+#titleBar > span {
+  margin: auto;
+  padding: 0px 16px 0px 16px;
+}
+
+#titleBar > input {
   flex: 1;
   margin: 8px;
   border-radius: 5px;
@@ -237,17 +287,12 @@ For cases where the browser does not support the caption control overlay, a CSS 
   padding: 8px;
 }
 
-.titleBarContainer > span {
-  margin: auto;
-  padding: 0px 16px 0px 16px;
-}
-
 #mainContent {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  top: var(--fallback-title-bar-height, 50px);
+  top: env(safe-area-inset-top, var(--fallback-title-bar-height));
   overflow-y: scroll;
 }
 ```
@@ -261,25 +306,23 @@ After styling the `titleBar`, the top inset of the `mainContent` needs to be set
 
 Since these position values are scaled when resizing the browser window--but the caption control overlay will not--each of these values will need to be reset each time the window is resized. 
 ```javascript
-const resizeTitleBar = () => {
-  if (!window.navigator.controlsOverlay) {
-    return;
+// initialize the title bar to avoid the caption control overlay which
+// could be in either the top right or top left corner
+const initializeTitleBar = () => {
+  const titleBar = document.getElementById("titleBar");
+  const rect = window.navigator.controlsOverlay.getBoundingRect();
+
+  // rect.x will be 0 if the overlay is on the left
+  if (rect.x === 0) {
+    titleBar.classList.add("leftOverlay");
+  } else {
+    titleBar.classList.add("rightOverlay");
   }
-  
-  const overlay = window.navigator.controlsOverlay.getBoundingRect();
+};
 
-  const titleBar = document.getElementById('titleBar');
-  titleBar.style.left = `${overlay.x ? 0 : overlay.width}px`;
-  titleBar.style.right = `${overlay.x ? overlay.width : 0}px`;
-  titleBar.style.top = '0px';
-  titleBar.style.bottom = `${window.innerHeight - overlay.bottom}px`;
-
-  const mainContent = document.getElementById('mainContent');
-  mainContent.style.top = `${overlay.height}px`;
+if (window.navigator.controlsOverlay && window.navigator.controlsOverlay.visible) {
+  initializeTitleBar();
 }
-
-resizeTitleBar();
-window.addEventListener('resize', resizeTitleBar);
 ```
 
 ## Security Considerations
