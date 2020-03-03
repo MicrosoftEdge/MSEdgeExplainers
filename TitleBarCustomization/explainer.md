@@ -117,7 +117,7 @@ In the example of Windows operating systems, caption controls are either drawn o
 - Left to right languages - close button shown on the upper right of the frame
 - Right to left languages - close button shown on the upper left of the frame
 
-The bounding rectangle and the visibility of the caption controls overlay will need to be made available to the web content. This information is provided to the developer through a combination of JavaScript APIs and CSS environment variables.
+The bounding rectangle and the visibility of the caption controls overlay will need to be made available to the web content. This information is provided to the developer through JavaScript APIs and CSS environment variables.
 
 #### JavaScript APIs
 To provide the visibility and bounding rectangle of the overlay, this explainer proposes a new object on the `window.navigator` property called `controlsOverlay`.
