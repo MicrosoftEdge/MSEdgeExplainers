@@ -12,6 +12,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Native Caret Browsing Explainer](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
 * [UIA Explainer](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md)
 * [WebVTT Caption Styling Explainer](WebVTTCaptionStyling/explainer.md)
+* [Tagged PDFs support Explainer](PDF/TaggedPDF/explainer.md)
 
 ## Audio
 * [Audio Stream Category](AudioStreamCategory/explainer.md)
