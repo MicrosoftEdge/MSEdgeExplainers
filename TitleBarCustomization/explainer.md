@@ -133,29 +133,9 @@ Whenever the overlay is resized, a `resize` event will be fired on the `window` 
 #### CSS Environment Variables
 Although it's possible to layout the content of the title bar and web page with just the JavaScript APIs provided above, they are not as responsive as a CSS solution. This is problematic either when the overlay resizes to accommodate the origin text or a new extension icon populates the overlay, or when the window resizes.
 
-The approach is to treat the overlay like a notch in a phone screen. Currently developers can work around notches using the [`safe-area-inset-[top/left/bottom/right]`](https://developer.mozilla.org/en-US/docs/Web/CSS/env) CSS environment variables. For the custom title bar scenario, we can use `safe-area-inset-top` to describe the height of the title bar area. 
+The solution is to treat the overlay like a notch in a phone screen and layout the title bar area next to the caption controls overlay "notch". The position of the overlay can be defined using the existing [`safe-area-inset-top`](https://developer.mozilla.org/en-US/docs/Web/CSS/env) CSS environment variable to determine the height, and two new CSS environment variables describing the left and right insets of the overlay: [`unsafe-area-top-inset-left/right`](https://github.com/w3c/csswg-drafts/issues/4721). See the [sample code](#example) below on one method of laying out the title bar using these CSS environment variables. 
 
-Following this pattern, we propose new CSS environment variables to define the insets of the unsafe notch area in more detail: 
-- Describes horizontal insets of the notch on the **top** edge of the screen
-  - `unsafe-area-top-inset-left`
-  - `unsafe-area-top-inset-right`
-- Describes horizontal insets of the notch on the **bottom** edge of the screen
-  - `unsafe-area-bottom-inset-left`
-  - `unsafe-area-bottom-inset-right`
-- Describes vertical insets of the notch on the **left** edge of the screen
-  - `unsafe-area-left-inset-top`
-  - `unsafe-area-left-inset-bottom`
-- Describes vertical insets of the notch on the **right** edge of the screen
-  - `unsafe-area-right-inset-top`
-  - `unsafe-area-right-inset-bottom`
-
-For example, when defining a notch on the top of the screen, you can define its position via the insets from the edges of the window:
-  - top inset: `0`
-  - left inset: `env(unsafe-area-top-inset-left)`
-  - bottom inset: `env(safe-area-inset-top)`
-  - right inset: `env(unsafe-area-top-inset-right)`
-
-The caption controls overlay can be treated like a notch in the top of the screen in which one of the insets (left or right) is always `0`. See the [sample code](#example) below on one method of laying out the title bar using these CSS environment variables. 
+We explored and rejected an alternative approach which instead uses CSS environment variables to describe the safe area of the title bar, `title-bar-area-[top/left/bottom/right]`. Although this "safe area" approach would be easier for developers to use than the "unsafe area" approach, it would be difficult to standardize given that it is such a niche use case (only available on desktop PWAs). 
 
 ### Defining Draggable Regions in Web Content
 Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. The proposed solution is to standardize the existing CSS property: `-webkit-app-region`. 
