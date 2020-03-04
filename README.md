@@ -30,6 +30,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [pen-action Explainer](PenAction/explainer.md)
 * [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) ~~[archived initial explainer](WebInkEnhancement/explainer.md)~~
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
+* [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md)
 
 ## Fonts
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
