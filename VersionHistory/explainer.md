@@ -10,7 +10,7 @@ When a new version of a piece of native software rolls out users are typically m
 
 ## Update behavior
 
-Manifest.json changes are not reflected in an already installed PWA until the user agent deems an update neccesary. We intend for this feature to update via the same mechanism. When a PWA developer updates the section of the manifest.json related to version history, the user agent should deem an update neccesary. After the update is complete, the user agent can choose to publize that there are new updates.
+Manifest.json changes are not reflected in an already installed PWA until the user agent deems an update necessary. We intend for this feature to update via the same mechanism. When a PWA developer updates the section of the manifest.json related to version history, the user agent should deem an update neccesary. After the update is complete, the user agent can choose to publize that there are new updates.
 
 ## Publicizing changes
 
