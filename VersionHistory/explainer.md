@@ -97,12 +97,12 @@ Provides the MIME type of file found at `url`. At a minimum, acceptable MIME typ
 ## Example
 
 ```json
-changelog: {
-  version: "1.0.1"
-  history: [{
-    url: "https://foo.com/history",
-    type: "text/html"
-  }]
+"changelog": {
+  "version": "1.0.1",
+  "history": [{
+    "url": "https://foo.com/history",
+    "type": "text/html"
+  }]
 }
 ```
 
