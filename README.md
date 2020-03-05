@@ -58,6 +58,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md)
 * [Title Bar Customization Explainer](TitleBarCustomization/explainer.md)
 * [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
+* [Version History](VersionHistory/explainer.md)
 
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
