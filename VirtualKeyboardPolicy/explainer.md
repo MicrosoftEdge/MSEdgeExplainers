@@ -1,7 +1,7 @@
 # Virtual Keyboard Control
 
 
-**Note - this proposal extends the scope of [VirtualKeybard Interface](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/VirtualKeyboardAPI/explainer.md)**
+**Note - this proposal extends the scope of [VirtualKeyboard Interface](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/VirtualKeyboardAPI/explainer.md)**
 
 
 
