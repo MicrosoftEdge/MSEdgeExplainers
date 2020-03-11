@@ -33,7 +33,21 @@ A user hass purchased a new device that comes with a PWA-based communication ser
 
 ## Prior Art
 
-Prior to the launch of Android 6.0, app installations in Android were accompanied by a declaration of which permissions the application would be granted upon install. This model was discontinued—in favor of a more web-like runtime request model—because many apps were taking advantage of the opportunity to get access to as much sensitive user data as they could, without the user being able to deny access to any of the individual APIs. The problem with this model was that users had to accept all of the permissions in order to install the app. Their only other choice was to not install the app (which may not have been an option in some cases).
+Prior to the launch of Android 6.0, app installations in Android were accompanied by a declaration of which permissions the application would be granted upon install. This model was discontinued—in favor of a more web-like runtime request model—because many apps were taking advantage of the opportunity to get access to as much sensitive user data as they could, without the user being able to deny access to any of the individual APIs. The problem with this model was that users had to accept all of the permissions in order to install the app. Their only other choice was to not install the app (which may not have been an option in some cases). The idea set forth in this explainer improves upon that approach by enabling users to approve or deny (or defer) permissions on an individual basis.
+
+Some Implementors also currently bundle requests for camera and microphone access within a single permissions prompt when requests are made via `getUserMedia()`:
+
+<figure id="chromium-batch">
+
+![In Chromium, permissions for both microphone & camera access can be requested at once.](2.png)
+
+</figure>
+
+<figure id="firefox-batch">
+
+![Firefox’s batch prompt also enables users to choose the device to use](3.png)
+
+</figure>
 
 ## API Proposal
 
@@ -65,7 +79,7 @@ Implementors MUST still provide access to audit these permissions post-install.
 
 An implementor could choose to present these permissions within the installation prompt like this:
 
-<figure id="twitter">
+<figure id="hypothetical-prompt">
 
 ![Hypothetical install prompt that incorporates permission requests between the app identification and the Install & Cancel buttons](1.png)
 
@@ -77,7 +91,8 @@ If the implementor supports use of some form of enterprise-level permissions pol
 
 ## Open Questions
 
-1. **Should implementors be allowed to limit the number of permissions that could be requested during install (perhaps with a formal minimum)?** This would force developers to prioritize critical permissions requests and would keep the UI from becoming overwhelming.
-2. **Should the order of the strings in the `request_on_install` array dictate the order in which the permissions requests are displayed in the installation UI?** On one hand, consistency in display order could make it more familiar to users, but on the other, having it be different each time might cause users to pay more attention to it. Worth exploring.
-3. **If a user denies a given permission, should the developer be granted one additional chance to request the permission in context?**  For example, if the user denies camera access during install, but then explicitly clicks the button that would launch their camera within the app’s UI, should the developer be able to request that permission one more time? If we grant this "second chance," should it only be offered in the installed experience or should it be granted to the site in a tab as well?
-4. **As denial of certain permissions can cripple a PWA’s ability to function as intended, should we consider providing some mechanism for developers to indicate critical permissions?** This seems like it could be abused and put this feature into the same position Android ended up.
+1. **Should the key be, simply, `permissions` instead?** This would potentially allow different implementors to enable different experiences that take into account install, first run, etc.
+2. **Should implementors be allowed to limit the number of permissions that could be requested during install (perhaps with a formal minimum)?** This would force developers to prioritize critical permissions requests and would keep the UI from becoming overwhelming.
+3. **Should the order of the strings in the `request_on_install` array dictate the order in which the permissions requests are displayed in the installation UI?** On one hand, consistency in display order could make it more familiar to users, but on the other, having it be different each time might cause users to pay more attention to it. Worth exploring.
+4. **If a user denies a given permission, should the developer be granted one additional chance to request the permission in context?**  For example, if the user denies camera access during install, but then explicitly clicks the button that would launch their camera within the app’s UI, should the developer be able to request that permission one more time? If we grant this "second chance," should it only be offered in the installed experience or should it be granted to the site in a tab as well?
+5. **As denial of certain permissions can cripple a PWA’s ability to function as intended, should we consider providing some mechanism for developers to indicate critical permissions?** This seems like it could be abused and put this feature into the same position Android ended up.
