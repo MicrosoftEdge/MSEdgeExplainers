@@ -29,7 +29,7 @@ All of these considerations point to a need for some form of bulk permission req
 
 A user browses to a new social media site and opts to install the service as a PWA to try it out. The developer has declared that they are interested in access to their users’ camera(s) and location and they want to be able to send the user push notifications. During install, the user is presented with these requests and chooses to grant push notification access, but denies access to the camera and location because they aren’t interested in using the service’s features that rely on those APIs.
 
-A user hass purchased a new device that comes with a PWA-based communication service pre-installed. When they first launch the PWA, they are asked to grant access to the device’s camera(s) and microphone, enable push notifications, and the ability to send and receive phone calls and text messages. Based on how they anticipate using the app, the user chooses to grant or deny each of these permissions.
+A user has purchased a new device that comes with a PWA-based communication service pre-installed. When they first launch the PWA, they are asked to grant access to the device’s camera(s) and microphone, enable push notifications, and the ability to send and receive phone calls and text messages. Based on how they anticipate using the app, the user chooses to grant or deny each of these permissions.
 
 ## Prior Art
 
