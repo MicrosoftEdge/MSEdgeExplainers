@@ -137,3 +137,11 @@ The **Microsoft Store** currently displays an overview of changes that came with
 ## Privacy Considerations
 
 No considerable privacy concerns are expected. Fingerprinting via Feature detection is a low risk as a webpage cannot tell if a user agent does not support changelogs, or the user simply did not trigger it. In the case a user does trigger it, we may reveal we are a browser that supports this changelog feature.
+
+## Security Considerations
+
+The main security concern is that user agents need to process untrusted data feeds from the web. Putting aside that users need to install the PWA itself from the website - user agents need to be careful how they process the data feeds in case they are malicious. User agents need to take care not to try to process these untrusted data sets in privileged code.
+
+Done correctly the risk is the same as running arbitrary javascript on an relatively trusted site (since the user already installed the PWA).
+
+HTML changelogs are not a particular security concern, as this would be no riskier than a standard navigation.
