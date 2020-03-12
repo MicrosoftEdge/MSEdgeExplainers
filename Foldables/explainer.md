@@ -2,6 +2,9 @@
 
 Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https://github.com/dlibby-), [Zouhir Chahoud](https://github.com/Zouhir)
 
+### Important Announcements and Updates
+- Feb 26, 2020: 🚚📦 [Window Segments Enumeration JavaScript API](#proposal-window-segments-enumeration-javascript-api) has now moved to the Second-screen W3C CG repo on GitHub, for issues and comments please refer to [webscreens/window-segments](https://github.com/webscreens/window-segments)
+
 ### Table of content
 - [Motivation](#motivation)
 	* [Some of the current problems](#current-problems)

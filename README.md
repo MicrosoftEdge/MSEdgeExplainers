@@ -40,8 +40,9 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [PenEvents Explainer](PenEvents/explainer.md) and [Design Doc](PenEvents/dev-design.md)
 * [TSF1 Explainer](TSF1/explainer.md)
 * [pen-action Explainer](PenAction/explainer.md)
-* [Web Ink Enhancement Explainer](WebInkEnhancement/explainer.md)
+* [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) ~~[archived initial explainer](WebInkEnhancement/explainer.md)~~
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
+* [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md)
 
 ## Fonts
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
@@ -66,8 +67,10 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Run on OS Login Explainer](RunOnLogin/Explainer.md)
 * [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
 * [Custom Dialog on Close Explainer](CustomDialogOnClose/explainer.md)
+* [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md)
 * [Title Bar Customization Explainer](TitleBarCustomization/explainer.md)
 * [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
+* [Version History](VersionHistory/explainer.md)
 
 ## Smooth Scrolling
   * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
