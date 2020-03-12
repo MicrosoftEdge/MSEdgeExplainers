@@ -4,6 +4,9 @@
 
 -   Austin Orion
 
+## Withdrawn
+This explainer has been withdrawn. The customer need has been met by other means, and this design conflicted with the philosophy of keeping tab close as fast as possible. In order to accomplish actions on tab close, developers should try writing to IndexedDB on the  `visibilitychange` event, and then trigger a Service Worker to read from the DB and do any other necessary work.
+
 ## Introduction
 Installed PWAs need a way to allow developers to perform asynchronous operations (such as saving a file) and optionally show a customizable dialog before the user closes the app and their state is lost.
 
