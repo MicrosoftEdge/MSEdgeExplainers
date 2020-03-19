@@ -1,0 +1,141 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #444;
+}
+
+header {
+    background: slateblue;
+    color: white;
+}
+
+h1 {
+    margin: 0;
+    padding: 8px;
+    font-weight: normal;
+}
+
+h2 {
+    margin: 16px;
+    font-weight: normal;
+}
+
+h3 {
+    margin-top: 0;
+}
+
+.method-name, .param-name, .type {
+    font-family: Consolas, monaco, monospace;
+}
+
+h4 {
+    color: #888;
+}
+
+a {
+    text-decoration: none;
+    color: dodgerblue;
+}
+
+h3 a {
+    color: slateblue;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+main {
+    display: flex;
+    flex-flow: row nowrap;
+    width: 100%;
+}
+
+nav {
+    background: white;
+}
+
+nav a {
+    color: #444;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav .category-name {
+    padding: 8px;
+    display: block;
+    background-color: #ddd;
+    font-weight: bold;
+    color: #666;
+}
+
+nav ul li.item a {
+    padding: 8px 8px 8px 24px;
+    display: block;
+    width: 100%;
+}
+
+nav ul li.item a:hover {
+    background: rgb(197, 188, 255);
+    cursor: pointer;
+}
+
+.content {
+    display: block;
+    flex-grow: 1;
+    background-color: whitesmoke;
+}
+
+.entry {
+    margin: 16px;
+    padding: 16px;
+    box-shadow: 0 0 4px gray;
+    border-radius: 4px;
+    background: white;
+}
+
+table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+}
+.optional {
+    font-size: 0.8em;
+    color: #888;
+}
+
+table tr:nth-child(odd) {
+    background: #ececec;
+}
+
+table tr:nth-child(even) {
+    background: #ddd;
+}
+
+td {
+    padding: 4px;
+}
+
+td.param-name {
+    width: 25%;
+}
+
+td.type {
+    width: 25%;
+}
+
+td.param-name, td.type {
+    padding-left: 8px;
+    padding-right: 24px;
+}
+
+td.description {
+    width: 50%;
+}
