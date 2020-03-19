@@ -1,3 +1,7 @@
+# MOVED: This Explainer is no longer maintained in this repo. Please follow: https://github.com/w3c/webdriver/blob/master/webdriver-bidi/webdriver.md to find the current version. Thanks!
+
+---
+
 # Bidirectional WebDriver Protocol
 
 ## Overview
