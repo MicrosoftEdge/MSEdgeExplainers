@@ -93,3 +93,6 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## 3D / Immersive Experiences
 * [Native GLTF Pre-explainer](https://github.com/immersive-web/proposals/issues/52)
+
+## Withdrawn
+* [Custom Dialog on Close Explainer](Withdrawn/CustomDialogOnClose/explainer.md)
