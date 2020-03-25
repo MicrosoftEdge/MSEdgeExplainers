@@ -73,9 +73,10 @@ we will move them into the [Alumni section](#alumni-).
 
 ### Progressive Web Applications
 
-* [Run on OS Login](RunOnLogin/Explainer.md)
 * [Cache API Response Metadata](CacheAPIResponseMetadata/explainer.md)
+* [ImageResource `color_scheme`](ImageResource-color_scheme/explainer.md)
 * [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md)
+* [Run on OS Login](RunOnLogin/Explainer.md)
 * [Title Bar Customization](TitleBarCustomization/explainer.md)
 * [URL Protocol Handler Registration for PWAs](URLProtocolHandler/explainer.md)
 * [Version History](VersionHistory/explainer.md)
@@ -87,10 +88,6 @@ we will move them into the [Alumni section](#alumni-).
 ### UI
 
 * [Web Platform Primitives for Enlightened Experiences on Foldable Devices (CSS parts)](Foldables/explainer.md) | ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Foldables) | File an issue...
-
-### Web App Manifest
-
-* [ImageResource `color_scheme`](ImageResource-color_scheme/explainer.md)
 
 
 # Alumni 🎓
