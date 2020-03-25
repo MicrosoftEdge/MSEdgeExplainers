@@ -148,7 +148,7 @@ We love our developer tools! Checkout these cool innovations being designed for 
 * [Stackable Overlays](https://docs.google.com/document/d/13MHkk0rgHJl_MAIgrouUef5k9fK7lZMI1IEiNIUKbD0/)
 
 
-## Other Documents
+# Other Documents
 
 A collection of explainers documenting platform enhancements (not web 
 developer-facing features), implementation designs, and other public documents
