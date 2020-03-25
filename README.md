@@ -84,7 +84,6 @@ we will move them into the [Alumni section](#alumni-).
 
 * [Autofill Reauthentication](AutofillReauthentication/explainer.md)
 * [Time-limited Permissions Explainer](TimeLimitedPermissions/Explainer.md)
-* [Principles: Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md)
 
 ### Progressive Web Applications
 
@@ -178,6 +177,11 @@ related to the construction of Microsoft Edge.
 
 * [Hardware-offloaded Audio Processing](AudioOffload/explainer.md) explainer
 * [Media Cache Reduction](MediaCacheReduction/explainer.md) explainer
+
+### Privacy
+
+* [Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md) a principles document describing our commitment to privacy through the principles of transparency, control, respect, and protection for our users.
+
 
 ### User Interaction
 
