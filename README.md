@@ -52,13 +52,13 @@ we will move them into the [Alumni section](#alumni-).
 
 ### Accessibility
 
-* [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
+* [ARIA Virtual Content](Accessibility/VirtualContent/explainer.md)
 
 ### Editing
 
-* [Highlight Events Explainer](highlight/events-explainer.md)
-* [PenEvents Explainer](PenEvents/explainer.md)
-* [pen-action Explainer](PenAction/explainer.md)
+* [Highlight Events](highlight/events-explainer.md)
+* [PenEvents](PenEvents/explainer.md)
+* [pen-action](PenAction/explainer.md)
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
 * [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md)
   
@@ -69,20 +69,20 @@ we will move them into the [Alumni section](#alumni-).
 ### Privacy
 
 * [Autofill Reauthentication](AutofillReauthentication/explainer.md)
-* [Time-limited Permissions Explainer](TimeLimitedPermissions/Explainer.md)
+* [Time-limited Permissions](TimeLimitedPermissions/Explainer.md)
 
 ### Progressive Web Applications
 
-* [Run on OS Login Explainer](RunOnLogin/Explainer.md)
-* [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
+* [Run on OS Login](RunOnLogin/Explainer.md)
+* [Cache API Response Metadata](CacheAPIResponseMetadata/explainer.md)
 * [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md)
-* [Title Bar Customization Explainer](TitleBarCustomization/explainer.md)
-* [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
+* [Title Bar Customization](TitleBarCustomization/explainer.md)
+* [URL Protocol Handler Registration for PWAs](URLProtocolHandler/explainer.md)
 * [Version History](VersionHistory/explainer.md)
 
 ### Storage
 
-* [Storage Access API Explainer](StorageAccessAPI/explainer.md)
+* [Storage Access API](StorageAccessAPI/explainer.md)
 
 ### UI
 
@@ -90,10 +90,7 @@ we will move them into the [Alumni section](#alumni-).
 
 ### Web App Manifest
 
-* [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
-
-### 3D / Immersive Experiences
-* [Native GLTF Pre-explainer](https://github.com/immersive-web/proposals/issues/52)
+* [ImageResource `color_scheme`](ImageResource-color_scheme/explainer.md)
 
 
 # Alumni 🎓
@@ -119,6 +116,7 @@ standards communities. Thanks for your interest!
 | (direct-to-incubation) | Controls | [Open UI (Standardized Form Controls)](https://github.com/WICG/form-controls-components) in the [Web Incubator Community Group](https://wicg.io/). |
 | (direct-to-incubation) | HTML | [ES Module Attributes and JSON modules Explainer](https://github.com/tc39/proposal-module-attributes/blob/master/README.md) in the [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm). |
 | (direct-to-incubation) | Media | ['hdrMetadataType' for HDR query](https://w3c.github.io/media-capabilities/#videoconfiguration) and ['spatialRendering' for spatial audio query](https://w3c.github.io/media-capabilities/#audioconfiguration) of [Media Capabilities](https://w3c.github.io/media-capabilities/) in the [W3C Media Working Group](https://www.w3.org/media-wg/) and<br> [@media queries for HDR video](https://drafts.csswg.org/mediaqueries-4/#video-prefixed-features) of [Media Queries Level 4](https://drafts.csswg.org/mediaqueries-4/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/). |
+| (proposal) | Immersive Experiences | [Native GLTF](https://github.com/immersive-web/proposals/issues/52) issue in the [W3C Immersive Web Community Group](https://immersive-web.github.io/). |
 
 
 # DevTools 🧰
