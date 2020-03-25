@@ -67,7 +67,6 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 ## Progressive Web Applications
 * [Run on OS Login Explainer](RunOnLogin/Explainer.md)
 * [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
-* [Custom Dialog on Close Explainer](CustomDialogOnClose/explainer.md)
 * [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md)
 * [Title Bar Customization Explainer](TitleBarCustomization/explainer.md)
 * [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
@@ -94,3 +93,6 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## 3D / Immersive Experiences
 * [Native GLTF Pre-explainer](https://github.com/immersive-web/proposals/issues/52)
+
+## Withdrawn
+* [Custom Dialog on Close Explainer](Withdrawn/CustomDialogOnClose/explainer.md)
