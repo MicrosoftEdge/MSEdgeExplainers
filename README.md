@@ -92,10 +92,6 @@ we will move them into the [Alumni section](#alumni-).
 
 * [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
 
-### WebDriver
-
-* [Bidirectional WebDriver Protocol Explainer](WebDriverRPC/webdriver.md)
-
 ### Web Performance Measurement
 
 * [Frame Timing Use Cases](FrameTiming/use_cases.md)
@@ -122,6 +118,7 @@ standards communities. Thanks for your interest!
 | [Media Blob](MediaBlob/explainer.md) | Media | [Improved Client-side Video Editing Explainer](https://github.com/WICG/video-editing/blob/master/readme.md) in the [Web Incubator Community Group](https://wicg.io/) |
 | [Shortcuts](Shortcuts/explainer.md) | Progressive Web Applications | ['shortcuts' member](https://w3c.github.io/manifest/#shortcuts-member) of [Web App Manifest](https://w3c.github.io/manifest/) in the [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) |
 | [Web Ink Enhancement (ink trail aided by the OS)](WebInkEnhancement/explainer.md) | Editing | [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) in the [Web Incubator Community Group](https://wicg.io/) |
+| [Bidirectional WebDriver Protocol](WebDriverRPC/webdriver.md) | WebDriver | [Bidirectional WebDriver Protocol Explainer](https://github.com/w3c/webdriver/blob/master/webdriver-bidi/webdriver.md) of the [WebDriver incubator](https://github.com/w3c/webdriver/blob/master/README.md) in the [W3C Browser Testing and Tools Working Group](https://www.w3.org/testing/browser/) |
 | [Window segments enumeration API](Foldables/explainer.md) | UI | [Window Segments Enumeration API Explainer](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md) in the [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) |
 | (direct-to-incubation) | Controls | [Open UI (Standardized Form Controls)](https://github.com/WICG/form-controls-components) in the [Web Incubator Community Group](https://wicg.io/) |
 | (direct-to-incubation) | HTML | [ES Module Attributes and JSON modules Explainer](https://github.com/tc39/proposal-module-attributes/blob/master/README.md) in the [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm) |
