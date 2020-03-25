@@ -53,7 +53,6 @@ we will move them into the [Alumni section](#alumni-).
 ### Accessibility
 
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
-* [Native Caret Browsing Explainer](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
 * [WebVTT Caption Styling Explainer](WebVTTCaptionStyling/explainer.md)
 * [Tagged PDFs support Explainer](PDF/TaggedPDF/explainer.md)
 
@@ -86,7 +85,6 @@ we will move them into the [Alumni section](#alumni-).
 * [Highlight API Editor's Draft](https://drafts.csswg.org/css-highlight-api-1/) ~~[Highlight API Explainer](highlight/explainer.md)~~
 * [Highlight Events Explainer](highlight/events-explainer.md)
 * [PenEvents Explainer](PenEvents/explainer.md) and [Design Doc](PenEvents/dev-design.md)
-* [TSF1 Explainer](TSF1/explainer.md)
 * [pen-action Explainer](PenAction/explainer.md)
 * [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) ~~[archived initial explainer](WebInkEnhancement/explainer.md)~~
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
@@ -176,7 +174,12 @@ related to the construction of Microsoft Edge.
 
 ### Acessibility
 
-* [UIA Explainer](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md)
+* [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
+* [UI Automation Provider Mappings](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md)
+
+### Editing
+
+* [Streamlined Text Input (TSF1)](TSF1/explainer.md)
 
 # Withdrawn
 
