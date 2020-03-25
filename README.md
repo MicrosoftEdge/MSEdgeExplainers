@@ -133,7 +133,7 @@ standards communities. Thanks for your interest!
 
 
 # DevTools 🧰
-We love our developer tools! Checkout these cool innovations being designed for Microsoft Edge developer tools:
+We love our developer tools! Checkout these cool innovations being designed for the developer tools:
 
 * [3D View]( https://docs.google.com/document/d/16xsQbr1YjjuoxHJlCsAaIzK-s4Ogd6fEuhrSajdVivA)
 * [CSS Grid Tooling](https://docs.google.com/document/d/1s0AkeMOtlwqD74GJZtedxqOnttQtgj9oo8RjfVyaHP8/)
