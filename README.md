@@ -36,7 +36,7 @@ Note: we use labels to filter the issues to specific explainers.
 
 If you're looking to file a product bug on Microsoft Edge and the bug is unique
 to Edge, please use the in-browser "Send Feedback" tool (Alt+Shift+i in Windows,
-or "..." > "Help and feedback"). The the bug reproduces in another Chromium-based
+or "..." > "Help and feedback"). If the bug reproduces in another Chromium-based
 browser, please file the issue upstream in the [Chromium bug database](https://bugs.chromium.org/p/chromium/).
 Thanks!
 
