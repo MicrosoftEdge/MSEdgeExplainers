@@ -54,10 +54,6 @@ we will move them into the [Alumni section](#alumni-).
 
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
 
-### Controls
-
-* [Standardized Form Controls](https://github.com/WICG/form-controls-components)
-
 ### Editing
 
 * [Highlight Events Explainer](highlight/events-explainer.md)
@@ -130,6 +126,8 @@ standards communities. Thanks for your interest!
 | [Highlight API](highlight/explainer.md) | Editing | [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
 | [Media Blob](MediaBlob/explainer.md) | Media | [Improved Client-side Video Editing Explainer](https://github.com/WICG/video-editing/blob/master/readme.md) in the [Web Incubator Community Group](https://wicg.io/) |
 | [Shortcuts](Shortcuts/explainer.md) | Progressive Web Applications | ['shortcuts' member](https://w3c.github.io/manifest/#shortcuts-member) of [Web App Manifest](https://w3c.github.io/manifest/) in the [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) |
+| (direct-to-incubation) | Controls | [Open UI (Standardized Form Controls)](https://github.com/WICG/form-controls-components) in the [Web Incubator Community Group](https://wicg.io/) |
+| (direct-to-incubation) | Media | ['hdrMetadataType' for HDR query](https://w3c.github.io/media-capabilities/#videoconfiguration) and ['spatialRendering' for spatial audio query](https://w3c.github.io/media-capabilities/#audioconfiguration) of [Media Capabilities](https://w3c.github.io/media-capabilities/) in the [W3C Media Working Group](https://www.w3.org/media-wg/) and [@media queries for HDR video](https://drafts.csswg.org/mediaqueries-4/#video-prefixed-features) of [Media Queries Level 4](https://drafts.csswg.org/mediaqueries-4/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
 
 
 # DevTools 🧰
