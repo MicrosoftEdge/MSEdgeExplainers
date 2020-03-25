@@ -60,7 +60,6 @@ we will move them into the [Alumni section](#alumni-).
 
 ### Controls
 
-* [Password Reveal Explainer](PasswordReveal/explainer.md)
 * [Standardized Form Controls](https://github.com/WICG/form-controls-components)
 
 ### DevTools
@@ -94,10 +93,6 @@ we will move them into the [Alumni section](#alumni-).
 * [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
 * [Media Blob Explainer](MediaBlob/explainer.md)
 
-### Navigation
-
-* [Arbitrary Text Fragments Explainer](Fragments/explainer.md)
-
 ### Privacy
 
 * [Autofill Reauthentication](AutofillReauthentication/explainer.md)
@@ -108,7 +103,6 @@ we will move them into the [Alumni section](#alumni-).
 
 * [Run on OS Login Explainer](RunOnLogin/Explainer.md)
 * [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
-* [Custom Dialog on Close Explainer](CustomDialogOnClose/explainer.md)
 * [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md)
 * [Title Bar Customization Explainer](TitleBarCustomization/explainer.md)
 * [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
@@ -195,3 +189,6 @@ the solutions described in these explainers at this time, but that doesn't
 mean the problem isn't worth solving. Have an idea for an alternate solution?
 We'd love to hear your feedback!
 
+* [Arbitrary Text Fragments](Fragments/explainer.md) explainer
+* [Custom Dialog on Close](CustomDialogOnClose/explainer.md) explainer
+* [Password Reveal](PasswordReveal/explainer.md) explainer
