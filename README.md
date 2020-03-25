@@ -114,10 +114,6 @@ we will move them into the [Alumni section](#alumni-).
 * [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
 * [Version History](VersionHistory/explainer.md)
 
-### Smooth Scrolling
-
-* [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
-
 ### Storage
 
 * [Storage Access API Explainer](StorageAccessAPI/explainer.md)
@@ -186,6 +182,11 @@ related to the construction of Microsoft Edge.
 
 * [Hardware-offloaded Audio Processing](AudioOffload/explainer.md) explainer
 * [Media Cache Reduction](MediaCacheReduction/explainer.md) explainer
+
+### User Interaction
+
+* [Impl Threaded Scrollbar scrolling](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4) intent-to-implement
+
 
 # Withdrawn
 
