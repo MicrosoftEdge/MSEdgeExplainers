@@ -1,10 +1,54 @@
+![Microsoft Edge Logo](https://avatars0.githubusercontent.com/u/11354582?s=100) 
 # Microsoft Edge Explainers
 
-[Explainers](https://w3ctag.github.io/explainers) are documents where we focus on describing a user/ developer/ customer problem and explore potential solutions. These documents are starting points for engaging the community and standards bodies in developing collaborative solutions fit for eventual standardization.
+Welcome! This repo is home to "explainers" and related documents originating 
+from the Microsoft Edge team.
 
-This repo is intended to be a starting place for explainers originating from the Microsoft Edge team (and an archive of the same explainers if/when they migrate to longer-term homes in other repositories such as W3C Community Group/ Working Group or WHATWG workstream repositories).
+[Explainers](https://w3ctag.github.io/explainers) are documents focused on 
+describing a user/ developer/ customer problem (at a high level) and exploring 
+potential solutions. These documents are starting points for engaging in discussion 
+with you and other members of the community. Explainers should address their 
+stated problems in clear and easy to understand language. Proposed solutions
+should be easy to follow and not too deep in technical details. When you read
+an explainer, we hope the stated problem is compelling and you can form an 
+opinion for whether the proposed solution would address the problem.
 
-We welcome public discussion in issues on these explainers. Thanks for your interest! Please [file an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new) or submit a PR with your feedback. Note that we try to label issues with the explainer they relate to for easy filtering.
+### Please provide feedback
+
+We are looking for feedback! Are the stated problems actually real problems? 
+How have they impacted your experience? Do the proposed solutions seem reasonable?
+Do they follow good [web principles](https://w3ctag.github.io/design-principles/)?
+Would they solve a problem you currently have? (We love to hear that; tell
+us more about your scenario!) Do you have related use-cases we hadn't considered?
+
+We appreciate you taking the time to offer feedback; it helps to improve the 
+explainers, validate the problem and solutions they describe, and show evidence
+that there is potential momentum to move an idea to the next stage--we desire
+to see all our explainers make the journey to become cross-browser supported
+web standards.
+
+**[Start a new issue here](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new)**,
+or [join in the discussion](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/)
+on existing issues. We also welcome PRs on the explainer documents themselves. 
+Note: we use labels to filter the issues to specific explainers.
+
+### Have a product bug?
+
+If you're looking to file a product bug on Microsoft Edge and the bug is unique
+to Edge, please use the in-browser "Send Feedback" tool (Alt+Shift+i in Windows,
+or "..." > "Help and feedback"). The the bug reproduces in another Chromium-based
+browser, please file the issue upstream in the [Chromium bug database](https://bugs.chromium.org/p/chromium/).
+Thanks!
+
+# Active Explainers
+
+These are the proposals we are currently investigating in this repo. Use the
+links below to read the explainers, review the current issues, and file new
+issues specifically for the given explainer(s). We hope they will all "graduate"
+and begin their journey along the standards-track as they gain sufficient interest;
+each explainer should have a "Status of this Document" section that indicates 
+what standards venue they expect to go to next (if known). When they graduate,
+we will move them into the [Alumni section](#alumni).
 
 ## Accessibility
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
@@ -80,7 +124,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [Storage Access API Explainer](StorageAccessAPI/explainer.md)
 
 ## UI
-* [Window segments enumeration API Explainer](Foldables/explainer.md)
+* [Window segments enumeration API Explainer](Foldables/explainer.md) | ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Foldables) | File an issue...
 
 ## Web App Manifest
 * [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
@@ -94,3 +138,28 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 
 ## 3D / Immersive Experiences
 * [Native GLTF Pre-explainer](https://github.com/immersive-web/proposals/issues/52)
+
+
+
+# Alumni
+
+Awesome! These explainers have moved on to bigger and better things! We've 
+archived the original explainers here for posterity and updated their document
+status section to help you find where the latest discussions are happening.
+Please continue to participate and follow the links below to the current
+standards communities where the latest discussions are happening. Thanks 
+for your interest!
+
+## Other Documents
+
+A collection of explainers documenting platform enhancements (not web 
+developer-facing features), implementation designs, and other public documents
+related to the construction of Microsoft Edge.
+
+# Withdrawn
+
+When at first you don't succeed... don't give up! We're no longer pursuing
+the solutions described in these explainers at this time, but that doesn't
+mean the problem isn't worth solving. Have an idea for an alternate solution?
+We'd love to hear your feedback!
+
