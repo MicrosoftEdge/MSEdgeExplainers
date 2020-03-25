@@ -40,7 +40,7 @@ or "..." > "Help and feedback"). The the bug reproduces in another Chromium-base
 browser, please file the issue upstream in the [Chromium bug database](https://bugs.chromium.org/p/chromium/).
 Thanks!
 
-# Active Explainers
+# Active Explainers 📣
 
 These are the proposals we are currently investigating in this repo. Use the
 links below to read the explainers, review the current issues, and file new
@@ -48,13 +48,11 @@ issues specifically for the given explainer(s). We hope they will all "graduate"
 and begin their journey along the standards-track as they gain sufficient interest;
 each explainer should have a "Status of this Document" section that indicates 
 what standards venue they expect to go to next (if known). When they graduate,
-we will move them into the [Alumni section](#alumni).
+we will move them into the [Alumni section](#alumni-).
 
 ## Accessibility
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
-* [High Contrast Explainer](Accessibility/HighContrast/explainer.md)
 * [Native Caret Browsing Explainer](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
-* [UIA Explainer](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md)
 * [WebVTT Caption Styling Explainer](WebVTTCaptionStyling/explainer.md)
 * [Tagged PDFs support Explainer](PDF/TaggedPDF/explainer.md)
 
@@ -141,7 +139,7 @@ we will move them into the [Alumni section](#alumni).
 
 
 
-# Alumni
+# Alumni 🎓
 
 Awesome! These explainers have moved on to bigger and better things! We've 
 archived the original explainers here for posterity and updated their document
@@ -150,11 +148,19 @@ Please continue to participate and follow the links below to the current
 standards communities where the latest discussions are happening. Thanks 
 for your interest!
 
+| Category | Archived Explainer | Document in Current Venue |
+|--|--|--|
+| Accessibility | [High Contrast](Accessibility/HighContrast/explainer.md) | [System Colors section](https://drafts.csswg.org/css-color/#css-system-colors) of [CSS Color Module Level 4](https://drafts.csswg.org/css-color/),<br> ['forced-color-adjust'](https://drafts.csswg.org/css-color-adjust-1/#forced) of [CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/), and<br> ['forced-colors'](https://drafts.csswg.org/mediaqueries-5/#forced-colors) of [Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |  
+
 ## Other Documents
 
 A collection of explainers documenting platform enhancements (not web 
 developer-facing features), implementation designs, and other public documents
 related to the construction of Microsoft Edge.
+
+### Acessibility
+
+* [UIA Explainer](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md)
 
 # Withdrawn
 
