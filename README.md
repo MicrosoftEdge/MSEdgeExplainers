@@ -174,12 +174,12 @@ related to the construction of Microsoft Edge.
 
 ### Acessibility
 
-* [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
-* [UI Automation Provider Mappings](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md)
+* [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md) | ✅Shipped in Edge XX
+* [UI Automation Provider Mappings](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md) | ✅Shipped in Edge XX
 
 ### Editing
 
-* [Streamlined Text Input (TSF1)](TSF1/explainer.md)
+* [Streamlined Text Input (TSF1)](TSF1/explainer.md) | ✅Shipped in Edge XX
 
 # Withdrawn
 
