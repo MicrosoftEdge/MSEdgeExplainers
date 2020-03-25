@@ -54,10 +54,6 @@ we will move them into the [Alumni section](#alumni-).
 
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
 
-### Audio
-
-* [Audio Stream Category](AudioStreamCategory/explainer.md)
-
 ### Controls
 
 * [Standardized Form Controls](https://github.com/WICG/form-controls-components)
@@ -91,6 +87,10 @@ we will move them into the [Alumni section](#alumni-).
 * [CSS Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) ~~[archived initial explainer](CSSModules/v1Explainer.md)~~
 * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md), ~~[archived initial explainer](HTMLModules/explainer.md)~~, and [intent-to-implement](HTMLModules/i2i.md)
 * [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
+
+### Media
+
+* [Audio Stream Category](AudioStreamCategory/explainer.md)
 * [Media Blob Explainer](MediaBlob/explainer.md)
 
 ### Privacy
