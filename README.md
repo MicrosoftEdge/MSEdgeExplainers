@@ -59,7 +59,6 @@ we will move them into the [Alumni section](#alumni-).
 * [Highlight Events Explainer](highlight/events-explainer.md)
 * [PenEvents Explainer](PenEvents/explainer.md) and [Design Doc](PenEvents/dev-design.md)
 * [pen-action Explainer](PenAction/explainer.md)
-* [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) ~~[archived initial explainer](WebInkEnhancement/explainer.md)~~
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
 * [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md)
   
@@ -126,6 +125,7 @@ standards communities. Thanks for your interest!
 | [Highlight API](highlight/explainer.md) | Editing | [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
 | [Media Blob](MediaBlob/explainer.md) | Media | [Improved Client-side Video Editing Explainer](https://github.com/WICG/video-editing/blob/master/readme.md) in the [Web Incubator Community Group](https://wicg.io/) |
 | [Shortcuts](Shortcuts/explainer.md) | Progressive Web Applications | ['shortcuts' member](https://w3c.github.io/manifest/#shortcuts-member) of [Web App Manifest](https://w3c.github.io/manifest/) in the [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) |
+| [Web Ink Enhancement (ink trail aided by the OS)](WebInkEnhancement/explainer.md) | Editing | [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) in the [Web Incubator Community Group](https://wicg.io/) |
 | [Window segments enumeration API](Foldables/explainer.md) | UI | [Window Segments Enumeration API Explainer](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md) in the [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) |
 | (direct-to-incubation) | Controls | [Open UI (Standardized Form Controls)](https://github.com/WICG/form-controls-components) in the [Web Incubator Community Group](https://wicg.io/) |
 | (direct-to-incubation) | HTML | [ES Module Attributes and JSON modules Explainer](https://github.com/tc39/proposal-module-attributes/blob/master/README.md) in the [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm) |
