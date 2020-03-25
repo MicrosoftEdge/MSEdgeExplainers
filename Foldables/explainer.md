@@ -244,6 +244,21 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 }
 ```
 
+#### LTR and RTL Layout Example
+![Yelow flex column being hinge aware in both LTR and RTL writing modes](ltr-rtl.svg)
+
+#### CSS solution outline:
+
+```css
+[dir="ltr"] .col {
+   flex: 0 0 env(fold-left);
+}
+
+[dir="rtl"] .col {
+   flex: 0 0 env(fold-right);
+}
+```
+
 ## Additional Links
 
 - [CSS Spanning media feature polyfill & example](https://github.com/zouhir/spanning-css-polyfill)
