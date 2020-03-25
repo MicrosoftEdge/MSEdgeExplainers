@@ -220,9 +220,9 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 
 	.yellow {
 		height: 100px;
-		width: calc(100vw - env(fold-left) + env(fold-width));
+		width: calc(100vw - env(fold-right));
 		position: absolute;
-		left: calc(env(fold-left) + env(fold-width) );
+		left: env(fold-right);
 		top: 0;
 	}
 
@@ -238,7 +238,7 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 		height: 100px;
 		width: 100px;
 		position: absolute;
-		left: calc(env(fold-left) + env(fold-width));
+		left: env(fold-right);
 		bottom: 0;
 	}
 }
