@@ -50,21 +50,25 @@ each explainer should have a "Status of this Document" section that indicates
 what standards venue they expect to go to next (if known). When they graduate,
 we will move them into the [Alumni section](#alumni-).
 
-## Accessibility
+### Accessibility
+
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
 * [Native Caret Browsing Explainer](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
 * [WebVTT Caption Styling Explainer](WebVTTCaptionStyling/explainer.md)
 * [Tagged PDFs support Explainer](PDF/TaggedPDF/explainer.md)
 
-## Audio
+### Audio
+
 * [Audio Stream Category](AudioStreamCategory/explainer.md)
 * [Hardware-offloaded Audio Processing explainer](AudioOffload/explainer.md)
 
-## Controls
+### Controls
+
 * [Password Reveal Explainer](PasswordReveal/explainer.md)
 * [Standardized Form Controls](https://github.com/WICG/form-controls-components)
 
-## DevTools
+### DevTools
+
 * [Stackable Overlays](https://docs.google.com/document/d/13MHkk0rgHJl_MAIgrouUef5k9fK7lZMI1IEiNIUKbD0/)
 * [Dual-screen Emulation](https://docs.google.com/document/d/1KMsmEXdjmn4h4iIl0n74N1EHxwwNUzh6R2p7GHrdtTI)
 * [High Contrast Simulation](https://docs.google.com/document/d/1SUx-hfodUUMAIwmcwIVYlpi9YDrLnkwW0T7yXUN8s50/)
@@ -76,7 +80,8 @@ we will move them into the [Alumni section](#alumni-).
 * [Localization of the DevTools](https://docs.google.com/document/d/1L6TkT2-42MMQ72ZSBMFwUaq7M6mDgA2X0x8oHHKaV_U/)
 * [DevTools Infobar UI Refresh](https://docs.google.com/document/d/1GjpfPkdljH97IAaWfY8d9NBim1wrPPRaD8zMl8PWhLs/)
 
-## Editing
+### Editing
+
 * [EditContext API Explainer](EditContext/explainer.md)
 * [Highlight API Editor's Draft](https://drafts.csswg.org/css-highlight-api-1/) ~~[Highlight API Explainer](highlight/explainer.md)~~
 * [Highlight Events Explainer](highlight/events-explainer.md)
@@ -87,10 +92,12 @@ we will move them into the [Alumni section](#alumni-).
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
 * [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md)
 
-## Fonts
+### Fonts
+
 * [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
   
-## HTML
+### HTML
+
 * [CSS Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) ~~[archived initial explainer](CSSModules/v1Explainer.md)~~
 * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md), ~~[archived initial explainer](HTMLModules/explainer.md)~~, and [intent-to-implement](HTMLModules/i2i.md)
 * [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
@@ -98,15 +105,18 @@ we will move them into the [Alumni section](#alumni-).
 * [Media Cache Reduction Explainer](MediaCacheReduction/explainer.md)
 * [Media Blob Explainer](MediaBlob/explainer.md)
 
-## Navigation
+### Navigation
+
 * [Arbitrary Text Fragments Explainer](Fragments/explainer.md)
 
-## Privacy
+### Privacy
+
 * [Autofill Reauthentication](AutofillReauthentication/explainer.md)
 * [Time-limited Permissions Explainer](TimeLimitedPermissions/Explainer.md)
 * [Principles: Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md)
 
-## Progressive Web Applications
+### Progressive Web Applications
+
 * [Run on OS Login Explainer](RunOnLogin/Explainer.md)
 * [Cache API Response Metadata Explainer](CacheAPIResponseMetadata/explainer.md)
 * [Custom Dialog on Close Explainer](CustomDialogOnClose/explainer.md)
@@ -115,26 +125,32 @@ we will move them into the [Alumni section](#alumni-).
 * [URL Protocol Handler Registration for PWAs Explainer](URLProtocolHandler/explainer.md)
 * [Version History](VersionHistory/explainer.md)
 
-## Smooth Scrolling
-  * [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
+### Smooth Scrolling
 
-## Storage
+* [Impl Threaded Scrollbar scrolling intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4)
+
+### Storage
+
 * [Storage Access API Explainer](StorageAccessAPI/explainer.md)
 
-## UI
+### UI
+
 * [Window segments enumeration API Explainer](Foldables/explainer.md) | ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Foldables) | File an issue...
 
-## Web App Manifest
+### Web App Manifest
+
 * [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
 * [Shortcuts Explainer](Shortcuts/explainer.md)
 
-## WebDriver
+### WebDriver
+
 * [Bidirectional WebDriver Protocol Explainer](WebDriverRPC/webdriver.md)
 
-## Web Performance Measurement
+### Web Performance Measurement
+
 * [Frame Timing Use Cases](FrameTiming/use_cases.md)
 
-## 3D / Immersive Experiences
+### 3D / Immersive Experiences
 * [Native GLTF Pre-explainer](https://github.com/immersive-web/proposals/issues/52)
 
 
