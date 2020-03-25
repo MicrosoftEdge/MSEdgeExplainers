@@ -53,13 +53,10 @@ we will move them into the [Alumni section](#alumni-).
 ### Accessibility
 
 * [ARIA Virtual Content Explainer](Accessibility/VirtualContent/explainer.md)
-* [WebVTT Caption Styling Explainer](WebVTTCaptionStyling/explainer.md)
-* [Tagged PDFs support Explainer](PDF/TaggedPDF/explainer.md)
 
 ### Audio
 
 * [Audio Stream Category](AudioStreamCategory/explainer.md)
-* [Hardware-offloaded Audio Processing explainer](AudioOffload/explainer.md)
 
 ### Controls
 
@@ -89,18 +86,12 @@ we will move them into the [Alumni section](#alumni-).
 * [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) ~~[archived initial explainer](WebInkEnhancement/explainer.md)~~
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
 * [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md)
-
-### Fonts
-
-* [End User Defined Characters (EUDC) Explainer](EUDC/explainer.md)
   
 ### HTML
 
 * [CSS Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) ~~[archived initial explainer](CSSModules/v1Explainer.md)~~
 * [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md), ~~[archived initial explainer](HTMLModules/explainer.md)~~, and [intent-to-implement](HTMLModules/i2i.md)
 * [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
-* [Synthetic Module Record Design Doc](SyntheticModules/designDoc.md)
-* [Media Cache Reduction Explainer](MediaCacheReduction/explainer.md)
 * [Media Blob Explainer](MediaBlob/explainer.md)
 
 ### Navigation
@@ -174,12 +165,27 @@ related to the construction of Microsoft Edge.
 
 ### Acessibility
 
-* [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) and [Design Doc](Accessibility/CaretBrowsing/designDoc.md) | ✅Shipped in Edge XX
-* [UI Automation Provider Mappings](Accessibility/UIA/explainer.md) and [intent-to-implement](Accessibility/UIA/i2i.md) | ✅Shipped in Edge XX
+* [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) explainer and [Design Doc](Accessibility/CaretBrowsing/designDoc.md) | ✅Shipped in Edge XX
+* [Tagged PDFs support](PDF/TaggedPDF/explainer.md) explainer
+* [UI Automation Provider Mappings](Accessibility/UIA/explainer.md) explainer and [intent-to-implement](Accessibility/UIA/i2i.md) | ✅Shipped in Edge XX
+* [WebVTT Caption Styling](WebVTTCaptionStyling/explainer.md) explainer
 
 ### Editing
 
-* [Streamlined Text Input (TSF1)](TSF1/explainer.md) | ✅Shipped in Edge XX
+* [Streamlined Text Input (TSF1)](TSF1/explainer.md) explainer | ✅Shipped in Edge XX
+
+### Fonts
+
+* [End User Defined Characters (EUDC)](EUDC/explainer.md) explainer | ✅Shipped in Edge XX
+
+### HTML
+
+* [Synthetic Module Record](SyntheticModules/designDoc.md) design document
+
+### Media
+
+* [Hardware-offloaded Audio Processing](AudioOffload/explainer.md) explainer
+* [Media Cache Reduction](MediaCacheReduction/explainer.md) explainer
 
 # Withdrawn
 
