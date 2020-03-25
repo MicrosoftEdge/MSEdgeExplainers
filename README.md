@@ -62,12 +62,6 @@ we will move them into the [Alumni section](#alumni-).
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
 * [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md)
   
-### HTML
-
-* [CSS Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) ~~[archived initial explainer](CSSModules/v1Explainer.md)~~
-* [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md), ~~[archived initial explainer](HTMLModules/explainer.md)~~, and [intent-to-implement](HTMLModules/i2i.md)
-* [JSON Modules intent-to-implement](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ)
-
 ### Media
 
 * [Audio Stream Category](AudioStreamCategory/explainer.md)
@@ -121,6 +115,8 @@ standards communities. Thanks for your interest!
 | Archived Explainer | Category | Document in Current Venue |
 |--|--|--|
 | [EditContext API](EditContext/explainer.md) | Editing | [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/ActiveDocuments/EditContext/explainer.md) in the [W3C Editing Task Force](https://w3c.github.io/editing/) |
+| [ES Modules for CSS (CSS Modules)](CSSModules/v1Explainer.md) | HTML | [CSS Modules V1 Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) in the [Web Components Incubator of the W3C Web Applications Working Group and WHATWG HTML and DOM Workstreams](https://github.com/w3c/webcomponents/) |
+| [ES Modules for HTML (HTML Modules)](HTMLModules/explainer.md) | HTML | [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) in the [Web Components Incubator of the W3C Web Applications Working Group and WHATWG HTML and DOM Workstreams](https://github.com/w3c/webcomponents/) |
 | [High Contrast](Accessibility/HighContrast/explainer.md) | Accessibility | [System Colors section](https://drafts.csswg.org/css-color/#css-system-colors) of [CSS Color Module Level 4](https://drafts.csswg.org/css-color/),<br> ['forced-color-adjust'](https://drafts.csswg.org/css-color-adjust-1/#forced) of [CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/), and<br> ['forced-colors'](https://drafts.csswg.org/mediaqueries-5/#forced-colors) of [Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
 | [Highlight API](highlight/explainer.md) | Editing | [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
 | [Media Blob](MediaBlob/explainer.md) | Media | [Improved Client-side Video Editing Explainer](https://github.com/WICG/video-editing/blob/master/readme.md) in the [Web Incubator Community Group](https://wicg.io/) |
@@ -170,6 +166,8 @@ related to the construction of Microsoft Edge.
 
 ### HTML
 
+* [HTML Modules](HTMLModules/i2i.md) intent-to-prototype
+* [JSON Modules](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ojwkySW-bpQ) intent-to-prototype
 * [Synthetic Module Record](SyntheticModules/designDoc.md) design document
 
 ### Media
