@@ -57,7 +57,7 @@ we will move them into the [Alumni section](#alumni-).
 ### Editing
 
 * [Highlight Events Explainer](highlight/events-explainer.md)
-* [PenEvents Explainer](PenEvents/explainer.md) and [Design Doc](PenEvents/dev-design.md)
+* [PenEvents Explainer](PenEvents/explainer.md)
 * [pen-action Explainer](PenAction/explainer.md)
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md)
 * [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md)
@@ -92,10 +92,6 @@ we will move them into the [Alumni section](#alumni-).
 
 * [ImageResource `color_scheme` Explainer](ImageResource-color_scheme/explainer.md)
 
-### Web Performance Measurement
-
-* [Frame Timing Use Cases](FrameTiming/use_cases.md)
-
 ### 3D / Immersive Experiences
 * [Native GLTF Pre-explainer](https://github.com/immersive-web/proposals/issues/52)
 
@@ -110,19 +106,19 @@ standards communities. Thanks for your interest!
 
 | Archived Explainer | Category | Document in Current Venue |
 |--|--|--|
-| [EditContext API](EditContext/explainer.md) | Editing | [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/ActiveDocuments/EditContext/explainer.md) in the [W3C Editing Task Force](https://w3c.github.io/editing/) |
-| [ES Modules for CSS (CSS Modules)](CSSModules/v1Explainer.md) | HTML | [CSS Modules V1 Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) in the [Web Components Incubator of the W3C Web Applications Working Group and WHATWG HTML and DOM Workstreams](https://github.com/w3c/webcomponents/) |
-| [ES Modules for HTML (HTML Modules)](HTMLModules/explainer.md) | HTML | [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) in the [Web Components Incubator of the W3C Web Applications Working Group and WHATWG HTML and DOM Workstreams](https://github.com/w3c/webcomponents/) |
-| [High Contrast](Accessibility/HighContrast/explainer.md) | Accessibility | [System Colors section](https://drafts.csswg.org/css-color/#css-system-colors) of [CSS Color Module Level 4](https://drafts.csswg.org/css-color/),<br> ['forced-color-adjust'](https://drafts.csswg.org/css-color-adjust-1/#forced) of [CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/), and<br> ['forced-colors'](https://drafts.csswg.org/mediaqueries-5/#forced-colors) of [Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
-| [Highlight API](highlight/explainer.md) | Editing | [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
-| [Media Blob](MediaBlob/explainer.md) | Media | [Improved Client-side Video Editing Explainer](https://github.com/WICG/video-editing/blob/master/readme.md) in the [Web Incubator Community Group](https://wicg.io/) |
-| [Shortcuts](Shortcuts/explainer.md) | Progressive Web Applications | ['shortcuts' member](https://w3c.github.io/manifest/#shortcuts-member) of [Web App Manifest](https://w3c.github.io/manifest/) in the [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) |
-| [Web Ink Enhancement (ink trail aided by the OS)](WebInkEnhancement/explainer.md) | Editing | [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) in the [Web Incubator Community Group](https://wicg.io/) |
-| [Bidirectional WebDriver Protocol](WebDriverRPC/webdriver.md) | WebDriver | [Bidirectional WebDriver Protocol Explainer](https://github.com/w3c/webdriver/blob/master/webdriver-bidi/webdriver.md) of the [WebDriver incubator](https://github.com/w3c/webdriver/blob/master/README.md) in the [W3C Browser Testing and Tools Working Group](https://www.w3.org/testing/browser/) |
-| [Window segments enumeration API](Foldables/explainer.md) | UI | [Window Segments Enumeration API Explainer](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md) in the [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) |
-| (direct-to-incubation) | Controls | [Open UI (Standardized Form Controls)](https://github.com/WICG/form-controls-components) in the [Web Incubator Community Group](https://wicg.io/) |
-| (direct-to-incubation) | HTML | [ES Module Attributes and JSON modules Explainer](https://github.com/tc39/proposal-module-attributes/blob/master/README.md) in the [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm) |
-| (direct-to-incubation) | Media | ['hdrMetadataType' for HDR query](https://w3c.github.io/media-capabilities/#videoconfiguration) and ['spatialRendering' for spatial audio query](https://w3c.github.io/media-capabilities/#audioconfiguration) of [Media Capabilities](https://w3c.github.io/media-capabilities/) in the [W3C Media Working Group](https://www.w3.org/media-wg/) and<br> [@media queries for HDR video](https://drafts.csswg.org/mediaqueries-4/#video-prefixed-features) of [Media Queries Level 4](https://drafts.csswg.org/mediaqueries-4/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
+| [EditContext API](EditContext/explainer.md) | Editing | [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/ActiveDocuments/EditContext/explainer.md) in the [W3C Editing Task Force](https://w3c.github.io/editing/). |
+| [ES Modules for CSS (CSS Modules)](CSSModules/v1Explainer.md) | HTML | [CSS Modules V1 Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) in the [Web Components Incubator of the W3C Web Applications Working Group and WHATWG HTML and DOM Workstreams](https://github.com/w3c/webcomponents/). |
+| [ES Modules for HTML (HTML Modules)](HTMLModules/explainer.md) | HTML | [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) in the [Web Components Incubator of the W3C Web Applications Working Group and WHATWG HTML and DOM Workstreams](https://github.com/w3c/webcomponents/). |
+| [High Contrast](Accessibility/HighContrast/explainer.md) | Accessibility | [System Colors section](https://drafts.csswg.org/css-color/#css-system-colors) of [CSS Color Module Level 4](https://drafts.csswg.org/css-color/),<br> ['forced-color-adjust'](https://drafts.csswg.org/css-color-adjust-1/#forced) of [CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/), and<br> ['forced-colors'](https://drafts.csswg.org/mediaqueries-5/#forced-colors) of [Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/). |
+| [Highlight API](highlight/explainer.md) | Editing | [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/). |
+| [Media Blob](MediaBlob/explainer.md) | Media | [Improved Client-side Video Editing Explainer](https://github.com/WICG/video-editing/blob/master/readme.md) in the [Web Incubator Community Group](https://wicg.io/). |
+| [Shortcuts](Shortcuts/explainer.md) | Progressive Web Applications | ['shortcuts' member](https://w3c.github.io/manifest/#shortcuts-member) of [Web App Manifest](https://w3c.github.io/manifest/) in the [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/). |
+| [Web Ink Enhancement (ink trail aided by the OS)](WebInkEnhancement/explainer.md) | Editing | [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) in the [Web Incubator Community Group](https://wicg.io/). |
+| [Bidirectional WebDriver Protocol](WebDriverRPC/webdriver.md) | WebDriver | [Bidirectional WebDriver Protocol Explainer](https://github.com/w3c/webdriver/blob/master/webdriver-bidi/webdriver.md) of the [WebDriver incubator](https://github.com/w3c/webdriver/blob/master/README.md) in the [W3C Browser Testing and Tools Working Group](https://www.w3.org/testing/browser/). |
+| [Window segments enumeration API](Foldables/explainer.md) | UI | [Window Segments Enumeration API Explainer](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md) in the [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/). |
+| (direct-to-incubation) | Controls | [Open UI (Standardized Form Controls)](https://github.com/WICG/form-controls-components) in the [Web Incubator Community Group](https://wicg.io/). |
+| (direct-to-incubation) | HTML | [ES Module Attributes and JSON modules Explainer](https://github.com/tc39/proposal-module-attributes/blob/master/README.md) in the [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm). |
+| (direct-to-incubation) | Media | ['hdrMetadataType' for HDR query](https://w3c.github.io/media-capabilities/#videoconfiguration) and ['spatialRendering' for spatial audio query](https://w3c.github.io/media-capabilities/#audioconfiguration) of [Media Capabilities](https://w3c.github.io/media-capabilities/) in the [W3C Media Working Group](https://www.w3.org/media-wg/) and<br> [@media queries for HDR video](https://drafts.csswg.org/mediaqueries-4/#video-prefixed-features) of [Media Queries Level 4](https://drafts.csswg.org/mediaqueries-4/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/). |
 
 
 # DevTools 🧰
@@ -156,6 +152,7 @@ related to the construction of Microsoft Edge.
 ### Editing
 
 * [Streamlined Text Input (TSF1)](TSF1/explainer.md) explainer | ✅Shipped in Edge XX
+* [PenEvents](PenEvents/dev-design.md) design document
 
 ### Fonts
 
@@ -181,6 +178,9 @@ related to the construction of Microsoft Edge.
 
 * [Impl Threaded Scrollbar scrolling](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4) intent-to-implement
 
+### Web Performance Measurement
+
+* [Frame Timing](FrameTiming/use_cases.md) use cases
 
 # Withdrawn
 
