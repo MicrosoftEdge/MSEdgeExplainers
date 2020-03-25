@@ -127,10 +127,10 @@ Please continue to participate and follow the links below to the current
 standards communities where the latest discussions are happening. Thanks 
 for your interest!
 
-| Category | Archived Explainer | Document in Current Venue |
+| Archived Explainer | Category | Document in Current Venue |
 |--|--|--|
-| Accessibility | [High Contrast](Accessibility/HighContrast/explainer.md) | [System Colors section](https://drafts.csswg.org/css-color/#css-system-colors) of [CSS Color Module Level 4](https://drafts.csswg.org/css-color/),<br> ['forced-color-adjust'](https://drafts.csswg.org/css-color-adjust-1/#forced) of [CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/), and<br> ['forced-colors'](https://drafts.csswg.org/mediaqueries-5/#forced-colors) of [Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |  
-| Progressive Web Applications | [Shortcuts](Shortcuts/explainer.md) | ['shortcuts' member](https://w3c.github.io/manifest/#shortcuts-member) of [Web App Manifest](https://w3c.github.io/manifest/) in [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) |
+| [High Contrast](Accessibility/HighContrast/explainer.md) | Accessibility | [System Colors section](https://drafts.csswg.org/css-color/#css-system-colors) of [CSS Color Module Level 4](https://drafts.csswg.org/css-color/),<br> ['forced-color-adjust'](https://drafts.csswg.org/css-color-adjust-1/#forced) of [CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/), and<br> ['forced-colors'](https://drafts.csswg.org/mediaqueries-5/#forced-colors) of [Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/) in the [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |  
+| [Shortcuts](Shortcuts/explainer.md) | Progressive Web Applications | ['shortcuts' member](https://w3c.github.io/manifest/#shortcuts-member) of [Web App Manifest](https://w3c.github.io/manifest/) in [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) |
 
 
 # DevTools 🧰
