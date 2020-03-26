@@ -98,7 +98,7 @@ status section to help you find where the latest discussions are happening.
 Please continue to participate and follow the links below to the current
 standards communities. Thanks for your interest!
 
-| Archived Explainer | Category | Document in Current Venue |
+| Archived Explainer | Category | Document and Current Venue |
 |--|--|--|
 | [EditContext API](EditContext/explainer.md) | Editing | [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/ActiveDocuments/EditContext/explainer.md) in the [W3C Editing Task Force](https://w3c.github.io/editing/). |
 | [ES Modules for CSS (CSS Modules)](CSSModules/v1Explainer.md) | HTML | [CSS Modules V1 Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) in the [Web Components Incubator of the W3C Web Applications Working Group and WHATWG HTML and DOM Workstreams](https://github.com/w3c/webcomponents/). |
