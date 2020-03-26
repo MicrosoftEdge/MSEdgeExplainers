@@ -2,6 +2,14 @@
 
 Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https://github.com/dlibby-), [Zouhir Chahoud](https://github.com/Zouhir)
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active** (CSS primitives for dual screen layouts)
+    * Expected venue: [W3C CSS Working Group](https://www.w3.org/Style/CSS/)
+* This document status: **ARCHIVED** (Window Segments Enumeration JavaScript API)
+    * Current venue: [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) | [webscreens/window-segments](https://github.com/webscreens/window-segments) | ![GitHub issues](https://img.shields.io/github/issues/webscreens/window-segments)
+    * Current version: [Window Segments Enumeration JavaScript API](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md)
+
 ### Important Announcements and Updates
 - Feb 26, 2020: 🚚📦 [Window Segments Enumeration JavaScript API](#proposal-window-segments-enumeration-javascript-api) has now moved to the Second-screen W3C CG repo on GitHub, for issues and comments please refer to [webscreens/window-segments](https://github.com/webscreens/window-segments)
 
