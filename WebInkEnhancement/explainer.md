@@ -6,7 +6,7 @@ Author: [Daniel Libby](https://github.com/dlibby-)
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **ARCHIVED**
 * Current venue: [W3C Web Incubator Community Group](https://wicg.io/) | [WICG/ink-enhancement](https://github.com/WICG/ink-enhancement) | ![GitHub issues](https://img.shields.io/github/issues/WICG/ink-enhancement)
-* Current version: [Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md)
+* Current version: [Web Ink Enhancement: Delegated Ink Trail Presentation Aided By The OS Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md)
 
 ## Introduction
 Achieving low latency is critical for delivering great inking experiences on the Web. Ink on the Web is generally produced by consuming PointerEvents and rendering strokes to the application view, whether that be 2D or WebGL canvas, or less commonly, SVG or even HTML.
