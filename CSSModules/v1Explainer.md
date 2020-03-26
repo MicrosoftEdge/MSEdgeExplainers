@@ -1,8 +1,12 @@
-# MOVED. This doc is now maintained at https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md.  Please refer to that link for the latest content.
-
 # CSS Modules V1 Explainer
 
 Author: [@dandclark](https://github.com/dandclark)
+
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **ARCHIVED**
+* Current venue: [Web Components Incubator of the W3C Web Applications Working Group and WHATWG HTML and DOM Workstreams](https://github.com/w3c/webcomponents/) | [w3c/webcomponents](https://github.com/w3c/webcomponents/) | ![GitHub issues by-label](https://img.shields.io/github/issues/w3c/webcomponents/modules)
+* Current version: [CSS Modules V1 Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md)
 
 ## Introduction
 
