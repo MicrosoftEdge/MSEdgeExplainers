@@ -139,19 +139,19 @@ related to the construction of Microsoft Edge.
 
 ### Acessibility
 
-* [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) explainer and [Design Doc](Accessibility/CaretBrowsing/designDoc.md) | ✅Shipped in Edge XX
+* [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) explainer and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
 * [Tagged PDFs support](PDF/TaggedPDF/explainer.md) explainer
-* [UI Automation Provider Mappings](Accessibility/UIA/explainer.md) explainer and [intent-to-implement](Accessibility/UIA/i2i.md) | ✅Shipped in Edge XX
+* [UI Automation Provider Mappings](Accessibility/UIA/explainer.md) explainer and [intent-to-implement](Accessibility/UIA/i2i.md)
 * [WebVTT Caption Styling](WebVTTCaptionStyling/explainer.md) explainer
 
 ### Editing
 
-* [Streamlined Text Input (TSF1)](TSF1/explainer.md) explainer | ✅Shipped in Edge XX
+* [Streamlined Text Input (TSF1)](TSF1/explainer.md) explainer
 * [PenEvents](PenEvents/dev-design.md) design document
 
 ### Fonts
 
-* [End User Defined Characters (EUDC)](EUDC/explainer.md) explainer | ✅Shipped in Edge XX
+* [End User Defined Characters (EUDC)](EUDC/explainer.md) explainer
 
 ### HTML
 
