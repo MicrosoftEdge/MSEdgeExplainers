@@ -1,5 +1,4 @@
-![Microsoft Edge Logo](https://avatars0.githubusercontent.com/u/11354582?s=100) 
-# Microsoft Edge Explainers
+# ![Microsoft Edge Logo](https://avatars0.githubusercontent.com/u/11354582?s=75)Microsoft Edge Explainers
 
 Welcome! This repo is home to "explainers" and related documents originating 
 from the Microsoft Edge team.
