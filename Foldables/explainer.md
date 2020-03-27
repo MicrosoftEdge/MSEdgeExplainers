@@ -88,7 +88,7 @@ This value describes the state of when the browser window is not in spanning mod
 
 ![predefined environment variables](css-env-variables.svg)
 
-We propose the addition of 4 pre-defined CSS environment variables `fold-top`, `fold-left`, `fold-width`, `fold-height`. Web developers can utilize those variables to calculate each screen segment size at both landscape and portrait orientations. While the spanning media query guarantees there is only a single hinge and two screen segments, developers must not take a dependency that each screen segment is 50% of the viewport height or width, as that is not always the case (see above example of `single-fold-horizontal` where portions of the top display are consumed by browser UI).
+We propose the addition of 6 pre-defined CSS environment variables `fold-top`, `fold-right`, `fold-bottom`, `fold-left`, `fold-width`, `fold-height`. Web developers can utilize those variables to calculate each screen segment size at both landscape and portrait orientations. While the spanning media query guarantees there is only a single hinge and two screen segments, developers must not take a dependency that each screen segment is 50% of the viewport height or width, as that is not always the case (see above example of `single-fold-horizontal` where portions of the top display are consumed by browser UI).
 
 The values of these variables are CSS pixels, and are relative to the layout viewport (i.e. are in the [client coordinates, as defined by CSSOM Views](https://drafts.csswg.org/cssom-view/#dom-mouseevent-clientx)). When evaluated when not in one of the spanning states, these values will be treated as if they don't exist, and use the fallback value as passed to the `env()` function.
 
@@ -110,7 +110,7 @@ partial interface Window {
 }
 ```
 
-The value returned from the `getWindowSegments()` API will be an array of DOMRects, based on the data returned for each WindowSegment, developers will be able to infer the number of hinges available as well as the hinge orientation. Following the above examples, when in the `single-fold-vertical` state, getWindowSegments will return an array of 2 WindowSegments where the `top` property for each one is identical and equals 0, whereas `single-fold-horizontal` will return 2 WindowSegments with the `left` property being the identical one.
+The value returned from the `getWindowSegments()` API will be an array of DOMRects, based on the data returned for each DOMRect, developers will be able to infer the number of hinges available as well as the hinge orientation. Following the above examples, when in the `single-fold-vertical` state, getWindowSegments will return an array of 2 DOMRects where the `top` property for each one is identical and equals 0, whereas `single-fold-horizontal` will return 2 DOMRects with the `left` property being the identical one.
 
 A user may at any point take the browser window out of spanning mode and place it on one of the screens or vice-versa, in those cases the window resize event will fire and authors can query and get the number of available screen segments.
 
@@ -220,9 +220,9 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 
 	.yellow {
 		height: 100px;
-		width: calc(100vw - env(fold-left) + env(fold-width));
+		width: calc(100vw - env(fold-right));
 		position: absolute;
-		left: calc(env(fold-left) + env(fold-width) );
+		left: env(fold-right);
 		top: 0;
 	}
 
@@ -238,9 +238,24 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 		height: 100px;
 		width: 100px;
 		position: absolute;
-		left: calc(env(fold-left) + env(fold-width));
+		left: env(fold-right);
 		bottom: 0;
 	}
+}
+```
+
+#### LTR and RTL Layout Example
+![Yelow flex column being hinge aware in both LTR and RTL writing modes](ltr-rtl.svg)
+
+#### CSS solution outline:
+
+```css
+[dir="ltr"] .col {
+   flex: 0 0 env(fold-left);
+}
+
+[dir="rtl"] .col {
+   flex: 0 0 env(fold-right);
 }
 ```
 

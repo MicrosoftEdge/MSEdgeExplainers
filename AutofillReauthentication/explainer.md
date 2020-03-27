@@ -1,6 +1,12 @@
 # Autofill Reauthentication
 Author: [Brandon Maslen](https://github.com/Brandr0id), [Eric Lawrence](https://github.com/ericlaw1979), [Scott Low](https://github.com/scottlow)
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: not on the standards track 
+* Current version: this document
+
 ## Motivation
 Users who want to quickly share their devices with family and friends have expressed concern over their accounts being accessed without their permission due to the behavior of autofill in the browser. For example, consider a user, UserA, who has their credential for `social.example` saved in the browser for ease of login. Even if UserA signs out of their `social.example` account before handing their device to UserB (a friend or family member) to borrow, autofill will still automatically inject UserA's saved credential into the login form if UserB navigates to the `social.example` home page. This allows UserB to sign into UserA’s account with a single click. Additionally, UserB can [trivially reveal](https://bugs.chromium.org/p/chromium/issues/detail?id=126398) the plaintext of the injected password.
 
