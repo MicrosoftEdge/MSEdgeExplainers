@@ -67,7 +67,6 @@ we will move them into the [Alumni section](#alumni-).
 
 ### Privacy
 
-* [Autofill Reauthentication](AutofillReauthentication/explainer.md)
 * [Time-limited Permissions](TimeLimitedPermissions/Explainer.md)
 
 ### Progressive Web Applications
@@ -166,7 +165,7 @@ related to the construction of Microsoft Edge.
 ### Privacy
 
 * [Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md) a principles document describing our commitment to privacy through the principles of transparency, control, respect, and protection for our users.
-
+* [Autofill Reauthentication](AutofillReauthentication/explainer.md) explainer
 
 ### User Interaction
 
