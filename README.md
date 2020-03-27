@@ -94,7 +94,7 @@ Awesome! These explainers have moved on to bigger and better things! We've
 archived the original explainers here for posterity and updated their document
 status section to help you find where the latest discussions are happening.
 Please continue to participate and follow the links below to the current
-standards communities. Thanks for your interest!
+standards communities. Thanks for your continued interest!
 
 | Archived Explainer | Category | Document and Current Venue |
 |--|--|--|
