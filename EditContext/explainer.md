@@ -3,7 +3,7 @@
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **ARCHIVED**
-* Current venue: [W3C Editing Task Force](https://w3c.github.io/editing/) | [Github](https://github.com/w3c/editing/)
+* Current venue: [W3C Editing Task Force](https://w3c.github.io/editing/) | [w3c/editing](https://github.com/w3c/editing/)
 * Current version: [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/ActiveDocuments/EditContext/explainer.md)
 
 ## Introduction
