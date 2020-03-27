@@ -45,13 +45,15 @@ These are the proposals we are currently investigating in this repo. Use the
 links below to read the explainers, review the current issues, and file new
 issues specifically for the given explainer(s). We hope they will all "graduate"
 and begin their journey along the standards-track as they gain sufficient interest;
-each explainer should have a "Status of this Document" section that indicates 
+each explainer has a "status of this document" section that indicates 
 what standards venue they expect to go to next (if known). When they graduate,
-we will move them into the [Alumni section](#alumni-).
+we move them into the [Alumni section](#alumni-) below.
 
 ### Accessibility
 
-* [ARIA Virtual Content](Accessibility/VirtualContent/explainer.md)
+* [ARIA Virtual Content](Accessibility/VirtualContent/explainer.md) | 
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Content) |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=Virtual+Content&template=aria-virtual-content.md)
 
 ### Editing
 
@@ -85,7 +87,9 @@ we will move them into the [Alumni section](#alumni-).
 
 ### UI
 
-* [Web Platform Primitives for Enlightened Experiences on Foldable Devices (CSS parts)](Foldables/explainer.md) | ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Foldables) | File an issue...
+* [Web Platform Primitives for Enlightened Experiences on Foldable Devices (CSS parts)](Foldables/explainer.md) | 
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Foldables) |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=boggydigital%2C+dlibby-%2C+zouhir&labels=Foldables&template=web-platform-primitives-for-foldables--css-part-.md)
 
 
 # Alumni 🎓
