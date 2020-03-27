@@ -7,6 +7,12 @@ Authors:
 
 **Authors’ Note: This is an early idea and we expect to experiment a bit with it before coming to a final recommendation.**
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
+* Current version: this document
+
 ## Introduction
 
 An increasing number of sensitive APIs have been added to the web platform. To ensure user privacy is protected, these APIs are restricted to secure origins and typically require an explicit user permissions grant in order for the API to be available to a given domain. As web applications have become more advanced, these permissions request prompts have proliferated. This proliferation has led to users having "permissions request fatigue," the major symptom of which is a compulsive denial permissions prompts, especially if the prompt is non-contextual or if several requests are shown in rapid succession. This situation is problematic for many applications that rely on these sensitive APIs to function (e.g., a video conferencing app not being granted access to the camera and microphone).
