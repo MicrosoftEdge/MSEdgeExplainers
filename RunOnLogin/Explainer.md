@@ -1,6 +1,12 @@
 # Allow installed PWA to run on OS login
 Authors: [Carlos Frias](https://github.com/carlosfriasand), [Jungkee Song](https://github.com/jungkees)
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
+* Current version: this document
+
 ## Introduction
 
 This document proposes a mechanism for a *Progressive Web Application* (PWA) to be configured at install time with the option to be launched automatically when a user logs in to its OS session.
