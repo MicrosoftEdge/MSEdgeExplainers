@@ -5,6 +5,9 @@ This document is intended as a starting point for engaging the community and sta
 * This document status: **Active**
 * Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
 * Current version: this document
+    * See also: [w3c/manifest#847](https://github.com/w3c/manifest/issues/847)
+    * See also: [w3c/csswg-drafts#4721](https://github.com/w3c/csswg-drafts/issues/4721)
+    * See also: [WICG discourse thread](https://discourse.wicg.io/t/proposal-title-bar-customization-for-web-apps/4278)
 
 ## Table of Contents
  - [Introduction](#introduction)
