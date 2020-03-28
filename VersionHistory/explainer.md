@@ -4,6 +4,12 @@
 
 Megan Dymerski, Pooja Patel, Samantha Sappenfield, Aaron Gustafson and Stanley Hon.
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
+* Current version: this document
+
 ## Introduction
 
 When a new version of a piece of native software rolls out users are typically made aware through a notification in their operating system or the app store they use. The web—in contrast—is evergreen, meaning that software built atop it is always up to date. Because of this, there is no formal "moment" in which developers of web-based software can inform their users of what’s changed with their software from release to release (e.g., new features that have been added, which bugs have been fixed). Providing a standardized means of surfacing version history would enable developers to surface this useful—and sometimes crucial—information.
