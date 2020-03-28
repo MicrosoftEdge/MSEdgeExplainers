@@ -232,7 +232,7 @@ related to the construction of Microsoft Edge.
 
 # Withdrawn
 
-When at first you don't succeed... don't give up! We're no longer pursuing
+When at first you don't succeed… don't give up! We're no longer pursuing
 the solutions described in these explainers at this time, but that doesn't
 mean the problem isn't worth solving. Have an idea for an alternate solution?
 We'd love to hear your feedback!
