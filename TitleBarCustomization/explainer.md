@@ -1,5 +1,14 @@
 # Title Bar Customization for Web Apps
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
+* Current version: this document
+    * See also: [w3c/manifest#847](https://github.com/w3c/manifest/issues/847)
+    * See also: [w3c/csswg-drafts#4721](https://github.com/w3c/csswg-drafts/issues/4721)
+    * See also: [WICG discourse thread](https://discourse.wicg.io/t/proposal-title-bar-customization-for-web-apps/4278)
+
 ## Table of Contents
  - [Introduction](#introduction)
  - [Examples of title bar customization on desktop apps](#examples-of-title-bar-customization-on-desktop-apps)
