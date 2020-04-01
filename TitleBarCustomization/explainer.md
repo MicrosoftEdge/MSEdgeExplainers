@@ -1,4 +1,4 @@
-# Extend client area into titlebar
+# Minimal-frame Window for Installed Desktop Web Apps
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -12,7 +12,7 @@ This document is intended as a starting point for engaging the community and sta
 ## Table of Contents
  - [Introduction](#introduction)
  - [Examples of title bar customization on desktop apps](#examples-of-title-bar-customization-on-desktop-apps)
- - [Problem to solve: PWA Title bar area is system reserved](#problem-to-solve-pwa-title-bar-area-is-system-reserved)
+ - [Problem to solve: Desktop installed web apps title bar area is system reserved](#problem-to-solve-pwa-title-bar-area-is-system-reserved)
  - [Goals](#goals)
  - [Proposal](#proposal)
    - [Overlaying Window Controls](#overlaying-window-controls)
@@ -26,17 +26,17 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Introduction 
 
-PWAs hosted within a user agent (UA) frame are able to declare which browser display mode best meets the needs of the application via the manifest file's [`display` member](https://developer.mozilla.org/en-US/docs/Web/Manifest/display). Currently, there are 4 supported values and their behaviors on Chromium browsers are described below:
+Web apps hosted within a user agent (UA) frame are able to declare which browser display mode best meets the needs of the application via the manifest file's [`display` member](https://developer.mozilla.org/en-US/docs/Web/Manifest/display). Currently, there are 4 supported values and their behaviors on Chromium browsers are described below:
 - `fullscreen`: All of the available display is used and no UA chrome is shown. This is implemented only for mobile devices running Android or iOS.
 - `standalone`: The web app looks like a standalone application. The title bar includes the title of the application, a web app menu button, and window control buttons (minimize, maximize/restore, close). 
 - `minimal-ui`: Similar to `standalone`, except it also contains a back and refresh button. 
 - `browser`: Currently, the same as `minimal-ui`
 
-Developers targeting non-mobile devices will find that none of the display modes above offer the ability to create an immersive, native-like title bar for their application. Instead, they must shift content down below the reserved title bar area, which can create a cramped application space especially on portable devices with smaller screens.
+Developers targeting non-mobile devices will find that none of the display modes above offer the ability to create an immersive, native-like title bar for their application. Instead, the client areas begins immediately below the reserved title bar area, which can create a cramped application space especially on portable devices with smaller screens.
 
 This explainer will examine different techniques that could be developed to provide more control of the title bar area to developers while still protecting the rights of users to manage the app window.
 
-## Examples of title bar customization on desktop apps
+## Examples of title bar area customization on desktop apps
 
 The title bar area of desktop applications is customized in many popular applications. The title bar area refers to the space to the left or right of the window controls (minimize, maximize, close etc.) and often contains the title of the application. On Windows, this area can be customized by the developer and apps based on Electron often reclaim this title bar space for frequently used UI like a search box, profile icon, new message icon etc.
 
@@ -57,11 +57,11 @@ Workplace collaboration and communication tool Microsoft Teams, also based on El
 
 ![Microsoft Teams title bar on Mac](MSTeamsMac.png)
 
-## Problem to solve: PWA Title bar area is system reserved
+## Problem to solve: Desktop installed web apps title bar area is system reserved
 
-Contrast the above examples of popular desktop applications with the current limitation in the `standalone` display mode in Chromium based desktop PWAs.
+Contrast the above examples of popular desktop applications with the current limitation in the `standalone` display mode in Chromium based desktop web apps.
 
-![PWA Title bar not available for content](TwitterStandalone.png)
+![Web app title bar not available for content](TwitterStandalone.png)
 
 - The UA supplied title bar is styled by the browser (with input from the developer via the manifest's [`"display"`](https://developer.mozilla.org/en-US/docs/Web/Manifest/display) and [`"theme_color"`](https://developer.mozilla.org/en-US/docs/Web/Manifest/theme_color))
 - The 3-dot menu is displayed beside the window controls
@@ -86,7 +86,7 @@ The solution proposed in this explainer is in multiple parts
 3. New CSS environment variables to define the left and right insets from the edges of the window: `unsafe-area-top-inset-left` and `unsafe-area-top-inset-right`
 4. A standards-based way for developers to define system drag regions on their content
 
-### Overlaying Window Controls
+### Overlaying Window Controls on a Minimal-frame Window
 To provide the maximum addressable area for web content, the User Agent (UA) will create a frameless window removing all UA provided chrome except for a window controls overlay.
 
 The window controls overlay ensures users can minimize, maximize or restore, and close the application, and also provides access to relevant browser controls via the web app menu. For Chromium browsers displayed in left-to-right (LTR) languages, the content will flow as follows, starting from the left/inner edge of the overlay:
@@ -94,10 +94,10 @@ The window controls overlay ensures users can minimize, maximize or restore, and
 - The "Settings and more" three-dot button which gives users access to extensions, security information about the page, access to cookies, etc.
 - The window control buttons minimize, maximize/restore, and close. On operating systems that only support full screen windows, the maximize/restore button will be omitted.
 
-![Window controls overlay on an empty PWA](WindowControlsOverlay.png)
+![Window controls overlay on an empty web app](WindowControlsOverlay.png)
 
 Additionally, there are two scenarios where other content will appear in the window controls overlay. When these show or hide, the overlay will resize to fit, and a `resize` event will be fired on the `window` object. 
-- When a PWA is launched, the origin of the page will display to the left of the three-dot button for a few seconds, then disappear.
+- When a web app is launched, the origin of the page will display to the left of the three-dot button for a few seconds, then disappear.
 - If a user interacts with an extension via the "Settings and more" menu, the icon of the extension will appear in the overlay to the left of the three-dot button. After clicking out of the modal dialog, the icon is removed from the overlay.
 
 ![window controls overlay with origin text displayed](WindowControlsWithOrigin.png)
@@ -144,7 +144,7 @@ Although it's possible to layout the content of the title bar and web page with 
 
 The solution is to treat the overlay like a notch in a phone screen and layout the title bar area next to the window controls overlay "notch". The position of the overlay can be defined using the existing [`safe-area-inset-top`](https://developer.mozilla.org/en-US/docs/Web/CSS/env) CSS environment variable to determine the height, and two new CSS environment variables describing the left and right insets of the overlay: [`unsafe-area-top-inset-left/right`](https://github.com/w3c/csswg-drafts/issues/4721). See the [sample code](#example) below on one method of laying out the title bar using these CSS environment variables. 
 
-We explored and rejected an alternative approach which instead uses CSS environment variables to describe the safe area of the title bar, `title-bar-area-[top/left/bottom/right]`. Although this "safe area" approach would be easier for developers to use than the "unsafe area" approach, it would be difficult to standardize given that it is such a niche use case (only available on desktop PWAs). 
+We explored and rejected an alternative approach which instead uses CSS environment variables to describe the safe area of the title bar, `title-bar-area-[top/left/bottom/right]`. Although this "safe area" approach would be easier for developers to use than the "unsafe area" approach, it would be difficult to standardize given that it is such a niche use case (only available on desktop web apps). 
 
 ### Defining Draggable Regions in Web Content
 Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. The proposed solution is to standardize the existing CSS property: `-webkit-app-region`. 
@@ -168,15 +168,15 @@ Dialogs like print `[Ctrl+P]` and find in page `[Ctrl + F]` are typically anchor
 
 ![Search in a standard Chromisum window](searchBrowser.png)
 
-With the omnibox hidden, PWAs anchor these elements to an icon to the left of the three-dot "Settings and more" button. To maintain consistency across all PWAs, the window controls overlay will use this pattern as well.
+With the omnibox hidden, web apps anchor these elements to an icon to the left of the three-dot "Settings and more" button. To maintain consistency across all web apps, the window controls overlay will use this pattern as well.
 
-![Search in a Chromium PWA](searchPWA.png)
+![Search in a Chromium web app](searchPWA.png)
 
 ## Example
 
 Below is an example of how these new features could be used to create a web application with a custom title bar. 
 
-![Example code as a PWA](CustomTitleBarExample.png)
+![Example code as a web app](CustomTitleBarExample.png)
 
 ### manifest.webmanifest
 In the manifest, set `"display": "standalone"` and `"display_modifiers": ["window-controls-overlay"]`. Set the `theme_color` to be the desired color of the title bar.
@@ -331,19 +331,19 @@ if (window.navigator.controlsOverlay && window.navigator.controlsOverlay.visible
 
 ## Security Considerations
 
-Giving sites partial control of the title bar leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
+Displaying web apps in a minimal-frame window leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
 
 Currently in Chromium browsers, `standalone` mode includes a title bar which on initial launch displays the `title` of the webpage on the left, and the origin of the page on the right (followed by the "settings and more" button and the window controls). After a few seconds, the origin text disappears. 
 
 In RTL configured browsers, this layout is flipped such that the origin text is on the left. This open the window controls overlay to spoofing the origin if there is insufficient padding between the origin and the right edge of the overlay. For example, the origin "evil.ltd" could be appended with a trusted site "google.com", leading users to believe that the source is trustworthy.  
 
-![Standalone PWA in RTL format](RTL-standalone-titlebar.png) 
+![Standalone web app in RTL format](RTL-standalone-titlebar.png) 
 
 ## Privacy Considerations
 
 Enabling the window controls overlay and draggable regions do not pose considerable privacy concerns other than feature detection. However, due to differing sizes and positions of the window control buttons across operating systems, the JavaScript API for `window.navigator.controlsOverlay.getBoundingRect()` will return a rect whose position and dimensions will reveal information about the operating system upon which the browser is running. Currently, developers can already discover the OS from the user agent string, but due to fingerprinting concerns there is discussion about [freezing the UA string and unifying OS versions](https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ). We would like to work with the community to understand how frequently the size of the window controls overlay changes across platforms, as we believe that these are fairly stable across OS versions and thus would not be useful for observing minor OS versions.
 
-Although this is a potential fingerprinting issue, it only applies to installed PWAs that use the custom title bar feature and does not apply to general browser usage. Additionally, the `controlsOverlay` API will not be available to iframes embedded inside of a PWA.
+Although this is a potential fingerprinting issue, it only applies to installed desktop web apps that use the minimal-frame feature and does not apply to general browser usage. Additionally, the `controlsOverlay` API will not be available to iframes embedded inside of a web app.
 
 ## Open Questions
 
