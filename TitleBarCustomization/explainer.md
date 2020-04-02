@@ -1,4 +1,4 @@
-# Minimal-frame Window for Installed Desktop Web Apps
+# Window Controls Overlay for Installed Desktop Web Apps
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -11,7 +11,7 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Table of Contents
  - [Introduction](#introduction)
- - [Examples of title bar customization on desktop apps](#examples-of-title-bar-customization-on-desktop-apps)
+ - [Examples of desktop apps customizing the title bar area](#examples-of-title-bar-customization-on-desktop-apps)
  - [Problem to solve: Desktop installed web apps title bar area is system reserved](#problem-to-solve-pwa-title-bar-area-is-system-reserved)
  - [Goals](#goals)
  - [Proposal](#proposal)
@@ -36,7 +36,7 @@ Developers targeting non-mobile devices will find that none of the display modes
 
 This explainer will examine different techniques that could be developed to provide more control of the title bar area to developers while still protecting the rights of users to manage the app window.
 
-## Examples of title bar area customization on desktop apps
+## Examples of desktop apps customizing the title bar area 
 
 The title bar area of desktop applications is customized in many popular applications. The title bar area refers to the space to the left or right of the window controls (minimize, maximize, close etc.) and often contains the title of the application. On Windows, this area can be customized by the developer and apps based on Electron often reclaim this title bar space for frequently used UI like a search box, profile icon, new message icon etc.
 
