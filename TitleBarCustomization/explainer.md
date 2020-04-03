@@ -12,10 +12,10 @@ This document is intended as a starting point for engaging the community and sta
 ## Table of Contents
  - [Introduction](#introduction)
  - [Examples of desktop apps customizing the title bar area](#examples-of-desktop-apps-customizing-the-title-bar-area)
- - [Problem to solve: Desktop installed web apps title bar area is system reserved](#problem-to-solve-installed-desktop-web-apps-title-bar-area-is-system-reserved)
+ - [Problem to solve: Installed desktop web apps title bar area is system reserved](#problem-to-solve-installed-desktop-web-apps-title-bar-area-is-system-reserved)
  - [Goals](#goals)
  - [Proposal](#proposal)
-   - [Overlaying Window Controls](#overlaying-window-controls)
+   - [Overlaying Window Controls](#overlaying-window-controls-on-a-frameless-window)
    - [Working Around the Window Controls Overlay](#working-around-the-window-controls-overlay)
      - [JavaScript APIs](#javascript-apis)
      - [CSS Environment Variables](#css-environment-variables) 
@@ -26,13 +26,13 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Introduction 
 
-Web apps hosted within a user agent (UA) frame are able to declare which browser display mode best meets the needs of the application via the manifest file's [`display` member](https://developer.mozilla.org/en-US/docs/Web/Manifest/display). Currently, there are 4 supported values and their behaviors on Chromium browsers are described below:
+Installed web apps hosted within a user agent (UA) frame are able to declare which browser display mode best meets the needs of the application via the manifest file's [`display` member](https://developer.mozilla.org/en-US/docs/Web/Manifest/display). Currently, there are 4 supported values and their behaviors on Chromium browsers are described below:
 - `fullscreen`: All of the available display is used and no UA chrome is shown. This is implemented only for mobile devices running Android or iOS.
 - `standalone`: The web app looks like a standalone application. The title bar includes the title of the application, a web app menu button, and window control buttons (minimize, maximize/restore, close). 
 - `minimal-ui`: Similar to `standalone`, except it also contains a back and refresh button. 
 - `browser`: Currently, the same as `minimal-ui`
 
-Developers targeting non-mobile devices will find that none of the display modes above offer the ability to create an immersive, native-like title bar for their application. Instead, the client areas begins immediately below the reserved title bar area, which can create a cramped application space especially on portable devices with smaller screens.
+Developers targeting non-mobile devices will find that none of the display modes above offer the ability to create an immersive, native-like title bar for their installed application. Instead, the client areas begins immediately below the reserved title bar area, which can create a cramped application space especially on portable devices with smaller screens.
 
 This explainer will examine different techniques that could be developed to provide more control of the title bar area to developers while still protecting the rights of users to manage the app window.
 
@@ -97,7 +97,7 @@ The window controls overlay ensures users can minimize, maximize or restore, and
 ![Window controls overlay on an empty web app](WindowControlsOverlay.png)
 
 Additionally, there are two scenarios where other content will appear in the window controls overlay. When these show or hide, the overlay will resize to fit, and a `resize` event will be fired on the `window` object. 
-- When a web app is launched, the origin of the page will display to the left of the three-dot button for a few seconds, then disappear.
+- When an installed web app is launched, the origin of the page will display to the left of the three-dot button for a few seconds, then disappear.
 - If a user interacts with an extension via the "Settings and more" menu, the icon of the extension will appear in the overlay to the left of the three-dot button. After clicking out of the modal dialog, the icon is removed from the overlay.
 
 ![window controls overlay with origin text displayed](WindowControlsWithOrigin.png)
@@ -168,7 +168,7 @@ Dialogs like print `[Ctrl+P]` and find in page `[Ctrl + F]` are typically anchor
 
 ![Search in a standard Chromisum window](searchBrowser.png)
 
-With the omnibox hidden, web apps anchor these elements to an icon to the left of the three-dot "Settings and more" button. To maintain consistency across all web apps, the window controls overlay will use this pattern as well.
+With the omnibox hidden, installed web apps anchor these elements to an icon to the left of the three-dot "Settings and more" button. To maintain consistency across all installed web apps, the window controls overlay will use this pattern as well.
 
 ![Search in a Chromium web app](searchPWA.png)
 
@@ -331,7 +331,7 @@ if (window.navigator.controlsOverlay && window.navigator.controlsOverlay.visible
 
 ## Security Considerations
 
-Displaying web apps in a frameless window leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
+Displaying installed web apps in a frameless window leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
 
 Currently in Chromium browsers, `standalone` mode includes a title bar which on initial launch displays the `title` of the webpage on the left, and the origin of the page on the right (followed by the "settings and more" button and the window controls). After a few seconds, the origin text disappears. 
 
@@ -343,7 +343,7 @@ In RTL configured browsers, this layout is flipped such that the origin text is 
 
 Enabling the window controls overlay and draggable regions do not pose considerable privacy concerns other than feature detection. However, due to differing sizes and positions of the window control buttons across operating systems, the JavaScript API for `window.navigator.controlsOverlay.getBoundingRect()` will return a rect whose position and dimensions will reveal information about the operating system upon which the browser is running. Currently, developers can already discover the OS from the user agent string, but due to fingerprinting concerns there is discussion about [freezing the UA string and unifying OS versions](https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ). We would like to work with the community to understand how frequently the size of the window controls overlay changes across platforms, as we believe that these are fairly stable across OS versions and thus would not be useful for observing minor OS versions.
 
-Although this is a potential fingerprinting issue, it only applies to installed desktop web apps that use the window controls overlay feature and does not apply to general browser usage. Additionally, the `controlsOverlay` API will not be available to iframes embedded inside of a web app.
+Although this is a potential fingerprinting issue, it only applies to installed desktop web apps that use the window controls overlay feature and does not apply to general browser usage. Additionally, the `controlsOverlay` API will not be available to iframes embedded inside of an installed web app.
 
 ## Open Questions
 
