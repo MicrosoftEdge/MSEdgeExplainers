@@ -11,8 +11,8 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Table of Contents
  - [Introduction](#introduction)
- - [Examples of desktop apps customizing the title bar area](#examples-of-title-bar-customization-on-desktop-apps)
- - [Problem to solve: Desktop installed web apps title bar area is system reserved](#problem-to-solve-pwa-title-bar-area-is-system-reserved)
+ - [Examples of desktop apps customizing the title bar area](#examples-of-desktop-apps-customizing-the-title-bar-area)
+ - [Problem to solve: Desktop installed web apps title bar area is system reserved](#problem-to-solve-installed-desktop-web-apps-title-bar-area-is-system-reserved)
  - [Goals](#goals)
  - [Proposal](#proposal)
    - [Overlaying Window Controls](#overlaying-window-controls)
@@ -57,11 +57,11 @@ Workplace collaboration and communication tool Microsoft Teams, also based on El
 
 ![Microsoft Teams title bar on Mac](MSTeamsMac.png)
 
-## Problem to solve: Desktop installed web apps title bar area is system reserved
+## Problem to solve: Installed desktop web apps title bar area is system reserved
 
 Contrast the above examples of popular desktop applications with the current limitation in the `standalone` display mode in Chromium based desktop web apps.
 
-![Web app title bar not available for content](TwitterStandalone.png)
+![Installed Web app title bar not available for content](TwitterStandalone.png)
 
 - The UA supplied title bar is styled by the browser (with input from the developer via the manifest's [`"display"`](https://developer.mozilla.org/en-US/docs/Web/Manifest/display) and [`"theme_color"`](https://developer.mozilla.org/en-US/docs/Web/Manifest/theme_color))
 - The 3-dot menu is displayed beside the window controls
@@ -86,7 +86,7 @@ The solution proposed in this explainer is in multiple parts
 3. New CSS environment variables to define the left and right insets from the edges of the window: `unsafe-area-top-inset-left` and `unsafe-area-top-inset-right`
 4. A standards-based way for developers to define system drag regions on their content
 
-### Overlaying Window Controls on a Minimal-frame Window
+### Overlaying Window Controls on a Frameless Window
 To provide the maximum addressable area for web content, the User Agent (UA) will create a frameless window removing all UA provided chrome except for a window controls overlay.
 
 The window controls overlay ensures users can minimize, maximize or restore, and close the application, and also provides access to relevant browser controls via the web app menu. For Chromium browsers displayed in left-to-right (LTR) languages, the content will flow as follows, starting from the left/inner edge of the overlay:
@@ -144,7 +144,7 @@ Although it's possible to layout the content of the title bar and web page with 
 
 The solution is to treat the overlay like a notch in a phone screen and layout the title bar area next to the window controls overlay "notch". The position of the overlay can be defined using the existing [`safe-area-inset-top`](https://developer.mozilla.org/en-US/docs/Web/CSS/env) CSS environment variable to determine the height, and two new CSS environment variables describing the left and right insets of the overlay: [`unsafe-area-top-inset-left/right`](https://github.com/w3c/csswg-drafts/issues/4721). See the [sample code](#example) below on one method of laying out the title bar using these CSS environment variables. 
 
-We explored and rejected an alternative approach which instead uses CSS environment variables to describe the safe area of the title bar, `title-bar-area-[top/left/bottom/right]`. Although this "safe area" approach would be easier for developers to use than the "unsafe area" approach, it would be difficult to standardize given that it is such a niche use case (only available on desktop web apps). 
+We explored and rejected an alternative approach which instead uses CSS environment variables to describe the safe area of the title bar, `title-bar-area-[top/left/bottom/right]`. Although this "safe area" approach would be easier for developers to use than the "unsafe area" approach, it would be difficult to standardize given that it is such a niche use case (only available on installed desktop web apps). 
 
 ### Defining Draggable Regions in Web Content
 Web developers will need a standards-based way of defining which areas of their content within the general area of the title bar should be treated as draggable. The proposed solution is to standardize the existing CSS property: `-webkit-app-region`. 
@@ -331,7 +331,7 @@ if (window.navigator.controlsOverlay && window.navigator.controlsOverlay.visible
 
 ## Security Considerations
 
-Displaying web apps in a minimal-frame window leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
+Displaying web apps in a frameless window leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
 
 Currently in Chromium browsers, `standalone` mode includes a title bar which on initial launch displays the `title` of the webpage on the left, and the origin of the page on the right (followed by the "settings and more" button and the window controls). After a few seconds, the origin text disappears. 
 
@@ -343,7 +343,7 @@ In RTL configured browsers, this layout is flipped such that the origin text is 
 
 Enabling the window controls overlay and draggable regions do not pose considerable privacy concerns other than feature detection. However, due to differing sizes and positions of the window control buttons across operating systems, the JavaScript API for `window.navigator.controlsOverlay.getBoundingRect()` will return a rect whose position and dimensions will reveal information about the operating system upon which the browser is running. Currently, developers can already discover the OS from the user agent string, but due to fingerprinting concerns there is discussion about [freezing the UA string and unifying OS versions](https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ). We would like to work with the community to understand how frequently the size of the window controls overlay changes across platforms, as we believe that these are fairly stable across OS versions and thus would not be useful for observing minor OS versions.
 
-Although this is a potential fingerprinting issue, it only applies to installed desktop web apps that use the minimal-frame feature and does not apply to general browser usage. Additionally, the `controlsOverlay` API will not be available to iframes embedded inside of a web app.
+Although this is a potential fingerprinting issue, it only applies to installed desktop web apps that use the window controls overlay feature and does not apply to general browser usage. Additionally, the `controlsOverlay` API will not be available to iframes embedded inside of a web app.
 
 ## Open Questions
 
