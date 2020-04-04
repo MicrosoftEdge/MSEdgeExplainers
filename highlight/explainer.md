@@ -1,6 +1,10 @@
-# MOVED. This doc is now maintained at https://drafts.csswg.org/css-highlight-api-1/. Please refer to that link for the latest content.
-
 # Highlight API Explained
+
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **ARCHIVED**
+* Current venue: [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [w3c/csswg-drafts](https://github.com/w3c/csswg-drafts) | ![GitHub issues by-label](https://img.shields.io/github/issues/w3c/csswg-drafts/css-highlight-api-1)
+* Current version: [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/)
 
 ## Overview
 
