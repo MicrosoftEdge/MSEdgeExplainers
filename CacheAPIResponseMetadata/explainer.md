@@ -2,6 +2,12 @@
 
 Authors: [Aaron Gustafson](https://github.com/aarongustafson), [Jungkee Song](https://github.com/jungkees)
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
+* Current version: this document
+
 ## Introduction
 
 Currently, many sites are using Service Workers and the Cache API to store absolutely everything they can, often relying on the browser to evict content when there is storage pressure. Sites that want to be more proactive in managing their caches are limited to pruning responses solely based on when they were cached, typically iterating over the keys of a given cache and deleting the first item until they reduce the quantity of cached responses below a predefined threshold. That might be a good strategy if all responses were equal, but they aren’t. Some payloads are large, others are small. Some resources are computationally-intensive to produce, others are static files served by a CDN. Some are only accessed once, others are accessed with great frequency, often depending on both the site itself and the particular user interacting with it.

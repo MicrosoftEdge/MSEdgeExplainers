@@ -2,6 +2,12 @@
 
 Authors: [Aaron Gustafson](https://github.com/aarongustafson)
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/)
+* Current version: this document
+
 ## Introduction
 
 With operating systems beginning to offer multiple color schemes (e.g., “dark mode” and “light mode”) and with [CSS offering a media query for that user preference](https://drafts.csswg.org/mediaqueries-5/#descdef-media-prefers-color-scheme), it is important to enable web apps to offer appropriate iconography for the context. As such, we need to upgrade the [<code>ImageResource</code> dictionary](https://w3c.github.io/manifest/#dom-imageresource) to include an optional member indicating which color scheme a given image should be associated with.
