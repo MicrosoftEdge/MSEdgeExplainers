@@ -111,10 +111,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Run%20on%20OS%20Login">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Run%20on%20OS%20Login?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=carlosfriasand%2C+jungkees&labels=Run+on+OS+Login&template=run-on-os-login.md)
-* [Title Bar Customization](TitleBarCustomization/explainer.md) | 
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Title%20Bar%20Customization">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Title%20Bar%20Customization?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=amandabaker&labels=Title+Bar+Customization&template=title-bar-customization.md)
 * [URL Protocol Handler Registration for PWAs](URLProtocolHandler/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/URLProtocolHandler">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/URLProtocolHandler?label=issues)</a> |
@@ -123,6 +119,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Version%20History">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Version%20History?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+stanleyhon&labels=Version+History&template=version-history.md)
+* [Window Controls Overlay for installed web apps (was: Title Bar Customization)](TitleBarCustomization/explainer.md) | 
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Window%20Controls%20Overlay">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Window%20Controls%20Overlay?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=amandabaker&labels=Window+Controls+Overlay&template=title-bar-customization.md)
 
 ### Storage
 
