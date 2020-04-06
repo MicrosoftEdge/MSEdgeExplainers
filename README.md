@@ -33,6 +33,7 @@ We welcome public discussion in issues on these explainers. Thanks for your inte
 * [3D View]( https://docs.google.com/document/d/16xsQbr1YjjuoxHJlCsAaIzK-s4Ogd6fEuhrSajdVivA)
 * [Localization of the DevTools](https://docs.google.com/document/d/1L6TkT2-42MMQ72ZSBMFwUaq7M6mDgA2X0x8oHHKaV_U/)
 * [DevTools Infobar UI Refresh](https://docs.google.com/document/d/1GjpfPkdljH97IAaWfY8d9NBim1wrPPRaD8zMl8PWhLs/)
+* [Service Worker Improvements](https://docs.google.com/document/d/1L-dhKWYoVECdoqVQ0hOKqtyWbk5LtluFWbZE8PJZtnU/)
 
 ## Editing
 * [EditContext API Explainer](EditContext/explainer.md)
