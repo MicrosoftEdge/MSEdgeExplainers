@@ -2,12 +2,14 @@
 
 ## **Authors**
 
-Fabio Rocha (<farocha@microsoft.com>)  
-Jose Leal (<joselea@microsoft.com>)  
-Eric Lawrence (<ericlaw@microsoft.com>)  
+Fabio Rocha (<farocha@microsoft.com>)
+Jose Leal (<joselea@microsoft.com>)
+Eric Lawrence (<ericlaw@microsoft.com>)
 
 ## Status of this Document
+
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+
 * This document status: **Active**
 * Expected venue: [Web Applications Working Group](https://www.w3.org/2019/webapps/) 
 * Current version: this document
@@ -22,7 +24,7 @@ It is important to note that both the manifest-based registration proposed in th
 
 Similarities include requirements around the list of schemes allowed to be registered (as discussed in the security section below), format of the parameters, same-origin policy and etc.
 
-There are subtle differences in the manifest-based registration, however, that might be useful to enhance the experience for PWA users. For example, the addition of extra parameters (e.g.: icons) that can be used in applicable UI in the OS to give visual cues about the part of the app that is handling a certain protocol. Likewise, manifest-based registrations could loosen some requirements that currently apply to `registerProtocolHandler`. For instance, the need of user interaction for a website to register to handle a certain protocol might not apply to manifest-based PWA registration, as when a user intentionally installs a PWA there's an implicit level of trust involved that installation-related things will occur, including the registration of protocol handlers. This could also mean that the user doesn't need to be notified that a new protocol handler has been registered, as currently happens when `registerProtocolHandler` is used, and instead we could rely on solutions that let the user know what will happen before installation, such as an install time permissions prompt, to convey that protocols handlers will be registered.
+There are subtle differences in the manifest-based registration, however, that might be useful to enhance the experience for PWA users. For example, manifest-based registrations could loosen some requirements that currently apply to `registerProtocolHandler`. For instance, the need of user interaction for a website to register to handle a certain protocol might not apply to manifest-based PWA registration, as when a user intentionally installs a PWA there's an implicit level of trust involved that installation-related things will occur, including the registration of protocol handlers. This could also mean that the user doesn't need to be notified that a new protocol handler has been registered, as currently happens when `registerProtocolHandler` is used, and instead we could rely on solutions that let the user know what will happen before installation, such as an install time permissions prompt, to convey that protocols handlers will be registered.
 
 ## Use Cases
 
@@ -43,18 +45,11 @@ In this example, a Web App Manifest declares that the app should be registered t
   "protocol_handlers": [
     {
       "scheme": "web+jngl",
-      "url": "/lookup?type=%s",
-      "title": "Jungle – A plant encyclopedia",
-      "icon": {
-        "src": "images/catalogicon-44.png",
-        "type": "image/png",
-        "sizes": "44x44"
-      }
+      "url": "/lookup?type=%s"
     },
     {
       "scheme": "web+jnglstore",
-      "url": "/shop?for=%s",
-      "title": "Jungle – Store"
+      "url": "/shop?for=%s"
     }
   ],
   "icons": [
@@ -88,8 +83,6 @@ These are the fields for each protocol handler:
 |:----------|:--------------------|:------------------------------------------------------------------------------------|:------------------------------------------------------------------|
 | `scheme` | Required            | Scheme to be handled. E.g.: `mailto`, `ms-word`, `web+jngl`.                         | N/A                                                               |
 | `url` | Required            | HTTPS URL within the application that will handle the protocol. The `%s` token will be replaced by the URL starting with the protocol handler's scheme.                      | N/A                                       |
-| `title`   | Optional            | Friendly name of the app. On Windows it will be shown in the App Resolver.          | Value supplied via the `name` member of the manifest.             |
-| `icon`   | Optional            | Icon to be displayed for the app in relevant places (e.g.: App Resolver on Windows) | One of the values supplied via the `icon` member of the manifest. |
 
 ## How Other Applications Register for URL Handling
 
