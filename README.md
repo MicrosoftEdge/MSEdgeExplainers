@@ -182,6 +182,7 @@ We love our developer tools! Checkout these cool innovations being designed for 
 * [Redux for State](https://docs.google.com/document/d/1yVI-ABz_PL5npfoNosvv1ZKOsXhUwSMKc30UHf2RyqM/)
 * [Settings Discoverability and Telemetry](https://docs.google.com/document/d/1n9AGuh0iWQoqgm749BJJELK-ckrkgnaB5jfgef9RWSA/)
 * [Stackable Overlays](https://docs.google.com/document/d/13MHkk0rgHJl_MAIgrouUef5k9fK7lZMI1IEiNIUKbD0/)
+* [Service Worker Improvements](https://docs.google.com/document/d/1L-dhKWYoVECdoqVQ0hOKqtyWbk5LtluFWbZE8PJZtnU/)
 
 
 # Other Documents
