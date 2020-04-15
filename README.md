@@ -107,6 +107,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Install%20Time%20Permissions">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Install%20Time%20Permissions?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=Install+Time+Permissions&template=install-time-permissions-prompt.md)
+* [PWAs as URI Handlers Explainer](PwaUriHandler/explainer.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PWA%20URI%20Handling">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PWA%20URI%20Handling?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=LuHuangMSFT&labels=PWA+URI+Handling&template=pwa-as-uri-handler.md)
 * [Run on OS Login](RunOnLogin/Explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Run%20on%20OS%20Login">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Run%20on%20OS%20Login?label=issues)</a> |
@@ -123,6 +127,7 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Window%20Controls%20Overlay">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Window%20Controls%20Overlay?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=amandabaker&labels=Window+Controls+Overlay&template=window-controls-overlay.md)
+
 
 ### Storage
 
