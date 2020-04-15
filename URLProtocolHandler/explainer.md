@@ -6,7 +6,7 @@ Fabio Rocha (<farocha@microsoft.com>)
 Connor Moody (<comoody@microsoft.com>)
 Samuel Tang (<samtan@microsoft.com>)
 
-No Longer Participating: 
+Former authors (no longer involved):
 Jose Leal (<joselea@microsoft.com>)
 Eric Lawrence (<ericlaw@microsoft.com>)
 
