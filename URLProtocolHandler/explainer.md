@@ -3,6 +3,10 @@
 ## **Authors**
 
 Fabio Rocha (<farocha@microsoft.com>)
+Connor Moody (<comoody@microsoft.com>)
+Samuel Tang (<samtan@microsoft.com>)
+
+Former authors (no longer involved):
 Jose Leal (<joselea@microsoft.com>)
 Eric Lawrence (<ericlaw@microsoft.com>)
 
