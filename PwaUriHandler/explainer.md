@@ -114,7 +114,7 @@ These are the fields in each URI handler object:
 
 A URI matches a URI handler if it matches the `base`, at least one of values in `paths` if there are any, and does not match any of the values in `excludePaths`.
 
-Requested URIs do not have to be within the requesting PWA's scope. In this scheme, any URI can be registered as part of the URI handling request. The `base` field is necessary because URIs from different domains can be requested. Not restricting URIs to the same scope or domain as the requesting PWA gives the developer freedom to use multiple domain names for the same content and handle them with the same PWA. See [this section](#app-to-site-association) for how cross-domain requests are validated. The `base` field can start with a `%*.` prefix to indicate the inclusion of subdomains.
+Requested URIs do not have to be within the requesting PWA's scope. In this scheme, any URI can be registered as part of the URI handling request. The `base` field is necessary because URIs from different domains can be requested. Not restricting URIs to the same scope or domain as the requesting PWA gives the developer freedom to use multiple domain names for the same content and handle them with the same PWA. See [this section](#pwa-to-site-association) for how cross-domain requests are validated. The `base` field can start with a `%*.` prefix to indicate the inclusion of subdomains.
 
 (Implementation note: URI handling requests are registered with either the browser or the OS when a PWA is being installed. At this point, the browser should validate the requests. If necessary, the PWA install can be failed.)
 
