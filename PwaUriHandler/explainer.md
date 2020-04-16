@@ -112,7 +112,7 @@ These are the fields in each URI handler object:
 | `paths`   | Optional            | Array of allowed paths relative to `base`        | `[]`                              |
 | `excludePaths` | Optional       | Array of disallowed paths relative to `base`     | `[]`                              |
 
-A URI matches a URI handler if it matches the `base`, at least one of values in `paths` if there are any, and does not match any of the values in `excludePaths`.
+In this scheme, a URI matches a URI handler if it matches the `base`, at least one of values in `paths` if there are any, does not match any of the values in `excludePaths`, and is [verifiably associated](#pwa-to-site-association) with the PWA.
 
 Requested URIs do not have to be within the requesting PWA's scope. In this scheme, any URI can be registered as part of the URI handling request. The `base` field is necessary because URIs from different domains can be requested. Not restricting URIs to the same scope or domain as the requesting PWA gives the developer freedom to use multiple domain names for the same content and handle them with the same PWA. See [this section](#pwa-to-site-association) for how cross-domain requests are validated. The `base` field can start with a `%*.` prefix to indicate the inclusion of subdomains.
 
@@ -122,7 +122,7 @@ Requested URIs do not have to be within the requesting PWA's scope. In this sche
 
 Wildcard characters can be used in the values of all three fields: `base`, `paths`, and `excludePaths`. The wildcard `*` matches zero or more characters. The wildcard `?` matches exactly one character.
 
-The `base` field is able to contain a wildcard prefix to allow the specification of sub-domains: eg. `%*.contoso.com` matches `jadams.contoso.com` and `www.jqadams.contoso.com` but not `contoso.com`.
+The `base` field is able to contain a wildcard prefix to allow the specification of sub-domains: eg. `%*.contoso.com` matches `jadams.contoso.com` and `www.jqadams.contoso.com` but not `contoso.com`. There may be other ways of specifying a group of related domains using a proposal such as [First Part Sets](https://github.com/krgovind/first-party-sets).
 
 ### PWA to site association
 
@@ -225,9 +225,7 @@ URI handler registrations should only be performed for installed PWAs as users e
 
 ## Privacy Considerations
 
-The introduction of URI handling features carries a fingerprinting risk: a third party could build up a profile on a user if they can determine which PWAs that the user has installed on their device.
-
-As websites are currently unable to launch URI handlers through normal in-browser navigation, this is not an immediate privacy concern. Fingerprinting risks should be thoroughly examined when designing web APIs that activate URI handlers instead of performing in-browser navigation.
+As websites are currently unable to launch URI handlers through normal in-browser navigation, we do not anticipate third-party websites being able to leverage this API to detect which PWAs the user has installed. Although not an immediate privacy concern, fingerprinting risks should be thoroughly examined when designing web APIs that activate URI handlers instead of performing in-browser navigation.
 
 Native applications can already use OS APIs to enumerate installed applications on the user's system. For example, native applications in Windows can use the [FindAppUriHandlersAsync](https://docs.microsoft.com/en-us/uwp/api/windows.system.launcher.findappurihandlersasync) API to enumerate URI handlers. If PWAs register as OS level URI handlers in Windows, their presence would be visible to other applications.
 
