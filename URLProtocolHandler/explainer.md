@@ -20,7 +20,7 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Motivation
 
-Developers can create a more engaging native-like experience if we allow Progressive Web Apps to be registered as handlers for URL protocols. Today, native applications can register themselves as protocol handlers, and HTML5 exposes a JavaScript API `registerProtocolHandler` for web sites to do the same, but it is desirable to offer registration as part of a PWA installation through its manifest.
+Developers can create a more engaging native-like experience if we allow Progressive Web Apps to be registered as handlers for URL protocols (aka schemes). Today, native applications can register themselves as protocol handlers, and HTML5 exposes a JavaScript API `registerProtocolHandler` for web sites to do the same, but it is desirable to offer registration as part of a PWA installation through its manifest.
 
 After registering a PWA as a protocol handler, when a user clicks on a hyperlink with a specific scheme such as `mailto://` , `ms-word://` or `web+music://` from a browser or a native app, the registered PWA would open and receive the URL.
 
@@ -40,7 +40,7 @@ There are subtle differences in the manifest-based registration, however, that m
 
 ## Manifest Example
 
-In this example, a Web App Manifest declares that the app should be registered to handle the schemes `web+jngl` and `web+jnglstore`.
+In this example, a Web App Manifest declares that the app should be registered to handle the protocols `web+jngl` and `web+jnglstore`.
 
 ```json
 {
@@ -48,11 +48,11 @@ In this example, a Web App Manifest declares that the app should be registered t
   "description": "A plant encyclopedia",
   "protocol_handlers": [
     {
-      "scheme": "web+jngl",
+      "protocol": "web+jngl",
       "url": "/lookup?type=%s"
     },
     {
-      "scheme": "web+jnglstore",
+      "protocol": "web+jnglstore",
       "url": "/shop?for=%s"
     }
   ],
@@ -79,13 +79,13 @@ In this example, a Web App Manifest declares that the app should be registered t
 }
 ```
 
-A developer can add a field in the manifest.json to declare which schemes the web app can handle. As seen in the example above, the key is named `protocol_handlers` and it contains an array of protocol handler declaration objects.
+A developer can add a field in the manifest.json to declare which protocols the web app can handle. As seen in the example above, the key is named `protocol_handlers` and it contains an array of protocol handler declaration objects.
 
 These are the fields for each protocol handler:
 
 | Field     | Required / Optional | Description                                                                         | Default                                                           |
 |:----------|:--------------------|:------------------------------------------------------------------------------------|:------------------------------------------------------------------|
-| `scheme` | Required            | Scheme to be handled. E.g.: `mailto`, `ms-word`, `web+jngl`.                         | N/A                                                               |
+| `protocol` | Required            | Protocol to be handled. E.g.: `mailto`, `ms-word`, `web+jngl`.                         | N/A                                                               |
 | `url` | Required            | HTTPS URL within the application that will handle the protocol. The `%s` token will be replaced by the URL starting with the protocol handler's scheme.                      | N/A                                       |
 
 ## How Other Applications Register for URL Handling
