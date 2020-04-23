@@ -1,9 +1,12 @@
 # Virtual Keyboard Control
 
-
 **Note - this proposal extends the scope of [VirtualKeyboard Interface](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/VirtualKeyboardAPI/explainer.md)**
 
-
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Editing Task Force](https://w3c.github.io/editing/) 
+* Current version: this document
 
 ## Introduction
 The Virtual Keyboard (VK) is the on-screen keyboard used for input in scenarios where a hardware keyboard may not be available. Unlike a hardware keyboard, a VK can adapt its shape to optimize for the expected type of input.  
