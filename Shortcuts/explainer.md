@@ -5,6 +5,12 @@ Authors:
 * [Matt Giuca](https://github.com/mgiuca) (Google)
 * [Aaron Gustafson](https://github.com/aarongustafson) (Microsoft)
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **ARCHIVED**
+* Current venue: [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) | [w3c/manifest](https://github.com/w3c/manifest/) | ![GitHub issues](https://img.shields.io/github/issues/w3c/manifest)
+* Current version: ['shortcuts' member](https://w3c.github.io/manifest/#shortcuts-member) of [Web App Manifest](https://w3c.github.io/manifest/)
+
 ## Introduction
 
 A number of operating systems offer a means by which authors add menu items to the app launcher icon itself. These provide quick access to key tasks for an app. Typically, these are exposed via a right click, long tap, or a similar context menu-triggering action. The list of shortcut actions often contains a mixture of static and dynamic shortcuts.<sup id="a1">[1](#f1)</sup> Generally these number around 4–5, depending on the platform—or in the case of Android, the launcher—used. Adding these to the web platform provides an equivalent capability to native apps on many platforms.

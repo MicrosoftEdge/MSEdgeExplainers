@@ -2,6 +2,12 @@
 
 By: Yash Khandelwal & Greg Whitworth
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **ARCHIVED**
+* Current venue: [W3C Web Incubator Community Group](https://wicg.io/) | [WICG/video-editing](https://github.com/WICG/video-editing) | ![GitHub issues](https://img.shields.io/github/issues/WICG/video-editing)
+* Current version: [Improved Client-side Video Editing Explainer](https://github.com/WICG/video-editing/blob/master/readme.md)
+
 ## Introduction
 Currently editing video within the browser is a very complex task as there isn't any 
 straight forward approach to decoding the encoded video file to produce a raw stream that 
