@@ -1,5 +1,11 @@
 # pen-action Explainer
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
+* Current version: this document
+
 ## Motivation
 To help ensure responsiveness to touch and other pointer input, authors must declare (using the touch-action CSS property) which types of manipulation the browser may initiate in response to pointer input.  All pointer input not consumed by the browser for a manipulation can be delivered as a [PointerEvent](https://www.w3.org/TR/pointerevents2/) for the web app to handle explicitly.
 
