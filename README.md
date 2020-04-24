@@ -18,7 +18,7 @@ opinion for whether the proposed solution would address the problem.
 
 ### Please provide feedback
 
-We are looking for feedback! Are the stated problems actually real problems? 
+We are looking for feedback! Are the stated problems relevant to you? 
 How have they impacted your experience? Do the proposed solutions seem reasonable?
 Do they follow good [web principles](https://w3ctag.github.io/design-principles/)?
 Would they solve a problem you currently have? (We love to hear that; tell
@@ -26,7 +26,7 @@ us more about your scenario!) Do you have related use-cases we hadn't considered
 
 We appreciate you taking the time to offer feedback; it helps to improve the 
 explainers, validate the problem and solutions they describe, and show evidence
-that there is potential momentum to move an idea to the next stage--we desire
+that there is potential momentum to move an idea to the next stage. We desire
 to see all our explainers make the journey to become cross-browser supported
 web standards.
 
