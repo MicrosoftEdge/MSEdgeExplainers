@@ -3,6 +3,10 @@
 Welcome! This repo is home to "explainers" and related documents originating 
 from the Microsoft Edge team.
 
+#### Jump to section: [Active Explainers](#active-explainers-) | [Alumni](#alumni-) | [DevTools](#devtools-) | [Other documents](#other-documents) | [Withdrawn](#withdrawn)
+
+## Introduction
+
 [Explainers](https://w3ctag.github.io/explainers) are documents focused on 
 describing a user/ developer/ customer problem (at a high level) and exploring 
 potential solutions. These documents are starting points for engaging in discussion 
