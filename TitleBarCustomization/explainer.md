@@ -21,6 +21,9 @@ This document is intended as a starting point for engaging the community and sta
      - [CSS Environment Variables](#css-environment-variables) 
    - [Defining Draggable Regions in Web Content](#defining-draggable-regions-in-web-content)
  - [Example](#example)
+ - [Security Considerations](#security-considerations)
+   - [Spoofing risks](#spoofing-risks)
+   - [Out-of-scope Navigation](#out-of-scope-navigation)
  - [Privacy Considerations](#privacy-considerations)
  - [Open Questions](#open-questions)
 
@@ -331,6 +334,8 @@ if (window.navigator.controlsOverlay && window.navigator.controlsOverlay.visible
 
 ## Security Considerations
 
+
+### Spoofing risks
 Displaying installed web apps in a frameless window leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
 
 Currently in Chromium browsers, `standalone` mode includes a title bar which on initial launch displays the `title` of the webpage on the left, and the origin of the page on the right (followed by the "settings and more" button and the window controls). After a few seconds, the origin text disappears. 
@@ -338,6 +343,23 @@ Currently in Chromium browsers, `standalone` mode includes a title bar which on 
 In RTL configured browsers, this layout is flipped such that the origin text is on the left. This open the window controls overlay to spoofing the origin if there is insufficient padding between the origin and the right edge of the overlay. For example, the origin "evil.ltd" could be appended with a trusted site "google.com", leading users to believe that the source is trustworthy.  
 
 ![Standalone web app in RTL format](RTL-standalone-titlebar.png) 
+
+### Out-of-scope Navigation
+
+Another existing security feature for installed web apps is an indicator of when a user has left the declared scope of the app. When a user navigates out of scope, a black bar appears between the title bar and the web content, and it includes the following information:
+- A close button to allow users to easily navigate back into scope
+- A security icon which opens the security info popup when clicked
+- The origin and title of the site
+
+With the window controls overlay enabled, if a user navigates out-of-scope the overlay will be temporarily replaced with a `standalone` title bar. When the user navigates back to into scope, the `standalone` title bar will be hidden again and the overlay displayed. 
+
+_In-scope: using the window controls overlay_
+
+![In-scope: using the window controls overlay](CustomTitleBarExampleShort.png)
+
+_Out-of-scope: reverting to the `standalone` title bar_
+
+![Out-of-scope: reverting to the `standalone` title bar](OutOfScopeNavigation.png)
 
 ## Privacy Considerations
 
