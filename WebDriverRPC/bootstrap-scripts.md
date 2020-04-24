@@ -1,8 +1,10 @@
-# MOVED: This Explainer is no longer maintained in this repo. Please follow: https://github.com/w3c/webdriver/blob/master/webdriver-bidi/bootstrap-scripts.md to find the current version. Thanks!
-
----
-
 # Bootstrap Scripts
+
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Archived**
+* Current venue: [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) 
+* Current version: [Bootstrap Scripts](https://github.com/w3c/webdriver/blob/master/webdriver-bidi/bootstrap-scripts.md)
 
 ## Overview
 
