@@ -2,8 +2,13 @@
 
 Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https://github.com/dlibby-), [Zouhir Chahoud](https://github.com/Zouhir)
 
-### Important Announcements and Updates
-- Feb 26, 2020: 🚚📦 [Window Segments Enumeration JavaScript API](#proposal-window-segments-enumeration-javascript-api) has now moved to the Second-screen W3C CG repo on GitHub, for issues and comments please refer to [webscreens/window-segments](https://github.com/webscreens/window-segments)
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active** (CSS primitives for dual screen layouts)
+    * Expected venue: [W3C CSS Working Group](https://www.w3.org/Style/CSS/)
+* This document status: **ARCHIVED** (Window Segments Enumeration JavaScript API)
+    * Current venue: [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) | [webscreens/window-segments](https://github.com/webscreens/window-segments) | ![GitHub issues](https://img.shields.io/github/issues/webscreens/window-segments)
+    * Current version: [Window Segments Enumeration JavaScript API](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md)
 
 ### Table of content
 - [Motivation](#motivation)
@@ -28,13 +33,14 @@ Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https:
 	* [Simple CSS spanning media feature demo in a web-based device emulator](https://foldables-emulator.netlify.com/?url=https://css-spanning.netlify.com/demo/basic/)
 
 ## Motivation:
-Web developers targeting foldable devices want to be able to effectively lay out the content in a window that spans multiple displays. However, the web platform does not yet provide the necessary primitives for building layouts that are optimized for foldable experiences.
+Web developers targeting dual-screen and foldable devices want to be able to effectively lay out the content in a window that spans multiple display regions. However, the web platform does not yet provide the necessary primitives for building layouts that are optimized for dual-screen or foldable experiences.
+
 Developers may be able to solve this by taking a hard dependency on a specific device hardware parameters - an approach that is fragile, not scalable, and requires work duplication for each new device.
 
 ### Current problems:
 More specific challenges we've heard from our internal product teams that were exploring building experiences for this emerging classes of devices include:
 
-- *Hardware differences*: Devices could be seamless (e.g. Samsung Galaxy Fold) or have a seam (e.g. [Microsoft Surface Neo](https://www.microsoft.com/en-us/surface/devices/surface-neo), [Microsoft Surface Duo](https://www.microsoft.com/en-us/surface/devices/surface-duo) or ZTE Axon M). In the latter case developers might want to take it into account or intentionally ignore depending on scenario;
+- *Hardware differences*: Devices could be seamless (e.g. Samsung Galaxy Fold) or have a seam (e.g. [Microsoft Surface Neo](https://www.microsoft.com/en-us/surface/devices/surface-neo), [Microsoft Surface Duo](https://www.microsoft.com/en-us/surface/devices/surface-duo) or ZTE Axon M). In both cases developers might want to take it into account or intentionally ignore depending on scenario;
 - *Folding capabilities, state*: the fold area could be safe or unsafe region to present content;
 - *Future-proofing*: Ideally developers would want a somewhat stable way to target this class of devices without having to rely on specific device hardware parameters.
 
@@ -53,13 +59,17 @@ Additionally, while not a solution in the same sense, a ["[css-media-queries] Fo
 
 ## Proposal: CSS primitives for building dual screen layouts
 
-In order to enable web developers to build layouts that are optimized for foldable experiences declaratively using CSS, we must consider  fundamental assumptions of CSS (i.e. a single contiguous rectangular space for laying out content) and introduce new primitives that -together with existing layout media queries- allow developers to create layouts that react to states where the root viewport spans multiple displays.
+A summary of the concepts from the other proposals:
+* Display region - The representation of a physical monitor on dual-screen devices or the logical view area seperated by the hinge on foldable devices.
+* Screen - the aggregate 2D space occupied by all the connected displays.
 
-The first primitive we propose is a CSS media feature to determine whether the website is spanning across two adjacent displays along with the configuration of those two adjacent displays (e.g. stacked or aside). The second primitive is a set of user agent-defined environment variables that will help developers calculate the size of each screen region in CSS pixels.
+In order to enable web developers to build layouts that are optimized for dual-screen and foldable experiences declaratively using CSS, we must consider fundamental assumptions of CSS (i.e. a single contiguous rectangular space for laying out content) and introduce new primitives that -together with existing layout media queries- allow developers to create layouts that react to states where the root viewport spans across multiple display regions.
+
+The first primitive we propose is a CSS media feature to determine whether the website is spanning across two adjacent display regions along with the configuration of those two adjacent display regions (e.g. stacked or aside). The second primitive is a set of user agent-defined environment variables that will help developers calculate the size of each screen region in CSS pixels.
 
 ### The 'spanning' CSS media feature
 
-The `spanning` CSS media feature can be used to test whether the browser window is spanning across multiple diplays.
+The `spanning` CSS media feature can be used to test whether the browser window is spanning across multiple display regions.
 
 ![Figure showing 2 foldable devices with different hinge postures](spanning-media-query.svg)
 
@@ -69,11 +79,11 @@ The `spanning` media feature value can be one of the following keywords:
 
 - **single-fold-vertical**
 
-This value matches when the layout viewport is spanning a single fold (two screens) and the fold posture is vertical.
+This value matches when the layout viewport is spanning a single fold (two display regions) and the fold posture is vertical.
 
 - **single-fold-horizontal**
 
-This value matches when the layout viewport is spanning a single fold (two screens) and the fold posture is horizontal.
+This value matches when the layout viewport is spanning a single fold (two display regions) and the fold posture is horizontal.
 
 - **none**
 
@@ -83,7 +93,7 @@ This value describes the state of when the browser window is not in spanning mod
 
 ![predefined environment variables](css-env-variables.svg)
 
-We propose the addition of 4 pre-defined CSS environment variables `fold-top`, `fold-left`, `fold-width`, `fold-height`. Web developers can utilize those variables to calculate each screen segment size at both landscape and portrait orientations. While the spanning media query guarantees there is only a single hinge and two screen segments, developers must not take a dependency that each screen segment is 50% of the viewport height or width, as that is not always the case (see above example of `single-fold-horizontal` where portions of the top display are consumed by browser UI).
+We propose the addition of 6 pre-defined CSS environment variables `fold-top`, `fold-right`, `fold-bottom`, `fold-left`, `fold-width`, `fold-height`. Web developers can utilize those variables to calculate each screen segment size at both landscape and portrait orientations. While the spanning media query guarantees there is only a single hinge and two screen segments, developers must not take a dependency that each screen segment is 50% of the viewport height or width, as that is not always the case (see above example of `single-fold-horizontal` where portions of the top display are consumed by browser UI).
 
 The values of these variables are CSS pixels, and are relative to the layout viewport (i.e. are in the [client coordinates, as defined by CSSOM Views](https://drafts.csswg.org/cssom-view/#dom-mouseevent-clientx)). When evaluated when not in one of the spanning states, these values will be treated as if they don't exist, and use the fallback value as passed to the `env()` function.
 
@@ -95,25 +105,7 @@ The proposed CSS constructs are not currently meant to map to spanning configura
 
 ## Proposal: Window Segments Enumeration JavaScript API 
 
-A summary of the concepts from the other proposals:
-* Display - the logical representation of an physical monitor.
-* Screen - the aggregate 2D space occupied by all the connected displays.
-
-We propose a new concept of Window Segments that represent the regions (and their dimensions) of the window that reside on separate (adjacent) displays. Window Segment dimensions are expressed in CSS pixels and will be exposed via a JavaScript API that allows developers to enumerate segments where logically separate pieces of content can be placed. 
-
-This proposal is primarily aimed at reactive scenarios, where an application wants to take advantage of the fact that it spans multiple displays, by virtue of the user/window manager placing it in that state. It is not designed for scenarios of proactively placing content in a separate top-level browsing context on the various displays available (this would fall under the [Window Placement API](https://github.com/spark008/window-placement/blob/master/EXPLAINER.md) or [Presentation API](https://w3c.github.io/presentation-api/)). Note that given the [Screen Enumeration API](https://github.com/spark008/screen-enumeration/blob/master/EXPLAINER.md) and existing primitives on the Web, it is possible to write JavaScript code that intersects the rectangles of the Display and window, while taking into account devicePixelRatio in order to compute the interesting layout regions of a window spanned across displays. However this may not correctly handle corner cases of future device form factors, and thus this proposal tries to centralize access to "here are the interesting parts of the screen a developer can target or consider for presenting content" as a practical starting point. 
-
-```
-partial interface Window {
-	sequence<DOMRect> getWindowSegments();
-}
-```
-
-The value returned from the `getWindowSegments()` API will be an array of WindowSegment objects, based on the data returned for each WindowSegment, developers will be able to infer the number of hinges available as well as the hinge orientation. Following the above examples, when in the `single-fold-vertical` state, getWindowSegments will return an array of 2 WindowSegments where the `top` property for each one is identical and equals 0, whereas `single-fold-horizontal` will return 2 WindowSegments with the `left` property being the identical one.
-
-A user may at any point take the browser window out of spanning mode and place it on one of the screens or vice-versa, in those cases the window resize event will fire and authors can query and get the number of available screen segments.
-
-This proposal doesn't aim to substitute existing APIs &mdash; the proposed development model can be summarized as requesting current window segments on interesting events and adjusting to the new presentation environment. There are no additional lifecycle proposals - the window segments are immutable and developers would request them upon common sense events (e.g. orientationchange, resize). It also  doesn't suggest how developers would use window segments to position, scale and orient content - in practical explorations developers used window segments to select the best declarative layout, not to modify layouts in script, but either would be possible.
+- Feb 26, 2020: 🚚📦 Window Segments Enumeration JavaScript API has now moved to the [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/). For the explainer, issues, and comments please refer to the [webscreens/window-segments](https://github.com/webscreens/window-segments) GitHub repo.
 
 ## Security and Privacy
 
@@ -219,9 +211,9 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 
 	.yellow {
 		height: 100px;
-		width: calc(100vw - env(fold-left) + env(fold-width));
+		width: calc(100vw - env(fold-right));
 		position: absolute;
-		left: calc(env(fold-left) + env(fold-width) );
+		left: env(fold-right);
 		top: 0;
 	}
 
@@ -237,9 +229,24 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 		height: 100px;
 		width: 100px;
 		position: absolute;
-		left: calc(env(fold-left) + env(fold-width));
+		left: env(fold-right);
 		bottom: 0;
 	}
+}
+```
+
+#### LTR and RTL Layout Example
+![Yelow flex column being hinge aware in both LTR and RTL writing modes](ltr-rtl.svg)
+
+#### CSS solution outline:
+
+```css
+[dir="ltr"] .col {
+   flex: 0 0 env(fold-left);
+}
+
+[dir="rtl"] .col {
+   flex: 0 0 env(fold-right);
 }
 ```
 
