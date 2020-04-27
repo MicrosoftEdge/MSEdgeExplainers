@@ -11,7 +11,7 @@ This document is intended as a starting point for engaging the community and sta
 
 The Audio Category is a proposed addition to the [mst-content-hint spec](https://github.com/w3c/mst-content-hint) that will allow websites to set a ```contentHint``` on a ```MediaStreamTrack``` that specifies that the track is meant for speech recognition by a machine.
 
-The ```contentHint``` we are proposing is ```uniformSpeech```.
+The ```contentHint``` we are proposing is ```speechRecognition```.
 
 ## Background
 
@@ -25,7 +25,7 @@ We plan to follow the lead of native applications across Android, iOS, and Windo
 
 ## Proposed API
 
-Add the ```uniformSpeech``` option to ```contentHint``` for audio tracks.
+Add the ```speechRecognition``` option to ```contentHint``` for audio tracks.
 
 ### IDL
 
@@ -46,7 +46,7 @@ navigator.mediaDevices.getUserMedia({ audio : constraints})
           handleMediaStreamAcquiredError.bind(this));
 
 function handleMediaStreamAcquired(mediaStream) {
-  mediaStream.getTracks()[0].contentHint = 'uniformSpeech';
+  mediaStream.getTracks()[0].contentHint = 'speechRecognition';
 }
 
 function handleMediaStreamAcquiredError(mediaStreamError) {
