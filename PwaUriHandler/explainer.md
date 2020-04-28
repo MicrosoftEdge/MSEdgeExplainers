@@ -122,7 +122,7 @@ Requested URIs do not have to be within the requesting PWA's scope. In this sche
 
 Wildcard characters can be used in the values of all three fields: `base`, `paths`, and `excludePaths`. The wildcard `*` matches zero or more characters. The wildcard `?` matches exactly one character.
 
-The `base` field is able to contain a wildcard prefix to allow the specification of sub-domains: eg. `%*.contoso.com` matches `jadams.contoso.com` and `www.jqadams.contoso.com` but not `contoso.com`. There may be other ways of specifying a group of related domains using a proposal such as [First Part Sets](https://github.com/krgovind/first-party-sets).
+The `base` field is able to contain a wildcard prefix to allow the specification of sub-domains: eg. `%*.contoso.com` matches `jadams.contoso.com` and `www.jqadams.contoso.com` but not `contoso.com`. There may be other ways of specifying a group of related domains using a proposal such as [First Party Sets](https://github.com/krgovind/first-party-sets).
 
 ### PWA to site association
 
