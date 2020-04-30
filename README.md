@@ -123,7 +123,7 @@ we move them into the [Alumni section](#alumni-) below.
 * [URL Protocol Handler Registration for PWAs](URLProtocolHandler/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/URLProtocolHandler">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/URLProtocolHandler?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=ericlaw1979%2C+fabiorocha%2C+joselea&labels=URLProtocolHandler&template=url-protocol-handler-registration.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=fabiorocha%2C+connor-moody%2C+samtan-msft&labels=URLProtocolHandler&template=url-protocol-handler-registration.md)
 * [Version History](VersionHistory/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Version%20History">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Version%20History?label=issues)</a> |
