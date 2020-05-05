@@ -144,7 +144,7 @@ As mentioned before, the Navigator interface from WebAPI has the method `registe
 
 ### Have `protocol_handlers` extend `registerProtocolHandler` with additional data
 
-[Issue #286](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/286) suggested that "this manifest addition serves to just 'enhance' the existing register protocol handler API." and that "the website still has to use the existing API". For instance, it could supplement the existing API with icons and other data that would be useful in an App context, but not as useful in a web site context.
+[Issue #286](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/286) suggested an alternative where "this manifest addition serves to just 'enhance' the existing register protocol handler API." and where "the website still has to use the existing API". For instance, it could supplement the existing API with icons and other data that would be useful in an App context, but not as useful in a web site context.
 
 Even though the author of the issue lists several good reasons as to why this could be an interesting alternative, this option will not be pursued because we believe this will not be ergonomic enough for developers. We could not find good examples on the web app space where manifest properties depend on calls to existing HTML5 APIs and having a dependency on that API being called at some point in time would work against the goal of having an app being able to handle protocols immediately after being installed.
 
