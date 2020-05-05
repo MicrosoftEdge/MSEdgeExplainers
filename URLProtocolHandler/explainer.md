@@ -148,7 +148,7 @@ As mentioned before, the Navigator interface from WebAPI has the method `registe
 
 Even though the author of the issue lists several good reasons as to why this could be an interesting alternative, this option will not be pursued because we believe this will not be ergonomic enough for developers. We could not find good examples on the web app space where manifest properties depend on calls to existing HTML5 APIs and having a dependency on that API being called at some point in time would work against the goal of having an app being able to handle protocols immediately after being installed.
 
-Having the APIs interact with each other would also cause confusion with regards to the order of API calls: "Do I first call `registerProtocolHandler` and then install the app, or the other way around?", "If I uninstall the app and install it again, do I need to have the API called again?", etc. There's also plans to have `protocol_handlers` supported in browser extensions, and coming up with logical interactions for 3 registration scenarios would be even more confusing for developers.
+Having the APIs interact with each other would also cause confusion with regards to the order of API calls: "Do I first call `registerProtocolHandler` and then install the app, or the other way around?", "If I uninstall the app and install it again, do I need to have the API called again?", etc. There's also plans to have `protocol_handlers` supported in [browser extensions](https://bugs.chromium.org/p/chromium/issues/detail?id=64100), and coming up with logical interactions for 3 registration scenarios would be even more confusing for developers.
 
 ## Security Considerations
 
