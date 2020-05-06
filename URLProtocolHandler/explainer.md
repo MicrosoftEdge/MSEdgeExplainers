@@ -134,11 +134,17 @@ Alternatively, it may be desirable to supply the URL as part of the [Launch Even
 
 ## Related APIs
 
+### registerProtocolHandler
+
 As mentioned before, the Navigator interface from WebAPI has the method `registerProtocolHandler` that allows web sites register as handlers of particular URL schemes.
 
 <https://html.spec.whatwg.org/multipage/system-state.html#custom-handlers>
 
 <https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerProtocolHandler>
+
+### protocol_handlers for WebExtensions
+
+Another related API is Mozilla's `protocol_handlers` API for their [WebExtensions](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/protocol_handlers). With that property, extensions can register a website as a handler for a particular protocol. Just like in this proposal, the syntax and semantics of this `WebExtensions` property is very similar to `registerProtocolHandler`, except that with `registerProtocolHandler` a website can only register itself as a handler. To avoid confusion for developers, it would be wise to keep the extensions API ([Chromium proposal](https://bugs.chromium.org/p/chromium/issues/detail?id=64100)), the web app API (proposed here) and `registerProtocolHandler` as aligned as possible. Keeping compatibility with all these APIs might also make it easier for user agents to share as much logic as possible among all the implementations. [Issue #280](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/280) provides more context on this.
 
 ## Security Considerations
 
