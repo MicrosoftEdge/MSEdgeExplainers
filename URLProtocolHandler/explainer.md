@@ -15,7 +15,7 @@ Eric Lawrence (<ericlaw@microsoft.com>)
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
 * This document status: **Active**
-* Expected venue: [Web Applications Working Group](https://www.w3.org/2019/webapps/) 
+* Expected venue: [Web Applications Working Group](https://www.w3.org/2019/webapps/)
 * Current version: this document
 
 ## Motivation
@@ -145,6 +145,16 @@ As mentioned before, the Navigator interface from WebAPI has the method `registe
 ### protocol_handlers for WebExtensions
 
 Another related API is Mozilla's `protocol_handlers` property for their [WebExtensions](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/protocol_handlers). With that property, extensions can register a website as a handler for a particular protocol. Just like in this proposal, the syntax and semantics of this `WebExtensions` property is very similar to `registerProtocolHandler`, except that with `registerProtocolHandler` a website can only register itself as a handler. To avoid confusion for developers, it would be wise to keep the extensions API ([Chromium proposal](https://bugs.chromium.org/p/chromium/issues/detail?id=64100)), the web app API (proposed here) and `registerProtocolHandler` as aligned as possible. Keeping compatibility with all these APIs might also make it easier for user agents to share as much logic as possible among all the implementations. [Issue #280](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/280) provides more context on this.
+
+## Alternatives Considered
+
+### Have `protocol_handlers` extend `registerProtocolHandler` with additional data
+
+[Issue #286](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/286) suggested an alternative where "this manifest addition serves to just 'enhance' the existing register protocol handler API." and where "the website still has to use the existing API". For instance, it could supplement the existing API with icons and other data that would be useful in an App context, but not as useful in a web site context.
+
+Even though the author of the issue lists several good reasons as to why this could be an interesting alternative, this option will not be pursued because we believe this will not be ergonomic enough for developers. We could not find good examples on the web app space where manifest properties depend on calls to existing HTML5 APIs and having a dependency on that API being called at some point in time would work against the goal of having an app being able to handle protocols immediately after being installed.
+
+Having the APIs interact with each other would also cause confusion with regards to the order of API calls: "Do I first call `registerProtocolHandler` and then install the app, or the other way around?", "If I uninstall the app and install it again, do I need to have the API called again?", etc. There's also plans to have `protocol_handlers` supported in [browser extensions](https://bugs.chromium.org/p/chromium/issues/detail?id=64100), and coming up with logical interactions for 3 registration scenarios would be even more confusing for developers.
 
 ## Security Considerations
 
