@@ -4,8 +4,8 @@ Authors: [Sam Dallstream](https://github.com/sjdallst), [Greg Whitworth](https:/
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **Active**
-* Expected venue: [W3C mst-content-hint](https://w3c.github.io/mst-content-hint/) 
-* Current version: this document
+* Expected venue: [MediaStreamTrack Content Hints](https://w3c.github.io/mst-content-hint/) of the [W3C Web RTC Working Group](https://www.w3.org/2011/04/webrtc/)
+* Current version: this document (see also related [PR](https://github.com/w3c/mst-content-hint/pull/40))
 
 ## Introduction
 
