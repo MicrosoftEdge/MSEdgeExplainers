@@ -142,13 +142,11 @@ Example pwa-site-association file hosted at `www.conto.so/.well-known/pwa-site-a
     {
       "manifest": "www.contoso.com/manifest.json",
       "paths": ["/*"],
-      "description": "We own both domains so this is fine."
     },
     {
       "manifest": "www.partnerapp.com/manifest.json",
       "paths": ["/*"],
       "exclude_paths": ["/users/*"],
-      "description": "Let our partner's PWA handle all URLs except for user content."
     }
   ],
   "allow_all_associations": false
@@ -172,7 +170,6 @@ These are the fields in each association object:
 | `manifest`| Required            | URL of the web app manifest of the associated PWA| N/A                               |
 | `paths`   | Optional            | Array of allowed paths                           | `["*"]`                           |
 | `exclude_paths`| Optional       | Array of disallowed paths                        | `[]`                              |
-| `description` | Optional        | Description of this allowance                    | None                              |
 
 #### File Location
 
