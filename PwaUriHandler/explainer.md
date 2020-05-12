@@ -10,7 +10,7 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Introduction
 
-Developers can create a more engaging experience if Progressive Web Apps (PWAs) are able to register as handlers for http(s) uniform resource identifiers (URLs). This document proposes a scheme for a PWA to register as a URL handler and be launched when associated URLs are activated. PWA developers and end users are the customers of this solution.
+Developers can create a more engaging experience if Progressive Web Apps (PWAs) are able to register as handlers for https uniform resource identifiers (URLs). This document proposes a scheme for a PWA to register as a URL handler and be launched when associated URLs are activated. PWA developers and end users are the customers of this solution.
 
 Today, native applications on many operating systems (Windows, Android, iOS, MacOS) can be associated with http(s) URLs. They can request to be launched as URL handlers when associated URLs are activated. For example, a user could click on a link to a news story from an e-mail. An associated native app for viewing news stories would automatically be launched to handle the activation of the link. Web developers would be able to build more compelling PWA experiences with stronger user engagement if PWAs could request to be URL handlers through their web app manifests.
 
