@@ -1,6 +1,6 @@
 # PWAs as URI Handlers
 
-Authors: [Lu Huang](https://github.com/LuHuangMSFT) &lt;luhua@microsoft.com&gt;<br>
+Authors: [Lu Huang](https://github.com/LuHuangMSFT) &lt;luhua@microsoft.com&gt;
 
 ## Status of this Document
 
