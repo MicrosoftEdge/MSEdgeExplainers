@@ -150,13 +150,20 @@ Example pwa-site-association file hosted at `www.conto.so/.well-known/pwa-site-a
       "exclude_paths": ["/users/*"],
       "description": "Let our partner's PWA handle all URLs except for user content."
     }
-  ]
+  ],
+  "allow_all_associations": false
 }
 ```
 
 This example `pwa-site-association` file proves that `www.conto.so` is associated with the PWA that has a web app manifest at `www.contoso.com/manifest.json`. Furthermore, it allows all `www.conto.so/*` URL to be handled by the PWA. The requested paths in the web app manifest `url_handlers` data must be a subset of the allowed paths in the association object.
 
 This example shows that `www.conto.so` also allows the PWA with web app manifest at `www.partnerapp.com/manifest.json` to also handle a subset of its URLs. All `www.conto.so/products/*` paths are allowed but all `www.conto.so/users/*` URL are disallowed to be handled by the `partnerapp.com` PWA.
+
+These are the fields at the top level:
+| Field                   | Required / Optional | Description                                   | Default          |
+|:------------------------|:--------------------|:----------------------------------------------|:-----------------|
+| `apps`                  | Required            | Array of association objects                  | `[]`             |
+| `allow_all_associations`| Optional            | Allow any app to associate. Overrides `apps`. | `false`          |
 
 These are the fields in each association object:
 
