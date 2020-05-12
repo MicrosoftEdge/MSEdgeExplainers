@@ -142,11 +142,11 @@ Example pwa-site-association file hosted at `www.conto.so/.well-known/pwa-site-a
 {
   "apps": [
     {
-      "manifest": "www.contoso.com/manifest.json",
+      "manifest_url": "www.contoso.com/manifest.json",
       "paths": ["*"],
     },
     {
-      "manifest": "www.partnerapp.com/manifest.json",
+      "manifest_url": "www.partnerapp.com/manifest.json",
       "paths": ["*"],
       "exclude_paths": ["/users/*"],
     }
@@ -167,7 +167,7 @@ These are the fields in each association object:
 
 | Field     | Required / Optional | Description                                      | Default                           |
 |:----------|:--------------------|:-------------------------------------------------|:----------------------------------|
-| `manifest`| Required            | URL of the web app manifest of the associated PWA| N/A                               |
+| `manifest_url`| Required            | URL of the web app manifest of the associated PWA| N/A                           |
 | `paths`   | Optional            | Array of allowed paths                           | `["*"]`                           |
 | `exclude_paths`| Optional       | Array of disallowed paths                        | `[]`                              |
 
