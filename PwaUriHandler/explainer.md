@@ -63,7 +63,7 @@ To allow PWAs to handle URLs that are outside of their own scope, it is necessar
 
 ### Manifest Changes
 
-We propose adding a new _optional_ data field `url_handlers` to the manifest object. This data value will contain an array of URL handler declaration objects. Each object should contains a `base` string, an optional `paths` array of strings, and an optional `excludePaths` array of strings.
+We propose adding a new _optional_ data field `url_handlers` to the manifest object. This data value will contain an array of URL handler declaration objects. Each object should contains a `base` string, an optional `paths` array of strings, and an optional `exclude_paths` array of strings.
 
 The `url_handlers` data serves as requests from the PWA to handle URLs. The browser should validate that the PWA has the authority to handle those URLs and then store the request for later use. On an OS that allows for deeper integration, the browser should also perform the URL handling registrations with the OS and keep them in sync with the app lifecycle.
 
@@ -77,7 +77,7 @@ Example web app manifest hosted at `www.contoso.com`:
       {
           "base": "www.contoso.com",
           "paths": ["*"],
-          "excludePaths": [
+          "exclude_paths": [
               "/about",
               "/blog",
               "/privacy"
@@ -110,9 +110,9 @@ These are the fields in each URL handler object:
 |:----------|:--------------------|:-------------------------------------------------|:----------------------------------|
 | `base`    | Required            | Base portion of the URL to be handled. Can also be a complete URL. | N/A             |
 | `paths`   | Optional            | Array of allowed paths relative to `base`        | `[]`                              |
-| `excludePaths` | Optional       | Array of disallowed paths relative to `base`     | `[]`                              |
+| `exclude_paths` | Optional       | Array of disallowed paths relative to `base`     | `[]`                              |
 
-In this scheme, a URL matches a URL handler if it matches the `base`, at least one of values in `paths` if there are any, does not match any of the values in `excludePaths`, and is [verifiably associated](#pwa-to-site-association) with the PWA.
+In this scheme, a URL matches a URL handler if it matches the `base`, at least one of values in `paths` if there are any, does not match any of the values in `exclude_paths`, and is [verifiably associated](#pwa-to-site-association) with the PWA.
 
 Requested URLs do not have to be within the requesting PWA's scope. In this scheme, any URL can be registered as part of the URL handling request. The `base` field is necessary because URLs from different domains can be requested. Not restricting URLs to the same scope or domain as the requesting PWA gives the developer freedom to use multiple domain names for the same content and handle them with the same PWA. See [this section](#pwa-to-site-association) for how cross-domain requests are validated. The `base` field can start with a `%*.` prefix to indicate the inclusion of subdomains.
 
@@ -120,7 +120,7 @@ Requested URLs do not have to be within the requesting PWA's scope. In this sche
 
 #### Wildcard Matching
 
-Wildcard characters can be used in the values of all three fields: `base`, `paths`, and `excludePaths`. The wildcard `*` matches zero or more characters. The wildcard `?` matches exactly one character.
+Wildcard characters can be used in the values of all three fields: `base`, `paths`, and `exclude_paths`. The wildcard `*` matches zero or more characters. The wildcard `?` matches exactly one character.
 
 The `base` field is able to contain a wildcard prefix to allow the specification of sub-domains: eg. `%*.contoso.com` matches `jadams.contoso.com` and `www.jqadams.contoso.com` but not `contoso.com`. There may be other ways of specifying a group of related domains using a proposal such as [First Party Sets](https://github.com/krgovind/first-party-sets).
 
@@ -147,7 +147,7 @@ Example pwa-site-association file hosted at `www.conto.so/.well-known/pwa-site-a
     {
       "manifest": "www.partnerapp.com/manifest.json",
       "paths": ["/*"],
-      "excludePaths": ["/users/*"],
+      "exclude_paths": ["/users/*"],
       "comment": "Let our partner's PWA handle all URLs except for user content."
     }
   ]
@@ -164,7 +164,7 @@ These are the fields in each association object:
 |:----------|:--------------------|:-------------------------------------------------|:----------------------------------|
 | `manifest`| Required            | URL of the web app manifest of the associated PWA| N/A                               |
 | `paths`   | Optional            | Array of allowed paths                           | `["*"]`                           |
-| `excludePaths`| Optional        | Array of disallowed paths                        | `[]`                              |
+| `exclude_paths`| Optional        | Array of disallowed paths                        | `[]`                              |
 | `comment` | Optional            | Comment associated with this allowance           | None                              |
 
 #### File Location
@@ -219,7 +219,7 @@ In the case where the browser registers URL handling with the OS on behalf of PW
 
 If an associated site is overtaken by a malicious actor, it is possible for users to be exposed to malicious content through the PWA handling those URLs. To mitigate this risk, the browser may want to suppress the PWA launch or get user confirmation using a security mechanism which detects risky URLs.
 
-Conforming browsers may want to limit the maximum allowed number of `url_handlers` entries to N and the numbers of `paths` and `excludePaths` each to M. This will limit the amount of work the manifest parser does and further limit the risk of URL hijacking.
+Conforming browsers may want to limit the maximum allowed number of `url_handlers` entries to N and the numbers of `paths` and `exclude_paths` each to M. This will limit the amount of work the manifest parser does and further limit the risk of URL hijacking.
 
 URL handler registrations should only be performed for installed PWAs as users expect installed applications to be more deeply integrated with the OS. Furthermore, conforming browsers should not register PWAs as URL handlers for any URL without an explicit user confirmation.
 
