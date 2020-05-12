@@ -86,7 +86,7 @@ Example web app manifest hosted at `www.contoso.com`:
           ]
       },
       {
-          "base": "%*.contoso.com",
+          "base": "*.contoso.com",
           "paths": ["*"]
       },
       {
@@ -116,15 +116,15 @@ These are the fields in each URL handler object:
 
 In this scheme, a URL matches a URL handler if it matches the `base`, at least one of values in `paths` if there are any, does not match any of the values in `exclude_paths`, and is [verifiably associated](#pwa-to-site-association) with the PWA.
 
-Requested URLs do not have to be within the requesting PWA's scope. In this scheme, any URL can be registered as part of the URL handling request. The `base` field is necessary because URLs from different domains can be requested. Not restricting URLs to the same scope or domain as the requesting PWA gives the developer freedom to use multiple domain names for the same content and handle them with the same PWA. See [this section](#pwa-to-site-association) for how cross-domain requests are validated. The `base` field can start with a `%*.` prefix to indicate the inclusion of subdomains.
+Requested URLs do not have to be within the requesting PWA's scope. In this scheme, any URL can be registered as part of the URL handling request. The `base` field is necessary because URLs from different domains can be requested. Not restricting URLs to the same scope or domain as the requesting PWA gives the developer freedom to use multiple domain names for the same content and handle them with the same PWA. See [this section](#pwa-to-site-association) for how cross-domain requests are validated. The `base` field can start with a `*.` prefix to indicate the inclusion of subdomains.
 
 (Implementation note: URL handling requests are registered with either the browser or the OS when a PWA is being installed. At this point, the browser should validate the requests. If necessary, the PWA install can be failed.)
 
 #### Wildcard Matching
 
-Wildcard characters can be used in the values of all three fields: `base`, `paths`, and `exclude_paths`. The wildcard `*` matches zero or more characters. The wildcard `?` matches exactly one character.
+Wildcard characters can be used in the values of all three fields: `base`, `paths`, and `exclude_paths`. The wildcard character `*` matches zero or more characters. Wildcard can only be used as a prefix for `base`. Wildcard can only be used as a postfix for `paths` and `exclude_paths`. In-fix wildcards are disallowed to protect against poor performance during string matching.
 
-The `base` field is able to contain a wildcard prefix to allow the specification of sub-domains: eg. `%*.contoso.com` matches `jadams.contoso.com` and `www.jqadams.contoso.com` but not `contoso.com`. There may be other ways of specifying a group of related domains using a proposal such as [First Party Sets](https://github.com/krgovind/first-party-sets).
+The `base` field is able to contain a wildcard prefix to allow the specification of sub-domains: eg. `*.contoso.com` matches `jadams.contoso.com` and `www.jqadams.contoso.com` but not `contoso.com`. There may be other ways of specifying a group of related domains using a proposal such as [First Party Sets](https://github.com/krgovind/first-party-sets).
 
 ### PWA to site association
 
@@ -143,11 +143,11 @@ Example pwa-site-association file hosted at `www.conto.so/.well-known/pwa-site-a
   "apps": [
     {
       "manifest": "www.contoso.com/manifest.json",
-      "paths": ["/*"],
+      "paths": ["*"],
     },
     {
       "manifest": "www.partnerapp.com/manifest.json",
-      "paths": ["/*"],
+      "paths": ["*"],
       "exclude_paths": ["/users/*"],
     }
   ]
@@ -175,7 +175,7 @@ These are the fields in each association object:
 
 In the case where a fully specified `base` is used, the association file must be found at `[base]/.well-known/pwa-site-association` (without an extension).
 
-If a `base` with a `%*.` prefix is used, the pwa-site-association file must be present at the path without the prefix. Eg. a `base` of `%*.contoso.com` must have a `pwa-site-association` file at `contoso.com/.well-known/pwa-site-association`.
+If a `base` with a `*.` prefix is used, the pwa-site-association file must be present at the path without the prefix. Eg. a `base` of `*.contoso.com` must have a `pwa-site-association` file at `contoso.com/.well-known/pwa-site-association`.
 
 #### Failure to Associate
 
