@@ -2,6 +2,11 @@
 
 **Authors:** Bo Cupp, Alex Keng, Greg Whitworth
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Withdrawn**
+* Note: Rather than working on this HTML controls feature in isolation, we have rolled this effort into the larger [Open UI](https://github.com/WICG/open-ui) project of the [Web Incubator Community Group](https://wicg.io/) in an effort to provide a standardized set of form controls for the web, including password.
+
 ## Motivation:
 
 Passwords have long been a pain point for users on the web. Newer standards and extensions have been introduced in hopes of resolving some of the problems to varying degrees of success.
