@@ -3,8 +3,8 @@
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **Active**
-* Expected venue: [W3C Privacy Community Group](https://privacycg.github.io/) 
-* Current version: this document
+* Expected venue: [W3C Privacy Community Group](https://privacycg.github.io/)
+* Current version: this document. See also: [The Storage Access API](https://github.com/privacycg/storage-access/) in discussion at the [Privacy Community Group](https://privacycg.github.io/).
 
 ## Motivation
 As privacy is becoming increasingly important to users, requests for stricter browser defaults and user opt-in settings like blocking all third-party storage access are increasingly common. While these settings help improve privacy and block unwanted access by unknown or untrusted parties, they can have unwanted side effects such as blocking access to content the user may want to view (e.g. social media and embedded media content).
