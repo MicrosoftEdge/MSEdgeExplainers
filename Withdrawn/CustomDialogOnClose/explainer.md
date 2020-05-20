@@ -4,8 +4,10 @@
 
 -   Austin Orion
 
-## Withdrawn
-This explainer has been withdrawn. This design conflicted with the philosophy of keeping tab close as fast as possible. Work is ongoing to describe a way to meet the needs that this design aimed to address.
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Withdrawn**
+* Note: This design conflicted with the philosophy of keeping tab close as fast as possible. Work is ongoing to describe a way to meet the needs that this design aimed to address.
 
 ## Introduction
 Installed PWAs need a way to allow developers to perform asynchronous operations (such as saving a file) and optionally show a customizable dialog before the user closes the app and their state is lost.
