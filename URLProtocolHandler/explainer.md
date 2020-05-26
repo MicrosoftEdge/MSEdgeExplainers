@@ -164,9 +164,15 @@ The `registerProtocolHandler` API implements an allow list of schemes that may b
 
 URLs may contain sensitive user data; because PWAs require a secure context (HTTPS), invocation of a protocol handler will take place in a secure context. However, PWAs that implement protocol handlers must still take care to avoid sending potentially-sensitive URL data over insecure channels.
 
-Whenever there is ambiguity between which app must handle a protocol invocation, it is up to the OS to show the app resolver and let the user decide which one to use.
-
 We may want to cap the number of allowed protocols to a number N per manifest.
+
+### Handler Registration and App Launch
+To provide a smooth install experience, protocol handlers will be registered with the OS silently as part of PWA installation, however, the following following security mitigations will be implemented:
+1.	Registration of PWA protocol handlers won’t take over the default handler for a protocol. Instead, the next time the protocol is invoked, an OS disambiguation dialog will prompt the user to either keep using the default handler or select the newly registered handler.
+2.	On first launch (or potentially every launch) of the PWA due to an invoked protocol, the user will be presented with a permission dialog. This dialog will display the app name and origin of the app, and ask the user if the app is allowed to handle links from the protocol. If a user rejects the permission dialog, the protocol handler is unregistered with the OS.
+ 
+On some OSs, a handler registered for an uncontested protocol automatically takes over as the default handler during registration. Though no OS disambiguation dialog will display in this case, the user will still give consent through launch time permission prompt.
+
 
 ## Privacy Considerations
 
