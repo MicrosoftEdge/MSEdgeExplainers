@@ -150,8 +150,7 @@ Example pwa-site-association file hosted at `www.conto.so/.well-known/pwa-site-a
       "paths": ["/*"],
       "exclude_paths": ["/users/*"],
     }
-  ],
-  "allow_all_associations": false
+  ]
 }
 ```
 
@@ -163,7 +162,6 @@ These are the fields at the top level:
 | Field                   | Required / Optional | Description                                   | Default          |
 |:------------------------|:--------------------|:----------------------------------------------|:-----------------|
 | `apps`                  | Required            | Array of association objects                  | `[]`             |
-| `allow_all_associations`| Optional            | Allow any app to associate. Overrides `apps`. | `false`          |
 
 These are the fields in each association object:
 
