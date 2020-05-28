@@ -112,10 +112,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Install%20Time%20Permissions">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Install%20Time%20Permissions?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=Install+Time+Permissions&template=install-time-permissions-prompt.md)
-* [PWAs as URI Handlers Explainer](PwaUriHandler/explainer.md) |
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PWA%20URI%20Handling">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PWA%20URI%20Handling?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=LuHuangMSFT&labels=PWA+URI+Handling&template=pwa-as-uri-handler.md)
 * [Run on OS Login](RunOnLogin/Explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Run%20on%20OS%20Login">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Run%20on%20OS%20Login?label=issues)</a> |
@@ -158,6 +154,7 @@ standards communities. Thanks for your continued interest!
 
 | Archive date | Archived explainer | Category | Current document | Current standards venue |
 |--|--|--|--|--|
+| 2020-05-28 | [PWAs as URL Handlers](PwaUriHandler/explainer.md) | Progressive Web Applications | [Progressive Web Apps as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) |
 | 2020-03-17 | [EditContext API](EditContext/explainer.md) | Editing | [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/ActiveDocuments/EditContext/explainer.md) | [W3C Editing Task Force](https://w3c.github.io/editing/) |
 | 2020-03-13 | [Bidirectional WebDriver Protocol](WebDriverRPC/webdriver.md) | WebDriver | [Bidirectional WebDriver Protocol Explainer](https://github.com/w3c/webdriver/blob/master/webdriver-bidi/webdriver.md) | [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) |
 | 2020-02-27 | [Web Ink Enhancement (ink trail aided by the OS)](WebInkEnhancement/explainer.md) | Editing | [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) | [W3C Web Incubator Community Group](https://wicg.io/) |
