@@ -232,6 +232,10 @@ related to the construction of Microsoft Edge.
 * [Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md) a principles document describing our commitment to privacy through the principles of transparency, control, respect, and protection for our users.
 * [Autofill Reauthentication](AutofillReauthentication/explainer.md) explainer
 
+### Testing & Trials
+
+* [Microsoft Edge Origin Trials Guide](OriginTrialsGuide/explainer.md)
+
 ### User Interaction
 
 * [Impl Threaded Scrollbar scrolling](https://groups.google.com/a/chromium.org/forum/#!topic/input-dev/6ACOSDoAik4) intent-to-implement
