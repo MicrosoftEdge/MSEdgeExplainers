@@ -61,7 +61,7 @@ We are proposing that a new member be added to the [<code>ImageResource</code> d
     "src": "/icons/play-later.svg",
     "type": "image/svg+xml",
     "purpose": "any",
-    "color_scheme": "no-preference"
+    "color_scheme": "light"
   },
   {
     "src": "/icons/play-later-reverse.svg",
@@ -72,7 +72,7 @@ We are proposing that a new member be added to the [<code>ImageResource</code> d
 ]
 ```
 
-Without a defined `color_scheme`, the value of "no-preference" would be assigned.
+Without a defined `color_scheme`, the value of "light" would be assigned.
 
 ## Open Questions
 
