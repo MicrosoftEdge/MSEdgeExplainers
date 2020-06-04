@@ -45,11 +45,34 @@ window.navigator.virtualKeyboard.overlaysContent = true;
 ![Figure showing virtual keyboard overlaying page content](keyboard-occluding-content.png)
 
 
-### Listening and Respondinng to Virtual Keyboard Visibility Change
+### Listening and Responding to Virtual Keyboard Visibility Change
 
-Additionally, the `VirtualKeyboard` interface is an `EventTarget` which can be targeted by the `overlaygeometrychange` event. The user agent will fire this event when the virtual keyboard is shown in a docked state, and the virtual keyboard overlays the web content. Additionally it will fire when the virtual keyboard transitions from overlayed to hidden, or is moved to no longer intersect with the web content.
+Additionally, the `VirtualKeyboard` interface is an `EventTarget` which can be targeted by the `geometrychange` event. The user agent will fire this event when the virtual keyboard is shown in a docked state, and the virtual keyboard overlays the web content. Additionally it will fire when the virtual keyboard transitions from overlayed to hidden, or is moved to no longer intersect with the web content.
 
-The `overlaygeometrychange` event provides a `boundingRect` object with four read-only properties `top, left, width, height, bottom, right` to help developers reason about the virtual keyboard size and geometry. These values are in CSS pixels, and are in the client coordinate system.
+The `geometrychange` event provides a `boundingRect` object with four read-only properties `top, left, width, height, bottom, right` to help developers reason about the virtual keyboard size and geometry. These values are in CSS pixels, and are in the client coordinate system. This `boundingRect` is also available in `virtualKeyboard` object that is stored in `navigator`.
+
+### Virtual Keyboard Visibility Change CSS environment variables 
+
+We propose the addition of 6 pre-defined CSS environment variables safe-keyboard-area-inset-top, safe-keyboard-area-inset-right, safe-keyboard-area-inset-bottom, safe-keyboard-area-inset-left, safe-keyboard-area-inset-width, safe-keyboard-area-inset-height. Web developers can utilize those variables to calculate the Virtual keyboard size at both landscape and portrait orientations.
+
+The values of these variables are CSS pixels, and are relative to the layout viewport (i.e. are in the client coordinates, as defined by CSSOM Views). When evaluated when not in one of the spanning states, these values will be treated as if they don't exist, and use the fallback value as passed to the env() function.
+
+### Syntax
+```css
+env(safe-area-inset-top);
+env(safe-area-inset-right);
+env(safe-area-inset-bottom);
+env(safe-area-inset-left);
+```
+
+### Example
+```css
+
+.search-box {
+  position: absolute;
+  bottom: env(safe-keyboard-area-inset-bottom);
+}
+```
 
 ### API Availability in iframe Context
 
