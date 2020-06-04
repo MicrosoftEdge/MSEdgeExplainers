@@ -59,10 +59,10 @@ The values of these variables are CSS pixels, and are relative to the layout vie
 
 ### Syntax
 ```css
-env(safe-area-inset-top);
-env(safe-area-inset-right);
-env(safe-area-inset-bottom);
-env(safe-area-inset-left);
+env(safe-keyboard-area-inset-top);
+env(safe-keyboard-area-inset-right);
+env(safe-keyboard-area-inset-bottom);
+env(safe-keyboard-area-inset-left);
 ```
 
 ### Example
@@ -78,7 +78,7 @@ env(safe-area-inset-left);
 
 iframes will not be able to set or change the virtual keyboard behaviour via `navigator.virtualKeyboard.overlaysContent`, the root page is responsible for setting this policy. However, the `overlaygeometrychange` event will fire in the focus chain of the element that triggered the virtual keyboard visibility (i.e. the frame in which the focused element lives, along with its ancestor frames).
 
-We must also note that virtual keyboard's `boundingRect` (geometry) exposed to the iframe via the `overlaygeometrychange` event are relative to the iframe's client coordinates and not the root page or in other words the `boundingRect` exposed represents the intersection between the virtual keyboard and the iframe element.
+We must also note that virtual keyboard's `boundingRect` (geometry) exposed to the iframe via the `geometrychange` event are relative to the iframe's client coordinates and not the root page or in other words the `boundingRect` exposed represents the intersection between the virtual keyboard and the iframe element.
 
 ![Figure showing virtual keyboard geometry exposed to an iframe and the root page](keyboard-occluding-content.png)
 
@@ -104,7 +104,7 @@ We must also note that virtual keyboard's `boundingRect` (geometry) exposed to t
 ```javascript
 window.navigator.virtualKeyboard.overlaysContent = true;
 
-navigator.virtualKeyboard.addEventListener("overlaygeometrychange", (evt) => {
+navigator.virtualKeyboard.addEventListener("geometrychange", (evt) => {
   let { width, height } = evt.boundingRect;
   if( width !== 0 && height !== 0 ) {
     console.log('virtual keyboard is now visible!')
