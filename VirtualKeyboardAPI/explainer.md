@@ -53,16 +53,14 @@ The `geometrychange` event provides a `boundingRect` object with four read-only 
 
 ### Virtual Keyboard Visibility Change CSS environment variables 
 
-We propose the addition of 6 pre-defined CSS environment variables safe-keyboard-area-inset-top, safe-keyboard-area-inset-right, safe-keyboard-area-inset-bottom, safe-keyboard-area-inset-left, safe-keyboard-area-inset-width, safe-keyboard-area-inset-height. Web developers can utilize those variables to calculate the Virtual keyboard size at both landscape and portrait orientations.
-
-The values of these variables are CSS pixels, and are relative to the layout viewport (i.e. are in the client coordinates, as defined by CSSOM Views). When evaluated when not in one of the spanning states, these values will be treated as if they don't exist, and use the fallback value as passed to the env() function.
+We propose the addition of 6 pre-defined CSS environment variables keyboard-inset-top, keyboard-inset-right, keyboard-inset-bottom, keyboard-inset-left, keyboard-inset-width, keyboard-inset-height. Web developers can utilize those variables to calculate the virtual keyboard size at both landscape and portrait orientations.
 
 ### Syntax
 ```css
-env(safe-keyboard-area-inset-top);
-env(safe-keyboard-area-inset-right);
-env(safe-keyboard-area-inset-bottom);
-env(safe-keyboard-area-inset-left);
+env(keyboard-inset-top);
+env(keyboard-inset-right);
+env(keyboard-inset-bottom);
+env(keyboard-inset-left);
 ```
 
 ### Example
@@ -70,7 +68,7 @@ env(safe-keyboard-area-inset-left);
 
 .search-box {
   position: absolute;
-  bottom: env(safe-keyboard-area-inset-bottom);
+  bottom: env(keyboard-inset-bottom);
 }
 ```
 
