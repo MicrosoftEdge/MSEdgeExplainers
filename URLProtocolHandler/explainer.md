@@ -1,22 +1,48 @@
 # URL Protocol Handler Registration for PWAs
 
-## **Authors**
+## Table of Contents
+<!-- TOC -->
+
+- [Status of this Document](#status-of-this-document)
+- [Motivation](#motivation)
+- [Use Cases](#use-cases)
+- [Manifest Example](#manifest-example)
+- [How Other Applications Register for URL Handling](#how-other-applications-register-for-url-handling)
+  - [Windows](#windows)
+  - [Linux](#linux)
+  - [Mac](#mac)
+- [Handling Multiple Registrations](#handling-multiple-registrations)
+  - [Different apps registering the same protocol](#different-apps-registering-the-same-protocol)
+  - [Same app registering multiple protocols](#same-app-registering-multiple-protocols)
+- [Other Scenarios](#other-scenarios)
+  - [Custom protocol URL is used as an &lt;iframe>](#custom-protocol-url-is-used-as-an-iframe)
+  - [Non user-initiated navigation attempt](#non-user-initiated-navigation-attempt)
+- [PWA Launch and Context Passing](#pwa-launch-and-context-passing)
+- [Related APIs](#related-apis)
+  - [registerProtocolHandler](#registerprotocolhandler)
+  - [protocol_handlers for WebExtensions](#protocol_handlers-for-webextensions)
+- [Alternatives Considered](#alternatives-considered)
+  - [Have `protocol_handlers` extend `registerProtocolHandler` with additional data](#have-protocol_handlers-extend-registerprotocolhandler-with-additional-data)
+- [Security Considerations](#security-considerations)
+  - [Handler Registration and App Launch](#handler-registration-and-app-launch)
+- [Privacy Considerations](#privacy-considerations)
+- [Open Questions](#open-questions)
+
+<!-- /TOC -->
+
+## Authors
 
 Fabio Rocha (<farocha@microsoft.com>)
 Connor Moody (<comoody@microsoft.com>)
 Samuel Tang (<samtan@microsoft.com>)
 
-Former authors (no longer involved):
-Jose Leal (<joselea@microsoft.com>)
-Eric Lawrence (<ericlaw@microsoft.com>)
-
 ## Status of this Document
 
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-* This document status: **Active**
-* Expected venue: [Web Applications Working Group](https://www.w3.org/2019/webapps/)
-* Current version: this document
+- This document status: **Active**
+- Expected venue: [Web Applications Working Group](https://www.w3.org/2019/webapps/)
+- Current version: this document
 
 ## Motivation
 
@@ -126,6 +152,18 @@ On Mac, Chromium's `SetAsDefaultProtocolClient` function calls the API `LSSetDef
 - The Microsoft News UWP app is registered to handle `msnews` and `msnnews`.
 - The Xbox Console Companion app is registered to handle `xbox`, `xbox-captures`, `xbox-friendfinder`, `xbox-settings`, etc.
 
+## Other Scenarios
+
+### Custom protocol URL is used as an &lt;iframe>
+
+This should be disallowed to prevent apps from automatically opening when the iframe source URL is loaded. The same should apply to other mechanisms that allow URL loading, e.g., `<img>`.
+
+In some User Agents (e.g.: Chromium for Desktop), however, that doesn't seem to be the current behavior for custom handlers registered via registerProtocolHandler. Websites are able to be loaded in iframes if they're registered as the handlers for an iframe src that uses a protocol handler. User agents might want to implement the same behavior for these two scenarios.
+
+### Non user-initiated navigation attempt
+
+Similar to our recommendation for iframes above, we believe opening apps on non user-initiated navigation should be disallowed to prevent user confusion (e.g.: why does navigating to a website open an app?) and popup clutter.
+
 ## PWA Launch and Context Passing
 
 Opening the selected app is the first step. In the common case, the target URL will be supplied as a query param in the app's HTTPS URL. For example, the hyperlink `web+jngl:cacao-tree` would open the Jungle PWA to `jungleapp.com/lookup?type=web%2Bjngl%3Acacao-tree`.
@@ -167,12 +205,13 @@ URLs may contain sensitive user data; because PWAs require a secure context (HTT
 We may want to cap the number of allowed protocols to a number N per manifest.
 
 ### Handler Registration and App Launch
-To provide a smooth install experience, protocol handlers will be registered with the OS silently as part of PWA installation, however, the following following security mitigations will be implemented:
-1.	Registration of PWA protocol handlers won’t take over the default handler for a protocol. Instead, the next time the protocol is invoked, an OS disambiguation dialog will prompt the user to either keep using the default handler or select the newly registered handler.
-2.	On first launch (or potentially every launch) of the PWA due to an invoked protocol, the user will be presented with a permission dialog. This dialog will display the app name and origin of the app, and ask the user if the app is allowed to handle links from the protocol. If a user rejects the permission dialog, the protocol handler is unregistered with the OS.
- 
-On some OSs, a handler registered for an uncontested protocol automatically takes over as the default handler during registration. Though no OS disambiguation dialog will display in this case, the user will still give consent through launch time permission prompt.
 
+To provide a smooth install experience, protocol handlers will be registered with the OS silently as part of PWA installation, however, the following following security mitigations will be implemented:
+
+1. Registration of PWA protocol handlers won’t take over the default handler for a protocol. Instead, the next time the protocol is invoked, an OS disambiguation dialog will prompt the user to either keep using the default handler or select the newly registered handler.
+2. On first launch (or potentially every launch) of the PWA due to an invoked protocol, the user will be presented with a permission dialog. This dialog will display the app name and origin of the app, and ask the user if the app is allowed to handle links from the protocol. If a user rejects the permission dialog, the protocol handler is unregistered with the OS.
+
+On some OSs, a handler registered for an uncontested protocol automatically takes over as the default handler during registration. Though no OS disambiguation dialog will display in this case, the user will still give consent through launch time permission prompt.
 
 ## Privacy Considerations
 
