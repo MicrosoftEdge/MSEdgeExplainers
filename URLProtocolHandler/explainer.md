@@ -17,6 +17,7 @@
 - [Other Scenarios](#other-scenarios)
   - [Custom protocol URL is used as an &lt;iframe>](#custom-protocol-url-is-used-as-an-iframe)
   - [Non user-initiated navigation attempt](#non-user-initiated-navigation-attempt)
+  - [App updates and handler registration](#app-updates-and-handler-registration)
 - [PWA Launch and Context Passing](#pwa-launch-and-context-passing)
 - [Related APIs](#related-apis)
   - [registerProtocolHandler](#registerprotocolhandler)
@@ -163,6 +164,15 @@ In some User Agents (e.g.: Chromium for Desktop), however, that doesn't seem to 
 ### Non user-initiated navigation attempt
 
 Similar to our recommendation for iframes above, we believe opening apps on non user-initiated navigation should be disallowed to prevent user confusion (e.g.: why does navigating to a website open an app?) and popup clutter.
+
+### App updates and handler registration
+
+Handler registrations must be synchronized with the latest manifest version provided via app update. The expected behavior of this scenario is:
+
+1) An update that adds new handlers triggers handler registration (separate from app installation).
+2) An update that removes handlers triggers handler unregistration (separate from app uninstallation).
+
+Failing to account for handlers removed from a manifest during an app update would leave untracked handlers on a machine and have privacy and security implications.
 
 ## PWA Launch and Context Passing
 
