@@ -56,7 +56,7 @@ A certification program would also allow for the validation of standardized tran
 * Clear browsing data experiences whereby users could clear both client-side browser data in addition to data that's been collected on them by various first and third parties as they browse the web
 
 ### Reducing User Permission Prompts
-Several of the future looking web standard proposals for preserving user privacy—such as the current iterations of the [Storage Access API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/StorageAccessAPI/explainer.md) and [Privacy Budget](https://github.com/bslassey/privacy-budget)—touch on the use of permission prompts to inform users when some information that could be used to track them is to be shared on the web. Such prompts may be shown when certain technological heuristics say that they should be, disrupting a user's experience while browsing the web.
+Several of the future looking web standard proposals for preserving user privacy—such as the current iterations of the [Storage Access API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/StorageAccessAPI/explainer.md) and [Privacy Budget](https://github.com/bslassey/privacy-budget)—touch on the use of permission prompts to inform users when some information that could be used to track them is to be shared on the web. Such prompts may be shown when certain technological heuristics say that they should be, disrupting a user's experience while browsing the web.
 
 An auditing program for privacy on the web could again be used to augment such technological solutions by suppressing user permission prompts on sites that are known to give users control over their privacy.
 

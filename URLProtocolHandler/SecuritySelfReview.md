@@ -59,8 +59,7 @@ This has been created by cut-and-paste from https://w3ctag.github.io/security-qu
 15. Does this specification have a "Security Considerations" and "Privacy Considerations" section?
 
     Yes.
-    https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/URLProtocolHandler/explainer.md#security-considerations
-    https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/URLProtocolHandler/explainer.md#security-considerations
+    https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/URLProtocolHandler/explainer.md#security-considerations
 
 16. Does this specification allow downgrading default security characteristics?
 
