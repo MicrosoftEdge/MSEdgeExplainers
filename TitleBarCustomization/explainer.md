@@ -58,7 +58,7 @@ Popular streaming music service Spotify is also built on Electron and they use t
 ### Microsoft Teams
 Workplace collaboration and communication tool Microsoft Teams, also based on Electron for portability, customize the title bar in a similar fashion to Spotify, providing user information, a search and command bar and their own back/forward in-app navigation controls. 
 
-![Microsoft Teams title bar on Mac](MSTeamsMac.png)
+![Microsoft Teams title bar on Mac](MSTeams.png)
 
 ## Problem to solve: Installed desktop web apps title bar area is system reserved
 
@@ -169,7 +169,7 @@ The coordinate system will not be affected by the overlay, although content my b
 #### Omnibox-anchored Dialogs
 Dialogs like print `[Ctrl+P]` and find in page `[Ctrl + F]` are typically anchored to the omnibox. 
 
-![Search in a standard Chromisum window](searchBrowser.png)
+![Search in a standard Chromium window](searchBrowser.png)
 
 With the omnibox hidden, installed web apps anchor these elements to an icon to the left of the three-dot "Settings and more" button. To maintain consistency across all installed web apps, the window controls overlay will use this pattern as well.
 
