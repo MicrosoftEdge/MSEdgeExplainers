@@ -99,7 +99,7 @@ The window controls overlay ensures users can minimize, maximize or restore, and
 
 ![Window controls overlay on an empty web app](WindowControlsOverlay.png)
 
-Additionally, there are two scenarios where other content will appear in the window controls overlay. When these show or hide, the overlay will resize to fit, and a `resize` event will be fired on the `window` object. 
+Additionally, there are two scenarios where other content will appear in the window controls overlay. When these show or hide, the overlay will resize to fit, and a `geometrychange` event will be fired on the `navigator.windowControlsOverlay` object. 
 - When an installed web app is launched, the origin of the page will display to the left of the three-dot button for a few seconds, then disappear.
 - If a user interacts with an extension via the "Settings and more" menu, the icon of the extension will appear in the overlay to the left of the three-dot button. After clicking out of the modal dialog, the icon is removed from the overlay.
 
@@ -140,7 +140,7 @@ To provide the visibility and bounding rectangle of the overlay, this explainer 
 
 For privacy, the `windowControlsOverlay` will not be accessible to iframes inside of a webpage. See [Privacy Considerations](#privacy-considerations) below
 
-Whenever the overlay is resized, a `resize` event will be fired on the `window` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
+Whenever the overlay is resized, a `geometrychange` event will be fired on the `navigator.windowControlsOverlay` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
 
 #### CSS Environment Variables
 Although it's possible to layout the content of the title bar and web page with just the JavaScript APIs provided above, they are not as responsive as a CSS solution. This is problematic either when the overlay resizes to accommodate the origin text or a new extension icon populates the overlay, or when the window resizes.
