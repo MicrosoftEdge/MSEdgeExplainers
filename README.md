@@ -61,6 +61,13 @@ we move them into the [Alumni section](#alumni-) below.
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Content?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=Virtual+Content&template=aria-virtual-content.md)
 
+### CSS
+
+* [CSS color-mix() function](CSSColorMix/explainer.md | 
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSColorMix">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSSColorMix?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=CSSColorMix&template=css-color-mix---function.md)
+
 ### Editing
 
 * [Highlight Events](highlight/events-explainer.md) | 
