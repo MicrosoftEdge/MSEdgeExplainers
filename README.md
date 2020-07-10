@@ -131,10 +131,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Version%20History">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Version%20History?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+stanleyhon&labels=Version+History&template=version-history.md)
-* [Window Controls Overlay for Installed Desktop Web Apps (was: Title Bar Customization)](TitleBarCustomization/explainer.md) | 
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Window%20Controls%20Overlay">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Window%20Controls%20Overlay?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=amandabaker&labels=Window+Controls+Overlay&template=window-controls-overlay.md)
 
 ### Storage
 
@@ -161,6 +157,7 @@ standards communities. Thanks for your continued interest!
 
 | Archive date | Archived explainer | Category | Current document | Current standards venue |
 |--|--|--|--|--|
+| 2020-07-08 | [Window Controls Overlay for Installed Desktop Web Apps]() | Progressive Web Applications | [Window Controls Overlay for Installed Desktop Web Apps](https://github.com/WICG/window-controls-overlay/blob/master/explainer.md) | [Web Incubator Community Group]() |
 | 2020-05-28 | [PWAs as URL Handlers](PwaUriHandler/explainer.md) | Progressive Web Applications | [Progressive Web Apps as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) |
 | 2020-03-17 | [EditContext API](EditContext/explainer.md) | Editing | [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/docs/EditContext/explainer.md) | [W3C Editing Task Force](https://w3c.github.io/editing/) |
 | 2020-03-13 | [Bidirectional WebDriver Protocol](WebDriverRPC/webdriver.md) | WebDriver | [Bidirectional WebDriver Protocol Explainer](https://github.com/w3c/webdriver-bidi/blob/master/explainer.md) | [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) |
