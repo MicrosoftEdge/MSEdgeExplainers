@@ -53,7 +53,7 @@ After registering a PWA as a protocol handler, when a user clicks on a hyperlink
 
 It is important to note that both the manifest-based registration proposed in this explainer and `registerProtocolHandler` play very similar roles in practice, while still allowing the possibility for subtle but complementary user-experiences.
 
-Similarities include requirements around the list of schemes allowed to be registered (as discussed in the security section below), format of the parameters, same-origin policy and etc.
+Similarities include requirements around the list of schemes allowed to be registered (as discussed in the security section below), name and format of parameters, etc.
 
 There are subtle differences in the manifest-based registration, however, that might be useful to enhance the experience for PWA users. For example, manifest-based registrations could loosen some requirements that currently apply to `registerProtocolHandler`. For instance, the need of user interaction for a website to register to handle a certain protocol might not apply to manifest-based PWA registration, as when a user intentionally installs a PWA there's an implicit level of trust involved that installation-related things will occur, including the registration of protocol handlers. This could also mean that the user doesn't need to be notified that a new protocol handler has been registered, as currently happens when `registerProtocolHandler` is used, and instead we could rely on solutions that let the user know what will happen before installation, such as an install time permissions prompt, to convey that protocols handlers will be registered.
 
@@ -110,10 +110,10 @@ A developer can add a field in the manifest.json to declare which protocols the 
 
 These are the fields for each protocol handler:
 
-| Field     | Required / Optional | Description                                                                         | Default                                                           |
-|:----------|:--------------------|:------------------------------------------------------------------------------------|:------------------------------------------------------------------|
-| `protocol` | Required            | Protocol to be handled. E.g.: `mailto`, `ms-word`, `web+jngl`.                         | N/A                                                               |
-| `url` | Required            | HTTPS URL within the application that will handle the protocol. The `%s` token will be replaced by the URL starting with the protocol handler's scheme.                      | N/A                                       |
+| Field      | Required / Optional | Description                                                                                                                                                   | Default |
+|:-----------|:--------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+| `protocol` | Required            | Protocol to be handled. E.g.: `mailto`, `ms-word`, `web+jngl`.                                                                                                | N/A     |
+| `url`      | Required            | HTTPS URL within the application scope that will handle the protocol. The `%s` token will be replaced by the URL starting with the protocol handler's scheme. | N/A     |
 
 ## How Other Applications Register for URL Handling
 
