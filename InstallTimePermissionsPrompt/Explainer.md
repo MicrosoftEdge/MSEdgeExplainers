@@ -69,7 +69,7 @@ As the document that governs the installation and presentation of PWAs within an
 ]
 ```
 
-This example would request five permissions: [Camera access](https://w3c.github.io/permissions/#dom-permissionname-camera), [Microphone access](https://w3c.github.io/permissions/#dom-permissionname-camera), the ability to [send notifications](https://w3c.github.io/permissions/#dom-permissionname-notifications) and [push notifications](https://w3c.github.io/permissions/#dom-permissionname-push), and [the ability to run when a user is logging in to their OS](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/master/RunOnLogin/Explainer.md).
+This example would request five permissions: [Camera access](https://w3c.github.io/permissions/#dom-permissionname-camera), [Microphone access](https://w3c.github.io/permissions/#dom-permissionname-camera), the ability to [send notifications](https://w3c.github.io/permissions/#dom-permissionname-notifications) and [push notifications](https://w3c.github.io/permissions/#dom-permissionname-push), and [the ability to run when a user is logging in to their OS](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RunOnLogin/Explainer.md).
 
 ## User Interface
 
