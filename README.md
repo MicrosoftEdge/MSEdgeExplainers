@@ -184,18 +184,20 @@ standards communities. Thanks for your continued interest!
 We love our developer tools! Checkout these cool innovations being designed for the developer tools:
 
 * [3D View]( https://docs.google.com/document/d/16xsQbr1YjjuoxHJlCsAaIzK-s4Ogd6fEuhrSajdVivA)
+* [Closeable tabs](https://docs.google.com/document/d/1TC1FxzSgRIaXmChpjL05T7sZuduRos3IDPDG5vCS1Oc/)
 * [CSS Grid Tooling](https://docs.google.com/document/d/1s0AkeMOtlwqD74GJZtedxqOnttQtgj9oo8RjfVyaHP8/)
 * [Customizable Keyboard Shortcuts](https://docs.google.com/document/d/1oOPSWPxCHvMoBZ0Fw9jwFZt6gP4lrsrsl8DEAp-Hy7o/)
 * [Dual-screen Emulation](https://docs.google.com/document/d/1KMsmEXdjmn4h4iIl0n74N1EHxwwNUzh6R2p7GHrdtTI)
 * [High Contrast Simulation](https://docs.google.com/document/d/1SUx-hfodUUMAIwmcwIVYlpi9YDrLnkwW0T7yXUN8s50/)
 * [Infobar UI Refresh](https://docs.google.com/document/d/1GjpfPkdljH97IAaWfY8d9NBim1wrPPRaD8zMl8PWhLs/)
 * [Localization](https://docs.google.com/document/d/1L6TkT2-42MMQ72ZSBMFwUaq7M6mDgA2X0x8oHHKaV_U/)
+* [Movable tabs](https://docs.google.com/document/d/1S4tLbaK9ukeiK6ew_kU_uiLoVlycN5gineGA05boHK4/)
 * [Redux for State](https://docs.google.com/document/d/1yVI-ABz_PL5npfoNosvv1ZKOsXhUwSMKc30UHf2RyqM/)
 * [Service Worker Improvements](https://docs.google.com/document/d/1L-dhKWYoVECdoqVQ0hOKqtyWbk5LtluFWbZE8PJZtnU/)
 * [Settings Discoverability and Telemetry](https://docs.google.com/document/d/1n9AGuh0iWQoqgm749BJJELK-ckrkgnaB5jfgef9RWSA/)
-* [Settings Search](https://docs.google.com/document/d/1nRh5Y7JqNOowkOqpbYfJMbSZ1rqSHhRh_7HqzqhuHwY/edit?usp=sharing)
+* [Settings Search](https://docs.google.com/document/d/1nRh5Y7JqNOowkOqpbYfJMbSZ1rqSHhRh_7HqzqhuHwY/)
 * [Stackable Overlays](https://docs.google.com/document/d/13MHkk0rgHJl_MAIgrouUef5k9fK7lZMI1IEiNIUKbD0/)
-* [webhint](https://docs.google.com/document/d/1IHoVXF5tn7kD8UaSIRPuIvEn5cHdjlyIPEvqEQiIv0k/edit#)
+* [webhint](https://docs.google.com/document/d/1IHoVXF5tn7kD8UaSIRPuIvEn5cHdjlyIPEvqEQiIv0k/)
 
 
 # Other Documents
