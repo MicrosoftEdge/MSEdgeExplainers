@@ -1,6 +1,10 @@
 Formatted Text
 =============
 
+Authors:
+ [sushraja-msft](https://github.com/sushraja-msft),
+ [travisleithead](https://github.com/travisleithead)
+
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards
 bodies in developing collaborative solutions fit for standardization. As the solutions
