@@ -90,7 +90,14 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Keyboard%20Policy">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20Policy?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Virtual+Keyboard+Policy&template=virtual-keyboard-policy.md)
-  
+
+### Graphics
+
+* [Canvas Formatted Text](Canvas/FormattedText.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Canvas%20Formatted%20Text">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Canvas%20Formatted%20Text?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead%2C+sushraja-msft&labels=Canvas+Formatted+Text&template=canvas-formatted-text.md)
+
 ### Media
 
 * [Audio Stream Category](AudioStreamCategory/explainer.md) | 
