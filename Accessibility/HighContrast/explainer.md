@@ -1,8 +1,17 @@
-﻿# High Contrast Explainer
+# High Contrast Explainer
 
 Authors: [Rossen Atanassov](https://github.com/atanassov), [Alison Maher](https://github.com/amaher23)
 
 Last Updated: 2019-01-18
+
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **ARCHIVED**
+* Current venue: [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [w3c/csswg-drafts](https://github.com/w3c/csswg-drafts)
+* Current version:
+    * [System Colors](https://drafts.csswg.org/css-color/#css-system-colors) section of [CSS Color Module Level 4](https://drafts.csswg.org/css-color) | ![GitHub issues by-label](https://img.shields.io/github/issues/w3c/csswg-drafts/css-color-4)
+    * ['forced-color-adjust'](https://drafts.csswg.org/css-color-adjust-1/#forced) of [CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1) | ![GitHub issues by-label](https://img.shields.io/github/issues/w3c/csswg-drafts/css-color-adjust-1)
+    * ['forced-colors'](https://drafts.csswg.org/mediaqueries-5/#forced-colors) of [Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5) | ![GitHub issues by-label](https://img.shields.io/github/issues/w3c/csswg-drafts/mediaqueries-5)
 
 ## Overview
 

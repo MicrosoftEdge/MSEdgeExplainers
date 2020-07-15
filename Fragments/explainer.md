@@ -2,6 +2,11 @@
 
 Authors: [Aaron Gustafson](https://github.com/aarongustafson)
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Withdrawn**
+* Note: We are now directing our efforts into providing feedback on the similar proposal [ScrollToTextFragment](https://github.com/WICG/ScrollToTextFragment/) already being incubated in the [W3C Web Incubator Community Group](https://wicg.io/).
+
 ## Introduction
 
 URLs have been a fantastic way to enable people to reference content on the web. With the addition of anchor points within Web documents (via `name` and `id`), authors were empowered to link to specific sections of a document or other documents across the web. Unfortunately, however, that utility requires action on the part of every web page author to include those anchor points. Numerous systems have cropped up to enable automated `id`-ing of headings (e.g., [Kramdown’s `auto_id_prefix`](https://kramdown.gettalong.org/options.html)), but they are seldom used. They are also limited to headings only and provide no direct access to flow content.

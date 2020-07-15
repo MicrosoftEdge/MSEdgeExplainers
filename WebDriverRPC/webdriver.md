@@ -1,5 +1,11 @@
 # Bidirectional WebDriver Protocol
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **ARCHIVED**
+* Current venue: [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) 
+* Current version: [Bidirectional WebDriver Protocol](https://github.com/w3c/webdriver/blob/master/webdriver-bidi/webdriver.md)
+
 ## Overview
 
 This document presents a possible design for a bidirectional WebDriver protocol, incorporating scenarios and resolutions discussed at the TPAC 2019 working group meeting. The protocol uses JSON-RPC messaging over WebSockets as the transport mechanism. WebDriver's current model of the browser is extended to include service workers and other non-page targets and make it possible for clients to target these additional contexts. We also discuss how the new protocol can interoperate with the existing protocol. Sample protocol messages illustrating how the protocol would work are included, and an JSON API specification is included alongside the document.

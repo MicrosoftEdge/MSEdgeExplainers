@@ -2,6 +2,12 @@
 
 Authors: [Daniel Libby](https://github.com/dlibby-), [Zouhir Chahoud](https://github.com/Zouhir)
 
+## Status of this Document
+This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+* This document status: **Active**
+* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
+* Current version: this document
+
 ## Introduction
 
 Today on the web, User Agents respond to the presence of the virtual (software) keyboard, without any exposure of this information to the web page. This document proposes a new web API surface for virtual keyboards that developers can use to enable better customization of their webpage's content and experiences.
@@ -39,17 +45,38 @@ window.navigator.virtualKeyboard.overlaysContent = true;
 ![Figure showing virtual keyboard overlaying page content](keyboard-occluding-content.png)
 
 
-### Listening and Respondinng to Virtual Keyboard Visibility Change
+### Listening and Responding to Virtual Keyboard Visibility Change
 
-Additionally, the `VirtualKeyboard` interface is an `EventTarget` which can be targeted by the `overlaygeometrychange` event. The user agent will fire this event when the virtual keyboard is shown in a docked state, and the virtual keyboard overlays the web content. Additionally it will fire when the virtual keyboard transitions from overlayed to hidden, or is moved to no longer intersect with the web content.
+Additionally, the `VirtualKeyboard` interface is an `EventTarget` which can be targeted by the `geometrychange` event. The user agent will fire this event when the virtual keyboard is shown in a docked state, and the virtual keyboard overlays the web content. Additionally it will fire when the virtual keyboard transitions from overlayed to hidden, or is moved to no longer intersect with the web content.
 
-The `overlaygeometrychange` event provides a `boundingRect` object with four read-only properties `top, left, width, height, bottom, right` to help developers reason about the virtual keyboard size and geometry. These values are in CSS pixels, and are in the client coordinate system.
+The `geometrychange` event provides a `boundingRect` object with four read-only properties `top, left, width, height, bottom, right` to help developers reason about the virtual keyboard size and geometry. These values are in CSS pixels, and are in the client coordinate system. This `boundingRect` is also available in `virtualKeyboard` object that is stored in `navigator`.
+
+### Virtual Keyboard Visibility Change CSS environment variables 
+
+We propose the addition of 6 pre-defined CSS environment variables keyboard-inset-top, keyboard-inset-right, keyboard-inset-bottom, keyboard-inset-left, keyboard-inset-width, keyboard-inset-height. Web developers can utilize those variables to calculate the virtual keyboard size at both landscape and portrait orientations.
+
+### Syntax
+```css
+env(keyboard-inset-top);
+env(keyboard-inset-right);
+env(keyboard-inset-bottom);
+env(keyboard-inset-left);
+```
+
+### Example
+```css
+
+.search-box {
+  position: absolute;
+  bottom: env(keyboard-inset-bottom);
+}
+```
 
 ### API Availability in iframe Context
 
-iframes will not be able to set or change the virtual keyboard behaviour via `navigator.virtualKeyboard.overlaysContent`, the root page is responsible for setting this policy. However, the `overlaygeometrychange` event will fire in the focus chain of the element that triggered the virtual keyboard visibility (i.e. the frame in which the focused element lives, along with its ancestor frames).
+iframes will not be able to set or change the virtual keyboard behaviour via `navigator.virtualKeyboard.overlaysContent`, the root page is responsible for setting this policy. However, the `geometrychange` event will fire in the focus chain of the element that triggered the virtual keyboard visibility (i.e. the frame in which the focused element lives, along with its ancestor frames).
 
-We must also note that virtual keyboard's `boundingRect` (geometry) exposed to the iframe via the `overlaygeometrychange` event are relative to the iframe's client coordinates and not the root page or in other words the `boundingRect` exposed represents the intersection between the virtual keyboard and the iframe element.
+We must also note that virtual keyboard's `boundingRect` (geometry) exposed to the iframe via the `geometrychange` event are relative to the iframe's client coordinates and not the root page or in other words the `boundingRect` exposed represents the intersection between the virtual keyboard and the iframe element.
 
 ![Figure showing virtual keyboard geometry exposed to an iframe and the root page](keyboard-occluding-content.png)
 
@@ -75,7 +102,7 @@ We must also note that virtual keyboard's `boundingRect` (geometry) exposed to t
 ```javascript
 window.navigator.virtualKeyboard.overlaysContent = true;
 
-navigator.virtualKeyboard.addEventListener("overlaygeometrychange", (evt) => {
+navigator.virtualKeyboard.addEventListener("geometrychange", (evt) => {
   let { width, height } = evt.boundingRect;
   if( width !== 0 && height !== 0 ) {
     console.log('virtual keyboard is now visible!')
