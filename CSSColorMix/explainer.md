@@ -60,8 +60,8 @@ This example tints the borders of two elements using off-white and off-black adj
   display: inline-block;
   margin: 5px;
   background-color: var(--base-color);
-  --highlight-color: color-mix(var(--base-color) var(--tint-color) 25% srgb);
-  --shadow-color: color-mix(var(--base-color) var(--shade-color) 25% srgb);
+  --highlight-color: color-mix(srgb var(--base-color) 25%, var(--tint-color));
+  --shadow-color: color-mix(srgb var(--base-color) 25%, var(--shade-color));
   border-left-color: var(--highlight-color);
   border-top-color: var(--highlight-color);
   border-right-color: var(--shadow-color);
@@ -120,7 +120,7 @@ This example uses a CSS Animation that adjusts the tint color to generate a "sun
   background-color: var(--base-color);
 }
 .result {
-  background-color: color-mix(var(--base-color) var(--sun-color) 25% srgb);
+  background-color: color-mix(srgb var(--base-color) 25%, var(--sun-color));
 }
 </style>
 <div class="container">
