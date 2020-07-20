@@ -98,6 +98,13 @@ we move them into the [Alumni section](#alumni-) below.
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Canvas%20Formatted%20Text?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead%2C+sushraja-msft&labels=Canvas+Formatted+Text&template=canvas-formatted-text.md)
 
+### HTML
+
+* [Enabling Custom Control UI](ControlUICustomization/explainer.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Custom%20Control%20UI">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Custom%20Control%20UI?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md)
+
 ### Media
 
 * [Audio Stream Category](AudioStreamCategory/explainer.md) | 
