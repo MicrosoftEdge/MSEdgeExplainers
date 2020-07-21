@@ -384,7 +384,7 @@ Consider the case where the control element itself has an explicitly set accessi
 
 ```html
 <label for="my-range">My custom range</label>
-<range id="my-range' value="10" min="0" max="20">
+<range id="my-range" value="10" min="0" max="20">
   <div slot="thumb" part="thumb"><svg><!-- Draw icon with SVG --></svg></div>
 </range>
 ```
