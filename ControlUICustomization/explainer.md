@@ -393,6 +393,52 @@ There was initially a question of whether the accessible name of the light DOM e
 
 However, experiments with accessibility tools (Narrator, NVDA, VoiceOver) and a sample page with a named shadow host demonstrated that this is not necessary.  When focus is changed from outside the shadow root to some focusable item within the shadow root, the name of the shadow host is announced, followed by the name of whatever was focused in the shadow.  This behavior should also apply to custom control UIs, so no special handling is necessary to ensure that the light DOM element's name is properly announced.
 
+### Feature detection
+
+Developers will have a couple of options for feature-detecting custom controls
+in order to apply a polyfill or go down a fallback codepath in browsers where
+they have not yet been implemented.
+
+For controls for which new `HTMLElement` types are introduced, e.g. `<range>`
+for `<input type="range">`, feature detection could check whether the new
+element exists:
+
+```js
+if (!window.hasOwnProperty("HTMLRangeElement")) {
+  /* apply polyfill/fallback */
+}
+```
+
+If new element types are not introduced for things like custom `<select>`, an
+alternative is to check `attachShadow`, which currently throws for controls like
+`<select>` but will not do so with this proposal -- see
+[Shadow DOM replacement](#Shadow-DOM-replacement):
+```js
+function hasCustomSelectFeature() {
+  try {
+    document.createElement("select").attachShadow({mode: "open"});
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+```
+
+For a CSS selector specifying a control part, if the part doesn't exist (e.g.
+because a browser hasn't implemented this proposal yet for the control in
+question) then the rule will simply be ignored:
+
+```css
+select::part(button) {
+ /*
+  * This will apply to the button of a <select> if customizable <select> has
+  * been implemented, and will be a no-op on browsers that haven't yet
+  * implemented customizable <select> since the selector won't match
+  * anything. Other CSS rules in the stylesheet will still apply normally.
+  */
+}
+```
+
 ## Privacy and Security Considerations
 
 ### Privacy
