@@ -68,7 +68,7 @@ For the purposes of this document a 'part' is an element that has standardized m
 
 Rough examples:
 
-* The anatomy of a `<select>` could be defined as consisting of 1 'button' part containing 1 'selected-value' part and 1 popup 'listbox' part containing 0-N 'option' parts. At a very high level, the expected behavior of clicking the button is to expand the list, the expected behavior of the selected-value part is to keep its inner text updated to show the value of the currently selected option, the expected behavior of clicking outside the opened list is to collapse it, etc.  For a more detailed definition, see [Open UI `<select>` specification](https://open-ui.org/components/select).
+* The anatomy of a `<select>` could be defined as consisting of 1 'button' part containing 1 'selected-value' part and 1 popup 'listbox' part containing 0-N 'option' parts. At a very high level, the expected behavior of clicking the button is to expand the list, the expected behavior of the selected-value part is to keep its inner text updated to show the value of the currently selected option, the expected behavior of clicking outside the opened list is to collapse it, etc.  For a more detailed definition, see the [Open UI `<select>` specification](https://open-ui.org/components/select).
 * The anatomy of an `<input type="range">` could be defined as consisting of 1 draggable 'thumb' part that moves along 1 'track' part.
 
 When the developer provides a custom UI with the parts identified, the platform can apply native event handlers and ARIA roles to the elements designated as the parts to light up the control's expected behavior and accessibility without extra code from the developer.
