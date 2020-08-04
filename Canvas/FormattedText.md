@@ -409,20 +409,9 @@ dictionary CanvasFormattedTextLineSegment {
 
 ## Open issues and questions
 
-* Vertical Writing Modes - text drawing needs to be aware of vertical writing mode
-  to rotate glyphs in some fonts / languages while rendering a line. The topic needs
-  further investigation.
-* Should `fillFormattedText` (the single shot API) return the total height consumed
-  after drawing lines?
-* Additional investigation needed to understand white space collapsing behavior like
-  collapsing trailing or leading whitespaces around a line break. If there is no
-  standard behavior, options for controlling it may need to be exposed on the
-  `CanvasFormattedText` object.
-* Should the word break positions be exposed in the `CanvasFormattedTextLineSegment`
-  in order to help with accessibility?
-* A variety of additional text justification and hyphenation features are available in
-  HTML. Are there important use-cases for including these features?
-* WebIDL-specific ideas:
+Please review and comment on our [existing open issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues?q=is%3Aissue+is%3Aopen+label%3A%22Canvas+Formatted+Text%22).
+
+Additionally, here are a few minor tweaks suggested for the current API surface (subject to change):
    * Recommend adding a constructor overload of `CanvasFormattedText` that takes a list
      of `CanvasFormattedTextRun` objects, e.g.,
      `constructor( sequence<CanvasFormattedTextRun> formattedRunsInit );`
