@@ -104,6 +104,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Custom%20Control%20UI">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Custom%20Control%20UI?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md)
+* [EyeDropper](EyeDropper/explainer.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/EyeDropper">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/EyeDropper?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft&labels=EyeDropper&template=eyedropper.md)
 
 ### Media
 
