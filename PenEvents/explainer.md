@@ -76,7 +76,7 @@ The docked property identifies whether the pen has transitioned to a docked stat
 ## System Interactions
 Note on some operating systems, adding or removing the event listener may cause side-effects.  For example, on Windows, the shell provides configurable behavior for launching frequently used inking applications when pen button interactions are detected. Applications may register with the system to provide alternative behaviors and suppress the default behavior from the OS.  For web applications, it is expected that only active documents that have a registered event listener can override the system behavior.
 
-These side effects are one reason why new events are proposed instead of reusing existing events like `pointerdown`, `pointerup` and `click`.  Listening to these existing events doesn't imply that the user specifically wants to override system behavior, while listening to a `penbuttonclick` serves as a clear signal that the web app has specialized behavior.
+These side effects are one reason why new events are proposed instead of reusing existing events like `pointerdown`, `pointerup` and `click`.  Sites which listen to these existing events don't intend to override system behavior.  In contrast, listening to a `penbuttonclick` is well aligned with the event that generates the specialized behavior for pens on Windows and serves as a clear signal that the web app intends to provide its own behavior to replace the default system action.
 
 
 ## Sample Code
@@ -116,9 +116,9 @@ This option isn't currently being pursued for a two reasons:
 2. The Windows "hotkeys" for pen interactions F18 through F20 are more of an implementation detail and fail to convey any semantic meaning about what the user is doing.  In contrast, a penbuttondblclick event seems like a good fit for an Apple Pencil double-tap, so the current proposal has broader device applicability.
 
 ### Dispatching Additional PointerEvents
-Currently PointerEvents for pens represent some proximity to the digitizer (either hovering or in contact with it).  The `pointerdown` and `pointerup` events represent a "button" of the pen coming in contact with the digitizer and then lifting.  When the pen tip comes in contact and lifts the button would be 0.  When the pen eraser button comes in contact and lifts the button is 5.
+Currently PointerEvents are named as such because the common trait of all devices that generate PointerEvents is that they point at some location on the screen.  Specifically for pens, a PointerEvent represents a "button" of the pen coming into contact with the digitizer (or being moved near the digitizer) at a specific location.
 
-Because the actions represented by the proposed events don't occur when the pen is coming in contact with the digitizer, generating a `pointerdown`, `pointerup` and `click` event seem misaligned with the current PointerEvents spec.  As a result, this option is not being pursued.
+Because the actions represented by the proposed events don't relate to a particular location, generating a PointerEvent seems semantically wrong.  As a result, this option is not being pursued.
 
 ## Open Questions:
 1. Microsoft Surface Hubs have more than one pen and more than one dock to hold those pens.  Should a dock identifier be considered so that web apps could, for example, position drawing UI nearby the location of the dock which generated the event?
