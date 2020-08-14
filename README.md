@@ -66,103 +66,103 @@ we move them into the [Alumni section](#alumni-) below.
 * [CSS color-mix() function](CSSColorMix/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSColorMix">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSSColorMix?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=CSSColorMix&template=css-color-mix---function.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=CSSColorMix&template=css-color-mix---function.md&title=%5BCSS+color-mix+function%5D+%3CTITLE+HERE%3E)
 
 ### Editing
 
 * [Highlight Events](highlight/events-explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HighlightEvents">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/HighlightEvents?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=sanketj&labels=HighlightEvents&template=highlight-events.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=sanketj&labels=HighlightEvents&template=highlight-events.md&title=%5BHighlight+Events%5D+%3CTITLE+HERE%3E)
 * [PenEvents](PenEvents/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Events">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Pen%20Events?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Pen+Events&template=pen-events.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Pen+Events&template=pen-events.md&title=%5BPenEvents%5D+%3CTITLE+HERE%3E)
 * [pen-action](PenAction/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Action">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Pen%20Action?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Pen+Action&template=pen-action.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Pen+Action&template=pen-action.md&title=%5Bpen-action%5D+%3CTITLE+HERE%3E)
 * [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Keyboard%20API">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20API?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dlibby-%2C+zouhir&labels=Virtual+Keyboard+API&template=virtual-keyboard-api.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dlibby-%2C+zouhir&labels=Virtual+Keyboard+API&template=virtual-keyboard-api.md&title=%5BVirtual+Keyboard+API%5D+%3CTITLE+HERE%3E)
 * [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Keyboard%20Policy">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20Policy?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Virtual+Keyboard+Policy&template=virtual-keyboard-policy.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Virtual+Keyboard+Policy&template=virtual-keyboard-policy.md&title=%5BVirtual+Keyboard+Policy%5D+%3CTITLE+HERE%3E)
 
 ### Graphics
 
 * [Canvas Formatted Text](Canvas/FormattedText.md) |
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Canvas%20Formatted%20Text">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Canvas%20Formatted%20Text?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead%2C+sushraja-msft&labels=Canvas+Formatted+Text&template=canvas-formatted-text.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead%2C+sushraja-msft&labels=Canvas+Formatted+Text&template=canvas-formatted-text.md&title=%5BCanvas+Formatted+Text%5D+%3CTITLE+HERE%3E)
 
 ### HTML
 
 * [Enabling Custom Control UI](ControlUICustomization/explainer.md) |
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Custom%20Control%20UI">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Custom%20Control%20UI?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md&title=%5BEnabling+Custom+Control+UI%5D+%3CTITLE+HERE%3E)
 * [EyeDropper](EyeDropper/explainer.md) |
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/EyeDropper">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/EyeDropper?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft&labels=EyeDropper&template=eyedropper.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft&labels=EyeDropper&template=eyedropper.md&title=%5BEyeDropper%5D+%3CTITLE+HERE%3E)
 
 ### Media
 
 * [Audio Stream Category](AudioStreamCategory/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Audio%20Stream%20Category">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Audio%20Stream%20Category?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=gregwhitworth%2C+rahulsingh-msft%2C+sjdallst&labels=Audio+Stream+Category&template=audio-stream-category.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=gregwhitworth%2C+rahulsingh-msft%2C+sjdallst&labels=Audio+Stream+Category&template=audio-stream-category.md&title=%5BAudio+Stream+Category%5D+%3CTITLE+HERE%3E)
 
 ### Privacy
 
 * [Time-limited Permissions](TimeLimitedPermissions/Explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Time-limited%20Permissions">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Time-limited%20Permissions?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson&labels=Time-limited+Permissions&template=time-limited-permissions.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson&labels=Time-limited+Permissions&template=time-limited-permissions.md&title=%5BTime-limited+Permissions%5D+%3CTITLE+HERE%3E)
 
 ### Progressive Web Applications
 
 * [Cache API Response Metadata](CacheAPIResponseMetadata/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Cache%20API%20Response%20Metadata">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Cache%20API%20Response%20Metadata?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+jungkees&labels=Cache+API+Response+Metadata&template=cache-api-response-metadata.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+jungkees&labels=Cache+API+Response+Metadata&template=cache-api-response-metadata.md&title=%5BCache+API+Response+Metadata%5D+%3CTITLE+HERE%3E)
 * [ImageResource `color_scheme`](ImageResource-color_scheme/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/ImageResource%20Color%20Scheme">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/ImageResource%20Color%20Scheme?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson&labels=ImageResource+Color+Scheme&template=imageresource-color-scheme.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson&labels=ImageResource+Color+Scheme&template=imageresource-color-scheme.md&title=%5BImageResource+Color+Scheme%5D+%3CTITLE+HERE%3E)
 * [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Install%20Time%20Permissions">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Install%20Time%20Permissions?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=Install+Time+Permissions&template=install-time-permissions-prompt.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=Install+Time+Permissions&template=install-time-permissions-prompt.md&title=%5BInstall+Time+Permissions+Prompt%5D+%3CTITLE+HERE%3E)
 * [Run on OS Login](RunOnLogin/Explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Run%20on%20OS%20Login">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Run%20on%20OS%20Login?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=carlosfriasand%2C+jungkees&labels=Run+on+OS+Login&template=run-on-os-login.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=carlosfriasand%2C+jungkees&labels=Run+on+OS+Login&template=run-on-os-login.md&title=%5BRun+on+OS+Login%5D+%3CTITLE+HERE%3E)
 * [URL Protocol Handler Registration for PWAs](URLProtocolHandler/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/URLProtocolHandler">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/URLProtocolHandler?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=fabiorocha%2C+connor-moody%2C+samtan-msft&labels=URLProtocolHandler&template=url-protocol-handler-registration.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=fabiorocha%2C+connor-moody%2C+samtan-msft&labels=URLProtocolHandler&template=url-protocol-handler-registration.md&title=%5BURL+Protocol+Handler+Registration%5D+%3CTITLE+HERE%3E)
 * [Version History](VersionHistory/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Version%20History">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Version%20History?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+stanleyhon&labels=Version+History&template=version-history.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+stanleyhon&labels=Version+History&template=version-history.md&title=%5BVersion+History%5D+%3CTITLE+HERE%3E)
 
 ### Storage
 
 * [Storage Access API](StorageAccessAPI/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Storage%20Access%20API">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Storage%20Access%20API?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=Brandr0id&labels=Storage+Access+API&template=storage-access-api.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=Brandr0id&labels=Storage+Access+API&template=storage-access-api.md&title=%5BStorage+Access+API%5D+%3CTITLE+HERE%3E)
 
 ### UI
 
 * [Primitives for Enlightened Experiences on Foldable Devices (CSS parts)](Foldables/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Foldables">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Foldables?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=boggydigital%2C+dlibby-%2C+zouhir&labels=Foldables&template=web-platform-primitives-for-foldables--css-part-.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=boggydigital%2C+dlibby-%2C+zouhir&labels=Foldables&template=web-platform-primitives-for-foldables--css-part-.md&title=%5BCSS+Foldable+Primitives%5D+%3CTITLE+HERE%3E)
 
 
 # Alumni 🎓
