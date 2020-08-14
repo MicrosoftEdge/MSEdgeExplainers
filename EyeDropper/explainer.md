@@ -122,3 +122,9 @@ eyeDropper.addEventListener("close", e => {
     // handle the user choosing to exit eyedropper mode
 })
  ```
+
+## Alternatives Considered
+### Extending input[type=color]
+This [WhatWG issue](https://github.com/whatwg/html/issues/5584) proposes a new eyedropper attribute on the HTMLInputElement.  This approach wasn't pursued primarily to avoid adding `open` and `close` methods to an already crowded HTMLInputElement API surface.
+
+Having `open` and `close` methods allows the author more control over the duration of "eyedropper mode" and can enable repeated color selections by the user until they either ESC "eyedropper mode" or the author explicitly exits the mode, for example, in response to a click on a non-eyedropper tool.
