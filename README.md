@@ -59,7 +59,7 @@ we move them into the [Alumni section](#alumni-) below.
 * [ARIA Virtual Content](Accessibility/VirtualContent/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Content">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Content?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=Virtual+Content&template=aria-virtual-content.md)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=Virtual+Content&template=aria-virtual-content.md&title=%5BARIA+Virtual+Content%5D+%3CTITLE+HERE%3E)
 
 ### CSS
 
