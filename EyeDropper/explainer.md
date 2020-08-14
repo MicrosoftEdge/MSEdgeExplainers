@@ -123,6 +123,17 @@ eyeDropper.addEventListener("close", e => {
 })
  ```
 
+## Feature Detection
+Authors can feature detect the EyeDropper by testing for the presence of the interface on `window`: 
+```javascript
+if ("EyeDropper" in window) {
+    // EyeDropper supported
+}
+else {
+    // not supported
+}
+```
+
 ## Alternatives Considered
 ### Extending input[type=color]
 This [WhatWG issue](https://github.com/whatwg/html/issues/5584) proposes a new eyedropper attribute on the HTMLInputElement.  This approach wasn't pursued primarily to avoid adding `open` and `close` methods to an already crowded HTMLInputElement API surface.
