@@ -1,7 +1,7 @@
 ---
 name: ImageResource Color Scheme
 about: new issue
-title: ''
+title: '[ImageResource Color Scheme] <TITLE HERE>'
 labels: ImageResource Color Scheme
 assignees: aarongustafson
 
