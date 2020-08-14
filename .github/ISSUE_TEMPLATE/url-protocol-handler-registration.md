@@ -1,7 +1,7 @@
 ---
 name: URL Protocol Handler Registration
 about: new issue
-title: ''
+title: '[URL Protocol Handler Registration] <TITLE HERE>'
 labels: URLProtocolHandler
 assignees: ericlaw1979, fabiorocha, joselea
 
