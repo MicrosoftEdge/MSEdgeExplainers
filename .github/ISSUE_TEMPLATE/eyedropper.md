@@ -1,7 +1,7 @@
 ---
 name: EyeDropper
 about: new issue
-title: ''
+title: '[EyeDropper] <TITLE HERE>'
 labels: EyeDropper
 assignees: BoCupp-Microsoft
 

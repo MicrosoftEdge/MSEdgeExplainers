@@ -1,7 +1,7 @@
 ---
 name: Highlight Events
 about: new issue
-title: ''
+title: '[Highlight Events] <TITLE HERE>'
 labels: HighlightEvents
 assignees: sanketj
 
