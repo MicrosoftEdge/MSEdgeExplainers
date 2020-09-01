@@ -26,7 +26,7 @@ In most of the OSes, users can configure native apps as auto-start apps of the O
 
 - A video chat service asks for a user consent during its first run experience so the user can always be ready to get incoming calls as soon as they log into the OS.
 - A user chose to install a web app from the browser's UI and noticed that they can choose to turn the auto-start on. The user then decides to install a set of their favorite web apps with the auto-start option on so they will be available each time they log in.
-- A user, noticing they do not want the installed web app to auto-start with the OS session anymore, uses the browser’s UI to disables the auto-start.
+- A user, noticing they do not want the installed web app to auto-start with the OS session anymore, uses the browser’s UI to disable the auto-start.
 - A user chooses to enable/disable auto-starting the web app from within the web app's own settings UI page.
 
 ## Proposed Solution
