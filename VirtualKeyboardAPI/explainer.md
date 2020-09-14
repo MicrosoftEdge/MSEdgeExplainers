@@ -1,6 +1,6 @@
 # Virtual Keyboard API
 
-Authors: [Daniel Libby](https://github.com/dlibby-), [Zouhir Chahoud](https://github.com/Zouhir)
+Authors: [Daniel Libby](https://github.com/dlibby-), [Zouhir Chahoud](https://github.com/Zouhir), [Bo Cupp](https://github.com/BoCupp-Microsoft)
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -48,7 +48,7 @@ if ("virtualKeyboard" in navigator) {
 
 ### Virtual Keyboard Visibility Change CSS environment variables 
 
-We propose the addition of six CSS environment variables: `keyboard-inset-top`, `keyboard-inset-right`, `keyboard-inset-bottom`, `keyboard-inset-left`, `keyboard-inset-width`, `keyboard-inset-height`. Web developers can utilize these variables to calculate the virtual keyboard size and position and adjust layout accordingly.
+We propose the addition of six CSS environment variables: `keyboard-top`, `keyboard-right`, `keyboard-bottom`, `keyboard-left`, `keyboard-width`, `keyboard-height`. Web developers can utilize these variables to calculate the virtual keyboard size and position and adjust layout accordingly.
 
 ### Example
 ```html
@@ -62,7 +62,7 @@ body {
     grid-template: 
         "content"  1fr
         "search"   auto
-        "keyboard" env(keyboard-inset-height, 0px);
+        "keyboard" env(keyboard-height, 0px);
 }
 input[type=search]::placeholder {
     color: #444;
@@ -89,7 +89,7 @@ input[type=search] {
 
 Additionally, the `VirtualKeyboard` interface is an `EventTarget` from which the user agent will dispatch `geometrychange` events when the virtual keyboard is shown, hidden or otherwise changes its intersection with the layout viewport.
 
-The `geometrychange` event provides a `boundingRect` object with six read-only properties `top`, `left`, `bottom`, `right`, `width`, and `height` for web developers to use in adjusting the layout of their document. These values are in CSS pixels and are in the client coordinate system. This `boundingRect` is also available through the `virtualKeyboard` object on `navigator`.
+The `VirtualKeyboard` interface provides a `boundingRect` object with six read-only properties `top`, `left`, `bottom`, `right`, `width`, and `height` for web developers to use in adjusting the layout of their document. These values are in CSS pixels and are in the client coordinate system.
 
 ## Example
 
