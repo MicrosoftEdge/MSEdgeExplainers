@@ -56,7 +56,7 @@ The `ongeometrychange` event is dispatched when the intersection of the virtual 
 
 ### Virtual Keyboard Visibility Change CSS environment variables 
 
-We further propose the addition of six CSS environment variables: `keyboard-top`, `keyboard-right`, `keyboard-bottom`, `keyboard-left`, `keyboard-width`, `keyboard-height`. Web developers can utilize these variables to calculate the virtual keyboard size and position and adjust layout accordingly.
+We further propose the addition of six CSS environment variables: `keyboard-inset-top`, `keyboard-inset-right`, `keyboard-inset-bottom`, `keyboard-inset-left`, `keyboard-inset-width`, `keyboard-inset-height`. Web developers can utilize these variables to calculate the virtual keyboard size and position and adjust layout accordingly.
 
 ### API Availability in iframe Context
 
@@ -95,7 +95,7 @@ To ensure content that the user needs to interact with remains visible when the 
     grid-template: 
       "messages"  1fr
       "input"     auto
-      "keyboard"  env(keyboard-height, 0px);
+      "keyboard"  env(keyboard-inset-height, 0px);
   }
   input[type=text]::placeholder {
     color: #444;
@@ -120,11 +120,9 @@ To ensure content that the user needs to interact with remains visible when the 
 
 ### Repositioning Content using JavaScript
 
-The `VirtualKeyboard` interface is an `EventTarget` from which the user agent will dispatch `geometrychange` events when the virtual keyboard is shown, hidden or otherwise changes its intersection with the layout viewport.
+The `VirtualKeyboard` interface is an `EventTarget` from which the user agent will dispatch `geometrychange` events when the virtual keyboard is shown, hidden or otherwise changes its intersection with the layout viewport.  When the `geometrychange` event is received, authors can access the `boundingRect` property on the `VirtualKeyboard` interface to adjust the layout of their document. These values are in CSS pixels and are in the client coordinate system.
 
-The `VirtualKeyboard` interface provides a `boundingRect` object with six read-only properties `top`, `left`, `bottom`, `right`, `width`, and `height` for web developers to use in adjusting the layout of their document. These values are in CSS pixels and are in the client coordinate system.
-
-The figure below is a representation of a canvas-based spreadsheet that repositions the active cell when the virtual keyboard is shown.
+The figure and markup below is a representation of a canvas-based spreadsheet that repositions the active cell when the virtual keyboard is shown.  The `geometrychange` event triggers a paint request for the canvas.  The painting code can then use the `boundingRect` property to render the active cell in the proper location.
 
 ![Spreadsheet example being offset by the virtual keyboard](spreadsheet-example.svg)
 
@@ -172,11 +170,12 @@ The figure below is a representation of a canvas-based spreadsheet that repositi
 
 ### Repositioning Content on Foldable Devices
 
-The figure below represents a map application that presents a map on one window segment and search results on another.
+The figure below represents a map application that presents a map on one window segment and search results on another.  
+
+Using the proposal for [Window Segments](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Foldables/explainer.md) and media queries, the search box shown will increase its bottom margin to remain visible whenever the virtual keyboard appears on the left side of the foldable device.
 
 ![Foldable with the left segment of the window containing a map and the right segment containing list of search results](example.png)
 
-Note the example markup below is dependent on the proposal for Window Segments, which can be [found here](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Foldables/explainer.md).
 
 ```html
 <!DOCTYPE html>
@@ -190,11 +189,11 @@ Note the example markup below is dependent on the proposal for Window Segments, 
       grid-template-columns: env(fold-left) calc(100vw - env(fold-right));
       grid-column-gap: calc(env(fold-right) - env(fold-left));
     }
-    #map {
+    .map {
       grid-column: 1;
       grid-row: 1;
     }
-    input[type=search] {
+    .search-box {
       /* overlay into same grid column as the map */
       grid-column: 1;
       grid-row: 1;
@@ -212,23 +211,53 @@ Note the example markup below is dependent on the proposal for Window Segments, 
       border-radius: 4px;
       background-color: #86DBF6;
     }
-    #search-results {
+    .locations-list {
       grid-column: 2;
       grid-row: 1;
     }
 
-    @media (env(keyboard-right) <= env(fold-left)) {
+    @media (env(keyboard-inset-right) <= env(fold-left)) {
       /* keyboard is on the left screen, adjust search box */
-      #search {
-        margin-bottom: calc(20px + env(keyboard-height));
+      .search-box {
+        margin-bottom: calc(20px + env(keyboard-inset-height));
       }
     }
   }
 </style>
-<div id="map">...</div>
-<input type="search" placeholder="search...">
-<div id="search-results">...</div>
+<div class="map">...</div>
+<input class="search-box" type="search" placeholder="search...">
+<div class="locations-list">...</div>
 <script type="module">
     navigator.virtualKeyboard.overlaysContent = true
 </script>
 ```
+
+## Alternatives Considered
+
+### Extending the Visual Viewport API
+The [Visual Viewport API](https://wicg.github.io/visual-viewport/) reports changes in size, scale or offset (from the layout viewport) of the visual viewport.  One of the reasons the visual viewport changes size is in response to the virtual keyboard being shown or hidden.  Authors currently use the visual viewport to infer when the virtual keyboard appears, but this solution is imperfect, since there are multiple reasons the visual viewport can change.
+
+We briefly considered extending the Visual Viewport API to call out changes to the geomtry of the virtual keyboard, but did not pursue that approach for the following reasons:
+
+1. This proposal opts out of visual viewport changes in response to the virtual keyboard being shown or hidden.  It seems inappropriate to dispatch visual viewport events in response to changes in something other than the visual viewport.
+2. A virtual keyboard interface provides a home for a cohesive set of APIs all related ot the virtual keyboard.  One example is this [complementary proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/VirtualKeyboardPolicy/explainer.md) offering authors the ability to control when the keyboard is shown or hidden.
+
+
+## Privacy Considerations
+
+The hypothetical privacy issue with the virtual keyboard is that authors now have more specific information about the shape of the virtual keyboard which could contribute to fingerprinting users.
+
+Two pieces of information that might help with fingerprinting:
+
+1. The height of the virtual keyboard
+2. The specific intersection of the virtual keyboard with the layout viewport
+
+The first piece of information can already be inferred by authors today using the visual viewport API.  The second can be at least partially mitigated.
+
+If the virtual keyboard doesn't fully span the width of the viewport, it may not be key to the experience, for example if a virtual keyboard had some gaps to either side (centered at the bottom of the viewport) the user agent need not report the extra space and can instead describe the instersection as taking up the full width of the viewport.  If the intersection is key to the experience, as it is with [foldable devices](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Foldables/explainer.md), then the same information can likely be discovered by the author through other APIs, for example by checking the number of window segments, which are necessary so that optimized experiences can be developed for these devices.
+
+In summary, with some user agent mitigations, authors won't gain any new information for use in fingerprinting.
+
+## Quality Concerns / Abuse
+
+It's possible authors could build less usable experiences since the user agent will no longer automatically ensure visibility of the editable field that caused the virtual keyboard to appear.  This is only a minor concern, however, as authors already have the power to build bad website experiences :-) and any author opting into this API is explicitly focusing on optimizing the experience for the virtual keyboard.
