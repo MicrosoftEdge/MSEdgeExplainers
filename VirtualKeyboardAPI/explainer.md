@@ -32,52 +32,85 @@ This proposal is currently scoped to exposing information about *docked* virtual
 
 ## Proposal
 
-To enable these scenarios and ensure backward site compatibility, we propose a mechanism for developers to opt-into a different behavior when the virtual keyboard appears: a docked virtual keyboard will occlude content along with providing JavaScript events when the virtual keyboard overlay geometry changes.
+To enable these scenarios and ensure backward site compatibility, we propose a mechanism for developers to opt-in to a different behavior when the virtual keyboard appears: a docked virtual keyboard will overlay content (as opposed to repositioning it) and JavaScript events will be dispatched to allow the author to rearrange the layout of their document to compensate for changes in the intersection of the layout viewport with the virtual keyboard.
 
-### Allowing Virtual Keyboard to Occlude Content
+### Web IDL
+```
+partial interface Navigator {
+    [SameObject] readonly attribute VirtualKeyboard virtualKeyboard;
+};
 
-The first new feature is an additional `virtualKeyboard` attribute on `Navigator` that exposes a new object. This object (via the `VirtualKeyboard` interface) will contain a boolean attribute `overlaysContent` which enables developers to enable the new behavior of the virtual keyboard overlaying page content, instead of performing the UA default action of resizing viewport, as described in the Motivation section.
-
-```javascript
-if ("virtualKeyboard" in navigator) {
-    window.navigator.virtualKeyboard.overlaysContent = true;
-}
+[Exposed=Window]
+interface VirtualKeyboard : EventTarget {
+    readonly attribute DOMRectReadOnly boundingRect;
+    attribute boolean overlaysContent;
+    attribute EventHandler ongeometrychange;
+};
 ```
 
-![Figure showing virtual keyboard overlaying page content](keyboard-occluding-content.png)
+The `overlaysContent` attribute enables the author to opt-out of resizing of the visual viewport as described in the Motivation section.
+
+The `boundingRect` attribute reports the intersection of the virtual keyboard with the layout viewport in client coordinates.
+
+The `ongeometrychange` event is dispatched when the intersection of the virtual keyboard and the layout viewport changes, e.g. in response to the virtual keyboard being shown or hidden or the browser window being repositioned. 
 
 ### Virtual Keyboard Visibility Change CSS environment variables 
 
-We propose the addition of six CSS environment variables: `keyboard-top`, `keyboard-right`, `keyboard-bottom`, `keyboard-left`, `keyboard-width`, `keyboard-height`. Web developers can utilize these variables to calculate the virtual keyboard size and position and adjust layout accordingly.
+We further propose the addition of six CSS environment variables: `keyboard-top`, `keyboard-right`, `keyboard-bottom`, `keyboard-left`, `keyboard-width`, `keyboard-height`. Web developers can utilize these variables to calculate the virtual keyboard size and position and adjust layout accordingly.
 
-### Example
+### API Availability in iframe Context
+
+iframes will not be able to set or change the virtual keyboard behaviour via `navigator.virtualKeyboard.overlaysContent`, the root page is responsible for setting this policy. However, the `geometrychange` event will fire in the focus chain of the element that triggered the virtual keyboard visibility (i.e. the frame in which the focused element lives, along with its ancestor frames).
+
+Note that the geometry exposed to the iframe via the `navigator.virtualKeyboard.boundingRect` property are relative to the iframe's client coordinates and not the root page; in other words, the `boundingRect` exposed represents the intersection between the virtual keyboard and the iframe element.
+
+## Examples
+
+### Allowing Virtual Keyboard to Occlude Content
+
+An author must first opt-in to the new behavior (i.e. opt-out of visual viewport changes in response to visibility changes of the virtual keyboard) by setting `overlaysContent` to `true`.
+
+```javascript
+if ("virtualKeyboard" in navigator) {
+    navigator.virtualKeyboard.overlaysContent = true;
+}
+```
+
+The figure below shows the virtual keyboard overlaying the content of the document instead of repositioning it.
+
+![Figure showing virtual keyboard overlaying page content](keyboard-occluding-content.png)
+
+
+### Repositioning Content using CSS
+To ensure content that the user needs to interact with remains visible when the virtual keyboard is displayed, the author must reposition elements of the page.  In this example a search box is repositioned using the proposed CSS environment variables.
+
 ```html
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body {
+  body {
     display: grid;
     margin: 8px;
     height: calc(100vh - 16px);
     grid-template: 
-        "content"  1fr
-        "search"   auto
-        "keyboard" env(keyboard-height, 0px);
-}
-input[type=search]::placeholder {
+      "messages"  1fr
+      "input"     auto
+      "keyboard"  env(keyboard-height, 0px);
+  }
+  input[type=text]::placeholder {
     color: #444;
-}
-input[type=search] {
+  }
+  input[type=text] {
     padding: 10px;
     font-size: 24px;
     border: 4px solid black;
     border-radius: 4px;
     background-color: #86DBF6;
     justify-self: center;
-}
+  }
 </style>
-<div id="content">...</div>
-<input type="search" placeholder="search...">
+<div id="messages">...</div>
+<input type="text" placeholder="type...">
 <script>
     if ("virtualKeyboard" in navigator) {
         navigator.virtualKeyboard.overlaysContent = true
@@ -85,48 +118,117 @@ input[type=search] {
 </script>
 ```
 
-### Listening and Responding to Virtual Keyboard Visibility Change
+### Repositioning Content using JavaScript
 
-Additionally, the `VirtualKeyboard` interface is an `EventTarget` from which the user agent will dispatch `geometrychange` events when the virtual keyboard is shown, hidden or otherwise changes its intersection with the layout viewport.
+The `VirtualKeyboard` interface is an `EventTarget` from which the user agent will dispatch `geometrychange` events when the virtual keyboard is shown, hidden or otherwise changes its intersection with the layout viewport.
 
 The `VirtualKeyboard` interface provides a `boundingRect` object with six read-only properties `top`, `left`, `bottom`, `right`, `width`, and `height` for web developers to use in adjusting the layout of their document. These values are in CSS pixels and are in the client coordinate system.
 
-## Example
+The figure below is a representation of a canvas-based spreadsheet that repositions the active cell when the virtual keyboard is shown.
 
-### A map application that presents a map on one window segment and search results on another
+![Spreadsheet example being offset by the virtual keyboard](spreadsheet-example.svg)
+
+```html
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body {
+    display: grid;
+    margin: 0;
+    height: 100vh;
+    grid-template:
+      "controls" min-content
+      "cells"    1fr;
+  }
+  #controls {
+    height: 100px;
+    background-color: #139CFF;
+  }
+  canvas {
+    justify-self: stretch;
+    align-self: stretch;
+  }
+</style>
+<div id="controls">...</div>
+<canvas></canvas>
+<script type="module">
+    navigator.virtualKeyboard.overlaysContent = true
+
+    navigator.virtualKeyboard.addEventListener("geometrychange", () => {
+        // Request the canvas be repainted so it can reposition
+        // the active cell above the virtual keyboard.
+        requestAnimationFrame(paintCanvas)
+    })
+
+    paintCanvas() {
+        let keyboardRect = navigator.virtualKeyboard.boundingRect
+
+        // Use keyboard rect in omitted code below to paint cells in the 
+        // proper position accounting for the keyboard rect along with
+        // any panning of the cell area that the user may have performed.
+    }
+</script>
+```
+
+### Repositioning Content on Foldable Devices
+
+The figure below represents a map application that presents a map on one window segment and search results on another.
 
 ![Foldable with the left segment of the window containing a map and the right segment containing list of search results](example.png)
 
-```css
-.map {
-  position: relative;
-  ...
-}
+Note the example markup below is dependent on the proposal for Window Segments, which can be [found here](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Foldables/explainer.md).
 
-.search-box {
-  position: absolute;
-  bottom:  15px;
-}
-```
-
-```javascript
-navigator.virtualKeyboard.overlaysContent = true
-
-navigator.virtualKeyboard.addEventListener("geometrychange", adjustSearchBoxPosition)
-
-function adjustSearchBoxPosition() {
-    let { width, height } = navigator.virtualKeyboard.boundingRect
-    if( width !== 0 && height !== 0 ) {
-      console.log('virtual keyboard is visible!')
+```html
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @media (spanning: single-fold-vertical) {
+    body {
+      display: grid;
+      margin: 0;
+      height: 100vh;
+      grid-template-columns: env(fold-left) calc(100vw - env(fold-right));
+      grid-column-gap: calc(env(fold-right) - env(fold-left));
     }
-    document.querySelector(".search-box").style.bottom = `${height + 15}px`
-}
+    #map {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    input[type=search] {
+      /* overlay into same grid column as the map */
+      grid-column: 1;
+      grid-row: 1;
 
-adjustSearchBoxPosition()
+      /* position the search box at the bottom of the cell, centered */
+      align-self: end;
+
+      /* margin when keyboard not showing on left screen */
+      margin: 20px;
+
+      /* give it a little style */
+      padding: 10px;
+      font-size: 24px;
+      border: 4px solid black;
+      border-radius: 4px;
+      background-color: #86DBF6;
+    }
+    #search-results {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    @media (env(keyboard-right) <= env(fold-left)) {
+      /* keyboard is on the left screen, adjust search box */
+      #search {
+        margin-bottom: calc(20px + env(keyboard-height));
+      }
+    }
+  }
+</style>
+<div id="map">...</div>
+<input type="search" placeholder="search...">
+<div id="search-results">...</div>
+<script type="module">
+    navigator.virtualKeyboard.overlaysContent = true
+</script>
 ```
-
-### API Availability in iframe Context
-
-iframes will not be able to set or change the virtual keyboard behaviour via `navigator.virtualKeyboard.overlaysContent`, the root page is responsible for setting this policy. However, the `geometrychange` event will fire in the focus chain of the element that triggered the virtual keyboard visibility (i.e. the frame in which the focused element lives, along with its ancestor frames).
-
-Note that the geometry exposed to the iframe via the `navigator.virtualKeyboard.boundingRect` property are relative to the iframe's client coordinates and not the root page; in other words, the `boundingRect` exposed represents the intersection between the virtual keyboard and the iframe element.
