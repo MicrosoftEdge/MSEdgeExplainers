@@ -91,13 +91,6 @@ we move them into the [Alumni section](#alumni-) below.
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20Policy?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Virtual+Keyboard+Policy&template=virtual-keyboard-policy.md&title=%5BVirtual+Keyboard+Policy%5D+%3CTITLE+HERE%3E)
 
-### Graphics
-
-* [Canvas Formatted Text](Canvas/FormattedText.md) |
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Canvas%20Formatted%20Text">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Canvas%20Formatted%20Text?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead%2C+sushraja-msft&labels=Canvas+Formatted+Text&template=canvas-formatted-text.md&title=%5BCanvas+Formatted+Text%5D+%3CTITLE+HERE%3E)
-
 ### HTML
 
 * [Enabling Custom Control UI](ControlUICustomization/explainer.md) |
@@ -175,6 +168,7 @@ standards communities. Thanks for your continued interest!
 
 | Archive date | Archived explainer | Category | Current document | Current standards venue |
 |--|--|--|--|--|
+| 2020-09-23 | [Canvas Formatted Text](Canvas/FormattedText.md) | Graphics | https://github.com/WICG/canvas-formatted-text/blob/main/README.md | [Web Incubator Community Group](https://wicg.io/) |
 | 2020-07-08 | [Window Controls Overlay for Installed Desktop Web Apps](TitleBarCustomization/explainer.md) | Progressive Web Applications | [Window Controls Overlay for Installed Desktop Web Apps](https://github.com/WICG/window-controls-overlay/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) |
 | 2020-05-28 | [PWAs as URL Handlers](PwaUriHandler/explainer.md) | Progressive Web Applications | [Progressive Web Apps as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) |
 | 2020-03-17 | [EditContext API](EditContext/explainer.md) | Editing | [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/docs/EditContext/explainer.md) | [W3C Editing Task Force](https://w3c.github.io/editing/) |
