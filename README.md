@@ -122,6 +122,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Time-limited%20Permissions">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Time-limited%20Permissions?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson&labels=Time-limited+Permissions&template=time-limited-permissions.md&title=%5BTime-limited+Permissions%5D+%3CTITLE+HERE%3E)
+* [Trust Token Issuer Redemption Statistics](TrustTokenExtensions/IssuerRedemptionStatistics.md) | 
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Trust%20Token%20Issuer%20Redemption%20Statistics">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Trust%20Token%20Issuer%20Redemption%20Statistics?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=Brandr0id%2C+erik-anderson&labels=Trust+Token+Issuer+Redemption+Statistics&template=trust-token-issuer-redemption-statistics.md&title=%5BTrust+Token+Issuer+Redemption+Statistics%5D+%3CTITLE+HERE%3E)
 
 ### Progressive Web Applications
 
