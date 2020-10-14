@@ -96,7 +96,7 @@ we move them into the [Alumni section](#alumni-) below.
 * [Set and Reset Clip](Canvas/SetAndResetClip.md) |
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SetClip">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/SetClip?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?)
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead%2C+sushraja-msft&labels=SetClip&template=set-and-reset-clip.md&title=%5BSet+Clip%5D+%3CTITLE+HERE%3E)
     
 ### HTML
 
