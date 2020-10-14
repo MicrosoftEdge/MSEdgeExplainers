@@ -91,6 +91,13 @@ we move them into the [Alumni section](#alumni-) below.
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20Policy?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Virtual+Keyboard+Policy&template=virtual-keyboard-policy.md&title=%5BVirtual+Keyboard+Policy%5D+%3CTITLE+HERE%3E)
 
+### Graphics
+
+* [Set and Reset Clip](Canvas/SetAndResetClip.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SetClip">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/SetClip?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?)
+    
 ### HTML
 
 * [Enabling Custom Control UI](ControlUICustomization/explainer.md) |
