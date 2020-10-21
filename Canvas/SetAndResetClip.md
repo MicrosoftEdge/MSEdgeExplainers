@@ -56,10 +56,6 @@ At this point, the developer will naturally check the documentation for a way to
 region, but won't be able to find such an API because it doesn't exist. Eventually, they may stumble
 upon the [unintuitive workaround](https://stackoverflow.com/questions/25282793/how-to-remove-the-clip-of-a-region-in-html-5-canvas) for this limitation.
 
-Note, this use case is another argument for adding a 
-[`clear()` API](https://github.com/fserb/canvas2D/blob/master/spec/clear.md) to the Canvas,
-where `clear()` would include clearing the current clipping region.
-
 ### Multiple clips
 
 In many scenarios, in order to render the desired effect, multiple clipping regions (that do not 
