@@ -30,7 +30,7 @@ Taken together, this Explainer proposes adding the following read-only attribute
 - `cachedAt`: timestamp added when the Response is cached
 - `lastResponseAt`: timestamp updated [each time a cached Response is returned by the Service Worker](#observing-responses); must be at least as new as `cachedAt`
 - `responseCount`: a number that increments [each time a cached Response is returned by the Service Worker](#observing-responses)
-- `size`: computed disk size of the Request/Response object pair
+- `size`: computed disk size of the Request/Response object pair (or 0 for opaque `Response`s)
 
 If adding these directly to the `Response` is not feasible, these could be added as properties of an object assigned to a single key, such as `Response.cacheData`. Ideally, however, these could be added to a subclass of the `Response` interface used in the `Cache API` context specifically:
 
@@ -43,7 +43,7 @@ interface CachedResponse : Response {
 };
 ```
 
-These keys would only be available for `CachedResponse`s from the same-origin, obtained via a GET `Request`. All other cached `CachedResponse`s would return zero (0) values for these properties so as not to require developers to include additional code to do value checking or provide alternate code paths.
+These keys would only be available for all `CachedResponse`s with the exception of opaque `Request`s, which must always report a size of "0".
 
 ## Goal
 
@@ -163,18 +163,17 @@ As an example of why this matters, consider [this scenario](https://remysharp.co
 
 ## Implementation Notes
 
-* We should test for potential performance issues with respect to updating `lastResponseAt` and `responseCount` ([Issue #148](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/148))
+* Testing is required to confirm whether or not there are performance issues with respect to updating `lastResponseAt` and `responseCount` ([Issue #148](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/148))
 
 ## Privacy Considerations
 
-It is possible that the timestamps stored in the `cachedAt` and `lastResponseAt` properties could be used for fingerprinting, especially when used in conjunction with `responseCount`. For this reason, [user agents should never return an exact millisecond match of the timestamp](https://www.w3.org/TR/fingerprinting-guidance/#narrow-scope-availability). Developers do not need millisecond-level accuracy in these values and, in most cases, will only really care about the year, month, and day. As such, a user agent should prevent the use of these fields as a fingerprinting vector by always returning timestamp values that **report the date accurately, but always report the time as one second past midnight**. If the user agent chooses to expose the true value of these properties in Developer Tooling, which could be useful, they should store the correct value, but alter the value provided via the getter.
+It is possible that the timestamps stored in the `cachedAt` and `lastResponseAt` properties could be used for fingerprinting. As developers already have the ability to use `performance.now()` to get timestamps when resources are cached, this new functionality does not introduce any new fingerprinting risk.
 
 It is possible that `responseCount` could be used for fingerprinting (leveraging the [User Behavior fingerprinting vector](https://2019.www.torproject.org/projects/torbrowser/design/#fingerprinting-linkability)), but the `responseCount` property does not introduce any fingerprinting surface not already exposed via the Cache API.
 
-Limiting these new properties to same-origin `Response`s eliminates the possibility that the first-party website could use this new functionality to snoop on a user’s engagement with third-party services. User Agents would be instructed to report zero values for all of these properties on any opaque `Response`s.
+To eliminate the possibility that a first-party website could use this functionality to snoop on the content of a third-party request service, User Agents are required to report a `size` of 0 for all opaque `Response`s.
 
 ## Open Questions
 
-1. Are there any additional vectors for fingerprinting or other abuse we haven’t considered?
-2. Is subclassing `Response` the best approach?
-3. Would developers be interested in getting information about how many times or when a resource was accessed in addition to the last time it was [used in a response](#observing-responses)?
+1. Would it be worthwhile to introduce a mechanism by which developers specifically opt-out of updating details like `lastResponseAt` and/or `responseCount` when retrieving an item from the cache?
+2. The `trimCache` examples could be run in the main thread or the ServiceWorker, but in either instance could potentially cause the script to lock up. Would it make sense to introduce an async iterator to the Cache API in order to reduce the need for repeatedly calling match? Could there be an async iterator that efficiently enables cache pruning based on these keys?
