@@ -177,30 +177,30 @@ status section to help you find where the latest discussions are happening.
 Please continue to participate and follow the links below to the current
 standards communities. Thanks for your continued interest!
 
-| Archive date | Archived explainer | Category | Current document | Current standards venue |
-|--|--|--|--|--|
-| 2020-09-23 | [Canvas Formatted Text](Canvas/FormattedText.md) | Graphics | https://github.com/WICG/canvas-formatted-text/blob/main/README.md | [Web Incubator Community Group](https://wicg.io/) |
-| 2020-07-08 | [Window Controls Overlay for Installed Desktop Web Apps](TitleBarCustomization/explainer.md) | Progressive Web Applications | [Window Controls Overlay for Installed Desktop Web Apps](https://github.com/WICG/window-controls-overlay/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) |
-| 2020-05-28 | [PWAs as URL Handlers](PwaUriHandler/explainer.md) | Progressive Web Applications | [Progressive Web Apps as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) |
-| 2020-03-17 | [EditContext API](EditContext/explainer.md) | Editing | [EditContext API Explainer](https://github.com/w3c/editing/blob/gh-pages/docs/EditContext/explainer.md) | [W3C Editing Task Force](https://w3c.github.io/editing/) |
-| 2020-03-13 | [Bidirectional WebDriver Protocol](WebDriverRPC/webdriver.md) | WebDriver | [Bidirectional WebDriver Protocol Explainer](https://github.com/w3c/webdriver-bidi/blob/master/explainer.md) | [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) |
-| 2020-02-27 | [Web Ink Enhancement (ink trail aided by the OS)](WebInkEnhancement/explainer.md) | Editing | [Web Ink Enhancement Explainer](https://github.com/WICG/ink-enhancement/blob/master/README.md) | [W3C Web Incubator Community Group](https://wicg.io/) |
-| 2020-02-26 | [Window segments enumeration API](Foldables/explainer.md) | UI | [Window Segments Enumeration API Explainer](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md) | [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) |
-| 2020-01-17 | (direct-to-incubation) | Media | [@media queries for HDR video in Media Queries Level 4](https://drafts.csswg.org/mediaqueries-4/#video-prefixed-features) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
-| 2020-01-08 | [Media Blob](MediaBlob/explainer.md) | Media | [Improved Client-side Video Editing Explainer](https://github.com/WICG/video-editing/blob/master/readme.md) | [W3C Web Incubator Community Group](https://wicg.io/) |
-| 2019-12-10 | [Highlight API](highlight/explainer.md) | Editing | [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
-| 2019-11-08 | (direct-to-incubation) | HTML | [ES Module Attributes and JSON modules Explainer](https://github.com/tc39/proposal-module-attributes/blob/master/README.md) | [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm) |
-| 2019-11-04 | [Shortcuts](Shortcuts/explainer.md) | Progressive Web Applications | ['shortcuts' member of Web App Manifest](https://w3c.github.io/manifest/#shortcuts-member) | [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) |
-| 2019-10-02 | (direct-to-incubation) | Media | ['spatialRendering' for spatial audio query in Media Capabilities](https://w3c.github.io/media-capabilities/#audioconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) |
-| 2019-08-08 | [ES Modules for CSS (CSS Modules)](CSSModules/v1Explainer.md) | HTML | [CSS Modules V1 Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) | [W3C/WHATWG Web Components Incubator](https://github.com/w3c/webcomponents/) |
-| 2019-08-05 | [High Contrast](Accessibility/HighContrast/explainer.md) | Accessibility | [System Colors section of CSS Color Module Level 4](https://drafts.csswg.org/css-color/#css-system-colors) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
-| 2019-07-29 | (direct-to-incubation) | Media | ['hdrMetadataType' for HDR query in Media Capabilities](https://w3c.github.io/media-capabilities/#videoconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) |
-| 2019-07-15 | (proposal) | Immersive Experiences | [Native GLTF proposal](https://github.com/immersive-web/proposals/issues/52) | [W3C Immersive Web Community Group](https://immersive-web.github.io/) |
-| 2019-05-15 | (direct-to-incubation) | Controls | [Open UI (Standardized Form Controls)](https://github.com/WICG/open-ui) | [Web Incubator Community Group](https://wicg.io/) |
-| 2019-04-19 | [High Contrast](Accessibility/HighContrast/explainer.md) | Accessibility | ['forced-colors' of Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/#forced-colors) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
-| 2019-04-19 | [High Contrast](Accessibility/HighContrast/explainer.md) | Accessibility | ['forced-color-adjust' of CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/#forced) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) |
-| 2019-02-26 | [ES Modules for HTML (HTML Modules)](HTMLModules/explainer.md) | HTML | [HTML Modules Explainer](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) | [W3C/WHATWG Web Components Incubator](https://github.com/w3c/webcomponents/) |
 
+| Current Explainer | Current Venue | Archive link and date |
+|---|---|---|
+| [Canvas Formatted Text](https://github.com/WICG/canvas-formatted-text/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-09-23](Canvas/FormattedText.md) |
+| [Window Controls Overlay for Installed Desktop Web Apps](https://github.com/WICG/window-controls-overlay/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-07-08](TitleBarCustomization/explainer.md) |
+| [PWAs as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-05-28](PwaUriHandler/explainer.md) |
+| [EditContext API](https://github.com/w3c/editing/blob/gh-pages/docs/EditContext/explainer.md) | [W3C Editing Task Force](https://w3c.github.io/editing/) | [2020-03-17](EditContext/explainer.md) |
+| [Bidirectional WebDriver Protocol](https://github.com/w3c/webdriver-bidi/blob/master/explainer.md) | [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) | [2020-03-13](WebDriverRPC/webdriver.md) |
+| [Web Ink Enhancement: Delegated Ink Trail Presentation Aided By The OS](https://github.com/WICG/ink-enhancement/blob/master/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-02-27](WebInkEnhancement/explainer.md) |
+| [Window Segments Enumeration API](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md) | [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) | [2020-02-26](Foldables/explainer.md) |
+| [@media queries for HDR video in Media Queries Level 4](https://drafts.csswg.org/mediaqueries-4/#video-prefixed-features) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | 2020-01-17 |
+| [Improved Client-side Video Editing](https://github.com/WICG/video-editing/blob/master/readme.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-01-08](MediaBlob/explainer.md) |
+| [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-12-10](highlight/explainer.md) |
+| [Import Assertions](https://github.com/tc39/proposal-import-assertions/blob/master/README.md) | [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm) | 2019-11-08 |
+| ['shortcuts' member of Web App Manifest](https://w3c.github.io/manifest/#shortcuts-member) | [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) | [2019-11-04](Shortcuts/explainer.md) |
+| ['spatialRendering' for spatial audio query in Media Capabilities](https://w3c.github.io/media-capabilities/#audioconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) | 2019-10-02 |
+| [CSS Modules V1](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) | [W3C/WHATWG Web Components Incubator](https://github.com/w3c/webcomponents/) | [2019-08-08](CSSModules/v1Explainer.md) |
+| [System Colors section of CSS Color Module Level 4](https://drafts.csswg.org/css-color/#css-system-colors) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-08-05](Accessibility/HighContrast/explainer.md) |
+| ['hdrMetadataType' for HDR query in Media Capabilities](https://w3c.github.io/media-capabilities/#videoconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) | 2019-07-29 |
+| [Native GLTF proposal](https://github.com/immersive-web/proposals/issues/52) | [W3C Immersive Web Community Group](https://immersive-web.github.io/) | 2019-07-15 |
+| [Open UI (Standardized Form Controls)](https://github.com/WICG/open-ui) | [Web Incubator Community Group](https://wicg.io/) | 2019-05-15 |
+| ['forced-colors' of Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/#forced-colors) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-04-19](Accessibility/HighContrast/explainer.md) |
+| ['forced-color-adjust' of CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/#forced) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-04-19](Accessibility/HighContrast/explainer.md) |
+| [HTML Modules](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) | [W3C/WHATWG Web Components Incubator](https://github.com/w3c/webcomponents/) | [2019-02-26](HTMLModules/explainer.md) |
 
 # DevTools 🧰
 
