@@ -193,14 +193,14 @@ standards communities. Thanks for your continued interest!
 | [Import Assertions](https://github.com/tc39/proposal-import-assertions/blob/master/README.md) | [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm) | 2019-11-08 |
 | ['shortcuts' member of Web App Manifest](https://w3c.github.io/manifest/#shortcuts-member) | [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) | [2019-11-04](Shortcuts/explainer.md) |
 | ['spatialRendering' for spatial audio query in Media Capabilities](https://w3c.github.io/media-capabilities/#audioconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) | 2019-10-02 |
-| [CSS Modules V1](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) | [W3C/WHATWG Web Components Incubator](https://github.com/w3c/webcomponents/) | [2019-08-08](CSSModules/v1Explainer.md) |
+| [CSS Modules V1](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2019-08-08](CSSModules/v1Explainer.md) |
 | [System Colors section of CSS Color Module Level 4](https://drafts.csswg.org/css-color/#css-system-colors) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-08-05](Accessibility/HighContrast/explainer.md) |
 | ['hdrMetadataType' for HDR query in Media Capabilities](https://w3c.github.io/media-capabilities/#videoconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) | 2019-07-29 |
 | [Native GLTF proposal](https://github.com/immersive-web/proposals/issues/52) | [W3C Immersive Web Community Group](https://immersive-web.github.io/) | 2019-07-15 |
 | [Open UI (Standardized Form Controls)](https://github.com/WICG/open-ui) | [Web Incubator Community Group](https://wicg.io/) | 2019-05-15 |
 | ['forced-colors' of Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/#forced-colors) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-04-19](Accessibility/HighContrast/explainer.md) |
 | ['forced-color-adjust' of CSS Color Adjustment Module Level 1](https://drafts.csswg.org/css-color-adjust-1/#forced) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-04-19](Accessibility/HighContrast/explainer.md) |
-| [HTML Modules](https://github.com/w3c/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) | [W3C/WHATWG Web Components Incubator](https://github.com/w3c/webcomponents/) | [2019-02-26](HTMLModules/explainer.md) |
+| [HTML Modules](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2019-02-26](HTMLModules/explainer.md) |
 
 # DevTools 🧰
 
