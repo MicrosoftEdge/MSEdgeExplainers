@@ -141,6 +141,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Install%20Time%20Permissions">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Install%20Time%20Permissions?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=Install+Time+Permissions&template=install-time-permissions-prompt.md&title=%5BInstall+Time+Permissions+Prompt%5D+%3CTITLE+HERE%3E)
+* [Ratings & Reviews Prompt](RatingsAndReviewsPrompt/explainer.md) | 
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Ratings%20and%20Reviews">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Ratings%20and%20Reviews?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+diekus&labels=Ratings+and+Reviews&template=ratings-and-reviews-prompt.md&title=%5BRatings+and+Reviews+Prompt%5D+%3CTITLE+HERE%3E)
 * [Run on OS Login](RunOnLogin/Explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Run%20on%20OS%20Login">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Run%20on%20OS%20Login?label=issues)</a> |
