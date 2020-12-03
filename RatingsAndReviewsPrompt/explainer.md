@@ -53,7 +53,7 @@ Each app catalog provides its own API for triggering an app review flow within t
 
 To request a review, a PWA developer would use the Promise-based method `navigator.requestReview()`. This method will:
 
-* resolve when a rating or review has been [successfully handed off](#the-handoff-to-a-catalog)—the `success` value will be equal to the origin of the catalog chosen (e.g., play.google.com, www.microsoft.com, www.pwastore.com); or
+* resolve when a rating or review has been [successfully handed off](#the-handoff-to-a-catalog)—the `success` value will be equal to the origin of the catalog chosen (e.g., [play.google.com](https://play.google.com), www.microsoft.com, www.pwastore.com); or
 * be rejected if the user declines to leave a review/rating at this time.
 
 ```js
