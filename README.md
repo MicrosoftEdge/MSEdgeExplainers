@@ -54,13 +54,6 @@ each explainer has a "status of this document" section that indicates
 what standards venue they expect to go to next (if known). When they graduate,
 we move them into the [Alumni section](#alumni-) below.
 
-### Accessibility
-
-* [ARIA Virtual Content](Accessibility/VirtualContent/explainer.md) | 
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Content">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Content?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=Virtual+Content&template=aria-virtual-content.md&title=%5BARIA+Virtual+Content%5D+%3CTITLE+HERE%3E)
-
 ### CSS
 
 * [CSS color-mix() function](CSSColorMix/explainer.md) | 
@@ -197,6 +190,7 @@ standards communities. Thanks for your continued interest!
 | [Import Assertions](https://github.com/tc39/proposal-import-assertions/blob/master/README.md) | [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm) | 2019-11-08 |
 | ['shortcuts' member of Web App Manifest](https://w3c.github.io/manifest/#shortcuts-member) | [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) | [2019-11-04](Shortcuts/explainer.md) |
 | ['spatialRendering' for spatial audio query in Media Capabilities](https://w3c.github.io/media-capabilities/#audioconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) | 2019-10-02 |
+| [ARIA Virtual Content](https://github.com/WICG/accessible-loading-and-searching-of-content/commits/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) |[2019-09-27](Accessibility/VirtualContent/explainer.md) |
 | [CSS Modules V1](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/css-modules-v1-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2019-08-08](CSSModules/v1Explainer.md) |
 | [System Colors section of CSS Color Module Level 4](https://drafts.csswg.org/css-color/#css-system-colors) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-08-05](Accessibility/HighContrast/explainer.md) |
 | ['hdrMetadataType' for HDR query in Media Capabilities](https://w3c.github.io/media-capabilities/#videoconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) | 2019-07-29 |
