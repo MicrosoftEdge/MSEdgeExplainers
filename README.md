@@ -101,6 +101,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/EyeDropper">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/EyeDropper?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft&labels=EyeDropper&template=eyedropper.md&title=%5BEyeDropper%5D+%3CTITLE+HERE%3E)
+* [Popup](Popup/explainer.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Popup">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Popup?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=melanierichards%2C+BoCupp-Microsoft%2C+ipopescu93&labels=Popup&template=popup.md&title=%5BPopup%5D+%3CTITLE+HERE%3E)
 
 ### Media
 
