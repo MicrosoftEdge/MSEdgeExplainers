@@ -31,11 +31,13 @@ The web platform can be extended such that authors can get popup interactions an
 
 ## Goals
 Authors can efficiently create popups which:
+
 * Can contain arbitrary content
 * Can be fully styled, including properties which require compositing with other layers of the host web application (e.g. the `box-shadow` or `backdrop-filter` CSS properties)
 * Can be sized and positioned to the author’s discretion
 * Are rendered on top of all other content in the host web application
-* Include an appropriate user input management experience “out of the box”, with flexibility to modify behaviors such as initial focus.
+* Include an appropriate user input management experience “out of the box”, with flexibility to modify behaviors such as initial focus
+* Are accessible by default, with the ability to further extend semantics/behaviors as needed for the author’s specific use case
 
 ## Non-Goals
 
