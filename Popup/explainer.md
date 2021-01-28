@@ -51,7 +51,7 @@ We propose a new HTML element called `popup`. This new element can be used for a
 
 * A `show()` JavaScript method, for invoking the `popup`. When visible, the `popup` will have a default set of behaviors as well as a default positioning scheme.
 * Logic for an optional `autofocus` attribute which enables moving focus to the `popup` or to a descendent.
-* An optional `delegatefocus` attribute, for passing focus to descendants.
+* An optional `delegatesfocus` attribute, for passing focus to descendants.
 * An optional `anchor` attribute, which both relates the `popup` to an activating element and can be used in a separately-proposed, CSS-based anchor positioning scheme.
 * A `hide()` method for hiding the `popup`
 * [Light dismiss](#light-dismiss) behaviors.
@@ -121,12 +121,12 @@ To move focus to a descendent upon invocation, place the attribute on that desce
 
 These `autofocus` rules will be processed each time `show` is called, as opposed to initial document load.
 
-### `delegatefocus`
+### `delegatesfocus`
 
-Some authors may need to automatically focus the popup's first focusable descendent, and may not wish to write script to determine at runtime which element that is. In such cases  the  `delegatefocus` attribute can be applied to the popup:
+Some authors may need to automatically focus the popup's first focusable descendent, and may not wish to write script to determine at runtime which element that is. In such cases  the  `delegatesfocus` attribute can be applied to the popup:
 
 ```html
-<popup delegatefocus>
+<popup delegatesfocus>
     <p>I am not a focusable element.</p>
     <p>Nor am I.</p>
     <button>I will be focused whenever the popup becomes focused.</button>
