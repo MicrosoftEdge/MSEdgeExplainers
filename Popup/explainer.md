@@ -63,7 +63,7 @@ One use case for a `popup` is a popup menu triggered by a menu button:
 ![A popup menu displayed beneath a button that says "menu". The popup obscures other text on the page.](menu.png)
 
 An author could produce this popup menu using the following markup:
-```
+```html
 <button aria-haspopup="true" aria-controls="menuPopup" id="menuButton">Menu</button>
 <popup id="menuPopup" role="menu" anchor="menuButton">
     <!-- Markup for menuitems goes here -->
@@ -76,7 +76,7 @@ Popup menus are not visible until `show()` is called by the author:
 
 The script to show the `popup` could look like the following:
 
-```
+```javascript
 document.getElementById('menuButton').addEventListener('click', () => {
   document.getElementById('menuPopup').show()
 })
@@ -107,13 +107,13 @@ By default, focus remains on the current active element when the `popup` is invo
 
 To move focus to the `popup` itself when `show` is called—without the need to explicitly call `popupElement.focus()`—place the attribute directly on the `popup`:
 
-```
+```html
 <popup autofocus>...</popup>
 ```
 
 To move focus to a descendent upon invocation, place the attribute on that descendent:
 
-```
+```html
 <popup>
     <button autofocus>My cool button</button>
 </popup>
@@ -125,7 +125,7 @@ These `autofocus` rules will be processed each time `show` is called, as opposed
 
 Some authors may need to automatically focus the popup's first focusable descendent, and may not wish to write script to determine at runtime which element that is. In such cases  the  `delegatefocus` attribute can be applied to the popup:
 
-```
+```html
 <popup delegatefocus>
     <p>I am not a focusable element.</p>
     <p>Nor am I.</p>
@@ -198,7 +198,7 @@ By default, `popup` has a fixed position in the top-left corner of the viewport.
 
 We will soon make an additional proposal for a CSS anchored positioning scheme, which can be applied to `popup` and other top-layer, interactive elements. For now, it is worth noting that a `popup`'s anchor element (the element it will be “pinned” to) can be expressed using a new `anchor` attribute on the popup:
 
-```
+```html
 <button id="myButton">Anchor element</button>
 <popup id="myPopup" anchor="myButton">Popup</popup>
 ```
@@ -207,7 +207,7 @@ We will soon make an additional proposal for a CSS anchored positioning scheme, 
 
 A `popup` can be hidden by calling the `hide()` method:
 
-```
+```javascript
 // Author calls hide() according to some app logic, such as choosing a menu item
 document.getElementById('menuPopup').hide();
 ```
@@ -238,7 +238,7 @@ Per [“Enabling Custom Control UI”](https://github.com/MicrosoftEdge/MSEdgeEx
 
 For example, `popup` may be used in the `select` Shadow DOM like so:
 
-```
+```html
 <template>
     <slot name="entire">
         <slot name="button-wrap">
@@ -259,7 +259,7 @@ For example, `popup` may be used in the `select` Shadow DOM like so:
 
 If it fits their use case, an author could then entirely replace this listbox with their own `popup` in markup:
 
-```
+```html
 <select>
     <div slot="button-container" part="button" style="display: flex;">
         <div part="selected-value-wrap">Option One</div>
