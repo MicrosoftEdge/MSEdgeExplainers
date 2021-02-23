@@ -51,7 +51,7 @@ We propose a new HTML element called `popup`. This new element can be used for a
 
 * A few options to invoke/show the `popup`:
   * A `popup` attribute, applied to whichever element should invoke a given popup (if applicable).
-  * An optional `option` attribute, applied to the `popup` to express that it should be shown.
+  * An optional `open` attribute, applied to the `popup` to express that it should be shown.
   * A `show()` JavaScript method, for invoking the `popup`.
 * When visible, a default set of behaviors as well as a default positioning scheme.
 * Logic for an optional `autofocus` attribute which enables moving focus to the `popup` or to a descendent.
