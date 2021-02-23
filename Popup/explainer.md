@@ -50,7 +50,7 @@ We propose a new HTML element called `popup`. This new element can be used for a
 `popup` will include:
 
 * A few options to invoke/show the `popup`:
-  * A `popup` attribute, applied to whichever element should invoke a given popup (if applicable).
+  * A `popup` attribute, applied to whichever elements should invoke a given popup (if applicable).
   * An optional `open` attribute, applied to the `popup` to express that it should be shown.
   * A `show()` JavaScript method, for invoking the `popup`.
 * When visible, a default set of behaviors as well as a default positioning scheme.
@@ -191,7 +191,7 @@ We will soon make an additional proposal for a CSS anchored positioning scheme, 
 </popup>
 ```
 
-Note: for many `popup`s, the element which invokes the `popup` and the element the `popup` is anchored to will be one in the same. However, there are cases where the author may want to anchor to a child/parent of the element which invoked the popup. Similiarly, there are cases (such as this teaching UI example) where no such invoking element exists. Therefore, we do not propose collapsing invocation and anchoring responsibilities to one attribute, as they are distinct responsibilities.
+Note: for many `popup`s, the element which invokes the `popup` and the element the `popup` is anchored to will be one and the same. However, there are cases where the author may want to anchor to a child/parent of the element which invoked the popup. Similiarly, there are cases (such as this teaching UI example) where no such invoking element exists. Therefore, we do not propose collapsing invocation and anchoring responsibilities to one attribute, as they are distinct responsibilities.
 
 ### Dismissing the `popup`
 
@@ -338,7 +338,7 @@ Freedom over the size and position of a `popup` could enable an author to spoof 
 
 ### Anchoring and event bubbling
 
-In a previous version of this document, we proposed that the hierarchy created by the `anchor` attribute relationship affects the event propagation path. With the introduction of a separate `popup` attribute which creates an invocation relationship, it is less clear whether event bubbling should be applied as a result of the `popup` attribute and/or the `anchor` attribute.
+In a previous version of this document, we proposed that the hierarchy created by the `anchor` attribute relationship affects the event propagation path. With the introduction of a separate `popup` attribute which creates an invocation relationship, it is less clear whether event bubbling should be changed as a result of the `popup` attribute and/or the `anchor` attribute.
 
 This behavior as previously proposed adds complexity to the platform, and it is not clear whether there is enough value to authors for the platform to take on that complexity. We welcome feedback on this point and preserve the previous proposal here.
 
