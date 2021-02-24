@@ -127,9 +127,9 @@ Only one “top-level” `popup` may be displayed at a time. When a `popup` is s
 
 The following would be considered an “ancestral” `popup`:
 
-* An ancestor of the new `popup`’s invoking element (based on the `popup` attribute)
-* An ancestor of the new `popup`’s anchoring element (based on the `anchor` attribute)
-* An ancestor of the new `popup` itself
+* A `popup` ancestor of the new `popup`’s invoking element (based on the `popup` attribute)
+* A `popup` ancestor of the new `popup`’s anchoring element (based on the `anchor` attribute)
+* A `popup` ancestor of the new `popup` itself
 
 Other events also remove a `popup` from the stack, including loss of focus, or hitting `ESC` (often referred to as [light dimiss](#light-dismiss) behaviors). Interactions with other elements like `dialog`, or other future types of popup-like elements, for example, showing a menu, must also remove the `popup`s from the top-layer stack. [Dismissing a `popup`](#dismissing-the-popup) will also remove any child `popup`s from the stack.
 
