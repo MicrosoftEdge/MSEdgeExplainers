@@ -58,7 +58,8 @@ We propose a new HTML element called `popup`. This new element can be used for a
 * An optional `delegatesfocus` attribute, for passing focus to descendants.
 * An optional `anchor` attribute, which both relates the `popup` to an activating element and can be used in a separately-proposed, CSS-based anchor positioning scheme.
 * A couple means to dismiss the `popup`:
-  * An optional `hidden` attribute, applied to the `popup` to express that it should be hidden.
+  * Behaviors tied to the aforementioned `popup` attribute.
+  * Removing the `open` attribute from `popup`.
   * A `hide()` method for hiding the `popup`.
   * [Light dismiss](#light-dismiss) behaviors.
 
@@ -195,7 +196,7 @@ Note: for many `popup`s, the element which invokes the `popup` and the element t
 
 ### Dismissing the `popup`
 
-#### Option A: the `popup` attribute
+#### The `popup` attribute
 
 When the `popup` was shown as a result of user interaction on an element with the `popup` attribute…
 
@@ -208,9 +209,9 @@ When the `popup` was shown as a result of user interaction on an element with th
 
 …repeating/reversing that action will dismiss the popup. In this example, invoking the `button` again when the `popup` is visible will hide the `popup`. Moving focus from `input type="text"` (so long as focus does not then move to the `popup`) will hide an associated `popup`.
 
-#### Option B: the `hidden` attribute
+#### Removing the `open` attribute
 
-A `popup` that was shown using the `open` attribute…
+Recall that authors can apply the `open` attribute in order to show the `popup`:
 
 ```html
 <popup open>
@@ -219,16 +220,9 @@ A `popup` that was shown using the `open` attribute…
 </popup>
 ```
 
-…can be dismissed using the `hidden` attribute:
+Removing the attribute will dismiss the `popup`.
 
-```html
-<popup hidden>
-  <p><strong>New!</strong> I’m some sort of educational UI…</p>
-  …
-</popup>
-```
-
-#### Option C: the `hide()` method
+#### The `hide()` method
 
 A `popup` can be hidden by calling the `hide()` method:
 
@@ -335,6 +329,10 @@ Freedom over the size and position of a `popup` could enable an author to spoof 
 * **Animating state transitions:** applying animations and transitions to interactive elements’ show/hide states can be difficult. For example, to apply a CSS transition the element must first produce an initial box before its properties can be transitioned to new values. That requires a two step process to first show the element, and in a subsequent frame, initiate a transition by applying a class. Likewise, since the browser manages the visibility of the popup for light dismiss behaviors, it is impossible to apply a close animation. To address this issue perhaps the answer is to invent a new CSS animation primitive that is triggered when an element stops producing a box.
 
 ## Appendix
+
+### The `hidden` attribute
+
+This proposal specifies that, similarly to the `dialog` element, the `open` attribute can be used to show a `popup`. Currently, authors are advised to add a `hidden` attribute to `dialog` when hiding it, as there are [some quirks with removing the `open` attribute](https://html.spec.whatwg.org/multipage/interactive-elements.html#the-dialog-element). Rather than porting over this behavior to `popup`, it would be ideal to [adjust the behavior on `dialog`](https://github.com/whatwg/html/issues/5802). As a result and to provide simpler authoring, we are proposing that authors solely remove/add the `open` attribute in order to toggle visibility of a `popup`, as opposed to introducing the `hidden` attribute to this new element.
 
 ### Anchoring and event bubbling
 
