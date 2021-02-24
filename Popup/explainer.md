@@ -135,6 +135,8 @@ Other events also remove a `popup` from the stack, including loss of focus, or h
 
 `popup`s in the stack are laid out and rendered from the bottom of the stack to the top. Each `popup` will paint atomically as its own stacking context.
 
+Showing a `popup` via options A (`popup` attribute) or C (calling the `show()`) method will also cause the `open` attribute to be set on the `popup`.
+
 ### `autofocus` logic
 
 By default, focus remains on the current active element when the `popup` is invoked.  If this element is somehow destroyed, focus moves to a focusable ancestral element.
@@ -196,19 +198,6 @@ Note: for many `popup`s, the element which invokes the `popup` and the element t
 
 ### Dismissing the `popup`
 
-#### The `popup` attribute
-
-When the `popup` was shown as a result of user interaction on an element with the `popup` attribute…
-
-```html
-<button id="menuButton" popup="menuPopup">Menu</button>
-<popup id="menuPopup" role="menu" anchor="menuButton">
-    <!-- Markup for menuitems goes here -->
-</popup>
-```
-
-…repeating/reversing that action will dismiss the popup. In this example, invoking the `button` again when the `popup` is visible will hide the `popup`. Moving focus from `input type="text"` (so long as focus does not then move to the `popup`) will hide an associated `popup`.
-
 #### Removing the `open` attribute
 
 Recall that authors can apply the `open` attribute in order to show the `popup`:
@@ -221,6 +210,21 @@ Recall that authors can apply the `open` attribute in order to show the `popup`:
 ```
 
 Removing the attribute will dismiss the `popup`.
+
+All other following methods of dismissing the `popup` will automatically remove the `open` attribute from the `popup`.
+
+#### The `popup` attribute
+
+When the `popup` was shown as a result of user interaction on an element with the `popup` attribute…
+
+```html
+<button id="menuButton" popup="menuPopup">Menu</button>
+<popup id="menuPopup" role="menu" anchor="menuButton">
+    <!-- Markup for menuitems goes here -->
+</popup>
+```
+
+…repeating/reversing that action will dismiss the popup. In this example, invoking the `button` again when the `popup` is visible will hide the `popup`. Moving focus from `input type="text"` (so long as focus does not then move to the `popup`) will hide an associated `popup`.
 
 #### The `hide()` method
 
