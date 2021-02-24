@@ -393,3 +393,5 @@ After a command is selected from the menu, the menu dispatches a custom command 
     }
 </script>
 ```
+
+Note: if event bubbling remains unchanged by the `anchor` attribute, authors in this case would need to query for the `popup`’s anchor element and dispatch the event from that element. So, `e.currentTarget.dispatchEvent(new CommandEvent(e.currentTarget.id))` becomes `bugCommands.anchor.dispatchEvent(new CommandEvent(e.currentTarget.id))`.
