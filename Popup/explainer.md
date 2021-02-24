@@ -192,7 +192,7 @@ We will soon make an additional proposal for a CSS anchored positioning scheme, 
 </popup>
 ```
 
-Note: for many `popup`s, the element which invokes the `popup` and the element the `popup` is anchored to will be one and the same. However, there are cases where the author may want to anchor to a child/parent of the element which invoked the popup. Similiarly, there are cases (such as this teaching UI example) where no such invoking element exists. Therefore, we do not propose collapsing invocation and anchoring responsibilities to one attribute, as they are distinct responsibilities.
+Note: for many `popup`s, the element which invokes the `popup` and the element the `popup` is anchored to will be one and the same. However, there are cases where the author may want to anchor to a child/parent of the element which invoked the popup. Similiarly, there are cases (such as this teaching UI example) where no such invoking element exists. Therefore, we do not propose collapsing invocation and anchoring responsibilities to one attribute, as they are distinct responsibilities. In cases where the `anchor` attribute is unset, but there is an associated invoking element, we could explore treating this as the anchor element. There would be complexities to think through if more than one element is associated to a `popup` via the `popup` attribute, or if the `anchor` association causes reordering of trees (refer to [Open Questions](#open-questions)).
 
 ### Dismissing the `popup`
 
