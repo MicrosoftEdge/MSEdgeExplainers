@@ -213,6 +213,10 @@ We love our developer tools! Checkout these cool innovations being designed for 
 * [CSS Grid Tooling](https://docs.google.com/document/d/1s0AkeMOtlwqD74GJZtedxqOnttQtgj9oo8RjfVyaHP8/)
 * [Customizable Keyboard Shortcuts](https://docs.google.com/document/d/1oOPSWPxCHvMoBZ0Fw9jwFZt6gP4lrsrsl8DEAp-Hy7o/)
 * [Dual-screen Emulation](https://docs.google.com/document/d/1KMsmEXdjmn4h4iIl0n74N1EHxwwNUzh6R2p7GHrdtTI)
+* [Focus Mode](DevTools/FocusMode/explainer.md) | 
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DevTools">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/DevTools?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=DevTools&title=%5BDevTools%5D+%3CTITLE+HERE%3E)
 * [High Contrast Simulation](https://docs.google.com/document/d/1SUx-hfodUUMAIwmcwIVYlpi9YDrLnkwW0T7yXUN8s50/)
 * [Infobar UI Refresh](https://docs.google.com/document/d/1GjpfPkdljH97IAaWfY8d9NBim1wrPPRaD8zMl8PWhLs/)
 * [Localization](https://docs.google.com/document/d/1L6TkT2-42MMQ72ZSBMFwUaq7M6mDgA2X0x8oHHKaV_U/)
