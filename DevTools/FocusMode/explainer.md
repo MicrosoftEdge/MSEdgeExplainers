@@ -8,8 +8,6 @@ Authors:
  - Ebou Jobe, Software Engineer
  - Josephine Le, Designer
 
-![Focus Mode UI](focusmode.png)
-
 ## Status of this feature
 This feature is experimental and in active development. See [Changelog section](#changelog) for details on progressive feature implementation starting with Edge 90.0.810.0.
 
@@ -26,6 +24,8 @@ To address these diverse needs, we're experimenting with new features that make 
   -  A tooltip help feature to help you learn what different parts of DevTools do.
 
 This document describes a fourth new feature to address the complexity of DevTools: Focus Mode. Focus Mode is an alternative, minimal UI option that lives alongside the "classic" Chromium DevTools UI. This interface will offer all the same functionality but with a cleaner, customizable interface, helping you put in focus your most important debugging tasks without extra clutter or distractions.
+
+![Focus Mode UI](focusmode.png)
 
 ## Goals
   1. To lower the learning curve for new users of Edge DevTools,
