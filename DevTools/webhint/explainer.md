@@ -26,6 +26,8 @@ Our goal in including webhint in DevTools is to help developers rapidly address 
   - **customizable,** catering the kind of feedback you see based on your project's needs, and 
   - **actionable,** with concrete recommendations on how to fix the issue.
 
+![webhint feedback in Issues tool](webhint-screenshot.png)
+
 ## Usage
 
 ### View feedback in **Issues**
@@ -34,7 +36,6 @@ Our goal in including webhint in DevTools is to help developers rapidly address 
 
 Feedback is sorted into categories based on the type of feedback. Click a category to expanded or collapse it. Each recommendation includes documentation, affected code snippet (where applicable), a severity label (e.g., Warning, Error, Info), and links to other relevant information in the **Elements,** **Network,** or **Sources** tools. 
 
-![webhint feedback in Issues tool](webhint-screenshot.png)
 
 ### Preview issues in **Elements**
 
