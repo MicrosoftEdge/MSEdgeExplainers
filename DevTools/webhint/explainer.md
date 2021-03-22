@@ -11,19 +11,19 @@ Authors:
 This feature is experimental and in active development. See [Changelog section](#changelog) for details on progressive feature implementation starting with Edge 85.
 
 ## Introduction
-The [2019 MDN Web Developer Needs Assessment report](https://mdn-web-dna.s3-us-west-2.amazonaws.com/MDN-Web-DNA-Report-2019.pdf) illuminates a number of pain points that web developers face in their work. Among the challenges were implementing and testing cross-browser compatibility, security, performance, and accessibility. Web developers also note the difficulty of keeping up with documentation and the latest best practices.
+The [2019 MDN Web Developer Needs Assessment report](https://mdn-web-dna.s3-us-west-2.amazonaws.com/MDN-Web-DNA-Report-2019.pdf) illuminates a number of pain points that web developers face in their work. The report outlines challenges in implementing and testing cross-browser compatibility, security, performance, and accessibility. Web developers also note the difficulty of keeping up with documentation and the latest best practices.
 
-There are numerous tools that audit websites for problems in compatibility, security, etc. However, keeping up with these solutions, learning how to use and configure them, and finally integrating them into a web development workflow can require a great deal of time and effort. Additionally, most tools provide audits or reports that are generally run *after* a site is built&mdash;in CI/CD, for example, when changes are more challgening or costly to make.
+There are numerous tools that audit websites for problems in compatibility, security, etc. However, keeping up with these solutions, learning how to use and configure them, and integrating them into a web development workflow can require a great deal of time and effort. Additionally, these tools provide audits or reports that are generally run *after* a site is built&mdash;in a CI/CD pipeline, for example&mdash;when changes are more challgening or costly to make.
 
-To address these pain points, the Edge DevTools now offer *proactive* feedback on accessibility, cross-browser compatibility, performance, security, PWAs, and more that can be used in real-time during development and debugging. We acheive this through the inclusion of [https://webhint.io](webhint), a fully open-source best practices engine that uses indsutry-leading APIs from MDN, Deque Univeristy. 
+To address these pain points, the Edge DevTools now offer *proactive* feedback on accessibility, cross-browser compatibility, performance, security, PWAs, and more that can be used in real-time during development and debugging. We acheive this through the inclusion of [webhint](https://webhint.io), a fully open-source best practices engine that uses industry-leading APIs from MDN, Deque University, and more. 
 
 ## Goals
-Our goal in including webhint in DevTools is to help developers rapidly address known pain points around accessibility, cross-browser testing, etc. *during* development, rather than after. webhint is both open-source and highly customizable, meaning it reflects the best practices of web developers rather than browser vendors. webhint's recommendations, which appear **Issues** tool in DevTools, are:
+Our goal in including webhint in DevTools is to help developers rapidly address known pain points around accessibility, cross-browser testing, etc. *during* development, rather than after. webhint is both open-source and highly customizable, meaning it reflects the best practices of web developers rather than browser vendors. Specifically, the recommendations that appear in the **Issues** tool in DevTools are:
 
   - **specific,** down to the line of code or HTTP request in question,
   - **trustworthy,** linking to relevant documentation when more context is needed, 
-  - **just in time,** conveniently updating in real-time like a code linter,
-  - **customizable,** catering the kind of feedback you see based on your project's needs, and 
+  - **just in time,** conveniently updated in real-time like a code linter,
+  - **customizable,** catering the feedback you see to your project's needs, and 
   - **actionable,** with concrete recommendations on how to fix the issue.
 
 ![webhint feedback in Issues tool](webhint-screenshot.png)
