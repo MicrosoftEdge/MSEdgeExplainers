@@ -47,9 +47,9 @@ To see the issue details, Shift + click on the underlined item. Or, use the cont
 
 ### Roadmap for new features
 
-Plans for upcoming releases include
+Additional features we are considering for upcoming releases include
 
- - additional sort and filter capabilities, and
+ - more sort and filter capabilities, and
  - localization of feedback to match the language of your DevTools
 
 The team welcomes your feedback on this feature; please [file an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=DevTools&template=devtools.md&title=%5BDevTools%5D+%3CTITLE+HERE%3E) to share your thoughts.
