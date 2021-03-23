@@ -177,7 +177,7 @@ standards communities. Thanks for your continued interest!
 
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
-| [Enabling popups](https://open-ui.org/components/popup.research.explainer) | [Open UI CG](https://www.w3.org/community/open-ui/) | [2021-03-22](Popup/explainer.md) |
+| [Enabling popups](https://open-ui.org/components/popup.research.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2021-03-22](Popup/explainer.md) |
 | [PARAKEET](https://github.com/WICG/privacy-preserving-ads/blob/main/Parakeet.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-03-04 |
 | [Canvas Formatted Text](https://github.com/WICG/canvas-formatted-text/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-09-23](Canvas/FormattedText.md) |
 | [Window Controls Overlay for Installed Desktop Web Apps](https://github.com/WICG/window-controls-overlay/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-07-08](TitleBarCustomization/explainer.md) |
