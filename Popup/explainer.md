@@ -14,9 +14,9 @@ Authors:
 ## Status of this Document
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-* This document status: **Active**
-* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) / [Web Hypertext Application Technology Working Group (WHATWG)](https://whatwg.org/)
-* **Current version: this document**
+* This document status: **`ARCHIVED`**
+* Current venue: [Open UI Community Group](https://www.w3.org/community/open-ui/)
+* Current version: [Enabling popups](https://open-ui.org/components/popup.research.explainer)
 
 ## Introduction
 When building a web application, there are many cases in which an author needs to create transient user interface (UI) elements that are displayed on top of all other web app UI. These include user-interactive elements like action menus, form element suggestions, content pickers, and teaching UI. These paradigms will be collectively referred to as *popups*.
