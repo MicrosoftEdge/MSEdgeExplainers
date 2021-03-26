@@ -203,6 +203,7 @@ standards communities. Thanks for your continued interest!
 | [HTML Modules](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2019-02-26](HTMLModules/explainer.md) |
 
 # DevTools 🧰
+<a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DevTools">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/DevTools?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=DevTools&title=%5BDevTools%5D+%3CTITLE+HERE%3E)
 
 We love our developer tools! Checkout these cool innovations being designed for the developer tools:
 
@@ -211,10 +212,7 @@ We love our developer tools! Checkout these cool innovations being designed for 
 * [CSS Grid Tooling](https://docs.google.com/document/d/1s0AkeMOtlwqD74GJZtedxqOnttQtgj9oo8RjfVyaHP8/)
 * [Customizable Keyboard Shortcuts](https://docs.google.com/document/d/1oOPSWPxCHvMoBZ0Fw9jwFZt6gP4lrsrsl8DEAp-Hy7o/)
 * [Dual-screen Emulation](https://docs.google.com/document/d/1KMsmEXdjmn4h4iIl0n74N1EHxwwNUzh6R2p7GHrdtTI)
-* [Focus Mode](DevTools/FocusMode/explainer.md) | 
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DevTools">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/DevTools?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=DevTools&title=%5BDevTools%5D+%3CTITLE+HERE%3E)
+* [Focus Mode](DevTools/FocusMode/explainer.md)
 * [High Contrast Simulation](https://docs.google.com/document/d/1SUx-hfodUUMAIwmcwIVYlpi9YDrLnkwW0T7yXUN8s50/)
 * [Infobar UI Refresh](https://docs.google.com/document/d/1GjpfPkdljH97IAaWfY8d9NBim1wrPPRaD8zMl8PWhLs/)
 * [Localization](https://docs.google.com/document/d/1L6TkT2-42MMQ72ZSBMFwUaq7M6mDgA2X0x8oHHKaV_U/)
@@ -224,7 +222,7 @@ We love our developer tools! Checkout these cool innovations being designed for 
 * [Settings Discoverability and Telemetry](https://docs.google.com/document/d/1n9AGuh0iWQoqgm749BJJELK-ckrkgnaB5jfgef9RWSA/)
 * [Settings Search](https://docs.google.com/document/d/1nRh5Y7JqNOowkOqpbYfJMbSZ1rqSHhRh_7HqzqhuHwY/)
 * [Stackable Overlays](https://docs.google.com/document/d/13MHkk0rgHJl_MAIgrouUef5k9fK7lZMI1IEiNIUKbD0/)
-* [webhint](https://docs.google.com/document/d/1IHoVXF5tn7kD8UaSIRPuIvEn5cHdjlyIPEvqEQiIv0k/)
+* [webhint](DevTools/webhint/explainer.md)
 
 
 # Other Documents
