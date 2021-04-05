@@ -2,9 +2,9 @@
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
-* This document status: **Active**
-* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
-* Current version: this document
+* This document status: **ARCHIVED**
+* Current venue: [W3C Web Incubator Community Group](https://wicg.io/) 
+* Current version: https://github.com/WICG/window-controls-overlay/blob/master/explainer.md
     * See also: [w3c/manifest#847](https://github.com/w3c/manifest/issues/847)
     * See also: [w3c/csswg-drafts#4721](https://github.com/w3c/csswg-drafts/issues/4721)
     * See also: [WICG discourse thread](https://discourse.wicg.io/t/proposal-title-bar-customization-for-web-apps/4278)
@@ -21,6 +21,9 @@ This document is intended as a starting point for engaging the community and sta
      - [CSS Environment Variables](#css-environment-variables) 
    - [Defining Draggable Regions in Web Content](#defining-draggable-regions-in-web-content)
  - [Example](#example)
+ - [Security Considerations](#security-considerations)
+   - [Spoofing risks](#spoofing-risks)
+   - [Out-of-scope Navigation](#out-of-scope-navigation)
  - [Privacy Considerations](#privacy-considerations)
  - [Open Questions](#open-questions)
 
@@ -55,7 +58,7 @@ Popular streaming music service Spotify is also built on Electron and they use t
 ### Microsoft Teams
 Workplace collaboration and communication tool Microsoft Teams, also based on Electron for portability, customize the title bar in a similar fashion to Spotify, providing user information, a search and command bar and their own back/forward in-app navigation controls. 
 
-![Microsoft Teams title bar on Mac](MSTeamsMac.png)
+![Microsoft Teams title bar on Mac](MSTeams.png)
 
 ## Problem to solve: Installed desktop web apps title bar area is system reserved
 
@@ -82,7 +85,7 @@ None of this area is available to application developers. This is a problem wher
 
 The solution proposed in this explainer is in multiple parts
 1. A new display modifier option for the web app manifest - `"window-controls-overlay"`
-2. New APIs for developers to query the bounding rects and other states of the UA provided window controls overlay which will overlay into the web content area through a new object on the `window.navigator` property called `controlsOverlay`
+2. New APIs for developers to query the bounding rects and other states of the UA provided window controls overlay which will overlay into the web content area through a new object on the `window.navigator` property called `windowControlsOverlay`
 3. New CSS environment variables to define the left and right insets from the edges of the window: `unsafe-area-top-inset-left` and `unsafe-area-top-inset-right`
 4. A standards-based way for developers to define system drag regions on their content
 
@@ -96,7 +99,7 @@ The window controls overlay ensures users can minimize, maximize or restore, and
 
 ![Window controls overlay on an empty web app](WindowControlsOverlay.png)
 
-Additionally, there are two scenarios where other content will appear in the window controls overlay. When these show or hide, the overlay will resize to fit, and a `resize` event will be fired on the `window` object. 
+Additionally, there are two scenarios where other content will appear in the window controls overlay. When these show or hide, the overlay will resize to fit, and a `geometrychange` event will be fired on the `navigator.windowControlsOverlay` object. 
 - When an installed web app is launched, the origin of the page will display to the left of the three-dot button for a few seconds, then disappear.
 - If a user interacts with an extension via the "Settings and more" menu, the icon of the extension will appear in the overlay to the left of the three-dot button. After clicking out of the modal dialog, the icon is removed from the overlay.
 
@@ -129,15 +132,15 @@ In the example of Windows operating systems, window controls are either drawn on
 The bounding rectangle and the visibility of the window controls overlay will need to be made available to the web content. This information is provided to the developer through JavaScript APIs and CSS environment variables.
 
 #### JavaScript APIs
-To provide the visibility and bounding rectangle of the overlay, this explainer proposes a new object on the `window.navigator` property called `controlsOverlay`.
+To provide the visibility and bounding rectangle of the overlay, this explainer proposes a new object on the `window.navigator` property called `windowControlsOverlay`.
 
-`controlsOverlay` would make available the following objects:
-* `getBoundingRect()` which would return a [`DOMRectReadOnly`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly) that represents the area under the window controls overlay. Interactive web content should not be displayed beneath the overlay.
+`windowControlsOverlay` would make available the following objects:
+* `getBoundingClientRect()` which would return a [`DOMRect`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRect) that represents the area under the window controls overlay. Interactive web content should not be displayed beneath the overlay.
 * `visible` a boolean to determine if the window controls overlay has been rendered
 
-For privacy, the `controlsOverlay` will not be accessible to iframes inside of a webpage. See [Privacy Considerations](#privacy-considerations) below
+For privacy, the `windowControlsOverlay` will not be accessible to iframes inside of a webpage. See [Privacy Considerations](#privacy-considerations) below
 
-Whenever the overlay is resized, a `resize` event will be fired on the `window` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
+Whenever the overlay is resized, a `geometrychange` event will be fired on the `navigator.windowControlsOverlay` object to notify the client that it should recalculate the layout based on the new bounding rect of the overlay. 
 
 #### CSS Environment Variables
 Although it's possible to layout the content of the title bar and web page with just the JavaScript APIs provided above, they are not as responsive as a CSS solution. This is problematic either when the overlay resizes to accommodate the origin text or a new extension icon populates the overlay, or when the window resizes.
@@ -166,7 +169,7 @@ The coordinate system will not be affected by the overlay, although content my b
 #### Omnibox-anchored Dialogs
 Dialogs like print `[Ctrl+P]` and find in page `[Ctrl + F]` are typically anchored to the omnibox. 
 
-![Search in a standard Chromisum window](searchBrowser.png)
+![Search in a standard Chromium window](searchBrowser.png)
 
 With the omnibox hidden, installed web apps anchor these elements to an icon to the left of the three-dot "Settings and more" button. To maintain consistency across all installed web apps, the window controls overlay will use this pattern as well.
 
@@ -314,7 +317,7 @@ We assume this web app will be launched in `browser` or `standalone` mode, so by
 // could be in either the top right or top left corner
 const initializeTitleBar = () => {
   const titleBar = document.getElementById("titleBar");
-  const rect = window.navigator.controlsOverlay.getBoundingRect();
+  const rect = window.navigator.windowControlsOverlay.getBoundingClientRect();
 
   // rect.x will be 0 if the overlay is on the left
   if (rect.x === 0) {
@@ -324,13 +327,15 @@ const initializeTitleBar = () => {
   }
 };
 
-if (window.navigator.controlsOverlay && window.navigator.controlsOverlay.visible) {
+if (window.navigator.windowControlsOverlay && window.navigator.windowControlsOverlay.visible) {
   initializeTitleBar();
 }
 ```
 
 ## Security Considerations
 
+
+### Spoofing risks
 Displaying installed web apps in a frameless window leaves room for developers to spoof content in what was previously a trusted, UA-controlled region. 
 
 Currently in Chromium browsers, `standalone` mode includes a title bar which on initial launch displays the `title` of the webpage on the left, and the origin of the page on the right (followed by the "settings and more" button and the window controls). After a few seconds, the origin text disappears. 
@@ -339,11 +344,28 @@ In RTL configured browsers, this layout is flipped such that the origin text is 
 
 ![Standalone web app in RTL format](RTL-standalone-titlebar.png) 
 
+### Out-of-scope Navigation
+
+Another existing security feature for installed web apps is an indicator of when a user has left the declared scope of the app. When a user navigates out of scope, a black bar appears between the title bar and the web content, and it includes the following information:
+- A close button to allow users to easily navigate back into scope
+- A security icon which opens the security info popup when clicked
+- The origin and title of the site
+
+With the window controls overlay enabled, if a user navigates out-of-scope the overlay will be temporarily replaced with a `standalone` title bar. When the user navigates back to into scope, the `standalone` title bar will be hidden again and the overlay displayed. 
+
+_In-scope: using the window controls overlay_
+
+![In-scope: using the window controls overlay](CustomTitleBarExampleShort.png)
+
+_Out-of-scope: reverting to the `standalone` title bar_
+
+![Out-of-scope: reverting to the `standalone` title bar](OutOfScopeNavigation.png)
+
 ## Privacy Considerations
 
-Enabling the window controls overlay and draggable regions do not pose considerable privacy concerns other than feature detection. However, due to differing sizes and positions of the window control buttons across operating systems, the JavaScript API for `window.navigator.controlsOverlay.getBoundingRect()` will return a rect whose position and dimensions will reveal information about the operating system upon which the browser is running. Currently, developers can already discover the OS from the user agent string, but due to fingerprinting concerns there is discussion about [freezing the UA string and unifying OS versions](https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ). We would like to work with the community to understand how frequently the size of the window controls overlay changes across platforms, as we believe that these are fairly stable across OS versions and thus would not be useful for observing minor OS versions.
+Enabling the window controls overlay and draggable regions do not pose considerable privacy concerns other than feature detection. However, due to differing sizes and positions of the window control buttons across operating systems, the JavaScript API for `window.navigator.windowControlsOverlay.getBoundingClientRect()` will return a rect whose position and dimensions will reveal information about the operating system upon which the browser is running. Currently, developers can already discover the OS from the user agent string, but due to fingerprinting concerns there is discussion about [freezing the UA string and unifying OS versions](https://groups.google.com/a/chromium.org/forum/m/#!msg/blink-dev/-2JIRNMWJ7s/yHe4tQNLCgAJ). We would like to work with the community to understand how frequently the size of the window controls overlay changes across platforms, as we believe that these are fairly stable across OS versions and thus would not be useful for observing minor OS versions.
 
-Although this is a potential fingerprinting issue, it only applies to installed desktop web apps that use the window controls overlay feature and does not apply to general browser usage. Additionally, the `controlsOverlay` API will not be available to iframes embedded inside of an installed web app.
+Although this is a potential fingerprinting issue, it only applies to installed desktop web apps that use the window controls overlay feature and does not apply to general browser usage. Additionally, the `windowControlsOverlay` API will not be available to iframes embedded inside of an installed web app.
 
 ## Open Questions
 
@@ -352,7 +374,7 @@ Although this is a potential fingerprinting issue, it only applies to installed 
 - If so, a fixed set of sizes (small, medium, large) or a pixel value that is constrained by the UA?
 
 ### Open Questions: Working Around the Window Controls Overlay
-- Would it be valuable to an additional member,`window.navigator.controlsOverlay.controls` which has boolean member properties to provide information on which of the window controls are currently being rendered? This would include `maximize`, `minimize`, `restore`, `close` among other values that are implementation specific, for example a small `dragRegion` area and `settings` menu.  
+- Would it be valuable to an additional member,`window.navigator.windowControlsOverlay.controls` which has boolean member properties to provide information on which of the window controls are currently being rendered? This would include `maximize`, `minimize`, `restore`, `close` among other values that are implementation specific, for example a small `dragRegion` area and `settings` menu.  
 
 ### Open Questions: Defining Draggable Regions in Web Content
 - Different operating systems could have requirements for draggable regions. One approach could be to have a drag region that runs 100% width but only comes down a small number of pixels from the top of the frame. This could provide a consistent area for end users to grab and drag at the cost of reducing the addressable real estate for web content. Is this desirable?

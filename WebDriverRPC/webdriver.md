@@ -3,8 +3,8 @@
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **ARCHIVED**
-* Current venue: [WebDriver incubator](https://github.com/w3c/webdriver/) of the [W3C Browser Testing and Tools Working Group](https://www.w3.org/testing/browser/) | [w3c/webdriver](https://github.com/w3c/webdriver/)
-* Current version: [Bidirectional WebDriver Protocol Explainer](https://github.com/w3c/webdriver/blob/master/webdriver-bidi/webdriver.md)
+* Current venue: [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) 
+* Current version: [Bidirectional WebDriver Protocol](https://github.com/w3c/webdriver/blob/master/webdriver-bidi/webdriver.md)
 
 ## Overview
 

@@ -1,28 +1,61 @@
 # URL Protocol Handler Registration for PWAs
 
-## **Authors**
+## Table of Contents
+<!-- TOC -->
 
-Fabio Rocha (<farocha@microsoft.com>)  
-Jose Leal (<joselea@microsoft.com>)  
-Eric Lawrence (<ericlaw@microsoft.com>)  
+- [Status of this Document](#status-of-this-document)
+- [Motivation](#motivation)
+- [Use Cases](#use-cases)
+- [Manifest Example](#manifest-example)
+- [How Other Applications Register for URL Handling](#how-other-applications-register-for-url-handling)
+  - [Windows](#windows)
+  - [Linux](#linux)
+  - [Mac](#mac)
+- [Handling Multiple Registrations](#handling-multiple-registrations)
+  - [Different apps registering the same protocol](#different-apps-registering-the-same-protocol)
+  - [Same app registering multiple protocols](#same-app-registering-multiple-protocols)
+- [Other Scenarios](#other-scenarios)
+  - [Custom protocol URL is used as an &lt;iframe>](#custom-protocol-url-is-used-as-an-iframe)
+  - [Non user-initiated navigation attempt](#non-user-initiated-navigation-attempt)
+  - [App updates and handler registration](#app-updates-and-handler-registration)
+- [PWA Launch and Context Passing](#pwa-launch-and-context-passing)
+- [Related APIs](#related-apis)
+  - [registerProtocolHandler](#registerprotocolhandler)
+  - [protocol_handlers for WebExtensions](#protocol_handlers-for-webextensions)
+- [Alternatives Considered](#alternatives-considered)
+  - [Have `protocol_handlers` extend `registerProtocolHandler` with additional data](#have-protocol_handlers-extend-registerprotocolhandler-with-additional-data)
+- [Security Considerations](#security-considerations)
+  - [Handler Registration and App Launch](#handler-registration-and-app-launch)
+- [Privacy Considerations](#privacy-considerations)
+- [Open Questions](#open-questions)
+
+<!-- /TOC -->
+
+## Authors
+
+Fabio Rocha (<farocha@microsoft.com>)
+Connor Moody (<comoody@microsoft.com>)
+Samuel Tang (<samtan@microsoft.com>)
 
 ## Status of this Document
+
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
-* This document status: **Active**
-* Expected venue: [Web Applications Working Group](https://www.w3.org/2019/webapps/) 
-* Current version: this document
+
+- This document status: **Active**
+- Expected venue: [Web Applications Working Group](https://www.w3.org/2019/webapps/)
+- Current version: this document
 
 ## Motivation
 
-Developers can create a more engaging native-like experience if we allow Progressive Web Apps to be registered as handlers for URL protocols. Today, native applications can register themselves as protocol handlers, and HTML5 exposes a JavaScript API `registerProtocolHandler` for web sites to do the same, but it is desirable to offer registration as part of a PWA installation through its manifest.
+Developers can create a more engaging native-like experience if we allow Progressive Web Apps to be registered as handlers for URL protocols (aka schemes). Today, native applications can register themselves as protocol handlers, and HTML5 exposes a JavaScript API `registerProtocolHandler` for web sites to do the same, but it is desirable to offer registration as part of a PWA installation through its manifest.
 
 After registering a PWA as a protocol handler, when a user clicks on a hyperlink with a specific scheme such as `mailto://` , `ms-word://` or `web+music://` from a browser or a native app, the registered PWA would open and receive the URL.
 
 It is important to note that both the manifest-based registration proposed in this explainer and `registerProtocolHandler` play very similar roles in practice, while still allowing the possibility for subtle but complementary user-experiences.
 
-Similarities include requirements around the list of schemes allowed to be registered (as discussed in the security section below), format of the parameters, same-origin policy and etc.
+Similarities include requirements around the list of schemes allowed to be registered (as discussed in the security section below), name and format of parameters, etc.
 
-There are subtle differences in the manifest-based registration, however, that might be useful to enhance the experience for PWA users. For example, the addition of extra parameters (e.g.: icons) that can be used in applicable UI in the OS to give visual cues about the part of the app that is handling a certain protocol. Likewise, manifest-based registrations could loosen some requirements that currently apply to `registerProtocolHandler`. For instance, the need of user interaction for a website to register to handle a certain protocol might not apply to manifest-based PWA registration, as when a user intentionally installs a PWA there's an implicit level of trust involved that installation-related things will occur, including the registration of protocol handlers. This could also mean that the user doesn't need to be notified that a new protocol handler has been registered, as currently happens when `registerProtocolHandler` is used, and instead we could rely on solutions that let the user know what will happen before installation, such as an install time permissions prompt, to convey that protocols handlers will be registered.
+There are subtle differences in the manifest-based registration, however, that might be useful to enhance the experience for PWA users. For example, manifest-based registrations could loosen some requirements that currently apply to `registerProtocolHandler`. For instance, the need of user interaction for a website to register to handle a certain protocol might not apply to manifest-based PWA registration, as when a user intentionally installs a PWA there's an implicit level of trust involved that installation-related things will occur, including the registration of protocol handlers. This could also mean that the user doesn't need to be notified that a new protocol handler has been registered, as currently happens when `registerProtocolHandler` is used, and instead we could rely on solutions that let the user know what will happen before installation, such as an install time permissions prompt, to convey that protocols handlers will be registered.
 
 ## Use Cases
 
@@ -34,7 +67,7 @@ There are subtle differences in the manifest-based registration, however, that m
 
 ## Manifest Example
 
-In this example, a Web App Manifest declares that the app should be registered to handle the schemes `web+jngl` and `web+jnglstore`.
+In this example, a Web App Manifest declares that the app should be registered to handle the protocols `web+jngl` and `web+jnglstore`.
 
 ```json
 {
@@ -42,19 +75,12 @@ In this example, a Web App Manifest declares that the app should be registered t
   "description": "A plant encyclopedia",
   "protocol_handlers": [
     {
-      "scheme": "web+jngl",
-      "url": "/lookup?type=%s",
-      "title": "Jungle – A plant encyclopedia",
-      "icon": {
-        "src": "images/catalogicon-44.png",
-        "type": "image/png",
-        "sizes": "44x44"
-      }
+      "protocol": "web+jngl",
+      "url": "/lookup?type=%s"
     },
     {
-      "scheme": "web+jnglstore",
-      "url": "/shop?for=%s",
-      "title": "Jungle – Store"
+      "protocol": "web+jnglstore",
+      "url": "/shop?for=%s"
     }
   ],
   "icons": [
@@ -80,16 +106,14 @@ In this example, a Web App Manifest declares that the app should be registered t
 }
 ```
 
-A developer can add a field in the manifest.json to declare which schemes the web app can handle. As seen in the example above, the key is named `protocol_handlers` and it contains an array of protocol handler declaration objects.
+A developer can add a field in the manifest.json to declare which protocols the web app can handle. As seen in the example above, the key is named `protocol_handlers` and it contains an array of protocol handler declaration objects.
 
 These are the fields for each protocol handler:
 
-| Field     | Required / Optional | Description                                                                         | Default                                                           |
-|:----------|:--------------------|:------------------------------------------------------------------------------------|:------------------------------------------------------------------|
-| `scheme` | Required            | Scheme to be handled. E.g.: `mailto`, `ms-word`, `web+jngl`.                         | N/A                                                               |
-| `url` | Required            | HTTPS URL within the application that will handle the protocol. The `%s` token will be replaced by the URL starting with the protocol handler's scheme.                      | N/A                                       |
-| `title`   | Optional            | Friendly name of the app. On Windows it will be shown in the App Resolver.          | Value supplied via the `name` member of the manifest.             |
-| `icon`   | Optional            | Icon to be displayed for the app in relevant places (e.g.: App Resolver on Windows) | One of the values supplied via the `icon` member of the manifest. |
+| Field      | Required / Optional | Description                                                                                                                                                   | Default |
+|:-----------|:--------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|
+| `protocol` | Required            | Protocol to be handled. E.g.: `mailto`, `ms-word`, `web+jngl`.                                                                                                | N/A     |
+| `url`      | Required            | HTTPS URL within the application scope that will handle the protocol. The `%s` token will be replaced by the URL starting with the protocol handler's scheme. | N/A     |
 
 ## How Other Applications Register for URL Handling
 
@@ -129,6 +153,27 @@ On Mac, Chromium's `SetAsDefaultProtocolClient` function calls the API `LSSetDef
 - The Microsoft News UWP app is registered to handle `msnews` and `msnnews`.
 - The Xbox Console Companion app is registered to handle `xbox`, `xbox-captures`, `xbox-friendfinder`, `xbox-settings`, etc.
 
+## Other Scenarios
+
+### Custom protocol URL is used as an &lt;iframe>
+
+This should be disallowed to prevent apps from automatically opening when the iframe source URL is loaded. The same should apply to other mechanisms that allow URL loading, e.g., `<img>`.
+
+In some User Agents (e.g.: Chromium for Desktop), however, that doesn't seem to be the current behavior for custom handlers registered via registerProtocolHandler. Websites are able to be loaded in iframes if they're registered as the handlers for an iframe src that uses a protocol handler. User agents might want to implement the same behavior for these two scenarios.
+
+### Non user-initiated navigation attempt
+
+Similar to our recommendation for iframes above, we believe opening apps on non user-initiated navigation should be disallowed to prevent user confusion (e.g.: why does navigating to a website open an app?) and popup clutter.
+
+### App updates and handler registration
+
+Handler registrations must be synchronized with the latest manifest version provided via app update. The expected behavior of this scenario is:
+
+1) An update that adds new handlers triggers handler registration (separate from app installation).
+2) An update that removes handlers triggers handler unregistration (separate from app uninstallation).
+
+Failing to account for handlers removed from a manifest during an app update would leave untracked handlers on a machine and have privacy and security implications.
+
 ## PWA Launch and Context Passing
 
 Opening the selected app is the first step. In the common case, the target URL will be supplied as a query param in the app's HTTPS URL. For example, the hyperlink `web+jngl:cacao-tree` would open the Jungle PWA to `jungleapp.com/lookup?type=web%2Bjngl%3Acacao-tree`.
@@ -137,11 +182,27 @@ Alternatively, it may be desirable to supply the URL as part of the [Launch Even
 
 ## Related APIs
 
+### registerProtocolHandler
+
 As mentioned before, the Navigator interface from WebAPI has the method `registerProtocolHandler` that allows web sites register as handlers of particular URL schemes.
 
 <https://html.spec.whatwg.org/multipage/system-state.html#custom-handlers>
 
 <https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerProtocolHandler>
+
+### protocol_handlers for WebExtensions
+
+Another related API is Mozilla's `protocol_handlers` property for their [WebExtensions](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/protocol_handlers). With that property, extensions can register a website as a handler for a particular protocol. Just like in this proposal, the syntax and semantics of this `WebExtensions` property is very similar to `registerProtocolHandler`, except that with `registerProtocolHandler` a website can only register itself as a handler. To avoid confusion for developers, it would be wise to keep the extensions API ([Chromium proposal](https://bugs.chromium.org/p/chromium/issues/detail?id=64100)), the web app API (proposed here) and `registerProtocolHandler` as aligned as possible. Keeping compatibility with all these APIs might also make it easier for user agents to share as much logic as possible among all the implementations. [Issue #280](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/280) provides more context on this.
+
+## Alternatives Considered
+
+### Have `protocol_handlers` extend `registerProtocolHandler` with additional data
+
+[Issue #286](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/286) suggested an alternative where "this manifest addition serves to just 'enhance' the existing register protocol handler API." and where "the website still has to use the existing API". For instance, it could supplement the existing API with icons and other data that would be useful in an App context, but not as useful in a web site context.
+
+Even though the author of the issue lists several good reasons as to why this could be an interesting alternative, this option will not be pursued because we believe this will not be ergonomic enough for developers. We could not find good examples on the web app space where manifest properties depend on calls to existing HTML5 APIs and having a dependency on that API being called at some point in time would work against the goal of having an app being able to handle protocols immediately after being installed.
+
+Having the APIs interact with each other would also cause confusion with regards to the order of API calls: "Do I first call `registerProtocolHandler` and then install the app, or the other way around?", "If I uninstall the app and install it again, do I need to have the API called again?", etc. There's also plans to have `protocol_handlers` supported in [browser extensions](https://bugs.chromium.org/p/chromium/issues/detail?id=64100), and coming up with logical interactions for 3 registration scenarios would be even more confusing for developers.
 
 ## Security Considerations
 
@@ -151,9 +212,16 @@ The `registerProtocolHandler` API implements an allow list of schemes that may b
 
 URLs may contain sensitive user data; because PWAs require a secure context (HTTPS), invocation of a protocol handler will take place in a secure context. However, PWAs that implement protocol handlers must still take care to avoid sending potentially-sensitive URL data over insecure channels.
 
-Whenever there is ambiguity between which app must handle a protocol invocation, it is up to the OS to show the app resolver and let the user decide which one to use.
-
 We may want to cap the number of allowed protocols to a number N per manifest.
+
+### Handler Registration and App Launch
+
+To provide a smooth install experience, protocol handlers will be registered with the OS silently as part of PWA installation, however, the following following security mitigations will be implemented:
+
+1. Registration of PWA protocol handlers won’t take over the default handler for a protocol. Instead, the next time the protocol is invoked, an OS disambiguation dialog will prompt the user to either keep using the default handler or select the newly registered handler.
+2. On first launch (or potentially every launch) of the PWA due to an invoked protocol, the user will be presented with a permission dialog. This dialog will display the app name and origin of the app, and ask the user if the app is allowed to handle links from the protocol. If a user rejects the permission dialog, the protocol handler is unregistered with the OS.
+
+On some OSs, a handler registered for an uncontested protocol automatically takes over as the default handler during registration. Though no OS disambiguation dialog will display in this case, the user will still give consent through launch time permission prompt.
 
 ## Privacy Considerations
 

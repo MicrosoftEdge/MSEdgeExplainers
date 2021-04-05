@@ -1,0 +1,40 @@
+<title>CanvasFormattedText samples</title>
+<body style="display:flex;align-items: start;">
+<canvas width="500" height="500" style="border:1px solid black"></canvas>
+Text wrap width: <input type="number" value="250" min="0" max="450">
+<script>
+const context = document.getElementsByTagName('canvas')[0].getContext('2d');
+const input = document.getElementsByTagName('input')[0];
+
+function repaintCanvas() {
+  context.clearRect(0,0,context.canvas.width,context.canvas.height);
+
+  context.font = "18pt Arial";
+
+  let formattedText = new CanvasFormattedText();
+  formattedText.appendRun( { text: "the quick " } );
+  formattedText.appendRun( { text: "brown", font: `bold ${context.font}` } );
+  formattedText.appendRun( { text: " fox jumps over the lazy dog" } );
+
+  let yOffset = 50;
+  let bottomOfCanvas = context.canvas.height - yOffset;
+  let textWrapWidth = input.valueAsNumber;
+
+  context.fillFormattedText( formattedText, 0, yOffset, textWrapWidth );
+
+  // Show the wrapping edge
+  context.setLineDash( [3, 2] );
+  context.beginPath();
+  context.moveTo( textWrapWidth, yOffset );
+  context.lineTo( textWrapWidth, bottomOfCanvas );
+  context.stroke();
+  context.font = "10pt Arial";
+  context.fillText( textWrapWidth + "px", textWrapWidth + 5, yOffset );
+}
+
+repaintCanvas();
+
+input.onchange = repaintCanvas;
+
+
+</script>
