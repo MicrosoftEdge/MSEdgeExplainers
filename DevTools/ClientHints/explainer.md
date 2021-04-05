@@ -8,7 +8,7 @@ Authors: [Erica Draud](https://github.com/erdraud)
     
 ## Introduction
 
-User-Agent Client Hints are a new expansion to the Client Hints API, that enables developers to access information about a user's browser in a privacy-preserving and ergonomic way. The existing edit and send experience for these client hints has been described as limited and “super painful” by our internal clients. This is a high priority for the Web Platform team; they want to encourage people to switch to using Client Hints over Strings as we hypothesize it will greatly improve site compatibility and code hygiene. They’ve gotten feedback that limited testing infrastructure is a large friction point in that migration, so we are taking on this work to support developers and to improve our existing UX.  
+[User-Agent Client Hints](https://wicg.github.io/ua-client-hints/) are a new expansion to the Client Hints API, that enables developers to access information about a user's browser in a privacy-preserving and ergonomic way. The existing edit and send experience for these client hints has been described as limited and “super painful” by our internal clients. This is a high priority for the Web Platform team; they want to encourage people to switch to using Client Hints over Strings as we hypothesize it will greatly improve site compatibility and code hygiene. They’ve gotten feedback that limited testing infrastructure is a large friction point in that migration, so we are taking on this work to support developers and to improve our existing UX.  
 
 While there are many feature requests regarding UA Client Hints, the Web Platform and our team have worked together to focus on the higher impact items: 
 
