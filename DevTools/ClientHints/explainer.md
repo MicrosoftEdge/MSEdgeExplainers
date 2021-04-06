@@ -32,16 +32,16 @@ We are taking on the top pain points for developers working with UA Client Hints
 
 ### Verify success of sent Client Hints headers 
  
-The most desired feature for debugging Client Hints is Ensuring CH headers are still getting sent even if custom UA is used. UA Client Hints were recently enabled in Chromium, which has resulted in some compatibility issues and some bugs. One inconsistency that directly impacts the UA Client Hint edit and send story is the Network Conditions UX. 
+The most desired feature for debugging Client Hints is ensuring CH headers are still getting sent even if custom UA is used. UA Client Hints were recently enabled in Chromium, which has resulted in some compatibility issues and some bugs. One inconsistency that directly impacts the UA Client Hint edit and send story is the Network Conditions UX. 
 
 ![Network conditions UA experience](ua-network-conditions.jpg) 
 
-In Network conditions > User agent, if you select a custom or pre-canned user agent, the UA Client Hints are no longer available; the headers are not sent, navigator.userAgentData is still present in the DOM but the brands property is of 0 size: 
+In Network conditions > User agent, if you select a custom or pre-canned user agent, the UA Client Hints are no longer available; the headers are not sent, `navigator.userAgentData` is still present in the DOM but the brands property is of 0 size: 
  
 ![Custom UA bug](custom-ua-bug.jpg) 
 
  
-The expected behavior is that sec-ua-ch headers continue to get sent and that navigator.userAgentData.brands is not empty. The user also shared that “if the precanned values of “Chrome – Windows” also updated the Client Hints values to match that would substantially address [their] testing concerns.” This improvement could also benefit the associated XBOX UA experience. 
+The expected behavior is that `sec-ua-ch headers` continue to get sent and that `navigator.userAgentData.brands` is not empty. The user also shared that “if the precanned values of “Chrome – Windows” also updated the Client Hints values to match that would substantially address [their] testing concerns.” This improvement could also benefit the associated XBOX UA experience. 
 
 ### Customize UA Client Hints set-up 
 
