@@ -48,6 +48,6 @@ The expected behavior is that sec-ua-ch headers continue to get sent and that na
  
 In the DevTools Settings > Devices, there is a feature where users can add custom devices, which enables users to send user agent client hints. The current experience forces users to define every single value in the “User agent client hints” section to send any at all.  
 
-![Current user agent client hints experience](current-UA-devices.jpg)
+![Current user agent client hints experience](current-ua-devices.jpg)
 
 Users want the option to choose which hints to customize such that the remaining fields will just be the value that would have been sent.  
