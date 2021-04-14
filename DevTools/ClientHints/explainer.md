@@ -51,3 +51,26 @@ In the DevTools Settings > Devices, there is a feature where users can add custo
 ![Current user agent client hints experience](current-ua-devices.jpg)
 
 Users want the option to choose which hints to customize such that the remaining fields will just be the value that would have been sent.  
+
+## Q&A
+
+**Q: Will we need to make changes to the CDP (Chrome Dev Protocol)?**
+
+A: No
+
+**Q: Are the client hints displayed in the Emulated Devices pane the only hints available or are there other options that aren’t displayed?**
+
+A: The list in the device emulation view is the complete set of UA Client Hints
+
+**Q: Are all the hint inputs currently required because HTTP needs to be send with all of the header items?**
+
+A: No, it's fine if some of the headers are undefined.
+
+**Q: For emulated devices (not the current device), where would auto-fill pull from?**
+
+A: For *emulated devices that are built-in*, ideally there would be an auto-mapping of characteristics. For examplke, an Android phone would use the same UA brands list as on desktop, but it would need a hardcoded value for model info (e.g. the UA string baked into DevTools might have been “Nexus 5 Build/MRA58N” but would now need to report a similar string in the Sec-CH-UA-Model hint. For iPhone emulation, it would ideally drop all of the hints by default since UA Client Hints aren’t available for iPhone at all.
+For a *custom device* (or an edited one…), ideally an empty string for one of the UA Clients Hints fields would map to “send whatever the browser would have done otherwise”. 
+
+**Q: Do we need to add default client hints to the existing emulation library for this or for future use cases?**
+
+A: Yes, I think the emulation library should be upgraded to actually understand Client Hints.
