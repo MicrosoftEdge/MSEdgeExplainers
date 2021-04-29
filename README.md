@@ -54,6 +54,13 @@ each explainer has a "status of this document" section that indicates
 what standards venue they expect to go to next (if known). When they graduate,
 we move them into the [Alumni section](#alumni-) below.
 
+### Accessibility
+
+* [Accessible Confirmation of Action](Accessibility/ConfirmationOfAction/explainer.md) | 
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Confirmation%20of%20Action">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Confirmation%20of%20Action?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead&labels=Confirmation+of+Action&template=confirmation-of-action.md&title=%5BConfirmation+of+Action%5D+%3CTITLE+HERE%3E)
+
 ### CSS
 
 * [CSS color-mix() function](CSSColorMix/explainer.md) | 
