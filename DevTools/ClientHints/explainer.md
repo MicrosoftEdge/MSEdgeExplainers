@@ -52,6 +52,20 @@ In the DevTools Settings > Devices, there is a feature where users can add custo
 
 Users want the option to choose which hints to customize such that the remaining fields will just be the value that would have been sent.  
 
+## Proposed Solution
+
+### Emulated Devices
+
+We will be re-working the User agent client hints UI to be cleaner and easier to use. The form will use grouping for both accessibility and clarity. and we'll use drop-downs to lessen the users burden. Users also won't have to submit every element and will have the guidance of default suggestions. These default will replace the gray text within the form elements shown below.
+
+![Proposed user agent client hints experience](proposed-ua-devices.jpg)
+
+While the design does include changes in other parts of the Devices pane, that is out of scope. We will prioritize accessibility issues there and then investigate if other UI changes should be made there.
+
+### Network conditions
+
+While investigating the [header bug](https://bugs.chromium.org/p/chromium/issues/detail?id=1174299), we also noticed that the UI was lacking. To enter a custom user agent, the developer must type it in a specific string format. To help users navigate this form, we will add the proposed UI for the Devices pane into the Network conditions tool, too.  
+
 ## Q&A
 
 **Q: Will we need to make changes to the CDP (Chrome Dev Protocol)?**
