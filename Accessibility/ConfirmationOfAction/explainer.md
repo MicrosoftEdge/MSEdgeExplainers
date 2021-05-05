@@ -294,7 +294,7 @@ avoid the risk of denial-of-service type attacks on ATs through this API.
     
 ## Alternative Solutions
 
-Previous discussions for a Notifications API in the AOM group:
+Previous discussions for a Notifications API in the AOM and ARIA groups:
 * [Issue 3 - Use Case: Accessibility Notifications](https://github.com/wicg/aom/issues/3)
 * [Issue 84 - Live region properties vs announcement notification](https://github.com/WICG/aom/issues/84)
 * [Issue 832 - Do we need a notifications API in ARIA](https://github.com/w3c/aria/issues/832)
