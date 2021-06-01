@@ -16,19 +16,18 @@ Several creative applications would like to utilize the ability to pick a color 
 Even though some browsers have built-in eyedropper functionality into color input tags, this limits customizability and can be seen as being out of place for many applications.
 
 ## Goals 
-1. Provide access to the color values of one or more user-selected pixels, including pixels rendered by different origins, or outside of the browser.
-2. Provide coordinate information in addition to a color value so that web apps may utilize any data known for the selected pixel whenever the selected color is from a document having a similar origin, e.g. layering information in a painting web app.
-3. Provide the set of keyboard modifiers and pointer buttons pressed while selecting a pixel so that web apps can provide differentiated actions while the eyedropper tool is active, for example, selecting the background color when the SHIFT key is held and the foreground color otherwise.
-4. Allow the developer to enable and disable the eyedropper through script (subject to user activation).
-5. Keep the user in control by providing the means to exit the eyedropper mode, for example, by pressing the ESC key and ensuring the event is not cancellable by the author.
-6. Keep the user in control by requiring some explicit action, for example pressing a mouse button, to indicate which pixels will have color information returned to the web page.
-7. Allow browser implementors the freedom to implement eyedropper pixel selection UI that best fits their platform and browser.  Note that a future version of the proposal may afford web developers more control over that UI.  One example supported by Chromium-based browsers is shown below. 
+1. Provide access to the color value of one user-selected pixel, including pixels rendered by different origins, or outside of the browser.
+2. Allow the developer to enable the eyedropper through script (subject to user activation).
+3. Keep the user in control by providing the means to exit the eyedropper mode, for example, by pressing the ESC key and ensuring the event is not cancellable by the author.
+4. Keep the user in control by requiring some explicit action, for example pressing a mouse button, to indicate which pixel will have color information returned to the web page.
+5. Allow browser implementors the freedom to implement eyedropper pixel selection UI that best fits their platform and browser.  Note that a future version of the proposal may afford web developers more control over that UI.  One example supported by Chromium-based browsers is shown below.
 
 <img src= "preview.png" alt= "example eyedropper cursor" width="500"/>
 
 ## Non-Goals
 1. This proposal does not currently define an object model for a color, though it seems like something that would be a good addition to the web platform. 
-1. This proposal does not currently define a mechanism to allow developers to hide or show the eyedropper's pixel selection UI while remaining in eyedropoper mode, but a future version may allow that, for example, to facilitate clicking on application UI elements instead of selecting a color value.
+2. This proposal does not currently define a mechanism to allow developers to hide or show the eyedropper's pixel selection UI while remaining in eyedropoper mode, but a future version may allow that, for example, to facilitate clicking on application UI elements instead of selecting a color value.
+3. This proposal does not provide a mechanism for capturing data other than the selected pixel, such as coordinates of the selected pixel.
 
 ## Privacy
 Exposing endpoints allowing developers to access unrestricted pixel data from a user's machine presents security challenges. In particular any eyedropper implementation should not allow a web page to "screen scrape" information the user didn't intend to share with the web application, for example, while the user moves the mouse around the screen.
@@ -40,55 +39,31 @@ Additionally, browsers should provide a clear indication as to when the user has
 The transition into eyedropper mode should require [consumable user activation](https://github.com/mustaqahmed/user-activation-v2), for example, clicking on a button from the web page, to help avoid unintentionally revealing pixel data.
 
 ## Solution
-The API will enable web developers to incorporate an eyedropper in their web applications. The eyedropper would allow the developer to access the hex value (of the form `#RRGGBB`) of a user specified pixel, its position and modifier keys pressed when the pixel was selected.
+The API will enable web developers to incorporate an eyedropper in their web applications. The eyedropper would allow the developer to access the hex value (of the form `#RRGGBB`) of a user specified pixel.
 
-The position of the selected color is included to facilitate scenarios where a web app using the eyedropper samples a pixel color from its own document.  The web app could, for example, include an alpha channel for the selected pixel or create a palette of colors associated with a pixel's location based on layer information known to the web app.  The color value would otherwise be the final composited color as seen by the user.
+Since the representation of color on the web is in transition and the [Color on the Web Community Group](https://w3c.github.io/ColorWeb-CG) is already working on better representing colors, to avoid competing with other effors this API will initially provide a single color string which is gamut mapped to the sRGB color space. It is expected that a color object will be the primary mechanism by which authors will access sampled color data in the future and that it will have the facilities to map between color spaces.
 
 ### Web IDL
 ```
-dictionary ColorSelectEventInit : PointerEventInit {
-    DOMString value = "";
-};
-
-[Exposed=Window]
-interface ColorSelectEvent : PointerEvent {
-    constructor(DOMString type, optional ColorSelectEventInit eventInitDict = {});
- 
-    readonly attribute DOMString value;
+dictionary ColorSelectionResult {
+    DOMString sRGBHex;
 };
  
-/// @event name="colorselect", type="ColorSelectEvent"
-/// @event name="close", type="Event"
 [Exposed=Window]
-interface EyeDropper : EventTarget {
+interface EyeDropper {
     constructor();
  
-    Promise<void> open();
-    void close();
-
-    readonly attribute boolean opened;
- 
-    // Event handler attributes
-    attribute EventHandler oncolorselect;
-    attribute EventHandler onclose;
+    Promise<ColorSelectionResult> open();
 };
 ```
 
-The `open` method places the web page into an "eyedropper mode" where user input is suppressed: no UI events except `colorselect` are dispatched to the web page and the `colorselect` event is only dispatched while the primary pointer is down. 
+The `open` method places the web page into an "eyedropper mode" where user input is suppressed: no UI events are dispatched to the web page.
 
-The `open` method returns a `Promise` which resolves if "eyedropper mode" was succesfully entered and rejects otherwise to facilitate any permissions prompts that a user agent may choose to implement.
+The `open` method returns a `Promise` which resolves if the user has succesfully selected a color based on existing onscreen colors and rejects otherwise to facilitate any scenario where the user has exited the "eyedropper mode" without selecting a color.
 
-The `close` method exits the "eyedropper mode".
+The `ColorSelectionResult` contains the result of calling `open()`. It contains one member, `sRGBHex`, which is a 6-digit hex value representing the red, green and blue color components of the selected color in the form: `#RRGGBB`.
 
-While in "eyedropper mode", `opened` is `true`; otherwise it is `false`.
-
-If the user presses ESC or invokes some other affordance for exiting "eyedropper mode", the `close` event will be dispatched.
-
-The `colorselect` event's `value` is a 6-digit hex value representing the red, green and blue color components of the selected color in the form: `#RRGGBB`.
-
-The `ColorSelectEvent` interface inherits from `PointerEvent` to provide the location of the selected pixel, the relevant view to which the location applies, and any modifier keys pressed when the pixel was selected.  If the view of the `colorselect` event is null, the selected pixel was not from a document with a similar origin and the location attributes of the event will be 0.
-
-[getCoalescedEvents](https://w3c.github.io/pointerevents/#dom-pointerevent-getcoalescedevents) and [getPredictedEvents](https://w3c.github.io/pointerevents/#dom-pointerevent-getpredictedevents) will always return the empty set for `colorselect` events.  Other inherited members of `ColorSelectEvent` all serve a meaningful purpose and will return a value as described in the relevant specifications.
+If the user presses ESC or invokes some other affordance for exiting "eyedropper mode", the `Promise` is going to be rejected.
 
 ## Example Usage
 ```javascript
@@ -98,29 +73,15 @@ let eyeDropper = new EyeDropper();
 // Enter eyedropper mode
 let icon = document.getElementbyId("eyeDropperIcon")
 icon.addEventListener('click', e => {
-    eyeDropper.open().then(
-        () => { console.log("entered eyedropper mode") },
-        () => { console.log("could not enter eyedropper mode") }
-    )
+    eyeDropper.open()
+    .then(colorSelectionResult => {
+        // returns hex color value (#RRGGBB) of the selected pixel
+        console.log(colorSelectionResult.sRGBHex);
+    })
+    .catch(error => {
+        // handle the user choosing to exit eyedropper mode without a selection
+    });
 });
- 
-eyeDropper.addEventListener('colorselect', e => {
-    // returns hex color value (#RRGGBB) of the selected pixel
-    console.log(e.value);
-
-    if (e.view) {
-        // The selected pixel came from our own document (or a document of similar origin)
-        // The selected pixel is located at:
-        console.log(`${e.clientX}, ${e.clientY}`)
-    }
-
-    // close explicitly if we only want to select one color and exit eyedropper mode
-    eyeDropper.close();
-});
-
-eyeDropper.addEventListener("close", e => {
-    // handle the user choosing to exit eyedropper mode
-})
  ```
 
 ## Feature Detection
