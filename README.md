@@ -67,9 +67,9 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSColorMix">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSSColorMix?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=CSSColorMix&template=css-color-mix---function.md&title=%5BCSS+color-mix+function%5D+%3CTITLE+HERE%3E)
-* [CSS Anchored Positioning](CSSAnchoredPositioning/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSAnchoredPositioning">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSSAnchoredPositioning?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=melanierichards%2C+BoCupp-Microsoft%2C+ipopescu93%2C+dandclark&labels=CSSAnchoredPositioning&template=css-anchored-positioning.md&title=%5BCSS+Anchored+Positioning%5D+%3CTITLE+HERE%3E)
+* [CSS Anchored Positioning](CSSAnchoredPositioning/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSS%20Anchored%20Positioning">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSS%20Anchored%20Positioning?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=melanierichards%2C+BoCupp-Microsoft%2C+ipopescu93%2C+dandclark&labels=CSS+Anchored+Positioning&template=css-anchored-positioning.md&title=%5BCSS+Anchored+Positioning%5D+%3CTITLE+HERE%3E)
 
 ### Editing
 
