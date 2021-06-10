@@ -77,7 +77,7 @@ Authors must not anchor an element to one of its descendents.
 In CSS, the author positions the element by:
 
 * Using a `fixed` positioning scheme
-* Declaring sets of preferred and fallback positions using the `position-sets` property and associated at-rules.
+* Declaring sets of preferred and fallback positions using the `position-set` property and associated at-rules.
 * Leveraging a new `anchor` CSS function. `anchor()` enables authors to reference edges of the anchor element where CSS lengths are used.
 
 Suppose that an author would like to anchor a menu to a button. They would prefer that the popup's top-left corner is anchored to the bottom-left corner of a button:
@@ -100,7 +100,7 @@ Here is how the author would express this in CSS:
 <style>
     #myPopup {
         position: fixed;
-        position-sets: buttonMenuPos;
+        position-set: buttonMenuPos;
         overflow: auto;
 
         /* The popup is at least as wide as the button */
@@ -111,7 +111,7 @@ Here is how the author would express this in CSS:
     }
 
     /* This example intentionally left verbose */
-    @position-sets buttonMenuPos {
+    @position-set buttonMenuPos {
         /* First try to align the top, left edge of the popup
         with the bottom, left edge of the button. */
         1 {
@@ -177,8 +177,8 @@ _Sets are 1-based for consistency with other CSS features._
 
 Breaking this apart:
 
-* The author uses the `@position-sets` at-rule to create a custom-named set of candidate positions. 1-based integers are used as selectors for sets of positioning rules.
-* These custom set name is then referenced as the value of the `position-sets` property declared on the popup to be anchored.
+* The author uses the `@position-set` at-rule to create a custom-named set of candidate positions. 1-based integers are used as selectors for sets of positioning rules.
+* This custom set name is then referenced as the value of the `position-set` property declared on the popup to be anchored.
 * The `anchor(edge)` CSS function resolves to a length which is the distance between the opposing starting edge of the layout viewport and the named border-box edge of the anchoring element. The named edge can be physical (`top`, `left`, `bottom`, `right`) or logical (`block-start`, `inline-start`, `block-end`, `inline-end`).
 
 How the user agent will process these rules:
@@ -200,21 +200,21 @@ In the previous example, the author declared a `min-height` to ensure that their
 <style>
     #myPopup {
         position: fixed;
-        position-sets: largestHeight(buttonMenuPos);
+        position-set: largestHeight(buttonMenuPos);
         overflow: auto;
 
         /* The popup is at least as wide as the button */
         min-width: calc(anchor(right) - anchor(left));
     }
 
-    @position-sets buttonMenuPos {
+    @position-set buttonMenuPos {
         …
     }
 ```
 
 The user agent will now favor the position set that results in the largest height. Suppose that position set `1` would not cause overflow of the layout viewport, but would cause overflow of the popup's contents, introducing a subscroller. Position set `2` provides enough space to render the popup such that all 4 menu items are visible without overflow. The user agent would use position set `2`.
 
-**Note:** if these functions are not introduced to `position-sets` values, user agent processing rules for calculating layout viewport overflow would need to be changed to ignore `max-width` and `max-height`. That way, positioning logic can optimize for the anchored element's natural dimensions. This is necessary for cases where position set `1` would never cause viewport overflow (due to a viewport-aware `max-*` value and a missing or very small `min-*` value), but position set `2` would result in no content overflow.
+**Note:** if these functions are not introduced to `position-set` values, user agent processing rules for calculating layout viewport overflow would need to be changed to ignore `max-width` and `max-height`. That way, positioning logic can optimize for the anchored element's natural dimensions. This is necessary for cases where position set `1` would never cause viewport overflow (due to a viewport-aware `max-*` value and a missing or very small `min-*` value), but position set `2` would result in no content overflow.
 
 ### DRY-ing up declared position sets
 
@@ -226,12 +226,12 @@ In the first example, the author declared four separate position sets that the u
 <style>
     #myPopup {
         position: fixed;
-        position-sets: buttonMenuPos;
+        position-set: buttonMenuPos;
         min-width: calc(anchor(right) - anchor(left));
         min-height: 6em;
     }
 
-    @position-sets buttonMenuPos {
+    @position-set buttonMenuPos {
         /* INLINE DIRECTION: first try to align the left edge of the popup
         with the top, left edge of the button. */
         1, 2 {
@@ -279,7 +279,7 @@ This is achievable using the `anchor()` function in `calc()` expressions, along 
 <style>
     #myPopup {
         position: fixed;
-        position-sets: verticallyCenteredPopup;
+        position-set: verticallyCenteredPopup;
 
         /* The width will be fixed and the callout
            will be as tall as it needs to be to fit
@@ -287,7 +287,7 @@ This is achievable using the `anchor()` function in `calc()` expressions, along 
         width: 400px;
     }
 
-    @position-sets verticallyCenteredPopup {
+    @position-set verticallyCenteredPopup {
         1, 2 {
             --anchorMidpoint: calc(anchor(top) + ((anchor(bottom) - anchor(top)) / 2));
 
@@ -328,7 +328,7 @@ This proposal currently restricts the applicability of the `anchor(edge)` CSS fu
 
 ### Additional details
 
-* Similarly to `@keyframes`, properties included within `@position-sets` will take precedence over other cascade values of those same properties.
+* Similarly to `@keyframes`, properties included within `@position-set` will take precedence over other cascade values of those same properties.
 * Authors may declare any CSS properties in the position sets, not just those impacting position or box dimensions. For example, perhaps a popup should have a light blue background only if is displayed to the right of its anchor.
 
 ### Using JavaScript for position-aware operations
@@ -382,7 +382,7 @@ An author could provide this directionally-aware decoration using the `beforesho
 
     #myPopup {
         position: fixed;
-        position-sets: teachingUIPos;
+        position-set: teachingUIPos;
 
         /* The width will be fixed and the callout
            will be as tall as it needs to be to fit
@@ -390,7 +390,7 @@ An author could provide this directionally-aware decoration using the `beforesho
         width: 400px;
     }
 
-    @position-sets teachingUIPos {
+    @position-set teachingUIPos {
         1, 2 {
             left: anchor(right);  
         }
