@@ -479,13 +479,13 @@ The author would use comma-separated values to express a preferred position, the
     #myPopup {
         /* First try to align the top, left edge of the popup
         with the bottom, left edge of the button. */
-        top: anchor(bottom), auto;
-        left: anchor(left), auto;
+        top: position-set(anchor(bottom), auto);
+        left: position-set(anchor(left), auto);
         
         /* Next try to align the bottom, right edge of the popup
         with the top, right edge of the button. */
-        bottom: auto, anchor(top);
-        right: auto, anchor(right);
+        bottom: position-set(auto, anchor(top));
+        right: position-set(auto, anchor(right));
 
         /* the popup is at least as wide as the button */
         min-width: calc(anchor(right) - anchor(left));
@@ -494,7 +494,7 @@ The author would use comma-separated values to express a preferred position, the
            left button edge to the right edge of the viewport,
            OR 
            the right button edge to left edge of the viewport. */
-        max-width: calc(100vw - anchor(left)), anchor(right);
+        max-width: position-set(calc(100vw - anchor(left)), anchor(right));
 
         /* clamp the height of the the popup to be no taller than
            the distance between the bottom of the button and the 
