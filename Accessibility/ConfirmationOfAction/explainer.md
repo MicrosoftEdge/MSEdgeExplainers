@@ -17,9 +17,9 @@ a "confirmation of action" where the action in question is not necessarily tied 
 ## Status of this Document
 
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
-* This document status: **Active**
-* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/)
-* **Current version: this document**
+* This document status: **ARCHIVED**
+* Current venue: [AOM](https://wicg.github.io/aom/) within the [W3C Web Incubator Community Group](https://wicg.io/)
+* **Current version: https://wicg.github.io/aom/notification-api.html**
     
 ## Introduction
 
