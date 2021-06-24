@@ -54,13 +54,6 @@ each explainer has a "status of this document" section that indicates
 what standards venue they expect to go to next (if known). When they graduate,
 we move them into the [Alumni section](#alumni-) below.
 
-### Accessibility
-
-* [Accessible Confirmation of Action](Accessibility/ConfirmationOfAction/explainer.md) | 
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Confirmation%20of%20Action">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Confirmation%20of%20Action?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead&labels=Confirmation+of+Action&template=confirmation-of-action.md&title=%5BConfirmation+of+Action%5D+%3CTITLE+HERE%3E)
-
 ### CSS
 
 * [CSS color-mix() function](CSSColorMix/explainer.md) | 
@@ -187,6 +180,7 @@ standards communities. Thanks for your continued interest!
 
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
+| [Accessible Confirmation of Action](https://wicg.github.io/aom/notification-api.html) | [Web Incubator Community Group](https://wicg.io/) | [2021-06-23](Accessibility/ConfirmationOfAction/explainer.md) |
 | [MACAW](https://github.com/WICG/privacy-preserving-ads/blob/main/MACAW.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-04-07 |
 | [Enabling popups](https://open-ui.org/components/popup.research.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2021-03-22](Popup/explainer.md) |
 | [PARAKEET](https://github.com/WICG/privacy-preserving-ads/blob/main/Parakeet.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-03-04 |
