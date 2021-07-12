@@ -167,7 +167,13 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Foldables">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Foldables?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=boggydigital%2C+dlibby-%2C+zouhir&labels=Foldables&template=web-platform-primitives-for-foldables--css-part-.md&title=%5BCSS+Foldable+Primitives%5D+%3CTITLE+HERE%3E)
+    
+### Web Capabilities
 
+* [Haptics Device API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HapticsDevice%20API">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/HapticsDevice%20API?label=issues)</a> |
+    [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=HapticsDevice+API&template=hapticsdevice-api.md&title=%5BHapticsDevice%5D+Issue)
 
 # Alumni 🎓
 
