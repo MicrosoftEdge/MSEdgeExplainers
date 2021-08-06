@@ -78,10 +78,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Action">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Pen%20Action?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Pen+Action&template=pen-action.md&title=%5Bpen-action%5D+%3CTITLE+HERE%3E)
-* [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md) | 
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Keyboard%20API">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20API?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dlibby-%2C+zouhir&labels=Virtual+Keyboard+API&template=virtual-keyboard-api.md&title=%5BVirtual+Keyboard+API%5D+%3CTITLE+HERE%3E)
 * [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Keyboard%20Policy">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20Policy?label=issues)</a> |
@@ -190,6 +186,7 @@ standards communities. Thanks for your continued interest!
 | [MACAW](https://github.com/WICG/privacy-preserving-ads/blob/main/MACAW.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-04-07 |
 | [Enabling popups](https://open-ui.org/components/popup.research.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2021-03-22](Popup/explainer.md) |
 | [PARAKEET](https://github.com/WICG/privacy-preserving-ads/blob/main/Parakeet.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-03-04 |
+| [Virtual Keyboard API](https://w3c.github.io/editing/docs/virtualkeyboard/index.html) | [W3C Editing Task Force](https://w3c.github.io/editing/) | [2021-03-02](VirtualKeyboardAPI/explainer.md) |
 | [Canvas Formatted Text](https://github.com/WICG/canvas-formatted-text/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-09-23](Canvas/FormattedText.md) |
 | [Window Controls Overlay for Installed Desktop Web Apps](https://github.com/WICG/window-controls-overlay/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-07-08](TitleBarCustomization/explainer.md) |
 | [PWAs as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-05-28](PwaUriHandler/explainer.md) |
