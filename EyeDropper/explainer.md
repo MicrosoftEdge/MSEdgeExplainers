@@ -3,9 +3,9 @@ Authors: [Sidhika Tripathee](https://github.com/t-sitri), [McKinna Estridge](htt
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
-* This document status: **Active**
-* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/)
-* Current version: this document
+* This document status: **ARCHIVED**
+* Current venue: [W3C Web Incubator Community Group](https://wicg.io/) | [WICG/eyedropper-api](https://github.com/WICG/eyedropper-api) | ![GitHub issues](https://img.shields.io/github/issues/WICG/eyedropper-api)
+* Current version: [EyeDropper API Explainer](https://github.com/WICG/eyedropper-api/blob/main/README.md)
 
 ## Introduction
 Currently on the web, creative application developers are unable to implement an eyedropper, a tool that allows users to select a color from the pixels on their screen, including the pixels rendered outside of the web page requesting the color data. This explainer proposes an API that enables developers to use a browser-supplied eyedropper in the construction of custom color pickers. 
