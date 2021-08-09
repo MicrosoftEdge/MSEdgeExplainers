@@ -182,6 +182,7 @@ standards communities. Thanks for your continued interest!
 
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
+| [Masked LARK](https://github.com/WICG/privacy-preserving-ads/blob/main/MaskedLARK.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-07-11 |
 | [Accessible Confirmation of Action](https://wicg.github.io/aom/notification-api.html) | [Web Incubator Community Group](https://wicg.io/) | [2021-06-23](Accessibility/ConfirmationOfAction/explainer.md) |
 | [MACAW](https://github.com/WICG/privacy-preserving-ads/blob/main/MACAW.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-04-07 |
 | [Enabling popups](https://open-ui.org/components/popup.research.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2021-03-22](Popup/explainer.md) |
