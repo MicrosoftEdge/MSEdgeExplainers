@@ -178,7 +178,7 @@ standards communities. Thanks for your continued interest!
 
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
-| [EyeDropper API](https://github.com/WICG/eyedropper-api/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-08-03 |
+| [EyeDropper API](https://github.com/WICG/eyedropper-api/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2021-08-03](EyeDropper/explainer.md) |
 | [Masked LARK](https://github.com/WICG/privacy-preserving-ads/blob/main/MaskedLARK.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-07-11 |
 | [Accessible Confirmation of Action](https://wicg.github.io/aom/notification-api.html) | [Web Incubator Community Group](https://wicg.io/) | [2021-06-23](Accessibility/ConfirmationOfAction/explainer.md) |
 | [MACAW](https://github.com/WICG/privacy-preserving-ads/blob/main/MACAW.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-04-07 |
