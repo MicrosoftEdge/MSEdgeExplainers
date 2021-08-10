@@ -96,10 +96,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Custom%20Control%20UI">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Custom%20Control%20UI?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md&title=%5BEnabling+Custom+Control+UI%5D+%3CTITLE+HERE%3E)
-* [EyeDropper](EyeDropper/explainer.md) |
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/EyeDropper">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/EyeDropper?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft&labels=EyeDropper&template=eyedropper.md&title=%5BEyeDropper%5D+%3CTITLE+HERE%3E)
 
 ### Media
 
@@ -182,6 +178,7 @@ standards communities. Thanks for your continued interest!
 
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
+| [EyeDropper API](https://github.com/WICG/eyedropper-api/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2021-08-03](EyeDropper/explainer.md) |
 | [Masked LARK](https://github.com/WICG/privacy-preserving-ads/blob/main/MaskedLARK.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-07-11 |
 | [Accessible Confirmation of Action](https://wicg.github.io/aom/notification-api.html) | [Web Incubator Community Group](https://wicg.io/) | [2021-06-23](Accessibility/ConfirmationOfAction/explainer.md) |
 | [MACAW](https://github.com/WICG/privacy-preserving-ads/blob/main/MACAW.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-04-07 |
