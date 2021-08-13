@@ -36,7 +36,7 @@ A new generation of gaming controllers are built on buffered haptics and Linear 
 
 ## Out of Scope
 ### Non-Interactive Haptic Feedback
-It is not the goal of this proposal to address developers leveraging haptic feedback in cases where user interaction has not occured, see below for more information and [Potential Extensions](#potential-extensions). This requires additional investigation to security and privacy as well as ways for a user to disable non-interactive feedback. Selecting the correct device to route haptic feedback in this scenario is another area that requires discussion.
+It is not the goal of this proposal to address developers leveraging haptic feedback in cases where user interaction has not occurred, see below for more information and [Potential Extensions](#potential-extensions). This requires additional investigation to security and privacy as well as ways for a user to disable non-interactive feedback. Selecting the correct device to route haptic feedback in this scenario is another area that requires discussion.
 
 ### User Settings
 While a user setting will be needed on the User Agent to toggle haptic feedback on their device, how that is implemented is outside the scope of this proposal.
@@ -48,7 +48,7 @@ This explainer defines a new Haptics API and proposes that this start as an attr
 ### Continuous Haptic Waveform
 A continuous waveform is a waveform that is meant to be played in a loop to generate a specific kind of effect. 
 ### Transient Haptic Waveform
-A transient haptic waveform is a waveform that can occur at any point in time, even during a continuous waveform. Usually these waveforms are short-lived in nature, such as a click effect.
+A transient haptic waveform is a waveform that can occur at any point in time, even during a continuous waveform. Usually, these waveforms are short-lived in nature, such as a click effect.
 
 ### Web IDL
 The proposed WebIDL for this feature is as follows. For more information on how this shape was reached, please see the [Alternative Solutions](#alternative-solutions) section.
@@ -59,24 +59,24 @@ partial interface PointerEvent {
 }
 
 interface HapticsDevice {
-    void play(HapticsPredefinedWaveform waveform);
+    void play(HapticsPredefinedWaveform predefinedWaveform);
     void stop();
 }
 
-dictionary HapticsPredefinedWaveformInit }
+dictionary HapticsPredefinedWaveformInit {
     required unsigned short waveformId;
-    float? intensity = 1.0;
-    DOMString? vendorId = null;
-    sequence<HapticsPredecinedWaveformInit>? alternates = [];
+    float intensity = 1.0;
+    DOMString vendorId = "";
+    sequence<HapticsPredefinedWaveform> alternates = [];
 }
 
 interface HapticsPredefinedWaveform {
     constructor(HapticsPredefinedWaveformInit predefinedWaveformInit);
     readonly attribute unsigned short waveformId;
-    readonly attribute float? intensity = 1.0;
-    readonly attribute DOMString? vendorId = null;
-    readonly attribute FrozenArray<HapticsPredfinedWaveform>? alternates;
-}
+    readonly attribute float intensity;
+    readonly attribute DOMString vendorId;
+    readonly attribute FrozenArray<HapticsPredefinedWaveform> alternates;
+};
 ```
 
 ### Pre-Defined Waveforms
@@ -213,7 +213,7 @@ A potential path forwards here could be to define a new web API for querying the
 
 ### Unifying Other APIs Around Haptics API
 
-As additional use cases for haptics on the web are identified, it may make sense to standardize the creation and playback of haptic waveforms around a single interface so that developers have a consistent experience whenever they work with haptics on the web. `HapticsDevice` is one potential mechanism for this, but given the cross-web-community conversations such an effort would require, this was not placed under the scope of this proposal.
+As additional use cases for haptics on the web are identified, it may make sense to standardize the creation and playback of haptic waveforms around a single interface so that developers have a consistent experience whenever they work with haptics on the web. `HapticsDevice` is one potential mechanism for this, but, given the cross-web-community conversations such an effort would require, this was not placed under the scope of this proposal.
 
 ## Alternative Solutions
 
