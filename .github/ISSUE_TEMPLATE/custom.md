@@ -1,7 +1,7 @@
 ---
-name: HapticsDevice API
+name: Custom issue template
 about: Describe this issue template's purpose here.
-title: "[HapticsDevice] Issue"
+title: ''
 labels: ''
 assignees: ''
 
