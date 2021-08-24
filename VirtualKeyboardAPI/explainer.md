@@ -6,7 +6,7 @@ Authors: [Daniel Libby](https://github.com/dlibby-), [Zouhir Chahoud](https://gi
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **`ARCHIVED`**
 * Current venue: [W3C Web Editing Working Group](https://w3c.github.io/editing/) 
-* Current version: https://w3c.github.io/editing/docs/virtualkeyboard/index.html
+* Current version: https://www.w3.org/TR/virtual-keyboard/
 
 ## Introduction
 
