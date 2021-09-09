@@ -92,6 +92,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Custom%20Control%20UI">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Custom%20Control%20UI?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md&title=%5BEnabling+Custom+Control+UI%5D+%3CTITLE+HERE%3E)
+* [`focusgroup` attribute](Focusgroup/explainer.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/focusgroup">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/focusgroup?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead&labels=focusgroup&template=focusgroup.md&title=%5Bfocusgroup%5D+%3CTITLE+HERE%3E)
 
 ### Media
 
