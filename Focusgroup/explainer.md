@@ -11,7 +11,7 @@ described in this document progress along the standards-track, we will retain th
 document as an archive and use this section to keep the community up-to-date with the 
 most current standards venue and content location of future work and discussions.
 * This document status: **Active**
-* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/)
+* Expected venue: [WHATWG HTML Workstream](https://whatwg.org/workstreams#:~:text=html)
 * **Current version: this document**
     
 ## 1. Introduction
