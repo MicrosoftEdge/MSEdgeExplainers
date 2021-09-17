@@ -13,7 +13,11 @@ most current standards venue and content location of future work and discussions
 * This document status: **Active**
 * Expected venue: [WHATWG HTML Workstream](https://whatwg.org/workstreams#:~:text=html)
 * **Current version: this document**
-    
+
+**⭐New: A video recording of 
+[a presentation of this explainer to the W3C Open UI community group](https://us02web.zoom.us/rec/play/M9CQws3fPYB6vzKjvjJi6uVgYbzHKZ2L5pWpZ-A_VNUa8SbPiqsZFoGX4TmbgClfIo2RHZdeHxoi3gyN.BJWX3lSoah5ddYDW?continueMode=true&_x_zm_rtaid=vgoo4d78TTmnS6SlqvSKQw.1631896465490.797a543ba5ef0034680f19392aa6a088&_x_zm_rhtaid=706)
+is now available.**
+
 ## 1. Introduction
 
 When writing custom controls, authors need to implement the semantics of various known
