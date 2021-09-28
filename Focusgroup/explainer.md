@@ -715,6 +715,10 @@ has defined related CSS properties `nav-up`, `nav-right`, `nav-down`, `nav-left`
 properties are expected to provide focus navigation control similar to `focusgroup`. They 
 differ in some significant ways:
 
+* `nav-*` are defined using CSS (vs HTML). Not that HTML-without-CSS is really a modern 
+    concern, but proposing focusgroup in HTML enables the user agent to setup focusgroups 
+    without the CSS dependency (or behavior change should CSS application be delayed due to 
+    network conditions).
 * Each of `nav-up`, etc., require an explicit content selector (id) for ordering, which
     makes them relatively brittle. This design presents at least three challenges:
     
