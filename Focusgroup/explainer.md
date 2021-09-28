@@ -705,7 +705,88 @@ We considered various alternative solutions before arriving at the current propo
     of building a native HTML feature to expose the built-in platform arrow-key
     navigation of certain controls.
 
-## 9. Open Questions
+## 9. Related Work
+
+### 9.1. CSS Basic UI 4 Keyboard Navigation properties
+
+[Since at least 2002](https://www.w3.org/TR/2002/WD-css3-ui-20020802/#nav-dir) the CSS WG
+has defined related CSS properties `nav-up`, `nav-right`, `nav-down`, `nav-left` in 
+[CSS Basic UI 4's Keyboard Control](https://drafts.csswg.org/css-ui-4/#keyboard). These 
+properties are expected to provide focus navigation control similar to `focusgroup`. They 
+differ in some significant ways:
+
+* Each of `nav-up`, etc., require an explicit content selector (id) for ordering, which
+    makes them relatively brittle. This design presents at least three challenges:
+    
+    * The possibility of mis-alignment to content. If stylesheet `nav-*` selectors are not
+        updated in terms of changes to document content (at authoring time) the navigation 
+        expectations can get out of sync.
+    * Unexpected side-effects with responsive design. If the wrapping and reflow of 
+        presentational content changes depending on device characteristics (such as orientation,
+        zoom level), authors must likely provide dynamic run-time updates to `nav-*` properties 
+        in order to keep top/left/bottom/right navigation logical per the current layout.
+    * Related to the previous point, it can be easy to make logical errors in navigation 
+        sequences when targetting specific directions. This can lead to directions that don't
+        match the property names (e.g., `nav-left` actually navigates up or right) while also
+        opening up the possibility of unidirectional navigation (e.g., after navigating right,
+        the user can't go "back" to the left due to missing or erroneous selectors).
+* Ordering is not based on content. These properties serve visual presentations, but possibly
+    make focus navigation illogical for accessibility users (especially when *any* element
+    can be targeted by selector.
+* Verbose descriptors. To get four-direction navigation on one element requires specifying 
+    four unique CSS properties.
+* Special focus handling. The use of a selector on one of the `nav-*` properties has the unique
+    property of making that element focusable upon keyboard navigation to it. Additional 
+    clarity on how this special semantic applies would be needed for implementation. It
+    is unclear (especially given the related Note in the spec) if this is a desirable 
+    behavior.
+
+In nearly 20 years, user agents have not implemented these properties. It is likely that 
+`focusgroup` will create an incongruency in the platform with these `nav-*` CSS properties.
+Should the two exist simultaneously, the `nav-*` properties might provide override semantics
+for directional movement, and take precedence over the `focusgroup` attribute. However, we 
+hope that such a conflict will not occur.
+
+### 9.2. Spatial Navigation
+
+Another approach to focusable navigation has been defined in
+[CSS Spatial Navigation](https://drafts.csswg.org/css-nav-1/). This specification enables 
+user agents to deterministically navigate focusable elements in logical directions 
+(top, left, bottom, and right) according to those element's visual presentation. It assumes
+that a user agent will use some undefined trigger to enter a "spatial navigation mode" in 
+which the specification-defined behavior will apply. This mechanism of navigating content
+can be an alternative (or addition to) traditional TAB key navigation (or equivalent) for 
+a variety of devices (like TVs).
+
+Spatial navigation occurs in the context of a "spatial navigation container" which defaults
+to any scroll container (e.g., the viewport). The specification provides an API to enable
+programmatic navigation, and offers several CSS properties: to enable additional spatial 
+navigation containers, to control the behavior of focus and scroll actions by navigation 
+keys, and to customize the algorithm used for finding the next focusable element in a given
+direction.
+
+The specification does not presume to use spatial navigation in a limited (e.g., scoped
+and grouped) way as `focusgroup` implies. It appears to assume that arrow key direction
+navigation will be a primary navigation technique, thus any and all focusable content 
+should participate.
+
+It may be possible for Spatial Navigation and `focusgroup` to coexist simultaneously in 
+the same content. In the case that spatial navigation is only enabled via a special mode,
+it would be likely that its navigation model would take precedence over `focusgroup`, as 
+it is meant to make all visual, focusable content navigable, and would provide a 
+super-set of navigational movement for visual content. It is worth noting that accessibility
+tools would not likely enable spatial navigation mode.
+
+It seems desirable to have a feature to easily enable spatial-navigation-like behavior 
+for a subset of elements in a presentation. While this would not be ideal for an 
+accessibility-view of the content, it is possible that particular spatial navigation metaphors
+could be omitted by accessibility tools when performing navigation. For example, when an
+AT interfaces with the user agent, the AT might limit navigation to "forward/backward" content
+navigation modes, while a user not working with an AT (or ATs designed for visual navigation)
+would enable the full spatial navigation model. An opt-in for spatial navigation would certainly
+be a requirement and could be an extension to `focusgroup` (e.g., `focusgroup=spatial`).
+
+## 10. Open Questions
 
 <b id="note1">1.</b> It may not make sense to support focusgroup on every HTML element,
 especially those that already have platform-provide focusgroup-like internal behavior 
