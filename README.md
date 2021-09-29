@@ -127,8 +127,8 @@ we move them into the [Alumni section](#alumni-) below.
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson&labels=ImageResource+Color+Scheme&template=imageresource-color-scheme.md&title=%5BImageResource+Color+Scheme%5D+%3CTITLE+HERE%3E)
 * [First Run Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Install%20Time%20Permissions">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Install%20Time%20Permissions?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=Install+Time+Permissions&template=install-time-permissions-prompt.md&title=%5BInstall+Time+Permissions+Prompt%5D+%3CTITLE+HERE%3E)
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/First%20Run%20Permissions?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=First+Run+Permissions&template=first-run-permissions-prompt.md&title=%5BFirst+Run+Permissions+Prompt%5D+%3CTITLE+HERE%3E)
 * [Ratings & Reviews Prompt](RatingsAndReviewsPrompt/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Ratings%20and%20Reviews">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Ratings%20and%20Reviews?label=issues)</a> |
