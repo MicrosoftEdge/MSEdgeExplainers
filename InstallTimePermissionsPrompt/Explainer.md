@@ -1,4 +1,4 @@
-# Install Time Permissions Prompt Explainer
+# First Run Permissions Prompt Explainer
 
 Authors:
 
