@@ -29,67 +29,70 @@ Privacy CG discussions:
 - https://github.com/privacycg/storage-access/issues/83
 
 ## Usage
-If a website will redirect to an identity provider, with the knowledge that is will later load that identity provider as third-party content that requires access to its first-party storage, the Forward Declared Storage Access API provides a mechanism for the identity provider to request that access while it is accessed in a first-party context. A document can call one of two new APIs to check for access or request access respectively.
+If a website will redirect to an identity provider, with the knowledge that is will later load that identity provider as third-party content that requires access to its first-party storage, the Forward Declared Storage Access API provides a mechanism for the identity provider to request that access while it is accessed in a first-party context. Both the website and the IDP must call an API to unblock this scenario. 
 
 API usage:
 ```js
 partial interface Document {
-    Promise<bool> hasStorageAccess();
-    Promise<void> requestStorageAccess();
+    Promise<bool> allowStorageAccessOnSite(Url);
+    bool hasStorageAccessForSite(Url);
+    void requestStorageAccessForSite(Url);
 };
 ```
 
-#### document.hasStorageAccess()
+#### document.allowStorageAccessOnSite(Url)
 ```js
-var promise = document.hasStorageAccess();
-promise.then(
-  function (hasAccess) {
-    // Boolean hasAccess says whether the document has access or not.
-  },
-  function (reason) {
-    // Promise was rejected for some reason.
-  }
+document.allowStorageAccessOnSite("login.example.com");
+window.location.href = "https://login.example.com?client_id=123&redirect_uri=https://site.example2.com/callback...";
 );
 ```
 
-#### document.requestStorageAccess()
-```html
-<script>
-function makeRequestWithUserGesture() {
-  var promise = document.requestStorageAccess();
-  promise.then(
-    function () {
-      // Storage access was granted.
-    },
-    function () {
-      // Storage access was denied.
-    }
-  );
+#### document.requestStorageAccessForSite(Url)
+```js
+var params = new URLSearchParams(window.location.search);
+var redirectUri = new URL(params.get("redirect_uri"));
+
+if(document.hasStorageAccessForSite(redirectUri.origin)){
+    return; // No need to prompt.
 }
-</script>
-<button onclick="makeRequestWithUserGesture()">Play video</button>
+
+document.requestStorageAccessForSite(redirectUri.origin);
+window.location.href = redirectUri + authenticationParameters; 
+
 ```
 
-This greater level of control over storage access permissions allows for existing Chromium privacy controls such as third-party cookie blocking to be hooked up to this API in order to allow for broader adoption of more privacy-centric settings while also providing potentially broken scenarios-- such as federated authentication and user-desired third-party content-- a mechanism to restore functionality in a highly-targeted manner. This API also provides a valuable abstraction at the platform layer for other Chromium implementors to integrate additional privacy controls while providing a unified mechanism to control storage access permissions.
+This pattern allows standard authentication flows to request neccesary access while hosted in a website, in a way that allows the identity provider to explain to the user why the prompt is neccesary. 
 
 ## Scope of Access
-The API would address storage access for all forms of storage that may currently be blocked by existing polcies and browser settings such as third-party cookies. This includes traditional HTTP cookies as well as other storage apis such as indexedDB and localStorage.
+The API would address storage access for all forms of storage that may currently be blocked by existing polcies and browser settings such as third-party cookies. This includes traditional HTTP cookies as well as other storage apis such as indexedDB and localStorage.  No changes to the scope or length of the permission grant would be made compared to the original Storage Access API.  
 
 ## Example
 **Third-party cookie settings are set to block.**
 
-A root document, https://example.site, embeds an iframe from https://socialmedia.site that requires access to storage to authenticate.
-- Any requests for storage access from the socialmedia.site frame will be blocked (no change)
-- The content from socialmedia.site can use the Storage Access API to request access to storage while loaded on example.site.
-- The first time a user interacts with content from socialmedia.site and document.requestStorageAccess() is called, a decision is made by the browser to allow or reject access. This can be done using existing information such as previous/current site-engagement with socialmedia.site, an optional prompt, or other browser implemented logic.
-    - Subsequent requests to storage will be allowed if the call to document.requestStorageAccess() was successful.
-    - Subsequent calls to Storage Access API methods will auto resolve/reject based on the previous decision.
-- Subsequent loads of socialmedia.site on example.site, within a set timeframe after a successful document.requestStorageAccess() call (e.g. 30 days), will result in immediately granting storage access.
-    - This allows content to seamlessly work for a reasonable period of time after explicit interaction and consent has been obtained, allowing it to function in subsequent loads without re-prompting the user.
+A root document, https://example.site, embeds an iframe from https://federatedid.site that requires access to cookies to continue authenticating the user.
+- Any requests for storage access from the federatedid.site frame will be blocked (no change)
+- example.site will redirect the user to federatedid.site in order to sign in. 
+- Immediately prior to the redirect, example.site will indicate that it expects federatedid.site to request Storage Access, by calling document.allowStorageAccessOnSite("federatedid.site")
+- After the user authenticates at federatedid.site, federatedid.site will request Storage Access for later, when it is embedded within example.site, by calling document.requestStorageAccessForSite("example.site")
+- The user will observe the prompt, and either accept or reject the prompt.  No promise is provided to federatedid.site to detect how the user has answered. 
+- If federatedid.site does not immediately redirect to example.site, after showing the prompt, the permission will not be granted between the two sites. 
+- If the browser or tab is closed between example.site redirecting to federatedid.site, or the user accepting the prompt and federatedid.site redirecting back to example.site, the permission is not granted between the two sites. 
+- 
 
 ## Implementation Considerations
-There are two existing similar implementations with minor differences (Firefox, and Safari), documented at https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API#Safari_implementation_differences.
-The intent is to follow common implementation patterns between the two implementations. Where differences exist or more favorable Chromium mechanisms exist (e.g. site-engagement scores) a preference towards being minimally invasive for the user (e.g. few, or no prompts) and maintaining functional web experiences will be taken. There are a number of considerations discussed by various Chromium implementors and browser vendors in the WHATWG discussion (https://github.com/whatwg/html/issues/3338). The intent is to take these concerns, feedback, and considerations into account when making design decisions in areas that differ between implementations.
+
+The permission from the parent frame to the to-be-embedded frame to request storage access is a short-lived permission it should last as long as the user's browser session, preferably being erased if the site does not immediately (for some minutes-long value of immediately) redirect to the permitted site. 
+
+For cases where potentially one of many sites may request storage access, indicated by the parent site calling allowStorageAccessOnSite multiple times, all of these permitted sites must belong to the same First Party Set. 
+
+For the purpose of "same-tab browsing session", a pop-up opened by the site is considered part of the same-tab browsing session. 
+
+It is desirable to allow websites to permit this access while redirecting via an HTTP 302.  For this purpose, a header shall be introduced that provides the same effect - sec-allowStorageAccessRequest, permitted only on HTTP 302 redirects. The site being ultimately redirected to (e.g. in the case of 302 redirects from example.site to LegacyFederated.site to federatedid.site) shall be allowed to request storage access for the originating site as if it had called document.allowStorageAccessOnSite(). 
+
+**The following remain open issues:**
+
+- Should the requesting site ever learn the result of the prompt? Discussed in this [Privacy CG issue](https://github.com/privacycg/storage-access/issues/60) in part. 
+- Is it desireable for a site to indicate that potentially one of many sites could request storage access within it as a result of a redirect? This may be a niche use case that presents attack concerns, with or without the First Party Set limitation. 
 
 ---
-[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Storage%20Access%20API) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BStorage%20Access%20API%5D)
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Forward%20Declared%20Storage%20Access%20API) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BForward%20Declared%20Storage%20Access%20API%5D)
