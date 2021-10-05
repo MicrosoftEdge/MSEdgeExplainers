@@ -178,6 +178,7 @@ standards communities. Thanks for your continued interest!
 
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
+| [Web App Link Handling Manifest Options](https://github.com/WICG/pwa-url-handler/blob/main/handle_links/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-09-28 |
 | [EyeDropper API](https://github.com/WICG/eyedropper-api/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2021-08-03](EyeDropper/explainer.md) |
 | [Virtual Keyboard Policy](https://www.w3.org/TR/virtual-keyboard/) | [W3C Editing Working Group](https://w3c.github.io/editing/) | [2021-07-29](VirtualKeyboardPolicy/explainer.md) |
 | [Masked LARK](https://github.com/WICG/privacy-preserving-ads/blob/main/MaskedLARK.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-07-11 |
@@ -188,7 +189,7 @@ standards communities. Thanks for your continued interest!
 | [Virtual Keyboard API](https://www.w3.org/TR/virtual-keyboard/) | [W3C Editing Working Group](https://w3c.github.io/editing/) | [2021-03-02](VirtualKeyboardAPI/explainer.md) |
 | [Canvas Formatted Text](https://github.com/WICG/canvas-formatted-text/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-09-23](Canvas/FormattedText.md) |
 | [Window Controls Overlay for Installed Desktop Web Apps](https://github.com/WICG/window-controls-overlay/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-07-08](TitleBarCustomization/explainer.md) |
-| [PWAs as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-05-28](PwaUriHandler/explainer.md) |
+| [PWAs as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) ([updated proposal here](https://github.com/WICG/pwa-url-handler/blob/main/handle_links/explainer.md)) | [Web Incubator Community Group](https://wicg.io/) | [2020-05-28](PwaUriHandler/explainer.md) |
 | [EditContext API](https://github.com/w3c/editing/blob/gh-pages/docs/EditContext/explainer.md) | [W3C Editing Working Group](https://w3c.github.io/editing/) | [2020-03-17](EditContext/explainer.md) |
 | [Bidirectional WebDriver Protocol](https://github.com/w3c/webdriver-bidi/blob/master/explainer.md) | [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) | [2020-03-13](WebDriverRPC/webdriver.md) |
 | [Web Ink Enhancement: Delegated Ink Trail Presentation Aided By The OS](https://github.com/WICG/ink-enhancement/blob/master/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-02-27](WebInkEnhancement/explainer.md) |
