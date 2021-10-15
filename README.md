@@ -239,7 +239,7 @@ A collection of explainers documenting platform enhancements (not web
 developer-facing features), implementation designs, and other public documents
 related to the construction of Microsoft Edge.
 
-### Acessibility
+### Accessibility
 
 * [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) explainer and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
 * [Tagged PDFs support](PDF/TaggedPDF/explainer.md) explainer
@@ -269,7 +269,6 @@ related to the construction of Microsoft Edge.
 ### Privacy
 
 * [Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md) a principles document describing our commitment to privacy through the principles of transparency, control, respect, and protection for our users.
-* [Autofill Reauthentication](AutofillReauthentication/explainer.md) explainer
 
 ### Testing & Trials
 

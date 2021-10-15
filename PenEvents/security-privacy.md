@@ -23,7 +23,7 @@ No.
 No.
 ### 11. Does this specification allow an origin some measure of control over a user agent's native UI?
 No.
-### 12. What temporary identifiers might this this specification create or expose to the web?
+### 12. What temporary identifiers might this specification create or expose to the web?
 None.
 ### 13. How does this specification distinguish between behavior in first-party and third-party contexts?
 Pen Events do not distinguish between behavior in first-party and third-party contexts.

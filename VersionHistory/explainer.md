@@ -16,7 +16,7 @@ When a new version of a piece of native software rolls out users are typically m
 
 ## Update behavior
 
-Manifest.json changes are not reflected in an already installed PWA until the user agent deems an update necessary. We intend for this feature to update via the same mechanism. When a PWA developer updates the section of the manifest.json related to version history, the user agent should deem an update neccesary. After the update is complete, the user agent can choose to publcize that there are new updates.
+Manifest.json changes are not reflected in an already installed PWA until the user agent deems an update necessary. We intend for this feature to update via the same mechanism. When a PWA developer updates the section of the manifest.json related to version history, the user agent should deem an update necessary. After the update is complete, the user agent can choose to publicize that there are new updates.
 
 ## Publicizing changes
 
@@ -138,7 +138,7 @@ The **Microsoft Store** currently displays an overview of changes that came with
 
 1. Should history be stored as a dictionary instead of a collection?
 2. Alternative formats for storing version data?
-3. Are there titles other than "Version History" that would be preferrable?
+3. Are there titles other than "Version History" that should be preferred?
 
 ## Privacy Considerations
 
@@ -148,6 +148,6 @@ No considerable privacy concerns are expected. Fingerprinting via Feature detect
 
 The main security concern is that user agents need to process untrusted data feeds from the web. Putting aside that users need to install the PWA itself from the website - user agents need to be careful how they process the data feeds in case they are malicious. User agents need to take care not to try to process these untrusted data sets in privileged code.
 
-Done correctly the risk is the same as running arbitrary javascript on an relatively trusted site (since the user already installed the PWA).
+Done correctly the risk is the same as running arbitrary javascript on a relatively trusted site (since the user already installed the PWA).
 
 HTML changelogs are not a particular security concern, as this would be no riskier than a standard navigation.

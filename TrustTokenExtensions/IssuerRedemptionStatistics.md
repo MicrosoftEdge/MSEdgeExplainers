@@ -25,7 +25,7 @@ If a set of statistics around Trust Token issuance and redemption is known, it w
 
 ##### Example 1:
 
-A bot or malicious extension controls a legitimate browser instance and requests tokens. It then programatically redeems tokens and continues to request more when the user is not using their computer.
+A bot or malicious extension controls a legitimate browser instance and requests tokens. It then programmatically redeems tokens and continues to request more when the user is not using their computer.
 
 The presence of statistics on token issuance would have helped alert the issuer to non-human usage of tokens.
 

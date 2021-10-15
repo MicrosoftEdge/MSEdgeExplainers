@@ -164,7 +164,7 @@ pet.disconnect()
 ### Dispatching a KeyboardEvent
 On Windows, the `click`, `dblclick` and `pressandhold` actions on the pen are sent as hotkeys from the OS to the active app.  One option would be to dispatch this OS-specific representation of the event as a `KeyboardEvent` to the `activeElement`.
 
-This option isn't currently being pursued for a two reasons:
+This option isn't currently being pursued for two reasons:
 
 1. Devices with a stable `pointerId` can benefit from correlating the button events with subsequent `PointerEvent`s that are generated from the same device.  For example, clicking the eraser may put the device into an eraser mode while a double click may switch from pencil to pen.  `KeyboardEvent` doesn't have a `pointerId` property, so this approach wouldn't facilitate these scenarios.
 2. The Windows "hotkeys" for pen interactions F18 through F20 are more of an implementation detail and fail to convey any semantic meaning about what the user is doing.  In contrast, a `dblclick` event on a `PenEventTarget` seems like a good fit for an Apple Pencil double-tap, so the current proposal has broader device applicability.

@@ -40,7 +40,7 @@ Finally, we uncovered a scenario that we didn't consider originally – (likely 
 
  <center><img src="register.png"></center>
 
-These qualitive factors encouraged us to propose a standardized solution. Additionally we've instrumented the reveal pseudo-element to check how often it appeared and how often it was clicked, and we found that unique users clicked the button on average on up to 10% of the sessions where the pseudo-element appeared.
+These qualitative factors encouraged us to propose a standardized solution. Additionally we've instrumented the reveal pseudo-element to check how often it appeared and how often it was clicked, and we found that unique users clicked the button on average on up to 10% of the sessions where the pseudo-element appeared.
 
 ## Proposal:
 
@@ -62,7 +62,7 @@ User agents may implement the reveal pseudo-element on inputs that have `type=pa
 
 #### Allowing for ease of author adjustment
 
-* The graphic, text or other visual represenation the user agent utilizes to inform the user that they can interact with it must be set as a background image to allow authors to easily utilize the functionality but adjust this representation to meet their design needs if necessary.
+* The graphic, text or other visual representation the user agent utilizes to inform the user that they can interact with it must be set as a background image to allow authors to easily utilize the functionality but adjust this representation to meet their design needs if necessary.
 
 #### Showing, hiding password reveal element, obscuring the password
 
@@ -80,7 +80,7 @@ Following events would obscure password and hide a reveal element:
 
  * Password input has lost focus
 
- This is important because even though the user may find value in being able to see their password, they may only desire for it to be visible for a short amount of time and doing this allows for keeping the password private even if the user forgets to invoke the `::reveal` psuedo-element. Additionally, when the browser itself loses focus the password is obscured as well.
+ This is important because even though the user may find value in being able to see their password, they may only desire for it to be visible for a short amount of time and doing this allows for keeping the password private even if the user forgets to invoke the `::reveal` pseudo-element. Additionally, when the browser itself loses focus the password is obscured as well.
 
 #### Supported styles
 

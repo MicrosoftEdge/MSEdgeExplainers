@@ -26,7 +26,7 @@ and blue, can have the same HSL lightness).
 ## Use Cases
 
 One example application of `color-mix()` is tinting. The css-color-5 spec also proposes `color-adjust()`, which can adjust the lightness of a color up or down. This is
-analagous to adjusting the tint of a paint color by mixing it with a pure white or pure black paint. The `color-mix()` function provides greater flexibility, by allowing for
+analogous to adjusting the tint of a paint color by mixing it with a pure white or pure black paint. The `color-mix()` function provides greater flexibility, by allowing for
 adjustment using colors other than pure white or pure black. Doing so can provide "warmth" or "coolness" to a color palette, as seen in
 [this example](https://alistapart.com/article/mixing-color-for-the-web-with-sass/#section5) using Sass.
 

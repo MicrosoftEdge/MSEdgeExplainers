@@ -21,7 +21,7 @@ There is clear demand for this functionality in the developer community -- see [
 [HTML Imports](https://www.w3.org/TR/html-imports/) were proposed (and implemented in Chromium) as a solution, but they were developed independently of ES6 Modules and have several limitations:
 
 * **Global object pollution:** vars created in an HTML Import show up on the global object by default.  An ideal solution would minimize such side-effects.  Accordingly, global object pollution does not occur in ES6 Modules.
-* **Parse blocking with inline script:** the parsing of an HTML Import will block the main document's parser if included prior to an inline script element.  ES6 Modules have defer semantics and thus do not block the parser.
+* **Parse blocking with inline script:** the parsing of an HTML Import will block the main document's parser if included prior to an inline script element.  ES6 Modules have deferred semantics and thus do not block the parser.
 * **Independent dependency resolution infrastructures between HTML Imports and ES6 Script Modules:** since these systems were developed independently their infrastructures for dependency resolution don't talk to each other, leading to missed performance opportunities and to bugs like [this one](https://bugs.chromium.org/p/chromium/issues/detail?id=767841).
 * **Non-intuitive import pass through:** HTML Imports require the consumer to access their content from standard DOM queries like getElementById and querySelector.  This is clumsy and limited relative to Script Modules' import/export statements that allow for explicit specification of the API surface provided by a module.
 

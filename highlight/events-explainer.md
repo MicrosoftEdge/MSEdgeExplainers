@@ -72,7 +72,7 @@ Ranges can overlap and each range may belong to more than one HighlightRangeGrou
 
 #### Option 1
 
-Only fire one event on one HighlightRangeGroup. HighlightRangeGroups have a priority order as defined in the [Highlight API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/highlight/explainer.md). To find the group that will receive the event, sort the HighlightRangeGroup objects in descending priority order and dispatch the event to the first HighlightRangeGroup. The priority order establishes a layering of highlights, so firing the event based on this ordering ensures the higlight "nearest to the user" receives the event.
+Only fire one event on one HighlightRangeGroup. HighlightRangeGroups have a priority order as defined in the [Highlight API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/highlight/explainer.md). To find the group that will receive the event, sort the HighlightRangeGroup objects in descending priority order and dispatch the event to the first HighlightRangeGroup. The priority order establishes a layering of highlights, so firing the event based on this ordering ensures the highlight "nearest to the user" receives the event.
 
 It is also possible that there are multiple hit ranges within the target HighlightRangeGroup. To handle this, we also define a priority order for ranges within a HighlightRangeGroup, where the range that was added to the group first has the highest priority and the range added last has the lowest priority. Using this ordering, we take the range with the highest priority to be the HighlightRangePointerEvent's range.
 

@@ -189,7 +189,7 @@ and returns later. Instead, the "leaving" and "returning" logic (for keyboard sc
 preexisting *tabindex sequential focus navigation* only. In other words, because Tab is often used to enter,
 optionally move through, and leave a focusgroup, the enter-and-exit points depend on which elements
 participate in the tab order (those with `tabindex=0` for example). Much like tracking which item is 
-"selected", if the author wants to mark an exist or entry location in the focusgroup, they must update
+"selected", if the author wants to mark an exit or entry location in the focusgroup, they must update
 the tabindex values in script.
 <sup><a href="#note2">2</a></sup>
 
@@ -485,7 +485,7 @@ The focusgroups still have an extended linear group relationship in the horizont
 in the horizontal direction cannot be changed by the child), and a descender/ascender relationship in
 the vertical direction (also one-way from `<div>` to `<span>` and not vice-versa). The `<span>`'s
 focusgroup supports a direction (vertical) that it doesn't extend from the `<div>`'s focusgroup and
-so vertical arrow keys (while focused inside the `<span>`'s focusgroup can be independently
+so vertical arrow keys (while focused inside the `<span>`'s focusgroup) can be independently
 configured to wrap or not wrap by adding or omitting the `wrap` value on the `<span>`'s focusgroup 
 attribute. In Example 15, the up/down arrows keys will not wrap, but given Example 16:
 
@@ -573,7 +573,7 @@ reflect the accessible structure of the document, not the presentation view made
 possible with CSS. For example, it is easy to create views that visually appear
 grid-like, but do not make sense to navigate like a grid if considering that the 
 data model is fundamentally a list, which is how users of accessibility technology
-would percieve it. Wrapping a list of contact cards on screen in a grid-like
+would perceive it. Wrapping a list of contact cards on screen in a grid-like
 presentation allows for more content density on screen for sighted users. In that 
 scenario, arrow key navigation to move linearly (left-to-right following the 
 line-breaking across each line) through the contents makes sense (especially if 
@@ -695,7 +695,7 @@ We considered various alternative solutions before arriving at the current propo
     potentially link these groups together. Finally, this proposal suggested that the
     attribute also enable the element to get keyboard focus if it didn't already have
     it--another new way of making elements focusable wasn't deemed a great idea.
- 2. In another iteration, we considered codifying the ARIA authoring practices to apply
+ 2. In another iteration, we considered codifying the ARIA authoring practices applying
     platform behavior automatically based on the presence of certain ARIA attributes
     (such as role="tab"). This idea didn't get too far, as we ultimately felt that
     aria attributes really shouldn't have native behavior locked into them as that sets
@@ -736,7 +736,7 @@ differ in some significant ways:
         the user can't go "back" to the left due to missing or erroneous selectors).
 * Ordering is not based on content. These properties serve visual presentations, but possibly
     make focus navigation illogical for accessibility users (especially when *any* element
-    can be targeted by selector.
+    can be targeted by selector).
 * Verbose descriptors. To get four-direction navigation on one element requires specifying 
     four unique CSS properties.
 * Special focus handling. The use of a selector on one of the `nav-*` properties has the unique
@@ -820,5 +820,5 @@ pageup/down for paginated movement (TBD on how this could be calculated and in w
 increments), as well as the home/end keys to jump to the beginning and end of groups.
 
 It might also be interesting to add support for typeahead scenarios (though what values to
-look for when building an index would need to be worked out, and may ultimately proove to be
+look for when building an index would need to be worked out, and may ultimately prove to be
 too complicated).

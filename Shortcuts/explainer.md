@@ -118,7 +118,7 @@ Provides a human-readable label for the shortcut action when displayed to the us
 
 ### `short_name`
 
-Optional. Provides an abbreviated, human-readable label for the shortcut action. It is intended to be used where there is insufficient space to display the `name`. In its absense, systems looking for this key should fall back to `name`.
+Optional. Provides an abbreviated, human-readable label for the shortcut action. It is intended to be used where there is insufficient space to display the `name`. In its absence, systems looking for this key should fall back to `name`.
 
 ### `description`
 

@@ -23,7 +23,7 @@ This document is intended as a starting point for engaging the community and sta
 - [Proposal: Window Segments Enumeration JavaScript API](#proposal-window-segments-enumeration-javascript-api)
 
 - [Security and Privacy](#security-and-privacy)
-	* [APIs avalibility in iframe context](#apis-avalibility-in-iframe-context)
+	* [APIs availability in iframe context](#apis-avalibility-in-iframe-context)
 
 - [Examples of user experiences and solution outlines that can leverage two screens](#examples-of-user-experiences-and-solution-outlines-that-can-leverage-two-screens)
 
@@ -48,7 +48,7 @@ More specific challenges we've heard from our internal product teams that were e
 Before discussing the solution proposal - let's overview existing proposals that are relevant and applicable to the problem space. 
 As matter of principle we should generally avoid creating redundant concepts if we can reuse existing platform APIs and capabilities.
 
-- [Presentation API](https://w3c.github.io/presentation-api/) is solving the problem of a effective use of a _secondary_ screen and likely won't attempt to solve challenges outlined above that are specific to devices where a window can span separate physical displays. This would likely still be a separate problem for foldables
+- [Presentation API](https://w3c.github.io/presentation-api/) is solving the problem of an effective use of a _secondary_ screen and likely won't attempt to solve challenges outlined above that are specific to devices where a window can span separate physical displays. This would likely still be a separate problem for foldables
 
 - [Screen Enumeration API Explainer](https://github.com/spark008/screen-enumeration/blob/master/EXPLAINER.md) provides information about the physical screen configuration. Web developers might be able to leverage that on foldables, but would need to do extra effort to correlate that information with window parameters. Some concrete examples on why a special purpose API might be useful in addition to Screen Enumeration:
 	- Getting adjacency information about spanning window regions to lay out content in several areas in logical way for a device;
@@ -109,7 +109,7 @@ The proposed CSS constructs are not currently meant to map to spanning configura
 
 ## Security and Privacy
 
-### APIs avalibility in iframe context
+### APIs availability in iframe context
 
 The CSS constructs and the JavaScript API will be available in `iframe` context but disabled by default for privacy and security considerations. An author may enable them using the `screen-spanning` policy; a new feature policy we are proposing that will enable authors to selectively enable the previously mentioned CSS and JavaScript constructs in iframe context. When disabled, getWindowSegments will return a single segment the size of the iframe's viewport, and the CSS environment variables will be treated as unset, and use the fallback values.
 
@@ -193,7 +193,7 @@ window.onresize = function() {
 
 ![Foldable with the left segment of the window containing browser and location finder website, right segment containing calculator app](colored-boxes.svg)
 
-This is an illustrative example that demonstrates how to use the new enviroment variables to position content relative to the fold.
+This is an illustrative example that demonstrates how to use the new environment variables to position content relative to the fold.
 
 Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however, the requirement for Box 2 `.yellow` and Box 3 `.pink` is to *fill the screen segment width* and have a height of *100px*
 
@@ -236,7 +236,7 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 ```
 
 #### LTR and RTL Layout Example
-![Yelow flex column being hinge aware in both LTR and RTL writing modes](ltr-rtl.svg)
+![Yellow flex column being hinge aware in both LTR and RTL writing modes](ltr-rtl.svg)
 
 #### CSS solution outline:
 

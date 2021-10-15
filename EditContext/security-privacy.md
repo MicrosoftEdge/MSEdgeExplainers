@@ -32,7 +32,7 @@ No.
 
 ## 2.8. What data does this specification expose to an origin? Please also document what data is identical to data exposed by other features, in the same or different contexts.
 
-EditContext exposes text that has been typed by the user. This data is not exposed to another origin nor does it allow to access data from other origins.
+EditContext exposes text that has been typed by the user. This data is not exposed to another origin nor does it allow accessing data from other origins.
 
 ## 2.9. Does this specification enable new script execution/loading mechanisms?
 
@@ -46,7 +46,7 @@ No.
 
 It isn't the user agent UI, but is platform native UI (candidate window during IME compositions) used for input text. The EditContext provides coordinates at which text input related UI should be displayed. It offers a similar level of control compared to what the author can do by positioning an input element in the page. No new behavior is exposed to authors for controlling UI, only new APIs to communicate the coordinates in a more direct way.
 
-## 2.12. What temporary identifiers might this this specification create or expose to the web?
+## 2.12. What temporary identifiers might this specification create or expose to the web?
 
 EditContext does not create any temporary identifiers.
 
