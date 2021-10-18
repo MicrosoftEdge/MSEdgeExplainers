@@ -97,6 +97,13 @@ we move them into the [Alumni section](#alumni-) below.
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/focusgroup?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead&labels=focusgroup&template=focusgroup.md&title=%5Bfocusgroup%5D+%3CTITLE+HERE%3E)
 
+### JavaScript
+
+* [Source Hashes in Stack Traces](DevTools/SourceHash/explainer.md) |
+  <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Source+hash">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Source+hash?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=robpaveza&labels=Source+hash&title=%5BSource+Hashes%5D+%3CTITLE+HERE%3E)
+
 ### Media
 
 * [Audio Stream Category](AudioStreamCategory/explainer.md) | 
