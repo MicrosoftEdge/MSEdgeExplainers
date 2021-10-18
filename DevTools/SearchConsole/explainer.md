@@ -1,4 +1,4 @@
-# Search Console error
+# Search the Console for Errors
 
 Authors: [Erica Draud](https://github.com/erdraud)
 
