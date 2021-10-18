@@ -25,7 +25,7 @@ Add an origin-trial <meta> tag to the head of any page, example:
 <meta http-equiv="origin-trial" content="your-token-gues-here">
 ```
 
-#### Option 2: Using a HTTP Header
+#### Option 2: Using an HTTP Header
 Another option is to add `Origin-Trial` to your HTTP server response headers, example:
 
 ```json

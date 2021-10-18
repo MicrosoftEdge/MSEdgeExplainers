@@ -4,9 +4,9 @@ Authors: [Daniel Libby](https://github.com/dlibby-), [Zouhir Chahoud](https://gi
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
-* This document status: **Active**
-* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/) 
-* Current version: this document
+* This document status: **`ARCHIVED`**
+* Current venue: [W3C Web Editing Working Group](https://w3c.github.io/editing/) 
+* Current version: https://www.w3.org/TR/virtual-keyboard/
 
 ## Introduction
 
@@ -14,7 +14,7 @@ Today on the web, User Agents respond to the presence of the virtual (software) 
 
 ## Motivation
 
-Virtual keyboards are typically invoked when a user interacts with an editable area via touch input. In order for users to effectively use the virtual keyboard to input text, the editable area must be remain visible. To try to ensure this happens across the web today, there are two User Agent behaviors associated with the appearance of a docked virtual keyboard:
+Virtual keyboards are typically invoked when a user interacts with an editable area via touch input. In order for users to effectively use the virtual keyboard to input text, the editable area must remain visible. To try to ensure this happens across the web today, there are two User Agent behaviors associated with the appearance of a docked virtual keyboard:
 
 - The entire application is resized, which ends up affecting the layout of the page. Once the resize is completed, the focused element is scrolled into view.
 
@@ -237,7 +237,7 @@ Using the proposal for [Window Segments](https://github.com/MicrosoftEdge/MSEdge
 ### Extending the Visual Viewport API
 The [Visual Viewport API](https://wicg.github.io/visual-viewport/) reports changes in size, scale or offset (from the layout viewport) of the visual viewport.  One of the reasons the visual viewport changes size is in response to the virtual keyboard being shown or hidden.  Authors currently use the visual viewport to infer when the virtual keyboard appears, but this solution is imperfect, since there are multiple reasons the visual viewport can change.
 
-We briefly considered extending the Visual Viewport API to call out changes to the geomtry of the virtual keyboard, but did not pursue that approach for the following reasons:
+We briefly considered extending the Visual Viewport API to call out changes to the geometry of the virtual keyboard, but did not pursue that approach for the following reasons:
 
 1. This proposal opts out of visual viewport changes in response to the virtual keyboard being shown or hidden.  It seems inappropriate to dispatch visual viewport events in response to changes in something other than the visual viewport.
 2. A virtual keyboard interface provides a home for a cohesive set of APIs all related ot the virtual keyboard.  One example is this [complementary proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/VirtualKeyboardPolicy/explainer.md) offering authors the ability to control when the keyboard is shown or hidden.
@@ -254,10 +254,10 @@ Two pieces of information that might help with fingerprinting:
 
 The first piece of information can already be inferred by authors today using the visual viewport API.  The second can be at least partially mitigated.
 
-If the virtual keyboard doesn't fully span the width of the viewport, it may not be key to the experience, for example if a virtual keyboard had some gaps to either side (centered at the bottom of the viewport) the user agent need not report the extra space and can instead describe the instersection as taking up the full width of the viewport.  If the intersection is key to the experience, as it is with [foldable devices](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Foldables/explainer.md), then the same information can likely be discovered by the author through other APIs, for example by checking the number of window segments, which are necessary so that optimized experiences can be developed for these devices.
+If the virtual keyboard doesn't fully span the width of the viewport, it may not be key to the experience, for example if a virtual keyboard had some gaps to either side (centered at the bottom of the viewport) the user agent need not report the extra space and can instead describe the intersection as taking up the full width of the viewport.  If the intersection is key to the experience, as it is with [foldable devices](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Foldables/explainer.md), then the same information can likely be discovered by the author through other APIs, for example by checking the number of window segments, which are necessary so that optimized experiences can be developed for these devices.
 
 In summary, with some user agent mitigations, authors won't gain any new information for use in fingerprinting.
 
 ## Quality Concerns / Abuse
 
-It's possible authors could build less usable experiences since the user agent will no longer automatically ensure visibility of the editable field that caused the virtual keyboard to appear.  This is only a minor concern, however, as authors already have the power to build bad website experiences :-) and any author opting into this API is explicitly focusing on optimizing the experience for the virtual keyboard.
+It's possible that authors could build less usable experiences since the user agent will no longer automatically ensure visibility of the editable field that caused the virtual keyboard to appear.  This is only a minor concern, however, as authors already have the power to build bad website experiences :-) and any author opting into this API is explicitly focusing on optimizing the experience for the virtual keyboard.

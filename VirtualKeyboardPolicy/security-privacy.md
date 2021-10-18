@@ -32,7 +32,7 @@ No.
 
 ## 2.8. What data does this specification expose to an origin? Please also document what data is identical to data exposed by other features, in the same or different contexts.
 
-VirtualKeyboard interface only exposes the geometry of the VK. This data is not exposed to another origin nor does it allow to access data from other origins.
+VirtualKeyboard interface only exposes the geometry of the VK. This data is not exposed to another origin nor does it allow accessing data from other origins.
 
 ## 2.9. Does this specification enable new script execution/loading mechanisms?
 
@@ -46,7 +46,7 @@ No.
 
 It isn't the user agent UI, but is platform native UI (on-screen keyboard) used for input text. No new behavior is exposed to authors for controlling UI, only new APIs to control the behavior and geometry of the VK. The VK's layout can be controlled through an already existing inputMode attribute which is unrelated to the VirtualKeyboard APIs being proposed here.
 
-## 2.12. What temporary identifiers might this this specification create or expose to the web?
+## 2.12. What temporary identifiers might this specification create or expose to the web?
 
 VirtualKeyboard interface does not create any temporary identifiers.
 

@@ -52,7 +52,7 @@ Browsers should provide a clear indication as to when the user has been transiti
 
 The transition into eyedropper mode should require consumable user activation, for example, clicking on a button from the web page, to help avoid unintentionally revealing pixel data.
 
-### 2.12 What temporary identifiers might this this specification create or expose to the web? 
+### 2.12 What temporary identifiers might this specification create or expose to the web? 
 
 None.
 

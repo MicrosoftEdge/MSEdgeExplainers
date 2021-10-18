@@ -161,7 +161,7 @@ Both of these webkit prefixed properties have been shipping in Chromium for some
 ### Resulting Changes in Browser
 
 #### Coordinate System
-The coordinate system will not be affected by the overlay, although content my be covered by the overlay.
+The coordinate system will not be affected by the overlay, although content may be covered by the overlay.
 - The point (0,0) will be the top left corner of the viewport. This point will fall _under_ the overlay if the overlay is in the top-left corner.
 - `window.innerHeight` will return the full height of the client area including the area under the overlay. On operating systems which do not include borders around the window, `window.innerHeight === window.outerHeight`
 - `vh` and `vw` units would be unaffected. They would still represent 1/100th of the height/width of the viewport which is also not affected by the overlay.

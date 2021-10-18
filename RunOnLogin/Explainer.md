@@ -146,7 +146,7 @@ Also, to provide the user with ultimate control, if the user wants to disable th
 
 ## Privacy and Security Considerations
 ### Privacy
-An installed web app that was configured to be auto started on OS login could be used to track the user by using available web platform services e.g. geolocation and ping remote services using an unique instance id, every time the user logs in to its computer. 
+An installed web app that was configured to be auto started on OS login could be used to track the user by using available web platform services e.g. geolocation and ping remote services using a unique instance id, every time the user logs in to its computer. 
 
 Auto starting a web app is a powerful capability, while it does not add a new vector, as it is already possible for native applications to be auto started, it does add the possibility of increasing the frequency for this scenario happening at OS login. That is why we propose gating the capability on the user granting its permission and allowing the user to also disable the web app from auto running in the future from within the browser or by using the OS specific way of managing auto starting applications.
 

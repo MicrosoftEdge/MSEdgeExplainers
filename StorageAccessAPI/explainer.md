@@ -80,7 +80,7 @@ function makeRequestWithUserGesture() {
 This greater level of control over storage access permissions allows for existing Chromium privacy controls such as third-party cookie blocking to be hooked up to this API in order to allow for broader adoption of more privacy-centric settings while also providing potentially broken scenarios-- such as federated authentication and user-desired third-party content-- a mechanism to restore functionality in a highly-targeted manner. This API also provides a valuable abstraction at the platform layer for other Chromium implementors to integrate additional privacy controls while providing a unified mechanism to control storage access permissions.
 
 ## Scope of Access
-The API would address storage access for all forms of storage that may currently be blocked by existing polcies and browser settings such as third-party cookies. This includes traditional HTTP cookies as well as other storage apis such as indexedDB and localStorage.
+The API would address storage access for all forms of storage that may currently be blocked by existing policies and browser settings such as third-party cookies. This includes traditional HTTP cookies as well as other storage apis such as indexedDB and localStorage.
 
 ## Example
 **Third-party cookie settings are set to block.**

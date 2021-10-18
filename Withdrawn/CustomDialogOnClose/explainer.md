@@ -44,7 +44,7 @@ There are many scenarios in which the web developer may want to invoke this dial
 
 ## Proposed Solution
 ### A Declarative Site State
-In order to prevent user data loss and provide more context about potentially undesired behaviors on application exit, we propose that sites should be able to indicate when they are in a dirty state and opt-in to showing a customizeable dialog and/or have some asynchronous Javascript code run on exit.
+In order to prevent user data loss and provide more context about potentially undesired behaviors on application exit, we propose that sites should be able to indicate when they are in a dirty state and opt-in to showing a customizable dialog and/or have some asynchronous Javascript code run on exit.
 
 When the user enters data or begins an operation that would be cancelled on tab close, the site can enter a dirty state by calling `window.setDirtyState(true)`. When the operation is finished or the data is saved, the site can exit the dirty state by calling `window.setDirtyState(false)`. When the tab is closed or navigated away from while the site is in a dirty state, a dialog may be shown and/or some JavaScript code may be run.
 
@@ -105,7 +105,7 @@ While this feature fills a gap in the platform that will improve the end user ex
 
 ## Considered Alternatives
 ### Extend the beforeunload event
-A familiar way to interrupt the leaving flow is to use the beforeunload event's properties, eitbher calling `preventDefault()` or assigning a value to `returnValue`. In line with this pattern, we are proposing the addition of a new property to the beforeunload event: `dialog`. The `dialog` property would have several methods `setMessage()`, `setButtonLabel()`, and `show()`. These functions are how the developer will customize the dialog, and provide code that will run based on the user's selection.
+A familiar way to interrupt the leaving flow is to use the beforeunload event's properties, either calling `preventDefault()` or assigning a value to `returnValue`. In line with this pattern, we are proposing the addition of a new property to the beforeunload event: `dialog`. The `dialog` property would have several methods `setMessage()`, `setButtonLabel()`, and `show()`. These functions are how the developer will customize the dialog, and provide code that will run based on the user's selection.
 ```javascript
 window.addEventListener("beforeunload", (event) => {
     if (event.dialog) {
@@ -120,7 +120,7 @@ window.addEventListener("beforeunload", (event) => {
 });
 ```
 
-`show()` returns a promise that will resolve with the user's selection. Once it resolves, the code provided by the developer will run, and the tab will close when it is finished. While the developer's code is running, we should display a dialog indicating that some work is being done, and present an option to the user that let's them cancel the work and leave immediately. Here is an example of how this "Cleaning up" dialog may look:
+`show()` returns a promise that will resolve with the user's selection. Once it resolves, the code provided by the developer will run, and the tab will close when it is finished. While the developer's code is running, we should display a dialog indicating that some work is being done, and present an option to the user that lets them cancel the work and leave immediately. Here is an example of how this "Cleaning up" dialog may look:
 
 This option will not be pursued, in favor of the declarative approach. The two approaches are very similar, offering the same capability, but the declarative approach has several clear benefits over this proposal such as: 
 - The UA can prepare the dialog ahead of time, and display it on behalf of a suspended tab without unsuspending it.

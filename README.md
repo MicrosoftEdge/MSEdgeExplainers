@@ -60,6 +60,9 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSColorMix">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSSColorMix?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=CSSColorMix&template=css-color-mix---function.md&title=%5BCSS+color-mix+function%5D+%3CTITLE+HERE%3E)
+* [CSS Anchored Positioning](CSSAnchoredPositioning/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSS%20Anchored%20Positioning">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSS%20Anchored%20Positioning?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=melanierichards%2C+BoCupp-Microsoft%2C+ipopescu93%2C+dandclark&labels=CSS+Anchored+Positioning&template=css-anchored-positioning.md&title=%5BCSS+Anchored+Positioning%5D+%3CTITLE+HERE%3E)
 
 ### Editing
 
@@ -75,14 +78,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Action">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Pen%20Action?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Pen+Action&template=pen-action.md&title=%5Bpen-action%5D+%3CTITLE+HERE%3E)
-* [Virtual Keyboard API](VirtualKeyboardAPI/explainer.md) | 
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Keyboard%20API">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20API?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dlibby-%2C+zouhir&labels=Virtual+Keyboard+API&template=virtual-keyboard-api.md&title=%5BVirtual+Keyboard+API%5D+%3CTITLE+HERE%3E)
-* [Virtual Keyboard Policy](VirtualKeyboardPolicy/explainer.md) | 
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Virtual%20Keyboard%20Policy">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Virtual%20Keyboard%20Policy?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Virtual+Keyboard+Policy&template=virtual-keyboard-policy.md&title=%5BVirtual+Keyboard+Policy%5D+%3CTITLE+HERE%3E)
 
 ### Graphics
 
@@ -97,10 +92,17 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Custom%20Control%20UI">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Custom%20Control%20UI?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md&title=%5BEnabling+Custom+Control+UI%5D+%3CTITLE+HERE%3E)
-* [EyeDropper](EyeDropper/explainer.md) |
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/EyeDropper">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/EyeDropper?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft&labels=EyeDropper&template=eyedropper.md&title=%5BEyeDropper%5D+%3CTITLE+HERE%3E)
+* [`focusgroup` attribute](Focusgroup/explainer.md) ([video overview](https://us02web.zoom.us/rec/play/M9CQws3fPYB6vzKjvjJi6uVgYbzHKZ2L5pWpZ-A_VNUa8SbPiqsZFoGX4TmbgClfIo2RHZdeHxoi3gyN.BJWX3lSoah5ddYDW?continueMode=true&_x_zm_rtaid=vgoo4d78TTmnS6SlqvSKQw.1631896465490.797a543ba5ef0034680f19392aa6a088&_x_zm_rhtaid=706)) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/focusgroup">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/focusgroup?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead&labels=focusgroup&template=focusgroup.md&title=%5Bfocusgroup%5D+%3CTITLE+HERE%3E)
+
+### JavaScript
+
+* [Source Hashes in Stack Traces](DevTools/SourceHash/explainer.md) |
+  <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Source+hash">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Source+hash?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=robpaveza&labels=Source+hash&title=%5BSource+Hashes%5D+%3CTITLE+HERE%3E)
 
 ### Media
 
@@ -130,10 +132,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/ImageResource%20Color%20Scheme">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/ImageResource%20Color%20Scheme?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson&labels=ImageResource+Color+Scheme&template=imageresource-color-scheme.md&title=%5BImageResource+Color+Scheme%5D+%3CTITLE+HERE%3E)
-* [Install Time Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | 
+* [First Run Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Install%20Time%20Permissions">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Install%20Time%20Permissions?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=Install+Time+Permissions&template=install-time-permissions-prompt.md&title=%5BInstall+Time+Permissions+Prompt%5D+%3CTITLE+HERE%3E)
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/First%20Run%20Permissions?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=First+Run+Permissions&template=first-run-permissions-prompt.md&title=%5BFirst+Run+Permissions+Prompt%5D+%3CTITLE+HERE%3E)
 * [Ratings & Reviews Prompt](RatingsAndReviewsPrompt/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Ratings%20and%20Reviews">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Ratings%20and%20Reviews?label=issues)</a> |
@@ -164,7 +166,13 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Foldables">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Foldables?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=boggydigital%2C+dlibby-%2C+zouhir&labels=Foldables&template=web-platform-primitives-for-foldables--css-part-.md&title=%5BCSS+Foldable+Primitives%5D+%3CTITLE+HERE%3E)
+    
+### Web Capabilities
 
+* [Haptics Device API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HapticsDevice%20API">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/HapticsDevice%20API?label=issues)</a> |
+    [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=HapticsDevice+API&template=hapticsdevice-api.md&title=%5BHapticsDevice%5D+Issue)
 
 # Alumni 🎓
 
@@ -177,12 +185,19 @@ standards communities. Thanks for your continued interest!
 
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
+| [Web App Link Handling Manifest Options](https://github.com/WICG/pwa-url-handler/blob/main/handle_links/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-09-28 |
+| [EyeDropper API](https://github.com/WICG/eyedropper-api/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2021-08-03](EyeDropper/explainer.md) |
+| [Virtual Keyboard Policy](https://www.w3.org/TR/virtual-keyboard/) | [W3C Editing Working Group](https://w3c.github.io/editing/) | [2021-07-29](VirtualKeyboardPolicy/explainer.md) |
+| [Masked LARK](https://github.com/WICG/privacy-preserving-ads/blob/main/MaskedLARK.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-07-11 |
+| [Accessible Confirmation of Action](https://wicg.github.io/aom/notification-api.html) | [Web Incubator Community Group](https://wicg.io/) | [2021-06-23](Accessibility/ConfirmationOfAction/explainer.md) |
+| [MACAW](https://github.com/WICG/privacy-preserving-ads/blob/main/MACAW.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-04-07 |
 | [Enabling popups](https://open-ui.org/components/popup.research.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2021-03-22](Popup/explainer.md) |
 | [PARAKEET](https://github.com/WICG/privacy-preserving-ads/blob/main/Parakeet.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-03-04 |
+| [Virtual Keyboard API](https://www.w3.org/TR/virtual-keyboard/) | [W3C Editing Working Group](https://w3c.github.io/editing/) | [2021-03-02](VirtualKeyboardAPI/explainer.md) |
 | [Canvas Formatted Text](https://github.com/WICG/canvas-formatted-text/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-09-23](Canvas/FormattedText.md) |
 | [Window Controls Overlay for Installed Desktop Web Apps](https://github.com/WICG/window-controls-overlay/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-07-08](TitleBarCustomization/explainer.md) |
-| [PWAs as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-05-28](PwaUriHandler/explainer.md) |
-| [EditContext API](https://github.com/w3c/editing/blob/gh-pages/docs/EditContext/explainer.md) | [W3C Editing Task Force](https://w3c.github.io/editing/) | [2020-03-17](EditContext/explainer.md) |
+| [PWAs as URL Handlers](https://github.com/WICG/pwa-url-handler/blob/master/explainer.md) ([updated proposal here](https://github.com/WICG/pwa-url-handler/blob/main/handle_links/explainer.md)) | [Web Incubator Community Group](https://wicg.io/) | [2020-05-28](PwaUriHandler/explainer.md) |
+| [EditContext API](https://github.com/w3c/editing/blob/gh-pages/docs/EditContext/explainer.md) | [W3C Editing Working Group](https://w3c.github.io/editing/) | [2020-03-17](EditContext/explainer.md) |
 | [Bidirectional WebDriver Protocol](https://github.com/w3c/webdriver-bidi/blob/master/explainer.md) | [WebDriver incubator of the W3C Browser Testing and Tools Working Group](https://github.com/w3c/webdriver/blob/master/README.md) | [2020-03-13](WebDriverRPC/webdriver.md) |
 | [Web Ink Enhancement: Delegated Ink Trail Presentation Aided By The OS](https://github.com/WICG/ink-enhancement/blob/master/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-02-27](WebInkEnhancement/explainer.md) |
 | [Window Segments Enumeration API](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md) | [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) | [2020-02-26](Foldables/explainer.md) |
@@ -231,7 +246,7 @@ A collection of explainers documenting platform enhancements (not web
 developer-facing features), implementation designs, and other public documents
 related to the construction of Microsoft Edge.
 
-### Acessibility
+### Accessibility
 
 * [Native Caret Browsing](Accessibility/CaretBrowsing/explainer.md) explainer and [Design Doc](Accessibility/CaretBrowsing/designDoc.md)
 * [Tagged PDFs support](PDF/TaggedPDF/explainer.md) explainer
@@ -261,7 +276,6 @@ related to the construction of Microsoft Edge.
 ### Privacy
 
 * [Auditing Privacy on the Web](WebPrivacyAuditing/explainer.md) a principles document describing our commitment to privacy through the principles of transparency, control, respect, and protection for our users.
-* [Autofill Reauthentication](AutofillReauthentication/explainer.md) explainer
 
 ### Testing & Trials
 

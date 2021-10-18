@@ -63,13 +63,13 @@ The spec itself doesn't have any actual provisions for Server-to-Client messagin
 
 >[RESOLUTION](https://www.w3.org/2019/09/20-webdriver-minutes.html#resolution04): research having a more formalized schema for defining the transport layer
 
-JSON-RPC is also accompanied by the [OpenRPC](https://open-rpc.org/) spec; an interface description format for JSON-RPC APIs that is both human and machine-readable. Using OpenRPC, we can document and describe the entire bidirectional WebDriver API, and also make it simple for clients to generate language bindings and keep them up to date. OpenRPC is recommended over OpenAPI because OpenRPC is designed specifically with JSON-RPC in mind. OpenAPI is designed to specify REST-style APIs, and so isn't as well suited to a JSON-RPC API. The OpenRPC maintainers provide tools to generate human-readable documenation and typings/bindings for various languages.
+JSON-RPC is also accompanied by the [OpenRPC](https://open-rpc.org/) spec; an interface description format for JSON-RPC APIs that is both human and machine-readable. Using OpenRPC, we can document and describe the entire bidirectional WebDriver API, and also make it simple for clients to generate language bindings and keep them up to date. OpenRPC is recommended over OpenAPI because OpenRPC is designed specifically with JSON-RPC in mind. OpenAPI is designed to specify REST-style APIs, and so isn't as well suited to a JSON-RPC API. The OpenRPC maintainers provide tools to generate human-readable documentation and typings/bindings for various languages.
 
 The JSON-RPC spec is transport-agnostic and covers only the message data format. WebSockets are the recommended transport mechanism. They support the full-duplex communication that we'll need for bidirectional WebDriver scenarios, and have broad library support in multiple languages. Adopting a technology other than HTTP and WebSockets is not recommended since this would likely require WebDriver implementers and users to take on new library dependencies on both the client and server sides.
 
 ### High-Level Interface
 
-A simple approach for adding bidirectional communication is to keep using the existing endpoints for command/response calls, and use the WebSocket transport only for browser-to-client notications. This requires the fewest changes to existing WebDriver implementations, but it requires the client to speak both HTTP and WebSocket. Naturally, there will be lots of existing HTTP-based automation that may want to adopt some new bidi features, so WebDriver should at least allow mixing HTTP and WebSocket messages to support this scenario. However, we should offer clients the ability to do everything using the JSON-RPC dialect if they are able.
+A simple approach for adding bidirectional communication is to keep using the existing endpoints for command/response calls, and use the WebSocket transport only for browser-to-client notifications. This requires the fewest changes to existing WebDriver implementations, but it requires the client to speak both HTTP and WebSocket. Naturally, there will be lots of existing HTTP-based automation that may want to adopt some new bidi features, so WebDriver should at least allow mixing HTTP and WebSocket messages to support this scenario. However, we should offer clients the ability to do everything using the JSON-RPC dialect if they are able.
 
 Exposing all of WebDriver's functionality via JSON-RPC has a few advantages. The API is more consistent, the client only needs to speak one dialect, and it is easier to reason about the order or messages when they are all going over the same transport. There may be potential performance advantages too. Multiple JSON-RPC commands may be sent as a batch, compared to HTTP which requires a new HTTP request for every command the client wants to send.
 
@@ -181,7 +181,7 @@ The "protocolVersion" capability may be either "1.0" or "2.0". WebDriver impleme
   }
 ```
 
-Alternatively, we can omit the WebSocket URL from the new session response and just return the protocolVersion instead. The WebSocket endpoint can be documented so that clients know where to connect to. This way, the capability key returned in the reponse will match the one the client actually sent.
+Alternatively, we can omit the WebSocket URL from the new session response and just return the protocolVersion instead. The WebSocket endpoint can be documented so that clients know where to connect to. This way, the capability key returned in the response will match the one the client actually sent.
 
 | Method | URI Template                                       | Command         |
 | -------|----------------------------------------------------|-----------------|

@@ -8,9 +8,9 @@ Authors: [Erica Draud](https://github.com/erdraud)
     
 ## Introduction
 
-[Client Hints](https://wicg.github.io/client-hints-infrastructure/) focus on securely enabling scalable content negotiation between the client and server through a collection of HTTP and user-agent features with a third-party delegation system. A new expansion to the Client Hints API, [User-Agent Client Hints](https://wicg.github.io/ua-client-hints/) enable developers to access information about a user's browser in a privacy-preserving and ergonomic way. The existing debugging experience for these client hints has been described as limited and “super painful” by users. Developers cannot easily modify UA Client Hints through an accessible UI, and currently the platform does not support testing custom UA Client Hints and [UA Strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent) simultaneously, an important use case for developers. People are switching to using Client Hints over Strings as it will greatly improve site compatibility and code hygiene. We’ve gotten [feedback](https://bugs.chromium.org/p/chromium/issues/detail?id=1174299) that limited testing infrastructure is a large friction point in that migration, so we are taking on this work to support developers and to improve our existing UX.  
+[Client Hints](https://wicg.github.io/client-hints-infrastructure/) focus on securely enabling scalable content negotiation between the client and server through a collection of HTTP and user-agent features with a third-party delegation system. A new expansion to the Client Hints API, [User-Agent Client Hints](https://wicg.github.io/ua-client-hints/) enable developers to access information about a user's browser in a privacy-preserving and ergonomic way. The existing debugging experience for these client hints has been described as limited and “super painful” by our internal clients. Developers cannot easily modify UA Client Hints through an accessible UI, and currently the platform does not support testing custom UA Client Hints and [UA Strings](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent) simultaneously, an important use case for developers. This is a high priority for the Web Platform team; they want to encourage people to switch to using Client Hints over Strings as we hypothesize it will greatly improve site compatibility and code hygiene. They’ve gotten feedback that limited testing infrastructure is a large friction point in that migration, so we are taking on this work to support developers and to improve our existing UX.  
 
-While there are many feature requests regarding UA Client Hints, we are focusing on the higher impact items: 
+While there are many feature requests regarding UA Client Hints, the Web Platform and our team have worked together to focus on the higher impact items: 
 
 - Address a high-impact bug: UA Client Hint headers are disappearing when custom UA strings are sent 
 
@@ -76,13 +76,14 @@ A: No
 
 A: The list in the device emulation view is the complete set of UA Client Hints
 
-**Q: Are all the hint inputs currently required because HTTP needs to be send with all of the header items?**
+**Q: Are all the hint inputs currently required because HTTP needs to be sent with all of the header items?**
 
 A: No, it's fine if some of the headers are undefined.
 
 **Q: For emulated devices (not the current device), where would auto-fill pull from?**
 
-A: For *emulated devices that are built-in*, ideally there would be an auto-mapping of characteristics. For examplke, an Android phone would use the same UA brands list as on desktop, but it would need a hardcoded value for model info (e.g. the UA string baked into DevTools might have been “Nexus 5 Build/MRA58N” but would now need to report a similar string in the Sec-CH-UA-Model hint. For iPhone emulation, it would ideally drop all of the hints by default since UA Client Hints aren’t available for iPhone at all.
+A: For *emulated devices that are built-in*, ideally there would be an auto-mapping of characteristics. For example, an Android phone would use the same UA brands list as on desktop, but it would need a hardcoded value for model info (e.g. the UA string baked into DevTools might have been “Nexus 5 Build/MRA58N” but would now need to report a similar string in the Sec-CH-UA-Model hint). For iPhone emulation, it would ideally drop all of the hints by default since UA Client Hints aren’t available for iPhone at all.
+
 For a *custom device* (or an edited one…), ideally an empty string for one of the UA Clients Hints fields would map to “send whatever the browser would have done otherwise”. 
 
 **Q: Do we need to add default client hints to the existing emulation library for this or for future use cases?**

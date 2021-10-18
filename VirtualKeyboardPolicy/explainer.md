@@ -4,9 +4,9 @@
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
-* This document status: **Active**
-* Expected venue: [W3C Editing Task Force](https://w3c.github.io/editing/) 
-* Current version: this document
+* This document status: **`ARCHIVED`**
+* Current venue: [W3C Editing Working Group](https://w3c.github.io/editing/)
+* Current version: https://www.w3.org/TR/virtual-keyboard/
 
 ## Introduction
 The Virtual Keyboard (VK) is the on-screen keyboard used for input in scenarios where a hardware keyboard may not be available. Unlike a hardware keyboard, a VK can adapt its shape to optimize for the expected type of input.  
@@ -149,7 +149,7 @@ The reason this wasn’t pursued is that showing and hiding the VK through an at
 ## Privacy Considerations
 No considerable privacy concerns are expected for the following reasons:
 
-* No information about an user is being shared with web authors. The API only controls what should happen to the virtual keyboard followed by the user action.
+* No information about a user is being shared with web authors. The API only controls what should happen to the virtual keyboard followed by the user action.
 
 ## Security/Quality/Abuse/Experience Considerations
 * Authors can already manipulate whether the keyboard is hiding or showing through focusing and blurring editable elements. No new authority is granted with this API, we are only separating virtual keyboard layout from visibility to enable new scenarios.

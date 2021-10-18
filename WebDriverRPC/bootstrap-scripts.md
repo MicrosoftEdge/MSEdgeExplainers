@@ -28,7 +28,7 @@ The [bidirectional WebDriver protocol](webdriver.md) defines 3 types of script c
 
 The main purpose of a bootstrap script is to run before any other scripts in the same script context. To do anything with a script context, the WebDriver client normally needs to know its ID. The WebDriver client first learns of a context's ID through a scriptContextCreated event. However, due to the asynchronous nature of events, it is possible (and even likely) that this context will start running script before the WebDriver client has a chance to inject a bootstrap script. Therefore, the WebDriver client needs some way to register a bootstrap script to run in a script context before it even knows the script context's ID.
 
-A solution would be to not use IDs at all, but to use match patterns. Instead of the client stating "Run this bootstrap script on scriptContext #4" (which is impractical for the reason stated above), the client would say "Run this bootstrap script on all script contexts belonging to example.com" or "Run this bootstrap script for service workers runing example.com/sw.js". This is similar in principle to setting a conditional breakpoint. The client declares where they want the bootstrap script to run, and the browser will check every new script context to see if it matches the user's conditions. Here's what the API call to register a bootstrap script would look like:
+A solution would be to not use IDs at all, but to use match patterns. Instead of the client stating "Run this bootstrap script on scriptContext #4" (which is impractical for the reason stated above), the client would say "Run this bootstrap script on all script contexts belonging to example.com" or "Run this bootstrap script for service workers running example.com/sw.js". This is similar in principle to setting a conditional breakpoint. The client declares where they want the bootstrap script to run, and the browser will check every new script context to see if it matches the user's conditions. Here's what the API call to register a bootstrap script would look like:
 
 ```javascript
 {
@@ -44,7 +44,7 @@ A solution would be to not use IDs at all, but to use match patterns. Instead of
 }
 ```
 
-The "match" parameter is an array of rules describing which contexts a script should execute in and the "script" parameter is the JS script to run. When this API is called, the script text is persisted on the WebDriver server. Whenever a new script context is created, the server checks if the script context matches any of the given rules, and if so, it executes the bootstrap script in that context. In the above example, the client is registering some script to run on "document" script contexts that belong to a browsing context who's URL matches "http://example.com/*". The API returns a unique identifier for the registration:
+The "match" parameter is an array of rules describing which contexts a script should execute in and the "script" parameter is the JS script to run. When this API is called, the script text is persisted on the WebDriver server. Whenever a new script context is created, the server checks if the script context matches any of the given rules, and if so, it executes the bootstrap script in that context. In the above example, the client is registering some script to run on "document" script contexts that belong to a browsing context whose URL matches "http://example.com/*". The API returns a unique identifier for the registration:
 
 ```javascript
 {
@@ -165,7 +165,7 @@ function myBootstrapScript(port) {
 
 The browser would call the function, passing in a MessagePort object. This would scope the port variable so that it is only visible inside the function. Of course, the user could proceed to expose the port to the page somehow, but this would at least be an explicit choice by the user.
 
-Another option is to avoid running bootstraps scripts in the same context as page script, and run them in some kind of "isolated" context instead; Something similar to a WebExtension [content script](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts#Content_script_environment), which has access to a clean version of the DOM, but has its own global scope. This would make it possible to expose the MessortPort (and possibly other priviledged APIs) to the bootstrap script as globals. However, this kind of functionality may not be available in all browsers and doesn't appear to be standardized outside of WebExtensions. This also makes it difficult for the bootstrap script to manipulate the page's view of the DOM, which could be a useful feature.
+Another option is to avoid running bootstraps scripts in the same context as page script, and run them in some kind of "isolated" context instead; Something similar to a WebExtension [content script](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts#Content_script_environment), which has access to a clean version of the DOM, but has its own global scope. This would make it possible to expose the MessortPort (and possibly other privileged APIs) to the bootstrap script as globals. However, this kind of functionality may not be available in all browsers and doesn't appear to be standardized outside of WebExtensions. This also makes it difficult for the bootstrap script to manipulate the page's view of the DOM, which could be a useful feature.
 
 ## Examples
 
@@ -173,7 +173,7 @@ Below are some end-to-end WebDriver example using bootstrap scripts with messagi
 
 ### Record navigation performance
 
-This example creates a PerformanceObserver before a page starts loading, and uses the message port to continuosly send performance entries to the WebDriver client as they happen.
+This example creates a PerformanceObserver before a page starts loading, and uses the message port to continuously send performance entries to the WebDriver client as they happen.
 
 ```javascript
 // Bootstrap strip that observes navigation performance entries and forwards them to the client.
@@ -260,7 +260,7 @@ try {
 
 ### Intercept console.log calls
 
-This example wraps the page's console.log method with a custom method that sends the arguments up to the client and then forwards to the original console.log method. Note that this is not a complete solution for adding logging to bidi WebDriver since it covers only console.log calls from JS and ignores other sources of console messages. Logging deserves its own set of new WebDriver APIs. However, this example is useful to illustrate how bootstap scripts empower users to add at least some of this functionality to WebDriver themselves.
+This example wraps the page's console.log method with a custom method that sends the arguments up to the client and then forwards to the original console.log method. Note that this is not a complete solution for adding logging to bidi WebDriver since it covers only console.log calls from JS and ignores other sources of console messages. Logging deserves its own set of new WebDriver APIs. However, this example is useful to illustrate how bootstrap scripts empower users to add at least some of this functionality to WebDriver themselves.
 
 ```javascript
 function bootstrapFunc(port) {

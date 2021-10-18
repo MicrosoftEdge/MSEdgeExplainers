@@ -48,7 +48,7 @@ The kCaretBrowsingEnabled preference is registered with a [PrefChangeRegistrar](
 
 The confirmation dialog that is shown when you press F7 is implemented by a new CaretBrowsingDialogDelegate class. The class inherits from a [DialogDelegateView](https://cs.chromium.org/chromium/src/ui/views/window/dialog_delegate.h?sq=package:chromium&g=0&l=178) class and overrides the methods it needs in order to provide the correct strings and functionality. The strings for the dialog are defined in [generated_resources.grd](https://cs.chromium.org/chromium/src/chrome/app/generated_resources.grd?q=generated_resources.grd&dr). A ShowCaretBrowsingDialog method is added to the [BrowserWindow](https://cs.chromium.org/chromium/src/chrome/browser/ui/browser_window.h?type=cs&q=+BrowserWindow&g=0&l=100) interface, which is implemented by [BrowserView](https://cs.chromium.org/chromium/src/chrome/browser/ui/views/frame/browser_view.h?type=cs&q=BrowserView&g=0&l=99). This method calls a static method of CaretBrowsingDialogDelegate to show the dialog. (A stub implementation of ShowCaretBrowsingDialog is also added to [TestBrowserWindow](https://cs.chromium.org/chromium/src/chrome/test/base/test_browser_window.h?type=cs&q=TestBrowserWindow&g=0&l=36).)
 
-### The caret browsing experimental feature flag chrome://flags)
+### The caret browsing experimental feature flag (chrome://flags)
 
 There is a "caret-browsing" experimental feature flag that determines if pressing F7 is ignored by the browser or if F7 starts the "toggle caret browsing mode" flow.
 

@@ -188,7 +188,7 @@ content that changed.
 
 To render one line at a time, we need to introduce a few additional objects and concepts.
 First of all, we need to be able to indicate what portion of the aggregate `CanvasFormattedText`
-text runs we need to render on each separate line, and we need to be able to specify a maxium
+text runs we need to render on each separate line, and we need to be able to specify a maximum
 width to render them into (which can change from line to line). The API is designed to allow
 an iterative approach to line rendering, but is also flexible enough to allow for many other
 scenarios.
@@ -205,7 +205,7 @@ components:
     position object belongs.
 2. `textRunIndex` - required number - the index of a text run object contained by the
     `CanvasFormattedText` (e.g., the object associated with the text run "the quick " in
-    the example above.
+    the example above).
 3. `textRunOffset` - required number - the offset into the text run value itself. For example:
     a `2` would indicate a position starting at the "e" in the string "the quick".
 
@@ -254,7 +254,7 @@ while ( startPosition ) {
 }
 ```
 
-We can use this additional flexibility to adjust each line's width and position to accomodate
+We can use this additional flexibility to adjust each line's width and position to accommodate
 any other objects being presented to the canvas. In this example, we adjust the lines to wrap
 around an image.
 
@@ -448,7 +448,7 @@ redraw the same text content for a changing available width.
 
 ## Accessibility Considerations
 
-Making the Canvas accessible is a persistant challenge for the web today. Several
+Making the Canvas accessible is a persistent challenge for the web today. Several
 efforts are underway, including a
 [promising solution](https://github.com/WICG/aom/blob/gh-pages/explainer.md#use-case-4-adding-non-dom-nodes-virtual-nodes-to-the-accessibility-tree)
 as part of the Accessible Object Model (AOM) family of proposals.
