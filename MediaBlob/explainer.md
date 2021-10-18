@@ -25,7 +25,7 @@ The final approach, allows you to avoid needing to download a large file or send
 
 This API is a starting point to enable video editing on the client that not only enables the capabilities listed above without the need to handle all of above overhead for the most common web based video editing scenarios. 
 
-We have worked with [Flipgrid](www.flipgrid.com) to validate that this approach tackles their video editing needs and significantly improves their user experience.
+We have worked with [Flipgrid](https://www.flipgrid.com) to validate that this approach tackles their video editing needs and significantly improves their user experience.
 
 ## Proposed Solution
 

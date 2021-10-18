@@ -149,7 +149,7 @@ The reason this wasn’t pursued is that showing and hiding the VK through an at
 ## Privacy Considerations
 No considerable privacy concerns are expected for the following reasons:
 
-* No information about an user is being shared with web authors. The API only controls what should happen to the virtual keyboard followed by the user action.
+* No information about a user is being shared with web authors. The API only controls what should happen to the virtual keyboard followed by the user action.
 
 ## Security/Quality/Abuse/Experience Considerations
 * Authors can already manipulate whether the keyboard is hiding or showing through focusing and blurring editable elements. No new authority is granted with this API, we are only separating virtual keyboard layout from visibility to enable new scenarios.

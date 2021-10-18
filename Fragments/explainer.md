@@ -80,7 +80,7 @@ CSS currently supports the `:target` pseudo-class selector, which may seem appli
 * What happens if the text contains a `#` (e.g., a hashtag)?
 * Does [generated content](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Generated_Content) get factored in?
 * Do things like text transformation, bi-directional, and mixed language modes cause issues for in-page search?
-* What are the exepectations around how URL encoding/decoding is handled (e.g., `%20` for space)?
+* What are the expectations around how URL encoding/decoding is handled (e.g., `%20` for space)?
 ---
 
 ## Appendix A: Document or Client?
@@ -112,7 +112,7 @@ There has been some discussion over whether white space should be represented as
 
 ## Appendix C: Related Ideas & Implementations
 
-* [Chrome Extention](https://chrome.google.com/webstore/detail/fragmentions/pgajkeekgcmgglngchhmcmnkffnhihck)
+* [Chrome Extension](https://chrome.google.com/webstore/detail/fragmentions/pgajkeekgcmgglngchhmcmnkffnhihck)
 * [JS implementation](https://github.com/chapmanu/fragmentions)
 * WordPress plugins: [wp-fragmention](https://christiaanconover.com/code/wp-fragmention) & [Fragmentions](https://github.com/goblindegook/Fragmentions/)
 * [Drupal Plugin](https://drupal.org/sandbox/ocean/2247743)

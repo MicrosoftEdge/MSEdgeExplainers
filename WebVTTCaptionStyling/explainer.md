@@ -52,8 +52,8 @@ struct NATIVE_THEME_EXPORT CaptionStyle {
   std::string window_radius;  // macOS only
 };
 ```
-3.	We add a OS specific implementations for CaptionStyle::FromSystemSettings(). For Windows 10, we added this in caption_style_win.cc.
-4.	We use system APIs to get caption styling property values that the user set. For Windows 10 we do this using the ClosedCaptionProperties class. This class became available starting with the intial release of Windows 10. For Windows versions previous to that, we return std::nullopt.
+3.	We add an OS specific implementations for CaptionStyle::FromSystemSettings(). For Windows 10, we added this in caption_style_win.cc.
+4.	We use system APIs to get caption styling property values that the user set. For Windows 10 we do this using the ClosedCaptionProperties class. This class became available starting with the initial release of Windows 10. For Windows versions previous to that, we return std::nullopt.
 5.	We map the returned non-Default property values to their equivalent CSS Strings and set these in the CaptionStyle struct. We then return the now populated CaptionStyle.
 ```C++
 if (background_color != ClosedCaptionColor_Default) {

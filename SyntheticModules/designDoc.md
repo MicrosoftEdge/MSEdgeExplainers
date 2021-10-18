@@ -6,7 +6,7 @@ daniec@microsoft.com, sasebree@microsoft.com, travil@microsoft.com, pcupp@micros
 
 ## Introduction
 
-The following document proposes an implementation of [Synthetic Module Records](https://heycam.github.io/webidl/#synthetic-module-records) (originally propsed by [here](https://github.com/tc39/proposal-javascript-standard-library/pull/44) by Domenic) in Chromium.  Also proposed is an implementation of [CSS Modules](https://github.com/w3c/webcomponents/issues/759) and [JSON Modules](https://github.com/whatwg/html/pull/4407) using Synthetic Module Records.  It is expected that Synthetic Module Record will be used to support additional future module types as well, e.g. [WebIDL Modules](https://github.com/heycam/webidl/pull/675).
+The following document proposes an implementation of [Synthetic Module Records](https://heycam.github.io/webidl/#synthetic-module-records) (originally proposed by [here](https://github.com/tc39/proposal-javascript-standard-library/pull/44) by Domenic) in Chromium.  Also proposed is an implementation of [CSS Modules](https://github.com/w3c/webcomponents/issues/759) and [JSON Modules](https://github.com/whatwg/html/pull/4407) using Synthetic Module Records.  It is expected that Synthetic Module Record will be used to support additional future module types as well, e.g. [WebIDL Modules](https://github.com/heycam/webidl/pull/675).
 
 At a high level, the changes are:
 - Introduce a `SyntheticModule` type in V8 to implement Synthetic Module Records in the ES module graph.
@@ -131,7 +131,7 @@ Handle<SyntheticModule> Factory::NewSyntheticModule(
 1. Look up the cell for the export name in the `Module::exports` `ObjectHashTable` and return it if it exists.
 1. If no such entry exists and `must_resolve` is true, call `Factory::NewSyntaxError()`.
 
-Resolution of namespace imports (`import * from "./my-synthetic-module"`), will work the same as for `JSModule`s with the the exception that `FetchStarExports` will now early-return if its `module` parameter is a `SyntheticModule`, as these have no requested modules and no star exports.
+Resolution of namespace imports (`import * from "./my-synthetic-module"`), will work the same as for `JSModule`s with the exception that `FetchStarExports` will now early-return if its `module` parameter is a `SyntheticModule`, as these have no requested modules and no star exports.
 
 ### Open question: should each SyntheticModule have a corresponding Context object?
 

@@ -54,10 +54,10 @@ pre-existing issues with the feature make it a challenge to use effectively:
   getting a more uniform experience.
 
 * Multiple live regions in use at a time introduce timing and precedence concerns
-  for which content authors have limited control (e.g., `polite` and `assertive`
+  for which content authors have limited control (e.g., `polite` and `assertive`)
   set basic expectations around precedence of announcements, but offer little
   in the way of expressing timing (apart from the moment the change is made), or 
-  other controlling factors like interruptability.
+  other controlling factors like interruptibility.
 
 * Live regions are built around the assumption that a _visual_ change needs to be
   announced, hence they are tightly coupled with DOM nodes. Many changes important
@@ -66,7 +66,7 @@ pre-existing issues with the feature make it a challenge to use effectively:
   these cases there is no surrounding context (an important consideration for many
   screen readers), nor any presentation to show. Worse yet, since these "live region
   hacks" do not play a role in the normal presentation flow of the content, they 
-  are usually ommitted for performance reasons until it is determined that a 
+  are usually omitted for performance reasons until it is determined that a 
   particular user needs an "accessible version" of the site (or by heuristically 
   trying to detect this--which is not a recommended practice). Accessibility should
   be designed into the experience from the start, and not bolted-on as an extra or
@@ -186,7 +186,7 @@ document.ariaNotify( "Text copied to clipboard.", { label: "clipboard" } );
 ```
 
 The label is used to group or categorize similar notifications. Assistive technology may
-chose to use these labels to provide a filtering mechanism for users.
+choose to use these labels to provide a filtering mechanism for users.
 
 Other means of expressing priority and coalescing behavior for similarly-labelled 
 notifications may be defined.
@@ -214,7 +214,7 @@ of platforms and assistive technologies on the web.
 #### Only plain text as input?
 
 Should the API allow for richer formatted text? Formatted text could provide hints 
-for expressiveness and pronounciation (TTML and WebVTT are potential candidates).
+for expressiveness and pronunciation (TTML and WebVTT are potential candidates).
 
 What about supporting non-textual cues? We think other platform capabilities (like 
 `<audio>.play()`) can be used to handle non-textual output, and that non-textual
@@ -242,7 +242,7 @@ languages).
 
 #### Catering to verbosity preferences?
 
-It may useful to enable authors to offer multiple levels of verbosity for a
+It may be useful to enable authors to offer multiple levels of verbosity for a
 notification depending on how a user has configured their AT. For example, if ATs
 are configured for minimal output, perhaps a single word could additionally be
 provided that generalizes the full text of the notification.
@@ -275,7 +275,7 @@ avoid the risk of denial-of-service type attacks on ATs through this API.
 
 1. **Readback.** Any readback of configuration settings for an AT via an API have the
     potential of exposing a connected (vs. not connected) AT, and as such is an easy
-    target for fingerprinting AT users, an undesireable outcome. Similarly, confirmation
+    target for fingerprinting AT users, an undesirable outcome. Similarly, confirmation
     of notifications (such as via a fulfilled promise) have similar traits and are
     avoided in this proposal.
 2. **Authoritative-sounding notifications.** Announcements could be crafted to deceive

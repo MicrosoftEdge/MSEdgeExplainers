@@ -23,7 +23,7 @@ All of these considerations point to a need for some form of bulk permission req
 
 ## Goals
 
-* Establish a mechanism by which developers can declare the sensitive APIs or enhanced permissions they would like to to use in order to prompt users for these permissions during install.
+* Establish a mechanism by which developers can declare the sensitive APIs or enhanced permissions they would like to use in order to prompt users for these permissions during install.
 
 ## Non-goals
 
@@ -93,7 +93,7 @@ An implementor could choose to present these permissions within the installation
 
 ## Interplay with Enterprise Policies
 
-If the implementor supports use of some form of enterprise-level permissions policy (e.g., forbidding certain permissions for all apps or automatically granting specific permissions to individual apps), they may modify the display of the enumaerated permissions shown during install. If the policy enforces a specific setting globally or for a specific app, the toggle control should be disabled and the implementor should include some language to the effect of "This permission is controlled by your organization."
+If the implementor supports use of some form of enterprise-level permissions policy (e.g., forbidding certain permissions for all apps or automatically granting specific permissions to individual apps), they may modify the display of the enumerated permissions shown during install. If the policy enforces a specific setting globally or for a specific app, the toggle control should be disabled and the implementor should include some language to the effect of "This permission is controlled by your organization."
 
 ## Open Questions
 

@@ -41,7 +41,7 @@ The transition into eyedropper mode should require [consumable user activation](
 ## Solution
 The API will enable web developers to incorporate an eyedropper in their web applications. The eyedropper would allow the developer to access the hex value (of the form `#RRGGBB`) of a user specified pixel.
 
-Since the representation of color on the web is in transition and the [Color on the Web Community Group](https://w3c.github.io/ColorWeb-CG) is already working on better representing colors, to avoid competing with other effors this API will initially provide a single color string which is gamut mapped to the sRGB color space. It is expected that a color object will be the primary mechanism by which authors will access sampled color data in the future and that it will have the facilities to map between color spaces.
+Since the representation of color on the web is in transition and the [Color on the Web Community Group](https://w3c.github.io/ColorWeb-CG) is already working on better representing colors, to avoid competing with other efforts this API will initially provide a single color string which is gamut mapped to the sRGB color space. It is expected that a color object will be the primary mechanism by which authors will access sampled color data in the future and that it will have the facilities to map between color spaces.
 
 ### Web IDL
 ```
@@ -59,7 +59,7 @@ interface EyeDropper {
 
 The `open` method places the web page into an "eyedropper mode" where user input is suppressed: no UI events are dispatched to the web page.
 
-The `open` method returns a `Promise` which resolves if the user has succesfully selected a color based on existing onscreen colors and rejects otherwise to facilitate any scenario where the user has exited the "eyedropper mode" without selecting a color.
+The `open` method returns a `Promise` which resolves if the user has successfully selected a color based on existing onscreen colors and rejects otherwise to facilitate any scenario where the user has exited the "eyedropper mode" without selecting a color.
 
 The `ColorSelectionResult` contains the result of calling `open()`. It contains one member, `sRGBHex`, which is a 6-digit hex value representing the red, green and blue color components of the selected color in the form: `#RRGGBB`.
 

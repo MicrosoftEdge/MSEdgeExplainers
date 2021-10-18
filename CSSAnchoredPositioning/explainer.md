@@ -514,7 +514,7 @@ First, properties affecting the inline direction of the margin box would be adju
 * `padding-left`, `padding-right`, `padding-inline-start`, `padding-inline-end`
 * `border-left`, `border-right`, `border-inline-start`, `border-inline-end`
 
-In the example above, the first set of author-specified properties having an affect on the inline margin box size would be:
+In the example above, the first set of author-specified properties having an effect on the inline margin box size would be:
 
 ```css
     #my-popup {
@@ -615,7 +615,7 @@ A conceivable alternative is to impose restrictions on which elements can serve 
 
 ### Should the user agent provide a default repositioning scheme?
 
-Such an algorithm would need to be predictible, straightforward to implement for interoperability, and simple to understand in lay terms. As an example, UAs could mirror edge positions (e.g. a popup's top-left corner pinned to the anchor's bottom-left => top-right corner pinned to bottom-right) and nudge center positions (e.g. a popup with its top-center pinned will be nudged just enough pixels horizontally in order to stay in the viewport). Should authors need to a lightweight opt-in for default repositioning logic?
+Such an algorithm would need to be predictable, straightforward to implement for interoperability, and simple to understand in lay terms. As an example, UAs could mirror edge positions (e.g. a popup's top-left corner pinned to the anchor's bottom-left => top-right corner pinned to bottom-right) and nudge center positions (e.g. a popup with its top-center pinned will be nudged just enough pixels horizontally in order to stay in the viewport). Should authors need to a lightweight opt-in for default repositioning logic?
 
 ### How could we better support directionally-aware styles?
 

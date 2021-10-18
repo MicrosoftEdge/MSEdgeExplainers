@@ -46,7 +46,7 @@ No
 
 The feature may show or not show UI relating to changelogs being available or not available.
 
-> 12. What temporary identifiers might this this specification create or expose to the web?
+> 12. What temporary identifiers might this specification create or expose to the web?
 
 N/A
 

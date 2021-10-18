@@ -97,7 +97,7 @@ This API is responsible for handling focus change related messages when the acti
  
 ## Event Flow:
 ### Browser-Renderer process communication:
-![browser_renderer_comm](browser_renderer_comm.png)
+![browser_renderer_comm](browser_renderer_comm.PNG)
 
 1. HWNDMessageHandler gets the WM_HOTKEY message from the WndProc.
 
@@ -111,7 +111,7 @@ RenderWidgetHostViewAura receives this new PenButtonEvent and forwards it to the
 RenderWidgetHostImpl receives this event and IPCs this message to renderer process via input router
  
 ### Renderer-Browser process communication:
-![browser_renderer_comm](renderer_browser_comm.png)
+![browser_renderer_comm](renderer_browser_comm.PNG)
 
 
 1. WidgetInputHandler receives the IPC message from the browser process and posts it to the main thread to be processed by the RenderWidget.

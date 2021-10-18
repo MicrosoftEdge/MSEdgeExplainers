@@ -47,7 +47,7 @@ No.
 
 No.
 
-### 2.12. What temporary identifiers might this this specification create or expose to the web?
+### 2.12. What temporary identifiers might this specification create or expose to the web?
 
 None.
 

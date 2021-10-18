@@ -7,7 +7,7 @@ Sample caret browsing experience in Microsoft Edge on Wikipedia:
 ![Visual sample of using caret browsing to explore Wikipedia front page](CB_Example.gif)
 
 ### Current problems:
-Today Chromium users can download Caret Browsing extension from the Chrome Web Store. The are two problems with this approach:
+Today Chromium users can download Caret Browsing extension from the Chrome Web Store. There are two problems with this approach:
 
 * Extensions might be blocked in a work environment due to enterprise policies. See [Issue 611798] (https://crbug.com/611798);
 * Extensions might not be available in "Incognito" tabs, or when Guest profile is used;
@@ -27,7 +27,7 @@ Native caret browsing doesn't aim to replace extensions, they would continue to 
 ## Solution:
 The solution proposed in this explainer is to introduce native caret browsing in Chromium, a feature that is available in Mozilla Firefox, Microsoft Edge and Internet Explorer.
 
-In order to do that we suggest to implement a current common activation shortcut: F7 and confirm caret browsing activation with a dialog.
+In order to do that we suggest implementing a current common activation shortcut: F7 and confirm caret browsing activation with a dialog.
 
 Caret browsing activation confirmation in Microsoft Edge:
 ![Microsoft Edge browser dialog that asks user to confirm enabling caret browsing and allow to set the preference to never ask again in the future](edgeCaretBrosingPrompt.png)

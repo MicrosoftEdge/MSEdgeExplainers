@@ -85,7 +85,7 @@ The following is an overview of the algorithms for HTMLModule instantiation, eva
 
 - **Module Execution:** HTMLModule will implement a modified version of [InnerModuleEvaluation](https://html.spec.whatwg.org/#fetch-the-descendants-of-a-module-script)(*module*, *stack*, *index*).  For ScriptModules, the idea of this method is to recurse for each child module, then execute the JS of the current module.  HTMLModules don't have any code of their own to execute -- instead, they just recurse into their RequestedModules (i.e., the `<script>` elements in the module's HTMLDocument).  In spec language, the algorithm has the following changes from the ScriptModule version:
   - Change step 10 and step 10a to be the following, to account for the different structure of HTMLModule vs ScriptModule.  Steps 10b-10f remain the same:
-    - 10\. For each HTMLModuleScriptEntry *se* in *module*.[[RequestedModules]]), do:
+    - 10\. For each HTMLModuleScriptEntry *se* in *module*.[[RequestedModules]], do:
       - a\. If (*se*.[[IsInline]] == true), let *requiredModule* be *se*.[[ModuleRecord]], else let *requiredModule* be HostResolveImportedModule(*module*, *se*.[[SourceName]])
    - Omit step 11 (since the HTML module doesn’t have any JS code of its own to run; it only recurses to run the code of its requested modules per step 10).
 

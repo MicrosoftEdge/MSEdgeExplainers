@@ -44,7 +44,7 @@ Similarly, on Windows, if High Contrast is not enabled, we match `(prefers-contr
 
 ## Design considerations 
 
-`prefers-contrast` had initially been designed to support three values: `high`, `low`, and `no-preference`. However, these values [failed to properly capture Increased Contrast Mode](https://github.com/w3c/csswg-drafts/issues/2943) on macOS and iOS. More specifically, Increased Contrast is different from Window’s High Contrast Mode in that the result is not a true “high” contrast, but an intermediary “increased” contrast state. To encompass the varying OS settings, the values of `high` and `low` were update to a more general `more` and `less`. 
+`prefers-contrast` had initially been designed to support three values: `high`, `low`, and `no-preference`. However, these values [failed to properly capture Increased Contrast Mode](https://github.com/w3c/csswg-drafts/issues/2943) on macOS and iOS. More specifically, Increased Contrast is different from Window’s High Contrast Mode in that the result is not a true “high” contrast, but an intermediary “increased” contrast state. To encompass the varying OS settings, the values of `high` and `low` were updated to a more general `more` and `less`. 
 
 This three-value design, however, was flagged as potentially problematic for Forced Colors Mode users that have a color scheme with contrast ratios which are not considered particularly high or low. More specifically, if an author were to apply styles using the `prefers-contrast` boolean context to, for example, reduce visual complexity for all users with a contrast preference, any user whose Forced Color Scheme did not match `more` or `less` would fail to see these updated styles. 
 

@@ -115,7 +115,7 @@ It should be noted that a user agent MUST present the time-limiting permissions 
 
 For the purposes of time-limiting permissions, a session is a top-level browsing context (inclusive of all current browsing context that share an origin). When a new `Document` is created in a browsing context which has a top-level browsing context, the user agent must validate any permission usage against the top-level browsing context for that document's origin. Any permissions granted in that top-level browsing context are inherited by the new Document.
 
-A session ends when the top-level browsing context is destroyed. To account for crashes and similar events that may artificially cause a top-level browssing context to be destroyed, user agents should persist any permissions granted for a session for no less than 5 minutes. At the conclusion of that time period, all permissions granted for that session should be revoked by setting the permission `state` to "expired".
+A session ends when the top-level browsing context is destroyed. To account for crashes and similar events that may artificially cause a top-level browsing context to be destroyed, user agents should persist any permissions granted for a session for no less than 5 minutes. At the conclusion of that time period, all permissions granted for that session should be revoked by setting the permission `state` to "expired".
 
 ## Abiding by the time limit
 
@@ -129,7 +129,7 @@ In order to help user agents understand the implications of the various duration
 
 ## What to do with existing permissions
 
-Any permissions granted or denited prior to implementation of this API would remain as-is. A User Agent may choose to prompt users to audit their permissions if they know permissions have been granted by a user prior to this API becomign available.
+Any permissions granted or denied prior to implementation of this API would remain as-is. A User Agent may choose to prompt users to audit their permissions if they know permissions have been granted by a user prior to this API becoming available.
 
 ## Open Questions
 

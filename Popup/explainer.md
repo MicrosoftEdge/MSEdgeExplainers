@@ -194,7 +194,7 @@ We will soon make an additional proposal for a CSS anchored positioning scheme, 
 </popup>
 ```
 
-Note: for many `popup`s, the element which invokes the `popup` and the element the `popup` is anchored to will be one and the same. However, there are cases where the author may want to anchor to a child/parent of the element which invoked the popup. Similiarly, there are cases (such as this teaching UI example) where no such invoking element exists. Therefore, we do not propose collapsing invocation and anchoring responsibilities to one attribute, as they are distinct responsibilities. In cases where the `anchor` attribute is unset, but there is an associated invoking element, we could explore treating this as the anchor element. There would be complexities to think through if more than one element is associated to a `popup` via the `popup` attribute, or if the `anchor` association causes reordering of trees (refer to [Open Questions](#open-questions)).
+Note: for many `popup`s, the element which invokes the `popup` and the element the `popup` is anchored to will be one and the same. However, there are cases where the author may want to anchor to a child/parent of the element which invoked the popup. Similarly, there are cases (such as this teaching UI example) where no such invoking element exists. Therefore, we do not propose collapsing invocation and anchoring responsibilities to one attribute, as they are distinct responsibilities. In cases where the `anchor` attribute is unset, but there is an associated invoking element, we could explore treating this as the anchor element. There would be complexities to think through if more than one element is associated to a `popup` via the `popup` attribute, or if the `anchor` association causes reordering of trees (refer to [Open Questions](#open-questions)).
 
 ### Dismissing the `popup`
 
@@ -308,7 +308,7 @@ Freedom over the size and position of a `popup` could enable an author to spoof 
 ## Alternate Solutions Considered
 
 * **Extending the `dialog` element** with `popup`-specific methods and new options. This option wasn't pursued because it would result in a “mashed-up” API surface and collection of behaviors that seem better separate than together. Here are some examples of the semantic differences between the two elements to illustrate the point: 
-    * `popup`s have lightweight UI that dismises automatically when the user interacts with other UI, or when a task is completed within the `popup` (such as selecting an option).  
+    * `popup`s have lightweight UI that dismisses automatically when the user interacts with other UI, or when a task is completed within the `popup` (such as selecting an option).  
     * `dialogs` are more persistent and are generally dismissed explicitly by the user.
     * Only one `popup` can be shown at a time.
     * More than one `dialog` can be presented at a time.  

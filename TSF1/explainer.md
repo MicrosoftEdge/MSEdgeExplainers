@@ -10,7 +10,7 @@ Not all apps on Windows get these services by default. Apps built on top of lega
 
 As it stands today, users of Chromium-based browsers are not able to take advantage of the text intelligence services that TSF provides today. The sample below showcases just one example where suggestions and shapewriting features are available in the existing version of Microsoft Edge (left) and not available to Chrome (right).
 
-![Visual representation of text intelligence services being available in Microsoft Edge and not availabe Google Chrome, when using on-screen keyboard in Windows 10](Edge_Chrome_SIP.gif)
+![Visual representation of text intelligence services being available in Microsoft Edge and not available Google Chrome, when using on-screen keyboard in Windows 10](Edge_Chrome_SIP.gif)
 
 ## Proposal:
 
@@ -26,7 +26,7 @@ This proposal is not planning on addressing on-screen keyboard issues on platfor
 
 ## Solution:
 
-We would like to improve Chromium text input on Windows by adding support for TSF 1.0. This would enable text intelligence services and enable input methods, already supported on Windows to Chromium. We identified a work in progress [crbug.com/657623](https://bugs.chromium.org/p/chromium/issues/detail?id=657623) and we beleive that the work there is aligned with our proposal.
+We would like to improve Chromium text input on Windows by adding support for TSF 1.0. This would enable text intelligence services and enable input methods, already supported on Windows to Chromium. We identified a work in progress [crbug.com/657623](https://bugs.chromium.org/p/chromium/issues/detail?id=657623) and we believe that the work there is aligned with our proposal.
 TSF 1.0 is available starting with Windows 7 and should cover most current Windows releases that are still in use.
 
 ## Alternatives considered:

@@ -44,7 +44,7 @@ No. We only support same origin Task URLs. Shortcuts are parsed per the algorith
 
 Yes. This integrates into the OS's Shortcuts menu/Jumplist. Any correctly formatted shortcuts' name and icon will show up in the Jumplist. Clicking on the link navigates to the target page.
 
-### 2.12 What temporary identifiers might this this specification create or expose to the web?
+### 2.12 What temporary identifiers might this specification create or expose to the web?
 
 None.
 

@@ -36,7 +36,7 @@ The default export of the module is the CSSStyleSheet generated from the CSS fil
 
 ## Some implementation details
 
-The MIME-type in the HTTP response header is checked to determine how a given module should interpreted.  A MIME-type of `text/css` will be treated as a CSS module.  Each imported CSS Module will have its own [module record](https://tc39.github.io/ecma262/#sec-abstract-module-records) as introduced in the ES6 spec and will participate in the module map and module dependency graphs.
+The MIME-type in the HTTP response header is checked to determine how a given module should be interpreted.  A MIME-type of `text/css` will be treated as a CSS module.  Each imported CSS Module will have its own [module record](https://tc39.github.io/ecma262/#sec-abstract-module-records) as introduced in the ES6 spec and will participate in the module map and module dependency graphs.
 
 The V1 of CSS Modules will be built using Synthetic Modules.  Specifically, to create a new CSS module given a fetched `text/css` file:
 1. Create a CSSStyleSheet() via the [constructor](https://wicg.github.io/construct-stylesheets/#dom-cssstylesheet-cssstylesheet).
