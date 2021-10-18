@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<head>
+ <title>focusgroup polyfill sample</title>
+ <script type="module" src="focusgroup_polyfill.js"></script>
+ <style>
+   span.fakeradio { display:inline-block; width:20px; height:20px; border-radius:50%; background:lightgray; }
+   span.fakeradio:focus { outline: 2px solid black; }
+   [role=menu] { display: flex; flex-direction: column; width: 250px; border: 1px solid black; }
+   [role=menuitem]:focus { outline: 2px solid blue; }
+ </style>
+</head>
+<body>
+ <div focusgroup>
+   <input type="checkbox">
+   <input type="checkbox">
+ </div>
+ <fieldset focusgroup>
+   <legend>shopping list</legend>
+   <label focusgroup="extends wrap"><input type="checkbox">Apples</label>
+   <label focusgroup="extends"><input type="checkbox">Bananas</label>
+   <label focusgroup="extends wrap"><input type="checkbox">Carrots</label>
+   <label focusgroup="extends"><input type="checkbox">Tomatoes</label>
+ </fieldset>
+ <p>Pretend radio buttons (wrapping)</p>
+ <div focusgroup="wrap">
+   <span tabindex="0" class="fakeradio"></span>
+   <span tabindex="-1" class="fakeradio"></span>
+   <span tabindex="-1" class="fakeradio"></span>
+   <span tabindex="-1" class="fakeradio"></span>
+ </div>
+ <p>vertical menu (with horizontal submenus)</p>
+ <div focusgroup="vertical" role="menu">
+  <div tabindex=0 role="menuitem">menu item 1</div>
+  <div tabindex=-1 role="menuitem">menu item 2</div>
+  <div tabindex=-1 role="menuitem">menu item 3</div>
+  <div tabindex=-1 focusgroup="extends horizontal wrap" aria-orientation="horizontal" style="display: flex;justify-content: space-evenly" >
+    <span tabindex=-1 role="menuitem">sub 3.1</span>
+    <span tabindex=-1 role="menuitem">sub 3.2</span>
+  </div>
+  <div tabindex=-1 role="menuitem">menu item 4</div>
+ </div>
+</body>
