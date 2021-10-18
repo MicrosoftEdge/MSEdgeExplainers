@@ -57,7 +57,7 @@ Error: This is an example error.
 
 ### Privacy
 
-There are not likely to be any privacy considerations.
+There are not likely to be any privacy considerations. It is conceivable that a malicious script might be able to brute-force, e.g., a script that contains personally identifiable information, by using the hash. However, SHA-256 balances the computational need required to take advantage of such an attack, the infrequent occurrence of such programming patterns as this, and the unlikely case in which a malicious script would be able to inject itself to monitor for errors to parse stacks in this way.
 
 ### Security
 
@@ -74,7 +74,3 @@ Error.stackTraceComputeFingerprint = (sourceContents: Uint8Array) => Promise<str
 Then, if at runtime the `stackTraceComputeFingerprint` function is not present, it can return to the present behavior.
 
 While this seems like a reasonable approach, it seems to be an excessive level of complexity that it's unlikely most customers would override; and, I am concerned that it might introduce cross-origin security issues.
-
-## Open Questions
-
-Optional section.
