@@ -64,7 +64,7 @@ window.location.href = redirectUri + authenticationParameters;
 This pattern allows standard authentication flows to request neccesary access while hosted in a website, in a way that allows the identity provider to explain to the user why the prompt is neccesary. 
 
 ## Scope of Access
-The API would address storage access for all forms of storage that may currently be blocked by existing polcies and browser settings such as third-party cookies. This includes traditional HTTP cookies as well as other storage apis such as indexedDB and localStorage.  No changes to the scope or length of the permission grant would be made compared to the original Storage Access API.  
+The API would address storage access for all forms of storage that may currently be blocked by existing policies and browser settings such as third-party cookies. This includes traditional HTTP cookies as well as other storage apis such as indexedDB and localStorage.  No changes to the scope or length of the permission grant would be made compared to the original Storage Access API.  
 
 ## Example
 **Third-party cookie settings are set to block.**
