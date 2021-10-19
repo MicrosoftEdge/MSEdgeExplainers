@@ -92,7 +92,7 @@ It is desirable to allow websites to permit this access while redirecting via an
 **The following remain open issues:**
 
 - Should the requesting site ever learn the result of the prompt? Discussed in this [Privacy CG issue](https://github.com/privacycg/storage-access/issues/60) in part. 
-- Is it desireable for a site to indicate that potentially one of many sites could request storage access within it as a result of a redirect? This may be a niche use case that presents attack concerns, with or without the First Party Set limitation. 
+- Is it desirable for a site to indicate that potentially one of many sites could request storage access within it as a result of a redirect? This may be a niche use case that presents attack concerns, with or without the First Party Set limitation. 
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Forward%20Declared%20Storage%20Access%20API) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BForward%20Declared%20Storage%20Access%20API%5D)
