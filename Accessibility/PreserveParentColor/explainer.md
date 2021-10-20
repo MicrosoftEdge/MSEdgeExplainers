@@ -1,7 +1,11 @@
-# preserve-parent-color Explainer `preserve-parent-color` is a new value for the
+# preserve-parent-color Explainer 
+
+`preserve-parent-color` is a new value for the
 [`forced-color-adjust`](https://www.w3.org/TR/css-color-adjust-1) CSS property.
 
-## Motivation `forced-color-adjust` is a CSS property that allows developers to
+## Motivation 
+
+`forced-color-adjust` is a CSS property that allows developers to
 opt out of Forced Colors Mode.
 
 Previously, there were two supported values: `auto` and `none`, which can be
@@ -58,7 +62,9 @@ case. By changing the default value of `forced-color-adjust` for SVGs from
 `none` to `preserve-parent-color`, SVG icons that make use of `currentColor`
 will now inherit the used `color` value of its parent, as expected.
 
-## Current Design `forced-color-adjust` supports three values:
+## Current Design 
+
+`forced-color-adjust` supports three values:
   - `auto`: adjust the element's style by the UA in Forced Colors Mode
   - `none`: do not adjust the element's style by the UA in Forced Colors Mode
   - `preserve-parent-color`: if the `color` property inherit from its parent,
