@@ -6,9 +6,9 @@ Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https:
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **Active** (CSS primitives for dual screen layouts)
     * Expected venue: [W3C CSS Working Group](https://www.w3.org/Style/CSS/)
-* This document status: **ARCHIVED** (Window Segments Enumeration JavaScript API)
-    * Current venue: [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) | [webscreens/window-segments](https://github.com/webscreens/window-segments) | ![GitHub issues](https://img.shields.io/github/issues/webscreens/window-segments)
-    * Current version: [Window Segments Enumeration JavaScript API](https://github.com/webscreens/window-segments/blob/master/EXPLAINER.md)
+* This document status: **ARCHIVED AND DEPRECATED** (The Window Segments Enumeration JavaScript API has been deprecated in favor of the Visual Viewport Segments Property)
+    * Venue: [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) | [webscreens/window-segments](https://github.com/webscreens/window-segments) | ![GitHub issues](https://img.shields.io/github/issues/webscreens/window-segments)
+    * Current version: [Visual Viewport Segments Property](https://github.com/WICG/visual-viewport/blob/57bc47268d2fc0042bf848d192d7e34ff9a3cafd/segments-explainer/SEGMENTS-EXPLAINER.md)
 
 ### Table of content
 - [Motivation](#motivation)
@@ -40,7 +40,7 @@ Developers may be able to solve this by taking a hard dependency on a specific d
 ### Current problems:
 More specific challenges we've heard from our internal product teams that were exploring building experiences for this emerging classes of devices include:
 
-- *Hardware differences*: Devices could be seamless (e.g. Samsung Galaxy Fold) or have a seam (e.g. [Microsoft Surface Neo](https://www.microsoft.com/en-us/surface/devices/surface-neo), [Microsoft Surface Duo](https://www.microsoft.com/en-us/surface/devices/surface-duo) or ZTE Axon M). In both cases developers might want to take it into account or intentionally ignore depending on scenario;
+- *Hardware differences*: Devices could be seamless (e.g. Samsung Galaxy Fold) or have a seam (e.g. [Microsoft Surface Duo](https://www.microsoft.com/en-us/surface/devices/surface-duo) or ZTE Axon M). In both cases developers might want to take it into account or intentionally ignore depending on scenario;
 - *Folding capabilities, state*: the fold area could be safe or unsafe region to present content;
 - *Future-proofing*: Ideally developers would want a somewhat stable way to target this class of devices without having to rely on specific device hardware parameters.
 
@@ -60,42 +60,49 @@ Additionally, while not a solution in the same sense, a ["[css-media-queries] Fo
 ## Proposal: CSS primitives for building dual screen layouts
 
 A summary of the concepts from the other proposals:
-* Display region - The representation of a physical monitor on dual-screen devices or the logical view area seperated by the hinge on foldable devices.
+* Display region - The representation of a physical monitor on dual-screen devices or the logical view area separated by the hinge on foldable devices.
 * Screen - the aggregate 2D space occupied by all the connected displays.
 
 In order to enable web developers to build layouts that are optimized for dual-screen and foldable experiences declaratively using CSS, we must consider fundamental assumptions of CSS (i.e. a single contiguous rectangular space for laying out content) and introduce new primitives that -together with existing layout media queries- allow developers to create layouts that react to states where the root viewport spans across multiple display regions.
 
 The first primitive we propose is a CSS media feature to determine whether the website is spanning across two adjacent display regions along with the configuration of those two adjacent display regions (e.g. stacked or aside). The second primitive is a set of user agent-defined environment variables that will help developers calculate the size of each screen region in CSS pixels.
 
-### The 'spanning' CSS media feature
+### Viewport Segments CSS media features
 
-The `spanning` CSS media feature can be used to test whether the browser window is spanning across multiple display regions.
+The `viewport-segments` media feature is used to detect the number of logical segments of the viewport when the device is positioned horizontally or vertically.
+
 
 ![Figure showing 2 foldable devices with different hinge postures](spanning-media-query.svg)
 
 #### Syntax
 
-The `spanning` media feature value can be one of the following keywords:
+The `viewport-segments` media feature can be one of two media expressions followed by an integer to identify the number of viewport segments. When the viewport is split by one or more hardware features, such as a fold or hinge between separate displays, segments are the regions of the viewport that can be treated as logically distinct by the page.
 
-- **single-fold-vertical**
+- **horizontal-viewport-segments**
 
-This value matches when the layout viewport is spanning a single fold (two display regions) and the fold posture is vertical.
+This describes the number of logical segments of the viewport in the horizontal direction and when the fold posture is horizontal (the displays are side by side.)
 
-- **single-fold-horizontal**
+- **vertical-viewport-segments**
 
-This value matches when the layout viewport is spanning a single fold (two display regions) and the fold posture is horizontal.
+This describes the number of logical segments of the viewport in the vertical direction and when the fold posture is vertical (the displays are stacked.)
 
-- **none**
+`@media (horizontal-viewport-segments: 2) and (vertical-viewport-segments: 1) { ... }` detects a viewport that has exactly two segments that are side by side.
 
-This value describes the state of when the browser window is not in spanning mode.
+Both the `horizontal-viewport-segments` and `vertical-viewport-segments` media features are false in the negative range. 
 
-### Device fold CSS environment variables
+
+
+### Viewport segment CSS environment variables
 
 ![predefined environment variables](css-env-variables.svg)
 
-We propose the addition of 6 pre-defined CSS environment variables `fold-top`, `fold-right`, `fold-bottom`, `fold-left`, `fold-width`, `fold-height`. Web developers can utilize those variables to calculate each screen segment size at both landscape and portrait orientations. While the spanning media query guarantees there is only a single hinge and two screen segments, developers must not take a dependency that each screen segment is 50% of the viewport height or width, as that is not always the case (see above example of `single-fold-horizontal` where portions of the top display are consumed by browser UI).
+We propose the addition of 6 pre-defined CSS environment variables `viewport-segment-width`, `viewport-segment-height`, `viewport-segment-top`, `viewport-segment-left`, `viewport-segment-bottom`, `viewport-segment-right`. Web developers can utilize those variables to calculate each screen segment size at both landscape and portrait orientations, as well as place content within the viewport with these variables. While the viewport segments media query guarantees there is only a single hinge and two screen segments, developers must not take a dependency that each screen segment is 50% of the viewport height or width, as that is not always the case (see above example of `vertical-viewport-segments` where portions of the top display are consumed by browser UI).
 
 The values of these variables are CSS pixels, and are relative to the layout viewport (i.e. are in the [client coordinates, as defined by CSSOM Views](https://drafts.csswg.org/cssom-view/#dom-mouseevent-clientx)). When evaluated when not in one of the spanning states, these values will be treated as if they don't exist, and use the fallback value as passed to the `env()` function.
+
+The viewport segment environment variables have two dimensions, which represent the x and y position, respectively, in the two dimensional grid created by the hardware features separating the segments. Segments along the left edge have x position 0, those in the next column to the right have x position 1, etc. Similarly, segments along the top edge have y position 0, etc.
+
+When the viewport is split into two side-by-side segments, the viewport segment on the left would have indices (0,0) and it's width would be represented as `env(viewport-segment-width 0 0)`. Additionally there is an option to provide a fallback value for an element's width or height if using either `viewport-segment-width` or `viewport-segment-height` that, for example, could be represented as `env(viewport-segment-width 0 0, 100%)`
 
 ### Non-goals:
 
@@ -106,10 +113,11 @@ The proposed CSS constructs are not currently meant to map to spanning configura
 ## Proposal: Window Segments Enumeration JavaScript API 
 
 - Feb 26, 2020: 🚚📦 Window Segments Enumeration JavaScript API has now moved to the [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/). For the explainer, issues, and comments please refer to the [webscreens/window-segments](https://github.com/webscreens/window-segments) GitHub repo.
+- October 25, 2021: The Windows Segments Enumeration JavaScript API has been deprecated in favor of the [Visual Viewport segments property](https://github.com/WICG/visual-viewport/blob/57bc47268d2fc0042bf848d192d7e34ff9a3cafd/segments-explainer/SEGMENTS-EXPLAINER.md) 
 
 ## Security and Privacy
 
-### APIs avalibility in iframe context
+### APIs availability in iframe context
 
 The CSS constructs and the JavaScript API will be available in `iframe` context but disabled by default for privacy and security considerations. An author may enable them using the `screen-spanning` policy; a new feature policy we are proposing that will enable authors to selectively enable the previously mentioned CSS and JavaScript constructs in iframe context. When disabled, getWindowSegments will return a single segment the size of the iframe's viewport, and the CSS environment variables will be treated as unset, and use the fallback values.
 
@@ -126,13 +134,13 @@ Let's take a look at a few practical examples of the scenarios above and how win
 #### CSS solution outline:
 
 ```css
-@media (spanning: single-fold-vertical) {	
+@media (horizontal-viewport-segments: 2) and (vertical-viewport-segments: 1) {	
 	body {
 		flex-direction: row;
 	}
 
 	.map {
-		flex: 1 1 env(fold-left)
+		flex: 1 1 env(viewport-segment-width 0 0)
 	}
 	
 	.locations-list {
@@ -144,11 +152,11 @@ Let's take a look at a few practical examples of the scenarios above and how win
 #### JavaScript solution outline:
 
 ```js  
-const screenSegments = window.getWindowSegments();
+const segments = window.visualViewport.segments;
 
-if( screenSegments.length > 1 ) {
+if( segments.length > 1 ) {
 	// now we know the device is a foldable
-	// it's recommended to test whether screenSegments[0].width === screenSegments[1].width
+	// it's recommended to test whether segments[0].width === segments[1].width
 	// and we can update CSS classes in our layout as appropriate 
 	document.body.classList.add('is-foldable');
 	document.querySelector('.map').classList.add('flex-one-half');
@@ -184,7 +192,7 @@ if( screenSegments.length > 1 ) {
 
 ```js  
 window.onresize = function() {
-	const segments = window.getWindowSegments();
+	const segments = window.visualViewport.segments;
 	console.log(segments.length) // 1
 }
 ```
@@ -193,7 +201,7 @@ window.onresize = function() {
 
 ![Foldable with the left segment of the window containing browser and location finder website, right segment containing calculator app](colored-boxes.svg)
 
-This is an illustrative example that demonstrates how to use the new enviroment variables to position content relative to the fold.
+This is an illustrative example that demonstrates how to use the new environment variables to position content relative to the fold.
 
 Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however, the requirement for Box 2 `.yellow` and Box 3 `.pink` is to *fill the screen segment width* and have a height of *100px*
 
@@ -205,21 +213,21 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 		height: 100px;
 		width: 100px;
 		position: absolute;
-		left: calc(env(fold-left) - 100px);
+		left: calc(env(viewport-segment-right 0 0) - 100px);
 		top: 0;
 	}
 
 	.yellow {
 		height: 100px;
-		width: calc(100vw - env(fold-right));
+		width: env(viewport-segment-width 1 0);
 		position: absolute;
-		left: env(fold-right);
+		left: env(viewport-segment-left 1 0);
 		top: 0;
 	}
 
 	.pink {
 		height: 100px;
-		width: env(fold-left);
+		width: env(viewport-segment-width 0 0, 100%);
 		position: absolute;
 		left: 0;
 		bottom: 0;
@@ -229,24 +237,24 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 		height: 100px;
 		width: 100px;
 		position: absolute;
-		left: env(fold-right);
+		left: env(viewport-segment-left 1 0);
 		bottom: 0;
 	}
 }
 ```
 
 #### LTR and RTL Layout Example
-![Yelow flex column being hinge aware in both LTR and RTL writing modes](ltr-rtl.svg)
+![Yellow flex column being hinge aware in both LTR and RTL writing modes](ltr-rtl.svg)
 
 #### CSS solution outline:
 
 ```css
 [dir="ltr"] .col {
-   flex: 0 0 env(fold-left);
+   flex: 0 0 env(viewport-segment-width 0 0);
 }
 
 [dir="rtl"] .col {
-   flex: 0 0 env(fold-right);
+   flex: 0 0 env(viewport-segment-width 1 0);
 }
 ```
 
