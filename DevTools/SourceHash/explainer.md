@@ -8,6 +8,7 @@ This document is a proposed enhancement to V8 in the area of JavaScript stack tr
 * This document status: **Active** (One-pager)
 * Expected venue: [V8-dev](https://groups.google.com/g/v8-dev)
 * **Current version: this document**
+* Prototype [implementation](https://chromium-review.googlesource.com/c/v8/v8/+/3229957) in V8
 
 ## Introduction
 
@@ -29,9 +30,9 @@ This document is a proposed enhancement to V8 in the area of JavaScript stack tr
 
 ## Proposed Solution
 
-JavaScript locations in which source file URLs are referenced should include a hash of the file as well. This will include, but is not limited to:
+The hash of source scripts should be accessible when preparing a stack trace or in other locations in which a source file is referenced. This will include, but is not limited to:
 
- - `Error#stack`, enabled by the property `Error.stackTraceSourceHash = true`. (While this is in discussion, it will not be enumerable by default).
+ - `CallSite`, exposed in the callback `Error.prepareStackTrace`
  - Some CDP properties:
    - `Runtime.CallFrame`
    - `Debugger.CallFrame`
@@ -41,17 +42,62 @@ By leveraging the hash of the source file, a "fingerprint" can be generated whic
 
 One drawback of this solution is that non-code changes in source files (such as comments or whitespace) are likely to generate files with identical "result sources." For the most part, however, this should be a solvable problem.
 
-### Appearance within `Error#stack`
+### Appearance within `CallSite`
 
-The hash will be a [SHA-256](https://en.wikipedia.org/wiki/SHA-2) and encoded in base-16. The inclusion of a source hash should appear after the `file` but before the `line` field of a stack frame:
+The hash will be a [SHA-256](https://en.wikipedia.org/wiki/SHA-2) and encoded in base-16. The following code snippet would append a source hash to the end of each error stack frame:
+
+```ts
+(() => {
+  let canGetScriptHash = false;
+  const oldPrepareStackTrace = Error.prepareStackTrace;
+  Error.prepareStackTrace = (er, frames) => {
+    if ('getScriptHash' in frames[0].constructor.prototype) {
+      canGetScriptHash = true;
+    }
+    return er.stack;
+  };
+  const error = new Error();
+  // This should invoke prepareStackTrace above.
+  const stack = error.stack;
+  console.log(`Was able to retrieve hash: ${canGetScriptHash}`);
+  if (!canGetScriptHash) {
+    Error.prepareStackTrace = oldPrepareStackTrace;
+  }
+  else {
+    Error.prepareStackTrace = (er, frames) => {
+      const originalStack = er.stack;
+      const lines = originalStack.split('\n');
+      let msg = er.name;
+      if (er.message) {
+        msg = `${er.name}: ${er.message}`;
+      }
+      const stackLines = lines.slice(1);
+      const formattedLines = stackLines.map((f, i) => {
+        const frame = frames[i];
+        const hash = frame.getScriptHash();
+        if (hash) {
+          return `${f} [source hash ${hash}]`;
+        }
+        return f;
+      });
+      formattedLines.unshift(msg);
+      return formattedLines.join('\n');
+    };
+  }
+})();
+```
+
+This will produce a stack trace along the following lines:
 
 ```
 Error: This is an example error.
-    at http://localhost:8080/test.js:ca119760926fbc8502b445d33dc94c4c34d4ef0f20103909e92f91b17c97f33d:6:11
-    at doWork (http://localhost:8080/additional-script.js:d91c151b875409add9cd0e19b20230e09610142727b11aa3873c54f0ae8de414:2:3)
-    at scenario (http://localhost:8080/test.js:ca119760926fbc8502b445d33dc94c4c34d4ef0f20103909e92f91b17c97f33d:4:3)
-    at HTMLButtonElement.btn.onclick (http://localhost:8080/main.js:ae30e92cf398451a2e9b32a7efae771c16ce7a4408c5e446aca1c3cc87995930:7:5)
+    at http://localhost:8080/test.js:6:11 [source hash ca119760926fbc8502b445d33dc94c4c34d4ef0f20103909e92f91b17c97f33d]
+    at doWork (http://localhost:8080/additional-script.js:2:3) [source hash d91c151b875409add9cd0e19b20230e09610142727b11aa3873c54f0ae8de414]
+    at scenario (http://localhost:8080/test.js:4:3) [source hash ca119760926fbc8502b445d33dc94c4c34d4ef0f20103909e92f91b17c97f33d]
+    at HTMLButtonElement.btn.onclick (http://localhost:8080/main.js:44:5) [source hash 0a5df129f563bdd835347968a0eca78dbd8bb4b2fc7bc95a1ee243e0f5a3d7ac]
 ```
+
+This is computed entirely in userland, except for the source hash.
 
 ## Privacy and Security Considerations
 
@@ -65,7 +111,9 @@ It is conceivable that a malicious web site might be able to uniquely identify a
 
 ## Alternative Solutions
 
-One alternative solution explored here was to enable a callback on the `Error` object, such as:
+The original alternative explored here was to enable a property on the `Error` object, `stackTraceSourceHash`, to embed the hash directly in the line. This proposal was rejected because the `Error#stack` property is already not standardized, and adding another flag here would create an additional burden to standardize.
+
+Another alternative solution explored here was to enable a callback on the `Error` object, such as:
 
 ```ts
 Error.stackTraceComputeFingerprint = (sourceContents: Uint8Array) => Promise<string>;
