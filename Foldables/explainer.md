@@ -210,7 +210,7 @@ Box 1 `.blue` and Box 4 `.green` have a *width* and *height* of *100px*, however
 #### CSS solution outline:
 
 ```css
-@media (spanning: single-fold-vertical) {	
+@media (horizontal-viewport-segments: 2) and (vertical-viewport-segments: 1) {	
 	.blue {
 		height: 100px;
 		width: 100px;
