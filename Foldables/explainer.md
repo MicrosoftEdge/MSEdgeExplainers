@@ -6,9 +6,9 @@ Authors: [Bogdan Brinza](https://github.com/boggydigital), [Daniel Libby](https:
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **Active** (CSS primitives for dual screen layouts)
     * Expected venue: [W3C CSS Working Group](https://www.w3.org/Style/CSS/)
-* This document status: **ARCHIVED AND DEPRECATED** (The Window Segments Enumeration JavaScript API has been deprecated in favor of the Visual Viewport Segments Property)
+* This document status: **ARCHIVED** (The Window Segments Enumeration JavaScript API has been deprecated in favor of the Visual Viewport Segments Property)
     * Venue: [W3C Second Screen Community Group](https://www.w3.org/community/webscreens/) | [webscreens/window-segments](https://github.com/webscreens/window-segments) | ![GitHub issues](https://img.shields.io/github/issues/webscreens/window-segments)
-    * Current version: [Visual Viewport Segments Property](https://github.com/WICG/visual-viewport/blob/57bc47268d2fc0042bf848d192d7e34ff9a3cafd/segments-explainer/SEGMENTS-EXPLAINER.md)
+    * Current version: [Visual Viewport Segments Property](https://github.com/WICG/visual-viewport/blob/gh-pages/segments-explainer/SEGMENTS-EXPLAINER.md)
 
 ### Table of content
 - [Motivation](#motivation)
@@ -80,7 +80,7 @@ The `viewport-segments` media feature can be one of two media expressions follow
 
 - **horizontal-viewport-segments**
 
-This describes the number of logical segments of the viewport in the horizontal direction and when the fold posture is horizontal (the displays are side by side.)
+This describes the number of logical segments of the viewport in the horizontal direction and when the fold posture is horizontal (the displays are side by side).
 
 - **vertical-viewport-segments**
 
@@ -96,7 +96,7 @@ Both the `horizontal-viewport-segments` and `vertical-viewport-segments` media f
 
 ![predefined environment variables](css-env-variables.svg)
 
-We propose the addition of 6 pre-defined CSS environment variables `viewport-segment-width`, `viewport-segment-height`, `viewport-segment-top`, `viewport-segment-left`, `viewport-segment-bottom`, `viewport-segment-right`. Web developers can utilize those variables to calculate each screen segment size at both landscape and portrait orientations, as well as place content within the viewport with these variables. While the viewport segments media query guarantees there is only a single hinge and two screen segments, developers must not take a dependency that each screen segment is 50% of the viewport height or width, as that is not always the case (see above example of `vertical-viewport-segments` where portions of the top display are consumed by browser UI).
+6 pre-defined CSS environment variables `viewport-segment-width`, `viewport-segment-height`, `viewport-segment-top`, `viewport-segment-left`, `viewport-segment-bottom`, `viewport-segment-right` will added, and web developers can utilize those variables to calculate each screen segment size at both landscape and portrait orientations, as well as place content within the viewport with these variables. While the viewport segments media query can detect if there is only a single hinge and two screen segments, developers must not take a dependency that each screen segment is 50% of the viewport height or width, as that is not always the case (see above example of `vertical-viewport-segments` where portions of the top display are consumed by browser UI).
 
 The values of these variables are CSS pixels, and are relative to the layout viewport (i.e. are in the [client coordinates, as defined by CSSOM Views](https://drafts.csswg.org/cssom-view/#dom-mouseevent-clientx)). When evaluated when not in one of the spanning states, these values will be treated as if they don't exist, and use the fallback value as passed to the `env()` function.
 
@@ -119,9 +119,11 @@ The proposed CSS constructs are not currently meant to map to spanning configura
 
 ### APIs availability in iframe context
 
-The CSS constructs and the JavaScript API will be available in `iframe` context but disabled by default for privacy and security considerations. An author may enable them using the `screen-spanning` policy; a new feature policy we are proposing that will enable authors to selectively enable the previously mentioned CSS and JavaScript constructs in iframe context. When disabled, getWindowSegments will return a single segment the size of the iframe's viewport, and the CSS environment variables will be treated as unset, and use the fallback values.
+The CSS constructs will be available in `iframe` context but disabled by default for privacy and security considerations. An author may enable them using the `screen-spanning` policy; a new feature policy we are proposing that will enable authors to selectively enable the previously mentioned CSS constructs in iframe context. When disabled, the CSS environment variables will be treated as unset, and use the fallback values.
 
 iframes where `screen-spanning` feature policy is enabled will receive values in the client coordinates of the top most window, and it's possible the iframe won't be able to interpret that data without other information from its embedder. As an example, for cross origin iframes, the iframe's embedder must provide information about how to transform from the root client coordinate space to the iframe's client coordinate space, as this information is not available to cross-origin iframes for security reasons. 
+
+The `segments` property will return null when called from within an iframe context.
 
 ## Examples of user experiences and solution outlines that can leverage two screens:
 
@@ -154,7 +156,7 @@ Let's take a look at a few practical examples of the scenarios above and how win
 ```js  
 const segments = window.visualViewport.segments;
 
-if( segments.length > 1 ) {
+if( segments && segments.length > 1 ) {
 	// now we know the device is a foldable
 	// it's recommended to test whether segments[0].width === segments[1].width
 	// and we can update CSS classes in our layout as appropriate 
@@ -172,7 +174,7 @@ if( segments.length > 1 ) {
 
 ```css
 
-@media (spanning: none) and (max-width: 728px) {	
+@media (max-width: 728px) {	
 	body {
 		flex-direction: column;
 	}
@@ -193,7 +195,7 @@ if( segments.length > 1 ) {
 ```js  
 window.onresize = function() {
 	const segments = window.visualViewport.segments;
-	console.log(segments.length) // 1
+	if ( segments != null) { console.log(segments.length) }// 1
 }
 ```
 
