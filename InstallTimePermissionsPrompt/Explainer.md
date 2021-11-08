@@ -39,6 +39,12 @@ A user browses to a new social media site and opts to install the service as a P
 
 A user has purchased a new device that comes with a PWA-based communication service pre-installed. When they first launch the PWA, they are asked to grant access to the device’s camera(s) and microphone, enable push notifications, and grant the app the ability to send and receive phone calls and text messages. Based on how they anticipate using the app, the user chooses to grant or deny each of these permissions.
 
+## Additional Use Cases
+
+An app catalog is onboarding a new web app. The catalog reads in the `permissions` values and maps each to a user-facing string to include in the product page.
+
+When a user views the "Site Permissions" UI in the web app’s wrapper, the browser considers the `permissions` values when prioritizing the order and/or display of the domain’s permissions.
+
 ## Prior Art
 
 Prior to the launch of Android 6.0, apps in the Play Store were accompanied by a declaration of which permissions the application would be granted upon install. This model was discontinued—in favor of a more web-like runtime request model—because many apps were taking advantage of the opportunity to get access to as much sensitive user data as they could, without the user being able to deny access to any of the individual APIs. The problem with this model was that users had to accept all of the permissions in order to install the app. Their only other choice was to not install the app (which may not have been an option in some cases). The idea set forth in this explainer improves upon that approach by enabling users to approve or deny (or defer) permissions on an individual basis.
