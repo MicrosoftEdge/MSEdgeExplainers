@@ -12,7 +12,8 @@ Yes, this information is necessary to enable the native apps to communicate with
 
 ### 2.3. How does this specification deal with personal information or personally-identifiable information or information derived thereof?
 
-Through the custom clipboard formats, PII may be transferable from web to native apps or vice versa. Currently copy-paste operation (ex. of plain text payloads) does expose highly sensitive PII such as SSN, DOB, passwords etc. and this feature doesn't expose anything new. This feature adds a user gesture requirement on top of existing async clipboard API security measures.  More details are [available here](https://github.com/dway123/clipboard-pickling/blob/main/explainer.md#user-gesture-requirement) in the explainer.
+Through the custom clipboard formats, PII may be transferable from web to native apps or vice versa. The risk is comparable to the existing DataTransfer APIs that expose unsanitized HTML content in the standard HTML format(via setData/getData methods), which is separate from custom formats, in that the native/web apps have to explicitly opt-in to read/write custom formats. Moreover, the custom format contents are less visible to the sites that don't know how to parse it, so this should alleviate some privacy concerns.
+This feature also adds a user gesture requirement on top of existing async clipboard API security measures.  More details are [available here](https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-pickling/explainer.md#user-gesture-requirement) in the explainer.
 
 ### 2.4. How does this specification deal with sensitive information?
 
