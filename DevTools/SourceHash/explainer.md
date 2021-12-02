@@ -101,13 +101,9 @@ This is computed entirely in userland, except for the source hash.
 
 ## Privacy and Security Considerations
 
-### Privacy
+To avoid the possibility that a script might perform some malicious computation based on incoming third-party script hashes, scripts will determine whether they have been loaded as "opaque." "Opaque" is a term of art within V8 that means that details of errors within a script should not be computed due to risks of leaking privacy details. This information is determined by the embedder policy when the `ScriptOrigin` objects are created as part of compiling a script; if the script is loaded as "opaque," then the computation of the hash will opportunistically exit and return an empty string.
 
-There are not likely to be any privacy considerations. It is conceivable that a malicious script might be able to brute-force, e.g., a script that contains personally identifiable information, by using the hash. However, SHA-256 balances the computational need required to take advantage of such an attack, the infrequent occurrence of such programming patterns as this, and the unlikely case in which a malicious script would be able to inject itself to monitor for errors to parse stacks in this way.
-
-### Security
-
-It is conceivable that a malicious web site might be able to uniquely identify a source file by its fingerprint present in an error stack in a way that it might not be ordinarily able to do. This would not expose any new security vulnerabilities, however; it would simply allow a malicious web application to more readily identify a vulnerable script. That having been said, this seems like a big stretch.
+For the browser, the result of this will be that classic scripts loaded with CORS can be computed, those loaded without CORS will not be able to be computed, and module scripts, which are always subject to CORS, will always be able to be computed.
 
 ## Alternative Solutions
 
