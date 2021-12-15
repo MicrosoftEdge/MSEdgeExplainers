@@ -1,4 +1,4 @@
-# Source Maps v3.1 Revision
+# Source Maps v4 Revision
 
 Authors: [Rob Paveza](https://github.com/robpaveza)
 
@@ -149,13 +149,14 @@ The scopes list should be as follows:
 
 By de-duplicating the names, that yields the expected `scopeNames` value of `['Global code', 'foo']`.
 
-Finally, `scopes` will need to be an array of strings, and this array should have the same number of entries as the `sources` field. Each string will be a comma-delimited list of Base64-encoded VLQs with the following set of entries (please note, all offsets are 0-based, in concurrence with the previous Source Maps spec):
+Finally, `scopes` will be a comma-delimited list of Base64-encoded VLQs with the following set of entries (please note, all offsets are 0-based, in concurrence with the previous Source Maps spec):
 
-1. A value representing starting line, relative to the previous starting line value. If this is the first value, it is an absolute value.
-2. A value representing the absolute starting column number.
-3. A value representing the ending line, **relative to the starting line** value.
-4. A value representing the ending starting column number.
-5. An index into the `scopeNames` array.
+1. A value representing the current source index, relative to the previous source index value. If this is the first value, it is an absolute value.
+2. A value representing starting line, relative to the previous starting line value. If this is the first value, it is an absolute value.
+3. A value representing the absolute starting column number.
+4. A value representing the ending line, **relative to the starting line** value.
+5. A value representing the ending starting column number.
+6. An index into the `scopeNames` array.
 
 This enhancement chooses to use a combination of relative and absolute numbers because of the nature of the values in question. For source line offsets, using relative encoding makes sense, because the numbers are always expected to be increasing. For column numbers, however, it is highly likely that, because these values represent locations in the *source* file, offsets from starting- to ending-location would be negative, and further, that offsets from an outer-scoped function to an inner-scoped function would be negative. Given that one might expect most source lines to be less than 120 characters in length, there does not appear to be a major need to encode the column as relative.
 
@@ -166,7 +167,7 @@ Given the above list, we should then encode the above values:
     "sources": ["example.js"],
     "scopeNames": ["Global code", "foo"],
     "scopes": [
-        "[0,0,0,33,0],[0,34,2,0,1],[2,1,1,6,0]"
+        "[0,0,0,0,33,0],[0,0,34,2,0,1],[0,2,1,1,6,0]"
     ]
 }
 ```
@@ -177,9 +178,7 @@ Or, when encoded with VLQ, as:
 {
     "sources": ["example.js"],
     "scopeNames": ["Global code", "foo"],
-    "scopes": [
-        "AAAiCA,AkCEAC,ECCMA"
-    ]
+    "scopes": "AAAAiCA,AAkCEAC,AECCMA"
 }
 ```
 
@@ -188,7 +187,7 @@ Or, when encoded with VLQ, as:
 The following recommendations are **recommendations only** and not part of the "standard". They are, rather, a best attempt to identify how common examples can produce high-fidelity diagnostics experiences.
 
 * **Class names included**: Class member functions should indicate that they are members of classes. Although a common JavaScript convention has been to use `#` as a shorthand for `Class.prototype.member`, the inclusion of `#` as valid syntax for `private` field shorthand suggests that this should not be used. This spec recommends that the expansion `ClassName.functionName` should be used for instance functions, and `static ClassName.functionName` for static functions.
-* **Anonymous callback name inference**: Callback functions are often anonymous, but the name of the function being invoked is typically interesting. In the following example, an interesting function name might be something along the lines of `anonymous function passed to map`:
+* **Anonymous callback name inference**: Callback functions are often anonymous, but the name of the function being invoked is typically interesting. In the following example, an interesting function name might be something along the lines of `anonymous function passed to myArray.map`:
 
 ```ts
     return myArray.map((item, index) => {
