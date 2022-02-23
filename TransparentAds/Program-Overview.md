@@ -223,6 +223,140 @@ For each ad described by a given set of metadata (all required unless otherwise 
     * OTHER
 
 
+## Ensure AdsMetadata meta tag is in the DOM
+Ad-serving partners must ensure that for all ads, the AdsMetadata meta tag is included in the DOM. While it is understood that adding meta tags to the DOM is easier for certain type of ads (banner) than others (native, video ads), it is the responsibility of the ad provider to ensure ads metadata transparency is accessible to the browser within the DOM.
+  
+### Including AdsMetadata meta tag for BANNER ads type 
+For banner ads, ad providers send the ad directly to the publisher as HTML and must include the ads transparency meta tag with the ad creative HTML. 
+  
+### Including AdsMetadata meta tag for VIDEO & AUDIO ads type
+For video & audio ads, ad providers typically use non-HTML data format like XML to communicate ad details to the publisher. Even though ad providers may not be responsible for generating the ad creative HTML, ad providers must ensure that AdsMetadata meta tag for all video & audio ads makes into the DOM. 
+  
+[Digital Video Ad Serving Template (VAST)](https://www.iab.com/guidelines/vast/) is a commonly used data schema for structuring video and audio ad tags for ads served to video players. ad providers may use parts of the VAST spec to pass AdsMetadata to the publisher's page. For instance:
+  * **Send metadata with \<CompanionAd\>**: Ad providers can use a \<CompanionAd\> containing a \<HTMLResource\> or \<IFrameResource\> sub-element to pass AdsMetadata along with a CompanionAd creative. 
+  * **Send metadata with \<Extension\>**: Alternatively, ad Providers may pass AdsMetadata as an Extension and work with publishers to ensure the VAST player used by the publisher is able to extract the AdsMetadata tag from the extension element and include it in the DOM
+
+Here is an example VAST ad Response that passes the AdsMetadata as a CompanionAd
+ 
+```xml 
+<VAST version="2.0">
+  <Ad id="preroll-1">
+    <InLine>
+      <AdSystem>2.0</AdSystem>
+      <AdTitle>Ad Title</AdTitle>
+      <Error><![CDATA[http://example.com/trackingurl/error]]></Error>
+      <Impression><![CDATA[http://example.com/trackingurl/impression]]></Impression>
+      <Creatives>
+        <Creative>
+          <Linear>
+            <Duration>00:00:15</Duration>
+            <MediaFiles>
+              <MediaFile id="5241" delivery="progressive" type="video/mp4" bitrate="500" width="400" height="300" scalable="1" maintainAspectRatio="1" apiFramework="VPAID">
+                <![CDATA[https://example.com/VideoAd.mp4]]>
+              </MediaFile>
+            </MediaFiles>
+        </Linear>
+        </Creative>       
+ <Creative>
+          <CompanionAds>
+            <Companion height="250" width="300" id="573242">
+              <HTMLResource>
+                <![CDATA[
+<img src="https://example.com/CompanionAd.jpg">
+<meta name="AdsMetadata" content="{&quot;advertisingPlatform&quot;: {&quot;idType&quot;: &quot;IAB_GVL_ID&quot;,&quot;id&quot;: 1111,&quot;name&quot;: &quot;Contoso&quot;},&quot;targetingCategory&quot;: {&quot;geoLocation&quot;: &quot;PRECISE&quot;,&quot;remarketing&quot;: &quot;NOT_USED&quot;,&quot;userCharacteristics&quot;: [&quot;NOT_USED&quot;],&quot;userInterests&quot;: true,&quot;context&quot;: false,&quot;device&quot;: false,&quot;lookalike&quot;: &quot;NOT_USED&quot;,&quot;other&quot;: false},&quot;ads&quot;: [{&quot;id&quot;: &quot;ad-1&quot;,&quot;advertiserDomain&quot;: &quot;shoplovegive.com&quot;,&quot;advertiserName&quot;: &quot;Teton Sleeping Bag&quot;,&quot;type&quot;: &quot;VIDEO&quot;}]}">						 
+						]]>
+              </HTMLResource>
+            </Companion>
+          </CompanionAds>
+        </Creative>
+      </Creatives>
+    </InLine>
+  </Ad>
+</VAST>
+  
+```
+Here is an example VAST ad Response that passes the AdsMetadata as an Extension.
+
+```xml
+<VAST version="2.0">
+  <Ad id="preroll-1">
+    <InLine>
+      <AdSystem>2.0</AdSystem>
+      <AdTitle>Ad Title</AdTitle>
+      <Error><![CDATA[http://example.com/trackingurl/error]]></Error>
+      <Impression><![CDATA[http://example.com/trackingurl/impression]]></Impression>
+      <Creatives>
+        <Creative>
+          <Linear>
+            <Duration>00:00:15</Duration>
+            <MediaFiles>
+              <MediaFile id="5241" delivery="progressive" type="video/mp4" bitrate="500" width="400" height="300" scalable="1" maintainAspectRatio="1" apiFramework="VPAID">
+                <![CDATA[https://example.com/VideoAd.mp4]]>
+              </MediaFile>
+            </MediaFiles>
+        </Linear>
+        </Creative>        
+      </Creatives>
+         <Extensions>
+            <Extension type="AdsTransparency">
+                 <![CDATA[
+<meta name="AdsMetadata" content="{&quot;advertisingPlatform&quot;: {&quot;idType&quot;: &quot;IAB_GVL_ID&quot;,&quot;id&quot;: 1111,&quot;name&quot;: &quot;Contoso&quot;},&quot;targetingCategory&quot;: {&quot;geoLocation&quot;: &quot;PRECISE&quot;,&quot;remarketing&quot;: &quot;NOT_USED&quot;,&quot;userCharacteristics&quot;: [&quot;NOT_USED&quot;],&quot;userInterests&quot;: true,&quot;context&quot;: false,&quot;device&quot;: false,&quot;lookalike&quot;: &quot;NOT_USED&quot;,&quot;other&quot;: false},&quot;ads&quot;: [{&quot;id&quot;: &quot;ad-1&quot;,&quot;advertiserDomain&quot;: &quot;shoplovegive.com&quot;,&quot;advertiserName&quot;: &quot;Teton Sleeping Bag&quot;,&quot;type&quot;: &quot;VIDEO&quot;}]}">					 
+						]]>
+            </Extension>
+  </Extensions>
+  </Ad>
+</VAST>
+
+```
+  
+### Include AdsMetadata meta tag for NATIVE ads type
+For native ads, ad providers typically use non-HTML data formats like JSON to communicate the details of the ad to the publisher. Even though the actual ad is communicated in data format, Ad partners must ensure that AdsMetadata meta tag for all native ads makes into the DOM. Updates to native ads rendering stack may be required.
+  
+[OpenRTB](https://iabtechlab.com/standards/openrtb/) is a commonly used standard with JSON data format for structuring native ads served to publishers. Ad servers may use the  `<ext>` object in the OpenRTB spec to pass AdsMetadata to the publisher and can update the ad rendering stack to include the AdsMetadata meta tag in the DOM. For instance:
+  * Ad providers can update provider owned client-side widgets used for rendering native ads to include the AdsMetadata meta tag in the DOM
+  * Ad providers can work with publishers to update their code used for rendering native ads to include the AdsMetadata meta tag in the DOM
+
+Here is an example of an OpenRTB Native ad Response that passes the contents of the AdsMetadata meta tag in the `ext` object.
+
+```json
+{
+  "native": {
+    "link": {
+      "url": "http://i.am.a/URL"
+    },
+    "assets": [
+      {
+        "id": 123,
+        "required": 1,
+        "title": {
+          "text": "Learn about this product"
+        }
+      },
+      {
+        "id": 124,
+        "required": 1,
+        "img": {
+          "url": "http://example.com/thumbnail1.png"
+        }
+      }
+    ],
+    "ext": {
+      "AdsTransparency": {
+        "adsMetadata": [
+          {
+            "content": {
+
+              "text": "{&quot;advertisingPlatform&quot;: {&quot;idType&quot;: &quot;IAB_GVL_ID&quot;,&quot;id&quot;: 1111,&quot;name&quot;: &quot;Contoso&quot;},&quot;targetingCategory&quot;: {&quot;geoLocation&quot;: &quot;PRECISE&quot;,&quot;remarketing&quot;: &quot;NOT_USED&quot;,&quot;userCharacteristics&quot;: [&quot;NOT_USED&quot;],&quot;userInterests&quot;: true,&quot;context&quot;: false,&quot;device&quot;: false,&quot;lookalike&quot;: &quot;NOT_USED&quot;,&quot;other&quot;: false},&quot;ads&quot;: [{&quot;id&quot;: &quot;ad-1&quot;,&quot;advertiserDomain&quot;: &quot;shoplovegive.com&quot;,&quot;advertiserName&quot;: &quot;Teton Sleeping Bag&quot;,&quot;type&quot;: &quot;NATIVE&quot;}]}"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+
+```
+  
 ## Ensure ad slots are marked with a unique identifier
 Ad slots must be marked with an `id attribute`. This identifier will be used to tie ads transparency data back to a relevant ad slot on the publisher page, providing the user with proper context without requiring TAP participants to store unique ad thumbnails.
 
