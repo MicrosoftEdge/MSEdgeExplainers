@@ -24,24 +24,26 @@ combo boxes, accordion panels, carousels, focusable grid tables, etc. Many of th
 patterns expect arrow-key navigation, as well as support for page down/up, home/end, even
 "type ahead" behavior. 
 
-The native HTML platform supports some of these linear navigation behaviors in native
+The native web platform supports *some* of these linear navigation behaviors in native
 controls like radio button groups (wrap-around arrow key movement that changes both focus
 and linked selection), &lt;select&gt; element popups (up/down movement among options), and 
-date-time controls (arrow key movement among the components of the date), but does not 
-expose a primitive that can be used independently to get this behavior. 
+date-time controls (arrow key movement among the components of the date), but **does not 
+expose a primitive** that can be used independently to get this behavior. 
 
-We propose an attribute 'focusgroup' that will facilitate focus navigation (not selection)
-using arrow keys among a set of focusable elements. The attribute can then be used 
+We propose exposing a new web platform primitive—'focusgroup'—to facilitate focus navigation (not selection)
+using arrow keys among a set of focusable elements. This feature can then be used 
 (**without any JavaScript**) to easily supply platform-provided focus group navigation into
 custom-authored controls in a standardized and predictable way for users.
 
 Customers like Microsoft's Fluent UI team are excited to leverage this built-in capacity
-for the advantages of consistency, accessibility by default, and promised interoperability
+for its keyboard consistency, default accessibility (provides a signal to ATs for alternate 
+keyboard navigation), and promised interoperability
 over existing solutions.
 
 While this document emphasizes the usage of the keyboard arrow keys for accessibility
 navigation, we acknowledge that there are other input modalities that work (or can be adapted 
-to work) equally well for focusgroup navigation behavior.
+to work) equally well for focusgroup navigation behavior (e.g., game controllers, gesture 
+recognizers, touch-based ATs, etc.)
 
 ## 2. Goal
 
@@ -58,56 +60,53 @@ implementing the pattern:
 * [FocusZone in Fluent UI](https://developer.microsoft.com/en-us/fluentui#/controls/web/focuszone)
 * [Elix component library's KeyboardDirectionMixin](https://component.kitchen/elix/KeyboardDirectionMixin)
 
-To achieve this goal, we believe that the solution must be done with declarative markup.
+To achieve this goal, we believe that the solution must be done with declarative markup or CSS.
 If JavaScript is required, then there seems little advantage to using a built-in feature over
 what can be implemented completely in author code. Furthermore, a declarative solution provides
 the key signal that allows the platform's accessibility infrastructure to make the group 
 accessible by default:
 
-* Signaling to the AT that arrow-key navigation, etc. can be used in the region, and that the 
-   user has entered a region where it is available.
-* Understanding the bounds/extent of the region, providing list context like "X in Y items" 
+* Signaling to the AT that arrow-key navigation can be used on the focused element.
+* Understanding the bounds/extent of the group, providing list context like "X in Y items" 
    (posinset/setsize)
 * Providing a consistent and reliable navigation usage pattern for users with no extra author code
    required.
 
 ## 3. Non-Goals
 
-It's worth noting that in most roving tabindex implementations, the notion of moving *focus* is 
+In most roving tabindex implementations, the notion of moving *focus* is 
 tightly coupled with the notion of *selection*. In some cases, it makes sense to have selection follow
 the focus, but in other scenarios these need to be decoupled. For this proposed standard, we decouple 
-selection from focus and only focus (cough) on the focus aspect and the movement of focus using the
-keyboard among eligible focus targets. Adding selection state--in essence a "memory" of where to
-restore focus when moving into or out of the group is left as an exercise for authors (there are 
-usually additional "actions" necessary to activate a selection and extra considerations for handling
-multiple selection that adds further complications).
+selection from focus and only focus (cough) on the focus aspect: moving focus using the
+keyboard among eligible focus targets. Adding selection state, e.g., tracking the currently selected 
+option in a list, will be a separate feature. To handle selection-based scenarios, we defer to the 
+CSS proposal [**Toggles**](https://tabatkins.github.io/css-toggle/) which can work nicely with focusgroups.
 
-No additional UI (e.g., "focus ring") is associated with the proposed 'focusgroup' attribute. It 
+No additional UI (e.g., a "focus ring") is associated with focusgroups. A focusgroup
 is wholly intended as a logical (transparent) grouping mechanism for a set of already focusable child elements,
 providing arrow key navigation among them. All the pre-existing styling/ native UI affordances for
 focus tracking are unchanged with this proposal.
 
 ## 4. Principles
 
-1. Intuitive use in markup. Focusgroups
-    * are easy to reason about (self-documenting) in the source markup.
-    * can be "extended" to apply their semantics naturally with the DOM hierarchy.
-    * provide a logical interaction between nested focusgroups. 
-    * blend in and play well with existing HTML semantics focus semantics
+1. Intuitive use in declarative scenarios. Focusgroups
+    * are easy to reason about (self-documenting) in the source markup or CSS.
+    * provide an intuitive interaction between focusgroups.
+    * integrate well with other related platform semantics.
 2. Focusgroups are easy to maintain and configure.
-    * Configuration should be done ideally in one place per focusgroup.
-    * Avoid extra configuration attributes: fit into existing HTML attribute value patterns.
-    * Avoid "spidery" linking using IDRefs or custom names that could lead to conflicts or
-       unexpected focusgroup inclusions.
-3. HTML-based "API" (versus using CSS properties).
-    * Focusgroup are intended for content model navigation (not the visual presentation of CSS). 
-       Couching the feature as an HTML "API" reinforces this principle. Additionally, like other
-       existing built-in HTML controls, focusgroup navigation follows DOM order to compliment
-       accessibility patterns.
+    * Configuration is managed in one place.
+    * Provide easy to understand usage into HTML and CSS patterns.
+    * Avoid "spidery connections" e.g., using IDRefs or custom names that are hard to maintain.
+3. Complimentary declarative representations in HTML and CSS
+    * HTML attributes offers focusgroup usage directly with impacted content and provide for
+       the most straightforward scenarios.
+    * CSS properties allow for responsive design patterns to conditionally apply focusgroup 
+       behavior under changing layouts. Enables some advanced use cases where selector-based
+       matching is advantageous.
      
 ## 5. Use Cases
 
-1. A set of focusable controls parented by one element can be trivially added to a focusgroup.
+1. Group a set of focusable child elements under a single focusgroup.
 2. A set of focusable controls spanning a hierarchy of DOM can be added to a single logical 
     focusgroup.
 3. A logical focusgroup can be configured to have wrap-around focus semantics if desired.
