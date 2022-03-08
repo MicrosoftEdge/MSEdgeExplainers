@@ -4,7 +4,7 @@
 
 Windows Text Services Framework (TSF) enables a TSF-enabled app to receive text input from a number of devices or sources including IMEs (Input Method Editors) and on-screen keyboards.
 
-TSF makes it possible for apps to leverage new text intelligence services, such as autocorrection, text suggestions as you type, shapewriting that lets you swipe over keys without releasing your finger to type, IME reconversion after composition has ended, and other input modalities. Many customers have come to expect these features on mobile devices. This work will help bring similar capabilities to touch enabled Windows devices.
+TSF makes it possible for apps to leverage new text intelligence services, such as autocorrection, text suggestions as you type, shapewriting that lets you swipe over keys without releasing your finger to type, IME reconversion after composition has ended, text URL association, and other input modalities. Many customers have come to expect these features on mobile devices. This work will help bring similar capabilities to touch enabled Windows devices.
 
 Not all apps on Windows get these services by default. Apps built on top of legacy IMM32 (Input Method Manager) framework must do additional work to enable text intelligence services to light-up the new streamlined text input. This currently includes Chromium-based browsers.
 
@@ -18,6 +18,7 @@ The proposal targets the following use-cases:
 * Enable text intelligence services - allows user to select text suggestions as they type;
 * Swipe keyboard – allow user to use shapewriting for text input;
 * Enable reconversion after commit – for languages that support reconversion, allow user to select committed text and reconvert it.
+* Enable text URL association – allows for URL based protection facilities such as blocking pasted text to documents with URLs not on a safe list.
 
 ### Non-Goals:
 
