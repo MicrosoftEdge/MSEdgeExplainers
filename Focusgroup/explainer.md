@@ -278,9 +278,7 @@ Some built-in controls like `<input type=text>` "trap" nearly all keys that woul
 focusgroup. This proposal does not provide a way to prevent this from happening (Tab should continue
 to be used to "exit" these trapping elements).
 
-### 6.3. Configuring and customizing the focusgroup
-
-#### 6.3.1. Wrapping behaviors
+### 6.3. Enabling wrapping behaviors
 
 By default, focusgroup traversal with arrow keys ends at boundaries of the focus group (the start and
 end of a linear focusgroup, and the start and end of both rows and columns in a grid focusgroup). The 
@@ -289,52 +287,63 @@ following focusgroup definition values can configure this:
 | HTML attribute value | CSS property & value | Explanation |
 |----------------------|----------------------|-------------|
 | focusgroup="wrap" | focus&#8209;group&#8209;wrap:&nbsp;wrap | **linear focusgroup**: causes movement beyond the ends of the focusgroup to wrap around to the other side; **grid focusgroup**: causes focus movement at the ends of the rows/columns to wrap around to the opposite side of the same rows/columns |
-| focusgroup="nowrap" | focus&#8209;group&#8209;wrap:&nbsp;nowrap | Disables any kind of wrapping (the initial/default value) |
+| focusgroup="" (unspecified) | focus&#8209;group&#8209;wrap:&nbsp;nowrap | Disables any kind of wrapping (the initial/default value) |
 
 The following are only applicable to grid focusgroups:
 
 | HTML attribute value | CSS property & value | Explanation |
 |----------------------|----------------------|-------------|
-| focusgroup="row-wrap" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;wrap | Rows wrap around, but column wrapping [and flowing as described below] is disabled. |
-| focusgroup="col-wrap" | focus&#8209;group&#8209;wrap:&nbsp;col&#8209;wrap | Columns wrap around, but row wrapping [and flowing as described below] is disabled. |
+| focusgroup="row&#8209;wrap" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;wrap | Rows wrap around, but column wrapping [and flowing as described below] is disabled. |
+| focusgroup="col&#8209;wrap" | focus&#8209;group&#8209;wrap:&nbsp;col&#8209;wrap | Columns wrap around, but row wrapping [and flowing as described below] is disabled. |
 | focusgroup="flow" | focus&#8209;group&#8209;wrap:&nbsp;flow | Movement past the end of a row wraps the focus to the beginning of **the next row**. Movement past the beginning of a row wraps focus back to the end of **the prior row**. Same for columns. The last row/column wraps to the first row/column and vice versa. |
-| focusgroup="row-flow" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;flow | Rows "flow" from row ends to the next/prior row as described above, but column flowing/wrapping is disabled. |
-| focusgroup="col-flow" | focus&#8209;group&#8209;wrap:&nbsp;col&#8209;flow | Columns "flow" from column ends to the next/prior column as described above, but row flowing/wrapping is disabled. |
+| focusgroup="row&#8209;flow" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;flow | Rows "flow" from row ends to the next/prior row as described above, but column flowing/wrapping is disabled. |
+| focusgroup="col&#8209;flow" | focus&#8209;group&#8209;wrap:&nbsp;col&#8209;flow | Columns "flow" from column ends to the next/prior column as described above, but row flowing/wrapping is disabled. |
 
 No option is provided for the hybrid condition of row wrap + column flow behavior (or vice-versa) in the 
 same grid. If this combination of behavior is needed, we want to hear this feedback.
 
-#### 6.3.2. 'extend' - Extending the focusgroup
+### 6.4. Expanding and connecting linear focusgroups together (`extend`)
 
-By default, the focusgroup's scope only covers its direct children. To extend the reach of the focusgroup,
-simply declare a second focusgroup attribute on one of the original focusgroup's direct children, and 
-indicate that this group will extend the parent's group. It becomes an extension of the original group.
+By default, a focusgroup definition's focusgroup candidates are its direct children. To "extend the
+reach" of a linear focusgroup's candidates, a linear focusgroup definition can declare that it intends
+to `extend` an ancestor linear focusgroup. If there is an anscestor linear focusgroup of the same name,
+the extending focusgroup becomes an extension of that ancestor's focusgroup. Extending a linear 
+focusgroup is also an opportunity to change the directionality (and, conditionally, the wrappping) of
+the newly extended focusgroup candidates (as described later).
 
-Below, the `<my-accordion>` element with a focusgroup attribute defines a focusgroup with nothing focusable
-in it. :( This is because the focusable `<button>` elements are separated by a level in the hierarchy:
+Using `extend` in a focusgroup definition is only valid for linear focusgroups. Grid focusgroups 
+**cannot** use `extend` to become a part of linear focusgroup. Similarly, linear focusgroups **cannot**
+use `extend` to become part of a grid focusgroup. And grid focusgroups cannot use `extend` to join
+an anscestor grid focusgroup.
+
+Below, the `<my-accordion>` element with a focusgroup attribute defines a focusgroup with nothing
+focusable in it; the focusable `<button>` elements are separated by an `<h3>` element. The `<h3>` and 
+`<div>` elements are the focusgroup candidates, and are not focusable:
 
 Example 4:
 ```html
-<my-accordion focusgroup> 
-  <h3><button aria-expanded=true aria-controls=p1>Panel 1</button></h3> 
-  <div id=p1 role=region>Panel 1 contents</div> 
-  <h3><button aria-expanded=true aria-controls=p2>Panel 2</button></h3> 
-  <div id=p2 role=region>Panel 2 contents</div> 
+<my-accordion focusgroup>
+  <h3><button aria-expanded=true aria-controls=p1>Panel 1</button></h3>
+  <div id=p1 role=region>Panel 1 contents</div>
+  <h3><button aria-expanded=true aria-controls=p2>Panel 2</button></h3>
+  <div id=p2 role=region>Panel 2 contents</div>
 </my-accordion> 
 ```
 
-To make the `<button>`s belong to one focusgroup, the `<h3>`s need to extend the group. Note that the element
-that does the extension does not itself have to be focusable:
+To make the `<button>`s belong to one focusgroup, a focusgroup definition must placed on the `<h3>`
+elements that explicitly declares `extend`, causing `<h3>` children to become focusgroup candidates.
 
 Example 5:
-```html
-<my-accordion focusgroup> 
-  <h3 focusgroup="extend"><button aria-expanded=true aria-controls=p1>Panel 1</button></h3> 
-  <div id=p1 role=region>Panel 1 contents</div> 
-  <h3 focusgroup="extend"><button aria-expanded=true aria-controls=p2>Panel 2</button></h3> 
-  <div id=p2 role=region>Panel 2 contents</div> 
-</my-accordion> 
+```css
+my-accordion[focusgroup] > h3 {
+   focus-group-name: auto extend;
+}
 ```
+
+The `extend` value employs an ancestor lookup to attempt to locate-and-extend a same-named
+linear focusgroup. It is not necessary that an extending linear focusgroup be a direct
+child of an existing focusgroup. The first-located focusgroup definition in the ancestor 
+chain of elements is the focusgroup definition that is considered for extending.
 
 When extending a focusgroup, traversal order is based on document order. Given the following: 
 
@@ -342,9 +351,13 @@ Example 6:
 ```html
 <div focusgroup> 
   <div id=A tabindex=0></div> 
-  <div id=B tabindex=-1 focusgroup=extend> 
-    <div id=B1 tabindex=-1></div> 
-    <div id=B2 tabindex=-1></div> 
+  <div id=B tabindex=-1>
+    <div>
+      <div focusgroup=extend>
+        <div id=B1 tabindex=-1></div> 
+        <div id=B2 tabindex=-1></div>
+      </div>
+    </div>
   </div> 
   <div id=C tabindex=-1></div> 
 </div> 
@@ -353,18 +366,22 @@ Example 6:
 Sequentially pressing the right arrow (assuming `horizontal-tb` + LTR writing-mode) would move
 through the `<div>`s: A, B, B1, B2, C. (And in reverse direction: C, B2, B1, B, A, as expected.)
 
-Certain configuration values are extended down from parent to child, for example `wrap`. It does
-not need to be repeated in an extending focusgroup. Specifying `wrap` on any extending focusgroup
-when it is not specified on a parent focusgroup may or may not apply (more on that later). In this
-case it would not apply (no wrapping behavior) because the child focusgroup (id=B) extended a 
-[no-wrap] state from its parent focusgroup and will use that value regardless of the presence of 
-`wrap`:
+Unless otherwise explicitly changed, focusgroup definition state of the ancestor is applied to
+the extending focusgroup definition: wrapping and direction. These directives do not need to be
+repeated in an extending focusgroup.
+
+Under certain conditions (explained later), the extended state can't be changed. For
+example: specifying `wrap` on an extending focusgroup definition when "nowrap" (even implicitly)
+was specified on a parent focusgroup does not make sense; the extending focusgroup candidates
+join the rest of the ancestor focusgroup candidates to form one logical ordering--they do not
+define a separate range of focusgroup candidates to apply different wrapping logic onto.
 
 Example 7:
 ```html
+<!-- This is an example of what NOT TO DO -->
 <div focusgroup> 
   <div id=A tabindex=0></div> 
-  <div id=B tabindex=-1 focusgroup="extend wrap"> 
+  <div id=B tabindex=-1 focusgroup="extend wrap"> <!-- 'wrap' will not apply -->
     <div id=B1 tabindex=-1></div> 
     <div id=B2 tabindex=-1></div> 
   </div> 
@@ -372,18 +389,35 @@ Example 7:
 </div> 
 ```
 
-#### 6.3.3. 'horizontal' and 'vertical' - limiting navigation directionality
+In this, `wrap` specified on the extending focusgroup definition will not cause any wrapping
+behavior to apply. The extending focusgroup (id=B) extended a "nowrap" state from its ancestor
+focusgroup and will use that value regardless of the presence of `wrap`.
+
+#### 6.5. Limiting linear focusgroup directionality
 
 In many cases, having multi-axis directional movement (both right arrow and down arrow linked to 
 the forward direction) is not desirable, such as when implementing a tablist, and it may not make
 sense for the up and down arrows to also move the focus left and right. Likewise, when moving up
 and down in a vertical menu, the author might wish to make use of the left and right arrow keys to
 provide behavior such as opening or closing sub-menus. In these situations, it makes sense to limit
-the focusgroup to one-axis traversal. The `horizontal` and `vertical` values provide this behavior. 
+the linear focusgroup to one-axis traversal.
+
+Note that the following only apply to linear focusgroup definitions (they have no effect on grid
+focusgroups).
+
+| HTML attribute value | CSS property & value | Explanation |
+|----------------------|----------------------|-------------|
+| focusgroup="horizontal" | focus&#8209;group&#8209;direction:&nbsp;horizontal | The focusgroup items will respond to forward and backward movement only with the "horizontal" arrow keys (left and right). |
+| focusgroup="vertical" | focus&#8209;group&#8209;direction:&nbsp;vertical | The focusgroup items will respond to forward and backward movement only with the "vertical" arrow keys (up and down). |
+| focusgroup="" (unspecified) | focus&#8209;group&#8209;direction:&nbsp;both | The focusgroup items will respond to forward and backward movement with both directions (horizontal and vertical). The default/initial value. |
 
 Example 8:
 ```html
-<tab-group role=tablist focusgroup="horizontal wrap"> 
+<style>
+  tab-group { focus-group: auto horizontal wrap; }
+</style>
+<!-- ... -->
+<tab-group role=tablist> 
   <a-tab role=tab tabindex=0>…</a-tab> 
   <a-tab role=tab tabindex=-1>…</a-tab> 
   <a-tab role=tab tabindex=-1>…</a-tab> 
@@ -399,6 +433,7 @@ same time on one focusgroup is not allowed:
 
 Example 9:
 ```html
+<!-- This is an example of what NOT TO DO -->
 <radiobutton-group focusgroup="horizontal vertical wrap"> 
   This focusgroup configuration is an error--neither constraint will be applied (which is actually 
   what the author intended).
