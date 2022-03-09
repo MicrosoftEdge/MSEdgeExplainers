@@ -125,7 +125,9 @@ focus tracking are unchanged with this proposal.
 ## 6. Focusgroup Concepts
 
 A focusgroup is a group of elements that are related by arrow-key navigation and for which the 
-platform provides the arrow key navigation behavior by default (no JavaScript event handlers needed!)
+platform provides the arrow key navigation behavior by default (no JavaScript event handlers needed)!
+Navigation is provided according to order or structure of the DOM (not how the content is presented 
+in a user interface).
 
 This document describes two kinds of focusgroups: **linear focusgroups** and **grid focusgroups**.
 Linear focusgroups provide arrow key navigation among a *list* of elements. Grid focusgroups provide 
@@ -278,10 +280,29 @@ to be used to "exit" these trapping elements).
 
 ### 6.3. Configuring and customizing the focusgroup
 
-#### 6.3.1. 'wrap' - Wrapping focus
+#### 6.3.1. Wrapping behaviors
 
-By default, the focusgroup only provides linear traversal of the items in the group. When focus reaches
-a boundary, it stops. To enable wrap-around focus behavior, add the `wrap` token to the attribute.
+By default, focusgroup traversal with arrow keys ends at boundaries of the focus group (the start and
+end of a linear focusgroup, and the start and end of both rows and columns in a grid focusgroup). The 
+following focusgroup definition values can configure this:
+
+| HTML attribute value | CSS property & value | Explanation |
+|----------------------|----------------------|-------------|
+| focusgroup="wrap" | focus&#8209;group&#8209;wrap:&nbsp;wrap | **linear focusgroup**: causes movement beyond the ends of the focusgroup to wrap around to the other side; **grid focusgroup**: causes focus movement at the ends of the rows/columns to wrap around to the opposite side of the same rows/columns |
+| focusgroup="nowrap" | focus&#8209;group&#8209;wrap:&nbsp;nowrap | Disables any kind of wrapping (the initial/default value) |
+
+The following are only applicable to grid focusgroups:
+
+| HTML attribute value | CSS property & value | Explanation |
+|----------------------|----------------------|-------------|
+| focusgroup="row-wrap" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;wrap | Rows wrap around, but column wrapping [and flowing as described below] is disabled. |
+| focusgroup="col-wrap" | focus&#8209;group&#8209;wrap:&nbsp;col&#8209;wrap | Columns wrap around, but row wrapping [and flowing as described below] is disabled. |
+| focusgroup="flow" | focus&#8209;group&#8209;wrap:&nbsp;flow | Movement past the end of a row wraps the focus to the beginning of **the next row**. Movement past the beginning of a row wraps focus back to the end of **the prior row**. Same for columns. The last row/column wraps to the first row/column and vice versa. |
+| focusgroup="row-flow" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;flow | Rows "flow" from row ends to the next/prior row as described above, but column flowing/wrapping is disabled. |
+| focusgroup="col-flow" | focus&#8209;group&#8209;wrap:&nbsp;col&#8209;flow | Columns "flow" from column ends to the next/prior column as described above, but row flowing/wrapping is disabled. |
+
+No option is provided for the hybrid condition of row wrap + column flow behavior (or vice-versa) in the 
+same grid. If this combination of behavior is needed, we want to hear this feedback.
 
 #### 6.3.2. 'extend' - Extending the focusgroup
 
