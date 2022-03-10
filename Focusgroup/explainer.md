@@ -366,13 +366,10 @@ Example 6:
 Sequentially pressing the right arrow (assuming `horizontal-tb` + LTR writing-mode) would move
 through the `<div>`s: A, B, B1, B2, C. (And in reverse direction: C, B2, B1, B, A, as expected.)
 
-Unless otherwise explicitly changed, focusgroup definition state of the ancestor is applied to
-the extending focusgroup definition: wrapping and direction. These directives do not need to be
-repeated in an extending focusgroup.
-
-Under certain conditions (explained later), the extended state can't be changed. For
-example: specifying `wrap` on an extending focusgroup definition when "nowrap" (even implicitly)
-was specified on a parent focusgroup does not make sense; the extending focusgroup candidates
+When the extending linear focusgroup is axis-aligned (see following sections), the wrapping state 
+of an ancestor focusgroup definition is applied to it. For example: specifying `wrap` on an
+extending focusgroup definition when "nowrap" (even implicitly) was specified on a parent
+focusgroup (of the same supported axis) does not make sense; the extending focusgroup candidates
 join the rest of the ancestor focusgroup candidates to form one logical ordering--they do not
 define a separate range of focusgroup candidates to apply different wrapping logic onto.
 
@@ -393,7 +390,7 @@ In this, `wrap` specified on the extending focusgroup definition will not cause 
 behavior to apply. The extending focusgroup (id=B) extended a "nowrap" state from its ancestor
 focusgroup and will use that value regardless of the presence of `wrap`.
 
-#### 6.5. Limiting linear focusgroup directionality
+### 6.5. Limiting linear focusgroup directionality
 
 In many cases, having multi-axis directional movement (both right arrow and down arrow linked to 
 the forward direction) is not desirable, such as when implementing a tablist, and it may not make
@@ -414,7 +411,11 @@ focusgroups).
 Example 8:
 ```html
 <style>
-  tab-group { focus-group: auto horizontal wrap; }
+  tab-group { 
+     focus-group-name: auto;
+     focus-group-direction: horizontal;
+     focus-group-wrap: wrap;
+  }
 </style>
 <!-- ... -->
 <tab-group role=tablist> 
@@ -440,20 +441,20 @@ Example 9:
 </radiobutton-group> 
 ```
 
-#### 6.3.4. Interactions with directionality + extending
+### 6.6. Interactions with directionality + extending
 
-Powerful scenarios are possible when extending single-axis focusgroups. For example, authors
+Powerful scenarios are possible when extending single-axis linear focusgroups. For example, authors
 can create tiles that are navigated with left and right arrow keys, and within each tile use 
-sub-menus that are navigated with the up and down keys (all in one focusgroup!). Vertical email
+sub-menus that are navigated with the up and down keys (all in one logical focusgroup!). Vertical email
 lists can be navigated with up and down keys, while email actions can be easily accessed with right
 and left keys. Alternating horizontal and vertical interactions can be combined arbitrarily deep 
 in the DOM. 
 
 When a focusgroup extends another focusgroup, it never extends the parent's directionality values
-(`horizontal` or `vertical`). Each extending focusgroup must declare (or take the default
-2-axis) directionality. 
+(`horizontal` or `vertical`). Each extending focusgroup declares (or take the default)
+directionality. 
 
-##### 6.3.4.1. Making extended linear groups
+#### 6.6.1. Axis-aligned extending linear focusgroups
 
 When a focusgroup is processing an arrow keypress, if it has an extending
 focusgroup that supports the direction requested, then the arrow keypress is forwarded to that 
@@ -473,45 +474,46 @@ Example 10:
 </vertical-menu>
 ```
 
-When focus is on "Action 2" and a down arrow key is pressed, the `<vertical-menu>`'s focusgroup sees
-that the `<menu-group>`'s focusgroup is configured to handle a `vertical` directional arrow (also),
-and so, the down arrow key press passes to the `<menu-group>`'s focusgroup which ends up focusing the
-"Action 3" `<menu-item>`.
+Because the parent and the extending focusgroup are axis-aligned, they form an **extended 
+linear focusgroup**.
 
-If the right arrow key was pressed with "Action 2" focused, the `<vertical-menu>`'s focusgroup checks
-the `<menu-group>`'s focusgroup to see if it supports the `horizontal` axis, and because it does not,
-the right arrow key press is ignored.
-
-Because the parent and the extending focusgroup are axis-aligned, they form an **extended linear group**.
-
-Note: only the immediately extending focusgroups are checked for axis-alignment (in either the forward
-or reverse navigation directions). In other words, once a candidate check fails, the algorithm won't
-continue looking further at other extended focusgroups.
-
-##### 6.3.4.2. Extending using Ascending and Descending relationships
+#### 6.6.2. Orthogonal-axis extending linear focusgroups
 
 Example 11:
 ```html
-<horizontal-menu focusgroup="horizontal wrap">
+<style>
+  horizontal-menu {
+    focus-group-name: auto;
+    focus-group-direction: wrap;
+    focus-group-wrap: wrap;
+  }
+  omni-menu {
+    focus-group-name: auto extend;
+  }
+</style>
+<!-- ... -->
+<horizontal-menu>
   <menu-item tabindex="-1">Action 1</menu-item>
   <menu-item tabindex="0">Action 2</menu-item>
-  <omni-menu tabindex="-1" focusgroup="extend">
-    <menu-item tabindex="-1">Sub-Action 3</menu-item>
-    <menu-item tabindex="-1">Sub-Action 4</menu-item>
-  </omni-menu>
+  <container-element tabindex="-1">
+    <omni-menu>
+      <menu-item tabindex="-1">Sub-Action 3</menu-item>
+      <menu-item tabindex="-1">Sub-Action 4</menu-item>
+    </omni-menu>
+  </container-element>
   <menu-item tabindex="-1">Action 5</menu-item>
 </horizontal-menu>
 ```
 
-The above is an example of a vertical menu nested inside of a horizontal menu. When "Action 2" is 
-focused and a down arrow key is pressed, the `<horizontal-menu>` focusgroup ignores the key because
-it is configured to only handle `horizontal` keys. However, when focus moves to the `<omni-menu>`
-element and a down arrow key is pressed, the `<horizontal-menu>` focusgroup will consult that element's
-focusgroup and check to see if it supports the given axis. In this case it supports both horizontal and 
-vertical directions, and so the down arrow key is forwarded to the `<omni-menu>`'s focusgroup, 
-which processes this forward direction (down and right map to forward) by focusing "Sub-Action 3".
-What was different in this case is that the down arrow key which was not supported by the 
-`<horizontal-menu>`'s focusgroup, was able to be handled by the `<omni-menu>`'s focusgroup. 
+The above is an example of a vertical menu nested inside of a horizontal menu. When 
+"Action 2" is focused and a down arrow key is pressed, the `<horizontal-menu>` focusgroup 
+ignores the key because it is configured to only handle `horizontal` keys. However, when 
+focus moves to the `<container-element>` and a down arrow key is pressed, the 
+`<omni-menu>`'s extending focusgroup (a child of the currently focused element) supports 
+the given axis ('both' axes is the initial value), and so the focus is moved "forward" to 
+"Sub-Action 3". What was different in this case, is that the down arrow key which was not
+supported by the `<horizontal-menu>`'s focusgroup definition, was handled by the 
+`<omni-menu>`'s focusgroup.
 
 The above is a **descent** operation.
 
@@ -526,7 +528,7 @@ Once descended into the `<omni-menu>`'s focusgroup, the way to **ascend** again 
 keypress that is axis-aligned with the parent's focusgroup (when focus is at the start or end of the
 child's focusgroup since the child's focusgroup handles both axes). Continuing with Example 11 and 
 "Sub-Action 3" focused, a left arrow key press (reverse direction) causes an ascension into the parent's
-focusgroup (focusing the `<omni-menu>` element). Similarly, when "Sub-Action 4" is focused, a right 
+focusgroup (focusing the `<container-element>` element). Similarly, when "Sub-Action 4" is focused, a right 
 arrow key will cause an ascension to the parent's focusgroup and focus "Action 5". The horizontal axis
 is aligned between the focusgroups and so horizontal arrow key requests are extensions of the parent's 
 focusgroup, while vertical arrow key presses stay "stuck" in the child focusgroup.
@@ -535,7 +537,8 @@ When extending focusgroups have orthogonal directionality they create ascender o
 relationships.
 
 The arrow key interactions will be clearer to users when nested focusgroups are strictly orthogonal
-to each other. For example:
+to each other. Authors should **not** extend `both` direction linear focusgroups with single-directional 
+linear focusgroups (and vice-versa) as a best practice. The following example is a best-practice:
 
 Example 12:
 ```html
@@ -550,37 +553,38 @@ Example 12:
 </horizontal-menu>
 ```
 
-When focus is on the `<vertical-menu>` element, only a down arrow key will descend into the nested 
-focusgroup (not a right arrow key because this is disallowed by the vertical extending focusgroup).
-Similarly, only a left arrow key will ascend back to the `<horizontal-menu>`'s focusgroup. Using 
-alternating directions in nested focusgroups ensures natural symmetry for users (cross-axis forward
-to descend, cross-axis reverse to ascend).
+When focus is on the `<vertical-menu>` focusgroup item, only a down arrow key will descend into the 
+nested focusgroup (not a right arrow key because this is disallowed by the vertical extending 
+focusgroup). Similarly, only a left arrow key will ascend from "Sub-Action 3" focusgroup item back 
+to the `<vertical-menu>` focusgroup item. Using alternating directions in nested focusgroups ensures
+natural symmetry for users (cross-axis forward to descend, cross-axis reverse to ascend).
 
 When a focusgroup is considering a cross-axis arrow key to descend, only the currently focused
-element (with a focusgroup) is considered. This behavior ensures that no unexpected descents occur
-when focus is not on a currently descendible element. Conversely, *any* of a focusgroup's focused 
-children will check the parent focusgroup for a cross-axis ascent (if that axis is not already 
-handled by the current focusgroup--and if it is handled, only the extremities of the focusgroup's 
-children perform this check as in Example 11). This means that ascending to the parent focusgroup
-is possible from any extending children.
+element and any of its extending focusgroup descendants are considered. This behavior ensures that
+no unexpected descents occur when focus is not on a currently descendible element. Conversely, 
+*any* of a focusgroup's focused children will check the parent focusgroup for a cross-axis ascent
+(if that axis is not already handled by the current focusgroup--and if it is handled, only the
+extremities of the focusgroup's children perform this check as in Example 11). This means that
+ascending to the parent focusgroup is possible from any extending children.
 
-##### 6.3.4.3. How extended 'wrap' works
+#### 6.6.3. Notes about wrapping while extending
 
-As noted previously, `wrap` is sometimes extended. More precisely, it is extended only when two
+As noted previously, the wrapping state of a focusgroup definition is extended only when two
 focusgroups have an axis-aligned relationship:
 
 Example 13:
 ```html
-<div focusgroup=wrap> 
+<!-- attributes making these elements focusable are elided -->
+<div focusgroup=wrap>
   <span focusgroup=extend>…</span> 
 </div> 
 ```
 
 Both the `<div>` and `<span>` have focusgroups configured with default 2-axis directionality.
 Both sets of axes are aligned, and so the `wrap` value is extended down and cannot be overridden
-by the `<span>`'s focusgroup. (Because the axes are aligned, they are an extended linear group.
-As one logical linear group, it does not make sense to try to change the wrapping behavior for a
-subset of the focusgroup.) 
+by the `<span>`'s focusgroup definition. (Because the axes are aligned, they are an extended 
+linear focusgroup. As one logical linear focusgroup, it does not make sense to try to change
+the wrapping behavior for a subset of the focusgroup.) 
 
 Example 14:
 ```html
@@ -589,56 +593,67 @@ Example 14:
 </div> 
 ```
 
-The above is a case where the focusgroups make an extended linear group in the horizontal direction 
-(`wrap` state cannot be changed by the child for the horizontal direction), and a 
+The above is a case where the focusgroups make an extended linear focusgroup in the horizontal
+direction (`wrap` state cannot be changed by the child for the horizontal direction), and a 
 descender/ascender relationship in the vertical direction (it's one-way: from the `<span>` to the
-`<div>` not vice-versa). But because the `<span>`'s focusgroup does not support the vertical 
-direction, there's nothing to extend from the parent. Conversely:
+`<div>` not vice-versa). But because the `<span>`'s focusgroup defintion does not support the 
+vertical direction, wrapping state is not extended from the parent. Conversely:
 
 Example 15:
 ```html
-<div focusgroup="wrap horizontal"> 
-  <span focusgroup="extend">…</span> 
+<style>
+  div  { focus-group: auto wrap horizontal; }
+  span { focus-group: auto extend; }
+</style>
+<!-- ... -->
+<div> 
+  <span>…</span> 
 </div>
 ```
 
-The focusgroups still have an extended linear group relationship in the horizontal direction (`wrap`
-in the horizontal direction cannot be changed by the child), and a descender/ascender relationship in
-the vertical direction (also one-way from `<div>` to `<span>` and not vice-versa). The `<span>`'s
-focusgroup supports a direction (vertical) that it doesn't extend from the `<div>`'s focusgroup and
-so vertical arrow keys (while focused inside the `<span>`'s focusgroup) can be independently
-configured to wrap or not wrap by adding or omitting the `wrap` value on the `<span>`'s focusgroup 
-attribute. In Example 15, the up/down arrows keys will not wrap, but given Example 16:
+The focusgroups are axis aligned in the horizontal direction (`wrap` in the horizontal direction cannot 
+be changed by the child), and a descender/ascender relationship in the vertical direction (also one-way
+from `<div>` to `<span>` and not vice-versa). The `<span>`'s focusgroup supports a direction (vertical)
+that it doesn't extend from the `<div>`'s focusgroup and so vertical arrow keys (while focused inside 
+the `<span>`'s focusgroup) can be independently configured to wrap or not wrap (in Example 15 they 
+won't wrap because `nowrap` is the initial value). In Example 16, the up/down arrow keys will wrap 
+around (exclusively) in the `<span>`'s focusgroup, but not when using the left/right arrow keys:
 
 Example 16:
 ```html
-<div focusgroup="horizontal"> 
-  <span focusgroup="wrap extend">…</span> 
+<style>
+  /* spacing aligned for comparison */
+  div  { focus-group: auto        nowrap horizontal; }
+  span { focus-group: auto extend wrap   both; }
+</style>
+<!-- ... -->
+<div> 
+  <span>…</span> 
 </div> 
 ```
 
-The up/down arrow keys would wrap around (exclusively) in the `<span>`'s focusgroup, but not when
-traversing the extended linear group relationship in the horizontal direction.
-
-When the relationships are descender/ascender in both directions, then `wrap` can't extend in any
-direction, and will apply to each focusgroup's chosen direction independently:
+When the relationships are descender/ascender in both directions, then the wrap state can't
+extend in any direction, and will apply to each focusgroup's chosen direction independently:
 
 Example 17:
 ```html
-<div focusgroup="wrap horizontal"> 
-  <span focusgroup="wrap vertical extend">…</span> 
+<style>
+  /* spacing aligned for comparison */
+  div  { focus-group: auto        horizontal nowrap; }
+  span { focus-group: auto extend vertical   wrap; }
+</style>
+<!-- ... -->
+<div> 
+  <span>…</span> 
 </div> 
 ```
 
-In Example 17, both focusgroups can be set to wrap or not wrap independently because the `wrap` 
-value in the given direction doesn't apply to the other.
-
-##### 6.3.4.4. Deep combinations
+##### 6.6.4. Deep combinations
 
 Nesting focusgroups can be applied to arbitrary depths to create either extended linear groups 
 or ascender/descender relationships as needed--all forming a single logical `focusgroup`.
-Consider vertical menus (3) inside of cards oriented horizontally (2) nested inside of table 
-data rows (1):
+Consider vertical menus (3) inside of cards oriented horizontally (2) nested inside of rows
+structures (1):
 
 ![image of tabular data in four rows, where each row contains four cells, and in each cell is a vertical menu structure of three items](nested_combos.png)
 
@@ -646,11 +661,18 @@ Structurally:
 
 Example 18:
 ```html
+<style>
+   table-row, card-view, .somestructure { focus-group-name: auto extend; }
+   table-row { focus-group-direction: horizontal; }
+   card-view, .somestructure { focus-group-direction: vertical; }
+   table-row, card-view { focus-group-wrap: wrap; }
+</style>
+<!-- ... -->
 <data-table focusgroup=vertical> 
-  <table-row focusgroup="extend horizontal wrap" tabindex=-1> 
-    <card-view focusgroup="extend vertical wrap" tabindex=-1> 
+  <table-row tabindex=-1> 
+    <card-view tabindex=-1> 
       <focusable-entry tabindex=-1></focusable-entry> 
-      <div class=somestructure focusgroup="extend vertical"> 
+      <div class=somestructure> 
         <focusable-entry tabindex=-1></focusable-entry> 
         <focusable-entry tabindex=-1></focusable-entry> 
       </div> 
@@ -673,7 +695,15 @@ structure in the markup. To "unify" the `<focusable-entry>`s into one logical li
 arrow navigation, the focusgroup on the `<div>` just extends in the same direction as 
 the parent (and the wrapping value is also extended).
 
-#### 6.3.5. 'grid' - navigating structured grids
+### 6.7. Opting-out
+
+TODO: describe how focusgroup items can opt-out
+
+### 6.8. Multiple focusgroups among siblings
+
+TODO: describe how this works in CSS
+
+### 6.9. grid focusgroups
 
 Some focusable data is structured not as a series of nested linear groups, but as a 
 2-dimensional grid such as Excel, where focus can move logically from cell-to-cell either
@@ -687,7 +717,7 @@ organization. Because grid structure navigation in two directions uses the arrow
 previously used to descend and ascend, new metaphors are needed to express "entering"
 and "existing" a grid cell.
 
-##### 6.3.5.1. Not for CSS grids or layout-only grids
+#### 6.9.1. Not for CSS grids or layout-only grids
 
 The arrow navigation in the grid (and in the previous non-grid scenarios) should
 reflect the accessible structure of the document, not the presentation view made
@@ -709,7 +739,7 @@ When considering using a grid-based focusgroup be sure that the data is structur
 like a grid and that the structure makes semantic sense in two dimensions (and not
 just for a particular layout or presentation).
 
-##### 6.3.5.2. Grid structural requirements
+#### 6.9.2. Grid structural requirements
 
 Two focusgroups working together are required to successfully navigate a grid. The
 first (outer) focusgroup is purely for understanding the structure of the grid
@@ -766,31 +796,12 @@ contains the data for all that column's rows). In this model, up/down arrow keys
 navigate linearly along the (inner) focusgroups candidate focus targets,
 while left/right compute a position as noted previously.
 
-##### 6.3.5.3. Empty Cell data 
+#### 6.9.3. Empty Cell data 
 
 Like non-grid focusgroups, focus is only set on elements that are focusable.
 The arrow key navigation algorithms attempt to find a focusable cell in the
 direction the arrow was pressed. If there are non-focusable cells, these are
 passed over in the search.
-
-##### 6.3.5.4. Grid wrapping 
-
-By default (in the no-wrap case), when arrow navigation reaches the boundary of
-the grid it stops. Grids can be configured to wrap in either row or column 
-direction by adding the `wrap` value to either the (inner) or (outer) focusgroups
-(or both):
-
-Example 21:
-```html
-<tbody focusgroup="grid horizontal"> 
-  <tr focusgroup="extend wrap">…</tr> 
-  <tr focusgroup="extend wrap">…</tr> 
-  <tr focusgroup="extend wrap">…</tr> 
-</tbody> 
-```
-
-In example 21, the grid is configured not to wrap around the columns but is 
-permitted to wrap around the rows.
 
 ## 7. Privacy and Security Considerations
 
