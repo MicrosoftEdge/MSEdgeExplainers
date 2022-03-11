@@ -821,9 +821,10 @@ like a grid and that the structure makes semantic sense in two dimensions (and n
 just for a particular layout or presentation).
 
 Tabular data can be structured using column-major or row-major organization. Given
-that ARIA attributes for grids (role=grid, role=row, role=gridcell) only exist for
-row-major grid types, this proposal does **not define** grid focusgroup organization
-for column-major data structures (and assumes row-major data structures throughout).
+that HTML tables and ARIA attributes for grids (role=grid, role=row, role=gridcell)
+only exist for row-major grid types, this proposal does **not define** grid focusgroup
+organization for column-major data structures (and assumes row-major data structures 
+throughout).
 
 #### 6.9.2. Grid isolation
 
