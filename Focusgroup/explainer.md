@@ -858,7 +858,6 @@ name of `gridrows` automatically creates row focusgroup candidates on
 its children. Similarly, a focusgroup name of `gridcells` automatically creates
 cell focusgroup candidates on its children.
 
-`gridrows` and `gridcells` are both necessary to create a proper grid focusgroup.
 Elements with the `gridcells` focusgroup definition must be descendants of an
 element with a `gridrows` focusgroup definition (but not necessarily direct 
 children of each other).
