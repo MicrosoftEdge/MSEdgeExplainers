@@ -306,7 +306,7 @@ same grid. If this combination of behavior is needed, we want to hear this feedb
 
 By default, a focusgroup definition's focusgroup candidates are its direct children. To "extend the
 reach" of a linear focusgroup's candidates, a linear focusgroup definition can declare that it intends
-to `extend` an ancestor linear focusgroup. If there is an anscestor linear focusgroup of the same name,
+to `extend` an ancestor linear focusgroup. If there is an ancestor linear focusgroup of the same name,
 the extending focusgroup becomes an extension of that ancestor's focusgroup. Extending a linear 
 focusgroup is also an opportunity to change the directionality (and, conditionally, the wrappping) of
 the newly extended focusgroup candidates (as described later).
@@ -314,7 +314,7 @@ the newly extended focusgroup candidates (as described later).
 Using `extend` in a focusgroup definition is only valid for linear focusgroups. Grid focusgroups 
 **cannot** use `extend` to become a part of linear focusgroup. Similarly, linear focusgroups **cannot**
 use `extend` to become part of a grid focusgroup. And grid focusgroups cannot use `extend` to join
-an anscestor grid focusgroup.
+an ancestor grid focusgroup.
 
 Below, the `<my-accordion>` element with a focusgroup attribute defines a focusgroup with nothing
 focusable in it; the focusable `<button>` elements are separated by an `<h3>` element. The `<h3>` and 
@@ -484,7 +484,7 @@ Example 11:
 <style>
   horizontal-menu {
     focus-group-name: auto;
-    focus-group-direction: wrap;
+    focus-group-direction: horizontal;
     focus-group-wrap: wrap;
   }
   omni-menu {
