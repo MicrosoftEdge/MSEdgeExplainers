@@ -697,11 +697,95 @@ the parent (and the wrapping value is also extended).
 
 ### 6.7. Opting-out
 
-TODO: describe how focusgroup items can opt-out
+Focusgroup definitions are assigned to an element in order to define the behavior for 
+their *child elements* which become focusgroup candidates. Because all *child elements*
+are focusgroup candidates, any child element that is (or becomes) focusable will
+automatically become a focusgroup item belonging to it's parent's focusgroup.
+
+What if an element should be focusable, exists as a child of an element with a focusgroup
+definition (because some of its other focusable siblings *should* belong to the focusgroup), 
+but does not want to participate in the focusgroup?
+
+Individual focusgroup candidates have the option of "opting-out" of participation in any
+focusgroup. Opting-out is a local focusgroup item decision (it should not be managed at the
+focusgroup definition attached to the parent element). In order for a focusgroup item to
+opt-out, a new (local) mechanism is needed.
+
+In this proposal, there is no way for a focusgroup item to opt-out using HTML alone (a 
+proposal would likely require a new attribute with different focusgroup semantics, and
+this opt-out scenario is considered an edge-case).
+
+To opt-out, a CSS property is used, which applies only to focusgroup candidates (not
+focusgroup definitions):
+
+| CSS property & value | Explanation |
+|----------------------|-------------|
+| focus&#8209;group&#8209;item:&nbsp;none | This focusgroup item will not participate in **any** focusgroup. (`none` is the initial value when there is no focusgroup definition on a parent element; `auto` is the initial value when there is a parent focusgropu definition.)  |
+
+Example 19:
+```html
+<style>
+  #container { focus-group: auto; }
+  .optout { focus-group-item: none; }
+</style>
+<!-- ... -->
+<control-row id=container>
+  <options-widget class=optout> ... </options-widget>
+  <action-button>...</action-button>
+  <action-button>...</action-button>
+  <action-button>...</action-button>
+  <action-button>...</action-button>
+</control-row>
+```
 
 ### 6.8. Multiple focusgroups among siblings
 
-TODO: describe how this works in CSS
+Similar to how some focusgroup candidates may want to opt-out (see prior section), other
+focusgroup candidates among a set of sibling elements may desire to participate in a 
+separate focusgroup from their other siblings.
+
+We elect to only provide this advanced scenario with CSS. Using `focus-group-item`, a 
+focusgroup candidate can specify the custom identifier of a matching parent focusgroup
+definition it would like to belong to (assuming it is focusable).
+
+CSS quite easily allows multiple focusgroup definitions to be applied to a single 
+container element via custom identifiers (this would be less elegant with HTML 
+attributes). The name `auto` (and the grid focusgroup names) are reserved, but other
+values are treated as custom identifiers and define new focusgroup definitions that
+focusgroup candidates can opt-into.
+
+**Note**: a focusgroup candidate can **only** be in one focusgroup at a time, and the 
+focusgroup it belongs to is the one specified by its `focus-group-item` value.
+
+| CSS property & value | Explanation |
+|----------------------|-------------|
+| focus&#8209;group&#8209;name:&nbsp;<custom&nbsp;ident> | Gives the focusgroup a custom identifiers. Only focusgroup candidates that opt-in to this named identifier will belong to this focusgroup. |
+| focus&#8209;group&#8209;item:&nbsp;<custom&nbsp;ident> | Declares this focusgroup candidates intention to belong to a focusgroup definition with the given identifier. |
+| focus&#8209;group&#8209;name, focus&#8209;group&#8209;direction, and focus&#8209;group&#8209;wrap | Each allows comma-separated list to accomodate multiple definitions. |
+
+The following example shows one parent element that has two focusgroups defined, and 
+opts half of the children into one and half into the other.
+
+Example 20:
+```html
+<style>
+  tabs { 
+    focus-group-name: redtab, bluetab;
+    focus-group-direction: horizontal, horizontal;
+  }
+  .redtab { focus-group-item: redtab; }
+  .bluetab { focus-group-item: bluetab; }
+</style>
+<!-- ... -->
+<tabs focusgroup>
+  <tab class=redtab>...</tab>
+  <tab class=redtab>...</tab>
+  <tab class=redtab>...</tab>
+  <tab class=bluetab>...</tab>
+  <tab class=bluetab>...</tab>
+  <tab class=bluetab>...</tab>
+</tab>
+```
 
 ### 6.9. grid focusgroups
 
