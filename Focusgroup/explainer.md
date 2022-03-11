@@ -787,21 +787,17 @@ Example 20:
 </tab>
 ```
 
-### 6.9. grid focusgroups
+### 6.9. Grid focusgroups
 
 Some focusable data is structured not as a series of nested linear groups, but as a 
-2-dimensional grid such as Excel, where focus can move logically from cell-to-cell either
-horizontally or vertically. In these data structures, it makes sense to support the 
-user's logical usage of the arrow keys to move around the data.
+2-dimensional grid such as in the Excel app, where focus can move logically from 
+cell-to-cell either horizontally or vertically. In these data structures, it makes 
+sense to support the user's logical usage of the arrow keys to move around the data.
 
-Grid navigation is fundamentally different than the approaches described above.
-Firstly, the data is expected to be highly structured and not arbitrarily nested. Highly
-structured grids have consistent rows and columns where DOM structure reflects this
-organization. Because grid structure navigation in two directions uses the arrow keys
-previously used to descend and ascend, new metaphors are needed to express "entering"
-and "existing" a grid cell.
+Grid navigation is expected to happen within well-structured content with consistent
+rows and columns where DOM structure reflects this organization.
 
-#### 6.9.1. Not for CSS grids or layout-only grids
+#### 6.9.1. Applicability to tabular data
 
 The arrow navigation in the grid (and in the previous non-grid scenarios) should
 reflect the accessible structure of the document, not the presentation view made
@@ -814,78 +810,183 @@ scenario, arrow key navigation to move linearly (left-to-right following the
 line-breaking across each line) through the contents makes sense (especially if 
 these are alphabetized), but orthogonal movement through the "grid" (up/down when 
 cards are aligned or in a masonry layout) jumps the focus to seemingly arbitrary
-content. Multi-directional arrow key navigation seems appropriate for sighted users
-that have the visual context only, but not for assistive technology. In this 
-scenario, a linear navigation model through the cards makes the most sense for 
-sighted as well as users with accessibility needs.
+locations. Multi-directional arrow key navigation may seem appropriate for sighted 
+users that have the visual context only, but are not appropriate for assistive
+technology. In the case of the list-presented-as-a-grid scenario, a linear 
+focusgroup will make the most sense for sighted as well as users with accessibility 
+needs.
 
-When considering using a grid-based focusgroup be sure that the data is structured
+When considering using a grid focusgroup, be sure that the data is structured
 like a grid and that the structure makes semantic sense in two dimensions (and not
 just for a particular layout or presentation).
 
-#### 6.9.2. Grid structural requirements
+Tabular data can be structured using column-major or row-major organization. Given
+that ARIA attributes for grids (role=grid, role=row, role=gridcell) only exist for
+row-major grid types, this proposal does **not define** grid focusgroup organization
+for column-major data structures (and assumes row-major data structures throughout).
 
-Two focusgroups working together are required to successfully navigate a grid. The
-first (outer) focusgroup is purely for understanding the structure of the grid
-contents, and to be able to navigate the DOM structure to support the 
-two-dimensional arrow key navigation directions. (None of its children need be
-focusable.) The second (inner) focusgroup will contain the content that will be
-focused (the cells).
+#### 6.9.2. Grid isolation
 
-To configure an (outer) focusgroup to work like a grid, add the value `grid` to
-the attribute value. The `grid` value will extend down to all child focusgroups
-(the inner focusgroup), so it only needs to be declared once.
+As noted previously the `extend` value is not applicable to grid focusgroups, and 
+grid focusgroups cannot be combined with linear focusgroups. While it is obviously
+possible to create linear focusgroups inside of a grid cell datastructure, and 
+vice-versa (a grid as a value of a list), this proposal does not allow these different
+focusgroup types to be connected automatically. Some additional scripting may be
+necessary to add explicit "cell enter/exit" behavior (or just use the Tab key).
 
-Note: if there is no extending (inner) focusgroup, among any of the focusgroup's
-children, then the value of `grid` is ignored and the focusgroup falls back its
-non-grid behavior.
+#### 6.9.2. Setting up a grid focusgroup
 
-Grid data structures typically include cells inside of row structures (e.g., 
-classic HTML Tables). To support custom controls that may structure cells in column
-structures, a value of either `horizontal` (a.k.a. "row") or `vertical` (a.k.a. 
-"column") is also needed.
+Two interrelated grid focusgroup definitions are necessary to properly setup a
+grid. First, the grid's row elements must be identified, and then the cells 
+within the row. 
 
-Note: the `grid` value must be present with either `horizontal` or `vertical` but
-not both.
+This proposal provides two ways of identifying these grid parts: 
+* using a focusgroup definition (applied to the appropriate parent container)
+* using a focusgroup item override
 
-Example 19:
+The first technique will be preferable when the grid contents are uniform and
+consistent (typical). It is also the only way of defining a grid focusgroup using
+HTML attributes.
+
+The second approach may be necessary when the grid structure is not uniform or 
+structurally consistent (atypical), and involves identifying the specific parts 
+of the grid on the specific focusgroup items.
+
+As with linear focusgroup definitions, the child elements of the element with a
+grid focusgroup definition become focusgroup candidates. A focusgroup reserved
+name of `gridrows` automatically creates row focusgroup candidates on 
+its children. Similarly, a focusgroup name of `gridcells` automatically creates
+cell focusgroup candidates on its children.
+
+`gridrows` and `gridcells` are both necessary to create a proper grid focusgroup.
+Elements with the `gridcells` focusgroup definition must be descendants of an
+element with a `gridrows` focusgroup definition (but not necessarily direct 
+children of each other).
+
+| HTML attribute value | CSS property & value | Explanation |
+|----------------------|----------------------|-------------|
+| focusgroup="gridrows" | focus&#8209;group&#8209;name:&nbsp;gridrows | Establishes the root of a grid focusgroup, and designates its children as `focus-group-item: row` focusgroup candidates. |
+| focusgroup="gridcells" | focus&#8209;group&#8209;name:&nbsp;gridcells | Must be a descendant of a grid focusgroup root (i.e., the `gridrows` element). Designates its children as `focus-group-item: cell` focusgroup candidates. |
+
+Example 21:
 ```html
-<tbody focusgroup="grid horizontal"> 
-  <tr focusgroup=extend>…</tr> 
-  <tr focusgroup=extend>…</tr> 
-  <tr focusgroup=extend>…</tr> 
+<tbody focusgroup=gridrows> 
+  <tr focusgroup=gridcells>…</tr> 
+  <tr focusgroup=gridcells>…</tr> 
+  <tr focusgroup=gridcells>…</tr> 
 </tbody> 
 ```
 
-The `<tbody>`'s focusgroup is an (outer) focusgroup where the children are row
-(horizontal) structured elements (`<tr>`s). The `<tr>` focusgroups extend the value
-of `grid` (so that they are setup as inner grid focusgroups). Focusgroups that extend 
-`grid` are not required to declare a direction because their direction is computed to
-be orthogonal to the direction of the (outer) focusgroup. In this setup, left/right 
-arrow keys will navigate linearly along the (inner) focusgroups children, while 
+The `<tbody>`'s "gridrows" focusgroup definition establishes each of its children (`<tr>`s)
+as focusgroup candidate rows. The `<tr>`'s "gridcells" focusgroup definition makes each of 
+its children (anticipated to be `<td>`'s) focusgroup candidate cells. Left/right 
+arrow keys in this grid focusgroup will navigate between cells in the table, and 
 up/down arrow keys will compute the new target based on the DOM position of the
-current child and its index relative to children in the prior or next (inner)
-focusgroup. 
+current focusgroup candidate cell in relation to the focusgroup candidate row. 
 
-Example 20:
+#### 6.9.3. Implicit row and cell connections
+
+Grid focusgroup rows and cells do not need to be direct children of the element
+that includes the grid focusgroup definition (either "gridrows" or "gridcells") in
+order to participate in the grid structure. Each focusgroup candidate will 
+perform an ancestor search to locate its nearest grid structural component: cells
+will look for their nearest row, and rows will look for their nearest grid root.
+
+In the following example, the `<my-cell>`s are all meant to be on the same row of the
+grid, and the rows are designated by `<my-row>` elements:
+
+Example 22:
 ```html
-<columnbased-data focusgroup="vertical grid"> 
-   <col-data focusgroup=extend>…</col-data> 
-   <col-data focusgroup=extend>…</col-data> 
-   <col-data focusgroup=extend>…</col-data> 
-</columnbased-data> 
+<style>
+   my-root { focus-group-name: gridrows; }
+   my-root > div { focus-group-item: none; } /* opt-out these extra wrappers from being considered rows */
+   cell-container { focus-group-name: gridcells; }
+</style>
+<!-- ... -->
+<my-root>
+  <div class="presentational_wrapper">...</div>
+  <my-row>
+    <first-thing>...</first-thing>
+    <cell-container>
+      <my-cell>...</my-cell>
+      <my-cell>...</my-cell>
+    </cell-container>
+    <cell-container>
+      <my-cell>...</my-cell>
+      <my-cell>...</my-cell>
+    </cell-container>
+  </my-row>
+  <!-- repeat pattern of div/my-row pairs... -->
+</my-root>
 ```
-In the above custom control, data is presented in column format (each `<col-data>` 
-contains the data for all that column's rows). In this model, up/down arrow keys
-navigate linearly along the (inner) focusgroups candidate focus targets,
-while left/right compute a position as noted previously.
 
-#### 6.9.3. Empty Cell data 
+Using CSS, specific row and cell focusgroup candidates can be set directly 
+using the `focus-group-item` property. Reserved values of `row` and `cell`
+opt-in a focusgroup candidate to that behavior. Cells cannot be children of 
+other cells, and rows cannot be children of rows. `focus-group-item: none` 
+can be used to disable candidate children that might otherwise prevent the 
+grid focusgroup from having the proper structure.
 
-Like non-grid focusgroups, focus is only set on elements that are focusable.
-The arrow key navigation algorithms attempt to find a focusable cell in the
-direction the arrow was pressed. If there are non-focusable cells, these are
-passed over in the search.
+| HTML attribute value | CSS property & value | Explanation |
+|----------------------|----------------------|-------------|
+| n/a | focus&#8209;group&#8209;item:&nbsp;row | Designates this element as a grid focusgroup candidate row. Must have a `gridrows` ancestor. Does not need to be focusable. All `focus-group-item: cell` candidates that are descendants of this row are considered included in this row (in DOM order). |
+| n/a | focus&#8209;group&#8209;item:&nbsp;cell | Designates this element as a grid focusgroup candidate cell. Must have a `focus-group-item: row` ancestor. Must be focusable in order to be a focusgroup item. |
+
+The grid focusgroup root (element with the `gridrows` focusgroup definition)
+only operates on the focusgroup candidates of `row` and `cell` in order to 
+properly navigate the grid. This implies that the grid focusgroup definition
+of `gridcells` is completely optional, assuming that `focus-group-item: cell`
+is manually designated in CSS:
+
+Example 23:
+```html
+<style>
+   [focusgroup=gridrows] > * { focus-group-item: none; }
+   .row { focus-group-item: row; }
+   .cell { focus-group-item: cell; }
+</style>
+<!-- ... -->
+<div class="soup" focusgroup=gridrows>
+  <div class="row">
+    <div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>
+  </div>
+  <div>
+    <div class="row">
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>
+  </div>
+  <div>
+    <div>
+      <div class="row">
+        <div>
+          <div class="cell"></div>
+          <div class="cell"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+```
+
+#### 6.9.4. Empty Cell data 
+
+Like linear focusgroups, focus is only set on elements that are focusable.
+The arrow key navigation algorithms look for grid focusgroup cells in the
+direction the arrow was pressed. Non-focusable grid focusgroup candidate cells
+are passed over in the search.
+
+#### 6.9.5. Non-uniform cells
+
+It is entirely possible to have rows with non-uniform numbers of cells. In these
+cases, focusgroup navigation behaviors may not work as visibly desired. Algorithms
+for navigating grid focusgroups will work based on content the grid content structure
+as specified. If the algorithms conclude that there is not "next candidate cell" to
+move to (e.g., in a grid with two rows, and the bottom row has three cells, and the
+top row only two, if the focus is on the 3rd cell, a request to move "up" to the prior
+row cannot be honored because there is no "3rd cell" in that row.
 
 ## 7. Privacy and Security Considerations
 
