@@ -1127,3 +1127,9 @@ increments), as well as the home/end keys to jump to the beginning and end of gr
 It might also be interesting to add support for typeahead scenarios (though what values to
 look for when building an index would need to be worked out, and may ultimately prove to be
 too complicated).
+
+## Acknowledgments
+
+Special thanks to those have have reviewed, commented on, filed issues, and talked with us
+offline about focusgroup. Your insight and ideas and contributions have helped dramatically
+improve this proposal.
