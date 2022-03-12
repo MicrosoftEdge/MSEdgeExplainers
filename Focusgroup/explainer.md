@@ -115,7 +115,7 @@ focus tracking are unchanged with this proposal.
 5. (Extend same direction) Focusgroups can be nested to provide arrow navigation into multiple 
     composed widgets (such as lists within lists).
 6. (Extend opposite direction) Focusgroups can be nested to provide arrow navigation into composed
-    widgets with orthogonal navigation semanantics (such as horizontal-inside-vertical menus).
+    widgets with orthogonal navigation semantics (such as horizontal-inside-vertical menus).
 7. (Multiple focusgroups) Multiple focusgroups can be established on a single element (advanced CSS 
     scenario).
 8. (Opt-out) Individual elements can opt-out of focusgroup participation (advanced CSS scenario)
@@ -310,7 +310,7 @@ assign a focusgroup candidate state to a descendant element (explained later). T
 `extend`. A linear focusgroup definition can declare that it intends to `extend` an ancestor linear 
 focusgroup. If there is an ancestor linear focusgroup of the same name, the extending focusgroup
 becomes an extension of that ancestor's focusgroup. Extending a linear focusgroup is also an
-opportunity to change the directionality (and, conditionally, the wrappping) of the newly extended
+opportunity to change the directionality (and, conditionally, the wrapping) of the newly extended
 focusgroup candidates (as described later).
 
 Using `extend` in a focusgroup definition is only valid for linear focusgroups. Grid focusgroups 
@@ -598,7 +598,7 @@ Example 14:
 The above is a case where the focusgroups make an extended linear focusgroup in the horizontal
 direction (`wrap` state cannot be changed by the child for the horizontal direction), and a 
 descender/ascender relationship in the vertical direction (it's one-way: from the `<span>` to the
-`<div>` not vice-versa). But because the `<span>`'s focusgroup defintion does not support the 
+`<div>` not vice-versa). But because the `<span>`'s focusgroup definition does not support the 
 vertical direction, wrapping state is not extended from the parent. Conversely:
 
 Example 15:
@@ -725,7 +725,7 @@ focusgroup definitions):
 
 | CSS property & value | Explanation |
 |----------------------|-------------|
-| focus&#8209;group&#8209;item:&nbsp;auto | Opt-in to a focusgroup: this element becomes a focusgroup candidate for the **nearest ancestor** that defines a linear focusgroup matching `auto`. The element will "search" its parent nodes looking for a matching focusgroup definition and will become an "extension" of that group (i.e., similar to using `extend`, but without the opportunity to re-establish a new focusgroup defintion) |
+| focus&#8209;group&#8209;item:&nbsp;auto | Opt-in to a focusgroup: this element becomes a focusgroup candidate for the **nearest ancestor** that defines a linear focusgroup matching `auto`. The element will "search" its parent nodes looking for a matching focusgroup definition and will become an "extension" of that group (i.e., similar to using `extend`, but without the opportunity to re-establish a new focusgroup definition) |
 | focus&#8209;group&#8209;item:&nbsp;none | Opt-out of a focusgroup: this element will not participate in **any** focusgroup. (`none` is the initial value when there is no focusgroup definition on a parent element; `auto` is the initial value when there is a parent focusgroup definition.) |
 
 In the following example, the `options-widget` opts-out of participation in the focusgroup.
@@ -791,7 +791,7 @@ focusgroup it belongs to is the one specified by its `focus-group-item` value.
 |----------------------|-------------|
 | focus&#8209;group&#8209;name:&nbsp;<custom&nbsp;ident> | Gives the focusgroup a custom identifiers. Only focusgroup candidates that opt-in to this named identifier will belong to this focusgroup. |
 | focus&#8209;group&#8209;item:&nbsp;<custom&nbsp;ident> | Declares this focusgroup candidate's intention to belong to a focusgroup definition with the given identifier. If there is no matching focusgroup definition with this name in its ancestry, then this is an error and this item will revert to focus-group-item: `none` (or `auto` if it is a child of an element defining a linear focusgroup. |
-| focus&#8209;group&#8209;name, focus&#8209;group&#8209;direction, and focus&#8209;group&#8209;wrap | Each allows comma-separated list to accomodate multiple definitions. |
+| focus&#8209;group&#8209;name, focus&#8209;group&#8209;direction, and focus&#8209;group&#8209;wrap | Each allows comma-separated list to accommodate multiple definitions. |
 
 The following example shows one parent element that has two focusgroups defined, and 
 opts half of the children into one and half into the other.
@@ -860,12 +860,12 @@ throughout).
 
 As noted previously the `extend` value is not applicable to grid focusgroups, and 
 grid focusgroups cannot be combined with linear focusgroups. While it is obviously
-possible to create linear focusgroups inside of a grid cell datastructure, and 
+possible to create linear focusgroups inside of a grid cell data structure, and 
 vice-versa (a grid as a value of a list), this proposal does not allow these different
 focusgroup types to be connected automatically. Some additional scripting may be
 necessary to add explicit "cell enter/exit" behavior (or just use the Tab key).
 
-#### 6.9.2. Setting up a grid focusgroup
+#### 6.9.3. Setting up a grid focusgroup
 
 Grid focusgroups can be created "automatically" or manually. HTML only supports
 the "automatic" grid, while CSS can be used to do the same or to manually
@@ -889,7 +889,7 @@ Elements with the `grid` focusgroup definition on the root element of the struct
 grid become automatic grid focusgroups. The implementation must attempt to validate
 the structure of the grid to ensure it has appropriate row and cell structures. In the 
 event that the implementation cannot automatically determine the grid structure, then
-the defintion is ignored (i.e., there is no fallback to a linear grid).
+the definition is ignored (i.e., there is no fallback to a linear grid).
 
 | HTML attribute value | CSS property & value | Explanation |
 |----------------------|----------------------|-------------|
@@ -911,7 +911,7 @@ arrow keys in this grid focusgroup will navigate between cells in the table, and
 up/down arrow keys will compute the new target based on the DOM position of the
 current focusgroup candidate cell in relation to the focusgroup candidate row. 
 
-#### 6.9.3. Manual grids: row and cell connections
+#### 6.9.4. Manual grids: row and cell connections
 
 A manual grid is declared in a focusgroup definition with the name `manual-grid`.
 With a manual grid, the rows and cells must be explicitly indicated using 
@@ -998,14 +998,14 @@ Example 24:
   </div>
 ```
 
-#### 6.9.4. Empty Cell data 
+#### 6.9.5. Empty Cell data 
 
 Like linear focusgroups, focus is only set on elements that are focusable.
 The arrow key navigation algorithms look for grid focusgroup cells in the
 direction the arrow was pressed. Non-focusable grid focusgroup candidate cells
 are passed over in the search.
 
-#### 6.9.5. Non-uniform cells
+#### 6.9.6. Non-uniform cells
 
 It is entirely possible to have rows with non-uniform numbers of cells. In these
 cases, focusgroup navigation behaviors may not work as visibly desired. Algorithms
@@ -1074,7 +1074,7 @@ differ in some significant ways:
         zoom level), authors must likely provide dynamic run-time updates to `nav-*` properties 
         in order to keep top/left/bottom/right navigation logical per the current layout.
     * Related to the previous point, it can be easy to make logical errors in navigation 
-        sequences when targetting specific directions. This can lead to directions that don't
+        sequences when targeting specific directions. This can lead to directions that don't
         match the property names (e.g., `nav-left` actually navigates up or right) while also
         opening up the possibility of unidirectional navigation (e.g., after navigating right,
         the user can't go "back" to the left due to missing or erroneous selectors).
@@ -1145,7 +1145,7 @@ the element's preexisting built-in behavior in favor of the new generic behavior
 Implementation experience and additional community feedback will be necessary to land 
 a reasonable plan for this case.
 
-### 9.1. Additional Keyboard support 
+### 10.1. Additional Keyboard support 
 
 In addition to arrow keys, the focusgroup should also enable other navigation keys such as
 pageup/down for paginated movement (TBD on how this could be calculated and in what 
@@ -1157,6 +1157,6 @@ too complicated).
 
 ## Acknowledgments
 
-Special thanks to those have have reviewed, commented on, filed issues, and talked with us
+Special thanks to those who have reviewed, commented on, filed issues, and talked with us
 offline about focusgroup. Your insight and ideas and contributions have helped dramatically
 improve this proposal.
