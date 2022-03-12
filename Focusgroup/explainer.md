@@ -124,7 +124,7 @@ focus tracking are unchanged with this proposal.
 
 ## 6. Focusgroup Concepts
 
-A focusgroup is a group of elements that are related by arrow-key navigation and for which the 
+A focusgroup is a group of elements that are related by arrow-key navigation and for which the web
 platform provides the arrow key navigation behavior by default (no JavaScript event handlers needed)!
 Navigation is provided according to order or structure of the DOM (not how the content is presented 
 in a user interface).
@@ -161,8 +161,6 @@ Example 1:
 
 Using CSS, a focusgroup definition can be applied with selectors, and must include a name. `auto` is 
 a reserved name that corresponds to the same focusgroup implied by the HTML `focusgroup` attribute.
-(Several additional reserved names are defined for grid focusgroups; any other name is considered a custom
-linear focusgroup.)
 
 ```css
 #parent { 
@@ -258,11 +256,13 @@ Example 3:
 
 The focusgroup doesn't "remember" the last element that was focused when focus leaves the group 
 and returns later. Instead, the "leaving" and "returning" logic (for keyboard scenarios) depends on the
-preexisting *tabindex sequential focus navigation* only. In other words, because Tab is often used to enter,
-optionally move through, and leave a focusgroup, the enter-and-exit points depend on which elements
-participate in the tab order (those with `tabindex=0` for example). The [CSS Toggles](https://tabatkins.github.io/css-toggle/) 
-proposal could be used in this same scenario to track the "toggle state" among this group of toggle-able
-elements, allowing focus changes to be decoupled from "selection/toggle" state.
+preexisting *tabindex sequential focus navigation* only (those with `tabindex=0` for example). The
+[CSS Toggles](https://tabatkins.github.io/css-toggle/) proposal could be used in this same scenario to
+track the "toggle state" among this group of toggle-able elements, allowing focus changes to be decoupled
+from "selection/toggle" state.
+
+A future extension of this proposal may allow focus entering a focusgroup to jump to the currently 
+toggled (or the toggle with the highest value) if any toggles are set in the focusgroup.
 
 ### 6.1. Key conflicts
 
@@ -289,27 +289,29 @@ following focusgroup definition values can configure this:
 | focusgroup="wrap" | focus&#8209;group&#8209;wrap:&nbsp;wrap | **linear focusgroup**: causes movement beyond the ends of the focusgroup to wrap around to the other side; **grid focusgroup**: causes focus movement at the ends of the rows/columns to wrap around to the opposite side of the same rows/columns |
 | focusgroup="" (unspecified) | focus&#8209;group&#8209;wrap:&nbsp;nowrap | Disables any kind of wrapping (the initial/default value) |
 
-The following are only applicable to grid focusgroups:
+The following are only applicable to grid focusgroups. Note, row and column-specific wrapping
+and flowing can be specified together: `focus-group-wrap` supports two-token specifiers for 
+this purpose.
 
 | HTML attribute value | CSS property & value | Explanation |
 |----------------------|----------------------|-------------|
-| focusgroup="row&#8209;wrap" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;wrap | Rows wrap around, but column wrapping [and flowing as described below] is disabled. |
+| focusgroup="row&#8209;wrap" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;wrap | Rows wrap around, column wrapping [and flowing as described below] is disabled. |
 | focusgroup="col&#8209;wrap" | focus&#8209;group&#8209;wrap:&nbsp;col&#8209;wrap | Columns wrap around, but row wrapping [and flowing as described below] is disabled. |
+| focusgroup="row&#8209;wrap&nbsp;col&#8209;flow | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;wrap&nbsp;col&#8209;flow | Rows wrap around, and columns flow (as described below). Similar combination possible for `row-flow` and `col-wrap`. Using `row-wrap` and `col-wrap` is equivalent to specifying `wrap` |
 | focusgroup="flow" | focus&#8209;group&#8209;wrap:&nbsp;flow | Movement past the end of a row wraps the focus to the beginning of **the next row**. Movement past the beginning of a row wraps focus back to the end of **the prior row**. Same for columns. The last row/column wraps to the first row/column and vice versa. |
 | focusgroup="row&#8209;flow" | focus&#8209;group&#8209;wrap:&nbsp;row&#8209;flow | Rows "flow" from row ends to the next/prior row as described above, but column flowing/wrapping is disabled. |
 | focusgroup="col&#8209;flow" | focus&#8209;group&#8209;wrap:&nbsp;col&#8209;flow | Columns "flow" from column ends to the next/prior column as described above, but row flowing/wrapping is disabled. |
 
-No option is provided for the hybrid condition of row wrap + column flow behavior (or vice-versa) in the 
-same grid. If this combination of behavior is needed, we want to hear this feedback.
-
 ### 6.4. Expanding and connecting linear focusgroups together (`extend`)
 
-By default, a focusgroup definition's focusgroup candidates are its direct children. To "extend the
-reach" of a linear focusgroup's candidates, a linear focusgroup definition can declare that it intends
-to `extend` an ancestor linear focusgroup. If there is an ancestor linear focusgroup of the same name,
-the extending focusgroup becomes an extension of that ancestor's focusgroup. Extending a linear 
-focusgroup is also an opportunity to change the directionality (and, conditionally, the wrappping) of
-the newly extended focusgroup candidates (as described later).
+By default, a focusgroup definition's focusgroup candidates are its direct children. There are two
+ways to "extend the reach" of a linear focusgroup's candidates. One way is to use CSS to directly 
+assign a focusgroup candidate state to a descendant element (explained later). The other is to use
+`extend`. A linear focusgroup definition can declare that it intends to `extend` an ancestor linear 
+focusgroup. If there is an ancestor linear focusgroup of the same name, the extending focusgroup
+becomes an extension of that ancestor's focusgroup. Extending a linear focusgroup is also an
+opportunity to change the directionality (and, conditionally, the wrappping) of the newly extended
+focusgroup candidates (as described later).
 
 Using `extend` in a focusgroup definition is only valid for linear focusgroups. Grid focusgroups 
 **cannot** use `extend` to become a part of linear focusgroup. Similarly, linear focusgroups **cannot**
@@ -695,9 +697,9 @@ structure in the markup. To "unify" the `<focusable-entry>`s into one logical li
 arrow navigation, the focusgroup on the `<div>` just extends in the same direction as 
 the parent (and the wrapping value is also extended).
 
-### 6.7. Opting-out
+### 6.7. Opting-in & opting-out
 
-Focusgroup definitions are assigned to an element in order to define the behavior for 
+Focusgroup definitions are assigned to an element in order to set the behavior for 
 their *child elements* which become focusgroup candidates. Because all *child elements*
 are focusgroup candidates, any child element that is (or becomes) focusable will
 automatically become a focusgroup item belonging to it's parent's focusgroup.
@@ -706,21 +708,27 @@ What if an element should be focusable, exists as a child of an element with a f
 definition (because some of its other focusable siblings *should* belong to the focusgroup), 
 but does not want to participate in the focusgroup?
 
-Individual focusgroup candidates have the option of "opting-out" of participation in any
-focusgroup. Opting-out is a local focusgroup item decision (it should not be managed at the
-focusgroup definition attached to the parent element). In order for a focusgroup item to
-opt-out, a new (local) mechanism is needed.
+Conversely, what if an element that is not a direct child of a linear focusgroup (but is
+a descendant) would like to become a member of a focusgroup without using `extend`?
 
-In this proposal, there is no way for a focusgroup item to opt-out using HTML alone (a 
-proposal would likely require a new attribute with different focusgroup semantics, and
-this opt-out scenario is considered an edge-case).
+Individual focusgroup candidates can "opt-out" or "opt-in" to participation in any
+focusgroup. Opting-in or out is a local focusgroup item decision (it is not be managed at 
+the focusgroup definition attached to the parent element). In order for a focusgroup item to
+opt-in or out, a new (local) mechanism is needed.
 
-To opt-out, a CSS property is used, which applies only to focusgroup candidates (not
+In this proposal, there is no way for a *focusgroup candidate* to opt-in or out using HTML
+alone (a proposal would likely require a new attribute with different focusgroup semantics, 
+and opt-in or opt-out scenarios are considered edge-cases).
+
+To opt-in or opt-out, a CSS property is used, which applies only to focusgroup candidates (not
 focusgroup definitions):
 
 | CSS property & value | Explanation |
 |----------------------|-------------|
-| focus&#8209;group&#8209;item:&nbsp;none | This focusgroup item will not participate in **any** focusgroup. (`none` is the initial value when there is no focusgroup definition on a parent element; `auto` is the initial value when there is a parent focusgropu definition.)  |
+| focus&#8209;group&#8209;item:&nbsp;auto | Opt-in to a focusgroup: this element becomes a focusgroup candidate for the **nearest ancestor** that defines a linear focusgroup matching `auto`. The element will "search" its parent nodes looking for a matching focusgroup definition and will become an "extension" of that group (i.e., similar to using `extend`, but without the opportunity to re-establish a new focusgroup defintion) |
+| focus&#8209;group&#8209;item:&nbsp;none | Opt-out of a focusgroup: this element will not participate in **any** focusgroup. (`none` is the initial value when there is no focusgroup definition on a parent element; `auto` is the initial value when there is a parent focusgroup definition.) |
+
+In the following example, the `options-widget` opts-out of participation in the focusgroup.
 
 Example 19:
 ```html
@@ -738,9 +746,31 @@ Example 19:
 </control-row>
 ```
 
+In the following example, the <deep-child> element opts-in to the focusgroup defined on "ancestor".
+
+Example 20:
+```html
+<style>
+  #ancestor { focus-group: auto; }
+  .optin { focus-group-item: auto; }
+</style>
+<!-- ... -->
+<div id=ancestor>
+  <div>
+    <div>
+      <div>
+        <div>
+          <deep-child class=optin>...</deep-child>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
 ### 6.8. Multiple focusgroups among siblings
 
-Similar to how some focusgroup candidates may want to opt-out (see prior section), other
+Similar to how some focusgroup candidates can opt-in or opt-out (see prior section), other
 focusgroup candidates among a set of sibling elements may desire to participate in a 
 separate focusgroup from their other siblings.
 
@@ -750,7 +780,7 @@ definition it would like to belong to (assuming it is focusable).
 
 CSS quite easily allows multiple focusgroup definitions to be applied to a single 
 container element via custom identifiers (this would be less elegant with HTML 
-attributes). The name `auto` (and the grid focusgroup names) are reserved, but other
+attributes). The name `auto` (and the grid focusgroup name) is reserved, but other
 values are treated as custom identifiers and define new focusgroup definitions that
 focusgroup candidates can opt-into.
 
@@ -760,13 +790,13 @@ focusgroup it belongs to is the one specified by its `focus-group-item` value.
 | CSS property & value | Explanation |
 |----------------------|-------------|
 | focus&#8209;group&#8209;name:&nbsp;<custom&nbsp;ident> | Gives the focusgroup a custom identifiers. Only focusgroup candidates that opt-in to this named identifier will belong to this focusgroup. |
-| focus&#8209;group&#8209;item:&nbsp;<custom&nbsp;ident> | Declares this focusgroup candidates intention to belong to a focusgroup definition with the given identifier. |
+| focus&#8209;group&#8209;item:&nbsp;<custom&nbsp;ident> | Declares this focusgroup candidate's intention to belong to a focusgroup definition with the given identifier. If there is no matching focusgroup definition with this name in its ancestry, then this is an error and this item will revert to focus-group-item: `none` (or `auto` if it is a child of an element defining a linear focusgroup. |
 | focus&#8209;group&#8209;name, focus&#8209;group&#8209;direction, and focus&#8209;group&#8209;wrap | Each allows comma-separated list to accomodate multiple definitions. |
 
 The following example shows one parent element that has two focusgroups defined, and 
 opts half of the children into one and half into the other.
 
-Example 20:
+Example 21:
 ```html
 <style>
   tabs { 
@@ -837,70 +867,79 @@ necessary to add explicit "cell enter/exit" behavior (or just use the Tab key).
 
 #### 6.9.2. Setting up a grid focusgroup
 
-Two interrelated grid focusgroup definitions are necessary to properly setup a
-grid. First, the grid's row elements must be identified, and then the cells 
-within the row. 
+Grid focusgroups can be created "automatically" or manually. HTML only supports
+the "automatic" grid, while CSS can be used to do the same or to manually
+describe the parts of the grid.
+         
+Automatic grids use the context of existing HTML semantics for tables as the
+structural components necessary to provide grid-based navigation. Any elements
+with computed table layout are suitable for an automatic grid (e.g., 
+`display: table-row` in place of using a `<tr>` elements).
+         
+(We are evaluating the suitability for other grid-like patterns including CSS
+`display: grid` or ARIA role=grid.)
 
-This proposal provides two ways of identifying these grid parts: 
-* using a focusgroup definition (applied to the appropriate parent container)
-* using a focusgroup item override
+The automatic grid approach will be preferable when the grid contents are uniform 
+and consistent and when re-using semantic elements for grids (typical). The manual
+approach may be necessary when the grid structure is not uniform or structurally
+inconsistent (atypical), and involves identifying the parts of the grid on specific
+focusgroup candidates using CSS.
 
-The first technique will be preferable when the grid contents are uniform and
-consistent (typical). It is also the only way of defining a grid focusgroup using
-HTML attributes.
-
-The second approach may be necessary when the grid structure is not uniform or 
-structurally consistent (atypical), and involves identifying the specific parts 
-of the grid on the specific focusgroup items.
-
-As with linear focusgroup definitions, the child elements of the element with a
-grid focusgroup definition become focusgroup candidates. A focusgroup reserved
-name of `gridrows` automatically creates row focusgroup candidates on 
-its children. Similarly, a focusgroup name of `gridcells` automatically creates
-cell focusgroup candidates on its children.
-
-Elements with the `gridcells` focusgroup definition must be descendants of an
-element with a `gridrows` focusgroup definition (but not necessarily direct 
-children of each other).
+Elements with the `grid` focusgroup definition on the root element of the structural
+grid become automatic grid focusgroups. The implementation must attempt to validate
+the structure of the grid to ensure it has appropriate row and cell structures. In the 
+event that the implementation cannot automatically determine the grid structure, then
+the defintion is ignored (i.e., there is no fallback to a linear grid).
 
 | HTML attribute value | CSS property & value | Explanation |
 |----------------------|----------------------|-------------|
-| focusgroup="gridrows" | focus&#8209;group&#8209;name:&nbsp;gridrows | Establishes the root of a grid focusgroup, and designates its children as `focus-group-item: row` focusgroup candidates. |
-| focusgroup="gridcells" | focus&#8209;group&#8209;name:&nbsp;gridcells | Must be a descendant of a grid focusgroup root (i.e., the `gridrows` element). Designates its children as `focus-group-item: cell` focusgroup candidates. |
+| focusgroup="grid" | focus&#8209;group&#8209;name:&nbsp;grid | Establishes the root of an automatic grid focusgroup. Descendants of the automatic grid are identified and assigned `focus-group-item: row` and `focus-group-item: cell` focusgroup candidate status automatically. |
 
-Example 21:
+Example 22:
 ```html
-<tbody focusgroup=gridrows> 
-  <tr focusgroup=gridcells>…</tr> 
-  <tr focusgroup=gridcells>…</tr> 
-  <tr focusgroup=gridcells>…</tr> 
-</tbody> 
+<table focusgroup=grid> 
+  <tr>…</tr> 
+  <tr>…</tr> 
+  <tr>…</tr> 
+</table> 
 ```
 
-The `<tbody>`'s "gridrows" focusgroup definition establishes each of its children (`<tr>`s)
-as focusgroup candidate rows. The `<tr>`'s "gridcells" focusgroup definition makes each of 
-its children (anticipated to be `<td>`'s) focusgroup candidate cells. Left/right 
+The `<table>`'s "grid" focusgroup definition automatically establishes each of its 
+descendant `<tr>`s as focusgroup candidate rows (the parser-generated `<tbody>` is
+accounted for) and `<td>`s as focusgroup candidate cells. Left/right 
 arrow keys in this grid focusgroup will navigate between cells in the table, and 
 up/down arrow keys will compute the new target based on the DOM position of the
 current focusgroup candidate cell in relation to the focusgroup candidate row. 
 
-#### 6.9.3. Implicit row and cell connections
+#### 6.9.3. Manual grids: row and cell connections
 
-Grid focusgroup rows and cells do not need to be direct children of the element
-that includes the grid focusgroup definition (either "gridrows" or "gridcells") in
-order to participate in the grid structure. Each focusgroup candidate will 
-perform an ancestor search to locate its nearest grid structural component: cells
-will look for their nearest row, and rows will look for their nearest grid root.
+A manual grid is declared in a focusgroup definition with the name `manual-grid`.
+With a manual grid, the rows and cells must be explicitly indicated using 
+`focus-group-item: row` and `focus-group-item: cell`.
+
+| HTML attribute value | CSS property & value | Explanation |
+|----------------------|----------------------|-------------|
+| n/a | focus&#8209;group&#8209;name:&nbsp;manual-grid | Establishes the root of a manual grid focusgroup. Descendants of the manual grid must be identified with `focus-group-item: row` and `focus-group-item: cell` explicitly. |
+| n/a | focus&#8209;group&#8209;item:&nbsp;row | Must be a descendant of a grid focusgroup root (i.e., the `manual-grid`-named focusgroup element). |
+| n/a | focus&#8209;group&#8209;item:&nbsp;cell | Must be a descendant of a grid focusgroup root (i.e., the `manual-grid`-named focusgroup element). Must also be a descendant of a `focus-group-item: row` focusgroup candidate. |
+
+Cells cannot be children of other cells, and rows cannot be children of rows.
+  
+Manual grid focusgroup rows and cells do not need to be direct children of the element
+that includes the manual grid focusgroup definition in order to participate in the grid
+structure. Each focusgroup candidate will perform an ancestor search to locate its nearest
+grid structural component: cells will look for their nearest row, and rows will look for
+their nearest manual-grid root.
 
 In the following example, the `<my-cell>`s are all meant to be on the same row of the
 grid, and the rows are designated by `<my-row>` elements:
 
-Example 22:
+Example 23:
 ```html
 <style>
-   my-root { focus-group-name: gridrows; }
-   my-root > div { focus-group-item: none; } /* opt-out these extra wrappers from being considered rows */
-   cell-container { focus-group-name: gridcells; }
+   my-root { focus-group-name: manual-grid; }
+   my-row { focus-group-item: row; }
+   my-cell { focus-group-name: cell; }
 </style>
 <!-- ... -->
 <my-root>
@@ -920,33 +959,21 @@ Example 22:
 </my-root>
 ```
 
-Using CSS, specific row and cell focusgroup candidates can be set directly 
-using the `focus-group-item` property. Reserved values of `row` and `cell`
-opt-in a focusgroup candidate to that behavior. Cells cannot be children of 
-other cells, and rows cannot be children of rows. `focus-group-item: none` 
-can be used to disable candidate children that might otherwise prevent the 
-grid focusgroup from having the proper structure.
+The following non-uniform structure can still have grid semantics added
+via `manual-grid`:
 
-| HTML attribute value | CSS property & value | Explanation |
-|----------------------|----------------------|-------------|
-| n/a | focus&#8209;group&#8209;item:&nbsp;row | Designates this element as a grid focusgroup candidate row. Must have a `gridrows` ancestor. Does not need to be focusable. All `focus-group-item: cell` candidates that are descendants of this row are considered included in this row (in DOM order). |
-| n/a | focus&#8209;group&#8209;item:&nbsp;cell | Designates this element as a grid focusgroup candidate cell. Must have a `focus-group-item: row` ancestor. Must be focusable in order to be a focusgroup item. |
-
-The grid focusgroup root (element with the `gridrows` focusgroup definition)
-only operates on the focusgroup candidates of `row` and `cell` in order to 
-properly navigate the grid. This implies that the grid focusgroup definition
-of `gridcells` is completely optional, assuming that `focus-group-item: cell`
-is manually designated in CSS:
-
-Example 23:
+Example 24:
 ```html
 <style>
-   [focusgroup=gridrows] > * { focus-group-item: none; }
+   .root { 
+     focus-group-name: manual-grid;
+     focus-group-wrap: flow;
+   }
    .row { focus-group-item: row; }
    .cell { focus-group-item: cell; }
 </style>
 <!-- ... -->
-<div class="soup" focusgroup=gridrows>
+<div class="root">
   <div class="row">
     <div>
       <div class="cell"></div>
