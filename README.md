@@ -243,11 +243,6 @@ and update frequency!⭐
 For explainers that were hosted in this repo, an achived copy remains here, and the related explainers
 link to their new location.
 
-TODO
-* Migrate issues
-* Drop labels
-* Re-link
-
 * [Closeable tabs](https://docs.google.com/document/d/1TC1FxzSgRIaXmChpjL05T7sZuduRos3IDPDG5vCS1Oc/)
 * [CSS Grid Tooling](https://docs.google.com/document/d/1s0AkeMOtlwqD74GJZtedxqOnttQtgj9oo8RjfVyaHP8/)
 * [Customizable Keyboard Shortcuts](https://docs.google.com/document/d/1oOPSWPxCHvMoBZ0Fw9jwFZt6gP4lrsrsl8DEAp-Hy7o/)
