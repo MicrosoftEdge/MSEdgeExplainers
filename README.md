@@ -96,7 +96,7 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Custom%20Control%20UI">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Custom%20Control%20UI?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md&title=%5BEnabling+Custom+Control+UI%5D+%3CTITLE+HERE%3E)
-* [focusgroup for HTML and CSS](Focusgroup/explainer.md) ([video overview](https://us02web.zoom.us/rec/play/M9CQws3fPYB6vzKjvjJi6uVgYbzHKZ2L5pWpZ-A_VNUa8SbPiqsZFoGX4TmbgClfIo2RHZdeHxoi3gyN.BJWX3lSoah5ddYDW?continueMode=true&_x_zm_rtaid=vgoo4d78TTmnS6SlqvSKQw.1631896465490.797a543ba5ef0034680f19392aa6a088&_x_zm_rhtaid=706)) |
+* [focusgroup for HTML and CSS](Focusgroup/explainer.md) |
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/focusgroup">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/focusgroup?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead&labels=focusgroup&template=focusgroup.md&title=%5Bfocusgroup%5D+%3CTITLE+HERE%3E)
