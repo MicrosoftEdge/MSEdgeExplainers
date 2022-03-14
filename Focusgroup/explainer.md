@@ -32,7 +32,7 @@ expose a primitive** that can be used independently to get this behavior.
 
 We propose exposing a new web platform primitive—'focusgroup'—to facilitate focus navigation (not selection)
 using arrow keys among a set of focusable elements. This feature can then be used 
-(**without any JavaScript**) to easily supply platform-provided focus group navigation into
+(**without any JavaScript**) to easily supply platform-provided focusgroup navigation into
 custom-authored controls in a standardized and predictable way for users.
 
 Customers like Microsoft's Fluent UI team are excited to leverage this built-in capacity
@@ -119,8 +119,8 @@ focus tracking are unchanged with this proposal.
 7. (Multiple focusgroups) Multiple focusgroups can be established on a single element (advanced CSS 
     scenario).
 8. (Opt-out) Individual elements can opt-out of focusgroup participation (advanced CSS scenario)
-9. (Grid) Focusgroups can be used for grid-type navigation (structured content grids like &lt;table&gt;,
-    not "presentation" grids).
+9. (Grid) Focusgroups can be used for grid-type navigation (&lt;table&gt;-structured content or other
+    grid-like structured content (advanced CSS scenario), but not "presentation" grids).
 
 ## 6. Focusgroup Concepts
 
@@ -134,14 +134,15 @@ Linear focusgroups provide arrow key navigation among a *list* of elements. Grid
 arrow key navigation behavior for tabular (or 2-dimensional) data structures.
 
 Multiple linear focusgroups can be combined together into one logical focusgroup, but linear focusgroups
-cannot be combined with grid focusgroups and vice-versa.
+cannot be combined with grid focusgroups and vice-versa (and grid focusgroups cannot be combined with
+each other).
 
 Focusgroups consist of a **focusgroup definition** that establish **focusgroup candidates** and
 **focusgroup items**. Focusgroup definitions manage the desired behavior for the associated focusgroup 
 items. Focusgroup items are the elements that actually participate in the focusgroup (among the possible
 focusgroup candidates).
 
-When a focusgroup definition is associated with an element, all of that element's direct children
+When a linear focusgroup definition is associated with an element, all of that element's direct children
 become focusgroup candidates. Focusgroup candidates become focusgroup items if they are focusable, e.g.,
 implicitly focusable elements like `<button>`, or explicitly made focusable via `tabindex` or some
 other mechanism (e.g., `contenteditable`).
@@ -178,12 +179,12 @@ of the tabindex sequential navigation ordering).
 
 Focusgroup definitions may include the following (in addition to a name):
 
-* extend -- a mechanism to join this focus group to an ancestor focusgroup. Note: linear focusgroups cannot
-   be joined to grid focusgroups and vice versa.
+* extend -- applies to linear focusgroups only: a mechanism to join this linear focusgroup to an ancestor 
+   linear focusgroup.
 * direction -- applies to linear focusgroups only: constrains the keys used for arrow key navigation to 
    horizontal, vertical, or both (the default).
 * wrap -- what to do when the attempting to move past the end of a focusgroup. The default/initial value is 
-   nowrap which means that focus is not moved past the end of a focus group with the arrow keys.
+   nowrap which means that focus is not moved past the end of a focusgroup with the arrow keys.
 
 In HTML these focusgroup definitions are applied as space-separated token values to the `focusgroup` 
 attribute. In CSS, these definitions are specified as properties (including a `focus-group` shorthand
@@ -280,7 +281,7 @@ to be used to "exit" these trapping elements).
 
 ### 6.3. Enabling wrapping behaviors
 
-By default, focusgroup traversal with arrow keys ends at boundaries of the focus group (the start and
+By default, focusgroup traversal with arrow keys ends at boundaries of the focusgroup (the start and
 end of a linear focusgroup, and the start and end of both rows and columns in a grid focusgroup). The 
 following focusgroup definition values can configure this:
 
