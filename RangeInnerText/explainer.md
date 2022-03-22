@@ -128,7 +128,7 @@ enum Endpoint {
     "end"
 }
 
-partial interface AbstractRange {
+partial interface Range {
     readonly DOMString innerText;
     void adjust(Endpoint endpoint, long codeunits);
 }
