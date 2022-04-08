@@ -31,7 +31,7 @@ The following code uses the ```::highlight``` pseudo-element to apply a yellow b
 
     let highlight = new Highlight(highlightsRange);
 
-    CSS.highlights.set("example-highlight", Highlight);
+    CSS.highlights.set("example-highlight", highlight);
 </script>
 ```
 
