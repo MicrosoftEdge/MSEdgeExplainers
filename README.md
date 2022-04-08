@@ -169,6 +169,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Version%20History">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Version%20History?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+stanleyhon&labels=Version+History&template=version-history.md&title=%5BVersion+History%5D+%3CTITLE+HERE%3E)
+* [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/GamepadHapticsActuatorTriggerRumble">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/GamepadHapticsActuatorTriggerRumble?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=GamepadHapticsActuatorTriggerRumble&template=gamepad-haptics-actuator-trigger-rumble.md&title=%5BGamepadHapticsActuator+Trigger+Rumble%5D+%3CTITLE+HERE%3E)
 
 ### Storage
 
