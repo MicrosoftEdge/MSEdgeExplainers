@@ -108,14 +108,14 @@ async function initiateSpellcheck(editableRegion) {
 
     // `results` is an array of misspelled word + code unit offsets.
     results.forEach((result) => {
-      let misspelling = new StaticRange(range);
+      let misspelling = new Range(range);
       misspelling.adjust("start", result.offset);
       misspelling.collapse(/*toStart*/ true);
       misspelling.adjust("end", result.text.length);
 
       // Add misspelling range to highlight map so that the
       // squiggles are drawn underneath via Highlight API.
-      CSS.highlights.set("misspellings", new Highlight(mispelling));
+      CSS.highlights.set("misspellings", new Highlight(new StaticRange(mispelling)));
     });
   });
 }
@@ -128,7 +128,7 @@ enum Endpoint {
     "end"
 }
 
-partial interface AbstractRange {
+partial interface Range {
     readonly DOMString innerText;
     void adjust(Endpoint endpoint, long codeunits);
 }
