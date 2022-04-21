@@ -11,9 +11,9 @@ developing collaborative solutions fit for standardization. As the solutions to 
 described in this document progress along the standards-track, we will retain this 
 document as an archive and use this section to keep the community up-to-date with the 
 most current standards venue and content location of future work and discussions.
-* This document status: **Active**
-* Expected venue: [WHATWG HTML Workstream](https://whatwg.org/workstreams#:~:text=html)
-* **Current version: this document**
+* This document status: **`ARCHIVED`**
+* Current venue: [Open UI Community Group](https://www.w3.org/community/open-ui/)
+* **Current version: https://open-ui.org/components/focusgroup.explainer**
 
 ## 1. Introduction
 
