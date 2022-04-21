@@ -96,10 +96,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Custom%20Control%20UI">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Custom%20Control%20UI?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dandclark&labels=Custom+Control+UI&template=custom-control-ui.md&title=%5BEnabling+Custom+Control+UI%5D+%3CTITLE+HERE%3E)
-* [focusgroup for HTML and CSS](Focusgroup/explainer.md) |
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/focusgroup">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/focusgroup?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead&labels=focusgroup&template=focusgroup.md&title=%5Bfocusgroup%5D+%3CTITLE+HERE%3E)
 
 ### JavaScript
 
@@ -207,9 +203,9 @@ status section to help you find where the latest discussions are happening.
 Please continue to participate and follow the links below to the current
 standards communities. Thanks for your continued interest!
 
-
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
+| [focusgroup for HTML and CSS](https://open-ui.org/components/focusgroup.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2022-04-09](Focusgroup/explainer.md) |
 | [Web App Link Handling Manifest Options](https://github.com/WICG/pwa-url-handler/blob/main/handle_links/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-09-28 |
 | [EyeDropper API](https://github.com/WICG/eyedropper-api/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2021-08-03](EyeDropper/explainer.md) |
 | [Virtual Keyboard Policy](https://www.w3.org/TR/virtual-keyboard/) | [W3C Editing Working Group](https://w3c.github.io/editing/) | [2021-07-29](VirtualKeyboardPolicy/explainer.md) |
