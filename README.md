@@ -3,7 +3,7 @@
 Welcome! This repo is home to "explainers" and related documents originating 
 from the Microsoft Edge team.
 
-#### Jump to section: [Active Explainers](#active-explainers-) | [Alumni](#alumni-) | [DevTools](#devtools-) | [Other documents](#other-documents) | [Withdrawn](#withdrawn)
+#### Jump to section: [Active Explainers](#active-explainers-) | [Alumni](#alumni-) | [DevTools](https://github.com/MicrosoftEdge/DevTools/tree/main/explainers) | [Other documents](#other-documents) | [Withdrawn](#withdrawn)
 
 ## Introduction
 
@@ -239,27 +239,31 @@ standards communities. Thanks for your continued interest!
 | [HTML Modules](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | [2019-02-26](HTMLModules/explainer.md) |
 
 # DevTools 🧰
-<a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DevTools">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/DevTools?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=DevTools&title=%5BDevTools%5D+%3CTITLE+HERE%3E)
 
-We love our developer tools! Checkout these cool innovations being designed for the developer tools:
+⭐Our DevTools explainers have moved to
+[their own repo](https://github.com/MicrosoftEdge/DevTools/tree/main/explainers) for improved tracking 
+and update frequency!⭐
+
+For explainers that were hosted in this repo, an achived copy remains here, and the related explainers
+link to their new location.
 
 * [Closeable tabs](https://docs.google.com/document/d/1TC1FxzSgRIaXmChpjL05T7sZuduRos3IDPDG5vCS1Oc/)
 * [CSS Grid Tooling](https://docs.google.com/document/d/1s0AkeMOtlwqD74GJZtedxqOnttQtgj9oo8RjfVyaHP8/)
 * [Customizable Keyboard Shortcuts](https://docs.google.com/document/d/1oOPSWPxCHvMoBZ0Fw9jwFZt6gP4lrsrsl8DEAp-Hy7o/)
 * [Dual-screen Emulation](https://docs.google.com/document/d/1KMsmEXdjmn4h4iIl0n74N1EHxwwNUzh6R2p7GHrdtTI)
-* [Focus Mode](DevTools/FocusMode/explainer.md)
+* [Focus Mode](https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/FocusMode/explainer.md) ([archive](DevTools/FocusMode/explainer.md))
 * [High Contrast Simulation](https://docs.google.com/document/d/1SUx-hfodUUMAIwmcwIVYlpi9YDrLnkwW0T7yXUN8s50/)
 * [Infobar UI Refresh](https://docs.google.com/document/d/1GjpfPkdljH97IAaWfY8d9NBim1wrPPRaD8zMl8PWhLs/)
 * [Localization](https://docs.google.com/document/d/1L6TkT2-42MMQ72ZSBMFwUaq7M6mDgA2X0x8oHHKaV_U/)
 * [Movable tabs](https://docs.google.com/document/d/1S4tLbaK9ukeiK6ew_kU_uiLoVlycN5gineGA05boHK4/)
 * [Redux for State](https://docs.google.com/document/d/1yVI-ABz_PL5npfoNosvv1ZKOsXhUwSMKc30UHf2RyqM/)
-* [Search Console](DevTools/SearchConsole/explainer.md)
+* [Search Console](https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/SearchConsole/explainer.md) ([archive](DevTools/SearchConsole/explainer.md))
 * [Service Worker Improvements](https://docs.google.com/document/d/1L-dhKWYoVECdoqVQ0hOKqtyWbk5LtluFWbZE8PJZtnU/)
 * [Settings Discoverability and Telemetry](https://docs.google.com/document/d/1n9AGuh0iWQoqgm749BJJELK-ckrkgnaB5jfgef9RWSA/)
 * [Settings Search](https://docs.google.com/document/d/1nRh5Y7JqNOowkOqpbYfJMbSZ1rqSHhRh_7HqzqhuHwY/)
 * [Stackable Overlays](https://docs.google.com/document/d/13MHkk0rgHJl_MAIgrouUef5k9fK7lZMI1IEiNIUKbD0/)
-* [Updated 3D View](DevTools/3DView/explainer.md) ([original](https://docs.google.com/document/d/16xsQbr1YjjuoxHJlCsAaIzK-s4Ogd6fEuhrSajdVivA))
-* [webhint](DevTools/webhint/explainer.md)
+* [Updated 3D View](https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/3DView/explainer.md) ([archive](DevTools/3DView/explainer.md), [original](https://docs.google.com/document/d/16xsQbr1YjjuoxHJlCsAaIzK-s4Ogd6fEuhrSajdVivA))
+* [webhint](https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/webhint/explainer.md) ([archive](DevTools/webhint/explainer.md))
 
 # Other Documents
 

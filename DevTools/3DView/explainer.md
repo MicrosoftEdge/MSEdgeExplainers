@@ -3,8 +3,8 @@
 Authors: [Erica Draud](https://github.com/erdraud)
 
 ## Status of this Document
-* This document status: **Active**
-* **Current version: this document**
+* This document status: **`ARCHIVED`**
+* **Current version: https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/3DView/explainer.md**
     
 ## Introduction
 We released [3D View](https://docs.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/3d-view/) as a comprehensive tool for debugging your web application in the 3D space. This document will cover enhancements and adjustments we're making based on feedback.

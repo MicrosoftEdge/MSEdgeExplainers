@@ -3,8 +3,8 @@
 Authors: [Erica Draud](https://github.com/erdraud)
 
 ## Status of this Document
-* This document status: **Active**
-* **Current version: this document**
+* This document status: **`ARCHIVED`**
+* **Current version: https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/ClientHints/explainer.md**
     
 ## Introduction
 

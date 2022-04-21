@@ -1,5 +1,9 @@
 # DevTools: Focus Mode UI
 
+## Status of this Document
+* This document status: **`ARCHIVED`**
+* **Current version: https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/FocusMode/explainer.md**
+
 Authors:
  - [Rachel Simone Weil](https://github.com/hxlnt), Program Manager
  - [Jose Leal Chapa](https://github.com/joselea), Senior Software Engineer
@@ -7,11 +11,6 @@ Authors:
  - [Chait Pinnamaneni](https://github.com/noobtiger), Software Engineer
  - Ebou Jobe, Software Engineer
  - Josephine Le, Designer
-
-## Status of this feature
-This feature is experimental and in active development. See [Changelog section](#changelog) for details on progressive feature implementation starting with Edge 90.0.810.0.
-
-The team welcomes your feedback on this feature; please [file an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=DevTools&template=devtools.md&title=%5BDevTools%5D+%3CTITLE+HERE%3E) to share your thoughts.
 
 ## Introduction
 Over the years, the Chromium DevTools have grown to include a large array of specialized tools—about 30 at time of writing—to help web developers troubleshoot web applications. Some, like **Elements** and **Console**, may be used daily, while others, like **Sensors** and **Performance monitor,** may have more specialized but infrequent use.

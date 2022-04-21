@@ -1,14 +1,15 @@
 # DevTools: webhint integration in Issues
 
+## Status of this Document
+* This document status: **`ARCHIVED`**
+* **Current version: https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/webhint/explainer.md**
+    
 Authors:
  - [Rachel Simone Weil](https://github.com/hxlnt), Program Manager
  - [Tony Ross](https://github.com/antross), Senior Software Engineer
  - [David Garcia Gomez](https://github.com/sarvaje), Software Engineer
  - [John Emau](https://github.com/johnemau), Software Engineer
  - Josephine Le, Designer
-
-## Status of this feature
-This feature is experimental and in active development. See [Changelog section](#changelog) for details on progressive feature implementation starting with Edge 85.
 
 ## Introduction
 The [2019 MDN Web Developer Needs Assessment report](https://mdn-web-dna.s3-us-west-2.amazonaws.com/MDN-Web-DNA-Report-2019.pdf) illuminates a number of pain points that web developers face in their work. The report outlines challenges in implementing and testing cross-browser compatibility, security, performance, and accessibility. Web developers also note the difficulty of keeping up with documentation and the latest best practices.

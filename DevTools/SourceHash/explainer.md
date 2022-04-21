@@ -5,10 +5,8 @@ Authors: [Rob Paveza](https://github.com/robpaveza)
 ## Status of this Document
 This document is a proposed enhancement to V8 in the area of JavaScript stack traces, which is today specifically not a Web Standard.
 
-* This document status: **Active** (One-pager)
-* Expected venue: [V8-dev](https://groups.google.com/g/v8-dev)
-* **Current version: this document**
-* Prototype [implementation](https://chromium-review.googlesource.com/c/v8/v8/+/3229957) in V8
+* This document status: **`ARCHIVED`**
+* **Current version: https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/SourceHash/explainer.md**
 
 ## Introduction
 
