@@ -169,7 +169,7 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/GamepadHapticsActuatorTriggerRumble">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/GamepadHapticsActuatorTriggerRumble?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=GamepadHapticsActuatorTriggerRumble&template=gamepad-haptics-actuator-trigger-rumble.md&title=%5BGamepadHapticsActuator+Trigger+Rumble%5D+%3CTITLE+HERE%3E)
-[PointerEvent DeviceId](PointerEventDeviceId) |
+* [PointerEvent DeviceId](PointerEventDeviceId) |
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PointerEventDeviceId">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PointerEventDeviceId?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=PointerEventDeviceId&template=pointerevent-deviceid.md&title=%5BPointerEvent+Device+ID%5D+%3CTITLE+HERE%3E)
