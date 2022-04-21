@@ -82,14 +82,7 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/RangeInnerText">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/RangeInnerText?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dlibby-&labels=RangeInnerText&template=range-innertext.md&title=%5BRangeInnerText%5D+%3CTITLE+HERE%3E)
-
-### Graphics
-
-* [Set and Reset Clip](Canvas/SetAndResetClip.md) |
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SetClip">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/SetClip?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=travisleithead%2C+sushraja-msft&labels=SetClip&template=set-and-reset-clip.md&title=%5BSet+Clip%5D+%3CTITLE+HERE%3E)
-    
+   
 ### HTML
 
 * [Enabling Custom Control UI](ControlUICustomization/explainer.md) |
@@ -117,8 +110,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Perf%20timing%20during%20browser%20start">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Perf%20timing%20during%20browser%20start?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dylank%2C+hemingzh&labels=Perf+timing+during+browser+start&template=performance-timing-during-browser-start.md&title=%5BPerf+Timing+during+launch%5D+%3CTITLE+HERE%3E)
-
-
 * [PerformanceNavigationTiming changes for protocol launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PerformanceNavigationTiming%20for%20Protocol%20Launch">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PerformanceNavigationTiming%20for%20Protocol%20Launch?label=issues)</a> |
@@ -324,6 +315,7 @@ We'd love to hear your feedback!
 
 | Explainer | Notes | Date |
 |---|---|---|
+| [Set and Reset Clip](Canvas/SetAndResetClip.md) | This feature proved technically infeasable during implementation due to shortcoming in the underlying Canvas technology stack, namely that Skia only had a way to restrict clip but not to expand it. Given additional compelling use cases, or changes in the implementation stack, this proposal could be re-considered. | 2022-04-21 |
 | [Custom Dialog on Close](Withdrawn/CustomDialogOnClose/explainer.md) | This design conflicted with the philosophy of keeping tab close as fast as possible. Work is ongoing to describe a way to meet the needs that this design aimed to address. | 2020-03-25 |
 | [Arbitrary Text Fragments](Fragments/explainer.md) | We are now directing our efforts into providing feedback on the similar proposal [ScrollToTextFragment](https://github.com/WICG/ScrollToTextFragment/) already being incubated in the [W3C Web Incubator Community Group](https://wicg.io/). | 2019-10-31 |
 | [Password Reveal](PasswordReveal/explainer.md) | Rather than working on this HTML controls feature in isolation, we have rolled this effort into the larger [Open UI](https://github.com/WICG/open-ui) project of the [Web Incubator Community Group](https://wicg.io/) in an effort to provide a standardized set of form controls for the web, including password. | 2019-06-17 |
