@@ -1,6 +1,5 @@
 # PWA-driven Widgets Explainer
 
-Consider all sections required unless otherwise noted.
 
 Author: [Aaron Gustafson](https://github.com/aarongustafson)
 
