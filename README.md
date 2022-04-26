@@ -140,6 +140,14 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Install%20Time%20Permissions">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/First%20Run%20Permissions?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+melanierichards&labels=First+Run+Permissions&template=first-run-permissions-prompt.md&title=%5BFirst+Run+Permissions+Prompt%5D+%3CTITLE+HERE%3E)
+* [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/GamepadHapticsActuatorTriggerRumble">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/GamepadHapticsActuatorTriggerRumble?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=GamepadHapticsActuatorTriggerRumble&template=gamepad-haptics-actuator-trigger-rumble.md&title=%5BGamepadHapticsActuator+Trigger+Rumble%5D+%3CTITLE+HERE%3E)
+* [PointerEvent DeviceId](PointerEventDeviceId) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PointerEventDeviceId">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PointerEventDeviceId?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=PointerEventDeviceId&template=pointerevent-deviceid.md&title=%5BPointerEvent+Device+ID%5D+%3CTITLE+HERE%3E)
 * [Ratings & Reviews Prompt](RatingsAndReviewsPrompt/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Ratings%20and%20Reviews">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Ratings%20and%20Reviews?label=issues)</a> |
@@ -156,14 +164,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Version%20History">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Version%20History?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+stanleyhon&labels=Version+History&template=version-history.md&title=%5BVersion+History%5D+%3CTITLE+HERE%3E)
-* [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) |
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/GamepadHapticsActuatorTriggerRumble">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/GamepadHapticsActuatorTriggerRumble?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=GamepadHapticsActuatorTriggerRumble&template=gamepad-haptics-actuator-trigger-rumble.md&title=%5BGamepadHapticsActuator+Trigger+Rumble%5D+%3CTITLE+HERE%3E)
-* [PointerEvent DeviceId](PointerEventDeviceId) |
-    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PointerEventDeviceId">
-    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PointerEventDeviceId?label=issues)</a> |
-    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=PointerEventDeviceId&template=pointerevent-deviceid.md&title=%5BPointerEvent+Device+ID%5D+%3CTITLE+HERE%3E)
+* [Widgets](PWAWidgets/README.md) | 
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PWA%20Widgets">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PWA%20Widgets?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson&labels=PWA+Widgets&template=pwa-widgets.md&title=%5BPWA+Widgets%5D+%3CTITLE+HERE%3E)
 
 ### Storage
 
