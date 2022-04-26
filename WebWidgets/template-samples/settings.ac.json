@@ -1,0 +1,183 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.5",
+  "sample_data": {
+    "name": "Sample Settings",
+    "type": "application/json",
+    "data": {
+      "settings": [
+        {
+          "label": "What City?",
+          "name": "locale",
+          "description": "Just start typing and we’ll give you some options",
+          "type": "text",
+          "default": "Seattle, WA USA",
+          "placeholder": "98118",
+          "required": true
+        },
+        {
+          "label": "What day?",
+          "name": "date",
+          "type": "date",
+          "value": "2022-02-01"
+        },
+        {
+          "label": "How many?",
+          "name": "num",
+          "type": "number",
+          "value": 4,
+          "min": 3,
+          "max": 10
+        },
+        {
+          "label": "Everything cool?",
+          "name": "cool",
+          "type": "boolean",
+          "value": true
+        },
+        {
+          "label": "Color?",
+          "name": "color",
+          "type": "select",
+          "options": ["red", "blue"],
+          "value": "blue"
+        },
+        {
+          "label": "Color?",
+          "name": "color2",
+          "type": "radio",
+          "options": ["red", "blue"],
+          "value": "blue"
+        },
+        {
+          "label": "Color?",
+          "name": "color3",
+          "type": "checkbox",
+          "options": ["red", "blue"],
+          "value": "red,blue"
+        }
+      ]
+    }
+  },
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Settings"
+    },
+    {
+      "type": "Container",
+      "items": [
+        {
+          "$data": "${settings}",
+          "type": "Container",
+          "items": [
+            {
+              "type": "Input.Text",
+              "$when": "${type == 'text' || type == 'email' || type == 'tel' || type == 'url'}",
+              "label": "${label}",
+              "placeholder": "${if(placeholder, placeholder, '')}",
+              "value": "${if(value, value, if(default, default, ''))}",
+              "id": "${name}"
+            },
+            {
+              "type": "Input.Number",
+              "$when": "${type == 'number'}",
+              "label": "${label}",
+              "placeholder": "${if(placeholder, placeholder, '')}",
+              "id": "${name}",
+              "value": "${if( value, int(value), if( default, int(default), ''))}",
+              "min": "${if( min, int(min), '')}",
+              "max": "${if( max, int(max), '')}"
+            },
+            {
+              "type": "Input.Date",
+              "$when": "${type == 'date' || type == 'datetime'}",
+              "label": "${label}",
+              "placeholder": "${if(placeholder, placeholder, '')}",
+              "value": "${if(value, value, if(default, default, ''))}",
+              "id": "${name}"
+            },
+            {
+              "type": "Input.ChoiceSet",
+              "$when": "${type == 'boolean'}",
+              "label": "${label}",
+              "choices": [
+                {
+                  "title": "Yes",
+                  "value": "true"
+                },
+                {
+                  "title": "No",
+                  "value": "false"
+                }
+              ],
+              "value": "${if(value, value, 'false')}",
+              "id": "${name}"
+            },
+            {
+              "type": "Input.ChoiceSet",
+              "$when": "${type == 'select'}",
+              "label": "${label}",
+              "choices": [
+                {
+                  "$data": "${options}",
+                  "title": "${$data}",
+                  "value": "${$data}"
+                }
+              ],
+              "value": "${if(value, value, if(default, default, ''))}",
+              "id": "${name}"
+            },
+            {
+              "type": "Input.ChoiceSet",
+              "$when": "${type == 'radio'}",
+              "style": "expanded",
+              "label": "${label}",
+              "choices": [
+                {
+                  "$data": "${options}",
+                  "title": "${$data}",
+                  "value": "${$data}"
+                }
+              ],
+              "value": "${if(value, value, if(default, default, ''))}",
+              "id": "${name}"
+            },
+            {
+              "type": "Input.ChoiceSet",
+              "$when": "${type == 'checkbox'}",
+              "style": "expanded",
+              "isMultiSelect": true,
+              "label": "${label}",
+              "choices": [
+                {
+                  "$data": "${options}",
+                  "title": "${$data}",
+                  "value": "${$data}"
+                }
+              ],
+              "value": "${if(value, value, if(default, default, ''))}",
+              "id": "${name}"
+            },
+            {
+              "type": "TextBlock",
+              "$when": "${description != null}",
+              "text": "${description}",
+              "size": "Small"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Save",
+      "data": {
+        "tag": "settings"
+      }
+    }
+  ]
+}
