@@ -233,7 +233,7 @@ One or more Widgets are defined within the `widgets` member of a Web App Manifes
 * `auth` - Boolean. Informational. Whether or not the Widget requires auth. False if not included.
 * `update` - Unsigned Integer. Informational. The frequency (in seconds) a developer wishes for the widget to be updated; for use in registering a Periodic Sync. The actual update schedule will use the Service Worker’s Periodic Sync infrastructure.
 * `actions` - An array of [`WidgetAction` objects](#Defining-a-WidgetAction) that will be exposed to users (if the template supports them) within an action-supporting template and trigger an event within the origin’s Service Worker.
-* `settings` - A array of [`WidgetSetting` objects](#Defining-a-WidgetSetting) that enable multiple instances of the same widget to be configured differently within a [Widget Host](#dfn-widget-host) (e.g., a weather widget that displays a single locale could be installed multiple times, targeting different cities).
+* `settings` - A array of [`WidgetSettingDefinition` objects](#Defining-a-WidgetSettingDefinition) that enable multiple instances of the same widget to be configured differently within a [Widget Host](#dfn-widget-host) (e.g., a weather widget that displays a single locale could be installed multiple times, targeting different cities).
 
 ### Optional Display-related properties
 
@@ -277,9 +277,9 @@ The `action` and `title` properties are required. The `icons` array is optional 
 When activated, a `WidgetAction` will dispatch a [`WidgetEvent`](#widget-related-events) (modeled on [`NotificationEvent`](https://notifications.spec.whatwg.org/#example-50e7c86c)) within its Service Worker. Within the Service Worker, the event will contain a payload that includes a reference to the Widget itself and the `action` value.
 
 
-## Defining a `WidgetSetting`
+## Defining a `WidgetSettingDefinition`
 
-A `WidgetSetting` defines a single field for use in a widget’s setting panel.
+A `WidgetSettingDefinition` defines a single field for use in a widget’s setting panel.
 
 ```json
 {
