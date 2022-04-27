@@ -911,13 +911,15 @@ self.addEventListener("widgetclick", function(event) {
                   .then(()=>{
                     // if the widget is set up to auto-update…
                     if ( "update" in widget.definition ) {
-                      let tags = await registration.periodicSync.getTags();
-                      // only one registration per tag
-                      if ( ! tags.includes( tag ) ) {
-                        periodicSync.register( tag, {
-                            minInterval: widget.definition.update
+                      registration.periodicSync.getTags()
+                        .then( tags => {
+                          // only one registration per tag
+                          if ( ! tags.includes( tag ) ) {
+                            periodicSync.register( tag, {
+                                minInterval: widget.definition.update
+                            });
+                          }
                         });
-                      }
                     }
                   });
               })
@@ -933,9 +935,10 @@ self.addEventListener("widgetclick", function(event) {
           .then( widget => {
             console.log("uninstalling", widget.definition.name, "instance", instance_id);
             // clean up periodic sync?
-            if ( widget.instances.length === 1 && "update" in widget.definition )
+            if ( widget.instances.length === 1 &&
+                 "update" in widget.definition )
             {
-              await periodicSync.unregister( tag );
+              periodicSync.unregister( tag );
             }
             widgets.removeInstance( instance_id );
           })
