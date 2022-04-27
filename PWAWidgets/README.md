@@ -888,9 +888,9 @@ self.addEventListener("widgetclick", function(event) {
   const tag = event.tag;
   const instance_id = event.instance;
     
-  // If a widget is being installed
   switch (action) {
     
+    // If a widget is being installed
     case "WidgetInstall":
       console.log("installing", widget, instance_id);
       event.waitUntil(
@@ -925,6 +925,7 @@ self.addEventListener("widgetclick", function(event) {
       );
       break;
     
+    // If a widget is being uninstalled
     case "WidgetUninstall":
       event.waitUntil(
         // find the widget
@@ -941,10 +942,11 @@ self.addEventListener("widgetclick", function(event) {
       );
       break;
 
+    // If a widget host is requesting all its widgets update
     case "WidgetResume":
       console.log("resuming all widgets");
       event.waitUntil(
-        // refresh the data on each widget (using Clients, just to show it can be done)
+        // refresh the data on each widget
         widgets.matchAll({ host: host_id })
           .then(function(widgetList) {
             for (let i = 0; i < widgetList.length; i++) {
