@@ -201,7 +201,7 @@ standards communities. Thanks for your continued interest!
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
 | [PARAKEET with Noisy Ranking](https://github.com/WICG/privacy-preserving-ads/blob/main/NoisyRanking.md) | [Web Incubator Community Group](https://wicg.io/) | 2022-04-19 |
-| [focusgroup for HTML and CSS](https://open-ui.org/components/focusgroup.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2022-04-09](Focusgroup/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-09-28 |
+| [focusgroup for HTML and CSS](https://open-ui.org/components/focusgroup.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2022-04-09](Focusgroup/explainer.md) |
 | [Web App Link Handling Manifest Options](https://github.com/WICG/pwa-url-handler/blob/main/handle_links/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-09-28 |
 | [EyeDropper API](https://github.com/WICG/eyedropper-api/blob/main/README.md) | [Web Incubator Community Group](https://wicg.io/) | [2021-08-03](EyeDropper/explainer.md) |
 | [Virtual Keyboard Policy](https://www.w3.org/TR/virtual-keyboard/) | [W3C Editing Working Group](https://w3c.github.io/editing/) | [2021-07-29](VirtualKeyboardPolicy/explainer.md) |
