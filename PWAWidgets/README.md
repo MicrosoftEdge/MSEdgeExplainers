@@ -978,4 +978,5 @@ self.addEventListener("periodicsync", event => {
 
 ## Open Questions
 
-1. TBD
+1. Could the Periodic Sync frequency be increased for a domain when there are active widgets?
+2. Assuming a Push could carry a payload to update a widget, would the widget displaying the new content fulfill the requirement that the user be shown something when the push arrives or would we still need to trigger a notification?
