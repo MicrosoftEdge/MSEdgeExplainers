@@ -561,7 +561,9 @@ Before sending a `WidgetPayload` to the Widget Service, the `WidgetDefinition` w
 1. If <var>payload["definition"]</var> is not a `WidgetDefinition`, then throw an Error.
 1. If <var>manifest["name"]</var>, set <var>payload["definition"]["app_name"]</var> to <var>manifest["name"]</var>.
 1. If <var>manifest["short_name"]</var>, set <var>payload["definition"]["app_short_name"]</var> to <var>manifest["short_name"]</var>.
-1. If <var>manifest["icons"]</var>, set <var>payload["definition"]["app_icons"]</var> to <var>manifest["icons"]</var>.
+1. If <var>manifest["icons"]</var>
+   1. Set <var>payload["definition"]["app_icons"]</var> to <var>manifest["icons"]</var>.
+   1. If <var>payload["definition"]["icons"]</var> is undefined or an empty array, set <var>payload["definition"]["icons"]</var> to <var>manifest["icons"]</var>.
 1. If <var>manifest["theme_color"]</var>, set <var>payload["definition"]["theme_color"]</var> to <var>manifest["theme_color"]</var>.
 1. If <var>manifest["background_color"]</var>, set <var>payload["definition"]["background_color"]</var> to <var>manifest["background_color"]</var>.
 1. Return <var>payload</var>.
