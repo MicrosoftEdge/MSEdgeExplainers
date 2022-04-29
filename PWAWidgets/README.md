@@ -68,7 +68,7 @@ An application that exposes Widgets. A browser would likely be the Widget Provid
 
 The list of <a href="#dfn-install">installable</a> <a href="#dfn-widget">Widgets</a> [registered](#dfn-register) by [Widget Providers](#dfn-widget-provider).
 </dd>
-<dt id="dfn-widget-service">Widget Service</dt><dd>
+<dt id="dfn-widget-service">Widget Service</dt><dd>Also: Widget Platform</dd><dd>
   
 Manages communications between [Widget Hosts](#dfn-widget-host) and [Widget Providers](#dfn-widget-provider).  
 </dd>
@@ -77,7 +77,7 @@ Manages communications between [Widget Hosts](#dfn-widget-host) and [Widget Prov
 ### Verbs
 
 <dl>
-<dt id="dfn-install">Install<br> (a.k.a., Instantiate)</dt><dd>
+<dt id="dfn-install">Install</dt><dd>Also: Instantiate</dd><dd>
 
 Create a [Widget Instance](#dfn-widget-instance).
 
