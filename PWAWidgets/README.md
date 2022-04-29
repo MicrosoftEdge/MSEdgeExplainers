@@ -330,7 +330,6 @@ The steps for <b id="parsing-widgets-from-a-manifest">parsing widgets from a Web
       1. If <var>manifest_widget["tag"]</var> exists in <var>collected_tags</var>, continue.
       1. Let <var>widget</var> be a new object.
       1. Set <var>widget["definition"]</var> to the value of <var>manifest_widget</var>.
-      1. Set <var>widget["hasSettings"]</var> to false.
       1. Set <var>widget["instances"]</var> to an empty array.
       1. Set <var>widget["installable"]</var> to the result of [determining widget installability](#determining-installability) with <var>manifest_widget</var>, <var>manifest</var>, and Widget Host.
       1. If <var>widget["installable"]</var> is true
@@ -371,7 +370,6 @@ Each Widget is represented within the `Widgets` interface as a `Widget`. Each Wi
 ```js
 {
   "installable": true,
-  "hasSettings": false,
   "definition": { },
   "instances": [ ]
 }
@@ -380,7 +378,6 @@ Each Widget is represented within the `Widgets` interface as a `Widget`. Each Wi
 All properties are Read Only to developers and are updated by the User Agent as appropriate.
 
 * `installable` - Boolean. Indicates whether the Widget is installable (based on UA logic around regarding data `type`, chosen `template`, etc.).
-* `hasSettings` - Boolean. Indicates whether the `WidgetDefinition` includes a non-empty `settings` array.
 * `definition` - Object. The original, as-authored, `WidgetDefinition` provided in the Manifest. Includes any [proprietary extensions](#Extensibility)).
 * `instances` - Array. A collection of `WidgetInstance` objects representing the current state of each instance of a Widget (from the perspective of the Service Worker). Empty if the widget has not been [installed](#dfn-install).
 
@@ -850,7 +847,8 @@ const periodicSync = self.registration.periodicSync;
 
 async function updateWidget( widget ){
   // Widgets with settings should be updated on a per-instance level
-  if ( widget.hasSettings ) {
+  if ( "settings" in widget.definition && 
+       widget.definition.settings.length > 0 ) {
     widget.instances.map(async (instance) => {
       let settings_data = new FormData();
       for ( let key in instance.settings ) {
