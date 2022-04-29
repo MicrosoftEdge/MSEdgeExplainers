@@ -729,10 +729,10 @@ self.addEventListener('widgetclick', function(event) {
 
 There are a few special [`WidgetEvent`](#widget-related-events) `action` types to consider as well. 
 
-* "WidgetInstall" - Executed when a [Widget Host](#dfn-widget-host) is requesting installation of a widget.
-* "WidgetUninstall" - Executed when a [Widget Host](#dfn-widget-host) is requesting un-installation of a widget.
-* "WidgetSave" - Executed when a Widget has settings and the user saves the settings for a specific `WidgetInstance`.
-* "WidgetResume" - Executed when a [Widget Host](#dfn-widget-host) is switching from its inactive to active state.
+* "widget-install" - Executed when a [Widget Host](#dfn-widget-host) is requesting installation of a widget.
+* "widget-uninstall" - Executed when a [Widget Host](#dfn-widget-host) is requesting un-installation of a widget.
+* "widget-save" - Executed when a Widget has settings and the user saves the settings for a specific `WidgetInstance`.
+* "widget-resume" - Executed when a [Widget Host](#dfn-widget-host) is switching from its inactive to active state.
 
 The <b id="creating-a-WidgetEvent">steps for creating a WidgetEvent</b> with Widget Service Message <var>message</var> are as follows:
 
@@ -741,11 +741,11 @@ The <b id="creating-a-WidgetEvent">steps for creating a WidgetEvent</b> with Wid
    1. Set <var>event["data"]</var> to a new object.
    1. Set <var>event["host"]</var> to the id of the Widget Host bound to <var>message</var>.
    1. If <var>message</var> is a request to refresh all widgets
-      1. Set <var>event["action"]</var> to "WidgetResume".
+      1. Set <var>event["action"]</var> to "widget-resume".
       1. Return <var>event</var>.
-   1. Else if <var>message</var> is a request to install a widget, set <var>event["action"]</var> to "WidgetInstall".
-   1. Else if <var>message</var> is a request to uninstall a widget, set <var>event["action"]</var> to "WidgetUninstall".
-   1. Else if <var>message</var> is a request to update a widget’s settings, set <var>event["action"]</var> to "WidgetSave".
+   1. Else if <var>message</var> is a request to install a widget, set <var>event["action"]</var> to "widget-install".
+   1. Else if <var>message</var> is a request to uninstall a widget, set <var>event["action"]</var> to "widget-uninstall".
+   1. Else if <var>message</var> is a request to update a widget’s settings, set <var>event["action"]</var> to "widget-save".
    1. Else set <var>event["action"]</var> to the user action bound to <var>message</var>.
    1. Let <var>instanceId</var> be the id of the Widget Instance bound to <var>message</var>.
    1. Set <var>event["instance"]</var> to <var>instanceId</var>.
@@ -756,7 +756,7 @@ The <b id="creating-a-WidgetEvent">steps for creating a WidgetEvent</b> with Wid
 1. Return <var>event</var>
 
 
-### WidgetInstall
+### widget-install
 
 When the User Agent receives a request to create a new instance of a widget, it will need to create a placeholder for the instance before triggering the WidgetClick event within the Service Worker.
 
@@ -783,14 +783,14 @@ The <b id="creating-a-placeholder-instance">steps for creating a placeholder ins
 
 ![](media/install.gif)
 
-1. A "WidgetInstall" signal is received by the User Agent, the placeholder instance is created, and the event is passed along to the Service Worker.
+1. A "widget-install" signal is received by the User Agent, the placeholder instance is created, and the event is passed along to the Service Worker.
 2. The Service Worker
     a. captures the Widget Instance `id` from the `widget` property,
     b. looks up the Widget via `widgets.getByInstance()`, and
     c. makes a `Request` for its `data` endpoint.
 3. The Service Worker then combines the `Response` with the Widget definition and passes that along to the [Widget Service](#dfn-widget-service) via the `updateInstance()` method.
 
-### WidgetUninstall
+### widget-uninstall
 
 Required `WidgetEvent` data:
 
@@ -802,13 +802,13 @@ Required `WidgetEvent` data:
 
 ![](media/uninstall.gif)
 
-1. The "WidgetUninstall" signal is received by the User Agent and is passed to the Service Worker.
+1. The "widget-uninstall" signal is received by the User Agent and is passed to the Service Worker.
 1. The Service Worker runs any necessary cleanup steps (such as un-registering a Periodic Sync if the widget is no longer in use).
 1. The Service Worker calls `removeInstance()` to complete the removal process.
 
 Note: When a PWA is uninstalled, its widgets must also be uninstalled. In this event, the User Agent must prompt the [Widget Service](#dfn-widget-service) to remove all associated widgets. If the UA purges all site data and the Service Worker during this process, no further steps are necessary. However, if the UA does not purge all data, it must issue uninstall events for each Widget Instance so that the Service Worker may unregister related Periodic Syncs and perform any additional cleanup.
 
-### WidgetSave
+### widget-save
 
 Required `WidgetEvent` data:
 
@@ -817,18 +817,18 @@ Required `WidgetEvent` data:
 * `tag`
 * `data`
 
-The "WidgetSave" process works like this:
+The "widget-save" process works like this:
 
-1. The "WidgetSave" signal is received by the User Agent.
+1. The "widget-save" signal is received by the User Agent.
 2. Internally, the `WidgetInstance` matching the `widget.id` value is examined to see if
    a. it has settings and
    b. its `settings` object matches the inbound `data`.
-3. If it has settings and the two do not match, the new `data` is saved to `settings` in the `WidgetInstance` and the "WidgetSave" event issued to the Service Worker.
+3. If it has settings and the two do not match, the new `data` is saved to `settings` in the `WidgetInstance` and the "widget-save" event issued to the Service Worker.
 4. The Service Worker receives the event and can react by issuing a request for new data, based on the updated settings values.
 
-### WidgetResume
+### widget-resume
 
-Many [Widget Hosts](#dfn-widget-host) will suspend the rendering surface when it is not in use (to conserve resources). In order to ensure Widgets are refreshed when the rendering surface is presented, the [Widget Host](#dfn-widget-host) will issue a "WidgetResume" event.
+Many [Widget Hosts](#dfn-widget-host) will suspend the rendering surface when it is not in use (to conserve resources). In order to ensure Widgets are refreshed when the rendering surface is presented, the [Widget Host](#dfn-widget-host) will issue a "widget-resume" event.
 
 Required `WidgetEvent` data:
 
@@ -889,7 +889,7 @@ self.addEventListener("widgetclick", function(event) {
   switch (action) {
     
     // If a widget is being installed
-    case "WidgetInstall":
+    case "widget-install":
       console.log("installing", widget, instance_id);
       event.waitUntil(
         // find the widget
@@ -926,7 +926,7 @@ self.addEventListener("widgetclick", function(event) {
       break;
     
     // If a widget is being uninstalled
-    case "WidgetUninstall":
+    case "widget-uninstall":
       event.waitUntil(
         // find the widget
         widgets.getByInstance( instance_id )
@@ -944,7 +944,7 @@ self.addEventListener("widgetclick", function(event) {
       break;
 
     // If a widget host is requesting all its widgets update
-    case "WidgetResume":
+    case "widget-resume":
       console.log("resuming all widgets");
       event.waitUntil(
         // refresh the data on each widget
