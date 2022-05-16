@@ -254,7 +254,7 @@ Some widget platforms may wish to allow developers to further refine a Widget’
 For example, if using something like [Adaptive Cards](https://docs.microsoft.com/en-us/adaptive-cards/templating/) for rendering, a [Widget Host](#dfn-widget-host) might consider adding something like the following to the `WidgetDefinition`:
 
 ```json
-"ms_ac-template": "/widgets/templates/agenda.ac.json",
+"ms_ac_template": "/widgets/templates/agenda.ac.json",
 ```
 
 This could be used to override the `template` value in scenarios where the [Widget Host](#dfn-widget-host) supports this feature.
