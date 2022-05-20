@@ -106,11 +106,11 @@ we move them into the [Alumni section](#alumni-) below.
 
 ### Performance
 
-* [performance timings during launch](PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md) | 
+* [PerformanceNavigationTiming User Agent Launch](PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Perf%20timing%20during%20browser%20start">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Perf%20timing%20during%20browser%20start?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dylank%2C+hemingzh&labels=Perf+timing+during+browser+start&template=performance-timing-during-browser-start.md&title=%5BPerf+Timing+during+launch%5D+%3CTITLE+HERE%3E)
-* [PerformanceNavigationTiming changes for protocol launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) | 
+* [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PerformanceNavigationTiming%20for%20Protocol%20Launch">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PerformanceNavigationTiming%20for%20Protocol%20Launch?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=atulkatti&labels=PerformanceNavigationTiming+for+Protocol+Launch&template=performancenavigationtiming-protocol-launch-timing-information.md&title=)

@@ -121,15 +121,10 @@ An analysis of fingerprinting capability provided by this surface suggests fairl
 
 No other meaningful privacy concerns are anticipated, but we welcome community feedback.
 
-## Alternative Solutions
-
-TODO: Discuss alternative designs that were considered (or may be explored in future iterations) with pros/cons.
-
 ## Open Questions
-
 
 ## Conclusion
 As outlined, it can be frustrating for application developers to identify and root-cause performance issues when load times that are influenced by other environmental factors like resource contention during a user agent launch. By modifying the `PerformanceNavigationTiming` API, web applications developers can have better insight into the conditions of their application's performance and remove noise in diagnosing performance metrics which will benefit the web apps ecosystem.
 
 ---
-[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers-private/labels/Performance) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers-private/issues/new?title=%5BPerformance%20Navigation%20Timing%5D)
+[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Performance) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dylank%2C+hemingzh&labels=Perf+timing+during+browser+start&template=performance-timing-during-browser-start.md&title=%5BPerf+Timing+during+launch%5D+%3CTITLE+HERE%3E)
