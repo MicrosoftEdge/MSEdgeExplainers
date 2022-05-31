@@ -146,7 +146,7 @@ Widgets support user interaction through one or more [developer-defined `WidgetA
 
 Data flow in a Templated Widget is largely managed in two ways:
 
-1. Data flows from the Service Worker to a Widget instance as part of the [`widgets.updateInstance()`](#widgetsupdateinstance) and [`widgets.updateByTag()`](#widgetsupdatebytag) methods.
+1. Data flows from the Service Worker to a Widget instance as part of the [`widgets.updateByInstanceId()`](#widgetsupdatebyinstanceid) and [`widgets.updateByTag()`](#widgetsupdatebytag) methods.
 2. Data (in the form of interaction) flows from a Widget to the associated PWA’s Service Worker via a [`WidgetEvent`](#widget-related-events).
 
 Here is an example of how this might look in the context of a Periodic Sync:
@@ -162,7 +162,7 @@ This video shows the following steps:
 1. As part of a Periodic Sync, the Service Worker makes a `Request` to the host or some other endpoint.
 2. The `Response` comes back.
 3. As the Service Worker is aware of which widgets rely on that data, via the `WidgetDefinition` provided during [install](#dfn-install), the Service Worker can identify which widgets need updating. (This is internal logic and not shown in the video).
-3. The Service Worker takes that data — perhaps packaging it with other instructions — and uses [`widgets.updateInstance()`](#widgetsupdateinstance) (or [`widgets.updateByTag()`](#widgetsupdatebytag)) to update the specific widgets that make use of that data.
+3. The Service Worker takes that data — perhaps packaging it with other instructions — and uses [`widgets.updateByInstanceId()`](#widgetsupdatebyinstanceid) (or [`widgets.updateByTag()`](#widgetsupdatebytag)) to update the specific widgets that make use of that data.
 
 To show a more complicated example, consider what should happen if certain Widgets depend on authentication and the user happens to log out in the PWA or a browser tab. The developers would need to track this and ensure the Service Worker is notified so it can replace any auth-requiring Widgets with a prompt back into the app to log in.
 
@@ -193,7 +193,7 @@ This video shows:
 2. The Service Worker is listening for that action and redirects the user to the login page of the app, either within an existing `Client` (or in a new `Client` if one is not open).
 3. The user logs in and the app sends a `postMessage()` to the Service Worker letting it know the user is authenticated again.
 4. The Service Worker grabs new data for its auth-related widgets from the network.
-5. The Service Worker pipes that data back into the auth-requiring Widgets using [`widgets.updateInstance()`](#widgetsupdateinstance) (or [`widgets.updateByTag()`](#widgetsupdatebytag)).
+5. The Service Worker pipes that data back into the auth-requiring Widgets using [`widgets.updateByInstanceId()`](#widgetsupdatebyinstanceid) (or [`widgets.updateByTag()`](#widgetsupdatebytag)).
 
 You can see more examples in [the `WidgetEvent` section](#Widget-related-Events).
 
@@ -639,9 +639,9 @@ Developers will use `updateByTag()` to push data to all [Instances](#dfn-widget-
 1. If <var>instancesUpdated</var> is not equal to <var>instanceCount</var>, then reject <var>promise</var> with an Error and return <var>promise</var>.
 1. Resolve and return <var>promise</var>.
 
-#### `widgets.removeInstance()`
+#### `widgets.removeByInstanceId()`
 
-Developers will use `removeInstance()` to remove an existing Widget Instance from its Host. This method will resolve with *undefined* if successful, but should throw [a descriptive Error](#widget-errors) if one is encountered.
+Developers will use `removeByInstanceId()` to remove an existing Widget Instance from its Host. This method will resolve with *undefined* if successful, but should throw [a descriptive Error](#widget-errors) if one is encountered.
 
 * **Arguments:** <var>instanceId</var> (String)
 * **Returns:** *undefined*
@@ -791,7 +791,7 @@ The <b id="creating-a-placeholder-instance">steps for creating a placeholder ins
     a. captures the Widget Instance `id` from the `widget` property,
     b. looks up the Widget via `widgets.getByInstanceId()`, and
     c. makes a `Request` for its `data` endpoint.
-3. The Service Worker then combines the `Response` with the Widget definition and passes that along to the [Widget Service](#dfn-widget-service) via the `updateInstance()` method.
+3. The Service Worker then combines the `Response` with the Widget definition and passes that along to the [Widget Service](#dfn-widget-service) via the `updateByInstanceId()` method.
 
 ### widget-uninstall
 
@@ -941,7 +941,7 @@ self.addEventListener("widgetclick", function(event) {
             {
               periodicSync.unregister( tag );
             }
-            widgets.removeInstance( instance_id );
+            widgets.removeByInstanceId( instance_id );
           })
       );
       break;
