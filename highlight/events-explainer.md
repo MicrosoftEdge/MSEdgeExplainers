@@ -28,7 +28,8 @@ interface HighlightPointerEvent : PointerEvent {
 }
 ```
 
-For the selected range, a HighlightPointerEvent object must be dispatched with the Highlight as its highlight, and the relevant range as its range.
+For the selected range, a HighlightPointerEvent object must be dispatched with the Highlight as its `highlight`, and the relevant range as its `range`.
+
 
 Here's an example illustrating how a "find-highlights" Highlight could move selection such that it coincides with the clicked find-on-page result.
 
