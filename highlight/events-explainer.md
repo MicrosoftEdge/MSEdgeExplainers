@@ -7,7 +7,7 @@ This document is intended as a starting point for engaging the community and sta
 * Current version: this document
 
 ## Introduction
-[Highlights](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/highlight/explainer.md) give ranges an appearance. Use cases include rendering background colors to denote comments or annotations in a document, powering find-on-page for virtualized content, adding squiggles for spelling and grammar checking, and more.
+[Highlights](https://drafts.csswg.org/css-highlight-api-1/) give ranges an appearance. Use cases include rendering background colors to denote comments or annotations in a document, powering find-on-page for virtualized content, adding squiggles for spelling and grammar checking, and more.
 
 These use cases require that the users not only be able to see the highlighted portion of the document, but also interact with it.
 
@@ -23,13 +23,11 @@ A new event, HighlightPointerEvent, will be created to describe how the user is 
 
 ```idl
 interface HighlightPointerEvent : PointerEvent {
-    readonly Highlight highlight;
     readonly Range range;
 }
 ```
 
-For the selected range, a HighlightPointerEvent object must be dispatched with the Highlight as its `highlight`, and the relevant range as its `range`.
-
+For the selected range, a HighlightPointerEvent object must be dispatched with the Highlight as its `currentTarget`, and the relevant range as its `range`. The event's `target` will be set to the element the user interacted with.
 
 Here's an example illustrating how a "find-highlights" Highlight could move selection such that it coincides with the clicked find-on-page result.
 
@@ -133,17 +131,22 @@ p1 pointerup
 ```
 
 ## Open Questions
-  1. Should we fire multiple events for each hit Range/Highlight pair as described in the [multiple Ranges and Highlights](#multiple-ranges-and-highlights) section above? As an example, two ranges, one marking a find-on-page result and another marking the location of an annotation in the document, could overlap. Clicking on the overlapping area of these two ranges could both move the selection to the clicked find-on-page result while also emphasizing the corresponding annotation text in another part of the web app's view.
+  1. Should we fire multiple events for each hit Range/Highlight pair as opposed to what's described in the [multiple Ranges and Highlights](#multiple-ranges-and-highlights) section above? As an example, two ranges, one marking a find-on-page result and another marking the location of an annotation in the document, could overlap. Clicking on the overlapping area of these two ranges could both move the selection to the clicked find-on-page result while also emphasizing the corresponding annotation text in another part of the web app's view. 
+  
+  2. If we don't fire multiple events per hit, what should happen in the case in which there is a single range which has been added to multiple highlights?
 
-  2. If we do fire multiple events per hit, does there need to be a way for one Highlight to stop a pointer event from reaching other Highlights? Consider a scenario where a website and an extension (ex. Grammarly) are both applying highlights to the same content, and both want to show a suggestion popup in response to a HighlightRangePointerEvent. If both groups receive the event and get to show their respective popups, it could mean that one popup is shown on top of the other, which may negatively affect the usability and/or look-and-feel of the page. One solution is to define a new event path that enables a single event to flow through all the hit Range/Highlight pairs in priority order, which would allow higher priority Highlights to call stopPropogation and prevent the event from reaching groups with lower priority. Another idea is to define the default action of each HighlightRangePointerEvent to be the generation of the HighlightRangePointerEvent for the next Range/Highlight pair (in descending priority order). This way, a group can call preventDefault and prevent events from reaching subsequent Highlights.
+  3. If we do fire multiple events per hit, does there need to be a way for one Highlight to stop a pointer event from reaching other Highlights? Consider a scenario where a website and an extension (ex. Grammarly) are both applying highlights to the same content, and both want to show a suggestion popup in response to a HighlightRangePointerEvent. If both groups receive the event and get to show their respective popups, it could mean that one popup is shown on top of the other, which may negatively affect the usability and/or look-and-feel of the page. One solution is to define a new event path that enables a single event to flow through all the hit Range/Highlight pairs in priority order, which would allow higher priority Highlights to call stopPropogation and prevent the event from reaching groups with lower priority. Another idea is to define the default action of each HighlightRangePointerEvent to be the generation of the HighlightRangePointerEvent for the next Range/Highlight pair (in descending priority order). This way, a group can call preventDefault and prevent events from reaching subsequent Highlights.
 
-  3. Should a highlight be able to prevent selection in response to a pointer event? Elements are able to prevent selection by calling preventDefault, but Highlights will not be able to do so because Elements and Highlights receive separate pointer events. One option is to define that cancelling the HighlightRangePointerEvent will also prevent selection.
+  4. Should a highlight be able to prevent selection in response to a pointer event? Elements are able to prevent selection by calling preventDefault, but Highlights will not be able to do so because Elements and Highlights receive separate pointer events. One option is to define that cancelling the HighlightRangePointerEvent will also prevent selection.
 
-  4. Is an API similar to elementsFromPoint needed for highlights? It would provide the additional ranges hit by the HighlightRangePointerEvent so that behaviors for multiple types of highlights can be composed at the web app's option. This may not work well, however, for scenarios where separate uncoordinated frameworks or extensions are trying to work together (ex. CKEditor may provide find-on-page and annotation highlights while Grammarly provides spellcheck highlights).
+  5. Is an API similar to elementsFromPoint needed for highlights? It would provide the additional ranges hit by the HighlightRangePointerEvent so that behaviors for multiple types of highlights can be composed at the web app's option. This may not work well, however, for scenarios where separate uncoordinated frameworks or extensions are trying to work together (ex. CKEditor may provide find-on-page and annotation highlights while Grammarly provides spellcheck highlights).
 
-  5. Should Highlights be able to receive pointer capture?
+  6. Should Highlights be able to receive pointer capture?
 
-  6. Should we fire the pointer event on the Range that was hit, instead of the containing Highlight? It seems more developer friendly to create a single event listener on a Highlight than to create one listener per Range in the group.
+  7. Should we fire the pointer event on the Range that was hit, instead of the containing Highlight? It seems more developer friendly to create a single event listener on a Highlight than to create one listener per Range in the group.
+  
+  8. Should the Highlight be the target of the same pointer event that is delivered to the parent Elements?
+  
 
   ---
   [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HighlightEvents) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BHighlightEvents%5D)
