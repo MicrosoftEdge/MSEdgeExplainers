@@ -68,7 +68,7 @@ Here's an example illustrating how a "find-highlights" Highlight could move sele
 
 ### [Multiple Ranges and Highlights](#multiple-ranges-and-highlights)
 
-Ranges can overlap and each range may belong to more than one Highlight. However, only one event will be fired on one Highlight. Highlights have a priority order as defined in the [Highlight API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/highlight/explainer.md). To find the group that will receive the event, sort the Highlight objects in descending priority order and dispatch the event to the first Highlight. The priority order establishes a layering of highlights, so firing the event based on this ordering ensures the highlight "nearest to the user" receives the event.
+Ranges can overlap and each range may belong to more than one Highlight. However, only one event will be fired on one Highlight. Highlights have a priority order as defined in the [Highlight API explainer](https://drafts.csswg.org/css-highlight-api-1/#priorities). To find the group that will receive the event, sort the Highlight objects in descending priority order and dispatch the event to the first Highlight. The priority order establishes a layering of highlights, so firing the event based on this ordering ensures the highlight "nearest to the user" receives the event.
 
 It is also possible that there are multiple hit ranges within the target Highlight. To handle this, we also define a priority order for ranges within a Highlight, where the range that was added to the group first has the highest priority and the range added last has the lowest priority. Using this ordering, we take the range with the highest priority to be the HighlightPointerEvent's range.
 
