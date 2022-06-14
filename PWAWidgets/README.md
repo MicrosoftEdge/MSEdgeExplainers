@@ -698,18 +698,17 @@ There are a host of different events that will take place in the context of a Se
 
 A [`WidgetEvent`](#widget-related-events) is an object with the following properties:
 
-* `host` - This is the GUID for the [Widget Host](#dfn-widget-host) (and is used for internal bookkeeping, such as which host is requesting install/uninstall).
-* `instance` - This is the GUID for the [Widget Instance](#dfn-widget-instance).
-* `tag` - This is the `tag` for the Widget.
-* `action` - This is the primary way to disambiguate events. The names of the events may be part of a standard lifecycle or app-specific, based on any [`WidgetAction` that has been defined](#Defining-a-WidgetAction).
-* `data` - This object comprises key/value pairs representing data sent from the [Widget Host](#dfn-widget-host) as part of the event. This could be, for example, the settings values to be saved to the [Widget Instance](#dfn-widget-instance).
+* `action` - Required. This is the primary way to disambiguate events. The names of the events may be part of a standard lifecycle or app-specific, based on any [`WidgetAction` that has been defined](#Defining-a-WidgetAction).
+* `data` - Required. This object comprises key/value pairs representing data sent from the [Widget Host](#dfn-widget-host) as part of the event. This could be, for example, the settings values to be saved to the [Widget Instance](#dfn-widget-instance). An empty object if no data is sent.
+* `widget` - Optional. This is a reference to the [`Widget`](#the-widget-object) (if any) associated with the event
+* `instanceId` - Optional. This is the GUID for the specific [Widget Instance](#dfn-widget-instance) (if any) associated with the event.
+* `hostId` - Optional. This is the GUID for the specific [Widget Host](#dfn-widget-host) (if any) associated with the event.
 
-```js
+```json
 {
-  "host": {{ GUID }},
-  "instance": {{ GUID }},
-  "tag": "agenda",
   "action": "create-event",
+  "widget": { },
+  "instanceId": "{{ GUID }}",
   "data": { }
 }
 ```
@@ -717,14 +716,18 @@ A [`WidgetEvent`](#widget-related-events) is an object with the following proper
 You can see a basic example of this in use in [the user login video, above](#user-login). There is a walk through of the interaction following that video, but here’s how the actual [`WidgetEvent`](#widget-related-events) could be handled:
 
 ```js
-self.addEventListener('widgetclick', function(event) {
+self.addEventListener('widgetclick', (event) => {
 
   const action = event.action;
 
   // If user is being prompted to login 
   if ( action == "login" ) {
-    // open a new window to the login page
-    clients.openWindow( "/login?from=widget" );
+    // open a new window to the login page & focus it
+    clients
+        .openWindow( "/login?from=widget" )
+        .then(windowClient => 
+          windowClient ? windowClient.focus() : null
+        );
   }
 
 });
@@ -742,18 +745,18 @@ The <b id="creating-a-WidgetEvent">steps for creating a WidgetEvent</b> with Wid
 1. Let <var>event</var> be a new ExtendableEvent.
 1. Run the following steps in parallel:
    1. Set <var>event["data"]</var> to a new object.
-   1. Set <var>event["host"]</var> to the id of the Widget Host bound to <var>message</var>.
    1. If <var>message</var> is a request to refresh all widgets
       1. Set <var>event["action"]</var> to "widget-resume".
+      1. Set <var>event["hostId"]</var> to the id of the Widget Host bound to <var>message</var>.
       1. Return <var>event</var>.
    1. Else if <var>message</var> is a request to install a widget, set <var>event["action"]</var> to "widget-install".
    1. Else if <var>message</var> is a request to uninstall a widget, set <var>event["action"]</var> to "widget-uninstall".
    1. Else if <var>message</var> is a request to update a widget’s settings, set <var>event["action"]</var> to "widget-save".
    1. Else set <var>event["action"]</var> to the user action bound to <var>message</var>.
    1. Let <var>instanceId</var> be the id of the Widget Instance bound to <var>message</var>.
-   1. Set <var>event["instance"]</var> to <var>instanceId</var>.
+   1. Set <var>event["instanceId"]</var> to <var>instanceId</var>.
    1. Let <var>widget</var> be the result of running the algorithm specified in [getByInstanceId(instanceId)](#widgetsgetbyinstanceid) with <var>instanceId</var>.
-   1. Set <var>event["tag"]</var> to <var>widget["tag"]</var>.
+   1. Set <var>event["widget"]</var> to <var>widget</var>.
    1. If <var>message</var> includes bound data,
       1. Set <var>event["data"]</var> to the data value bound to <var>message</var>.
 1. Return <var>event</var>
@@ -765,41 +768,33 @@ When the User Agent receives a request to create a new instance of a widget, it 
 
 Required `WidgetEvent` data:
 
-* `host`
-* `instance`
-* `tag`
+* `instanceId`
+* `widget`
 
-The <b id="creating-a-placeholder-instance">steps for creating a placeholder instance</b> with WidgetEvent <var>event</var>:
+The <b id="creating-a-placeholder-instance">steps for creating a placeholder instance</b> with `WidgetEvent` <var>event</var>:
 
-1. Let <var>tag</var> be <var>event["widget"]["tag"]</var>.
-1. Let <var>widget</var> be the result of running the algorithm specified in [getByTag(tag)](#widgetsgetbytag) with <var>tag</var>.
+1. Let <var>widget</var> be event["widget"].
 1. If <var>widget</var> is undefined, exit.
 1. Let <var>payload</var> be an object.
 1. Set <var>payload["data"]</var> to an empty JSON object.
 1. Set <var>payload["settings"]</var> to the result of [creating a default `WidgetSettings` object](#creating-a-default-widgetsettings-object) with <var>widget</var>.
-1. Set <var>payload["definition"]</var> to the value of <var>widget["definition"]</var>.
-1. Set <var>payload</var> to the result of [injecting manifest members into a `WidgetPayload`](#injecting-manifest-members-into-a-payload) with <var>payload</var>.
-1. Let <var>instance</var> be the result of [creating an instance](#creating-a-widget-instance) with <var>event["widget"]["id"]</var>, <var>event["widget"]["host"]</var>, and <var>payload</var>.
+1. Let <var>instance</var> be the result of [creating an instance](#creating-a-widget-instance) with <var>event["instanceId"]</var>, <var>event["hostId"]</var>, and <var>payload</var>.
 1. Append <var>instance</var> to <var>widget["instances"]</var>.
 
 <p id="install">Here is the flow for install:</p>
 
 ![](media/install.gif)
 
-1. A "widget-install" signal is received by the User Agent, the placeholder instance is created, and the event is passed along to the Service Worker.
-2. The Service Worker
-    a. captures the Widget Instance `id` from the `widget` property,
-    b. looks up the Widget via `widgets.getByInstanceId()`, and
-    c. makes a `Request` for its `data` endpoint.
-3. The Service Worker then combines the `Response` with the Widget definition and passes that along to the [Widget Service](#dfn-widget-service) via the `updateByInstanceId()` method.
+1. A "widget-install" signal is received by the User Agent, [the placeholder instance is created](#creating-a-placeholder-instance), and the event is passed along to the Service Worker.
+1. The Service Worker makes a `Request` for the `widget.data` endpoint.
+1. The Service Worker then creates a [payload](#the-widgetpayload-object) and passes that along to the [Widget Service](#dfn-widget-service) via the `updateByInstanceId()` method.
 
 ### widget-uninstall
 
 Required `WidgetEvent` data:
 
-* `host`
-* `instance`
-* `tag`
+* `instanceId`
+* `widget`
 
 <p id="uninstall">The "uninstall" process is similar:</p>
 
@@ -815,19 +810,18 @@ Note: When a PWA is uninstalled, its widgets must also be uninstalled. In this e
 
 Required `WidgetEvent` data:
 
-* `host`
-* `instance`
-* `tag`
+* `instanceId`
+* `widget`
 * `data`
 
 The "widget-save" process works like this:
 
 1. The "widget-save" signal is received by the User Agent.
-2. Internally, the `WidgetInstance` matching the `widget.id` value is examined to see if
+1. Internally, the `WidgetInstance` matching the `instanceId` value is examined to see if
    a. it has settings and
-   b. its `settings` object matches the inbound `data`.
-3. If it has settings and the two do not match, the new `data` is saved to `settings` in the `WidgetInstance` and the "widget-save" event issued to the Service Worker.
-4. The Service Worker receives the event and can react by issuing a request for new data, based on the updated settings values.
+   a. its `settings` object matches the inbound `data`.
+1. If it has settings and the two do not match, the new `data` is saved to `settings` in the `WidgetInstance` and the "widget-save" event issued to the Service Worker.
+1. The Service Worker receives the event and can react by issuing a request for new data, based on the updated settings values.
 
 ### widget-resume
 
@@ -835,9 +829,9 @@ Many [Widget Hosts](#dfn-widget-host) will suspend the rendering surface when it
 
 Required `WidgetEvent` data:
 
-* `host`
+* `hostId`
 
-Using this event, it is expected that the Service Worker will enumerate the Widget Instances associated with the `host` and Fetch new data for each.
+Using this event, it is expected that the Service Worker will enumerate the Widget Instances associated with the `hostId` and Fetch new data for each.
 
 ![](media/resume.gif)
 
@@ -863,7 +857,7 @@ async function updateWidget( widget ){
       })
       .then( response => {
         let payload = {
-          definition: widget.definition,
+          template: widget.definition.template,
           data: response.body
         };
         widgets.updateByInstanceId( instance.id, payload );
@@ -874,7 +868,7 @@ async function updateWidget( widget ){
     fetch( widget.data )
       .then( response => {
         let payload = {
-          definition: widget.definition,
+          template: widget.definition.template,
           data: response.body
         };
         widgets.updateByTag( widget.tag, payload );
@@ -885,65 +879,61 @@ async function updateWidget( widget ){
 self.addEventListener("widgetclick", function(event) {
 
   const action = event.action;
-  const host_id = event.host;
-  const tag = event.tag;
-  const instance_id = event.instance;
+  const host_id = event.hostId;
+  const widget = event.widget;
+  const instance_id = event.instanceId;
     
   switch (action) {
     
     // If a widget is being installed
     case "widget-install":
       console.log("installing", widget, instance_id);
-      event.waitUntil(
-        // find the widget
-        widgets.getByTag( tag )
-          .then( widget => {
-            // get the data needed
-            fetch( widget.data )
-              .then( response => {
-                let payload = {
-                  definition: widget.definition,
-                  data: response.body
-                };
-                // show the widget, passing in 
-                // the widget definition and data
-                widgets
-                  .updateByInstanceId( instance_id, payload )
-                  .then(()=>{
-                    // if the widget is set up to auto-update…
-                    if ( "update" in widget.definition ) {
-                      registration.periodicSync.getTags()
-                        .then( tags => {
-                          // only one registration per tag
-                          if ( ! tags.includes( tag ) ) {
-                            periodicSync.register( tag, {
-                                minInterval: widget.definition.update
-                            });
-                          }
-                        });
-                    }
-                  });
-              })
-          })
-      );
+      if ( widget && instance_id ) {
+        event.waitUntil(
+          // get the data needed
+          fetch( widget.data )
+            .then( response => {
+              let payload = {
+                template: widget.definition.template,
+                data: response.body
+              };
+              // show the widget, passing in 
+              // the widget definition and data
+              widgets
+                .updateByInstanceId( instance_id, payload )
+                .then(()=>{
+                  // if the widget is set up to auto-update…
+                  if ( "update" in widget.definition ) {
+                    registration.periodicSync.getTags()
+                      .then( tags => {
+                        // only one registration per tag
+                        if ( ! tags.includes( tag ) ) {
+                          periodicSync.register( tag, {
+                              minInterval: widget.definition.update
+                          });
+                        }
+                      });
+                  }
+                });
+            })
+        );
+      }
       break;
     
     // If a widget is being uninstalled
     case "widget-uninstall":
-      event.waitUntil(
-        // find the widget
-        widgets.getByInstanceId( instance_id )
-          .then( widget => {
-            console.log("uninstalling", widget.definition.name, "instance", instance_id);
-            // clean up periodic sync?
-            if ( widget.instances.length === 1 &&
-                 "update" in widget.definition )
-            {
-              periodicSync.unregister( tag );
-            }
-            widgets.removeByInstanceId( instance_id );
-          })
-      );
+      if ( widget && instance_id ) {
+        event.waitUntil(
+          console.log("uninstalling", widget.definition.name, "instance", instance_id);
+          // clean up periodic sync?
+          if ( widget.instances.length === 1 &&
+               "update" in widget.definition )
+          {
+            periodicSync.unregister( tag );
+          }
+          widgets.removeByInstanceId( instance_id );
+        );
+      }
       break;
 
     // If a widget host is requesting all its widgets update
