@@ -833,6 +833,29 @@ Using this event, it is expected that the Service Worker will enumerate the Widg
 
 ![](media/resume.gif)
 
+## Proactively Updating a Widget
+
+While the events outlined above allow developers to respond to widget interactions in real-time, developers will also likely want to update their widgets at other times. There are three primary methods for getting new data into a widget without interaction from a user or prompting via the [Widget Service](#dfn-widget-service):
+
+### Server Push
+
+Many developers are already familiar with Push Notifications as a means of notifying users of timely updates and information. Widgets offer an alternative means of informing users without interrupting them with a notification bubble.
+
+In order to use the [Push API](https://www.w3.org/TR/push-api/), a user must grant the developer [the necessary permission(s)](https://www.w3.org/TR/push-api/#permission). Once granted, however, developers could send widget data as part of any Server Push, either alongside pushes intended as Notifications or ones specifically intended to direct content into a widget.
+
+### Periodic Sync
+
+The [Periodic Sync API](https://developer.mozilla.org/docs/Web/API/Web_Periodic_Background_Synchronization_API) enables developers to wake up their Service Worker to synchronize data with the server. This Service Worker-directed event could be used to gather updates for any [Widget Instances](#dfn-widget-instance).
+
+Caveats:
+
+1. This API is currently only supported in Chromium browsers.
+1. Sync frequency is currently governed by site engagement metrics and is capped at 2× per day (once every 12 hours). We are investigating whether the frequency could be increased for PWAs with active widgets.
+
+### Server-sent Events
+
+[Server-sent Events](https://html.spec.whatwg.org/multipage/server-sent-events.html) are similar to a web socket, but only operate in one direction: from the server to a client. The `EventSource` interface is available within worker threads (including Service Workers) and can be used to "listen" for server-sent updates.
+
 ## Example
 
 Here is how this could come together in a Service Worker:
