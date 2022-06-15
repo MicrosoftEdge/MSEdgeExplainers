@@ -333,7 +333,7 @@ The steps for <b id="parsing-widgets-from-a-manifest">parsing widgets from a Web
       1. Set <var>widget["instances"]</var> to an empty array.
       1. Set <var>widget["installable"]</var> to the result of [determining widget installability](#determining-installability) with <var>manifest_widget</var>, <var>manifest</var>, and Widget Host.
       1. If <var>widget["installable"]</var> is true
-         1. Run the steps necessary to register <var>manifest_widget</var> with the [Widget Registry](#dfn-widget-registry), with <var>manifest</var> as necessary.
+         1. Run the steps necessary to register <var>manifest_widget</var> with the [Widget Registry](#dfn-widget-registry), with [any useful <var>manifest</var> members](#useful-manifest-members-for-registration).
       1. Add <var>manifest_widget["tag"]</var> to collected_tags</var>.
       1. Add <var>widget</var> to <var>widgets</var>.
 1. Store a copy of <var>widgets</var> for use with the Service Worker API.
@@ -347,6 +347,13 @@ The steps for <b id="determining-installability">determining install-ability</b>
 1. If <var>host</var> has additional requirements that are not met by <var>widget</var> (e.g., required `WidgetDefinition` extensions), classify the Widget as uninstallable and exit.
 1. Classify the widget as installable.
 
+<b id="useful-manifest-members-for-registration">Manifest members that may be useful in registering the widget</b> with a [Widget Registry](#dfn-widget-registry) include:
+
+1. <var>manifest["name"]</var>
+1. <var>manifest["short_name"]</var>
+1. <var>manifest["icons"]</var>
+1. <var>manifest["theme_color"]</var>
+1. <var>manifest["background_color"]</var>
 
 ## Service Worker APIs
 
@@ -552,22 +559,13 @@ The `Widgets` interface enables developers to work with individual widget instan
 
 In order to create or update a widget instance, the Service Worker must send the data necessary to render that widget. This data is called a payload and includes both template- and content-related data.  The members of a `WidgetPayload` are:
 
-* `definition` - Object. A `WidgetDefinition` for the Widget. This could be the raw definition from the `Widgets` interface or a constructed/modified version of that `WidgetDefinition`.
+* `template` - String. A named template to use for the Widget. Note: this value may be overridden by the User Agent, depending on the target [Widget Host](#dfn-widget-host).
 * `data` - String. The data to flow into the Widget template. If a developer wants to route JSON data into the Widget, they will need to `stringify()` it first.
 * `settings` - Object. The settings for the widget instance (if any).
 
-Before sending a `WidgetPayload` to the Widget Service, the `WidgetDefinition` will be modified to include several members of the Web App Manifest applicable to the web app. The steps for <b id="injecting-manifest-members-into-a-payload">injecting manifest members into a `WidgetPayload`</b> with <var>payload</var> and Web App Manifest <var>manifest</var> are as follows:
+The payload ultimately delivered to the [Widget Service](#dfn-widget-service) will vary. In some cases it may need to include one or more members of the `WidgetDefinition` or even members of the Web App Manifest itself (e.g., `theme_color`).
 
-1. If <var>payload</var> is not an `WidgetPayload`, then throw an Error.
-1. If <var>payload["definition"]</var> is not a `WidgetDefinition`, then throw an Error.
-1. If <var>manifest["name"]</var>, set <var>payload["definition"]["app_name"]</var> to <var>manifest["name"]</var>.
-1. If <var>manifest["short_name"]</var>, set <var>payload["definition"]["app_short_name"]</var> to <var>manifest["short_name"]</var>.
-1. If <var>manifest["icons"]</var>
-   1. Set <var>payload["definition"]["app_icons"]</var> to <var>manifest["icons"]</var>.
-   1. If <var>payload["definition"]["icons"]</var> is undefined or an empty array, set <var>payload["definition"]["icons"]</var> to <var>manifest["icons"]</var>.
-1. If <var>manifest["theme_color"]</var>, set <var>payload["definition"]["theme_color"]</var> to <var>manifest["theme_color"]</var>.
-1. If <var>manifest["background_color"]</var>, set <var>payload["definition"]["background_color"]</var> to <var>manifest["background_color"]</var>.
-1. Return <var>payload</var>.
+The `template` value ultimately sent to the [Widget Service](#dfn-widget-service) may also vary by implementation. It is also open to augmentation by the user agent. If, for example, the service supports a custom template (e.g., `ms_ac_template`), the User Agent may replace the template string with the value of that template, derived according to its own logic.
 
 #### Widget Errors
 
