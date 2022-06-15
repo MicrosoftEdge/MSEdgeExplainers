@@ -696,11 +696,11 @@ There are a host of different events that will take place in the context of a Se
 
 A [`WidgetEvent`](#widget-related-events) is an object with the following properties:
 
-* `action` - Required. This is the primary way to disambiguate events. The names of the events may be part of a standard lifecycle or app-specific, based on any [`WidgetAction` that has been defined](#Defining-a-WidgetAction).
-* `data` - Required. This object comprises key/value pairs representing data sent from the [Widget Host](#dfn-widget-host) as part of the event. This could be, for example, the settings values to be saved to the [Widget Instance](#dfn-widget-instance). An empty object if no data is sent.
-* `widget` - Optional. This is a reference to the [`Widget`](#the-widget-object) (if any) associated with the event
-* `instanceId` - Optional. This is the GUID for the specific [Widget Instance](#dfn-widget-instance) (if any) associated with the event.
-* `hostId` - Optional. This is the GUID for the specific [Widget Host](#dfn-widget-host) (if any) associated with the event.
+* `action` - Always required. This is the primary way to disambiguate events. The names of the events may be part of a standard lifecycle or app-specific, based on any [`WidgetAction` that has been defined](#Defining-a-WidgetAction).
+* `data` - Always required. This object comprises key/value pairs representing data sent from the [Widget Host](#dfn-widget-host) as part of the event. This could be, for example, the settings values to be saved to the [Widget Instance](#dfn-widget-instance). An empty object if no data is sent.
+* `widget` - Required for widget-specific events. This is a reference to the [`Widget`](#the-widget-object) (if any) associated with the event
+* `instanceId` - Required for widget-specific events. This is the GUID for the specific [Widget Instance](#dfn-widget-instance) (if any) associated with the event.
+* `hostId` - Required for host-specific events. This is the GUID for the specific [Widget Host](#dfn-widget-host) (if any) associated with the event.
 
 ```json
 {
