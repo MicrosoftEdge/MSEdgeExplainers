@@ -147,7 +147,7 @@ Widgets support user interaction through one or more [developer-defined `WidgetA
 Data flow in a Templated Widget is largely managed in two ways:
 
 1. Data flows from the Service Worker to a Widget instance as part of the [`widgets.updateByInstanceId()`](#widgetsupdatebyinstanceid) and [`widgets.updateByTag()`](#widgetsupdatebytag) methods.
-2. Data (in the form of interaction) flows from a Widget to the associated PWA’s Service Worker via a [`WidgetEvent`](#widget-related-events).
+1. Data (in the form of interaction) flows from a Widget to the associated PWA’s Service Worker via a [`WidgetEvent`](#widget-related-events).
 
 Here is an example of how this might look in the context of a Periodic Sync:
 
@@ -160,9 +160,9 @@ Here is an example of how this might look in the context of a Periodic Sync:
 This video shows the following steps:
 
 1. As part of a Periodic Sync, the Service Worker makes a `Request` to the host or some other endpoint.
-2. The `Response` comes back.
-3. As the Service Worker is aware of which widgets rely on that data, via the `WidgetDefinition` provided during [install](#dfn-install), the Service Worker can identify which widgets need updating. (This is internal logic and not shown in the video).
-3. The Service Worker takes that data — perhaps packaging it with other instructions — and uses [`widgets.updateByInstanceId()`](#widgetsupdatebyinstanceid) (or [`widgets.updateByTag()`](#widgetsupdatebytag)) to update the specific widgets that make use of that data.
+1. The `Response` comes back.
+1. As the Service Worker is aware of which widgets rely on that data, via the `WidgetDefinition` provided during [install](#dfn-install), the Service Worker can identify which widgets need updating. (This is internal logic and not shown in the video).
+1. The Service Worker takes that data — perhaps packaging it with other instructions — and uses [`widgets.updateByInstanceId()`](#widgetsupdatebyinstanceid) (or [`widgets.updateByTag()`](#widgetsupdatebytag)) to update the specific widgets that make use of that data.
 
 To show a more complicated example, consider what should happen if certain Widgets depend on authentication and the user happens to log out in the PWA or a browser tab. The developers would need to track this and ensure the Service Worker is notified so it can replace any auth-requiring Widgets with a prompt back into the app to log in.
 
@@ -177,7 +177,7 @@ Here’s how that might work:
 This video shows:
 
 1. The user logging out from the context of a `Client`. When that happens, the `Client`, sends a `postMessage()` to the Service Worker, alerting it to the state change in the app.
-2. The Service Worker maintains a list of active Widgets and is aware of which ones require authentication (informed by the `auth` property of the [`WidgetDefinition`](#defining-a-widget)). Knowing auth has been revoked, the Service Worker pushes a new template to each auth-requiring Widget with a notice and a button to prompt the user to log in again.
+1. The Service Worker maintains a list of active Widgets and is aware of which ones require authentication (informed by the `auth` property of the [`WidgetDefinition`](#defining-a-widget)). Knowing auth has been revoked, the Service Worker pushes a new template to each auth-requiring Widget with a notice and a button to prompt the user to log in again.
 
 The next step in this flow is for the user to log back in. They could do that directly in the Client, but let’s use the `WidgetAction` provided in the previous step:
 
@@ -190,10 +190,10 @@ The next step in this flow is for the user to log back in. They could do that di
 This video shows:
 
 1. The user clicking the "Login" action in the Widget. This triggers a [`WidgetEvent`](#widget-related-events) named "login".
-2. The Service Worker is listening for that action and redirects the user to the login page of the app, either within an existing `Client` (or in a new `Client` if one is not open).
-3. The user logs in and the app sends a `postMessage()` to the Service Worker letting it know the user is authenticated again.
-4. The Service Worker grabs new data for its auth-related widgets from the network.
-5. The Service Worker pipes that data back into the auth-requiring Widgets using [`widgets.updateByInstanceId()`](#widgetsupdatebyinstanceid) (or [`widgets.updateByTag()`](#widgetsupdatebytag)).
+1. The Service Worker is listening for that action and redirects the user to the login page of the app, either within an existing `Client` (or in a new `Client` if one is not open).
+1. The user logs in and the app sends a `postMessage()` to the Service Worker letting it know the user is authenticated again.
+1. The Service Worker grabs new data for its auth-related widgets from the network.
+1. The Service Worker pipes that data back into the auth-requiring Widgets using [`widgets.updateByInstanceId()`](#widgetsupdatebyinstanceid) (or [`widgets.updateByTag()`](#widgetsupdatebytag)).
 
 You can see more examples in [the `WidgetEvent` section](#Widget-related-Events).
 
@@ -206,6 +206,7 @@ One or more Widgets are defined within the `widgets` member of a Web App Manifes
 ```json
 {
   "name": "Agenda",
+  "description": "Your day, at a glance",
   "tag": "agenda",
   "template": "agenda",
   "data": "/widgets/data/agenda.ical",
@@ -238,6 +239,7 @@ One or more Widgets are defined within the `widgets` member of a Web App Manifes
 ### Optional Display-related properties
 
 * `short_name` - `DOMString`. An alternative short version of the `name`.
+* `description` - `DOMString`. A description of what the widget does or its purpose.
 * `icons` - an array of alternative icons to use in the context of this Widget; if undefined, the Widget icon will be the chosen icon from [the Manifest’s `icons` array](https://w3c.github.io/manifest/#icons-member).
 * `backgrounds` - an array of alternative background images (as [`ImageResource` objects](https://www.w3.org/TR/image-resource/)) that could be used in the template (if the [Widget Host](#dfn-widget-host) and template support background images).
 
@@ -333,7 +335,7 @@ The steps for <b id="parsing-widgets-from-a-manifest">parsing widgets from a Web
       1. Set <var>widget["instances"]</var> to an empty array.
       1. Set <var>widget["installable"]</var> to the result of [determining widget installability](#determining-installability) with <var>manifest_widget</var>, <var>manifest</var>, and Widget Host.
       1. If <var>widget["installable"]</var> is true
-         1. Run the steps necessary to register <var>manifest_widget</var> with the [Widget Registry](#dfn-widget-registry), with <var>manifest</var> as necessary.
+         1. Run the steps necessary to register <var>manifest_widget</var> with the [Widget Registry](#dfn-widget-registry), with [any useful <var>manifest</var> members](#useful-manifest-members-for-registration).
       1. Add <var>manifest_widget["tag"]</var> to collected_tags</var>.
       1. Add <var>widget</var> to <var>widgets</var>.
 1. Store a copy of <var>widgets</var> for use with the Service Worker API.
@@ -347,6 +349,13 @@ The steps for <b id="determining-installability">determining install-ability</b>
 1. If <var>host</var> has additional requirements that are not met by <var>widget</var> (e.g., required `WidgetDefinition` extensions), classify the Widget as uninstallable and exit.
 1. Classify the widget as installable.
 
+<b id="useful-manifest-members-for-registration">Manifest members that may be useful in registering the widget</b> with a [Widget Registry](#dfn-widget-registry) include:
+
+1. <var>manifest["name"]</var>
+1. <var>manifest["short_name"]</var>
+1. <var>manifest["icons"]</var>
+1. <var>manifest["theme_color"]</var>
+1. <var>manifest["background_color"]</var>
 
 ## Service Worker APIs
 
@@ -419,7 +428,7 @@ The steps for <b id="creating-a-default-widgetsettings-object">creating a defaul
 1. For each <var>setting</var> in <var>wiget["definition"]["settings"]</var>
    1. If setting["default"] is not null:
       1. Set <var>settings[setting["name"]]<var> to setting["default"].
-   2. Else:
+   1. Else:
       1. Set <var>settings[setting["name"]]<var> to an empty string.
 1. Return <var>settings</var>.
 
@@ -552,22 +561,13 @@ The `Widgets` interface enables developers to work with individual widget instan
 
 In order to create or update a widget instance, the Service Worker must send the data necessary to render that widget. This data is called a payload and includes both template- and content-related data.  The members of a `WidgetPayload` are:
 
-* `definition` - Object. A `WidgetDefinition` for the Widget. This could be the raw definition from the `Widgets` interface or a constructed/modified version of that `WidgetDefinition`.
+* `template` - String. A named template to use for the Widget. Note: this value may be overridden by the User Agent, depending on the target [Widget Host](#dfn-widget-host).
 * `data` - String. The data to flow into the Widget template. If a developer wants to route JSON data into the Widget, they will need to `stringify()` it first.
 * `settings` - Object. The settings for the widget instance (if any).
 
-Before sending a `WidgetPayload` to the Widget Service, the `WidgetDefinition` will be modified to include several members of the Web App Manifest applicable to the web app. The steps for <b id="injecting-manifest-members-into-a-payload">injecting manifest members into a `WidgetPayload`</b> with <var>payload</var> and Web App Manifest <var>manifest</var> are as follows:
+The payload ultimately delivered to the [Widget Service](#dfn-widget-service) will vary. In some cases it may need to include one or more members of the `WidgetDefinition` or even members of the Web App Manifest itself (e.g., `theme_color`).
 
-1. If <var>payload</var> is not an `WidgetPayload`, then throw an Error.
-1. If <var>payload["definition"]</var> is not a `WidgetDefinition`, then throw an Error.
-1. If <var>manifest["name"]</var>, set <var>payload["definition"]["app_name"]</var> to <var>manifest["name"]</var>.
-1. If <var>manifest["short_name"]</var>, set <var>payload["definition"]["app_short_name"]</var> to <var>manifest["short_name"]</var>.
-1. If <var>manifest["icons"]</var>
-   1. Set <var>payload["definition"]["app_icons"]</var> to <var>manifest["icons"]</var>.
-   1. If <var>payload["definition"]["icons"]</var> is undefined or an empty array, set <var>payload["definition"]["icons"]</var> to <var>manifest["icons"]</var>.
-1. If <var>manifest["theme_color"]</var>, set <var>payload["definition"]["theme_color"]</var> to <var>manifest["theme_color"]</var>.
-1. If <var>manifest["background_color"]</var>, set <var>payload["definition"]["background_color"]</var> to <var>manifest["background_color"]</var>.
-1. Return <var>payload</var>.
+The `template` value ultimately sent to the [Widget Service](#dfn-widget-service) may also vary by implementation. It is also open to augmentation by the user agent. If, for example, the service supports a custom template (e.g., `ms_ac_template`), the User Agent may replace the template string with the value of that template, derived according to its own logic.
 
 #### Widget Errors
 
@@ -698,18 +698,17 @@ There are a host of different events that will take place in the context of a Se
 
 A [`WidgetEvent`](#widget-related-events) is an object with the following properties:
 
-* `host` - This is the GUID for the [Widget Host](#dfn-widget-host) (and is used for internal bookkeeping, such as which host is requesting install/uninstall).
-* `instance` - This is the GUID for the [Widget Instance](#dfn-widget-instance).
-* `tag` - This is the `tag` for the Widget.
-* `action` - This is the primary way to disambiguate events. The names of the events may be part of a standard lifecycle or app-specific, based on any [`WidgetAction` that has been defined](#Defining-a-WidgetAction).
-* `data` - This object comprises key/value pairs representing data sent from the [Widget Host](#dfn-widget-host) as part of the event. This could be, for example, the settings values to be saved to the [Widget Instance](#dfn-widget-instance).
+* `action` - Always required. This is the primary way to disambiguate events. The names of the events may be part of a standard lifecycle or app-specific, based on any [`WidgetAction` that has been defined](#Defining-a-WidgetAction).
+* `data` - Always required. This object comprises key/value pairs representing data sent from the [Widget Host](#dfn-widget-host) as part of the event. This could be, for example, the settings values to be saved to the [Widget Instance](#dfn-widget-instance). An empty object if no data is sent.
+* `widget` - Required for widget-specific events. This is a reference to the [`Widget`](#the-widget-object) (if any) associated with the event
+* `instanceId` - Required for widget-specific events. This is the GUID for the specific [Widget Instance](#dfn-widget-instance) (if any) associated with the event.
+* `hostId` - Required for host-specific events. This is the GUID for the specific [Widget Host](#dfn-widget-host) (if any) associated with the event.
 
-```js
+```json
 {
-  "host": {{ GUID }},
-  "instance": {{ GUID }},
-  "tag": "agenda",
   "action": "create-event",
+  "widget": { },
+  "instanceId": "{{ GUID }}",
   "data": { }
 }
 ```
@@ -717,14 +716,18 @@ A [`WidgetEvent`](#widget-related-events) is an object with the following proper
 You can see a basic example of this in use in [the user login video, above](#user-login). There is a walk through of the interaction following that video, but here’s how the actual [`WidgetEvent`](#widget-related-events) could be handled:
 
 ```js
-self.addEventListener('widgetclick', function(event) {
+self.addEventListener('widgetclick', (event) => {
 
   const action = event.action;
 
   // If user is being prompted to login 
   if ( action == "login" ) {
-    // open a new window to the login page
-    clients.openWindow( "/login?from=widget" );
+    // open a new window to the login page & focus it
+    clients
+        .openWindow( "/login?from=widget" )
+        .then(windowClient => 
+          windowClient ? windowClient.focus() : null
+        );
   }
 
 });
@@ -742,18 +745,18 @@ The <b id="creating-a-WidgetEvent">steps for creating a WidgetEvent</b> with Wid
 1. Let <var>event</var> be a new ExtendableEvent.
 1. Run the following steps in parallel:
    1. Set <var>event["data"]</var> to a new object.
-   1. Set <var>event["host"]</var> to the id of the Widget Host bound to <var>message</var>.
    1. If <var>message</var> is a request to refresh all widgets
       1. Set <var>event["action"]</var> to "widget-resume".
+      1. Set <var>event["hostId"]</var> to the id of the Widget Host bound to <var>message</var>.
       1. Return <var>event</var>.
    1. Else if <var>message</var> is a request to install a widget, set <var>event["action"]</var> to "widget-install".
    1. Else if <var>message</var> is a request to uninstall a widget, set <var>event["action"]</var> to "widget-uninstall".
    1. Else if <var>message</var> is a request to update a widget’s settings, set <var>event["action"]</var> to "widget-save".
    1. Else set <var>event["action"]</var> to the user action bound to <var>message</var>.
    1. Let <var>instanceId</var> be the id of the Widget Instance bound to <var>message</var>.
-   1. Set <var>event["instance"]</var> to <var>instanceId</var>.
+   1. Set <var>event["instanceId"]</var> to <var>instanceId</var>.
    1. Let <var>widget</var> be the result of running the algorithm specified in [getByInstanceId(instanceId)](#widgetsgetbyinstanceid) with <var>instanceId</var>.
-   1. Set <var>event["tag"]</var> to <var>widget["tag"]</var>.
+   1. Set <var>event["widget"]</var> to <var>widget</var>.
    1. If <var>message</var> includes bound data,
       1. Set <var>event["data"]</var> to the data value bound to <var>message</var>.
 1. Return <var>event</var>
@@ -765,41 +768,33 @@ When the User Agent receives a request to create a new instance of a widget, it 
 
 Required `WidgetEvent` data:
 
-* `host`
-* `instance`
-* `tag`
+* `instanceId`
+* `widget`
 
-The <b id="creating-a-placeholder-instance">steps for creating a placeholder instance</b> with WidgetEvent <var>event</var>:
+The <b id="creating-a-placeholder-instance">steps for creating a placeholder instance</b> with `WidgetEvent` <var>event</var>:
 
-1. Let <var>tag</var> be <var>event["widget"]["tag"]</var>.
-1. Let <var>widget</var> be the result of running the algorithm specified in [getByTag(tag)](#widgetsgetbytag) with <var>tag</var>.
+1. Let <var>widget</var> be event["widget"].
 1. If <var>widget</var> is undefined, exit.
 1. Let <var>payload</var> be an object.
 1. Set <var>payload["data"]</var> to an empty JSON object.
 1. Set <var>payload["settings"]</var> to the result of [creating a default `WidgetSettings` object](#creating-a-default-widgetsettings-object) with <var>widget</var>.
-1. Set <var>payload["definition"]</var> to the value of <var>widget["definition"]</var>.
-1. Set <var>payload</var> to the result of [injecting manifest members into a `WidgetPayload`](#injecting-manifest-members-into-a-payload) with <var>payload</var>.
-1. Let <var>instance</var> be the result of [creating an instance](#creating-a-widget-instance) with <var>event["widget"]["id"]</var>, <var>event["widget"]["host"]</var>, and <var>payload</var>.
+1. Let <var>instance</var> be the result of [creating an instance](#creating-a-widget-instance) with <var>event["instanceId"]</var>, <var>event["hostId"]</var>, and <var>payload</var>.
 1. Append <var>instance</var> to <var>widget["instances"]</var>.
 
 <p id="install">Here is the flow for install:</p>
 
 ![](media/install.gif)
 
-1. A "widget-install" signal is received by the User Agent, the placeholder instance is created, and the event is passed along to the Service Worker.
-2. The Service Worker
-    a. captures the Widget Instance `id` from the `widget` property,
-    b. looks up the Widget via `widgets.getByInstanceId()`, and
-    c. makes a `Request` for its `data` endpoint.
-3. The Service Worker then combines the `Response` with the Widget definition and passes that along to the [Widget Service](#dfn-widget-service) via the `updateByInstanceId()` method.
+1. A "widget-install" signal is received by the User Agent, [the placeholder instance is created](#creating-a-placeholder-instance), and the event is passed along to the Service Worker.
+1. The Service Worker makes a `Request` for the `widget.data` endpoint.
+1. The Service Worker then creates a [payload](#the-widgetpayload-object) and passes that along to the [Widget Service](#dfn-widget-service) via the `updateByInstanceId()` method.
 
 ### widget-uninstall
 
 Required `WidgetEvent` data:
 
-* `host`
-* `instance`
-* `tag`
+* `instanceId`
+* `widget`
 
 <p id="uninstall">The "uninstall" process is similar:</p>
 
@@ -815,19 +810,18 @@ Note: When a PWA is uninstalled, its widgets must also be uninstalled. In this e
 
 Required `WidgetEvent` data:
 
-* `host`
-* `instance`
-* `tag`
+* `instanceId`
+* `widget`
 * `data`
 
 The "widget-save" process works like this:
 
 1. The "widget-save" signal is received by the User Agent.
-2. Internally, the `WidgetInstance` matching the `widget.id` value is examined to see if
+1. Internally, the `WidgetInstance` matching the `instanceId` value is examined to see if
    a. it has settings and
-   b. its `settings` object matches the inbound `data`.
-3. If it has settings and the two do not match, the new `data` is saved to `settings` in the `WidgetInstance` and the "widget-save" event issued to the Service Worker.
-4. The Service Worker receives the event and can react by issuing a request for new data, based on the updated settings values.
+   a. its `settings` object matches the inbound `data`.
+1. If it has settings and the two do not match, the new `data` is saved to `settings` in the `WidgetInstance` and the "widget-save" event issued to the Service Worker.
+1. The Service Worker receives the event and can react by issuing a request for new data, based on the updated settings values.
 
 ### widget-resume
 
@@ -835,11 +829,34 @@ Many [Widget Hosts](#dfn-widget-host) will suspend the rendering surface when it
 
 Required `WidgetEvent` data:
 
-* `host`
+* `hostId`
 
-Using this event, it is expected that the Service Worker will enumerate the Widget Instances associated with the `host` and Fetch new data for each.
+Using this event, it is expected that the Service Worker will enumerate the Widget Instances associated with the `hostId` and Fetch new data for each.
 
 ![](media/resume.gif)
+
+## Proactively Updating a Widget
+
+While the events outlined above allow developers to respond to widget interactions in real-time, developers will also likely want to update their widgets at other times. There are three primary methods for getting new data into a widget without interaction from a user or prompting via the [Widget Service](#dfn-widget-service):
+
+### Server Push
+
+Many developers are already familiar with Push Notifications as a means of notifying users of timely updates and information. Widgets offer an alternative means of informing users without interrupting them with a notification bubble.
+
+In order to use the [Push API](https://www.w3.org/TR/push-api/), a user must grant the developer [the necessary permission(s)](https://www.w3.org/TR/push-api/#permission). Once granted, however, developers could send widget data as part of any Server Push, either alongside pushes intended as Notifications or ones specifically intended to direct content into a widget.
+
+### Periodic Sync
+
+The [Periodic Sync API](https://developer.mozilla.org/docs/Web/API/Web_Periodic_Background_Synchronization_API) enables developers to wake up their Service Worker to synchronize data with the server. This Service Worker-directed event could be used to gather updates for any [Widget Instances](#dfn-widget-instance).
+
+Caveats:
+
+1. This API is currently only supported in Chromium browsers.
+1. Sync frequency is currently governed by site engagement metrics and is capped at 2× per day (once every 12 hours). We are investigating whether the frequency could be increased for PWAs with active widgets.
+
+### Server-sent Events
+
+[Server-sent Events](https://html.spec.whatwg.org/multipage/server-sent-events.html) are similar to a web socket, but only operate in one direction: from the server to a client. The `EventSource` interface is available within worker threads (including Service Workers) and can be used to "listen" for server-sent updates.
 
 ## Example
 
@@ -863,7 +880,7 @@ async function updateWidget( widget ){
       })
       .then( response => {
         let payload = {
-          definition: widget.definition,
+          template: widget.definition.template,
           data: response.body
         };
         widgets.updateByInstanceId( instance.id, payload );
@@ -874,7 +891,7 @@ async function updateWidget( widget ){
     fetch( widget.data )
       .then( response => {
         let payload = {
-          definition: widget.definition,
+          template: widget.definition.template,
           data: response.body
         };
         widgets.updateByTag( widget.tag, payload );
@@ -885,65 +902,61 @@ async function updateWidget( widget ){
 self.addEventListener("widgetclick", function(event) {
 
   const action = event.action;
-  const host_id = event.host;
-  const tag = event.tag;
-  const instance_id = event.instance;
+  const host_id = event.hostId;
+  const widget = event.widget;
+  const instance_id = event.instanceId;
     
   switch (action) {
     
     // If a widget is being installed
     case "widget-install":
       console.log("installing", widget, instance_id);
-      event.waitUntil(
-        // find the widget
-        widgets.getByTag( tag )
-          .then( widget => {
-            // get the data needed
-            fetch( widget.data )
-              .then( response => {
-                let payload = {
-                  definition: widget.definition,
-                  data: response.body
-                };
-                // show the widget, passing in 
-                // the widget definition and data
-                widgets
-                  .updateByInstanceId( instance_id, payload )
-                  .then(()=>{
-                    // if the widget is set up to auto-update…
-                    if ( "update" in widget.definition ) {
-                      registration.periodicSync.getTags()
-                        .then( tags => {
-                          // only one registration per tag
-                          if ( ! tags.includes( tag ) ) {
-                            periodicSync.register( tag, {
-                                minInterval: widget.definition.update
-                            });
-                          }
-                        });
-                    }
-                  });
-              })
-          })
-      );
+      if ( widget && instance_id ) {
+        event.waitUntil(
+          // get the data needed
+          fetch( widget.data )
+            .then( response => {
+              let payload = {
+                template: widget.definition.template,
+                data: response.body
+              };
+              // show the widget, passing in 
+              // the widget definition and data
+              widgets
+                .updateByInstanceId( instance_id, payload )
+                .then(()=>{
+                  // if the widget is set up to auto-update…
+                  if ( "update" in widget.definition ) {
+                    registration.periodicSync.getTags()
+                      .then( tags => {
+                        // only one registration per tag
+                        if ( ! tags.includes( tag ) ) {
+                          periodicSync.register( tag, {
+                              minInterval: widget.definition.update
+                          });
+                        }
+                      });
+                  }
+                });
+            })
+        );
+      }
       break;
     
     // If a widget is being uninstalled
     case "widget-uninstall":
-      event.waitUntil(
-        // find the widget
-        widgets.getByInstanceId( instance_id )
-          .then( widget => {
-            console.log("uninstalling", widget.definition.name, "instance", instance_id);
-            // clean up periodic sync?
-            if ( widget.instances.length === 1 &&
-                 "update" in widget.definition )
-            {
-              periodicSync.unregister( tag );
-            }
-            widgets.removeByInstanceId( instance_id );
-          })
-      );
+      if ( widget && instance_id ) {
+        event.waitUntil(
+          console.log("uninstalling", widget.definition.name, "instance", instance_id);
+          // clean up periodic sync?
+          if ( widget.instances.length === 1 &&
+               "update" in widget.definition )
+          {
+            periodicSync.unregister( tag );
+          }
+          widgets.removeByInstanceId( instance_id );
+        );
+      }
       break;
 
     // If a widget host is requesting all its widgets update
