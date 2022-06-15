@@ -206,6 +206,7 @@ One or more Widgets are defined within the `widgets` member of a Web App Manifes
 ```json
 {
   "name": "Agenda",
+  "description": "Your day, at a glance",
   "tag": "agenda",
   "template": "agenda",
   "data": "/widgets/data/agenda.ical",
@@ -238,6 +239,7 @@ One or more Widgets are defined within the `widgets` member of a Web App Manifes
 ### Optional Display-related properties
 
 * `short_name` - `DOMString`. An alternative short version of the `name`.
+* `description` - `DOMString`. A description of what the widget does or its purpose.
 * `icons` - an array of alternative icons to use in the context of this Widget; if undefined, the Widget icon will be the chosen icon from [the Manifest’s `icons` array](https://w3c.github.io/manifest/#icons-member).
 * `backgrounds` - an array of alternative background images (as [`ImageResource` objects](https://www.w3.org/TR/image-resource/)) that could be used in the template (if the [Widget Host](#dfn-widget-host) and template support background images).
 
