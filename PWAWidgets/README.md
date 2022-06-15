@@ -315,9 +315,11 @@ In order for [Widget Hosts](#dfn-widget-host) to be aware of what widgets are av
 
 * <var>manifest["name"]</var>
 * <var>manifest["short_name"]</var> (optionally)
-* <var>manifest["icons"]</var>
+* <var>manifest["icons"]</var> (optionally)
 * <var>manifest["lang"]</var>
 * <var>manifest["dir"]</var>
+* <var>manifest["theme_color"]</var> (optionally)
+* <var>manifest["background_color"]</var> (optionally)
 * <var>widget["name"]</var>
 * <var>widget["short_name"]</var> (optionally)
 * <var>widget["icons"]</var> (optionally)
@@ -335,7 +337,7 @@ The steps for <b id="parsing-widgets-from-a-manifest">parsing widgets from a Web
       1. Set <var>widget["instances"]</var> to an empty array.
       1. Set <var>widget["installable"]</var> to the result of [determining widget installability](#determining-installability) with <var>manifest_widget</var>, <var>manifest</var>, and Widget Host.
       1. If <var>widget["installable"]</var> is true
-         1. Run the steps necessary to register <var>manifest_widget</var> with the [Widget Registry](#dfn-widget-registry), with [any useful <var>manifest</var> members](#useful-manifest-members-for-registration).
+         1. Run the steps necessary to register <var>manifest_widget</var> with the [Widget Registry](#dfn-widget-registry), with any useful <var>manifest</var> members.
       1. Add <var>manifest_widget["tag"]</var> to collected_tags</var>.
       1. Add <var>widget</var> to <var>widgets</var>.
 1. Store a copy of <var>widgets</var> for use with the Service Worker API.
@@ -348,14 +350,6 @@ The steps for <b id="determining-installability">determining install-ability</b>
 1. If <var>widget["type"]</var> is not an acceptable MIME type for <var>widget["data"]</var> according to <var>host</var>, classify the Widget as uninstallable and exit.
 1. If <var>host</var> has additional requirements that are not met by <var>widget</var> (e.g., required `WidgetDefinition` extensions), classify the Widget as uninstallable and exit.
 1. Classify the widget as installable.
-
-<b id="useful-manifest-members-for-registration">Manifest members that may be useful in registering the widget</b> with a [Widget Registry](#dfn-widget-registry) include:
-
-1. <var>manifest["name"]</var>
-1. <var>manifest["short_name"]</var>
-1. <var>manifest["icons"]</var>
-1. <var>manifest["theme_color"]</var>
-1. <var>manifest["background_color"]</var>
 
 ## Service Worker APIs
 
