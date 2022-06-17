@@ -54,11 +54,11 @@ dictionary GamepadEffectParameters {
 };
 ```
 
-Since not every gamepad has the trigger-rumble feature, the developer must use the "supportsEffectType" method to query the device's capabilities. This method should take a GamepadHapticEffectType string and return true if the selected gamepad can play an effect of the specified type. Otherwise, it should return false. It should be noted that devices with trigger-rumble support should also be capable to provide dual-rumble feedback.
+Since not every gamepad has the trigger-rumble feature, the developer must use the "canPlay" method to query the device's capabilities. This method should take a GamepadHapticEffectType string and return true if the selected gamepad can play an effect of the specified type. Otherwise, it should return false. It should be noted that devices with trigger-rumble support should also be capable to provide dual-rumble feedback.
 
 ```js
 interface GamepadHapticActuator {
-    boolean supportsEffectType(GamepadHapticEffectType type);
+    boolean canPlay(GamepadHapticEffectType type);
 };
 ```
 
@@ -71,7 +71,7 @@ let gamepads = navigator.getGamepads();
 if (gamepads.length > 0) {
   let gamepad = gamepads[0];
   if (gamepad.vibrationActuator) {
-    if (gamepad.vibrationActuator.supportsEffectType("trigger-rumble")) {
+    if (gamepad.vibrationActuator.canPlay && gamepad.vibrationActuator.canPlay("trigger-rumble")) {
       gamepad.vibrationActuator.playEffect("trigger-rumble", {
         duration: 1000,
         leftTrigger: 0.5,
@@ -92,9 +92,9 @@ Also, it is possible to activate the feedback only for one trigger by omitting t
 
 ## Alternative Solutions
 
-### `supportsEffectType` versus a new `GamepadHapticActuatorType` entry
+### `canPlay` versus a new `GamepadHapticActuatorType` entry
 
-Adding a new entry entry, e.g. "trigger-rumble" to GamepadHapticActuatorType might be difficult to accomplish without breaking existing apps. For example, an app that always checks for "dual-rumble" may break if Xbox controllers suddenly begin to return "trigger rumble" as their `GamepadHapticActuatorType`. Therefore, it may be better to let the web applications do the required capability detection by calling `supportsEffectType`; and always define `GamepadHapticActuator.type` to be "dual-rumble", so apps cannot rely on it, then deprecate, and eventually remove it.
+Adding a new entry entry, e.g. "trigger-rumble" to GamepadHapticActuatorType might be difficult to accomplish without breaking existing apps. For example, an app that always checks for "dual-rumble" may break if Xbox controllers suddenly begin to return "trigger rumble" as their `GamepadHapticActuatorType`. Therefore, it may be better to let the web applications do the required capability detection by calling `canPlay`; and always define `GamepadHapticActuator.type` to be "dual-rumble", so apps cannot rely on it, then deprecate, and eventually remove it.
 
 ## Future Plans for this API
 The extension to the `GamepadHapticsActuator` is a short-term solution to unblock developers from being limited to 2-motor rumble on current generation hardware. In the long-term, we plan to invest in the [HapticsDevice API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md), which will supercede this API, the [Vibration API](https://w3c.github.io/vibration/#dom-navigator-vibrate), and will generalize haptics behaviors across many devices and applications. This new `HapticsDevice` API will be applied to Gamepad to support rumble and haptic effects in previous and next generation hardware.
