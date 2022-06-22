@@ -90,6 +90,10 @@ if (gamepads.length > 0) {
 
 Also, it is possible to activate the feedback only for one trigger by omitting the other one.
 
+## Privacy Considerations
+
+Allowing websites to query for Gamepads' haptic capabilities might raise fingerprinting concerns. However, `navigator.getGamepads` method returns an empty list before a gamepad user gesture has been detected (https://www.w3.org/TR/gamepad/#getgamepads-method), which will not allow queries to be done before the user has interacted with the gamepad in the website. 
+
 ## Alternative Solutions
 
 ### `canPlay` versus a new `GamepadHapticActuatorType` entry
@@ -104,5 +108,6 @@ The extension to the `GamepadHapticsActuator` is a short-term solution to unbloc
 [Gamepad Haptics API proposal](https://docs.google.com/document/d/1jPKzVRNzzU4dUsvLpSXm1VXPQZ8FP-0lKMT-R_p-s6g/edit#)  
 [Microsoft Xbox Controller](https://www.xbox.com/en-us/accessories/controllers/xbox-wireless-controller#white)  
 [Razer Wolverine Ultimate Controller](https://www.razer.com/console-controllers/razer-wolverine-ultimate/RZ06-02250100-R3U1)  
+[W3C Gamepad Working Draft](https://www.w3.org/TR/gamepad/#getgamepads-method)  
 [W3C Gamepad Extensions draft](https://w3c.github.io/gamepad/extensions)  
 [W3C Gamepad issue 138 - Xbox One impulse trigger effects](https://github.com/w3c/gamepad/issues/138)
