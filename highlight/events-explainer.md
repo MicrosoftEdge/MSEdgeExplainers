@@ -24,11 +24,10 @@ A new event, HighlightPointerEvent, will be created to describe how the user is 
 ```idl
 interface HighlightPointerEvent : PointerEvent {
     readonly Range range;
-    readonly Highlight currentTarget;
 }
 ```
 
-For the selected range, a HighlightPointerEvent object must be dispatched with the Highlight as its `currentTarget`, and the relevant range as its `range`. The event's `target` will be set to the element the user interacted with.
+For the selected highlight/range pair, a HighlightPointerEvent object must be dispatched with the relevant range as its `range` and the Highlight as its `currentTarget`. `Highlight` will be based on `EventTarget` in order to be able to have events fired against it. The event's `target` will be set to the element the user interacted with.
 
 Here's an example illustrating how a "find-highlights" Highlight could move selection such that it coincides with the clicked find-on-page result.
 
