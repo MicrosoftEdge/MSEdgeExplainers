@@ -24,6 +24,7 @@ A new event, HighlightPointerEvent, will be created to describe how the user is 
 ```idl
 interface HighlightPointerEvent : PointerEvent {
     readonly Range range;
+    readonly Highlight currentTarget;
 }
 ```
 
