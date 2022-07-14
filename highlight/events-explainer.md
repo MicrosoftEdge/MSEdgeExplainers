@@ -27,7 +27,19 @@ interface HighlightPointerEvent : PointerEvent {
 }
 ```
 
-For the selected range, a HighlightPointerEvent object must be dispatched with the Highlight as its `currentTarget`, and the relevant range as its `range`. The event's `target` will be set to the element the user interacted with.
+For the selected highlight/range pair, a HighlightPointerEvent object must be dispatched with the relevant range as its `range` and the Highlight as its `currentTarget`. The event's `target` will be set to the element the user interacted with.
+
+The `Highlight` interface will be changed to inherit from `EventTarget` in order to be able to have event listeners added to it and events fired against it.
+
+```idl
+[Exposed=Window]
+interface Highlight : EventTarget {
+  constructor(AbstractRange... initialRanges);
+  setlike<AbstractRange>;
+  attribute long priority;
+  attribute HighlightType type;
+};
+```
 
 Here's an example illustrating how a "find-highlights" Highlight could move selection such that it coincides with the clicked find-on-page result.
 
