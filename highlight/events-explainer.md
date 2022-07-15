@@ -138,22 +138,22 @@ Let's say the user performs a mouse down on the last line of p1, moves the mouse
 ```
 PointerDown p1
     Capture phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
-    Capture\Bubbling phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
+    Target phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
     Bubbling phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
 
 PointerMove(s) p1
     Capture phase p1 pointermove - target:p1 currentTarget:p1 range:r1
-    Capture\Bubbling phase h1 pointermove - target:p1 currentTarget:h1 range:r1
+    Target phase h1 pointermove - target:p1 currentTarget:h1 range:r1
     Bubbling phase p1 pointermove - target:p1 currentTarget:p1 range:r1
 
 PointerMove(s) p2
     Capture phase p2 pointermove - target:p2 currentTarget:p2 range:r2
-    Capture\Bubbling phase h2 pointermove - target:p2 currentTarget:h2 range:r2
+    Target phase h2 pointermove - target:p2 currentTarget:h2 range:r2
     Bubbling phase p2 pointermove - target:p2 currentTarget:p2 range:r2
 
 PointerUp p2
     Capture phase p2 pointerup - target:p2 currentTarget:p2 range:r2
-    Capture\Bubbling phase h2 pointerup - target:p2 currentTarget:h2 range:r2
+    Target phase h2 pointerup - target:p2 currentTarget:h2 range:r2
     Bubbling phase p2 pointerup - target:p2 currentTarget:p2 range:r2
 ```
 
@@ -166,19 +166,19 @@ If an element is taking pointer capture, only highlighted ranges within that ele
 ```
 PointerDown p1
     Capture phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
-    Capture\Bubbling phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
+    Target phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
     Bubbling phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
 
 PointerMove(s) p1
     Capture phase p1 pointermove - target:p1 currentTarget:p1 range:r1
-    Capture\Bubbling phase h1 pointermove - target:p1 currentTarget:h1 range:r1
+    Target phase h1 pointermove - target:p1 currentTarget:h1 range:r1
     Bubbling phase p1 pointermove - target:p1 currentTarget:p1 range:r1
 
 PointerMove(s) p1 taking pointer capture
-    Capture\Bubbling phase p1 pointermove - target:p1 currentTarget:p1
+    Target phase p1 pointermove - target:p1 currentTarget:p1
 
 PointerUp p1
-    Capture\Bubbling phase p1 pointerup - target:p1 currentTarget:p1
+    Target phase p1 pointerup - target:p1 currentTarget:p1
 ```
 
 ### [Interaction with the CSS pointer-events property](#CSS-pointer-events-property)
@@ -194,17 +194,17 @@ Let's once again consider the example from the [interaction with elements and el
 ```
 PointerDown p1
     Capture phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
-    Capture\Bubbling phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
+    Target phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
     Bubbling phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
 
 PointerMove(s) p1
     Capture phase p1 pointermove - target:p1 currentTarget:p1 range:r1
-    Capture\Bubbling phase h1 pointermove - target:p1 currentTarget:h1 range:r1
+    Target phase h1 pointermove - target:p1 currentTarget:h1 range:r1
     Bubbling phase p1 pointermove - target:p1 currentTarget:p1 range:r1
     
 PointerCancel p1
     Capture phase p1 pointercancel - target:p1 currentTarget:p1 *range:r1
-    *Capture\Bubbling phase h1 pointercancel - target:p1 currentTarget:h1 range:r1 
+    *Target phase h1 pointercancel - target:p1 currentTarget:h1 range:r1 
     Bubbling phase p1 pointercancel - target:p1 currentTarget:p1 *range:r1
     
 *if pans starts while user's finger is over h1
@@ -215,19 +215,19 @@ If p1 has touch-action set to some other value, when the user taps down with the
 ```
 PointerDown p1
     Capture phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
-    Capture\Bubbling phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
+    Target phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
     Bubbling phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
 
 PointerMove(s) p1
     Capture phase p1 pointermove - target:p1 currentTarget:p1 range:r1
-    Capture\Bubbling phase h1 pointermove - target:p1 currentTarget:h1 range:r1
+    Target phase h1 pointermove - target:p1 currentTarget:h1 range:r1
     Bubbling phase p1 pointermove - target:p1 currentTarget:p1 range:r1
 
 PointerMove(s) p1 taking implicit pointer capture
-    Capture\Bubbling phase p1 pointermove - target:p1 currentTarget:p1
+    Target phase p1 pointermove - target:p1 currentTarget:p1
 
 PointerUp p1
-    Capture\Bubbling phase p1 pointerup - target:p1 currentTarget:p1
+    Target phase p1 pointerup - target:p1 currentTarget:p1
 ```
 
 ## Open Questions
