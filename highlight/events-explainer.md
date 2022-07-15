@@ -27,7 +27,12 @@ interface HighlightPointerEvent : PointerEvent {
 }
 ```
 
-For the selected highlight/range pair, a HighlightPointerEvent object must be dispatched with the relevant range as its `range` and the Highlight as its `currentTarget`. In order to retain web compatibility and current PointerEvents' behaviour, the event's `target` will remian being the element the user interacted with throughout the event's propagation.
+When a user performs a pointer action on part of an element containing a highlighted `Range`, a `HighlightPointerEvent` object must be fired on the `Highlight` that that `Range` belongs to. `HighlightPointerEvent.range` will be set to that `Range` so that the event listener can determine which one of the `Highlight`'s ranges the event applies to. Propagation for the event will work as if the element was the first DOM parent of the `Highlight` (see below examples).
+
+One approach would be to set `HighlightPointerEvent.target` to the `Highlight`. But, this poses a web compatibility problem. Currently a `PointerEvent`'s `target` can only be an element, so `PointerEvent` handlers will expect this and encounter problems if they receive a `HighlightPointerEvent` whose `target` is a `Highlight`.
+
+So in order to retain web compatibility and not break `PointerEvent` handlers in existing code, the event's `target` will be set to the element rather than the `Highlight`.
+
 
 The `Highlight` interface will be changed to inherit from `EventTarget` in order to be able to have event listeners added to it and events fired against it.
 
@@ -245,7 +250,8 @@ PointerUp p1
 
   6. Should we fire the pointer event on the Range that was hit, instead of the containing Highlight? It seems more developer friendly to create a single event listener on a Highlight than to create one listener per Range in the group.
   
-  7. Should the Highlight be the target of the same pointer event that is delivered to the parent Elements? This would enable Highlights to be PointerEvent targets, and could introduce the risk of breaking the expectations of current code as PointerEvents currently only have Nodes as their target.
+  7. Should the Highlight be the `target` of the pointer event that is propagated to the parent Elements? This would enable Highlights to be PointerEvent targets, and could introduce the risk of breaking the expectations of current code as PointerEvents currently only have Nodes as their target.
+
 
   ---
   [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HighlightEvents) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BHighlightEvents%5D)
