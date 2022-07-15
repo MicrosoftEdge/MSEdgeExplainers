@@ -27,7 +27,12 @@ interface HighlightPointerEvent : PointerEvent {
 }
 ```
 
-For the selected highlight/range pair, a HighlightPointerEvent object must be dispatched with the relevant range as its `range` and the Highlight as its `currentTarget`. The event's `target` will be set to the element the user interacted with.
+When a user performs a pointer action on part of an element containing a highlighted `Range`, a `HighlightPointerEvent` object must be fired on the `Highlight` that that `Range` belongs to. `HighlightPointerEvent.range` will be set to that `Range` so that the event listener can determine which one of the `Highlight`'s ranges the event applies to. Propagation for the event will work as if the element was the first DOM parent of the `Highlight` (see below examples).
+
+One approach would be to set `HighlightPointerEvent.target` to the `Highlight`. But, this poses a web compatibility problem. Currently a `PointerEvent`'s `target` can only be an element, so `PointerEvent` handlers will expect this and encounter problems if they receive a `HighlightPointerEvent` whose `target` is a `Highlight`.
+
+So in order to retain web compatibility and not break `PointerEvent` handlers in existing code, the event's `target` will be set to the element rather than the `Highlight`.
+
 
 The `Highlight` interface will be changed to inherit from `EventTarget` in order to be able to have event listeners added to it and events fired against it.
 
@@ -54,7 +59,7 @@ Here's an example illustrating how a "find-highlights" Highlight could move sele
 </head>
 <body>
     <div id="content">text to highlight</div>
-	<script type="module">
+    <script type="module">
         const findHighlights = new Highlight()
         CSS.highlights.set("find-highlights", findHighlights)
 
@@ -73,10 +78,11 @@ Here's an example illustrating how a "find-highlights" Highlight could move sele
             selection.removeAllRanges()
             selection.addRange(range)
         })
-	</script>
+    </script>
 </body>
 </html>
 ```
+
 
 ### [Multiple Ranges and Highlights](#multiple-ranges-and-highlights)
 
@@ -95,13 +101,60 @@ Whenever an element receives pointer input, if a range within that element is al
 
 Elements and Highlights should receive the same pointer events. This means that a Highlight callback would be able to prevent the event from reaching an element by calling stopPropogation, as well as canceling the event via preventDefault.
 
-As an example, consider a scenario where there are two consecutive paragraphs, p1 and p2, with one highlight, h1, on the last line of p1 and another highlight, h2, on the first line of p2. Let's say the user performs a mouse down on the last line of p1, moves the mouse to the first line of p2, and then performs a mouse up. The sequence of events fired would be:
+As an example, consider a scenario where there are two consecutive paragraphs, p1 and p2, with one highlight, h1, on the last line of p1 and another highlight, h2, on the first line of p2.
+
+```html
+<html>
+<head>
+    <style>
+        :root::highlight(foo) {
+            background-color: red;
+        }
+        :root::highlight(bar) {
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <p id="p1">foo</p>
+    <p id="p2">bar</p>
+    <script type="module">
+        const p1 = document.getElementById("p1");
+        const r1 = new Range();
+        r1.selectNode(p1);
+        const p2 = document.getElementById("p2");
+        const r2 = new Range();
+        r2.selectNode(p2);
+
+        CSS.highlights.set("foo", new Highlight(r1));
+        CSS.highlights.set("bar", new Highlight(r2));
+    </script>
+</body>
+</html>
+```
+
+Let's say the user performs a mouse down on the last line of p1, moves the mouse to the first line of p2, and then performs a mouse up. The sequence of events fired would be:
 
 ```
-h1 pointerdown, p1 pointerdown
-h1 pointermove(s), p1 pointermove(s)
-h2 pointermove(s), p2 pointermove(s) - assuming p1 does not take pointer capture
-h2 pointerup, p2 pointerup
+PointerDown p1
+    Capture phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
+    Target phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
+    Bubbling phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
+
+PointerMove(s) p1
+    Capture phase p1 pointermove - target:p1 currentTarget:p1 range:r1
+    Target phase h1 pointermove - target:p1 currentTarget:h1 range:r1
+    Bubbling phase p1 pointermove - target:p1 currentTarget:p1 range:r1
+
+PointerMove(s) p2
+    Capture phase p2 pointermove - target:p2 currentTarget:p2 range:r2
+    Target phase h2 pointermove - target:p2 currentTarget:h2 range:r2
+    Bubbling phase p2 pointermove - target:p2 currentTarget:p2 range:r2
+
+PointerUp p2
+    Capture phase p2 pointerup - target:p2 currentTarget:p2 range:r2
+    Target phase h2 pointerup - target:p2 currentTarget:h2 range:r2
+    Bubbling phase p2 pointerup - target:p2 currentTarget:p2 range:r2
 ```
 
 ### [Interaction with pointer capture](#interaction-with-pointer-capture)
@@ -111,10 +164,21 @@ A Highlight cannot currently become a pointer capture target. There are no expos
 If an element is taking pointer capture, only highlighted ranges within that element's scope can receive pointer events. Let's reconsider the scenario from the [interaction with elements and element pointer events](#interaction-with-elements-and-element-pointer-events) section and this time let's say p1 is taking pointer capture. Because of pointer capture, even when the user's mouse has moved over p2, p1 will continue receiving pointer events and p2 does not get hit. Because p2 is not hit, h2 will also not be hit and will not receive pointer events. Additionally, because Highlights cannot take pointer capture, h1 will also stop receiving events once the mouse has moved off it. So the sequence of events will be:
 
 ```
-h1 pointerdown, p1 pointerdown
-h1 pointermove(s), p1 pointermove(s)
-p1 pointermove(s)
-p1 pointerup
+PointerDown p1
+    Capture phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
+    Target phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
+    Bubbling phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
+
+PointerMove(s) p1
+    Capture phase p1 pointermove - target:p1 currentTarget:p1 range:r1
+    Target phase h1 pointermove - target:p1 currentTarget:h1 range:r1
+    Bubbling phase p1 pointermove - target:p1 currentTarget:p1 range:r1
+
+PointerMove(s) p1 taking pointer capture
+    Target phase p1 pointermove - target:p1 currentTarget:p1
+
+PointerUp p1
+    Target phase p1 pointerup - target:p1 currentTarget:p1
 ```
 
 ### [Interaction with the CSS pointer-events property](#CSS-pointer-events-property)
@@ -128,18 +192,42 @@ The CSS [touch-action](https://w3c.github.io/pointerevents/#the-touch-action-css
 Let's once again consider the example from the [interaction with elements and element pointer events](#interaction-with-elements-and-element-pointer-events) section, but this time let's say the user is using their finger on a touchscreen instead of a mouse. If p1 has touch-action set to auto/pan-y/pan-up, p1 will receive a pointercancel event as the browser starts to pan up. If the pan starts while the user's finger is over h1, then h1 will also receive a pointercancel; however, if the pan starts after the user's finger has moved off h1, h1 will not receive a pointercancel because it will not be hit at that moment. So the event sequence will be:
 
 ```
-h1 pointerdown, p1 pointerdown
-h1 pointermove(s), p1 pointermove(s)
-h1 pointercancel, p1 pointercancel (if pans starts while user's finger is over h1) *or* p1 pointercancel (if pan starts after user's finger has moved off h1)
+PointerDown p1
+    Capture phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
+    Target phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
+    Bubbling phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
+
+PointerMove(s) p1
+    Capture phase p1 pointermove - target:p1 currentTarget:p1 range:r1
+    Target phase h1 pointermove - target:p1 currentTarget:h1 range:r1
+    Bubbling phase p1 pointermove - target:p1 currentTarget:p1 range:r1
+    
+PointerCancel p1
+    Capture phase p1 pointercancel - target:p1 currentTarget:p1 *range:r1
+    *Target phase h1 pointercancel - target:p1 currentTarget:h1 range:r1 
+    Bubbling phase p1 pointercancel - target:p1 currentTarget:p1 *range:r1
+    
+*if pans starts while user's finger is over h1
 ```
 
 If p1 has touch-action set to some other value, when the user taps down with their finger on the last line of p1, p1 will receive implicit pointer capture. So the sequence of events will be as it was in the [interaction with pointer capture](interaction-with-pointer-capture) section:
 
 ```
-h1 pointerdown, p1 pointerdown
-h1 pointermove(s), p1 pointermove(s)
-p1 pointermove(s)
-p1 pointerup
+PointerDown p1
+    Capture phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
+    Target phase h1 pointerdown - target:p1 currentTarget:h1 range:r1
+    Bubbling phase p1 pointerdown - target:p1 currentTarget:p1 range:r1
+
+PointerMove(s) p1
+    Capture phase p1 pointermove - target:p1 currentTarget:p1 range:r1
+    Target phase h1 pointermove - target:p1 currentTarget:h1 range:r1
+    Bubbling phase p1 pointermove - target:p1 currentTarget:p1 range:r1
+
+PointerMove(s) p1 taking implicit pointer capture
+    Target phase p1 pointermove - target:p1 currentTarget:p1
+
+PointerUp p1
+    Target phase p1 pointerup - target:p1 currentTarget:p1
 ```
 
 ## Open Questions
@@ -155,8 +243,8 @@ p1 pointerup
 
   6. Should we fire the pointer event on the Range that was hit, instead of the containing Highlight? It seems more developer friendly to create a single event listener on a Highlight than to create one listener per Range in the group.
   
-  7. Should the Highlight be the target of the same pointer event that is delivered to the parent Elements?
-  
+  7. Should the Highlight be the `target` of the pointer event that is propagated to the parent Elements? This would enable Highlights to be PointerEvent targets, and could introduce the risk of breaking the expectations of current code as PointerEvents currently only have Nodes as their target.
+
 
   ---
   [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HighlightEvents) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BHighlightEvents%5D)
