@@ -2,7 +2,7 @@
 name: Set and Reset Clip
 about: new issue
 title: "[Set Clip] <TITLE HERE>"
-labels: SetClip
+labels: ''
 assignees: sushraja-msft, travisleithead
 
 ---
