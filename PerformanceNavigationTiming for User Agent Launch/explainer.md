@@ -5,6 +5,7 @@ The purpose of this document is to propose changes to the [Performance Navigatio
 Authors:
 * [Heming Zhang](https://github.com/hemingzh) - Engineer at Microsoft Edge
 * [Dylan Kelly](https://github.com/dylank) - Engineer at Microsoft Edge
+* [Ben Mathwig](https://github.com/bmathwig) - Product Manager at Microsoft Edge
 
 ## Status of this Document
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -100,6 +101,21 @@ if (navigationEntries.length > 0) {
 
 // send log with the navigationType
 ```
+
+## Mapping to HTML `historyHandling` definition
+All types defined in a `NavigationType` have a correlation to an HTML [historyHandling type](https://html.spec.whatwg.org/multipage/browsing-the-web.html#history-handling-behavior):
+
+| HTML History Handling Type | Navigation Type |
+| -------------------------- | --------------- |
+| default                    | navigation      |
+| reload                     | reload          |
+| replace                    | back_forward    |
+| preload                    | prerender       |
+
+In the text of the specification, we propose adding a new `historyHandling` type called **`launch`** that can be used in the _optional_ `historyHandling` parameter instead of the value `default` by default in the case where the browser is navigating from a cold-start scenario. We would propose ammending Step #6 to read:
+> If historyHandling is "default" **_or "launch"_**, and any of the following are true:
+
+Because the history handling property is marked as optional, this should make the new type interoperable with the default value of `default`. This would allow us to map the `useragent_launch` type to the `launch` type specified in HTML.
 
 ## Privacy and Security Considerations
 
