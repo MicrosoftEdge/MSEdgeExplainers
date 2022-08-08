@@ -184,7 +184,10 @@ we move them into the [Alumni section](#alumni-) below.
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=boggydigital%2C+dlibby-%2C+zouhir&labels=Foldables&template=web-platform-primitives-for-foldables--css-part-.md&title=%5BCSS+Foldable+Primitives%5D+%3CTITLE+HERE%3E)
     
 ### Web Capabilities
-
+* [Calling Notifications](Notifications/notifications_actions_customization.md) | 
+   <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Calling%20Notifications">
+   ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Calling%20Notifications?label=issues)</a> | 
+   [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=jungkees%2C+gabrielsanbrito%2C+SteveBeckerMSFT&labels=Calling+Notifications&template=calling-notifications.md&title=%5BCalling+Notifications%5D+%3CTITLE+HERE%3E)
 * [Haptics Device API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md) |
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HapticsDevice%20API">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/HapticsDevice%20API?label=issues)</a> |
