@@ -14,7 +14,7 @@ Native applications that also have a Web counterpart might want the behavior of 
 ![call_teams_notification](https://user-images.githubusercontent.com/80070607/180506585-73f05e29-5676-4686-88dc-bd2fa05b8e6d.png)  
 *Figure 1: Calling notification scenario.*
 
-We would like to propose an extension to the [Notifications API](https://notifications.spec.whatwg.org/) standard for incoming call scenarios to allow the notification action buttons to be customized and also allow the application to play a custom ringtone. This capability would make the incoming call notifications, which may require a faster immediate response, clearly distinguishable from the others to the user and would also contribute to increasing accessibility on the Web. Moreover, apps would still be able to use their trademark ringtones on the web and users would be capable of identifying the calling app just by listening to it.
+We would like to propose an extension to the [Notifications API](https://notifications.spec.whatwg.org/) standard for incoming call scenarios to allow the notification action buttons to be customized and also allow the application to play a ringtone. This capability would make the incoming call notifications, which may require a faster immediate response, clearly distinguishable from the others to the user and would also contribute to increasing accessibility on the Web.
 
 ## Goals
 
@@ -31,18 +31,22 @@ Allow general web contents to arbitrarily change action button colors and sound 
 
 ## Proposed Solution
 
-We propose an extension to the current Notifications API where the `NotificationAction` dictionary would have a new `style` variable of type `NotificationActionStyle`, which is an enum with 3 values: 
+We propose an extension to the current Notifications API where the `NotificationAction` dictionary would have a new `style` property of type `NotificationActionStyle`, which is an enum with 4 values: 
 - `"default"`,
-- `"success"`, and
-- `"critical"`.
+- `"acknowledge"`,
+- `"acknowledge_with_video"`, and
+- `"dismiss"`.
 
-These styles are platform-dependent but should be distinct from each other to allow the user to easily identify its options. For example, the `"success"` action button could have a green theme - e.g., have green background color or have a green font over the default background - while the `"critical"` could be red-themed, but it is up to the platform to define the style. If the selected style is not supported by the platform, it should fallback to `"default"`
+These styles are platform-dependent but should be distinct from each other to allow the user to easily identify its options. Moreover, to disencourage use of these buttons outside the intended use-case scenarios - e.g., video/audio calls -, we also suggest disallowing the usage of a custom title and icon on these notifications by web applications. 
+
+For example, the `"acknowledge"` action button could have a green theme - e.g., have green background color with a solid white phone icon over the default background - while the `"dismiss"` could be red-themed, but it is up to the platform to define the style. If the selected style is not supported by the platform, it should fallback to `"default"`.
 
 ```javascript
 enum NotificationActionStyle {
   "default",
-  "success",
-  "critical"
+  "acknowledge",
+  "acknowledge_with_video"`,
+  "dismiss"
 }
 
 dictionary NotificationAction {
@@ -73,31 +77,44 @@ dictionary NotificationOptions {
 
 The `"default"` value would play the standard notification audio provided by the platform just once; whereas the `"ringtone"` one would execute a platform-provided audio, suitable for executing in a loop, and keep playing it for the duration of the notification. If the platform is not able to provide a suitable `"ringtone"` audio the User Agent (UA) must fallback to the `"default"` case.
 
+We propose the creation of a new property `type` in the `NotificationOptions` dictionary of type `NotificationType`, that is an enum with 2 values: `"default"` and `"calling"`. The action button customization and ringtone capabilities should be made available only if `Notification.type` is equal to `"calling" `. If a website attempts to customize a `"default"` notification, the UA should ignore the customization parameters: 
+- `Notification.sound` and
+-  `NotificationAction.style` in each `NotificationAction` object of `Notification.actions`.
+
+Likewise, if a notification is of type `"calling"`, the UA should ignore all the `NotificationAction.title` and `NotificationAction.icon` parameters in each `NotificationAction` object of `Notification.actions`.
+
+```javascript
+enum NotificationType {
+  "default",
+  "calling"
+}
+
+dictionary NotificationOptions {
+  NotificationType type = "default";
+  ...
+}
+```
+
 An incoming call notification from a VoIP Web app could be instantiated through a service worker by using:
 
 ```javascript
 const title = "Incoming call";
 const options = {
+  type: "calling",
   body: "John D.",
   sound: "ringtone",
   actions: [
     {
         action: "accept-audio-call",
-        title: "Accept",
-        icon: '/app/images/phone.png',
-        style: "success"
+        style: "acknowledge"
     },
     {
         action: "accept-video-call",
-        title: "Video",
-        icon: '/app/images/camera.png',
-        style: "success"
+        style: "acknowledge_with_video"
     },
     {
         action: "decline-call",
-        title: "Decline",
-        icon: '/app/images/decline.png',
-        style: "critical"
+        style: "dismiss"
     }    
   ]
 }
