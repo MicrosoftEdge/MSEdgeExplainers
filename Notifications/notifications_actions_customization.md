@@ -122,6 +122,19 @@ const options = {
 serviceWorkerRegistration.showNotification(title, options);
 ```
 
+### Permission Prompting
+
+Websites that were already given permission to send notifications of type `"default"` shouldn't automatically be allowed to customize notifications or play a ringtone. Therefore we propose creating a new type of permission for that scenario called "Ringing notifications". In this case, if the website "xyz.com" asks for permission to send ringing notifications, a prompt with the following text should popup:
+
+**xyz.com wants to**  
+[icon] Send you ringing notifications
+
+VoIP web applications will probably want to prompt permissions for both `"default"` and `"calling"` notifications, and adding one more prompt that users need to understand and accept might contribute to fatigue. Therefore, similarly to what happens with Camera and Microphone permissions, we also propose the creation of a new compound permission prompt for both `"default"` and `"calling"` notifications. The prompt text would be:
+
+**xyz.com wants to**  
+[icon_1] Send notifications  
+[icon_2] Send ringing notifications
+
 ## Privacy and Security Considerations
 
 ### Privacy
@@ -185,3 +198,9 @@ interface CallNotification : Notification {
 In this case, we would not need to have a NotificationSoundType attribute, given that it is implied that it is a ringtone audio played in a loop and we would be able to define a standard duration time for incoming call notifications. 
 
 Nevertheless, this option was not selected as the first choice, because it confines the action buttons color customization to incoming call scenarios and there might have unmapped valid use cases that fall out of this scenario.
+
+### Permission Prompt with Toggles
+
+Another idea would be to create just the compound type of permission prompt and provide toggles for each type of notification - i.e., `"default"` and `"calling"`, which the user could interact with and select only the types of notification he or she wants to receive. The prompt that already exists with only the `"default"` notifications would still exist.
+
+At first we didn't choose this as part of our proposal, because we aren't sure if it is feasible for the user agents to implement it.
