@@ -26,38 +26,36 @@ Allow general web contents to arbitrarily change action button colors and sound 
 
 ## Use Cases 
 
-- A video conferencing website can produce its call notification pop-up with a green "accept" button and red "decline" button.
-- Web apps will be capable to change the notification action button colors if they feel like this will improve it UX.
+- A video conferencing PWA can produce its call notification pop-up with a green "accept" button and red "decline" button.
+- Web apps will be capable to change the notification action button colors if they feel like this will improve its UX.
 
 ## Proposed Solution
 
-We propose an extension to the current Notifications API where the `NotificationAction` dictionary would have a new `style` property of type `NotificationActionStyle`, which is an enum with 4 values: 
-- `"default"`,
-- `"acknowledge"`,
-- `"acknowledge_with_video"`, and
-- `"dismiss"`.
-
-These styles are platform-dependent but should be distinct from each other to allow the user to easily identify its options. Moreover, to disencourage use of these buttons outside the intended use-case scenarios - e.g., video/audio calls -, we also suggest disallowing the usage of a custom title and icon on these notifications by web applications. 
-
-For example, the `"acknowledge"` action button could have a green theme - e.g., have green background color with a solid white phone icon over the default background - while the `"dismiss"` could be red-themed, but it is up to the platform to define the style. If the selected style is not supported by the platform, it should fallback to `"default"`.
+We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an enum with 2 values: `"default"` and `"calling"`. The color treatment and ringtone capabilities will only be available in the `"calling"` scenario.
 
 ```javascript
-enum NotificationActionStyle {
+enum NotificationScenario {
   "default",
-  "acknowledge",
-  "acknowledge_with_video"`,
-  "dismiss"
+  "calling"
 }
 
-dictionary NotificationAction {
-  required DOMString action;
-  required DOMString title;
-  USVString icon;
-  NotificationActionStyle style = "default";
-};
+dictionary NotificationOptions {
+  NotificationScenario scenario = "default";
+  ...
+}
 ```
 
-Similarly, to support this scenario we also propose the creation of a new NotificationSoundType enum and the inclusion of a `sound` attribute to the Notification interface and a correspondent property to the NotificationOptions dictionary:
+When the scenario is `"calling"`, the notification will always have a default dismiss button, which must occupy the rightmost action button position. This way, when a `"calling"` notification is displayed to the user, we can guarantee that he or she will always be capable to dismiss it. 
+
+### Color Treatment
+
+For notifications with `"scenario"` of type `"calling"`, the User Agent (UA) should change the notification's action buttons' color in a way that the style for the dismiss button is different from the other buttons, which are specified each as an element of the `Notfication.actions` array. If the platform does not allow color treatment for notification buttons, the UA should fallback to the `"default"` scenario colors.
+
+We propodr that the deafult dismiss action button should have a red theme - e.g., red background color with some predefined icon over the default background - while all the other buttons are green-themed, but it is up to the platform to define the style.
+
+### Ringtone
+
+Similarly, to support the `"calling"` scenario we also propose the creation of a new NotificationSoundType enum and the inclusion of a `sound` attribute to the Notification interface and a correspondent property to the NotificationOptions dictionary. If the scenario is not `"calling"` this property value must be ignored.
 
 ```javascript
 enum NotificationSoundType {
@@ -77,63 +75,54 @@ dictionary NotificationOptions {
 
 The `"default"` value would play the standard notification audio provided by the platform just once; whereas the `"ringtone"` one would execute a platform-provided audio, suitable for executing in a loop, and keep playing it for the duration of the notification. If the platform is not able to provide a suitable `"ringtone"` audio the User Agent (UA) must fallback to the `"default"` case.
 
-We propose the creation of a new property `type` in the `NotificationOptions` dictionary of type `NotificationType`, that is an enum with 2 values: `"default"` and `"calling"`. The action button customization and ringtone capabilities should be made available only if `Notification.type` is equal to `"calling" `. If a website attempts to customize a `"default"` notification, the UA should ignore the customization parameters: 
-- `Notification.sound` and
--  `NotificationAction.style` in each `NotificationAction` object of `Notification.actions`.
+### Use Examples
 
-Likewise, if a notification is of type `"calling"`, the UA should ignore all the `NotificationAction.title` and `NotificationAction.icon` parameters in each `NotificationAction` object of `Notification.actions`.
+An incoming call notification from a VoIP PWA without any specified action buttons could be instantiated through a service worker by using:
 
 ```javascript
-enum NotificationType {
-  "default",
-  "calling"
+const title = "Andrew Bares";
+const options = {
+  scenario: "calling",
+  body: "Incoming Call - Mobile",
+  sound: "ringtone"
 }
 
-dictionary NotificationOptions {
-  NotificationType type = "default";
-  ...
-}
+serviceWorkerRegistration.showNotification(title, options);
 ```
 
-An incoming call notification from a VoIP Web app could be instantiated through a service worker by using:
+In this case, the notification would be displayed with a ringtone and also have the default dismiss button as depicted in the figure below.
+
+If the web app specify any action buttons they should show up alongside with the default dismiss buttons and, if the platform allows, they should have colors different from the dismiss button. A PWA would be able to sent a `"calling"` notification with colored buttons by means of a service worker using:
 
 ```javascript
 const title = "Incoming call";
 const options = {
-  type: "calling",
-  body: "John D.",
+  scenario: "calling",
+  title: "Andrew Bares",
+  body: "Incoming Call - Mobile",
   sound: "ringtone",
   actions: [
     {
         action: "accept-audio-call",
-        style: "acknowledge"
+        title: "audio",
+        icon: "https://web.app.com/assets/accept_audio_call.png"
     },
     {
         action: "accept-video-call",
-        style: "acknowledge_with_video"
-    },
-    {
-        action: "decline-call",
-        style: "dismiss"
-    }    
+        title: "video"
+        icon: "https://web.app.com/assets/accept_video_call.png"
+    }
   ]
 }
 
 serviceWorkerRegistration.showNotification(title, options);
 ```
 
-### Permission Prompting
+The notification should look like this:
 
-Websites that were already given permission to send notifications of type `"default"` shouldn't automatically be allowed to customize notifications or play a ringtone. Therefore we propose creating a new type of permission for that scenario called "Ringing notifications". In this case, if the website "xyz.com" asks for permission to send ringing notifications, a prompt with the following text should popup:
+### Extension Scope
 
-**xyz.com wants to**  
-[icon] Send you ringing notifications
-
-VoIP web applications will probably want to prompt permissions for both `"default"` and `"calling"` notifications, and adding one more prompt that users need to understand and accept might contribute to fatigue. Therefore, similarly to what happens with Camera and Microphone permissions, we also propose the creation of a new compound permission prompt for both `"default"` and `"calling"` notifications. The prompt text would be:
-
-**xyz.com wants to**  
-[icon_1] Send notifications  
-[icon_2] Send ringing notifications
+The Notifications API is a [powerful feature](https://w3c.github.io/permissions/#dfn-powerful-feature) and, given that the extensions proposed in this explainer could be potentially abused, they should only be made available for Progressive Web Apps (PWAs). Therefore, the `Notification.scenario` and `Notification.sound` properties should be ignored unless a PWA is setting them.
 
 ## Privacy and Security Considerations
 
@@ -144,11 +133,7 @@ No privacy-related concerns were identified up to the moment.
 
 #### Preventing Ringtone Abuse
 
-Bad-behaved web sites might abuse this functionality to trigger many notifications together with a ringtone and disturb the user. The simplest mitigation in this case would be for the user to disable the notifications for that specific site. 
-
-Besides that, to enable button color treatment and customizing ringtones for calling web apps, we should be able to classify the web apps as calling apps. For that, we propose adding a permission type for "calling notifications". We might want to generalize this ability to classify notifications that need powerful features as "high priority notifications". However, we intend to start with a smaller scope for calling apps specific requirements.
-
-A user agent that implements and provides the extended customization behavior needs to differentiate the notification permission request experience of it from that of the generic notifications. The user agent needs to clearly indicate users of what accepting the calling notifications will provide them.
+Bad-behaved web apps might abuse this functionality to trigger many notifications together with a ringtone and disturb the user. The simplest mitigation in this case would be for the user to disable the notifications for that specific application. Besides that, the user can uninstall the PWA and use only its website version, which will not be able to play ringtones or change the button colors.
 
 ## Alternative Solutions
 ### Fully Customizable Colors
@@ -199,8 +184,19 @@ In this case, we would not need to have a NotificationSoundType attribute, given
 
 Nevertheless, this option was not selected as the first choice, because it confines the action buttons color customization to incoming call scenarios and there might have unmapped valid use cases that fall out of this scenario.
 
-### Permission Prompt with Toggles
+### Create a new permission type for websites
 
-Another idea would be to create just the compound type of permission prompt and provide toggles for each type of notification - i.e., `"default"` and `"calling"`, which the user could interact with and select only the types of notification he or she wants to receive. The prompt that already exists with only the `"default"` notifications would still exist.
+Websites that were already given permission to send notifications in a `"default"` scenario shouldn't automatically be allowed to customize notifications or play a ringtone. Therefore one option would be to create a new type of permission for that scenario called "Ringing notifications". In this case, if the website "xyz.com" asks for permission to send calling notifications, a prompt with the following text should popup
 
-At first we didn't choose this as part of our proposal, because we aren't sure if it is feasible for the user agents to implement it.
+**xyz.com wants to**  
+[icon] Send you ringing notifications
+
+VoIP web applications will probably want to prompt permissions for both `"default"` and `"calling"` notifications. Therefore, similarly to what happens with Camera and Microphone permissions, we could also create of a new compound permission prompt for both `"default"` and `"calling"` notifications. The prompt text would be:
+
+**xyz.com wants to**  
+[icon_1] Send notifications  
+[icon_2] Send ringing notifications
+
+Another idea would be to create just this compound type of permission prompt and provide toggles for each notification scenario - i.e., `"default"` and `"calling"` -, which the user could interact with and select only the types of notification he or she wants to receive.
+
+However, we think that creating more permission types introduces new elements that the users need to read and understand, which contributes to fatigue. Moreover, conveying the exact meaning of a permission type through a permission prompt can be challenging.
