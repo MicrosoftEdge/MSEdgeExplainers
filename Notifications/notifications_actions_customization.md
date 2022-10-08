@@ -19,7 +19,7 @@ We would like to propose an extension to the [Notifications API](https://notific
 
 ## Goals
 
-Propose an extension to the Notifications API to allow more customization for VoIP web apps. 
+Propose an extension to the Notifications API to allow more customization for VoIP Progressive Web Apps (PWAs). 
 
 ## Non-Goals
 
@@ -32,7 +32,7 @@ Allow general web contents to arbitrarily change action button colors and sound 
 
 ## Proposed Solution
 
-We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an enum with 2 values: `"default"` and `"calling"`. The color treatment and ringtone capabilities will only be available in the `"calling"` scenario.
+We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an `enum` with 2 values: `"default"` and `"calling"`. The color treatment and ringtone capabilities will only be available in the `"calling"` scenario.
 
 ```javascript
 enum NotificationScenario {
@@ -52,11 +52,11 @@ When the scenario is `"calling"`, the notification will always have a default di
 
 For notifications with `"scenario"` of type `"calling"`, the User Agent (UA) should change the notification's action buttons' color in a way that the style for the dismiss button is different from the other buttons, which are specified each as an element of the `Notfication.actions` array. If the platform does not allow color treatment for notification buttons, the UA should fallback to the `"default"` scenario colors.
 
-We propodr that the deafult dismiss action button should have a red theme - e.g., red background color with some predefined icon over the default background - while all the other buttons are green-themed, but it is up to the platform to define the style.
+We propose that the default dismiss action button should have a red theme - e.g., red background color with some predefined icon on it - while all the other buttons are green-themed, but it is up to the platform to define the style.
 
 ### Ringtone
 
-Similarly, to support the `"calling"` scenario we also propose the creation of a new NotificationSoundType enum and the inclusion of a `sound` attribute to the Notification interface and a correspondent property to the NotificationOptions dictionary. If the scenario is not `"calling"` this property value must be ignored.
+Similarly, to support the `"calling"` scenario we also propose the creation of a new NotificationSoundType `enum` and the inclusion of a `sound` attribute to the Notification interface and a correspondent property to the NotificationOptions dictionary. If the scenario is not `"calling"` this property value must be ignored.
 
 ```javascript
 enum NotificationSoundType {
@@ -97,7 +97,7 @@ In this case, the notification would be displayed with a ringtone and also have 
 
 *Figure 2: Calling notification scenario without provided action buttons.*
 
-If the web app specify any action buttons they should show up alongside with the default dismiss buttons and, if the platform allows, they should have colors different from the dismiss button. A PWA would be able to sent a `"calling"` notification with colored buttons by means of a service worker using:
+If the web app specifies any action buttons they should show up alongside with the default dismiss buttons and, if the platform allows, they should have colors different from the dismiss button. A PWA would be able to send a `"calling"` notification with colored buttons by means of a service worker using:
 
 ```javascript
 const title = "Incoming call";
@@ -131,7 +131,7 @@ The notification should look like this:
 
 ### Extension Scope
 
-The Notifications API is a [powerful feature](https://w3c.github.io/permissions/#dfn-powerful-feature) and, given that the extensions proposed in this explainer could be potentially abused, they should only be made available for Progressive Web Apps (PWAs). Therefore, the `Notification.scenario` and `Notification.sound` properties should be ignored unless a PWA is setting them.
+The Notifications API is a [powerful feature](https://w3c.github.io/permissions/#dfn-powerful-feature) and, given that the extensions proposed in this explainer could be potentially abused, they should only be made available for PWAs. Therefore, the `Notification.scenario` and `Notification.sound` properties should be ignored unless a PWA is setting them.
 
 ## Privacy and Security Considerations
 
@@ -161,9 +161,9 @@ However, this approach was not proposed as the main one because the only platfor
 
 ### Play Ringtone from Inside the Tab
 
-Previouly, the `sound` property was part of the Notifications API spec, but was removed mainly due to the lack of support across many platforms (refer to the discussion [here](https://github.com/whatwg/notifications/pull/127)). [Windows](https://docs.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/custom-audio-on-toasts#add-the-custom-audio), [Mac OS and iOS](https://developer.apple.com/documentation/usernotifications/unnotificationsound) allow the notifications to play custom sound, but the audio files should be stored beforehand in the local system. Besides that, it seems not possible to provide an audio file from the Web in any platform.
+Previouly, the `sound` property was part of the Notifications API specification, but was removed mainly due to the lack of support across many platforms (refer to the discussion [here](https://github.com/whatwg/notifications/pull/127)). [Windows](https://docs.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/custom-audio-on-toasts#add-the-custom-audio), [Mac OS and iOS](https://developer.apple.com/documentation/usernotifications/unnotificationsound) allow the notifications to play custom sound, but the audio files should be stored beforehand in the local system. Besides that, it seems not possible to provide an audio file from the Web in any platform.
 
-An option to circumvent this issue would be to trigger a silent notification, the moment the user receives an incoming call in the web app, and then play the custom audio inside the tab. However synchronicity problems might arise with the audio starting to play before or after the notification showing up in the screen.
+An option to circumvent this issue would be to trigger a silent notification, the moment the user receives an incoming call in the web app, and then play the custom audio inside the tab. However, synchronicity problems might arise with the audio starting to play before or after the notification showing up in the screen.
 
 ### CallNotification Child Interface
 
@@ -195,7 +195,7 @@ Nevertheless, this option was not selected as the first choice, because it confi
 
 ### Create a new permission type for websites
 
-Websites that were already given permission to send notifications in a `"default"` scenario shouldn't automatically be allowed to customize notifications or play a ringtone. Therefore one option would be to create a new type of permission for that scenario called "Ringing notifications". In this case, if the website "xyz.com" asks for permission to send calling notifications, a prompt with the following text should popup
+Websites that were already given permission to send notifications in a `"default"` scenario shouldn't automatically be allowed to customize notifications or play a ringtone. Therefore, one option would be to create a new type of permission for that scenario called "Ringing notifications". In this case, if the website "xyz.com" asks for permission to send calling notifications, a prompt with the following text should popup
 
 **xyz.com wants to**  
 [icon] Send you ringing notifications
