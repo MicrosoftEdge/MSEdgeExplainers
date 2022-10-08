@@ -92,6 +92,9 @@ serviceWorkerRegistration.showNotification(title, options);
 
 In this case, the notification would be displayed with a ringtone and also have the default dismiss button as depicted in the figure below.
 
+![Calling notification without provided action buttons](images/no_action.png)
+*Figure 2: Calling notification scenario without provided action buttons.*
+
 If the web app specify any action buttons they should show up alongside with the default dismiss buttons and, if the platform allows, they should have colors different from the dismiss button. A PWA would be able to sent a `"calling"` notification with colored buttons by means of a service worker using:
 
 ```javascript
@@ -119,6 +122,9 @@ serviceWorkerRegistration.showNotification(title, options);
 ```
 
 The notification should look like this:
+
+![Calling notification with action buttons](images/notification_with_actions.png)
+*Figure 3: Calling notification scenario with action buttons.*
 
 ### Extension Scope
 
