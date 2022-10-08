@@ -12,6 +12,7 @@ This document is a starting point for engaging the community and standards bodie
 Native applications that also have a Web counterpart might want the behavior of latter to be as similar to the former as much as possible to provide a consistent user experience across various devices and platforms. VoIP (Voice over Internet Protocol) applications - e.g., Microsoft Teams, Google Meet, Zoom, etc - are no exception and have become increasingly popular and demanded for remote collaboration over the last couple of years.
 
 ![call_teams_notification](https://user-images.githubusercontent.com/80070607/180506585-73f05e29-5676-4686-88dc-bd2fa05b8e6d.png)  
+
 *Figure 1: Calling notification scenario.*
 
 We would like to propose an extension to the [Notifications API](https://notifications.spec.whatwg.org/) standard for incoming call scenarios to allow the notification action buttons to be customized and also allow the application to play a ringtone. This capability would make the incoming call notifications, which may require a faster immediate response, clearly distinguishable from the others to the user and would also contribute to increasing accessibility on the Web.
@@ -93,6 +94,7 @@ serviceWorkerRegistration.showNotification(title, options);
 In this case, the notification would be displayed with a ringtone and also have the default dismiss button as depicted in the figure below.
 
 ![Calling notification without provided action buttons](images/no_action.png)
+
 *Figure 2: Calling notification scenario without provided action buttons.*
 
 If the web app specify any action buttons they should show up alongside with the default dismiss buttons and, if the platform allows, they should have colors different from the dismiss button. A PWA would be able to sent a `"calling"` notification with colored buttons by means of a service worker using:
@@ -124,6 +126,7 @@ serviceWorkerRegistration.showNotification(title, options);
 The notification should look like this:
 
 ![Calling notification with action buttons](images/notification_with_actions.png)
+
 *Figure 3: Calling notification scenario with action buttons.*
 
 ### Extension Scope
