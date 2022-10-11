@@ -50,7 +50,7 @@ When the scenario is `"incoming-call"`, the notification will always have a defa
 
 ### Color Treatment
 
-For notifications with `"scenario"` of type `"incoming-call"`, the User Agent (UA) should change the notification's action buttons' color in a way that the style for the dismiss button is different from the other buttons, which are specified each as an element of the `Notfication.actions` array. If the platform does not allow color treatment for notification buttons, the UA should fallback to the `"default"` scenario colors.
+For notifications with `"scenario"` of type `"incoming-call"`, the User Agent (UA) should set the notification's action buttons' color in a way that the style for the default dismiss button is preferably different from the other buttons, which are declared each as a `NotificationAction` element of the `Notfication.actions` array. If the platform does not allow color treatment for notification buttons, the UA should fallback to the `"default"` scenario colors.
 
 We propose that the default dismiss action button should have a red theme - e.g., red background color with some predefined icon on it - while all the other buttons are green-themed, but it is up to the platform to define the style.
 
