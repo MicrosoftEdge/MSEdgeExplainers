@@ -32,12 +32,12 @@ Allow general web contents to arbitrarily change action button colors and sound 
 
 ## Proposed Solution
 
-We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an `enum` with 2 values: `"default"` and `"calling"`. The color treatment and ringtone capabilities will only be available in the `"calling"` scenario.
+We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an `enum` with 2 values: `"default"` and `"incoming-call"`. The color treatment and ringtone capabilities will only be available in the `"incoming-call"` scenario.
 
 ```javascript
 enum NotificationScenario {
   "default",
-  "calling"
+  "incoming-call"
 }
 
 dictionary NotificationOptions {
@@ -46,35 +46,17 @@ dictionary NotificationOptions {
 }
 ```
 
-When the scenario is `"calling"`, the notification will always have a default dismiss button, which must occupy the rightmost action button position. This way, when a `"calling"` notification is displayed to the user, we can guarantee that he or she will always be capable to dismiss it. 
+When the scenario is `"incoming-call"`, the notification will always have a default dismiss button. This way, when a calling notification is displayed to the user, we can guarantee that he or she will always be capable to dismiss it. 
 
 ### Color Treatment
 
-For notifications with `"scenario"` of type `"calling"`, the User Agent (UA) should change the notification's action buttons' color in a way that the style for the dismiss button is different from the other buttons, which are specified each as an element of the `Notfication.actions` array. If the platform does not allow color treatment for notification buttons, the UA should fallback to the `"default"` scenario colors.
+For notifications with `"scenario"` of type `"incoming-call"`, the User Agent (UA) should change the notification's action buttons' color in a way that the style for the dismiss button is different from the other buttons, which are specified each as an element of the `Notfication.actions` array. If the platform does not allow color treatment for notification buttons, the UA should fallback to the `"default"` scenario colors.
 
 We propose that the default dismiss action button should have a red theme - e.g., red background color with some predefined icon on it - while all the other buttons are green-themed, but it is up to the platform to define the style.
 
 ### Ringtone
 
-Similarly, to support the `"calling"` scenario we also propose the creation of a new NotificationSoundType `enum` and the inclusion of a `sound` attribute to the Notification interface and a correspondent property to the NotificationOptions dictionary. If the scenario is not `"calling"` this property value must be ignored.
-
-```javascript
-enum NotificationSoundType {
-  "default",
-  "ringtone"
-}
-
-partial interface Notification {
-  readonly attribute NotificationSoundType sound;
-}
-
-dictionary NotificationOptions {
-  ...
-  NotificationSoundType sound = "default";
-}
-```
-
-The `"default"` value would play the standard notification audio provided by the platform just once; whereas the `"ringtone"` one would execute a platform-provided audio, suitable for executing in a loop, and keep playing it for the duration of the notification. If the platform is not able to provide a suitable `"ringtone"` audio the User Agent (UA) must fallback to the `"default"` case.
+We also propose that, when a notification is displayed in the `"incoming-call"` scenario, a ringtone is played. The UA should play a predefined - possibly platform-provided - audio, suitable for executing in a loop, and keep playing it for the duration of the notification. If the platform does not allow  displaying a notification with a ringtone, the UA must fallback to the `"default"` scenario sound.
 
 ### Use Examples
 
@@ -97,7 +79,7 @@ In this case, the notification would be displayed with a ringtone and also have 
 
 *Figure 2: Calling notification scenario without provided action buttons.*
 
-If the web app specifies any action buttons they should show up alongside with the default dismiss buttons and, if the platform allows, they should have colors different from the dismiss button. A PWA would be able to send a `"calling"` notification with colored buttons by means of a service worker using:
+If the web app specifies any action buttons they should show up alongside with the default dismiss buttons and, if the platform allows, they should have colors different from the dismiss button. A PWA would be able to send a `"incoming-call"` notification with colored buttons by means of a service worker using:
 
 ```javascript
 const title = "Incoming call";
@@ -195,17 +177,17 @@ Nevertheless, this option was not selected as the first choice, because it confi
 
 ### Create a new permission type for websites
 
-Websites that were already given permission to send notifications in a `"default"` scenario shouldn't automatically be allowed to customize notifications or play a ringtone. Therefore, one option would be to create a new type of permission for that scenario called "Ringing notifications". In this case, if the website "xyz.com" asks for permission to send calling notifications, a prompt with the following text should popup
+Websites that were already given permission to send notifications in a `"default"` scenario shouldn't automatically be allowed to customize notifications or play a ringtone. Therefore, one option would be to create a new type of permission for that scenario called "Ringing notifications". In this case, if the website "xyz.com" asks for permission to send calling notifications, a prompt with the following text should popup:
 
 **xyz.com wants to**  
 [icon] Send you ringing notifications
 
-VoIP web applications will probably want to prompt permissions for both `"default"` and `"calling"` notifications. Therefore, similarly to what happens with Camera and Microphone permissions, we could also create of a new compound permission prompt for both `"default"` and `"calling"` notifications. The prompt text would be:
+VoIP web applications will probably want to prompt permissions for both `"default"` and `"incoming-call"` notifications. Therefore, similarly to what happens with Camera and Microphone permissions, we could also create of a new compound permission prompt for both `"default"` and `"incoming-call"` notifications. The prompt text would be:
 
 **xyz.com wants to**  
 [icon_1] Send notifications  
 [icon_2] Send ringing notifications
 
-Another idea would be to create just this compound type of permission prompt and provide toggles for each notification scenario - i.e., `"default"` and `"calling"` -, which the user could interact with and select only the types of notification he or she wants to receive.
+Another idea would be to create just this compound type of permission prompt and provide toggles for each notification scenario - i.e., `"default"` and `"incoming-call"` -, which the user could interact with and select only the types of notification he or she wants to receive.
 
 However, we think that creating more permission types introduces new elements that the users need to read and understand, which contributes to fatigue. Moreover, conveying the exact meaning of a permission type through a permission prompt can be challenging.
