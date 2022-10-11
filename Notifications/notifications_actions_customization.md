@@ -32,7 +32,7 @@ Allow general web contents to arbitrarily change action button colors and sound 
 
 ## Proposed Solution
 
-We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an `enum` with 2 values: `"default"` and `"incoming-call"`. The color treatment and ringtone capabilities will only be available in the `"incoming-call"` scenario.
+We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an `enum` with two values: `"default"` and `"incoming-call"`. The color treatment and ringtone capabilities will only be available in the `"incoming-call"` scenario.
 
 ```javascript
 enum NotificationScenario {
@@ -47,6 +47,8 @@ dictionary NotificationOptions {
 ```
 
 When the scenario is `"incoming-call"`, the notification will always have a default dismiss button. This way, when a calling notification is displayed to the user, we can guarantee that he or she will always be capable to dismiss it. 
+
+Moreover, notifications created within the `"incoming-call"` scenario should have increased priority over the regular ones. That is, if a `"default"` notification is currently being displayed and another `"incoming-call"` notification gets created, it should break through and be displayed immediately, requiring immediate action from the user.
 
 ### Color Treatment
 
