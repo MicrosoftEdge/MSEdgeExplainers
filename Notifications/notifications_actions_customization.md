@@ -15,7 +15,7 @@ Native applications that also have a Web counterpart might want the behavior of 
 
 *Figure 1: Calling notification scenario.*
 
-We would like to propose an extension to the [Notifications API](https://notifications.spec.whatwg.org/) standard for incoming call scenarios to allow the notification action buttons to be customized and also allow the application to play a ringtone. This capability would make the incoming call notifications, which may require a faster immediate response, clearly distinguishable from the others to the user and would also contribute to increasing accessibility on the Web.
+We would like to propose an extension to the [Notifications API](https://notifications.spec.whatwg.org/) standard for incoming call scenarios to allow the notification action buttons to be customized and also allow the application to play a ringtone. This capability would make the incoming call notifications, which may require a faster immediate response, clearly distinguishable from the others to the user and would also contribute to increasing accessibility on the Web. Moreover, browsers may also decide to increase the priority of notifications for this scenario type by making it show immediately and for a longer duration. 
 
 ## Goals
 
@@ -27,12 +27,12 @@ Allow general web contents to arbitrarily change action button colors and sound 
 
 ## Use Cases 
 
-- A video conferencing PWA can produce its call notification pop-up with a green "accept" button and red "decline" button.
-- Web apps will be capable to change the notification action button colors if they feel like this will improve its UX.
+- A video conferencing PWA can produce its call notification pop-up with a green "accept" button and red "decline" button and make it visually distinguishable from the default notifications. This could make it easier for the users to quickly parse the options and choose one.
+- VoIP applications might want to use a ringtone and higher priority notifications to quickly draw the user's attention to an incoming call and take immediate action.
 
 ## Proposed Solution
 
-We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an `enum` with two values: `"default"` and `"incoming-call"`. The color treatment and ringtone capabilities will only be available in the `"incoming-call"` scenario.
+We propose the creation of a new property `scenario` in the `NotificationOptions` dictionary of type `NotificationScenario`, that is an `enum` with two values: `"default"` and `"incoming-call"`. The color treatment and ringtone capabilities will only be available in the `"incoming-call"` scenario. As a side note, the Notifications API could support additional scenarios in the future - e.g., alarms and reminders - by having more values added to the `NotificationScenario` enum.
 
 ```javascript
 enum NotificationScenario {
@@ -52,9 +52,9 @@ Moreover, notifications created within the `"incoming-call"` scenario should hav
 
 ### Color Treatment
 
-For notifications with `"scenario"` of type `"incoming-call"`, the User Agent (UA) should set the notification's action buttons' color in a way that the style for the default dismiss button is preferably different from the other buttons, which are declared each as a `NotificationAction` element of the `Notfication.actions` array. If the platform does not allow color treatment for notification buttons, the UA should fallback to the `"default"` scenario colors.
+For notifications with `"scenario"` of type `"incoming-call"`, the User Agent (UA) may style the notification's action buttons' differently than the `"default"` scenario. Additionally, it is preferable that the default dismiss button is colored distinctly than the others in the `Notfication.actions` array. We propose that the default dismiss action button should have a red theme - e.g., red background color with some predefined icon on it - while all the other buttons are green-themed, but it is up to the platform to define the style.
 
-We propose that the default dismiss action button should have a red theme - e.g., red background color with some predefined icon on it - while all the other buttons are green-themed, but it is up to the platform to define the style.
+Finally, if the platform does not allow color treatment for notification buttons, the UA should fallback to the `"default"` scenario colors.
 
 ### Ringtone
 
@@ -115,7 +115,7 @@ The notification should look like this:
 
 ### Extension Scope
 
-The Notifications API is a [powerful feature](https://w3c.github.io/permissions/#dfn-powerful-feature) and, given that the extensions proposed in this explainer could be potentially abused, they should only be made available for PWAs. Therefore, the `Notification.scenario` and `Notification.sound` properties should be ignored unless a PWA is setting them.
+The Notifications API is a [powerful feature](https://w3c.github.io/permissions/#dfn-powerful-feature) and, given that the extensions proposed in this explainer could be potentially abused, they should only be made available for PWAs. Therefore, the `Notification.scenario` property should be ignored unless a PWA is setting it.
 
 ## Privacy and Security Considerations
 
