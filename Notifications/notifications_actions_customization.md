@@ -13,7 +13,7 @@ Native applications that also have a Web counterpart might want the behavior of 
 
 ![call_teams_notification](https://user-images.githubusercontent.com/80070607/180506585-73f05e29-5676-4686-88dc-bd2fa05b8e6d.png)  
 
-*Figure 1: Calling notification scenario.*
+*Figure 1: Incoming call notification scenario.*
 
 We would like to propose an extension to the [Notifications API](https://notifications.spec.whatwg.org/) standard for incoming call scenarios to allow the notification action buttons to be customized and also allow the application to play a ringtone. This capability would make the incoming call notifications, which may require a faster immediate response, clearly distinguishable from the others to the user and would also contribute to increasing accessibility on the Web. Moreover, browsers may also decide to increase the priority of notifications for this scenario type by making it show immediately and for a longer duration. 
 
@@ -23,7 +23,7 @@ Propose an extension to the Notifications API to allow more customization for Vo
 
 ## Non-Goals
 
-Allow general web contents to arbitrarily change action button colors and sound sources without restrictions from the underly platforms.
+Allow general web contents to arbitrarily change action button colors and sound sources without restrictions from the underlying platforms.
 
 ## Use Cases 
 
@@ -67,7 +67,7 @@ An incoming call notification from a VoIP PWA without any specified action butto
 ```javascript
 const title = "Andrew Bares";
 const options = {
-  scenario: "calling",
+  scenario: "incoming-call",
   body: "Incoming Call - Mobile",
   sound: "ringtone"
 }
@@ -77,16 +77,16 @@ serviceWorkerRegistration.showNotification(title, options);
 
 In this case, the notification would be displayed with a ringtone and also have the default dismiss button as depicted in the figure below.
 
-![Calling notification without provided action buttons](images/no_action.png)
+![Incoming call notification without provided action buttons](images/no_action.png)
 
-*Figure 2: Calling notification scenario without provided action buttons.*
+*Figure 2: Incoming call notification scenario without provided action buttons.*
 
 If the web app specifies any action buttons they should show up alongside with the default dismiss buttons and, if the platform allows, they should have colors different from the dismiss button. A PWA would be able to send a `"incoming-call"` notification with colored buttons by means of a service worker using:
 
 ```javascript
 const title = "Incoming call";
 const options = {
-  scenario: "calling",
+  scenario: "incoming-call",
   title: "Andrew Bares",
   body: "Incoming Call - Mobile",
   sound: "ringtone",
@@ -109,9 +109,9 @@ serviceWorkerRegistration.showNotification(title, options);
 
 The notification should look like this:
 
-![Calling notification with action buttons](images/notification_with_actions.png)
+![Incoming call notification with action buttons](images/notification_with_actions.png)
 
-*Figure 3: Calling notification scenario with action buttons.*
+*Figure 3: Incoming call notification scenario with action buttons.*
 
 ### Extension Scope
 
