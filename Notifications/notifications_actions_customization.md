@@ -115,7 +115,11 @@ The notification should look like this:
 
 ### Extension Scope
 
-The Notifications API is a [powerful feature](https://w3c.github.io/permissions/#dfn-powerful-feature) and, given that the extensions proposed in this explainer could be potentially abused, they should only be made available for PWAs. Therefore, the `Notification.scenario` property should be ignored unless a PWA is setting it.
+The Notifications API is a [powerful feature](https://w3c.github.io/permissions/#dfn-powerful-feature) and, given that the full capabilities of the extensions proposed in this explainer could be potentially abused, they should only be made available for installed PWAs. Suppose that a domain which does not have an installed PWA in the user's machine attempts to create a notification with the `Notification.scenario` property set to `"incoming-call"`. In this case, the resulting notification should still have the default dismiss button and, apart from that, it should look and behave just like a `"default"` notification would - i.e., it should not have color treatment in its buttons, the ringtone should not be played, and it should not have increased priority over other notifications.
+
+If a domain that does not have an installed PWA attempts to create an `"incoming-call"` notification (like in Figure 3), the resulting notification should look like the one below.
+
+![Incoming call notification with action buttons](images/notification_without_colors.png)
 
 ## Privacy and Security Considerations
 
