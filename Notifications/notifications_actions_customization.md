@@ -11,7 +11,7 @@ This document is a starting point for engaging the community and standards bodie
 ## Introduction
 Native applications that also have a Web counterpart might want the behavior of latter to be as similar to the former as much as possible to provide a consistent user experience across various devices and platforms. VoIP (Voice over Internet Protocol) applications - e.g., Microsoft Teams, Google Meet, Zoom, etc - are no exception and have become increasingly popular and demanded for remote collaboration over the last couple of years.
 
-![call_teams_notification](https://user-images.githubusercontent.com/80070607/180506585-73f05e29-5676-4686-88dc-bd2fa05b8e6d.png)  
+![call_teams_notification](images/teams_incoming_call_example.png)  
 
 *Figure 1: Incoming call notification scenario.*
 
@@ -119,7 +119,9 @@ The Notifications API is a [powerful feature](https://w3c.github.io/permissions/
 
 If a domain that does not have an installed PWA attempts to create an `"incoming-call"` notification (like in Figure 3), the resulting notification should look like the one below.
 
-![Incoming call notification with action buttons](images/notification_without_colors.png)
+![Incoming call notification with action buttons from non-installed domain](images/notification_without_colors.png)
+
+*Figure 4: Incoming call notification with action buttons created by non-installed domain*
 
 ## Privacy and Security Considerations
 
