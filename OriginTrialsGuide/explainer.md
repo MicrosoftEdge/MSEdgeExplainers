@@ -11,7 +11,7 @@ Once you have registered your website for an experiment, you will be able to use
 # Getting Started
 ## Browse Available Experiments
 
-You can visit the [Edge Origin Trials Developer Console](https://developer.microsoft.com/en-us/microsoft-edge/origin-trials) to see a list of the experimental APIs Edge browser engineers are offering and would like to you try and give them feedback on.
+You can visit the [Edge Origin Trials Developer Console](https://developer.microsoft.com/microsoft-edge/origin-trials) to see a list of the experimental APIs Edge browser engineers are offering and would like to you try and give them feedback on.
 
 ## Register for an Experiment
 Our framework is consistent with [Chrome Origin Trials](https://developers.chrome.com/origintrials/#/trials/active), simply click the `register` button for any of the available experiments in our Origin Trials Developer console, provide your website's origin, and we will instantly generate a token once you agree to our terms and conditions and submit the form.
@@ -43,7 +43,7 @@ The Edge Origin Trials portal today **only supports SSL Enabled Origins**, websi
 
 ## Subdomains, URL Paths and Query Params
 
-It is possible to only enroll a specific subdomain such as `https://dev.example.com` or an origin with wild-card match to all it's subdomains by answering *Yes* to the "Do you need to match all subdomains for the provided origin?" question in the [Microsoft Edge Origin Trials Developer Console](https://developer.microsoft.com/en-us/microsoft-edge/origin-trials). However, the following scenarios are **not** possible:
+It is possible to only enroll a specific subdomain such as `https://dev.example.com` or an origin with wild-card match to all it's subdomains by answering *Yes* to the "Do you need to match all subdomains for the provided origin?" question in the [Microsoft Edge Origin Trials Developer Console](https://developer.microsoft.com/microsoft-edge/origin-trials). However, the following scenarios are **not** possible:
 
 - `https://example.com/path/new-feature`
 - `https://example.com/path/new-feature?test_id=12345`
@@ -66,4 +66,4 @@ To opt out of an experiment, you can simply remove the token we have provided fr
 
 ## Experimental feature implementation best practices
 
-MDN has a great resource on best practices for feature detection, you can [view it here](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Feature_detection). In summary, it is important to always provide a working experience if the feature your website is using does not exist in the browser your visitor is running, this is extremely applicable when relying on an experimental feature using a token that needs to be renewed every 6 weeks.
+MDN has a great resource on best practices for feature detection, you can [view it here](https://developer.mozilla.org/docs/Learn/Tools_and_testing/Cross_browser_testing/Feature_detection). In summary, it is important to always provide a working experience if the feature your website is using does not exist in the browser your visitor is running, this is extremely applicable when relying on an experimental feature using a token that needs to be renewed every 6 weeks.

@@ -253,7 +253,7 @@ A Manifest’s [`theme_color`](https://w3c.github.io/manifest/#theme_color-membe
 
 Some widget platforms may wish to allow developers to further refine a Widget’s appearance and/or functionality within their system. We recommend that those platforms use [the extensibility of the Manifest](https://www.w3.org/TR/appmanifest/#extensibility) to allow developers to encode their widgets with this additional information, if they so choose.
 
-For example, if using something like [Adaptive Cards](https://docs.microsoft.com/en-us/adaptive-cards/templating/) for rendering, a [Widget Host](#dfn-widget-host) might consider adding something like the following to the `WidgetDefinition`:
+For example, if using something like [Adaptive Cards](https://learn.microsoft.com/adaptive-cards/templating/) for rendering, a [Widget Host](#dfn-widget-host) might consider adding something like the following to the `WidgetDefinition`:
 
 ```json
 "ms_ac_template": "/widgets/templates/agenda.ac.json",

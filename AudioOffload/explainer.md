@@ -2,7 +2,7 @@
 **Author:** William Carr (drawn on work from Isuru Pathirana)
 
 # Summary Description
-Hardware Accelerated Audio Processing allows audio processing to be performed on dedicated audio processors. This process is commonly referred to as audio offload (the processing is offloaded from the computer's main CPU to the dedicated audio processor(s)). Because audio processing is a computationally expensive process, the use of specialized hardware can improve power efficiency, resulting in longer battery life. To read more about the general concept of audio offload on Windows, please see: https://docs.microsoft.com/en-us/windows-hardware/drivers/audio/hardware-offloaded-audio-processing
+Hardware Accelerated Audio Processing allows audio processing to be performed on dedicated audio processors. This process is commonly referred to as audio offload (the processing is offloaded from the computer's main CPU to the dedicated audio processor(s)). Because audio processing is a computationally expensive process, the use of specialized hardware can improve power efficiency, resulting in longer battery life. To read more about the general concept of audio offload on Windows, please see: https://learn.microsoft.com/windows-hardware/drivers/audio/hardware-offloaded-audio-processing
 
 This proposal lays out a path to enable the use of audio offload for the clear audio pipeline in Chromium on Windows when playback is using an audio device that supports hardware audio acceleration.
 

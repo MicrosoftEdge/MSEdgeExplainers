@@ -20,7 +20,7 @@ A simple example might be using a bootstrap script to register a "DOMContentLoad
 
 Expanding on the above example, a single-page app may load some UI content asynchronously and the "DOMContentLoaded" or "load" events may not be a good enough indication that the app is in a steady state and ready to test. If the app had a way to signal to test code that the UI is fully loaded, then the test code could listen for this event before proceeding with the test. This would be more reliable and efficient than either timeouts or polling the DOM. A bidirectional WebDriver protocol makes this sort of messaging possible.
 
-Another use case is adding instrumentation or shims before a page starts running. A bootstrap script could wrap the console.log function with a custom implementation that forwards its arguments to the WebDriver client. This would be a simple but effective way to add logging to a WebDriver test. Similarly, a bootstrap script could create a [PerformanceObserver](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceObserver) and use the messaging channel to forward performance entries to the WebDriver client.
+Another use case is adding instrumentation or shims before a page starts running. A bootstrap script could wrap the console.log function with a custom implementation that forwards its arguments to the WebDriver client. This would be a simple but effective way to add logging to a WebDriver test. Similarly, a bootstrap script could create a [PerformanceObserver](https://developer.mozilla.org/docs/Web/API/PerformanceObserver) and use the messaging channel to forward performance entries to the WebDriver client.
 
 ## Registering Bootstrap Scripts
 
@@ -151,7 +151,7 @@ Message data is an arbitrary JSON blob that will be deserialized on the bootstra
 
 ### Bootstrap script-side
 
-To allow a bootstrap script to send and receive messages from the client side, we can expose a [MessagePort](https://developer.mozilla.org/en-US/docs/Web/API/MessagePort) object. The script can subscribe to the MessagePort's onmessage event which will fire whenever the client calls postMessageToBootstrapScript. The script can call postMessage() which will fire a messageReceivedFromBootstrapScript event on the client side.
+To allow a bootstrap script to send and receive messages from the client side, we can expose a [MessagePort](https://developer.mozilla.org/docs/Web/API/MessagePort) object. The script can subscribe to the MessagePort's onmessage event which will fire whenever the client calls postMessageToBootstrapScript. The script can call postMessage() which will fire a messageReceivedFromBootstrapScript event on the client side.
 
 The question then is how to expose the MessagePort object to the bootstrap script. Bootstrap scripts run in the same context as page script, so exposing the port as a global is not a good idea. This would give untrusted page script access to the port object.
 
@@ -165,7 +165,7 @@ function myBootstrapScript(port) {
 
 The browser would call the function, passing in a MessagePort object. This would scope the port variable so that it is only visible inside the function. Of course, the user could proceed to expose the port to the page somehow, but this would at least be an explicit choice by the user.
 
-Another option is to avoid running bootstraps scripts in the same context as page script, and run them in some kind of "isolated" context instead; Something similar to a WebExtension [content script](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts#Content_script_environment), which has access to a clean version of the DOM, but has its own global scope. This would make it possible to expose the MessortPort (and possibly other privileged APIs) to the bootstrap script as globals. However, this kind of functionality may not be available in all browsers and doesn't appear to be standardized outside of WebExtensions. This also makes it difficult for the bootstrap script to manipulate the page's view of the DOM, which could be a useful feature.
+Another option is to avoid running bootstraps scripts in the same context as page script, and run them in some kind of "isolated" context instead; Something similar to a WebExtension [content script](https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/Content_scripts#Content_script_environment), which has access to a clean version of the DOM, but has its own global scope. This would make it possible to expose the MessortPort (and possibly other privileged APIs) to the bootstrap script as globals. However, this kind of functionality may not be available in all browsers and doesn't appear to be standardized outside of WebExtensions. This also makes it difficult for the bootstrap script to manipulate the page's view of the DOM, which could be a useful feature.
 
 ## Examples
 

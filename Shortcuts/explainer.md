@@ -82,7 +82,7 @@ This menu provides direct access to:
 
 ### Customer validation
 
-* **Twitter** is actively using [Windows’ "Jump Lists" feature](https://docs.microsoft.com/en-us/uwp/api/Windows.UI.StartScreen.JumpList) in their PWA via WinRT (see [the above example](#twitter)).
+* **Twitter** is actively using [Windows’ "Jump Lists" feature](https://learn.microsoft.com/uwp/api/Windows.UI.StartScreen.JumpList) in their PWA via WinRT (see [the above example](#twitter)).
 * **Starbucks** has also expressed interest in increasing re-engagement with their PWA by providing quick access to options like:
   * Pay with your Starbucks card,
   * Place an order, and
@@ -240,7 +240,7 @@ In iOS, a hard press (3D Touch) exposes the application shortcuts (iOS 9.0+ on 3
 
 ### macOS/Windows/Linux GUI/etc.
 
-In most OSes, this context menu is triggered by right clicking (or two finger tapping) on the icon. Windows calls these "Jump Lists" and allows each shortcut item to have a description ([Documentation](https://docs.microsoft.com/en-us/uwp/api/windows.ui.startscreen.jumplist)). In macOS these shortcuts are referred to as the "Dock Menu" ([Documentation](https://developer.apple.com/design/human-interface-guidelines/macos/menus/dock-menus/)).
+In most OSes, this context menu is triggered by right clicking (or two finger tapping) on the icon. Windows calls these "Jump Lists" and allows each shortcut item to have a description ([Documentation](https://learn.microsoft.com/uwp/api/windows.ui.startscreen.jumplist)). In macOS these shortcuts are referred to as the "Dock Menu" ([Documentation](https://developer.apple.com/design/human-interface-guidelines/macos/menus/dock-menus/)).
 
 ### Electron
 

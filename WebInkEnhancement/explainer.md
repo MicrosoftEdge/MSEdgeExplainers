@@ -13,7 +13,7 @@ Achieving low latency is critical for delivering great inking experiences on the
 
 There are a number of progressive enhancements to this programming model that are aimed at reducing latency.
 
-- [Offscreen canvas](https://developer.mozilla.org/en-US/docs/Web/API/OffscreenCanvas) and [Input for Workers](https://github.com/WICG/input-for-workers/blob/gh-pages/README.md)
+- [Offscreen canvas](https://developer.mozilla.org/docs/Web/API/OffscreenCanvas) and [Input for Workers](https://github.com/WICG/input-for-workers/blob/gh-pages/README.md)
 
   This helps web developers separate their pointer handling from other main thread logic and execution, which allows for more timely and consistent delivery of these input events.
 

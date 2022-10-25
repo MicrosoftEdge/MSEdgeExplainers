@@ -7,7 +7,7 @@ Authors: [Erica Draud](https://github.com/erdraud)
 * **Current version: https://github.com/MicrosoftEdge/DevTools/blob/main/explainers/3DView/explainer.md**
     
 ## Introduction
-We released [3D View](https://docs.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/3d-view/) as a comprehensive tool for debugging your web application in the 3D space. This document will cover enhancements and adjustments we're making based on feedback.
+We released [3D View](https://learn.microsoft.com/microsoft-edge/devtools-guide-chromium/3d-view/) as a comprehensive tool for debugging your web application in the 3D space. This document will cover enhancements and adjustments we're making based on feedback.
 
 ## Goals
 * Make the UI in the DOM and Z-index tabs consistent by updating the strings and their organization

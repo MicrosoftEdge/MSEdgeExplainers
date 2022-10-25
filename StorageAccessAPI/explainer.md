@@ -27,7 +27,7 @@ Users shouldn't have to compromise between privacy protections and enabling site
 ## Existing Implementations & Discussions
 Current implementations: Firefox, Safari
 
-MDN: https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API
+MDN: https://developer.mozilla.org/docs/Web/API/Storage_Access_API
 
 WHATWG discussions:
 - https://github.com/whatwg/html/issues/3338
@@ -95,7 +95,7 @@ A root document, https://example.site, embeds an iframe from https://socialmedia
     - This allows content to seamlessly work for a reasonable period of time after explicit interaction and consent has been obtained, allowing it to function in subsequent loads without re-prompting the user.
 
 ## Implementation Considerations
-There are two existing similar implementations with minor differences (Firefox, and Safari), documented at https://developer.mozilla.org/en-US/docs/Web/API/Storage_Access_API#Safari_implementation_differences.
+There are two existing similar implementations with minor differences (Firefox, and Safari), documented at https://developer.mozilla.org/docs/Web/API/Storage_Access_API#Safari_implementation_differences.
 The intent is to follow common implementation patterns between the two implementations. Where differences exist or more favorable Chromium mechanisms exist (e.g. site-engagement scores) a preference towards being minimally invasive for the user (e.g. few, or no prompts) and maintaining functional web experiences will be taken. There are a number of considerations discussed by various Chromium implementors and browser vendors in the WHATWG discussion (https://github.com/whatwg/html/issues/3338). The intent is to take these concerns, feedback, and considerations into account when making design decisions in areas that differ between implementations.
 
 ---

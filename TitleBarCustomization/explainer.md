@@ -29,7 +29,7 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Introduction 
 
-Installed web apps hosted within a user agent (UA) frame are able to declare which browser display mode best meets the needs of the application via the manifest file's [`display` member](https://developer.mozilla.org/en-US/docs/Web/Manifest/display). Currently, there are 4 supported values and their behaviors on Chromium browsers are described below:
+Installed web apps hosted within a user agent (UA) frame are able to declare which browser display mode best meets the needs of the application via the manifest file's [`display` member](https://developer.mozilla.org/docs/Web/Manifest/display). Currently, there are 4 supported values and their behaviors on Chromium browsers are described below:
 - `fullscreen`: All of the available display is used and no UA chrome is shown. This is implemented only for mobile devices running Android or iOS.
 - `standalone`: The web app looks like a standalone application. The title bar includes the title of the application, a web app menu button, and window control buttons (minimize, maximize/restore, close). 
 - `minimal-ui`: Similar to `standalone`, except it also contains a back and refresh button. 
@@ -66,7 +66,7 @@ Contrast the above examples of popular desktop applications with the current lim
 
 ![Installed Web app title bar not available for content](TwitterStandalone.png)
 
-- The UA supplied title bar is styled by the browser (with input from the developer via the manifest's [`"display"`](https://developer.mozilla.org/en-US/docs/Web/Manifest/display) and [`"theme_color"`](https://developer.mozilla.org/en-US/docs/Web/Manifest/theme_color))
+- The UA supplied title bar is styled by the browser (with input from the developer via the manifest's [`"display"`](https://developer.mozilla.org/docs/Web/Manifest/display) and [`"theme_color"`](https://developer.mozilla.org/docs/Web/Manifest/theme_color))
 - The 3-dot menu is displayed beside the window controls
 
 None of this area is available to application developers. This is a problem where 
@@ -135,7 +135,7 @@ The bounding rectangle and the visibility of the window controls overlay will ne
 To provide the visibility and bounding rectangle of the overlay, this explainer proposes a new object on the `window.navigator` property called `windowControlsOverlay`.
 
 `windowControlsOverlay` would make available the following objects:
-* `getBoundingClientRect()` which would return a [`DOMRect`](https://developer.mozilla.org/en-US/docs/Web/API/DOMRect) that represents the area under the window controls overlay. Interactive web content should not be displayed beneath the overlay.
+* `getBoundingClientRect()` which would return a [`DOMRect`](https://developer.mozilla.org/docs/Web/API/DOMRect) that represents the area under the window controls overlay. Interactive web content should not be displayed beneath the overlay.
 * `visible` a boolean to determine if the window controls overlay has been rendered
 
 For privacy, the `windowControlsOverlay` will not be accessible to iframes inside of a webpage. See [Privacy Considerations](#privacy-considerations) below
@@ -145,7 +145,7 @@ Whenever the overlay is resized, a `geometrychange` event will be fired on the `
 #### CSS Environment Variables
 Although it's possible to layout the content of the title bar and web page with just the JavaScript APIs provided above, they are not as responsive as a CSS solution. This is problematic either when the overlay resizes to accommodate the origin text or a new extension icon populates the overlay, or when the window resizes.
 
-The solution is to treat the overlay like a notch in a phone screen and layout the title bar area next to the window controls overlay "notch". The position of the overlay can be defined using the existing [`safe-area-inset-top`](https://developer.mozilla.org/en-US/docs/Web/CSS/env) CSS environment variable to determine the height, and two new CSS environment variables describing the left and right insets of the overlay: [`unsafe-area-top-inset-left/right`](https://github.com/w3c/csswg-drafts/issues/4721). See the [sample code](#example) below on one method of laying out the title bar using these CSS environment variables. 
+The solution is to treat the overlay like a notch in a phone screen and layout the title bar area next to the window controls overlay "notch". The position of the overlay can be defined using the existing [`safe-area-inset-top`](https://developer.mozilla.org/docs/Web/CSS/env) CSS environment variable to determine the height, and two new CSS environment variables describing the left and right insets of the overlay: [`unsafe-area-top-inset-left/right`](https://github.com/w3c/csswg-drafts/issues/4721). See the [sample code](#example) below on one method of laying out the title bar using these CSS environment variables. 
 
 We explored and rejected an alternative approach which instead uses CSS environment variables to describe the safe area of the title bar, `title-bar-area-[top/left/bottom/right]`. Although this "safe area" approach would be easier for developers to use than the "unsafe area" approach, it would be difficult to standardize given that it is such a niche use case (only available on installed desktop web apps). 
 

@@ -161,7 +161,7 @@ that should be announced beyond the immediate effect of the primary action.
 
 ## Proposed Solution
 
-(This version inspired by [UIA Notification API](https://docs.microsoft.com/en-us/windows/win32/api/uiautomationcoreapi/nf-uiautomationcoreapi-uiaraisenotificationevent))
+(This version inspired by [UIA Notification API](https://learn.microsoft.com/windows/win32/api/uiautomationcoreapi/nf-uiautomationcoreapi-uiaraisenotificationevent))
 
 For use cases that don't have an express UI tie-in, it makes sense to provide a solution
 not expressly tied to HTML element, but for which other document-centric information can

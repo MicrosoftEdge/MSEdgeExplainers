@@ -318,7 +318,7 @@ Freedom over the size and position of a `popup` could enable an author to spoof 
 
 ## Open questions
 
-1. **Collision with CSS contain.** It’s worth noting that using the [`contain` CSS property](https://developer.mozilla.org/en-US/docs/Web/CSS/contain) on an ancestor of `popup` will prevent `popup` from being positioned and painted correctly. How common is this use case? How might the platform resolve this unintentional effect?
+1. **Collision with CSS contain.** It’s worth noting that using the [`contain` CSS property](https://developer.mozilla.org/docs/Web/CSS/contain) on an ancestor of `popup` will prevent `popup` from being positioned and painted correctly. How common is this use case? How might the platform resolve this unintentional effect?
 
 2. **Could we require popups to use the DOM hierarchy for event propagation and establishing hierarchical popup relationships?** Elements used for popup UI today are frequently appended to the end of the DOM to ensure they appear on top of other UI. With the new capabilities of the `popup` element, that isn't necessary, yet we still assume in this proposal that DOM positioning of the `popup` needs to be separate from the anchor. One reason why that might still be needed is for anchor elements that can't accept a `popup` descendant, for example, image or input elements or custom-elements that expect a particular content model. Eliminating this requirement would also eliminate the complexity to modify the event propagation path based on the anchor attribute, and would make hierarchical relationships between popups clear just by observing the DOM hierarchy.
 

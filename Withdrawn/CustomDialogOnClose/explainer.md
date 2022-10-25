@@ -127,7 +127,7 @@ This option will not be pursued, in favor of the declarative approach. The two a
 - Having a beforeunload handler can harm the performance of the browser by preventing optimizations like BFCache. A declarative approach should lessen the frequency with which this optimization is missed.
 
 ### Extend window.confirm()
-[`window.confirm()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm) is a familiar API that lets websites query the user and act based on their response.
+[`window.confirm()`](https://developer.mozilla.org/docs/Web/API/Window/confirm) is a familiar API that lets websites query the user and act based on their response.
 
 ![A dialog is displayed with the title "An embedded page on this page says" and the contents "This is an example of the confirm API, this text is customizable". There are two buttons "OK" and "Cancel".](./images/ConfirmExample.PNG)
 

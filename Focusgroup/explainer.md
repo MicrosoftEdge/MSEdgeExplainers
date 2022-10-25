@@ -57,7 +57,7 @@ implementing the pattern:
 * [Rob Dodson explains roving tabindex (YouTube)](https://www.youtube.com/watch?v=uCIC2LNt0bk)
 * [roving tabindex in React](https://js.coach/package/react-roving-tabindex)
 * [Angular's ListKeyManager in the Component Dev Kit](https://material.angular.io/cdk/a11y/overview#listkeymanager)
-* [FocusZone in Fluent UI](https://developer.microsoft.com/en-us/fluentui#/controls/web/focuszone)
+* [FocusZone in Fluent UI](https://developer.microsoft.com/fluentui#/controls/web/focuszone)
 * [Elix component library's KeyboardDirectionMixin](https://component.kitchen/elix/KeyboardDirectionMixin)
 
 To achieve this goal, we believe that the solution must be done with declarative markup or CSS.
