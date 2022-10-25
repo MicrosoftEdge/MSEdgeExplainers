@@ -44,7 +44,7 @@ We welcome your feedback and opinion on ways we can help improve Chromium caret 
 
 * Caret Navigation: https://en.wikipedia.org/wiki/Caret_navigation
 * Caret Browsing extension in Chrome Web Store: https://chrome.google.com/webstore/detail/caret-browsing/fklpgenihifpccgiifchnihilipmbffg
-* Keyboard shortcuts in Windows (Copy, paste, and other general keyboard shortcuts): https://support.microsoft.com/en-us/help/12445/windows-keyboard-shortcuts
+* Keyboard shortcuts in Windows (Copy, paste, and other general keyboard shortcuts): https://support.microsoft.com/help/12445/windows-keyboard-shortcuts
 
 ---
 [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Caret%20Browsing) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BCaret%20Browsing%5D)

@@ -6,7 +6,7 @@
 
 # Summary
 An MF based DRM system can provide a highly secure, trusted and
-robust environment that premium media content providers expect to distribute high-value protected media. We propose additions to enable the integration of MF based DRM systems into Chromium. More details on MF based DRM systems can be found at [Protected Media Path (PMP)](https://docs.microsoft.com/en-us/windows/win32/medfound/protected-media-path).
+robust environment that premium media content providers expect to distribute high-value protected media. We propose additions to enable the integration of MF based DRM systems into Chromium. More details on MF based DRM systems can be found at [Protected Media Path (PMP)](https://learn.microsoft.com/windows/win32/medfound/protected-media-path).
 
 # Goals
 * Adding the support of specific MF based DRM systems into Chromium - this is done by writing an MF based CDM provider.
@@ -30,7 +30,7 @@ Components as seen from the media  [Encrypted Media Extensions (EME)](https://ww
 
 ### Component Interactions
 In terms of functionalities, 4 major components can be identified:
-1. In the Renderer process, a MFCdmSwitchingRenderer selects the Chromium DefaultRenderer by default. When the content is known to be protected media and the given key system is implemented by a MF based CDM, a MFMediaEngineRendererClient will be used as the media Renderer. The MFMediaEngineRendererClient and MFMediaEngineRenderer classes are specializations of FooRendererClient/FooRenderer pair as described in the "Specialized Out-of-Process media::Renderers" section of [media/mojo](https://chromium.googlesource.com/chromium/src/media/+/master/mojo/) document. The protected media data from the RenderClient side is pulled by the MFMediaEngineRenderer which in turn acts as a custom [IMFMediaSource](https://docs.microsoft.com/en-us/windows/win32/api/mfidl/nn-mfidl-imfmediasource) passing the media data to an [IMFMediaEngine](https://docs.microsoft.com/en-us/windows/win32/api/mfmediaengine/nn-mfmediaengine-imfmediaengine) instance.
+1. In the Renderer process, a MFCdmSwitchingRenderer selects the Chromium DefaultRenderer by default. When the content is known to be protected media and the given key system is implemented by a MF based CDM, a MFMediaEngineRendererClient will be used as the media Renderer. The MFMediaEngineRendererClient and MFMediaEngineRenderer classes are specializations of FooRendererClient/FooRenderer pair as described in the "Specialized Out-of-Process media::Renderers" section of [media/mojo](https://chromium.googlesource.com/chromium/src/media/+/master/mojo/) document. The protected media data from the RenderClient side is pulled by the MFMediaEngineRenderer which in turn acts as a custom [IMFMediaSource](https://learn.microsoft.com/windows/win32/api/mfidl/nn-mfidl-imfmediasource) passing the media data to an [IMFMediaEngine](https://learn.microsoft.com/windows/win32/api/mfmediaengine/nn-mfmediaengine-imfmediaengine) instance.
 
 2. Since the MF based CDM binary contains third-party code, we have added the creation of a Less Privileged AppContainer (LPAC) MF CDM Utility process to sandbox it. In this LPAC process, there are two new components. A MFMediaEngineRenderer component integrates with an instance of IMFMediaEngine rendering pipeline. A MF CDM Adapter component instantiates the MF based CDM and acts as a translation layer between this CDM and the Chromium CDM adapter.
 

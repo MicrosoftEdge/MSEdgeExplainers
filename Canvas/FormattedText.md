@@ -31,8 +31,8 @@ choice for presenting a rapidly-changing view.
 In these scenarios, it is often necessary to present text to the user. The 2D Canvas
 API currently provides a relatively simplistic text rendering capability: A single run
 of text can be
-[measured](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/measureText)
-and [rendered](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText)
+[measured](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/measureText)
+and [rendered](https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D/fillText)
 **as a single line**, optionally compressed to fit
 within a certain width. If the developer needs to present more than just a few words
 (e.g., a paragraph of text) then things get very complicated very quickly. Some options
@@ -77,7 +77,7 @@ This proposal aims to make it easy for web developers to get correct and fast
 multiline formatted text rendering functionality in Canvas, while preserving
 the low-level flexibility for positioning text that is already present in the
 existing Canvas API. It takes inspiration from
-[related APIs](https://docs.microsoft.com/en-us/dotnet/framework/wpf/advanced/drawing-formatted-text)
+[related APIs](https://learn.microsoft.com/dotnet/framework/wpf/advanced/drawing-formatted-text)
 as a starting point.
 
 The proposal below introduces a Canvas formatted text API and shows how it can
@@ -462,7 +462,7 @@ as a `<p>` element), with formatted sections wrapped in appropriate
 [phrasing content](https://html.spec.whatwg.org/multipage/dom.html#phrasing-content-2)
 (such as `<span>` and styled to match the `CanvasFormattedTextRun` formatting.) The
 markup should make use of
-[ARIA Live Regions](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions)
+[ARIA Live Regions](https://developer.mozilla.org/docs/Web/Accessibility/ARIA/ARIA_Live_Regions)
 to be sure assistive technologies (ATs) pickup and announce any dynamic changes.
 
 Looking generally at what low-level features are necessary to make text fully accessible

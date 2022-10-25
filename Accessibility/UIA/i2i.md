@@ -10,7 +10,7 @@ Rossen.Atanassov@microsoft.com, Melanie.Richards@microsoft.com
 
 ## Design doc/Spec
 
-[UI Automation Providers Overview](https://docs.microsoft.com/en-us/windows/desktop/winauto/uiauto-providersoverview)
+[UI Automation Providers Overview](https://learn.microsoft.com/windows/desktop/winauto/uiauto-providersoverview)
 
 A TAG review is not requested, as these interfaces are specific to the Windows platform and not intended to be introduced as web standards. It is not expected that web developers will need to make changes to their content as a result of this work, as UIAutomation support reflects lower-level implementation details, and will not be replacing or removing accessibility APIs already supported in Chromium.
 
@@ -57,7 +57,7 @@ A UIA implementation has no bearing on browser support for any other assistive t
 
 UIA doesn’t pose any specific performance concerns that aren’t applicable to any other assistive API, such as IA2.
 
-In order to extend UIA support from basic to full coverage, this work will continue to leverage Chromium’s platform-agnostic accessibility tree abstraction layer, and will map tree elements to the appropriate UIA control types. Support of UIA interfaces will be consistent with other UIA providers, as outlined in [UI Automation Providers Overview](https://docs.microsoft.com/en-us/windows/desktop/winauto/uiauto-providersoverview). For an overview of how web content semantics will map to UIA, refer to the following mapping specifications: [Core-AAM](https://w3c.github.io/core-aam/), [HTML-AAM](https://w3c.github.io/html-aam/), [Graphics-AAM](https://w3c.github.io/graphics-aam/), and [SVG-AAM](https://w3c.github.io/svg-aam/).
+In order to extend UIA support from basic to full coverage, this work will continue to leverage Chromium’s platform-agnostic accessibility tree abstraction layer, and will map tree elements to the appropriate UIA control types. Support of UIA interfaces will be consistent with other UIA providers, as outlined in [UI Automation Providers Overview](https://learn.microsoft.com/windows/desktop/winauto/uiauto-providersoverview). For an overview of how web content semantics will map to UIA, refer to the following mapping specifications: [Core-AAM](https://w3c.github.io/core-aam/), [HTML-AAM](https://w3c.github.io/html-aam/), [Graphics-AAM](https://w3c.github.io/graphics-aam/), and [SVG-AAM](https://w3c.github.io/svg-aam/).
 
 ### Activation
 

@@ -24,7 +24,7 @@ painted with certain effects applied.
 Ranges are somewhat limited in capabilities for advanced editing scenarios.
 While Ranges expose information about the rendering of the contained text via
 client rect(s), they only expose the text content (not the visible text &mdash;
-see [differences](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent#differences_from_innertext)) of the Range to script via `toString()`.
+see [differences](https://developer.mozilla.org/docs/Web/API/Node/textContent#differences_from_innertext)) of the Range to script via `toString()`.
 
 Complex editing applications on the Web will typically want to operate on
 the visible text, which in turn requires the use of heuristics to map
@@ -33,7 +33,7 @@ the computed innerText back to DOM Ranges.
 Creating an interoperable find-on-page feature exposes the difficulties in
 trying to use heuristics to perform this mapping.
 Performing the find without using the non-standard
-[`window.find()`](https://developer.mozilla.org/en-US/docs/Web/API/Window/find)
+[`window.find()`](https://developer.mozilla.org/docs/Web/API/Window/find)
 API requires computing matches based on the visible text. In order to visually
 highlight the matches, authors then must determine where the string matches that
 were found to live in the DOM. This becomes difficult to manage when there is

@@ -78,7 +78,7 @@ CSS currently supports the `:target` pseudo-class selector, which may seem appli
 ## Open Questions/Challenges
 
 * What happens if the text contains a `#` (e.g., a hashtag)?
-* Does [generated content](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Generated_Content) get factored in?
+* Does [generated content](https://developer.mozilla.org/docs/Web/CSS/CSS_Generated_Content) get factored in?
 * Do things like text transformation, bi-directional, and mixed language modes cause issues for in-page search?
 * What are the expectations around how URL encoding/decoding is handled (e.g., `%20` for space)?
 ---
@@ -125,8 +125,8 @@ There has been some discussion over whether white space should be represented as
 ## Appendix D: Related Specifications & Concepts
 
 * Media Fragments - [https://www.w3.org/TR/media-frags/](https://www.w3.org/TR/media-frags/)
-* CSS Selectors (only to elements though) - [https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)
-* XPath (only to elements though) - [https://developer.mozilla.org/docs/Web/XPath](https://developer.mozilla.org/en-US/docs/Web/XPath)
+* CSS Selectors (only to elements though) - [https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)
+* XPath (only to elements though) - [https://developer.mozilla.org/docs/Web/XPath](https://developer.mozilla.org/docs/Web/XPath)
 * DOM Range - [https://developer.mozilla.org/docs/Web/API/Range](https://developer.mozilla.org/en/docs/Web/API/Range)
 * EPUB Canonical Fragment Identifiers - [http://www.idpf.org/epub/linking/cfi/epub-cfi.html](http://www.idpf.org/epub/linking/cfi/epub-cfi.html)
 * SVG IRI fragments - [https://www.w3.org/TR/SVG/linking.html#LinksIntoSVG](https://www.w3.org/TR/SVG/linking.html#LinksIntoSVG)

@@ -123,9 +123,9 @@ Registering applications to handle URL schemes is operating system dependent. Th
 
 ### Windows
 
-- **Desktop applications** can be registered to handle URL schemes by modifying registry key values. See more [here](https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa767914(v=vs.85)?redirectedfrom=MSDN).
+- **Desktop applications** can be registered to handle URL schemes by modifying registry key values. See more [here](https://learn.microsoft.com/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa767914(v=vs.85)?redirectedfrom=MSDN).
 
-- **UWP apps** can specify a supported schemes in their package manifest. The OS registers these associations during installation. Read more [here](https://docs.microsoft.com/en-us/windows/uwp/launch-resume/handle-uri-activation).
+- **UWP apps** can specify a supported schemes in their package manifest. The OS registers these associations during installation. Read more [here](https://learn.microsoft.com/windows/uwp/launch-resume/handle-uri-activation).
 
 ### Linux
 
@@ -188,11 +188,11 @@ As mentioned before, the Navigator interface from WebAPI has the method `registe
 
 <https://html.spec.whatwg.org/multipage/system-state.html#custom-handlers>
 
-<https://developer.mozilla.org/en-US/docs/Web/API/Navigator/registerProtocolHandler>
+<https://developer.mozilla.org/docs/Web/API/Navigator/registerProtocolHandler>
 
 ### protocol_handlers for WebExtensions
 
-Another related API is Mozilla's `protocol_handlers` property for their [WebExtensions](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/protocol_handlers). With that property, extensions can register a website as a handler for a particular protocol. Just like in this proposal, the syntax and semantics of this `WebExtensions` property is very similar to `registerProtocolHandler`, except that with `registerProtocolHandler` a website can only register itself as a handler. To avoid confusion for developers, it would be wise to keep the extensions API ([Chromium proposal](https://bugs.chromium.org/p/chromium/issues/detail?id=64100)), the web app API (proposed here) and `registerProtocolHandler` as aligned as possible. Keeping compatibility with all these APIs might also make it easier for user agents to share as much logic as possible among all the implementations. [Issue #280](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/280) provides more context on this.
+Another related API is Mozilla's `protocol_handlers` property for their [WebExtensions](https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions/manifest.json/protocol_handlers). With that property, extensions can register a website as a handler for a particular protocol. Just like in this proposal, the syntax and semantics of this `WebExtensions` property is very similar to `registerProtocolHandler`, except that with `registerProtocolHandler` a website can only register itself as a handler. To avoid confusion for developers, it would be wise to keep the extensions API ([Chromium proposal](https://bugs.chromium.org/p/chromium/issues/detail?id=64100)), the web app API (proposed here) and `registerProtocolHandler` as aligned as possible. Keeping compatibility with all these APIs might also make it easier for user agents to share as much logic as possible among all the implementations. [Issue #280](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/280) provides more context on this.
 
 ## Alternatives Considered
 

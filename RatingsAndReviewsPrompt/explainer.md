@@ -46,7 +46,7 @@ Each app catalog provides its own API for triggering an app review flow within t
 
 * [Apple’s Store Kit](https://developer.apple.com/app-store/ratings-and-reviews/) provides `SKStoreReviewController.requestReview()`
 * Google’s Play Store provides this functionality in multiple languages: [C++](https://developer.android.com/guide/playcore/in-app-review/native) (`ReviewManager_requestReviewFlow`), [Java and Kotlin](https://developer.android.com/guide/playcore/in-app-review/kotlin-java) (`ReviewManager.requestReviewFlow()`), and [Unity](https://developer.android.com/guide/playcore/in-app-review/unity) (`ReviewManager.RequestReviewFlow()`).
-* Microsoft’s Store provides this functionality in multiple languages using [`RequestRateAndReviewAppAsync` and the proprietary URL protocol `ms-windows-store`](https://docs.microsoft.com/en-us/windows/uwp/monetize/request-ratings-and-reviews).
+* Microsoft’s Store provides this functionality in multiple languages using [`RequestRateAndReviewAppAsync` and the proprietary URL protocol `ms-windows-store`](https://learn.microsoft.com/windows/uwp/monetize/request-ratings-and-reviews).
 
 
 ## API Proposal

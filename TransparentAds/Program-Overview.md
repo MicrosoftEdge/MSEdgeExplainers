@@ -29,7 +29,7 @@ The following section outlines the strict set of privacy requirements to join th
 |--------------|----------|
 |The ability for users to contact the company serving personalized ads | Contact information can be published in the privacy policy or terms of service document for the company. | 
 | Privacy Policy must be published on the web at a [`/.well-known/`](https://datatracker.ietf.org/doc/html/rfc5785) location| Published privacy policies must cover the following:<ul><li> What types of cookies/tracking technologies are used? </li><li>What information is collected, how it is used, how it is stored/for how long? </li><li>How is collected data shared with other companies? </li><li>What security measures are taken to protect information? </li><li> What choices can users make regarding cookies and tracking technologies, such as opt-out or similar controls?  </li> |
-| For ad serving partners (i.e. demand-side platforms), provide users with a clear indication when they are seeing an ad while browsing | Example: An “Ad” or “Sponsored” tag that aligns with [Microsoft’s ad labelling policies](https://about.ads.microsoft.com/en-us/resources/policies/traffic-quality) (currently under “Publisher resources” section). AdChoices and similar inline icons and controls would also satisfy this requirement.|
+| For ad serving partners (i.e. demand-side platforms), provide users with a clear indication when they are seeing an ad while browsing | Example: An “Ad” or “Sponsored” tag that aligns with [Microsoft’s ad labelling policies](https://about.ads.microsoft.com/resources/policies/traffic-quality) (currently under “Publisher resources” section). AdChoices and similar inline icons and controls would also satisfy this requirement.|
 |Provide browser-consumable metadata on each ad that offers the following:<ul><li>For partners facilitating ad auctions: an understanding of what data was used to request bids</li><li>For ad serving partners: an understanding of what data was used to personalize the ad being served</li><li>An overview of how this data was acquired (user provided, inferred based on interactions on the same site, inferred based on interactions with other sites, collected via device characteristics, obtained from data partnerships with other companies, etc.)</li></ul>||
 | Ensure ad slots are marked with a unique identifier. | The identifier will be used to link ads transparency metadata to discrete creatives. 
 
@@ -47,13 +47,13 @@ The following section outlines the strict set of privacy requirements to join th
 ## Protection
 | Requirements | Comments | 
 |--------------|----------|
-|Any data collection must meet the [Microsoft privacy and data protection policies](https://about.ads.microsoft.com/en-us/resources/policies/privacy-and-data-protection-policies) and comply with all applicable laws and regulations related to the collection and use of personal data.||
+|Any data collection must meet the [Microsoft privacy and data protection policies](https://about.ads.microsoft.com/resources/policies/privacy-and-data-protection-policies) and comply with all applicable laws and regulations related to the collection and use of personal data.||
 
 
 # Detailed Implementation Requirements: Transparency
 No additional requirements apply to the following:
 * The ability for users to contact the company serving personalized ads
-* For ad serving partners (i.e. demand-side platforms), provide users with a clear indication when they are seeing an ad while browsing. Example: An “Ad” or “Sponsored” tag that aligns with [Microsoft’s ad labelling policies](https://about.ads.microsoft.com/en-us/resources/policies/traffic-quality) (currently under “Publisher resources” section). AdChoices and similar inline icons and controls would also satisfy this requirement.
+* For ad serving partners (i.e. demand-side platforms), provide users with a clear indication when they are seeing an ad while browsing. Example: An “Ad” or “Sponsored” tag that aligns with [Microsoft’s ad labelling policies](https://about.ads.microsoft.com/resources/policies/traffic-quality) (currently under “Publisher resources” section). AdChoices and similar inline icons and controls would also satisfy this requirement.
 
 ## Privacy policy at a /.well-known/ location
 
@@ -180,8 +180,8 @@ The following describes these fields and accepted values.
 
 **lookalike**
 * `NOT_USED`: Lookalike targeting was not used.
-* `SIMILAR_AUDIENCE`: Lookalike targeting using a behavioral seed was used. Examples include Microsoft Ads’ [Similar Audiences](https://about.ads.microsoft.com/en-us/solutions/audience-targeting/similar-audiences) or Google’s [Affinity Audiences](https://support.google.com/displayvideo/answer/6021489?hl=en#zippy=).
-* `ID_MATCH`: A customer was matched based on an identifier (e.g. email address, phone number, address) shared by the advertiser. An example includes Microsoft Ads’ [Customer Match](https://about.ads.microsoft.com/en-us/solutions/audience-targeting/customer-match).
+* `SIMILAR_AUDIENCE`: Lookalike targeting using a behavioral seed was used. Examples include Microsoft Ads’ [Similar Audiences](https://about.ads.microsoft.com/solutions/audience-targeting/similar-audiences) or Google’s [Affinity Audiences](https://support.google.com/displayvideo/answer/6021489?hl=en#zippy=).
+* `ID_MATCH`: A customer was matched based on an identifier (e.g. email address, phone number, address) shared by the advertiser. An example includes Microsoft Ads’ [Customer Match](https://about.ads.microsoft.com/solutions/audience-targeting/customer-match).
 
 Providers should match “lookalike” values based on the intent of a customer list, regardless of the origination. For example, a list of customers provided by a partner platform would be a match for `SIMILAR_AUDIENCE` if a behavioral seed was used to create that segment. If the “why” behind a particular customer segment from a third-party partner cannot be determined (e.g. unclear whether this customer segment is based on lookalike or remarketing behaviors), match the other: `OTHER_USED` key-value pair.
 
@@ -444,5 +444,5 @@ We plan to audit the program requirements using the process below:
 ## Protection
 | Requirements | Auditing | 
 |--------------|----------|
-|Any data collection must meet the [Microsoft privacy and data protection policies](https://about.ads.microsoft.com/en-us/resources/policies/privacy-and-data-protection-policies) and comply with all applicable laws and regulations related to the collection and use of personal data.|No new auditing under this program. Complaints raised against a participant (including but not limited to: informal user complaints, regulatory inquiries, and formal complaints filed in local jurisdictions) may cause review of inclusion in the program.|
+|Any data collection must meet the [Microsoft privacy and data protection policies](https://about.ads.microsoft.com/resources/policies/privacy-and-data-protection-policies) and comply with all applicable laws and regulations related to the collection and use of personal data.|No new auditing under this program. Complaints raised against a participant (including but not limited to: informal user complaints, regulatory inquiries, and formal complaints filed in local jurisdictions) may cause review of inclusion in the program.|
 

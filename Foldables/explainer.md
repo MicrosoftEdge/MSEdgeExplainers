@@ -40,7 +40,7 @@ Developers may be able to solve this by taking a hard dependency on a specific d
 ### Current problems:
 More specific challenges we've heard from our internal product teams that were exploring building experiences for this emerging classes of devices include:
 
-- *Hardware differences*: Devices could be seamless (e.g. Samsung Galaxy Fold) or have a seam (e.g. [Microsoft Surface Duo](https://www.microsoft.com/en-us/surface/devices/surface-duo) or ZTE Axon M). In both cases developers might want to take it into account or intentionally ignore depending on scenario;
+- *Hardware differences*: Devices could be seamless (e.g. Samsung Galaxy Fold) or have a seam (e.g. [Microsoft Surface Duo](https://www.microsoft.com/surface/devices/surface-duo) or ZTE Axon M). In both cases developers might want to take it into account or intentionally ignore depending on scenario;
 - *Folding capabilities, state*: the fold area could be safe or unsafe region to present content;
 - *Future-proofing*: Ideally developers would want a somewhat stable way to target this class of devices without having to rely on specific device hardware parameters.
 

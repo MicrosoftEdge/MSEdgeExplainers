@@ -15,9 +15,9 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Overview
 
-High contrast is a [Windows accessibility feature](https://docs.microsoft.com/en-us/windows/desktop/w8cookbook/high-contrast-mode) intended to increase the readability of text through color contrast. Individuals with low vision may find it more comfortable to read content when there is a strong contrast between foreground and background colors. High contrast is a useful feature in increasing the readability of screen-based text for such users.
+High contrast is a [Windows accessibility feature](https://learn.microsoft.com/windows/desktop/w8cookbook/high-contrast-mode) intended to increase the readability of text through color contrast. Individuals with low vision may find it more comfortable to read content when there is a strong contrast between foreground and background colors. High contrast is a useful feature in increasing the readability of screen-based text for such users.
 
-The Windows platform provides built-in [high contrast color themes](https://docs.microsoft.com/en-us/windows/uwp/design/accessibility/high-contrast-themes) such as the more popular "black-on-white" and "white-on-black" themes. Besides the default themes, users can customize the colors and create their own themes. Applications can make use of these color themes and propagate them into their content model. In the case of the web browser, high contrast colors are propagated to website pages as a set of user agent styles, thus increasing readability of the text and allowing a coherent experience across the Windows OS and various applications.
+The Windows platform provides built-in [high contrast color themes](https://learn.microsoft.com/windows/uwp/design/accessibility/high-contrast-themes) such as the more popular "black-on-white" and "white-on-black" themes. Besides the default themes, users can customize the colors and create their own themes. Applications can make use of these color themes and propagate them into their content model. In the case of the web browser, high contrast colors are propagated to website pages as a set of user agent styles, thus increasing readability of the text and allowing a coherent experience across the Windows OS and various applications.
 
 Microsoft Edge and IE are currently the only browsers to support the high contrast feature using Windows high contrast themes. Many of the features described in this document were first shipped in 2012 with IE 10 and continue to use the ```-ms-``` vendor prefix for names and values.
 
@@ -36,7 +36,7 @@ When high contrast is currently enabled in Chrome, a popup is displayed promptin
 
 ## CSS Media Query
 
-In order to allow developer defined high contrast rules for webpages, a [high contrast media query type](https://msdn.microsoft.com/en-us/library/hh771830(v=vs.85).aspx) would be added called ```high-contrast```. This CSS media query type is currently supported by Microsoft Edge and IE. If a ```high-contrast``` media query evaluates to true, any styles defined within that media query *will* be used when in high contrast and will *not* be overridden by the high contrast feature.
+In order to allow developer defined high contrast rules for webpages, a [high contrast media query type](https://msdn.microsoft.com/library/hh771830(v=vs.85).aspx) would be added called ```high-contrast```. This CSS media query type is currently supported by Microsoft Edge and IE. If a ```high-contrast``` media query evaluates to true, any styles defined within that media query *will* be used when in high contrast and will *not* be overridden by the high contrast feature.
 
 #### Possible values
 
@@ -86,7 +86,7 @@ To provide readability between foreground and background colors, high contrast c
 * ```-webkit-tap-highlight-color```
 * ```background-image``` (***only*** in the case of text/date/file input control types, as well as for ```select```, ```option```, and ```optgroup``` HTML tags)
 _____
-To allow for further developer customization of the high contrast feature, a [CSS property](https://msdn.microsoft.com/en-us/library/hh771863(v=vs.85).aspx), ```high-contrast-adjust```, would be added. This CSS property type is currently supported by Microsoft Edge and IE. This property can be used to override the effects of high contrast.
+To allow for further developer customization of the high contrast feature, a [CSS property](https://msdn.microsoft.com/library/hh771863(v=vs.85).aspx), ```high-contrast-adjust```, would be added. This CSS property type is currently supported by Microsoft Edge and IE. This property can be used to override the effects of high contrast.
 
 #### Possible values
 

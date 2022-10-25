@@ -3,11 +3,11 @@
 
   <img src="eudc-edit-example.jpg" alt="An example of a Chinese name utilizing EUDC to combine the characters that form their name" align="right" />
 
-[End User Defined Characters (EUDC)](https://docs.microsoft.com/en-us/windows/desktop/Intl/end-user-defined-characters
+[End User Defined Characters (EUDC)](https://learn.microsoft.com/windows/desktop/Intl/end-user-defined-characters
 ) utilize the [private use area (PUA)](https://unicode-table.com/en/blocks/private-use-area/) within unicode to provide extensibility to support custom
 characters. They can be defined by the end user or another party such as an equipment manufacturer, a user group, a government body, or a font design company. Their use enables users to form names and other words using characters that are not available in standard screen and printer fonts.
 
-The EUDC font is distributed via either a TTF or TTE file ([read more here](https://docs.microsoft.com/en-us/windows/desktop/intl/character-sets-and-fonts)) which are registered via the registry as supplementing the private use range of a specific or all system fonts. Typically organizations distribute this through a group policy script.
+The EUDC font is distributed via either a TTF or TTE file ([read more here](https://learn.microsoft.com/windows/desktop/intl/character-sets-and-fonts)) which are registered via the registry as supplementing the private use range of a specific or all system fonts. Typically organizations distribute this through a group policy script.
 
 ## Evidence
   - Microsoft has received feedback to retain support for EUDC for line-of-business and government applications and for their end users to utilize pre-defined characters.

@@ -105,4 +105,4 @@ The following section enumerates the potential privacy concerns identified durin
 ## References
 [PointerEvent interface](https://w3c.github.io/pointerevents/#pointerevent-interface)
 
-[WinRT PenDevice.PenId Property](https://docs.microsoft.com/en-us/uwp/api/windows.devices.input.pendevice.penid?view=winrt-22000)
+[WinRT PenDevice.PenId Property](https://learn.microsoft.com/uwp/api/windows.devices.input.pendevice.penid?view=winrt-22000)

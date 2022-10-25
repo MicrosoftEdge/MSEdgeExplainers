@@ -102,4 +102,4 @@ This class implements the WebInputMethodController interface and is also the eve
 | OS X | [Implementing Text Input Support](https://developer.apple.com/library/archive/documentation/TextFonts/Conceptual/CocoaTextArchitecture/TextEditing/TextEditing.html#//apple_ref/doc/uid/TP40009459-CH3-SW25) |
 | iOS | [Communicating with the Text Input System](https://developer.apple.com/library/archive/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/LowerLevelText-HandlingTechnologies/LowerLevelText-HandlingTechnologies.html#//apple_ref/doc/uid/TP40009542-CH15-SW16) |
 | Linux | [Intelligent Input Bus (IBus) ](https://github.com/ibus/ibus/wiki)
-| Windows | [Text Services Framework](https://docs.microsoft.com/en-us/windows/desktop/TSF/text-services-framework) |
+| Windows | [Text Services Framework](https://learn.microsoft.com/windows/desktop/TSF/text-services-framework) |
