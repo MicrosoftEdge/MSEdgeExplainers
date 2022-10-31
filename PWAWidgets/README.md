@@ -233,7 +233,7 @@ One or more Widgets are defined within the `widgets` member of a Web App Manifes
 ### Optional business logic properties
 
 * `auth` - Boolean. Informational. Whether or not the Widget requires auth. False if not included.
-* `prevent_multiple` - Boolean. Whether or not the multiple instances of this widget are allowed. False if not included.
+* `prevent_multiple` - Boolean. Whether or not the multiple instances of this widget are allowed, on a per widget host basis. False if not included.
 * `update` - Unsigned Integer. Informational. The frequency (in seconds) a developer wishes for the widget to be updated; for use in registering a Periodic Sync. The actual update schedule will use the Service Worker’s Periodic Sync infrastructure.
 * `actions` - An array of [`WidgetAction` objects](#Defining-a-WidgetAction) that will be exposed to users (if the template supports them) within an action-supporting template and trigger an event within the origin’s Service Worker.
 * `settings` - A array of [`WidgetSettingDefinition` objects](#Defining-a-WidgetSettingDefinition) that enable multiple instances of the same widget to be configured differently within a [Widget Host](#dfn-widget-host) (e.g., a weather widget that displays a single locale could be installed multiple times, targeting different cities).
