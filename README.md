@@ -132,6 +132,10 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Cache%20API%20Response%20Metadata">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Cache%20API%20Response%20Metadata?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+jungkees&labels=Cache+API+Response+Metadata&template=cache-api-response-metadata.md&title=%5BCache+API+Response+Metadata%5D+%3CTITLE+HERE%3E)
+* [Document Subtitle](DocumentSubtitle/explainer.md) | 
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Document%20Subtitle">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Document%20Subtitle?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=diekus&labels=Document+Subtitle&template=document-subtitle.md&title=%5BDocument+Subtitle%5D+%3CTITLE+HERE%3E)
 * [ImageResource `color_scheme`](ImageResource-color_scheme/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/ImageResource%20Color%20Scheme">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/ImageResource%20Color%20Scheme?label=issues)</a> |
