@@ -82,6 +82,7 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/RangeInnerText">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/RangeInnerText?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dlibby-&labels=RangeInnerText&template=range-innertext.md&title=%5BRangeInnerText%5D+%3CTITLE+HERE%3E)
+* [Delayed Clipboard Rendering](DelayedClipboard/DelayedClipboardRenderingExplainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Delayed%20Clipboard%20Rendering"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Delayed%20Clipboard%20Rendering?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=anaskim&labels=Delayed+Clipboard+Rendering&template=delayed-clipboard-rendering.md&title=%5BDelayed+Clipboard+Rendering%5D+%3CTITLE+HERE%3E)
    
 ### HTML
 
