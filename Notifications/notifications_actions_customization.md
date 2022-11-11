@@ -1,4 +1,4 @@
-# Notifications Action Buttons and Audio Customization
+# Incoming Call Notifications
 
 Authors: [Gabriel Brito](https://github.com/gabrielsanbrito), [Steve Becker](https://github.com/SteveBeckerMSFT), [Jungkee Song](https://github.com/jungkees)
 
