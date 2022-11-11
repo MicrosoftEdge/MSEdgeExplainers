@@ -1,4 +1,4 @@
-# Notifications Action Buttons and Audio Customization
+# Incoming Call Notifications
 
 Authors: [Gabriel Brito](https://github.com/gabrielsanbrito), [Steve Becker](https://github.com/SteveBeckerMSFT), [Jungkee Song](https://github.com/jungkees)
 
@@ -69,7 +69,6 @@ const title = "Andrew Bares";
 const options = {
   scenario: "incoming-call",
   body: "Incoming Call - Mobile",
-  sound: "ringtone"
 }
 
 serviceWorkerRegistration.showNotification(title, options);
@@ -89,7 +88,6 @@ const options = {
   scenario: "incoming-call",
   title: "Andrew Bares",
   body: "Incoming Call - Mobile",
-  sound: "ringtone",
   actions: [
     {
         action: "accept-audio-call",
@@ -151,7 +149,7 @@ However, this approach was not proposed as the main one because the only platfor
 
 ### Play Ringtone from Inside the Tab
 
-Previouly, the `sound` property was part of the Notifications API specification, but was removed mainly due to the lack of support across many platforms (refer to the discussion [here](https://github.com/whatwg/notifications/pull/127)). [Windows](https://docs.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/custom-audio-on-toasts#add-the-custom-audio), [Mac OS and iOS](https://developer.apple.com/documentation/usernotifications/unnotificationsound) allow the notifications to play custom sound, but the audio files should be stored beforehand in the local system. Besides that, it seems not possible to provide an audio file from the Web in any platform.
+Previouly, a `sound` property was part of the Notifications API specification, but was removed mainly due to the lack of support across many platforms (refer to the discussion [here](https://github.com/whatwg/notifications/pull/127)). [Windows](https://docs.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/custom-audio-on-toasts#add-the-custom-audio), [Mac OS and iOS](https://developer.apple.com/documentation/usernotifications/unnotificationsound) allow the notifications to play custom sound, but the audio files should be stored beforehand in the local system. Besides that, it seems not possible to provide an audio file from the Web in any platform.
 
 An option to circumvent this issue would be to trigger a silent notification, the moment the user receives an incoming call in the web app, and then play the custom audio inside the tab. However, synchronicity problems might arise with the audio starting to play before or after the notification showing up in the screen.
 
