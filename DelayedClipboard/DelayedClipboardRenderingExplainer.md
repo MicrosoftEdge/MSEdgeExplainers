@@ -40,20 +40,18 @@ With this proposal, we will be adding a new argument to the ClipboardItem constr
 ### Example 1: Map of MIME type to promise or callback in write()
 
 ```js
-const format1 = 'text/html';
-const format2 = 'image/png';
-const format3 = 'web application/x-custom-format-clipboard-format';
 const textInput = '<style>p {color:blue}</style><p>Hello World</p>';
-const blobInput = new Blob([textInput], {type: format1});
+const blobInput = new Blob([textInput], {type: 'text/html'});
 const delayedCallbacksMap = {
-  format2: function() {
-              return Promise.resolve(generateExpensiveImageBlob(), {format2});
-	   },
-  format3: function() {
-              return Promise.resolve(generateExpensiveCustomFormatBlob(), {format3});
-	   }
+  'image/png': function() {
+                 return Promise.resolve(generateExpensiveImageBlob());
+	       },
+  'web application/x-custom-format-clipboard-format': 
+    function() {
+      return Promise.resolve(generateExpensiveCustomFormatBlob());
+    }
 };
-const clipboardItemInput = new ClipboardItem({format1: blobInput}, delayedCallbacksMap);
+const clipboardItemInput = new ClipboardItem({'text/html': blobInput}, delayedCallbacksMap);
 navigator.clipboard.write([clipboardItemInput]);
 ```
 
@@ -62,20 +60,18 @@ An alternative to this is to use a new method, called addDelayedWriteCallback in
 ### Example 2: Map of MIME type to callback in new method
 
 ```js
-const format1 = 'image/png';
-const format2 = 'text/html';
 const delayedFunctionsMap = {
-  format1: function() {
-             return Promise.resolve(generateExpensiveImageBlob(), {format1});
-           },
-  format2: function() {
-             return Promise.resolve(generateExpensiveHTMLBlob(), {format2});
-           }
+  'image/png': function() {
+                 return Promise.resolve(generateExpensiveImageBlob());
+	       },
+  'text/html': function() {
+                 return Promise.resolve(generateExpensiveHTMLBlob());
+	       }
 };
 navigator.clipboard.addDelayedWriteCallback(delayedFunctionsMap);
-const blobInput1 = new Blob([], {type: format1});
-const blobInput2 = new Blob([], {type: format2});
-const clipboardItemInput = new ClipboardItem({[format1]: blobInput1, [format2]: blobInput2,});
+const blobInput1 = new Blob([], {type: 'image/png'});
+const blobInput2 = new Blob([], {type: 'text/html'});
+const clipboardItemInput = new ClipboardItem({['image/png']: blobInput1, ['text/html']: blobInput2,});
 navigator.clipboard.write([clipboardItemInput]);
 ```
 
@@ -126,4 +122,3 @@ callback ClipboardDelayedCallback = Promise<Blob>();
 * What should the result of `getType()` be? There are two main alternatives:
   * Generate the clipboard's payload. This would be consistent with the on-demand behavior of delayed clipboard rendering and with current behavior of `getType()`.
   * Return an empty blob. This would be a very strict interpretation of only producing clipboard data when a target application needs it via a paste command.
- 
