@@ -60,7 +60,6 @@ we move them into the [Alumni section](#alumni-) below.
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSColorMix">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSSColorMix?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=CSSColorMix&template=css-color-mix---function.md&title=%5BCSS+color-mix+function%5D+%3CTITLE+HERE%3E)
-* [CSS Anchored Positioning](CSSAnchoredPositioning/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSS%20Anchored%20Positioning">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSS%20Anchored%20Positioning?label=issues)</a> |
     [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=melanierichards%2C+BoCupp-Microsoft%2C+ipopescu93%2C+dandclark&labels=CSS+Anchored+Positioning&template=css-anchored-positioning.md&title=%5BCSS+Anchored+Positioning%5D+%3CTITLE+HERE%3E)
 
@@ -208,6 +207,7 @@ standards communities. Thanks for your continued interest!
 
 | Current Explainer | Current Venue | Archive link and date |
 |---|---|---|
+| [CSS Anchored Positioning](https://drafts.csswg.org/css-anchor-1/) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | 2022-10-30 |
 | [PARAKEET with Noisy Ranking](https://github.com/WICG/privacy-preserving-ads/blob/main/NoisyRanking.md) | [Web Incubator Community Group](https://wicg.io/) | 2022-04-19 |
 | [focusgroup for HTML and CSS](https://open-ui.org/components/focusgroup.explainer) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2022-04-09](Focusgroup/explainer.md) |
 | [Web App Link Handling Manifest Options](https://github.com/WICG/pwa-url-handler/blob/main/handle_links/explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2021-09-28 |
