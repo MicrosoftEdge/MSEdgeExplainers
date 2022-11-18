@@ -5,9 +5,9 @@ Authors: [Ana Sollano Kim](https://github.com/anaskim), [Anupam Snigdha](https:/
 
 ## Status of this Document
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
-* This document status: **Active**
+* This document status: **`ARCHIVED`**
 * Expected venue: [W3C Web Incubator Community Group](https://wicg.io/)
-* **Current version: this document**
+* **Current version: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/DelayedClipboard/DelayedClipboardRenderingExplainer.md**
 
 ## Introduction
 
@@ -33,11 +33,9 @@ Leverage the existing Async Clipboard API to allow websites exchange large data 
 * Modify the Data Transfer API
 * Replace the current functionality of the Async Clipboard API, as delayed clipboard rendering would be used at the discretion of web authors and only in the formats of their choosing.
 
-## Proposed Solution
+## Proposed solution: Map of MIME type to promise in `ClipboardItem` constructor
 
-With this proposal, we will be adding a new argument to the ClipboardItem constructor which will take a map of a MIME type to a callback. Authors should still be able to produce some formats immediately, so they may define the usual map with a MIME type as the key and a Blob as the value for formats that they don’t want to be delayed rendered.
-
-### Example 1: Map of MIME type to promise or callback in write()
+With this proposal, we will be adding a new argument to the `ClipboardItem` constructor which takes a map of a MIME type to a callback. Authors should still be able to produce some formats immediately, so they may define the usual map with a MIME type as the key and a Blob as the value for formats that they don’t want to be delayed rendered. An example is shown below:
 
 ```js
 const textInput = '<style>p {color:blue}</style><p>Hello World</p>';
@@ -55,9 +53,9 @@ const clipboardItemInput = new ClipboardItem({'text/html': blobInput}, delayedCa
 navigator.clipboard.write([clipboardItemInput]);
 ```
 
-An alternative to this is to use a new method, called addDelayedWriteCallback in the following example, that takes in a map of formats to callbacks.
+## Considered alternative: Map of MIME type to promise in new method
 
-### Example 2: Map of MIME type to callback in new method
+An alternative to this is to use a new method, called `addDelayedWriteCallback`, that takes in a map of formats to callbacks. As the the `ClipboardItem` constructor remains the same, web authors that want to adopt delayed clipboard rendering in their existing web applications will be able to move the generation of data to the callbacks map and pass it to `addDelayedWriteCallback`, without needing to change their existing `ClipboardItem` constructor. If the web author doesn't provide a delayed rendering callback or data, then an error is thrown in the source application and the write operation fails. An example of this proposal is shown below:
 
 ```js
 const delayedFunctionsMap = {
@@ -75,9 +73,7 @@ const clipboardItemInput = new ClipboardItem({['image/png']: blobInput1, ['text/
 navigator.clipboard.write([clipboardItemInput]);
 ```
 
-The disadvantage of the latter approach is that it adds overhead to the web author, as it is a new function for them to learn. However, as the clipboard item constructor remains the same, web authors that want to adopt delayed clipboard rendering in their existing web applications will just be able to move the generation of data to the callbacks map and pass it to addDelayedWriteCallback, without needing to change their existing clipboard item’s constructor.
-
-If the web author doesn't provide a delayed rendering callback or data, then an error is thrown in the source application and the write operation fails.
+The disadvantage of the latter approach is that it adds overhead to the web author, as it is a new function for them to learn. **As a result, we think that adding a new argument to the `ClipboardItem` constructor is the preferred solution.**
 
 ## Privacy and Security Considerations
 
