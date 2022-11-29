@@ -41,16 +41,23 @@ With this proposal, we will be adding a new argument to the `ClipboardItem` cons
 const textInput = '<style>p {color:blue}</style><p>Hello World</p>';
 const blobInput = new Blob([textInput], {type: 'text/html'});
 const delayedCallbacksMap = {
-  'image/png': function() {
-                 return Promise.resolve(generateExpensiveImageBlob());
-	       },
-  'web application/x-custom-format-clipboard-format': 
-    function() {
-      return Promise.resolve(generateExpensiveCustomFormatBlob());
-    }
+  'image/png': generateExpensiveImageBlob,
+  'web application/x-custom-format-clipboard-format': generateExpensiveCustomFormatBlob
 };
 const clipboardItemInput = new ClipboardItem({'text/html': blobInput}, delayedCallbacksMap);
 navigator.clipboard.write([clipboardItemInput]);
+```
+
+In the example, the functions `generateExpensiveImageBlob()` and `generateExpensiveCustomFormatBlob()` return a [Blob](https://w3c.github.io/FileAPI/#blob-section). The blob constructor takes in the content that will be written to the clipboard and its type.
+
+```js
+function generateExpensiveCustomFormatBlob() {
+  var inputData = ...;
+
+  // Produce expensive input data.
+
+  return new Blob([inputData], { type: 'web application/x-custom-format'});
+}
 ```
 
 ## Considered alternative: Map of MIME type to promise in new method
@@ -59,12 +66,8 @@ An alternative to this is to use a new method, called `addDelayedWriteCallback`,
 
 ```js
 const delayedFunctionsMap = {
-  'image/png': function() {
-                 return Promise.resolve(generateExpensiveImageBlob());
-	       },
-  'text/html': function() {
-                 return Promise.resolve(generateExpensiveHTMLBlob());
-	       }
+  'image/png': generateExpensiveImageBlob,
+  'text/html': generateExpensiveHTMLBlob
 };
 navigator.clipboard.addDelayedWriteCallback(delayedFunctionsMap);
 const blobInput1 = new Blob([], {type: 'image/png'});
@@ -72,6 +75,8 @@ const blobInput2 = new Blob([], {type: 'text/html'});
 const clipboardItemInput = new ClipboardItem({['image/png']: blobInput1, ['text/html']: blobInput2,});
 navigator.clipboard.write([clipboardItemInput]);
 ```
+
+Similarly to the proposed solution example, `generateExpensiveImageBlob` and `generateExpensiveHTMLBlob` return a [Blob](https://w3c.github.io/FileAPI/#blob-section) that should have the content that will be written to the clipboard and its type.
 
 The disadvantage of the latter approach is that it adds overhead to the web author, as it is a new function for them to learn. **As a result, we think that adding a new argument to the `ClipboardItem` constructor is the preferred solution.**
 
@@ -114,7 +119,14 @@ callback ClipboardDelayedCallback = Promise<Blob>();
   * Generate the clipboard data, which would override the author’s decision of delaying it until needed by a target application but prevents loss of information.
   * Asking the user if they would like to preserve contents on the clipboard before the app closes, which would require adding an extra step to close the tab.
   *  Throwing the contents of the clipboard away, which is in line with avoiding the production of expensive payloads that won’t be needed by a target application.
-* Are there target applications or operating systems that expect data to be immediately available when the user tries to paste the content of the clipboard? If so, what should happen with the generation of data?
+* Are there target applications or operating systems that expect data to be immediately available when the user tries to paste the content of the clipboard? If so, what should happen with the generation of data? Two main alternatives considered:
+  * Ignoring the delayed formats completely and or throwing an error. This would add burden to the web authors as they would have to handle that case.
+  * Producing the contents of delayed formats immediately.
 * What should the result of `getType()` be? There are two main alternatives:
   * Generate the clipboard's payload. This would be consistent with the on-demand behavior of delayed clipboard rendering and with current behavior of `getType()`.
   * Return an empty blob. This would be a very strict interpretation of only producing clipboard data when a target application needs it via a paste command.
+* Should we provide a way for authors to update the callbacks of the delayed rendered formats? Consider the following scenario: By the time a user tries pasting the content of the clipboard, the callback function needs data that is no longer available and/or has changed.
+
+## Related discussion
+
+[Support for delayed clipboard data](https://github.com/w3c/clipboard-apis/issues/41)
