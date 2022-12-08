@@ -691,65 +691,10 @@ Developers will use `removeByTag()` to remove all Instances of a Widget. This me
 ## Widget-related Events
 
 There are a host of different events that will take place in the context of a Service Worker.
-  
-### WidgetClickEvent
-  
-The [`WidgetClickEvent`](#widgetclickevent) is sent to the Service Worker when a user interacts (click/tap) with a Widget. The event handler of [`WidgetClickEvent`](#widgetclickevent) will be capable of making [`clients.openWindow()`](https://www.w3.org/TR/service-workers/#dom-clients-openwindow) to open the PWA.
-
-A [`WidgetClickEvent`](#widgetclickevent) is an object with the following properties:
-
-* `action` - Always required. This is the primary way to disambiguate events. The names of the events may be part of a standard lifecycle or app-specific, based on any [`WidgetAction` that has been defined](#Defining-a-WidgetAction).
-* `data` - Always required. This object comprises key/value pairs representing data sent from the [Widget Host](#dfn-widget-host) as part of the event. This could be, for example, the settings values to be saved to the [Widget Instance](#dfn-widget-instance). An empty object if no data is sent.
-* `widget` - Required for widget-specific events. This is a reference to the [`Widget`](#the-widget-object) (if any) associated with the event
-* `instanceId` - Required for widget-specific events. This is the GUID for the specific [Widget Instance](#dfn-widget-instance) (if any) associated with the event.
-* `hostId` - Required for host-specific events. This is the GUID for the specific [Widget Host](#dfn-widget-host) (if any) associated with the event.
-
-```json
-{
-  "action": "login",
-  "widget": { },
-  "instanceId": "{{ GUID }}",
-  "data": { }
-}
-```
-
-You can see a basic example of this in use in [the user login video, above](#user-login). There is a walk through of the interaction following that video, but here’s how the actual [`WidgetClickEvent`](#widgetclickevent) could be handled:
-
-```js
-self.addEventListener('widgetclick', (event) => {
-
-  const action = event.action;
-
-  // If user is being prompted to login 
-  if ( action == "login" ) {
-    // open a new window to the login page & focus it
-    clients
-        .openWindow( "/login?from=widget" )
-        .then(windowClient => 
-          windowClient ? windowClient.focus() : null
-        );
-  }
-
-});
-```
-
-The <b id="creating-a-WidgetClickEvent">steps for creating a WidgetClickEvent</b> with Widget Service Message <var>message</var> are as follows:
-
-1. Let <var>event</var> be a new WidgetClickEvent (inherits [`WidgetEvent`](#widgetevent)).
-1. Run the following steps in parallel:
-   1. Set <var>event["data"]</var> to a new object.
-   1. Set <var>event["action"]</var> to the user action bound to <var>message</var>.
-   1. Let <var>instanceId</var> be the id of the Widget Instance bound to <var>message</var>.
-   1. Set <var>event["instanceId"]</var> to <var>instanceId</var>.
-   1. Let <var>widget</var> be the result of running the algorithm specified in [getByInstanceId(instanceId)](#widgetsgetbyinstanceid) with <var>instanceId</var>.
-   1. Set <var>event["widget"]</var> to <var>widget</var>.
-   1. If <var>message</var> includes bound data,
-      1. Set <var>event["data"]</var> to the data value bound to <var>message</var>.
-1. Return <var>event</var>
 
 ### WidgetEvent
 
-There are a few special [`WidgetEvent`](#widgetevent) types to consider as well. 
+The [`WidgetEvent`](#widgetevent) is a generic event for widgets with the below types.
 
 * "widgetinstall" - Executed when a [Widget Host](#dfn-widget-host) is requesting installation of a widget.
 * "widgetuninstall" - Executed when a [Widget Host](#dfn-widget-host) is requesting un-installation of a widget.
@@ -871,6 +816,61 @@ Required `WidgetEvent` data:
 Using this event, it is expected that the Service Worker will enumerate the Widget Instances associated with the `hostId` and Fetch new data for each.
 
 ![](media/resume.gif)
+
+### WidgetClickEvent
+  
+The [`WidgetClickEvent`](#widgetclickevent) is sent to the Service Worker when a user interacts (click/tap) with a Widget. The event handler of [`WidgetClickEvent`](#widgetclickevent) will be capable of making [`clients.openWindow()`](https://www.w3.org/TR/service-workers/#dom-clients-openwindow) to open the PWA.
+
+A [`WidgetClickEvent`](#widgetclickevent) is an object with the following properties:
+
+* `action` - Always required. This is the primary way to disambiguate events. The names of the events may be part of a standard lifecycle or app-specific, based on any [`WidgetAction` that has been defined](#Defining-a-WidgetAction).
+* `data` - Always required. This object comprises key/value pairs representing data sent from the [Widget Host](#dfn-widget-host) as part of the event. This could be, for example, the settings values to be saved to the [Widget Instance](#dfn-widget-instance). An empty object if no data is sent.
+* `widget` - Required for widget-specific events. This is a reference to the [`Widget`](#the-widget-object) (if any) associated with the event
+* `instanceId` - Required for widget-specific events. This is the GUID for the specific [Widget Instance](#dfn-widget-instance) (if any) associated with the event.
+* `hostId` - Required for host-specific events. This is the GUID for the specific [Widget Host](#dfn-widget-host) (if any) associated with the event.
+
+```json
+{
+  "action": "login",
+  "widget": { },
+  "instanceId": "{{ GUID }}",
+  "data": { }
+}
+```
+
+You can see a basic example of this in use in [the user login video, above](#user-login). There is a walk through of the interaction following that video, but here’s how the actual [`WidgetClickEvent`](#widgetclickevent) could be handled:
+
+```js
+self.addEventListener('widgetclick', (event) => {
+
+  const action = event.action;
+
+  // If user is being prompted to login 
+  if ( action == "login" ) {
+    // open a new window to the login page & focus it
+    clients
+        .openWindow( "/login?from=widget" )
+        .then(windowClient => 
+          windowClient ? windowClient.focus() : null
+        );
+  }
+
+});
+```
+
+The <b id="creating-a-WidgetClickEvent">steps for creating a WidgetClickEvent</b> with Widget Service Message <var>message</var> are as follows:
+
+1. Let <var>event</var> be a new WidgetClickEvent (inherits [`WidgetEvent`](#widgetevent)).
+1. Run the following steps in parallel:
+   1. Set <var>event["data"]</var> to a new object.
+   1. Set <var>event["action"]</var> to the user action bound to <var>message</var>.
+   1. Let <var>instanceId</var> be the id of the Widget Instance bound to <var>message</var>.
+   1. Set <var>event["instanceId"]</var> to <var>instanceId</var>.
+   1. Let <var>widget</var> be the result of running the algorithm specified in [getByInstanceId(instanceId)](#widgetsgetbyinstanceid) with <var>instanceId</var>.
+   1. Set <var>event["widget"]</var> to <var>widget</var>.
+   1. If <var>message</var> includes bound data,
+      1. Set <var>event["data"]</var> to the data value bound to <var>message</var>.
+1. Return <var>event</var>
 
 ## Proactively Updating a Widget
 
@@ -1087,17 +1087,24 @@ self.addEventListener("widgetclick", function(event) {
   const host_id = event.hostId;
   const widget = event.widget;
   const instance_id = event.instanceId;
-    
+  
+  // Custom Actions
   switch (action) {
 
-    // Custom Actions
     case "refresh":
       console.log("Asking a widget to refresh itself");
       event.waitUntil(
         updateInstance( instance_id, widget )
       );
       break;
-
+    case "login":
+      // open a new window to the login page & focus it.
+      clients
+        .openWindow( "/login?from=widget" )
+        .then(windowClient => 
+          windowClient ? windowClient.focus() : null
+        );
+      break;
     // other cases
   }
 
