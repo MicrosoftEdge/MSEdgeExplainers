@@ -707,6 +707,8 @@ A [`WidgetEvent`](#widgetevent) is an object with the following properties:
 * `instanceId` - Required for widget-specific events. This is the GUID for the specific [Widget Instance](#dfn-widget-instance) (if any) associated with the event.
 * `hostId` - Required for host-specific events. This is the GUID for the specific [Widget Host](#dfn-widget-host) (if any) associated with the event.
 
+#### A Sample [`WidgetEvent`](#widgetevent) Object
+
 ```json
 {
   "widget": { },
@@ -828,6 +830,8 @@ A [`WidgetClickEvent`](#widgetclickevent) is an object with the following proper
 * `widget` - Required for widget-specific events. This is a reference to the [`Widget`](#the-widget-object) (if any) associated with the event
 * `instanceId` - Required for widget-specific events. This is the GUID for the specific [Widget Instance](#dfn-widget-instance) (if any) associated with the event.
 * `hostId` - Required for host-specific events. This is the GUID for the specific [Widget Host](#dfn-widget-host) (if any) associated with the event.
+
+#### A Sample [`WidgetClickEvent`](#widgetclickevent) Object
 
 ```json
 {
