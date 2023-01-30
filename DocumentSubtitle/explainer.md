@@ -1,7 +1,5 @@
  # HTML Document Subtitle (Fix installed web app title bar text)
 
-Consider all sections required unless otherwise noted.
-
 Authors: [Diego Gonzalez](https://github.com/diekus)
 
 ## Status of this Document
@@ -20,7 +18,7 @@ This document is a starting point for engaging the community and standards bodie
 
 ![image of twitter installed web app with a long text in the title bar](webAppTitleBar1.png)
 
-*We want to fix the text that appears on the title bar by giving developers control over the information that appears there&. Generally, applications utilize the text in the title bar of the window to specify the application's name and any other contextual information that is important to identify the window in the corresponding's platform UX. As an example, most word processors and image editors would display the name of the application and the name of the document or file that is being edited.
+We want to fix the text that appears on the title bar by giving developers control over the information that appears there. Generally, applications utilize the text in the title bar of the window to specify the application's name and any other contextual information that is important to identify the window in the corresponding's platform UX. As an example, most word processors and image editors would display the name of the application and the name of the document or file that is being edited.
 
 To fix this situation, we require a bucket to store this contextual information. Considering that this information is generally different from what is displayed in the page's title, we propose adding a subtitle definition that can be used for this specific purpose. The source of the title bar in installed web apps would be composed of the app's name as defined in the manifest, and an additional subtitle/detail from a meta tag in the head of the document.
 
@@ -72,6 +70,7 @@ If you believe your explainer may have non-trivial security implications, please
 
 * Using a field on the manifest to store the contextual information. This alternative would require constant reading and writing to an external (manifest) file and doesn't necessarily fit semantically with the context of the application's state.
 * Let the developer update the value of the title once the web application is installed. This might be problematic as  many websites still rely on the title (generally displayed in the tab on the browser) for when there is new notifications or certain events on the page. For instance, messaging apps can update the title every time a new message comes in to show number of unread messages. Additionally, in the case that a title didn't change on a web site, once a PWA is installed, if the user opens the web app in the browser through the `...` menu the original/current state title would have to be restored.
+* Use a media query to determine when an app is running in `standalone` mode to change the text that appears on the title of the document: This approach ahas several disadvantages, starting by having limited accessibility to the contextual information when you comparing to having it in a defiend bucket. It also requires JavaScript to match a media query and change the name of the document's title. This in return means the title must be stored or lost to make space for the new contextual subtitle.
            
 ## Open Questions
 
