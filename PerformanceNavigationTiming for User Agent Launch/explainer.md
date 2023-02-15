@@ -73,7 +73,7 @@ workerStart: 125.90000003576279
 
 Despite the variety of performance measurements available through the current API, it's difficult to discern from the `NavigationType` whether the measurements reflect those of a regular navigation under normal browsing, or of one where the browser is in a non-optimal performance state. As a launch is one of the most heavyweight performance scenarios commonly encountered in typical browser usage, and as application performance under this scenario does not reflect that of a normal navigation, our proposal seeks to create a new value for the `NavigationType` enum to differentiate this condition from others in measurements of web application performance.
 
-Modifying the `NavigationType` to include state for a user agent launch (i.e. `useragent_launch`) will enable engineers to determine whether a given measurement is taken from a launch scenario, enabling greater differentiation of application performance from browser performance in scenarios where the browser engine is launched and terminated frequently (e.g. in Electron apps, system webviews, or other application scenarios where the browser is relatively short-lived or commonly launched from scratch). The new enum definition will appear as follows:
+Modifying the `NavigationType` to include state for a user agent launch (i.e. `navigate_during_user_agent_launch`) will enable engineers to determine whether a given measurement is taken from a launch scenario, enabling greater differentiation of application performance from browser performance in scenarios where the browser engine is launched and terminated frequently (e.g. in Electron apps, system webviews, or other application scenarios where the browser is relatively short-lived or commonly launched from scratch). The new enum definition will appear as follows:
 
 ```javascript
 enum NavigationType {
@@ -81,11 +81,11 @@ enum NavigationType {
     "reload",
     "back_forward",
     "prerender",
-    "useragent_launch", <== New
+    "navigate_during_user_agent_launch", <== New
 };
 ``` 
 
-There is some concern this might break some pages that assume the `NavigationType` enum is fixed, and that the new `"useragent_launch"` navigation type will take away some portion of traffic that is currently classified as `"navigate"`. However, since the enum has already been expanded before to introduce `"prerender"`, we expect that web developers may have already adjusted the way they capture performance metrics. Furthermore, we expect this change to mostly impact web applications which commonly load during browser launch. For others, it is likely that they will observe no changes in their metrics since most navigation types will continue to be `"navigate"`.
+There is some concern this might break some pages that assume the `NavigationType` enum is fixed, and that the new `"navigate_during_user_agent_launch"` navigation type will take away some portion of traffic that is currently classified as `"navigate"`. However, since the enum has already been expanded before to introduce `"prerender"`, we expect that web developers may have already adjusted the way they capture performance metrics. Furthermore, we expect this change to mostly impact web applications which commonly load during browser launch. For others, it is likely that they will observe no changes in their metrics since most navigation types will continue to be `"navigate"`.
 
 An example of how a web application might use this:
 
@@ -115,7 +115,7 @@ All types defined in a `NavigationType` have a correlation to an HTML [historyHa
 In the text of the specification, we propose adding a new `historyHandling` type called **`launch`** that can be used in the _optional_ `historyHandling` parameter instead of the value `default` by default in the case where the browser is navigating from a cold-start scenario. We would propose ammending Step #6 to read:
 > If historyHandling is "default" **_or "launch"_**, and any of the following are true:
 
-Because the history handling property is marked as optional, this should make the new type interoperable with the default value of `default`. This would allow us to map the `useragent_launch` type to the `launch` type specified in HTML.
+Because the history handling property is marked as optional, this should make the new type interoperable with the default value of `default`. This would allow us to map the `navigate_during_user_agent_launch` type to the `launch` type specified in HTML.
 
 ## Privacy and Security Considerations
 
