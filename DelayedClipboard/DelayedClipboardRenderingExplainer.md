@@ -90,29 +90,6 @@ No considerable privacy concerns are expected, but we welcome community feedback
 
 This feature works with mandatory data types and custom formats, it does not change the sanitization (or lack thereof) of the clipboard's payload. Websites need to explicitly state which formats will be delayed rendered and provide functions to do so, legacy apps will not suffer any changes. A user gesture requirement (transient user activation) and existing async clipboard API security measures (focus document, permission prompts) will remain as they are.
 
-## IDL changes
-
-`clipboard_delayed_callback.idl` to store the callbacks to generate the async data.
-```
-callback ClipboardDelayedCallback = Promise<Blob>();
-```
-`clipboard_item.idl` added an additional constructor (if the first proposal ends up being chosen to prototype).
-```
-[
-  SecureContext,
-  Exposed=Window
-] interface ClipboardItem {
-  [RaisesException] constructor(record<DOMString, Promise<Blob>> items);
-  [RaisesException] constructor(record<DOMString, Promise<Blob>> items, record<DOMString, ClipboardDelayedCallback> callbacks);
-  readonly attribute FrozenArray<DOMString> types;
-
-  [
-    CallWith=ScriptState,
-    RaisesException
-  ] Promise<Blob> getType(DOMString type);
-};
-```
-
 ## Open Questions
 
 * What should happen if the user attempts to paste the content in a target application, but they have already closed the tab where the async data is supposed to be produced? We’ve identified three alternatives to address this issue:
@@ -126,6 +103,9 @@ callback ClipboardDelayedCallback = Promise<Blob>();
   * Generate the clipboard's payload. This would be consistent with the on-demand behavior of delayed clipboard rendering and with current behavior of `getType()`.
   * Return an empty blob. This would be a very strict interpretation of only producing clipboard data when a target application needs it via a paste command.
 * Should we provide a way for authors to update the callbacks of the delayed rendered formats? Consider the following scenario: By the time a user tries pasting the content of the clipboard, the callback function needs data that is no longer available and/or has changed.
+* Feature detection: Is it relevant to web authors to know whether the browser supports delayed rendering? If yes, how should we let them know?
+  * Programatically, via an API.
+  * Other media (such as articles, blog posts, etc.)
 
 ## Related discussion
 
