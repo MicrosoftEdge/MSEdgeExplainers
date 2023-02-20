@@ -24,6 +24,7 @@ To fix this situation, we require a bucket to store this contextual information.
 
 ## Goals
 * Align the UI of installed web apps to that of platform specific applications.
+* Provide better accessibility regarding information about the context of a web app.
 
 ## Non-Goals
 * **Provide advanced/custom title bar compositions**: APIs like `Window Controls Overlay` should be used to create custom title bar configurations.
@@ -39,11 +40,11 @@ This will allow developers 2 cases for the standard title bar.
 
 ## Proposed Solution
 
-As defined in the [HTML specification](https://html.spec.whatwg.org/multipage/semantics.html#the-meta-element), “meta element represents various kinds of metadata that cannot be expressed using the title, base, link, style, and script elements”. This is the case for the type of information we want to convey in the particular and novel case of text in the title bar of an installed web app. Following the guidelines of [usage for own metadata](https://html.spec.whatwg.org/multipage/semantics.html#other-metadata-names) names, and after consulting the [WHATWG Wiki MetaExtensions page](https://wiki.whatwg.org/wiki/MetaExtensions) to check for comparable existing values, the proposed tag would look like the following:
+As defined in the [HTML specification](https://html.spec.whatwg.org/multipage/semantics.html#the-meta-element), “meta element represents various kinds of metadata that cannot be expressed using the title, base, link, style, and script elements”. This is the case for the type of information we want to convey in the particular and novel case of text in the title bar of an installed web app/tab in browser. Following the guidelines of [usage for own metadata](https://html.spec.whatwg.org/multipage/semantics.html#other-metadata-names) names, there can be processing requirements for the UA so a new [standard name](https://html.spec.whatwg.org/#standard-metadata-names) needs to be added to the existing list. 
 
 `<meta name="subtitle" content="additional/secondary text to go in the title bar">`
 
-This requires to propose an extension to the repository. This also requires to add an IDL attribute to the WHATWG spec to reflect and expose the subtitle to the document.
+This also requires to add an IDL attribute to the WHATWG spec to reflect and expose the subtitle to the document.
 
 `document.subtitle`
 
