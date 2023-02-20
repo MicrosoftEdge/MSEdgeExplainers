@@ -1,4 +1,4 @@
- # HTML Document Subtitle (Fix installed web app title bar text)
+ # HTML Document Subtitle
 
 Authors: [Diego Gonzalez](https://github.com/diekus)
 
