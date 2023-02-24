@@ -4,7 +4,7 @@
 
 - [Adolf Daniel](https://github.com/adolfdaniel)
 - [Hoch Hochkeppel](https://github.com/mhochk)
-- Sohum Chatterjee
+- [Sohum Chatterjee](https://github.com/sohchatt)
 
 ## Status of this Document
 
