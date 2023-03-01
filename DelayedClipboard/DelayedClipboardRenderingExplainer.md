@@ -33,9 +33,13 @@ Leverage the existing Async Clipboard API to allow websites exchange large data 
 * Modify the Data Transfer API
 * Replace the current functionality of the Async Clipboard API, as delayed clipboard rendering would be used at the discretion of web authors and only in the formats of their choosing.
 
-## Proposed solution: Map of MIME type to promise in `ClipboardItem` constructor
+## Proposed solution: Use the existing `ClipboardItem` constructor to delay the promise to blob
 
-With this proposal, we will be adding a new argument to the `ClipboardItem` constructor which takes a map of a MIME type to a callback. Authors should still be able to produce some formats immediately, so they may define the usual map with a MIME type as the key and a Blob as the value for formats that they don’t want to be delayed rendered. An example is shown below:
+In this solution, user agents would decide to adopt a delayed clipboard rendering approach for one or all formats in a `ClipboardItem`. Because we're not changing the current clipboard API, web authors are not directly in control of which formats to delay and which formats to produce immediately. However, web authors would notice the difference in performance particularly in payloads that are expensive to generate.
+
+## Considered alternative 1: Map of MIME type to promise in `ClipboardItem` constructor
+
+An alternative to this proposal is to add a new argument to the `ClipboardItem` constructor which takes a map of a MIME type to a callback. Authors should still be able to produce some formats immediately, so they may define the usual map with a MIME type as the key and a Blob as the value for formats that they don’t want to be delayed rendered. An example is shown below:
 
 ```js
 const textInput = '<style>p {color:blue}</style><p>Hello World</p>';
@@ -60,9 +64,9 @@ function generateExpensiveCustomFormatBlob() {
 }
 ```
 
-## Considered alternative: Map of MIME type to promise in new method
+## Considered alternative 2: Map of MIME type to promise in new method
 
-An alternative to this is to use a new method, called `addDelayedWriteCallback`, that takes in a map of formats to callbacks. As the the `ClipboardItem` constructor remains the same, web authors that want to adopt delayed clipboard rendering in their existing web applications will be able to move the generation of data to the callbacks map and pass it to `addDelayedWriteCallback`, without needing to change their existing `ClipboardItem` constructor. If the web author doesn't provide a delayed rendering callback or data, then an error is thrown in the source application and the write operation fails. An example of this proposal is shown below:
+Another alternative to this is to use a new method, called `addDelayedWriteCallback`, that takes in a map of formats to callbacks. As the the `ClipboardItem` constructor remains the same, web authors that want to adopt delayed clipboard rendering in their existing web applications will be able to move the generation of data to the callbacks map and pass it to `addDelayedWriteCallback`, without needing to change their existing `ClipboardItem` constructor. If the web author doesn't provide a delayed rendering callback or data, then an error is thrown in the source application and the write operation fails. An example of this proposal is shown below:
 
 ```js
 const delayedFunctionsMap = {
