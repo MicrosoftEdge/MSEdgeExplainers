@@ -104,11 +104,11 @@ side panel by using Client Hints. The developer can use the `Sec-CH-UA` header
 or `navigator.userAgentData.brands` to detect if the web application is being
 displayed in the side panel.
 
-    ```javascript
-    if (navigator.userAgentData.brands.some(brand => brand.brand === 'EdgeSidePanel')) {
-      // The web application is being displayed in the side panel.
-    }
-    ```
+```javascript
+if (navigator.userAgentData.brands.some(brand => brand.brand === 'EdgeSidePanel')) {
+  // The web application is being displayed in the side panel.
+}
+```
 
 ## Alternatives Considered
 
