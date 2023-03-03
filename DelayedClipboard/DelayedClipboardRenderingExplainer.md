@@ -11,7 +11,7 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-Delayed clipboard rendering is the ability to delay the generation of a particular payload until it is needed by the target applications. It is useful when source applications support several clipboard formats, some or all of which are time-consuming to render. Delayed clipboard rendering enables web authors to specifically mark delayed rendered payloads and avoid producing them if they’re not requested by target applications. Currently, delayed rendering is supported in Linux, Mac OS X, and Windows.
+Delayed clipboard rendering is the ability to delay the generation of a particular payload until it is needed by the target applications. It is useful when source applications support several clipboard formats, some or all of which are time-consuming to render. Currently, delayed rendering is supported in Linux, Mac OS X, and Windows.
 
 ## Background
 
