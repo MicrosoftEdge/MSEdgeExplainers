@@ -22,7 +22,7 @@ Quoting from the [editor's draft](https://w3c.github.io/clipboard-apis/#clipboar
 
 A clipboard item may have multiple representations described by a MIME type. A target application, usually in response to the user performing a paste operation, will read one or more representations from the clipboard. The source application typically does not know where the user intends to paste the content at the time of copy, so the author must produce several formats when writing to the clipboard to prepare for many possible target applications. The generation of all representations may take enough time that it is noticeable to the user and it is unlikely that the target application will need all produced representations.
 
-The ability to delay the generation of clipboard data until it is needed is important for applications that support data types that are expensive to generate. Source applications would be able to indicate which representations they support for a clipboard item and wait until the target application attempts to access a particular representation before generating the data for it.
+The ability to delay the generation of clipboard data until it is needed is important for applications that support data types that are expensive to generate. Source applications would be able to wait until the target application attempts to access a particular representation before generating the data for it.
 
 ## Goal
 
