@@ -31,7 +31,6 @@ Leverage the existing Async Clipboard API to allow websites exchange large data 
 ## Non-Goals
 
 * Modify the Data Transfer API
-* Replace the current functionality of the Async Clipboard API, as delayed clipboard rendering would be used at the discretion of web authors and only in the formats of their choosing.
 
 ## Proposed solution: Use the existing `ClipboardItem` constructor to delay the promise to blob
 
@@ -82,7 +81,7 @@ navigator.clipboard.write([clipboardItemInput]);
 
 Similarly to the proposed solution example, `generateExpensiveImageBlob` and `generateExpensiveHTMLBlob` return a [Blob](https://w3c.github.io/FileAPI/#blob-section) that should have the content that will be written to the clipboard and its type.
 
-The disadvantage of the latter approach is that it adds overhead to the web author, as it is a new function for them to learn. **As a result, we think that adding a new argument to the `ClipboardItem` constructor is the preferred solution.**
+The disadvantage of the latter approach is that it adds overhead to the web author, as it is a new function for them to learn.
 
 ## Privacy and Security Considerations
 
@@ -92,7 +91,7 @@ No considerable privacy concerns are expected, but we welcome community feedback
 
 ### Security
 
-This feature works with mandatory data types and custom formats, it does not change the sanitization (or lack thereof) of the clipboard's payload. Websites need to explicitly state which formats will be delayed rendered and provide functions to do so, legacy apps will not suffer any changes. A user gesture requirement (transient user activation) and existing async clipboard API security measures (focus document, permission prompts) will remain as they are.
+This feature works with mandatory data types and custom formats, it does not change the sanitization (or lack thereof) of the clipboard's payload. A user gesture requirement (transient user activation) and existing async clipboard API security measures (focus document, permission prompts) will remain as they are.
 
 ## Open Questions
 
