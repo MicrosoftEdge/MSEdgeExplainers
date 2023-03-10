@@ -1,7 +1,7 @@
 
 # Delayed Clipboard Rendering
 
-Authors: [Ana Sollano Kim](https://github.com/anaskim), [Anupam Snigdha](https://github.com/snianu)
+Authors: [Ana Sollano Kim](https://github.com/anaskim), [Anupam Snigdha](https://github.com/snianu), [Sanket Joshi](https://github.com/sanketj)
 
 ## Status of this Document
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -20,52 +20,107 @@ In web applications, the clipboard can be accessed via the Data Transfer and Asy
 Quoting from the [editor's draft](https://w3c.github.io/clipboard-apis/#clipboard-item-interface):
 > A clipboard item is conceptually data that the user has expressed a desire to make shareable by invoking a "cut" or "copy" command. A clipboard item serves two purposes. First, it allows a website to read data copied by a user to the system clipboard. Second, it allows a website to write data to the system clipboard.
 
-A clipboard item may have multiple representations described by a MIME type. A target application, usually in response to the user performing a paste operation, will read one or more representations from the clipboard. The source application typically does not know where the user intends to paste the content at the time of copy, so the author must produce several formats when writing to the clipboard to prepare for many possible target applications. The generation of all representations may take enough time that it is noticeable to the user and it is unlikely that the target application will need all produced representations.
+A clipboard item may have multiple representations described by a MIME type. A target application, usually in response to the user performing a paste operation, will read one or more representations from the clipboard. The source application typically does not know where the user intends to paste the content at the time of copy, so the author must produce several formats when writing to the clipboard to prepare for many possible target applications. The generation of some or all representations may take enough time that it is noticeable to the user and it is unlikely that the target application will need all produced representations.
 
-The ability to delay the generation of clipboard data until it is needed is important for applications that support data types that are expensive to generate. Source applications would be able to wait until the target application attempts to access a particular representation before generating the data for it.
+The ability to delay the generation of clipboard data until it is needed is important for applications that support data types that are _expensive to generate_. In this context, _expensive to generate_ refers to the time and resources needed to process and produce the clipboard payload in the client side. Web applications may need to make calls to the server, encode or decode a large amount of data, serialize HTML, produce web custom formats, etc. in order to provide a high fidelity copy/paste experience to the user. Source applications would be able to wait until the target application attempts to access a particular representation before generating data for it, as opposed to producing all formats at once when attempting to write to the clipboard.
 
 ## Goal
 
-Leverage the existing Async Clipboard API to allow websites exchange large data payloads and improve performance by only producing clipboard payload when it’s needed by target applications.
+Leverage the existing Async Clipboard API to allow web applications to exchange large data payloads and improve their performance by only producing clipboard payload when it’s needed by target applications.
 
 ## Non-Goals
 
 * Modify the Data Transfer API
 
-## Proposed solution: Use the existing `ClipboardItem` constructor to delay the promise to blob
+## Proposed solution: Add a callback to `ClipboardItemData`
 
-In this solution, user agents would decide to adopt a delayed clipboard rendering approach for one or all formats in a `ClipboardItem`. Because we're not changing the current clipboard API, web authors are not directly in control of which formats to delay and which formats to produce immediately. However, web authors would notice the difference in performance particularly in payloads that are expensive to generate.
+In this proposal, web authors decide which formats they want to delay render and which ones they want to provide immediately in the `ClipboardItem` constructor. The advantages of this approach is that it provides better developer ergonomics and it's easier to differentiate formats that will be written immediately to the clipboard from those that, at the web author's discretion, will be produced on-demand with delayed rendering.
 
-## Considered alternative 1: Map of MIME type to promise in `ClipboardItem` constructor
-
-An alternative to this proposal is to add a new argument to the `ClipboardItem` constructor which takes a map of a MIME type to a callback. Authors should still be able to produce some formats immediately, so they may define the usual map with a MIME type as the key and a Blob as the value for formats that they don’t want to be delayed rendered. An example is shown below:
+An example of the usage is shown below:
 
 ```js
-const textInput = '<style>p {color:blue}</style><p>Hello World</p>';
-const blobInput = new Blob([textInput], {type: 'text/html'});
-const delayedCallbacksMap = {
-  'image/png': generateExpensiveImageBlob,
-  'web application/x-custom-format-clipboard-format': generateExpensiveCustomFormatBlob
-};
-const clipboardItemInput = new ClipboardItem({'text/html': blobInput}, delayedCallbacksMap);
+const textBlob = new Blob(['Hello, World!'], {type: 'text/plain'});
+const clipboardItemInput = new ClipboardItem({
+                            'text/plain': Promise.resolve(textBlob), 
+                            'web application/x-custom-format-clipboard-format': Promise.resolve(generateExpensiveCustomFormatBlob),
+                           });
 navigator.clipboard.write([clipboardItemInput]);
 ```
-
-In the example, the functions `generateExpensiveImageBlob()` and `generateExpensiveCustomFormatBlob()` return a [Blob](https://w3c.github.io/FileAPI/#blob-section). The blob constructor takes in the content that will be written to the clipboard and its type.
-
+where the callback `generateExpensiveCustomFormatBlob` is defined as follows:
 ```js
 function generateExpensiveCustomFormatBlob() {
+  // TODO: Provide an example on how a custom format can be expensive to generate.
   var inputData = ...;
-
-  // Produce expensive input data.
-
-  return new Blob([inputData], { type: 'web application/x-custom-format'});
+  return new Blob([inputData], {type: 'web application/x-custom-format'});
 }
 ```
+In this example, plain text is written immediately to the clipboard, while the custom format is delayed rendered. `generateExpensiveCustomFormatBlob` returns a [Blob](https://w3c.github.io/FileAPI/#blob-section). The blob constructor takes in the content that will be written to the clipboard and its type.
+
+### IDL changes to `ClipboardItemData`
+
+```
+typedef (DOMString or Blob) ClipboardItemValue;
+callback ClipboardItemValueCallback = ClipboardItemValue();
+typedef Promise<(ClipboardItemValue or ClipboardItemValueCallback)> ClipboardItemData;
+
+[SecureContext, Exposed=Window]
+interface ClipboardItem {
+  constructor(record<DOMString, ClipboardItemData> items,
+              optional ClipboardItemOptions options = {});
+
+  readonly attribute PresentationStyle presentationStyle;
+  readonly attribute FrozenArray<DOMString> types;
+
+  Promise<Blob> getType(DOMString type);
+};
+```
+
+## Considered alternative 1: Map of MIME type to callback in `ClipboardItem` constructor
+
+An alternative to our proposal is to add a new argument to the `ClipboardItem` constructor which takes a map of a MIME type to a callback. Authors should still be able to produce some formats immediately, so they may define the usual map with a MIME type as the key and a Blob as the value for formats that they don’t want to be delayed rendered. The disadvantage of this approach is that web authors may need to provide redundant format information to the callback map, which can also create confusion to UAs if the same format(s) appear(s) in both the promise `ClipboardItem` map and callback map. An example is shown below:
+
+```js
+const textBlob = new Blob(['Hello, World!'], {type: 'text/plain'});
+const delayedCallbacksMap = {
+  'web application/x-custom-format-clipboard-format': generateExpensiveCustomFormatBlob
+};
+const clipboardItemInput = new ClipboardItem({'text/plain': textBlob}, delayedCallbacksMap);
+navigator.clipboard.write([clipboardItemInput]);
+```
+where the callback `generateExpensiveCustomFormatBlob` is defined as follows:
+```js
+function generateExpensiveCustomFormatBlob() {
+  // TODO: Provide an example on how a custom format can be expensive to generate.
+  var inputData = ...;
+  return new Blob([inputData], {type: 'web application/x-custom-format'});
+}
+```
+Similarly to the example in the proposed solution, plain text is written immediately to the clipboard, while the custom format is delayed rendered. `generateExpensiveCustomFormatBlob` returns a [Blob](https://w3c.github.io/FileAPI/#blob-section). The blob constructor takes in the content that will be written to the clipboard and its type.
+
+### IDL changes to `ClipboardItem`
+
+```
+typedef (DOMString or Blob) ClipboardItemValue;
+callback ClipboardDelayedCallback = ClipboardItemValue();
+typedef Promise<ClipboardItemValue> ClipboardItemData;
+
+[SecureContext, Exposed=Window]
+interface ClipboardItem {
+  constructor(record<DOMString, ClipboardItemData> items,
+              record<DOMString, ClipboardDelayedCallback> callbacks,
+              optional ClipboardItemOptions options = {};
+
+  readonly attribute PresentationStyle presentationStyle;
+  readonly attribute FrozenArray<DOMString> types;
+
+  Promise<Blob> getType(DOMString type);
+};
+```
+
 
 ## Considered alternative 2: Map of MIME type to promise in new method
 
-Another alternative to this is to use a new method, called `addDelayedWriteCallback`, that takes in a map of formats to callbacks. As the the `ClipboardItem` constructor remains the same, web authors that want to adopt delayed clipboard rendering in their existing web applications will be able to move the generation of data to the callbacks map and pass it to `addDelayedWriteCallback`, without needing to change their existing `ClipboardItem` constructor. If the web author doesn't provide a delayed rendering callback or data, then an error is thrown in the source application and the write operation fails. An example of this proposal is shown below:
+Another alternative to this is to use a new method, called `addDelayedWriteCallback`, that takes in a map of formats to callbacks. As the `ClipboardItem` constructor remains the same, web authors that want to adopt delayed clipboard rendering in their web applications will be able to move the generation of data to the callbacks map and pass it to `addDelayedWriteCallback`, without needing to change the existing `ClipboardItem` constructor. If the web author doesn't provide a delayed rendering callback or data, then an error is thrown in the source application and the write operation fails. The disadvantages of this approach are that it adds overhead to the web author (it is a new function for them to learn) and it can create the same confusion as the first considered alternative when having the same format(s) repeated in both the `ClipboardItem` constructor and in `addDelayedWriteCallback`'s map. An example of this proposal is shown below:
 
 ```js
 const delayedFunctionsMap = {
@@ -78,10 +133,6 @@ const blobInput2 = new Blob([], {type: 'text/html'});
 const clipboardItemInput = new ClipboardItem({['image/png']: blobInput1, ['text/html']: blobInput2,});
 navigator.clipboard.write([clipboardItemInput]);
 ```
-
-Similarly to the proposed solution example, `generateExpensiveImageBlob` and `generateExpensiveHTMLBlob` return a [Blob](https://w3c.github.io/FileAPI/#blob-section) that should have the content that will be written to the clipboard and its type.
-
-The disadvantage of the latter approach is that it adds overhead to the web author, as it is a new function for them to learn.
 
 ## Privacy and Security Considerations
 
