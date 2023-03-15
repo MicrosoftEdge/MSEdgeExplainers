@@ -17,7 +17,7 @@ This document is a starting point for engaging the community and standards bodie
 ## Introduction
 When a user agent first launches (a "cold start" scenario), it must perform many expensive initialization tasks that compete for resources on the system. Consequently, web applications may suffer from bimodal distribution in page load performance. 
 
-Content they attempt to load will be in competition with other initialization work. This makes it difficult to detect if performance issues exist within web applications themselves, or because of a user-agent-generated condition of high resource contention. This is particularly a pain point for pinned PWAs (Progressive Web Apps) that will often require a cold start of the user agent, and teams we have worked with have been surprised by the tails in their dashboards. Without more information, it is challenging for developers to understand if (and when) their applications may be misbehaving or are simply being loaded in a contended period. To address this, we propose adding new information to existing Web Performance APIs. 
+Content they attempt to load will be in competition with other initialization work. This makes it difficult to detect if performance issues exist within web applications themselves, or because of a user-agent-generated condition of high resource contention. This is particularly a pain point for pinned PWAs (Progressive Web Apps) that will often require a cold start of the user agent, and teams we have worked with have been surprised at the difference between real-world dashboard metrics and what they observe in page profiling tools. Without more information, it is challenging for developers to understand if (and when) their applications may be misbehaving or are simply being loaded in a contended period. To address this, we propose adding new information to existing Web Performance APIs. 
 
 [Performance Navigation Timing](https://w3c.github.io/navigation-timing/#dom-performancenavigationtiming) provides a variety of performance measurements. A typical response for `performance.getEntriesByType("navigation")` will produce something like:
 
@@ -79,14 +79,16 @@ The proposed changes in this document aim to enable web application developers t
 
 To enable developers to discern if the page load occurs during a non-optimal performance state, we will add a new ‘systemEntropy’ field to the PerformanceNavigationTiming struct. This would be a new enum representing the state of the user agent at the time the navigation was started.  
 
-```enum NavigationEntropy { 
+```javascript
+enum NavigationEntropy { 
     "high", 
     "low" 
 }; 
 ```
 The payload of a performance.getEntriesByType("navigation") call would look like: 
 
-```connectEnd: 126.19999998807907 
+```javascript
+connectEnd: 126.19999998807907 
 connectStart: 126.19999998807907 
 <snip> 
 serverTiming: [] 
@@ -99,7 +101,8 @@ unloadEventStart: 0
 ```
 An example of how a web application might use this: 
 
-```const navigationEntries = window.performance.getEntriesByType('navigation'); 
+```javascript
+const navigationEntries = window.performance.getEntriesByType('navigation'); 
 let navigationType = 'none';  
 if (navigationEntries.length > 0) {  
     const navigationEntry = navigationEntries[0];  
@@ -119,7 +122,8 @@ This solution could also be easily extended to other performance structures if s
 
 One considered proposal was to create a new value for the NavigationType enum to differentiate navigations during launch from others in measurements of web application performance. Launch was specifically selected as that is the most common use case. The new enum definition will appear as follows: 
 
-```enum NavigationType { 
+```javascript
+enum NavigationType { 
     "navigate", 
     "reload", 
     "back_forward", 
@@ -130,7 +134,8 @@ One considered proposal was to create a new value for the NavigationType enum to
 
 The payload of a performance.getEntriesByType("navigation") call would look like: 
 
-```connectEnd: 126.19999998807907 
+```javascript
+connectEnd: 126.19999998807907 
 connectStart: 126.19999998807907 
 <snip> 
 transferSize: 300 
@@ -142,7 +147,8 @@ workerStart: 125.90000003576279
 
 An example of how a web application might use this: 
 
-```const navigationEntries = window.performance.getEntriesByType('navigation'); 
+```javascript
+const navigationEntries = window.performance.getEntriesByType('navigation'); 
 let navigationType; 
 if (navigationEntries.length > 0) { 
     const navigationEntry = navigationEntries[0]; 
@@ -160,7 +166,8 @@ In this proposal, we would add a new type to performance.getEntriesByType, to hi
 
 For example, if navigation occurred during a cold launch of the browser, then a PerformanceNavigationTiming object would be returned by both calls: 
 
-```const navigationEntries = window.performance.getEntriesByType('navigation'); 
+```javascript
+const navigationEntries = window.performance.getEntriesByType('navigation'); 
 const navigationUnderLoadEntries = window.performance.getEntriesByType('navigation_under_load'); 
 ```
 
