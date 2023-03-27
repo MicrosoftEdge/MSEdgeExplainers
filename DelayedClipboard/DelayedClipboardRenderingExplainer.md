@@ -32,6 +32,22 @@ Leverage the existing Async Clipboard API to allow web applications to exchange 
 
 * Modify the Data Transfer API
 
+## Scenarios
+
+Here are couple of scenarios where we think this feature would be useful:
+
+### Scenario 1: User copies cells from the native Excel App
+
+With just text in the cells, we see 22 different formats on the clipboard. Native Excel uses delayed clipboard rendering, so we don’t have the data for all the formats in the clipboard. The data for a particular format gets populated when the user pastes the content in an app that supports that format, e.g., when the user pastes this content in MS Paint, image formats are being read from the clipboard, but not the other formats (like CSV, HTML, Link, etc.)
+In this scenario, we can see that since the destination app is not known during copy, the native app must produce all the formats it supports for paste operation. The cost for serialization of data for each of these formats is high, so the app delay renders the most expensive formats (such as XML Spreadsheet, Bitmap, Embed Source, etc.), and populates the common ones that are relatively cheaper to produce (such as text, Unicode Text, etc.)
+
+On the web, we support web custom formats that apps can use to copy/paste high fidelity content between web-to-web, web-to-native or vice versa. These formats are expensive to produce, and only the app that supports the custom format can parse its content, so these formats are ideal candidates for delay rendering.
+
+For Excel online specifically, the model lives on the server, so copy-paste involves data transfer between the client and the server. This leads to a lot of COGS due to server-side processing and large amounts of data being transferred over-the-wire, particularly for large payloads. With delayed clipboard rendering, Excel online app is looking to efficiently handle the web custom formats (that are expensive compared to text & html) when it’s not requested by the target app where the user pastes the content copied from Excel online.
+
+### Scenario 2: Adobe PS use case
+From the PS perspective, copying a layer or object has two behaviors: it creates an internal clipboard copy which remains inside the PS engine (it is also a pointer to immutable data structures and virtual memory backed data) and is used for internal copy and paste, and on web surface now also must create a PNG encoded rendition and pass this to the clipboard API. Delayed clipboard rendering would mean the app could avoid that additional rasterization and encode until the user pastes externally to the app. This also plays into the fact that PS documents can be massive – encoding a 16k x 16k image that is never used is prohibitive to the UX and may cause memory issues to boot. CPU time savings on copy, memory saving would be some of the benefits of delaying rendering of a format.
+
 ## Proposed solution: Add a callback to `ClipboardItemData`
 
 In this proposal, web authors decide which formats they want to delay render and which ones they want to provide immediately in the `ClipboardItem` constructor. The advantages of this approach is that it provides better developer ergonomics and it's easier to differentiate formats that will be written immediately to the clipboard from those that, at the web author's discretion, will be produced on-demand with delayed rendering.
