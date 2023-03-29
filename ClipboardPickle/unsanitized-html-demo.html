@@ -8,21 +8,19 @@
   <script>
     copy.onclick = async () => {
       try {
-        const textInput = '<style>p {color:blue}</style><p>Hello, World!</p>';
-        const blobInput = new Blob([textInput], {type: 'text/html'});
-        const clipboardItem = new ClipboardItem({'text/html': blobInput});
+        const textInput = '<style>p { color: blue; }</style><p>Hello, World!</p>';
+        const blobInput = new Blob([textInput], {type: 'text/html' });
+        const clipboardItem = new ClipboardItem({ 'text/html': blobInput });
         await navigator.clipboard.write([clipboardItem]);
       } catch(e) {
-        console.log(e);
         console.log('Failed to write.');
       }
     };
 
     paste.onclick = async () => {
       try {
-        const clipboardItems = await navigator.clipboard.read({ unsanitized:['text/html'] });
-        const html = clipboardItems[0];
-        const blobOutput = await html.getType('text/html');
+        const clipboardItems = await navigator.clipboard.read({ unsanitized: ['text/html'] });
+        const blobOutput = await clipboardItems[0].getType('text/html');
         const outputHtml = await (new Response(blobOutput)).text();
         console.log(outputHtml);
         document.getElementById('result').innerHTML = outputHtml;
