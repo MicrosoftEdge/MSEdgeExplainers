@@ -1,0 +1,35 @@
+<html>
+<body>
+  <section>
+    <button id="copy"><strong>Copy</strong><br><em>(write to clipboard)</em></button>
+    <button id="paste"><strong>Paste</strong><br><em>(read from clipboard)</em></button>
+  </section>
+  <div id="result"></div>
+  <script>
+    copy.onclick = async () => {
+      try {
+        const textInput = '<style>p {color:blue}</style><p>Hello, World!</p>';
+        const blobInput = new Blob([textInput], {type: 'text/html'});
+        const clipboardItem = new ClipboardItem({'text/html': blobInput});
+        await navigator.clipboard.write([clipboardItem]);
+      } catch(e) {
+        console.log(e);
+        console.log('Failed to write.');
+      }
+    };
+
+    paste.onclick = async () => {
+      try {
+        const clipboardItems = await navigator.clipboard.read({ unsanitized:['text/html'] });
+        const html = clipboardItems[0];
+        const blobOutput = await html.getType('text/html');
+        const outputHtml = await (new Response(blobOutput)).text();
+        console.log(outputHtml);
+        document.getElementById('result').innerHTML = outputHtml;
+      } catch(e) {
+        console.log('Failed to read clipboard.');
+      }
+    };
+  </script>
+  </body>
+</html>
