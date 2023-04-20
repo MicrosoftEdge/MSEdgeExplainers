@@ -105,7 +105,7 @@ or `navigator.userAgentData.brands` to detect if the web application is being
 displayed in the side panel.
 
     ```javascript
-    if (navigator.userAgentData.brands.some(brand => brand.brand === 'EdgeSidePanel')) {
+    if (navigator.userAgentData.brands.some(brand => brand.brand === 'Edge Side Panel')) {
       // The web application is being displayed in the side panel.
     }
     ```
