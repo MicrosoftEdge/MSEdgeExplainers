@@ -14,7 +14,7 @@ This document is a starting point for engaging the community and standards bodie
 The [Digital Goods API](https://wicg.github.io/digital-goods/) allows web applications to get information about their digital products and their user’s purchases managed by a digital store. The user agent abstracts connections to the store and the [Payment Request API](https://www.w3.org/TR/payment-request/) is used to make purchases.
 
 ### Relation to [Digital Goods API](https://wicg.github.io/digital-goods/) proposal
-This explainer contains the extension of standard Digital Goods API to support in app purchase for PWAs in the Microsoft Store.
+This explainer contains the implementation of standard Digital Goods API to support in app purchase for PWAs in the Microsoft Store.
 
 ## Goals
 
@@ -220,7 +220,7 @@ dictionary PurchaseDetails {
 };
 ```
 
-## <dl><dt id="dfn-pre-requests">Prerequisites to use Digital Goods API on Windows</dt><dd>
+## <dt id="dfn-pre-requests">Prerequisites to use Digital Goods API on Windows</dt>
 1. To use Digital Goods API on Windows, you will have to publish your PWA to the Microsoft Store: [Publish a Progressive Web App to the Microsoft Store](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/overview?pivots=store-installer-pwa)
 2. Login to [Partner Center](https://partner.microsoft.com/en-us/dashboard/home) and create Add-ons you want to provide in your PWA, see guidance to [create the add-on in Partner Center](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/create-app-submission?pivots=store-installer-add-on).
 3. Register Digital Goods Origin Trial from: [Microsoft Edge Origin Trials Developer Console](https://developer.microsoft.com/en-us/microsoft-edge/origin-trials/)
