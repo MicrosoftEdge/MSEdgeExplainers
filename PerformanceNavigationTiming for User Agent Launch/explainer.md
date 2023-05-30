@@ -82,7 +82,7 @@ To enable developers to discern if the page load occurs during a non-optimal per
 ```javascript
 enum NavigationEntropy { 
     "high", 
-    "low" 
+    "normal" 
 }; 
 ```
 The payload of a performance.getEntriesByType("navigation") call would look like: 
@@ -114,7 +114,7 @@ if (navigationEntries.length > 0) {
 } 
 ```
 
-This solution could also be easily extended to other performance structures if so desired. It also allows the user agent to decide what high vs low systemEntropy might mean, and potentially extend the enum later providing more granularity for consumers of the API (e.g., ‘medium’ or 'veryHigh’).  
+This solution could also be easily extended to other performance structures if so desired. It also allows the user agent to decide what high vs normal systemEntropy might mean, and potentially extend the enum later providing more granularity for consumers of the API (e.g., ‘medium’ or 'veryHigh’).  
 
 ## Alternative Considered Solutions 
 
