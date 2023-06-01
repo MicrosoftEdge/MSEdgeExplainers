@@ -74,4 +74,4 @@ If you believe your explainer may have non-trivial security implications, please
            
 ## Open Questions
 
-Optional section.
+* The name `subtitle` might be misleading, so there is a possibility of using a more generic name that aligns better with the use of the content. Suggested, `app-title-suffix` and `app-title-custom` work as well. The final value of the meta tag name will likely be different from subtitle.
