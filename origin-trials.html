@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="styles.css" rel="stylesheet" type="text/css"/>
+        <script>
+            class TrialCard extends HTMLElement {
+                constructor() {
+                    super();
+
+                    let template = document.getElementById("trial-card");
+
+                    this.shadow = this.attachShadow({ mode: "open" });                    
+                    this.shadow.appendChild( template.content.cloneNode(true) );
+
+                    // Store references to internal components
+                    this.heading = this.shadow.querySelector('.trial-card__title');
+                    this.explainer = this.shadow.querySelector('.trial-card__explainer');
+                    this.expires = this.shadow.querySelector('.trial-card__expires');
+                    this.badge = this.shadow.querySelector('.trial-card__issue-badge');
+                    this.register = this.shadow.querySelector('.trial-card__registration-button');
+                }
+
+                connectedCallback() {
+                    // Set initial values of elements based on attributes
+                    let heading = this.getAttribute("label");
+                    let explainer = this.getAttribute("explainer");
+                    let expires = this.getAttribute("expires");
+                    let issue = this.getAttribute("issue");
+
+                    this.heading.innerHTML = heading;
+                    this.expires.innerHTML = expires;
+
+                    this.explainer.setAttribute('href', explainer);
+
+                    if (issue != null && issue.length > 0) {
+                        this.badge.setAttribute('href', this.getIssueLink(issue));
+
+                        let img = document.createElement('img');
+                        img.src = this.getIssueBadgeLink(issue);
+
+                        this.badge.appendChild(img)
+                    } else {
+                        this.badge.setAttribute('href', this.getGenericIssueLink(heading));
+
+                        let img = document.createElement('img');
+                        img.src = this.getIssueBadgeLink('OriginTrialFeedback');
+
+                        this.badge.appendChild(img);
+                    }
+                }
+
+                attributeChangedCallback(name, previous, current) {
+                    console.log(`${name} ${previous} ${current}`);
+                }
+
+                getIssueBadgeLink(tag) {
+                    let encoded = encodeURI(tag);
+                    return `https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/${encoded}?label=issues`;
+                }
+
+                getIssueLink(tag) {
+                    let encoded = encodeURI(tag);
+                    let label = tag.replace(' ', '+')
+                    return `https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=${label},OriginTrialFeedback&title=%5B${encoded}%5D+Feedback`
+                }
+
+                getGenericIssueLink(name) {
+                    let encoded = encodeURI(name);
+                    return `https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=OriginTrialFeedback&title=%5B${encoded}%5D+Feedback`;
+                }
+            }
+
+            customElements.define('trial-card', TrialCard)
+        </script>
+    </head>
+    <body>
+        <!-- Web Component Templates -->
+        <template id="trial-card">
+            <style>
+                .trial-card {
+                    display: flex;
+                    align-items: center;
+                    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
+                    padding: 0.5rem 1rem;
+                    justify-content: space-between;
+                    border-top: 3px solid rgb(8, 134, 226);
+                    margin: 0 0 1rem 0;
+                }
+
+                .trial-card__title {
+                    display: block;
+                    line-height: 32px;
+                    font-weight: 600;
+                    flex-grow: 0.75;
+                }
+
+                .trial-card__explainer {
+                    font-weight: 500;
+                    font-style: italic;
+                }
+
+                .trial-card__expires {
+                    display: block;
+                    line-height: 32px;
+                }
+
+                .trial-card__issue-badge {
+                    display: flex;
+                    height: 32px;
+                    line-height: 32px;
+                    align-items: center;
+                }
+
+                .trial-card__issue-badge > img {
+                    height: 20px;
+                }
+
+                .trial-card__registration-button {
+                    height: 32px;
+                    border: none;
+                    background-color: #004b50;
+                    color: #f2f2f2;
+                    padding: 0.5rem 1rem;
+                    cursor: pointer;
+                }
+
+                .trial-card__registration-button:hover {
+                    opacity: 0.85
+                }
+            </style>
+            <div class="trial-card">
+                <span class="trial-card__title"></span>
+                <a class="trial-card__explainer">Explainer</a>
+                <span class="trial-card__expires"></span>
+                <a class="trial-card__issue-badge"></a>
+                <button class="trial-card__registration-button">Register</button>
+            </div>
+        </template>
+        <!-- Site Content -->
+        <header>            
+            <div class="header__section-left">
+                <h1>Microsoft Edge Origin Trials</h1>
+                <p class="header__summary">The Origin Trial system is a way for web developers to connect with browser engineers and the Web standards community, it enables Web developers to experiment in new web platform capabilities and offers a medium where they can continuously provide feedback on various APIs shape, usability and effectiveness after experimenting with them for a limited period of time in real production sites.</p>
+            </div>
+        </header>
+        <main>
+            <section style="background-color: #f0f0f0">
+                <h2>Active Origin Trials</h2>
+    
+                <trial-card label="Web Haptics API" expires="2023-12-31" issue="HapticsDevice API" explainer="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md"></trial-card>
+                <trial-card label="Digital Goods API" expires="2023-08-17" explainer="#"></trial-card>
+            </section>
+        <section>
+            <h2>Getting Started</h2>
+            <h3>Register for an Experiment</h3>
+            <p>Our framework is consistent with [Chrome Origin Trials](https://developers.chrome.com/origintrials/#/trials/active), simply click the `register` button for any of the available experiments in our Origin Trials Developer console, provide your website's origin, and we will instantly generate a token once you agree to our terms and conditions and submit the form.</p>
+
+            <p>There are 2 ways to use the tokens provide in your page:</p>
+
+            <strong>Option 1: Using a &lt;meta&gt; Tag</strong>
+            <p>Add an origin-trial <meta> tag to the head of any page, example:</p>
+
+            <pre><code>
+                &lt;meta http-equiv="origin-trial" content="your-token-gues-here"&gt;
+            </code></pre>
+            
+
+            <strong>Option 2: Using an HTTP Header</strong>
+            Another option is to add `Origin-Trial` to your HTTP server response headers, example:
+
+            <pre><code>
+                Origin-Trial: your-token-goes-here
+            </code></pre>
+
+            <p>Once you have registered your website for an experiment, you will be able to use the experimental API without requiring your beta testers to turn a feature flag in [edge://flags](about://flags).</p>
+
+            <h2>Web Developer Guidelines</h2>
+
+            <h3>Allowed Origins</h3>
+
+            <p>The Edge Origin Trials portal today **only supports SSL Enabled Origins**, websites wanting to register for an experiment must have `HTTPS` properly implemented. However, in future portal releases we are looking to enable more secure origins such as:</p>
+
+            <ul>
+                <li>Localhost: it's going to be possible to register `http://localhost` in experiments, today developer can *enable* the appropriate feature flag in [edge://flags](about://flags).</li>
+                <li>Extensions: it's going to be possible for `extensions://` prefixed origins to enroll in experiments.</li>
+            </ul>
+            
+            <h3>Subdomains, URL Paths and Query Params</h3>
+
+            <p>It is possible to only enroll a specific subdomain such as `https://dev.example.com` or an origin with wild-card match to all it's subdomains by answering *Yes* to the "Do you need to match all subdomains for the provided origin?" question in the [Microsoft Edge Origin Trials Developer Console](https://developer.microsoft.com/en-us/microsoft-edge/origin-trials). However, the following scenarios are **not** possible:</p>
+
+            <ul>
+                <li><code>https://example.com/path/new-feature</code></li>
+                <li><code>https://example.com/path/new-feature?test_id=12345</code></li>
+            </ul>
+
+            <h3>Registered Trial Duration</h3>
+
+            <p>Once you have registered for a trial, your token will be valid for **6 weeks**, which this is the standard duration for a trial cycle, and the end of each cycle, you are eligible to renew after providing your feedback on the API you are experimenting with.</p>
+
+            <p>We will send out emails reminding you to provide feedback and renew before your token expires.</p>
+
+            <h3>Experiment duration</h3>
+
+            <p>The duration of an experiment is usually longer than 6 weeks, the standard duration for a trial cycle. When browsing available experiments you will be able to see which versions of Edge the experiment will be available for as well as the estimated end date.</p>
+
+            <p class="note">A browser feature team may decide to early-end an experiment in case of any major security incidents caused by the feature, or they have collected enough feedback and concluded the currently proposed API does not meet the web developer needs, and a major redesign need to happen. We will be sending out emails to all developers enrolled in an experiment in the case of early-end.</p>
+
+            <h3>Opting out of an experiment</h3>
+
+            <p>To opt out of an experiment, you can simply remove the token we have provided from your page's HEAD `meta` tag or server's response HTTP header.   </p>
+
+            <h3>Experimental feature implementation best practices</h3>
+
+            <p>MDN has a great resource on best practices for feature detection, you can [view it here](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Feature_detection). In summary, it is important to always provide a working experience if the feature your website is using does not exist in the browser your visitor is running, this is extremely applicable when relying on an experimental feature using a token that needs to be renewed every 6 weeks.</p>
+        </section>
+        
+    </main>
+    </body>
+</html>

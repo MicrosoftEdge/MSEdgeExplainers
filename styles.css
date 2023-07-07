@@ -1,0 +1,53 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI",Segoe,"Segoe WP","Lucida Grande","Lucida Sans",Verdana,sans-serif;
+    background-color: #f2f2f2;
+    border-top: 5px solid #004b50;
+    border-bottom: 10px solid #004b50;
+}
+
+header {
+    background-color: #018273;
+    color: #f2f2f2;
+    display: flex;
+    justify-content: center;
+    height: 256px;
+}
+
+main {
+    margin: 0 auto;
+    max-width: 50%;
+}
+
+header h1 {
+    margin: 0;
+    padding: 0;
+    font-weight: 200;
+}
+
+.header__section-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 50%;
+}
+
+.note {
+    background-color: rgba(28, 190, 28, 0.25);
+    padding: 1rem 1.2rem;
+}
+
+.note::before {
+    content: 'NOTE';
+    display: block;
+    font-weight: 600;
+    color: rgb(14, 80, 14);
+    padding: 0rem 0rem 1rem 0rem
+}
