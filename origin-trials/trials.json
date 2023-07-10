@@ -1,0 +1,18 @@
+{
+    "active": [
+        {
+            "label": "Web Haptics API",
+            "expiration": "2023-12-31",
+            "issue": "HapticsDevice API",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md"
+        },{
+            "label": "Digital Goods API",
+            "expiration": "2023-12-31",
+            "explainer": "#"
+        }
+    ],
+
+    "expired": [
+
+    ]
+}

@@ -32,6 +32,12 @@ header h1 {
     font-weight: 200;
 }
 
+hr {
+    margin: 4rem 0 4rem 0;
+    border: 1px solid #dfdfdf;
+    border-top: 1px solid #b0b0b0;
+}
+
 .header__section-left {
     display: flex;
     flex-direction: column;
@@ -50,4 +56,8 @@ header h1 {
     font-weight: 600;
     color: rgb(14, 80, 14);
     padding: 0rem 0rem 1rem 0rem
+}
+
+#active-trials-section {
+    margin: 4rem 0 0 0;
 }

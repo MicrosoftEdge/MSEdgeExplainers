@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="styles.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="trial-card.component.js"></script>
+    </head>
+    <body>
+        <!-- Site Content -->
+        <header>            
+            <div class="header__section-left">
+                <h1>Microsoft Edge Origin Trials</h1>
+                <p class="header__summary">Origin trials give web developers access to experimental web platform features to ensure utility and stability of a feature prior to being available to every developer. These trials are open to all developers and are limited in duration and usage.</p>
+            </div>
+        </header>
+        <main>
+            <h2>Active Origin Trials</h2>
+            <section id="active-trials-section"></section>
+            <hr>
+            <section id="guide-section">
+                <h2>Getting Started</h2>
+                <h3>Register for an Experiment</h3>
+                <p>Our registration process is consistent with <a href="https://developers.chrome.com/origintrials/#/trials/active">Chrome Origin Trials</a>, simply click the <strong>Register</strong> button for any of the available experiments listed above. Follow the prompts in the registration form and we'll send you a valid token to use on your site.</p>
+
+                <h3>Using an Origin Trial Token</h3>
+                <p>There are two ways to use the tokens provide in your page:</p>
+
+                <strong>Option 1: Using a &lt;meta&gt; Tag</strong>
+                <p>Add an origin-trial <meta> tag to the head of any page.</p>
+
+                <pre><code>
+                    &lt;meta http-equiv="origin-trial" content="your-token-goes-here"&gt;
+                </code></pre>                
+
+                <strong>Option 2: Using an HTTP Header</strong>
+                <p>Alternatively, you can add an `Origin-Trial` header to your HTTP server response.</p>
+
+                <pre><code>
+                    Origin-Trial: your-token-goes-here
+                </code></pre>
+
+                <p>When a token is found in a document, Microsoft Edge will automatically turn on the <a href="edge://flags"">Edge Feature Flag</a> corresponding to the trial for which the token is valid. This will allow visitors of the application to use the feature despite it's off-by-default state in their local browser.</p>
+
+                <h2>Developer Guidelines</h2>
+
+                <h3>Allowed Origins</h3>
+                <p>Edge origin trials <em>only support SSL-enabled domains</em>. For localhost testing of a feature, please use the appropriate <a href="edge://flags"">Edge Feature Flag</a> located in <a href="edge://flags"">about://flags</a>. In the future, we may publish public tokens that are valid for localhost testing.
+                
+                <h3>Subdomains, URL Paths and Query Params</h3>
+                <p>Origin trial tokens can be configured to support a single domain or subdomain, but they can also be configured to support wild card subdomains for a specific domain. For example, a developer can register <code>https://beta.example.com</code> without subdomain support <em>or</em> a developer can register <code>https://example.com</code> with the subdomain support checkbox selected at registration time to enable all subdomains of that origin.</p>
+
+                <p>Paths and query parameters are not supported by the origin trial system. URIs that are submitted with trailing paths or query parameters, such as <code>https://example.com/path/new-feature</code> will be registered as the root domain.</p>
+
+                <h3>Origin Trial Duration</h3>
+                <p>Once you have registered for a trial, your token will be valid until the expiration date listed on the trial informational card. After this date, the token will no longer function and the feature associated with the trial will be considered ready to ship or be brought back for further development based on developer feedback.</p>
+
+                <p class="note">A browser feature team may decide to early-end an experiment in case of any major security incidents caused by the feature, or they have collected enough feedback and concluded the currently proposed API does not meet the web developer needs, and a major redesign need to happen. We will be sending out emails to all developers enrolled in an experiment in the case of early-end.</p>
+
+                <h3>Providing Feedback on an Origin Trial</h3>
+                <p>If you would like to provide <em>public</em> feedback for a particular trial, please click the issues button located next to the registration button for that trial. We track all feedback as GitHub issues in order to allow for public discourse on ergonomics and stability of a feature.</p>
+
+                <h3>Opting out of an experiment</h3>
+                <p>To opt out of an experiment, you can simply remove the token we have provided from the <code>&lt;meta&gt;</code> tag or from the server response headers.</p>
+
+                <h3>Experimental feature implementation best practices</h3>
+                <p>MDN has a great resource on best practices for feature detection, you can <a href="https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Feature_detection">view it here</a>. We encourage all developers to treat origin trials as experimental and provide graceful fallback mechanisms should the token expire or the browser team choose to discontinue an active trial.</p>
+            </section>        
+        </main>
+        <script type="text/javascript" src="script.js"></script>
+    </body>
+</html>

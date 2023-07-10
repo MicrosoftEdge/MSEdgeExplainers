@@ -1,0 +1,59 @@
+<style>
+    .trial-card {
+        display: flex;
+        align-items: center;
+        box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.25);
+        padding: 0.5rem 1rem;
+        justify-content: space-between;
+        border-top: 3px solid rgb(8, 134, 226);
+        margin: 0 0 1rem 0;
+    }
+
+    .trial-card__title {
+        display: block;
+        line-height: 32px;
+        font-weight: 600;
+        flex-grow: 0.75;
+    }
+
+    .trial-card__explainer {
+        font-weight: 500;
+        font-style: italic;
+    }
+
+    .trial-card__expires {
+        display: block;
+        line-height: 32px;
+    }
+
+    .trial-card__issue-badge {
+        display: flex;
+        height: 32px;
+        line-height: 32px;
+        align-items: center;
+    }
+
+    .trial-card__issue-badge > img {
+        height: 20px;
+    }
+
+    .trial-card__registration-button {
+        height: 32px;
+        border: none;
+        background-color: #004b50;
+        color: #f2f2f2;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+    }
+
+    .trial-card__registration-button:hover {
+        opacity: 0.85
+    }
+</style>
+<div class="trial-card">
+    <span class="trial-card__title"></span>
+    <a class="trial-card__explainer">Explainer</a>
+    <span class="trial-card__expires"></span>
+    <a class="trial-card__issue-badge"></a>
+    <button class="trial-card__registration-button">Register</button>
+</div>
