@@ -3,12 +3,17 @@
         {
             "label": "Web Haptics API",
             "expiration": "2023-12-31",
-            "issue": "HapticsDevice API",
+            "issue": "WebHaptics",
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md"
         },{
             "label": "Digital Goods API",
             "expiration": "2023-12-31",
             "explainer": "#"
+        },{
+            "label": "SystemEntropy in PerformanceNavigationTiming",
+            "expiration": "2023-11-1",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md",
+            "issue": "PerformanceNavigationTimingSystemEntropy "
         }
     ],
 
