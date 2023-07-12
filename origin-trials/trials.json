@@ -13,7 +13,13 @@
             "label": "SystemEntropy in PerformanceNavigationTiming",
             "expiration": "2023-11-1",
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md",
-            "issue": "PerformanceNavigationTimingSystemEntropy "
+            "issue": "PerformanceNavigationTimingSystemEntropy ",
+            "flag": "MsUserAgentLaunchNavType"
+        },{
+            "label": "Unsanitized HTML for Async Clipboard API",
+            "expiration": "2024-02-29",
+            "explainer": "https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-unsanitized/explainer.md",
+            "flag": "EdgeClipboardUnsanitizedContent"
         }
     ],
 
