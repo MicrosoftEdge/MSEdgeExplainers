@@ -48,13 +48,15 @@ The goals of the side panel API are:
 - To provide a way for developers to allow their web application to be promoted
   as a side-by-side web application.
 - To provide a way for developers to control their web application appearance
-  on the side panel via Client Hints.
+  on the side panel.
 
 ## Non-Goals
 
-The side panel API not intended to be used for:
+The side panel API is not intended to be used for:
 
 - Displaying a web application in a side panel that is not of the same origin.
+- Granting additional capabilities to a web application.
+  - If a developer wants to render in a side panel with additional capabilities, they may consider using an Extension. See [chrome.sidePanel](https://developer.chrome.com/docs/extensions/reference/sidePanel/) and [Extensions in the Microsoft Edge sidebar](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/sidebar).
 
 ## Use Cases
 
