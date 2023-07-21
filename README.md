@@ -131,6 +131,10 @@ we move them into the [Alumni section](#alumni-) below.
 
 ### Progressive Web Applications
 
+* [Acquisition Info](AcquisitionInfo/explainer.md) |
+    <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Acquisition%20Info">
+    ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Acquisition%20Info?label=issues)</a> |
+    [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kyerebo&labels=Acquisition+Info&template=acquisition-info.md&title=%5BAcquisition+Info%5D+%3CTITLE+HERE%3E)
 * [Cache API Response Metadata](CacheAPIResponseMetadata/explainer.md) | 
     <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Cache%20API%20Response%20Metadata">
     ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Cache%20API%20Response%20Metadata?label=issues)</a> |
