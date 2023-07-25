@@ -24,7 +24,9 @@ No.
 
 ## 2.6. Do the features in your specification expose information about the underlying platform to origins?
 
-No.
+This API exposes a new means for sites to infer whether the site was launched while the user agent was running under non-optimal performance conditions. Sites could infer that their site is set as the user’s home page. However, since this is the only information that a site can figure out about itself, and not information that other applications can find out, we do not consider this a significant concern given the benefit this change will provide. Additionally, such inference suffers from false positives, as the user may have invoked the URL and launched the browser from the OS shell or another non-browser application.
+
+An analysis of fingerprinting capability provided by this surface suggests fairly limited impact.
 
 ## 2.7. Does this specification allow an origin to send data to the underlying platform?
 
