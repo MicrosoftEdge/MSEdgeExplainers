@@ -43,15 +43,15 @@ is recorded by the Store, and associated with the user's app entitlement. On any
 of the Store-acquired web app, the web app developer can call the JavaScript API to request the
 acquisition information from the Store in order to retrieve the Campaign ID associated with that
 user/app acquisition. The web app developer will then be able to use this information to help
-determmine which ad campaigns were most effective, to best inform their future ad investment
+determine which ad campaigns were most effective, to best inform their future ad investment
 decisions.
 
 ## Proposed Solution
 
-The Acquisition Info API introduces the `window.getAcquisitionInfoProvider()` method which allows
-developers to retrieve acquisition information for Store-installed web apps. The API will be
-`undefined` when run as a normal tab in the browser (which explicity excludes support for the
-[`browser` display mode][display mode]). To obtain a valid value, the site needs to run as an app
+The Acquisition Info API introduces the `navigator.getAcquisitionInfoProvider()` method which allows
+developers to retrieve a provider object that can return acquisition information for Store-installed
+web apps. The API will be `undefined` when run as a normal tab in the browser (which explicity excludes
+support for the [`browser` display mode][display mode]). To obtain a valid value, the site needs to run as an app
 with Store context. Browser extensions are not eligible to call this API.
 
 ### The current shape of acquisition information
@@ -67,19 +67,19 @@ functionality.
 
 ### Getting a provider instance
 
-The `window.getAcquisitionInfoProvider()` method returns an object of the
+The `navigator.getAcquisitionInfoProvider()` method returns an object of the
 `AcquisitionInfoProvider` interface, which provides access to various acquisition details,
 including the Campaign ID. There is no need for a parameter input when calling this method,
 as current implementations of the native API for Store information across platforms depend on
 derived contexts rather than specific service providers.
 
 ```js
-if (window.getAcquisitionInfoProvider === undefined) {
+if (navigator.getAcquisitionInfoProvider === undefined) {
   // The Acquisition Info API is not supported in this context.
   return;
 }
 try {
-  const acquisitionInfoProvider = window.getAcquisitionInfoProvider();
+  const acquisitionInfoProvider = navigator.getAcquisitionInfoProvider();
   // Use the service here.
   ...
 } catch (error) {
@@ -153,13 +153,20 @@ details = {
 We are introducing the layer of `AcquisitionInfoProvider` to `getDetails()` (rather than flattening
 the API) in order to leave the possibility of additional functionality attached to `AcquisitionInfoProvider` open.
 
+### Attribution on browser installs
+
+Currently user agent (UA) installs are initiated by the user directly on the website they want to install. There's no opportunity for these web app installs to have
+attribution information in the same way that store or app repo initiated web app installations do. However, with the addition of the Web Install API, there exists a
+possibility of cross-domain UA installations that may have associated attribution information. In this case, the UA is responsible for returning referral information
+to the web app since there would be no associated attribution for the Acquisition Info API to query. _[See the Web Install API explainer for more information.][Web Install API]_
+
 ## Privacy and Security Considerations
 
 1. _Lack of validation_: It is assumed that the Store platform does not perform any validation
   or sanitation of the Campaign ID itself.
 
 2. _Lack of user control regarding acquisition identifiers_: This solution provides no method for
-   the user to clear, disable, or modify the data retrieved from `AcquisitionInfo`.  We recognize that different vendors may have specific preferences and requirements regarding this aspect,
+   the user to clear, disable, or modify the data retrieved from `AcquisitionInfoProvider`.  We recognize that different vendors may have specific preferences and requirements regarding this aspect,
    so we defer to the individual Store platforms to handle that implementation.
 
 3. _Potential misuse of acquisition identifiers_: Acquisition identifiers could potentially be
@@ -175,7 +182,7 @@ is being exposed in this API.
 | Term        | Definition                                                          |
 | ----------- | ------------------------------------------------------------------- |
 | Attribution | Identifying the source by which an installation occured.            |
-| Acqusition  | Installation of the application in question.                        |
+| Acquisition  | Installation of the application in question.                        |
 | PWA         | Progressive Web App                                                 |
 | UWP         | Universal Windows Platform                                          |
 | API         | Application Programming Interface                                   |
@@ -189,5 +196,6 @@ is being exposed in this API.
 [Play Install Referrer API]: https://developer.android.com/google/play/installreferrer
 [Apple Ads Attribution API]: https://developer.apple.com/documentation/ad_services
 [secure context]: https://w3c.github.io/webappsec-secure-contexts/
+[Web Install API]: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/WebInstall/explainer.md
 
 ## Open Questions
