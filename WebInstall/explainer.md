@@ -149,7 +149,7 @@ Additionally for developers, the feature also:
 To install a PWA, a PWA would use the promise-based method `navigator.install([<url>][, <params>]]);`. This method will:
 
 * Resolve when an installation prompt has been shown.
-    * The success value will be an object that houses information like the origin that initiated the install and a second promise that will resolve or reject if the application was installed.
+    * The success value will be an object that houses information like the 'origin' that initiated the install and a second promise named 'installed' that will resolve or reject if the application was installed.
         * *The promise that is returned inside the success value will allow for **one** opportunity for the installation origin to get attribution for the install, parse any additional information like ad campaigns, or any other required processing in the origin after a successful installation.*
 
 ```javascript
