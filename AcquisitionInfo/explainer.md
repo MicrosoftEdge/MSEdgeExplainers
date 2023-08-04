@@ -48,11 +48,11 @@ decisions.
 
 ## Proposed Solution
 
-The Acquisition Info API introduces the `navigator.getAcquisitionInfoProvider()` method which allows
-developers to retrieve a provider object that can return acquisition information for Store-installed
+The Acquisition Info API introduces the `navigator.acquisitionInfoProvider` attribute which allows
+developers to access promise methods that can return acquisition information for Store-installed
 web apps. The API will be `undefined` when run as a normal tab in the browser (which explicity excludes
-support for the [`browser` display mode][display mode]). To obtain a valid value, the site needs to run as an app
-with Store context. Browser extensions are not eligible to call this API.
+support for the [`browser` display mode][display mode]). To obtain a valid value, the site needs to run as an
+installed webapp. Browser extensions are not eligible to call this API.
 
 ### The current shape of acquisition information
 
@@ -65,21 +65,23 @@ native applications and there exists no equivalent for web apps. The Acquisition
 continue efforts to close the gap between native apps and web apps by providing that missing
 functionality.
 
-### Getting a provider instance
+### Accessing the provider as an attribute
 
-The `navigator.getAcquisitionInfoProvider()` method returns an object of the
-`AcquisitionInfoProvider` interface, which provides access to various acquisition details,
+`navigator.acquisitionInfoProvider` accesses the acquisition info provider attribute of
+`navigator`, which provides access to methods such as `getDetails()` that surface various acquisition details,
 including the Campaign ID. There is no need for a parameter input when calling this method,
-as current implementations of the native API for Store information across platforms depend on
+as current implementations of the native API for Store information depend on
 derived contexts rather than specific service providers.
+We are introducing the layer of `acquisitionInfoProvider` to `getDetails()` (rather than flattening
+the API) in order to leave the possibility of additional functionality attached to `acquisitionInfoProvider` open.
 
 ```js
-if (navigator.getAcquisitionInfoProvider === undefined) {
+if (navigator.acquisitionInfoProvider === undefined) {
   // The Acquisition Info API is not supported in this context.
   return;
 }
 try {
-  const acquisitionInfoProvider = navigator.getAcquisitionInfoProvider();
+  const acquisitionInfoProvider = navigator.acquisitionInfoProvider.getDetails();
   // Use the service here.
   ...
 } catch (error) {
@@ -91,11 +93,11 @@ try {
 
 ### Accessing acquisition details
 
-Once we've obtained the provider, we can asynchronously retrieve a dictionary payload of
-acquisition details through the `getDetails()` method.
+Once we've accessed the provider, we can asynchronously retrieve a dictionary payload of
+acquisition details through the `getDetails()` method which returns a ScriptPromise object.
 
 ```js
-details = await acquisitionInfoProvider.getDetails();
+details = await navigator.acquisitionInfoProvider.getDetails();
 let platform = details["storePlatform"]; // e.g. Microsoft Store
 let campaignId = details["campaignId"]; // e.g. adCampaign202306
 ```
@@ -129,19 +131,10 @@ details = {
 }
 ```
 
-In the event that a web application was not acquired through a store platform, referral information has expired for that specific application, or in any other case
-where acquisition info is missing for the web application, the API would return empty values for the associated properties in the dictionary. This is consistent with
+In the event that a web application has referral information that has expired for that specific
+application, or in any other case where acquisition info is missing for the web application,
+the API would return empty values for the associated properties in the dictionary. This is consistent with
 existing behavior in store information retrieval API for native applications.
-
-Querying a browser-installed web application for store attribution information:
-
-```js
-details = {
-  storePlatform: ""
-}
-```
-
-Querying a store-installed web application that doesn't have acquisition information attributed to it.
 
 ```js
 details = {
@@ -150,15 +143,38 @@ details = {
 }
 ```
 
-We are introducing the layer of `AcquisitionInfoProvider` to `getDetails()` (rather than flattening
-the API) in order to leave the possibility of additional functionality attached to `AcquisitionInfoProvider` open.
+## Attribution on browser installs
 
-### Attribution on browser installs
+While attribution is currently not being tracked in the same capacity as Store installations for browser-initiated
+installations of web applications, the Acquisition Info API could enable this sort of attribution capability.
 
-Currently user agent (UA) installs are initiated by the user directly on the website they want to install. There's no opportunity for these web app installs to have
-attribution information in the same way that store or app repo initiated web app installations do. However, with the addition of the Web Install API, there exists a
-possibility of cross-domain UA installations that may have associated attribution information. In this case, the UA is responsible for returning referral information
-to the web app since there would be no associated attribution for the Acquisition Info API to query. _[See the Web Install API explainer for more information.][Web Install API]_
+### Same-domain installation
+
+One solution for capturing attribution in organic same-domain installations initiated as an user agent (UA) install
+could be the use of query parameters. If the web application after installation
+has listed GET parameters in their URL as attribution information, within the API we can define acquisition related parameters
+to capture such as `c_id` and translate it into the dictionary return.
+
+```js
+// URL: foo.com?c_id=browserInstallationCampaign
+details = {
+  storePlatform: "",
+  campaignId: "browserInstallationCampaign"
+}
+```
+
+This could also be expanded upon to capture a set of acquisition parameters related to browser installation such as the web
+referrer or any parameter of interest that is already being captured in Store attribution.
+
+### Web Install API
+
+Currently UA installs are initiated by the user directly on the website they want to install.
+There's no opportunity for these web app installs to have attribution information in the same way that store
+initiated web app installations do. However, with the addition of the Web Install API, there exists a
+possibility of cross-domain UA installations that may have associated attribution information through an app directory,
+and the new capability of webapps to install other webapps. Apps installed through the Web Install API will hold a promise
+within its returned success value that allows an opportunity for the installation origin to retrieve attribution information,
+at which point can be captured by the Acquisition Info API. _[See the Web Install API explainer for more information.][Web Install API]_
 
 ## Privacy and Security Considerations
 
@@ -166,7 +182,7 @@ to the web app since there would be no associated attribution for the Acquisitio
   or sanitation of the Campaign ID itself.
 
 2. _Lack of user control regarding acquisition identifiers_: This solution provides no method for
-   the user to clear, disable, or modify the data retrieved from `AcquisitionInfoProvider`.  We recognize that different vendors may have specific preferences and requirements regarding this aspect,
+   the user to clear, disable, or modify the data retrieved from `acquisitionInfoProvider`.  We recognize that different vendors may have specific preferences and requirements regarding this aspect,
    so we defer to the individual Store platforms to handle that implementation.
 
 3. _Potential misuse of acquisition identifiers_: Acquisition identifiers could potentially be
@@ -182,7 +198,7 @@ is being exposed in this API.
 | Term        | Definition                                                          |
 | ----------- | ------------------------------------------------------------------- |
 | Attribution | Identifying the source by which an installation occured.            |
-| Acquisition  | Installation of the application in question.                        |
+| Acquisition | Installation of the application in question.                        |
 | PWA         | Progressive Web App                                                 |
 | UWP         | Universal Windows Platform                                          |
 | API         | Application Programming Interface                                   |
@@ -199,3 +215,9 @@ is being exposed in this API.
 [Web Install API]: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/WebInstall/explainer.md
 
 ## Open Questions
+
+### Should we be returning some sort of install source on a browser installed app query?
+
+In the [current iteration of this proposal](#same-domain-installation), the API returns an empty string in the `storePlatform` field
+when called in a browser installed application. We could instead indicate a string value of `Browser`. However, this would mean we'd have to cover cases for other install types such as policy PWAs. Would it be appropriate to cover this browser case, or perhaps change the
+`storePlatform` field to something more general such as `installSource`?
