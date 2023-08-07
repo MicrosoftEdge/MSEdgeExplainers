@@ -5,31 +5,36 @@ if (document.readyState != 'loading') {
 }
 
 async function onload() {
-    await populateActiveTrialList();
+  let edgeSection = document.querySelector("#edge-active-trials-section");
+  let chromeSection = document.querySelector("#chrome-active-trials-section");
+  await populateActiveTrialList('downstream-trials.json', edgeSection);
+  await populateActiveTrialList('upstream-trials.json', chromeSection);
 }
 
-async function populateActiveTrialList() {
+async function populateActiveTrialList(trialsFile, section) {
 
-    let trials = await fetch('trials.json')
+    let trials = await fetch(trialsFile)
         .then( stream => stream.json() )
 
     let active = trials["active"];
 
-    let section = document.querySelector("#active-trials-section");
-
     active.forEach( trial  => {
-        let label       = trial["label"];
-        let expires     = trial["expiration"];
-        let explainer   = trial["explainer"];
-        let issue       = trial["issue"];
+        let label        = trial["label"];
+        let expires      = trial["expiration"];
+        let explainer    = trial["explainer"];
+        let repo         = trial["repo"];
+        let issue        = trial["issue"];
+        let feedbackLink = trial["feedbackLink"];
 
         let card = document.createElement("trial-card");
 
         card.setAttribute("label", label);
         card.setAttribute("expires", expires);
-        
-        if (explainer != undefined) {
-            card.setAttribute("explainer", explainer);
+        card.setAttribute("explainer", explainer);
+        card.setAttribute("repo", repo);
+
+        if (feedbackLink != undefined) {
+            card.setAttribute("feedbackLink", feedbackLink);
         }
 
         if (issue != undefined) {
