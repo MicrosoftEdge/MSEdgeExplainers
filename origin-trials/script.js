@@ -7,11 +7,11 @@ if (document.readyState != 'loading') {
 async function onload() {
   let edgeSection = document.querySelector("#edge-active-trials-section");
   let chromeSection = document.querySelector("#chrome-active-trials-section");
-  await populateActiveTrialList('downstream-trials.json', edgeSection);
-  await populateActiveTrialList('upstream-trials.json', chromeSection);
+  await populateActiveTrialList('downstream-trials.json', edgeSection, /*isUpstream=*/false);
+  await populateActiveTrialList('upstream-trials.json', chromeSection, /*isUpstream=*/true);
 }
 
-async function populateActiveTrialList(trialsFile, section) {
+async function populateActiveTrialList(trialsFile, section, isUpstream) {
 
     let trials = await fetch(trialsFile)
         .then( stream => stream.json() )
@@ -32,6 +32,7 @@ async function populateActiveTrialList(trialsFile, section) {
         card.setAttribute("expires", expires);
         card.setAttribute("explainer", explainer);
         card.setAttribute("repo", repo);
+        card.setAttribute("upstream", isUpstream);
 
         if (feedbackLink != undefined) {
             card.setAttribute("feedbackLink", feedbackLink);

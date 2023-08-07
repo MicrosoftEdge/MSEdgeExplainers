@@ -29,6 +29,7 @@ function define(template) {
             let repo         = this.getAttribute("repo");
             let issue        = this.getAttribute("issue");
             let feedbackLink = this.getAttribute("feedbackLink");
+            let isUpstream   = this.getAttribute("upstream"); 
 
             this._heading.innerHTML = heading;
             this._expires.innerHTML = expires;
@@ -44,14 +45,22 @@ function define(template) {
                 this._badge.setAttribute('href', this.getIssueLink(repo, issue));
 
                 let img = document.createElement('img');
-                img.src = this.getIssueBadgeLink(repo, issue);
+                if (isUpstream === "false") {
+                    img.src = this.getIssueBadgeLink(repo, issue);
+                } else {
+                    img.src = this.getIssueBadgeLink(repo, "");
+                }
 
                 this._badge.appendChild(img)
             } else {
                 this._badge.setAttribute('href', this.getGenericIssueLink(repo, heading));
 
                 let img = document.createElement('img');
-                img.src = this.getIssueBadgeLink(repo, 'OriginTrialFeedback');
+                if (isUpstream === "false") {
+                    img.src = this.getIssueBadgeLink(repo, 'OriginTrialFeedback');
+                } else {
+                    img.src = this.getIssueBadgeLink(repo, "");
+                }
 
                 this._badge.appendChild(img);
             }
@@ -64,8 +73,8 @@ function define(template) {
         }
 
         getIssueBadgeLink(repo, tag) {
-            let encodedTag = encodeURI(tag);
-            return `https://img.shields.io/github/issues/${repo}/${encodedTag}?label=issues`;
+            let encodedTag = tag.length > 0 ? `/${encodeURI(tag)}` : "";
+            return `https://img.shields.io/github/issues/${repo}${encodedTag}?label=issues`;
         }
 
         getIssueLink(repo, tag) {
