@@ -50,7 +50,7 @@ A server returns a response header `BPoP` to active binding. `BPoP` is a [struct
 - `SameSite` is an optional token whose value is either `None`, `Lax`, or `Strict` and whose default is `Lax` if omitted.
 - `algs` is a optional string list indicating algorithms supported by the website for BPoP proofs, per [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518). MUST NOT include none or any identifier for a symmetric algorithm (MAC). By default, it is the list `["RS256", "ES256"]`
 - `refresh-in` is an optional parameter indicating the number of seconds after which the browser should refresh the BPoP proof. The default is 5 seconds (minimum nonce validity). The value MUST be an integer greater than 0.
-- `cache-expiry` is an optional parameter indicating the number of seconds after which the browser should stop using the BPoP proof. The default is 300 milli seconds (5 seconds). The value MUST be an integer greater than 0.
+- `expires-in` is an optional parameter indicating the number of seconds after which the browser should stop using the BPoP proof. The default is 300 milli seconds (5 seconds). The value MUST be an integer greater than 0.
 
 A web server may also optionally return a `BPoP-Nonce` header, containing a nonce value to be included in BPoP proofs sent to them. The nonce syntax in ABNF used by [RFC6749](https://www.rfc-editor.org/rfc/rfc6749.html) is `nonce = 1*NQCHAR`.
 
@@ -175,8 +175,8 @@ A server may also return a new BPoP nonce on any 200 response.
 ```
 HTTP/1.1 200 Ok
 BPoP-Nonce: eyJ7S_zG.eyJH0-Z.HX4w-7v
-refresh-interval: 300
-cache-expiry: 300
+refresh-in: 300
+expires-in: 300
 ```
 
 The client SHOULD start using the new nonce on the next request.
