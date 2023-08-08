@@ -15,11 +15,16 @@
         font-weight: 600;
         flex-grow: 1;
         max-width: 50%;
+        overflow-wrap: break-word;
     }
 
-    .trial-card__explainer {
+    .trial-card__explainer, .trial-card__feedback {
         font-weight: 500;
         font-style: italic;
+    }
+
+    .trial-card__feedback {
+      display: none;
     }
 
     .trial-card__expires {
@@ -56,5 +61,6 @@
     <a class="trial-card__explainer">Explainer</a>
     <span class="trial-card__expires"></span>
     <a class="trial-card__issue-badge"></a>
+    <a class="trial-card__feedback">Feedback</a>
     <button class="trial-card__registration-button">Register</button>
 </div>

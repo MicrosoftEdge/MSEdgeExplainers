@@ -45,6 +45,19 @@ hr {
     width: 50%;
 }
 
+details {
+  margin-top: 1.5rem;
+}
+
+details section {
+  margin-top: 1.5rem;
+}
+
+summary {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
 .note {
     background-color: rgba(28, 190, 28, 0.25);
     padding: 1rem 1.2rem;
@@ -56,8 +69,4 @@ hr {
     font-weight: 600;
     color: rgb(14, 80, 14);
     padding: 0rem 0rem 1rem 0rem
-}
-
-#active-trials-section {
-    margin: 4rem 0 0 0;
 }
