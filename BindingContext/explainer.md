@@ -49,8 +49,8 @@ A server returns a response header `BPoP` to active binding. `BPoP` is a [struct
 - `subdomains` is an optional boolean whose value is `false` if omitted.
 - `SameSite` is an optional token whose value is either `None`, `Lax`, or `Strict` and whose default is `Lax` if omitted.
 - `algs` is a optional string list indicating algorithms supported by the website for BPoP proofs, per [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518). MUST NOT include none or any identifier for a symmetric algorithm (MAC). By default, it is the list `["RS256", "ES256"]`
-- `refresh-in` is an optional parameter indicating the number of seconds after which the browser should refresh the BPoP proof. The default is 5 seconds (minimum nonce validity). The value MUST be an integer greater than 0.
-- `expires-in` is an optional parameter indicating the number of seconds after which the browser should stop using the BPoP proof. The default is 300 milli seconds (5 seconds). The value MUST be an integer greater than 0.
+- `refresh-in` is an optional number whose value indicates the number of seconds after which the browser should refresh the BPoP proof. The value MUST be an integer greater than 0.
+- `expires-in` is an optional number whose value indicates the number of seconds after which the browser should stop using the BPoP proof. The default is 5 minutes (minimum nonce validity). The value MUST be an integer greater than 0.
 
 A web server may also optionally return a `BPoP-Nonce` header, containing a nonce value to be included in BPoP proofs sent to them. The nonce syntax in ABNF used by [RFC6749](https://www.rfc-editor.org/rfc/rfc6749.html) is `nonce = 1*NQCHAR`.
 
@@ -143,7 +143,7 @@ The browser initiates BPoP proof of possession only if:
 - BPoP nonce is expired or invalidated; set cache expiration time to `BPoP-Nonce` expiration time.
 
 ```
-BPoP: enabled, expires-in: 300
+BPoP: enabled, expires-in=300
 ```
 
 #### BPoP background refresh
@@ -151,7 +151,7 @@ BPoP: enabled, expires-in: 300
 The server response should also include a `refresh-in` parameter, that enables the app to refresh the nonce in a certain interval. This should help the APIs dependent on BPoP to proactively refresh the nonce in the background avoiding the need to refresh the nonce on demand.
 
 ```
-BPoP: enabled, refresh-in: 300
+BPoP: enabled, refresh-in=60
 ```
 
 ### Server challenge
