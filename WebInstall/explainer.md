@@ -22,7 +22,8 @@ While this is the general acquisition flow on many platforms, the web does not h
 * Replace `beforeinstallprompt` or associated behaviour (current way to install apps from the same-domain).
 * Allow a ***vetted* installation origin** to know if the web app is installed (see *`install_sources` new manifest field*).
 * Allow the web app to report to the origin the outcome of the installation.
-* Enable UAs to supress potential installation-prompt spam. 
+* Enable UAs to supress potential installation-prompt spam.
+* Track campaign IDs for marketing campaigns.
 
 ## Non-goals
 
@@ -32,13 +33,13 @@ While this is the general acquisition flow on many platforms, the web does not h
 * List purchased/installed goods from a store ([see Digital Goods API](https://github.com/WICG/digital-goods/blob/main/explainer.md)).
 * Installing non-PWAs or apps that do not pass the installability criteria (for security reasons).
 * Enumerate if the app/related apps are installed ([see getInstalledRelatedApps](https://github.com/WICG/get-installed-related-apps/blob/main/EXPLAINER.md)).
-* Track campaign IDs for marketing campaigns.
 
 ## Use Cases
 
 There are several use cases that the Web Install API enables:
 
-* **Installing a web app from the current origin:** The app can trigger its own installation. The current way of doing this is with the `onbeforeinstallprompt`, and this would be phased out in favor of a unified `install` method for same and cross domains.
+### **Installing a web app from the current origin**
+The app can trigger its own installation. The current way of doing this is with the `onbeforeinstallprompt`, and this would be phased out in favor of a unified `install` method for same and cross domains.
 
 ```javascript
 /* tries to install web app in the current domain */
@@ -66,9 +67,16 @@ if ('install' in navigator) {
 
 The **`navigator.install()` method will replace `onbeforeinstallprompt` for same domain installation**. When the method is called it will trigger the UA to prompt for the installation of an application. This is analogous to when the end user clicks on an affordance that the UA might have to inform the user of installing. On Edge, Chrome (desktop) and Samsung Internet (mobile), this would be then the user clicks on the 'app available' banner or related UX that appears on the omnibox of the browser.
 
+The threshold for ` navigator.install()` to resolve on same-domain installations uses the same checks that `onbeforeinstallprompt` currently has. The promise doesn't resolve until:
+1. Manifest and required fields are downloaded, parsed and checked.
+2. Engagement thresholds are met. 
+3. Service Worker checks pass.
+
 When called on the same domain, the **`install()` method will trigger/open the prompt for installation the same way that using `onbeforeinstallprompt` does right now.** If the domain is not an installable PWA, then the promise returns a `DOMException` of type 'NotSupportedError'.
 
-* **Web app installation from associated domain:** An associated domain (out-of-scope of the PWA) could prompt for the installation of the web app (in a different domain). The typical use case for this is a website of a service that informs their customers about their (PWA) web app.
+### **Web app installation from associated domain** 
+
+An associated domain (out-of-scope of the PWA) could prompt for the installation of the web app (in a different domain). The typical use case for this is a website of a service that informs their customers about their (PWA) web app.
 
 ```javascript
 /* example of using navigator.install and permissions API */
@@ -113,7 +121,9 @@ Manifest file for the Contoso App, allowing installation *ONLY* from contoso.com
 
 ![Different domain install flow](./difdomaininstall.png) 
 
-* **Creation of online catalogs:** A web app can list and install web apps. For example, `apprepo.com` would be able to distribute apps on multiple platforms and multiple devices.
+### **Creation of online catalogs**
+
+ A web app can list and install web apps. For example, `apprepo.com` would be able to distribute apps on multiple platforms and multiple devices.
 
 ```javascript
 /* tries to install a cross-domain web app */
