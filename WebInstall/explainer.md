@@ -21,7 +21,7 @@ While this is the general acquisition flow on many platforms, the web does not h
 * **Enable installation of web apps (same *and* cross-domain).**
 * Replace `beforeinstallprompt` or associated behaviour (current way to install apps from the same-domain).
 * Allow a ***vetted* installation origin** to know if the web app is installed (see *`install_sources` new manifest field*).
-* Allow the web app to report to the origin the outcome of the installation.
+* Allow the web app to report to the installation origin the outcome of the installation.
 * Enable UAs to supress potential installation-prompt spam.
 * Track campaign IDs for marketing campaigns.
 
