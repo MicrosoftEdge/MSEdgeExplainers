@@ -21,7 +21,7 @@ While this is the general acquisition flow on many platforms, the web does not h
 * **Enable installation of web apps (same *and* cross-domain).**
 * Replace `beforeinstallprompt` or associated behaviour (current way to install apps from the same-domain).
 * Allow a ***vetted* installation origin** to know if the web app is installed (see *`install_sources` new manifest field*).
-* Allow the web app to report to the origin the outcome of the installation.
+* Allow the web app to report to the installation origin the outcome of the installation.
 * Enable UAs to supress potential installation-prompt spam.
 * Track campaign IDs for marketing campaigns.
 
@@ -67,7 +67,7 @@ if ('install' in navigator) {
 
 The **`navigator.install()` method will replace `onbeforeinstallprompt` for same domain installation**. When the method is called it will trigger the UA to prompt for the installation of an application. This is analogous to when the end user clicks on an affordance that the UA might have to inform the user of installing. On Edge, Chrome (desktop) and Samsung Internet (mobile), this would be then the user clicks on the 'app available' banner or related UX that appears on the omnibox of the browser.
 
-The threshold for ` navigator.install()` to resolve on same-domain installations uses the same checks that `onbeforeinstallprompt` currently has. The promise doesn't resolve until:
+The threshold for `navigator.install()` to resolve on same-domain installations uses the same checks that `onbeforeinstallprompt` currently has. The promise doesn't resolve until:
 1. Manifest and required fields are downloaded, parsed and checked.
 2. Engagement thresholds are met. 
 3. Service Worker checks pass.
@@ -174,7 +174,7 @@ if ('install' in navigator ) {
 * Be rejected if the prompt is not shown and have a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
     * `NotAllowedError`: The `installation` [Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) has been used to block the use of this feature.
     * `NotSupportedError`: the target website is not installable.
-    * `OperationError `: other error.
+    * `OperationError`: other error.
  
 ```javascript
 (...)
