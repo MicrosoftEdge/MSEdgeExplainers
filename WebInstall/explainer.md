@@ -192,7 +192,7 @@ if ('install' in navigator ) {
     }
 });
 ```
-If the prompt is shown, the promise resolves with an object that includes the origin from which the installation was invoked and another promise that 
+If the prompt is shown, the promise resolves with an object that includes the origin from which the installation was invoked and another promise that resolves once the application is installed. 
 
 #### Signatures of the `install` method
 The Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in 3 different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
