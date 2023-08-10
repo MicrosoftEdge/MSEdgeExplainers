@@ -67,7 +67,7 @@ if ('install' in navigator) {
 
 The **`navigator.install()` method will replace `onbeforeinstallprompt` for same domain installation**. When the method is called it will trigger the UA to prompt for the installation of an application. This is analogous to when the end user clicks on an affordance that the UA might have to inform the user of installing. On Edge, Chrome (desktop) and Samsung Internet (mobile), this would be then the user clicks on the 'app available' banner or related UX that appears on the omnibox of the browser.
 
-The threshold for ` navigator.install()` to resolve on same-domain installations uses the same checks that `onbeforeinstallprompt` currently has. The promise doesn't resolve until:
+The threshold for `navigator.install()` to resolve on same-domain installations uses the same checks that `onbeforeinstallprompt` currently has. The promise doesn't resolve until:
 1. Manifest and required fields are downloaded, parsed and checked.
 2. Engagement thresholds are met. 
 3. Service Worker checks pass.
