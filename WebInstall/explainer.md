@@ -174,7 +174,7 @@ if ('install' in navigator ) {
 * Be rejected if the prompt is not shown and have a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
     * `NotAllowedError`: The `installation` [Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) has been used to block the use of this feature.
     * `NotSupportedError`: the target website is not installable.
-    * `OperationError `: other error.
+    * `OperationError`: other error.
  
 ```javascript
 (...)
