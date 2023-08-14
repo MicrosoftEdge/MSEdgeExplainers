@@ -39,7 +39,7 @@ While this is the general acquisition flow on many platforms, the web does not h
 There are several use cases that the Web Install API enables:
 
 ### **Installing a web app from the current origin**
-The app can trigger its own installation. The current way of doing this is with the `onbeforeinstallprompt`, and this would be phased out in favor of a unified `install` method for same and cross domains.
+The site can trigger its own installation. The current way of doing this is with the `onbeforeinstallprompt`, and this would be phased out in favor of a unified `install` method for same and cross domains.
 
 ```javascript
 /* tries to install web app in the current domain */
