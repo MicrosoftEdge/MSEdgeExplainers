@@ -311,7 +311,7 @@ switch (state) {
 
 * A new field called `install_sources` will be added to the manifest file to have a control list of sites that can install the app. In its most restrictive case, the developer can specify to not allow installation from any other origin, in which case the PWA conforms to its usual behaviour of only being able to be installed from its same origin.
 
-    * `inquire` field: If supported by the UA, the `inquire` field in the install sources hints at the UA that it can inform that installaiton origin if the app is installed. **If the browser has an active 'Do Not Track' setting, the `inquire` field is ignored and installation origins will not be allowed to know if that application is installed.**
+    * `inquire` field: If supported by the UA, the `inquire` field in the install sources hints at the UA that it can inform that installation origin if the app is installed. **If the browser has an active 'Do Not Track' setting, the `inquire` field is ignored and installation origins will not be allowed to know if that application is installed.**
 
 ```json
 
