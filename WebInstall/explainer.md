@@ -198,6 +198,8 @@ If the prompt is shown, there is a second promise (`installed`) that:
 	* `AbortError`: The installation (prompt) was closed/cancelled.
 	* `TimeoutError`: The installation failed due to timeout.
 
+![Promises resolve/reject flow](./installPromises.png) 
+
 *The **`installed`** promise that is returned upon a successful prompting will allow for **one** opportunity for the installation origin to get attribution for the install, parse any additional information like ad campaigns, or any other required processing in the origin after a successful installation.*
 
 #### Signatures of the `install` method
