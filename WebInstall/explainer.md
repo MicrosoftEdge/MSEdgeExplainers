@@ -159,10 +159,14 @@ Additionally for developers, the feature also:
 To install a PWA, a PWA would use the promise-based method `navigator.install([<url>][, <params>]]);`. This method will:
 
 * Resolve when an installation prompt has been shown.
-    * The success value will be an object that houses information like the 'origin' that initiated the install and a second promise named 'installed' that will resolve or reject if the application was installed.
-        * *The promise that is returned inside the success value will allow for **one** opportunity for the installation origin to get attribution for the install, parse any additional information like ad campaigns, or any other required processing in the origin after a successful installation.*
-
-```javascript
+    * The success value will be an object that contains:
+     	*  `installed`: *second* promise that will resolve or reject if the application is installed.
+* Be rejected if the prompt is not shown and have a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
+    * `NotAllowedError`: The `installation` [Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) has been used to block the use of this feature.
+    * `NotSupportedError`: the target website is not installable.
+    * `InsufficientEngagementError`: the UA's required (if any) [engagement heuristics](https://web.dev/install-criteria/#criteria) have not been met.
+    * `OperationError`: other error.
+ ```javascript
 /* example of using navigator.install */
 
 if ('install' in navigator ) {
@@ -170,12 +174,6 @@ if ('install' in navigator ) {
     .then( installation => console.log( `Installation started from ${installation.origin}` ));
 }
 ```
-
-* Be rejected if the prompt is not shown and have a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
-    * `NotAllowedError`: The `installation` [Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) has been used to block the use of this feature.
-    * `NotSupportedError`: the target website is not installable.
-    * `OperationError`: other error.
- 
 ```javascript
 (...)
 .catch(error => {
@@ -192,10 +190,18 @@ if ('install' in navigator ) {
     }
 });
 ```
-If the prompt is shown, the promise resolves with an object that includes the origin from which the installation was invoked and another promise that resolves once the application is installed. 
+If the prompt is shown, there is a second promise (`installed`) that:
+* resolves if the application is installed with an object that contains:
+	* `mode`: string with the surface-hint where the app was installed.
+ 	* `campaignId`: string associated campaignId with the installation. 
+* rejects with a `DOMExpception` with a with a value of:
+	* `AbortError`: The installation (prompt) was closed/cancelled.
+	* `TimeoutError`: The installation failed due to timeout.
+
+*The **`installed`** promise that is returned upon a successful prompting will allow for **one** opportunity for the installation origin to get attribution for the install, parse any additional information like ad campaigns, or any other required processing in the origin after a successful installation.*
 
 #### Signatures of the `install` method
-The Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in 3 different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
+The Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
 
 1. `navigator.install()`: The method receives no parameters and tries to install the current domain as an app. This would replace `beforeinstallprompt` and the current way developers have been controlling the prompt to install apps.
 
