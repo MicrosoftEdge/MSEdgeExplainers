@@ -19,12 +19,13 @@ location of future work and discussions.
 One of the major issues blocking the adoption of store platform advertisements is the lack of
 support for third-party (3P) attribution for Progressive Web Apps (PWAs). While attribution and
 acquisition information may look slightly different based on platform, PWAs lack this capability
-across all Store platforms (Microsoft Store, Google Play Store, Apple App Store). For example, on
+across all Store platforms (Microsoft Store, Google Play Store, Apple App Store). On
 Windows, this limitation prevents PWAs published in the Microsoft Store from obtaining the
 Campaign ID which identifies the ad campaign source of app acquisition. While
 [Universal Windows Platform (UWP) apps can access this information through a WinRT API][WinRT API],
 the absence of similar functionality for PWAs poses a gap between native applications and
-PWAs that we aim to bridge with the introduction of the Acquisition Info API.
+PWAs. We aim to not only bridge this gap, but to enable similar functionality surrounding attribution
+for browser-installed web applications through the introduction of the Acquisition Info API.
 
 ## Goals
 
@@ -33,9 +34,9 @@ from the browser.
 
 ## Non-Goals
 
-1. Fully implement attribution information retrieval process for every platform.
+1. Define how a UA can retrieve acquisition information from every platform-specific Store.
 
-## Use Case (Windows)
+## Store Use Case (Windows)
 
 A web app developer has submitted their app to the Microsoft Store, and they have created ad
 campaigns to promote their app.  When a user sees and clicks on an advertisement that leads them to
@@ -44,16 +45,16 @@ is recorded by the Store, and associated with the user's app entitlement. On any
 of the Store-acquired web app, the web app developer can call the JavaScript API to request the
 acquisition information from the Store in order to retrieve the Campaign ID associated with that
 user/app acquisition. The web app developer will then be able to use this information to help
-determine which ad campaigns were most effective, to best inform their future ad investment
+determine which ad campaigns were most effective to best inform their future ad investment
 decisions.
 
 ## Proposed Solution
 
 The Acquisition Info API introduces the `navigator.acquisitionInfoProvider` attribute which allows
-developers to access promise methods that can return acquisition information for Store-installed
+developers to access a promise method that can return acquisition information for Store-installed
 web apps. The API will be `undefined` when run as a normal tab in the browser (which explicity excludes
 support for the [`browser` display mode][display mode]). To obtain a valid value, the site needs to run as an
-installed webapp. Browser extensions are not eligible to call this API.
+installed web app. Browser extensions are not eligible to call this API.
 
 ### The current shape of acquisition information
 
@@ -71,10 +72,9 @@ functionality.
 `navigator.acquisitionInfoProvider` accesses the acquisition info provider attribute of
 `navigator`, which provides access to the `getDetails()` method that surfaces various acquisition details,
 including the Campaign ID. There is no need for a parameter input when calling this method,
-as current implementations of the native API for Store information depend on
-derived contexts rather than specific service providers.
+as the user agent (UA) is expected to derive application context through the UA or store platform user account.
 We are introducing the layer of `acquisitionInfoProvider` to `navigator` (rather than flattening
-the API as `navigator.getDetails()`) in order to leave the possibility of additional functionality
+the API as `navigator.getAcquisitionInfoDetails()`) in order to leave the possibility of additional functionality
 attached to the `acquisitionInfoProvider` attribute open.
 
 ```js
@@ -104,8 +104,17 @@ let installSource = details["installSource"]; // e.g. Microsoft Store
 let campaignId = details["campaignId"]; // e.g. adCampaign202306
 ```
 
-While there are some common key-value pairs, depending on the platform of the acquisition the
-pairs contained within the dictionary may differ to fit different use cases.
+`installSource` is a required dictionary property with values dependent on the following scenarios:
+
+1. `Microsoft Store` | `Google Play Store` | `Apple App Store` - The web app was installed through one of these store platforms.
+
+2. `Policy` - The web app was installed due to an enterprise policy.
+
+3. `<install origin>` - For [same-domain installation](#same-domain-installation), the domain name of the web app.
+For [cross-domain installation](#web-install-api-cross-domain-installation), the installer's domain name.
+
+While `installSource` remains a required property, depending on the platform of the acquisition the pairs contained within
+the dictionary may differ to fit different store use cases.
 
 > Payload examples are taken from [Play Install Referrer][Play Install Referrer API] and [Apple Ads Attribution][Apple Ads Attribution API]
 documentation and are not final.
@@ -157,24 +166,30 @@ installations of web applications, the Acquisition Info API could enable this so
 
 Currently the main method of installing a PWA through the browser is navigating to the desired web application and
 initiating a same-domain installation. It may be the case that the intial navigation was due to an ad click.
-By having the user agent (UA) capture a stadardized property (`attributionId`) for what led the user to the page
-upon installation, it becomes possible for the Acquistion Info API to return attribution information for browser-installed
-web applications as well.
+By having a standardized dictionary property (`attributionId`) that the UA is responsible for capturing to keep track of ad attribution,
+it becomes possible for the Acquistion Info API to return attribution information for browser-installed
+web applications as well. This `attributionId` dictionary property could be captured by the UA through a query parameter such
+as `__a_id` in the HTTP header `Referer` field.
 
 #### Example same-domain use case
 
-1. User clicks on a Bing ads campaign that leads them to _foo.com?atr\_id=bingAdsAug2023_.
+1. User clicks on a Bing ads campaign on `bar.com` that leads them to `foo.com`.
+The HTTP `Referer` passed to `foo.com` is `bar.com?__a_id=bingAdsAug2023`.
 
-2. User installs the _foo.com_ PWA from _foo.com_.
+2. User installs the `foo.com` PWA from `foo.com`.
 
 3. UA captures the attribution information at the time of installation.
 
-4. Calling the Acquisition Info API `getDetails()` for _foo.com_ PWA produces the following payload.
+4. Calling the Acquisition Info API `getDetails()` for `foo.com` PWA produces the following payload.
+
+> Proposed dictionary properties are not final and subject to change based on feedback.
 
 ```js
 details = {
   installSource: "foo.com",
-  attributionId: "bingAdsAug2023"
+  attributionId: "bingAdsAug2023",
+  httpReferrer: "bar.com?__a_id=bingAdsAug2023",
+  installTimestamp: "2023-08-16 10:30:00 UTC"
 }
 ```
 
@@ -182,35 +197,37 @@ details = {
 
 With the addition of the [Web Install API][Web Install API], there exists a possibility of cross-domain
 browser-initiated installations that may have associated attribution information through the new capability
-of webapps to install other webapps. Apps installed through the Web Install API will hold a promise
-within its returned success value that allows an opportunity for the installation origin to receive ad attribution information,
-at which point can be captured by the UA for later retrieval by the Acquisition Info API.
+of webapps to install other webapps. The Web Install API contains a `referral-info` parameter for its installation
+method, which contains an object that can hold arbitrary attribution information. The UA can capture the information
+contained in `referral-info` at install time so that the Acquisition Info API can return the data later.
 
 #### Example cross-domain use case
 
-1. User clicks on a Bing ads campaign (`bingAdsAug2023`) that leads them to a web application repository located at _apprepo.com_.
+1. User clicks on a Bing ads campaign on `bar.com` that leads them to the Microsoft Store website product landing
+page for `foo.com`. The HTTP `Referer` passed to the Microsoft Store website is `bar.com?__a_id=bingAdsAug2023`.
 
-2. User initiates installation of the _foo.com_ PWA from _apprepo.com_.
+2. User initiates installation of the `foo.com` PWA from the Microsoft Store product page through `navigator.install()`.
+Needed attribution information such as `attributionId`, `httpReferrer`, and `installTimestamp` is passed as an object to the
+`referral-info` parameter of the `navigator.install()` call.
 
-3. UA captures the installation origin and the attribution information returned through the Web Install API.
+3. UA captures the referral-info passed to the Web Install API at installation.
 
-4. Calling the Acquisition Info API `getDetails()` for _foo.com_ PWA produces the following payload.
+4. Calling the Acquisition Info API `getDetails()` for `foo.com` PWA produces the following payload.
 
 ```js
 details = {
-  installSource: "apprepo.com",
-  attributionId: "bingAdsAug2023"
+  installSource: "apps.microsoft.com",
+  attributionId: "bingAdsAug2023",
+  httpReferrer: "",
+  installTimestamp: "2023-08-16 10:30:00 UTC"
 }
 ```
-
-There is also the possibility that the advertisement is in the app repo itself, in which case the attribution
-information would still be returned in the Web Install API promise.
 
 ## Other attribution cases
 
 ### Policy applications
 
-It's possible that a policy app could have associated attribution, perhaps implemented through URL parameters. In this case queries
+It's possible that a policy app could have associated attribution, perhaps implemented through its URL parameters. In this case queries
 to the API should reflect the type of app in its install source as well as that attribution information which will follow the same property
 convention as browser installations.
 
@@ -225,7 +242,8 @@ details = {
 
 When PWAs are synced across devices for the same user, the UA may make it easier to install that same set of PWAs. In this case,
 the acquisition information that is recorded for the originally acquired application should be maintained to be the same for all
-other installations.
+other installations. This applies to any and all other installation for the same user profile across any other device supported
+by the UA.
 
 ## Privacy and Security Considerations
 
@@ -233,7 +251,8 @@ other installations.
   or sanitation of the acquisition data retrieved itself.
 
 2. _Lack of user control regarding acquisition identifiers_: This solution provides no method for
-   the user to clear, disable, or modify the data retrieved from `acquisitionInfoProvider.getDetails()`.  We recognize that different vendors may have specific preferences and requirements regarding this aspect,
+   the user to clear, disable, or modify the data retrieved from `navigator.acquisitionInfoProvider.getDetails()`.
+   We recognize that different vendors may have specific preferences and requirements regarding this aspect,
    so we defer to the individual install sources to handle that implementation.
 
 3. _Potential misuse of acquisition identifiers_: Acquisition identifiers could potentially be
@@ -257,6 +276,7 @@ is being exposed in this API.
 | Store       | Microsoft Store                                                     |
 | App         | Application                                                         |
 | Campaign ID | A unique identifier that is associated with a specific ad campaign. |
+| UA          | User Agent                                                          |
 
 [WinRT API]: https://learn.microsoft.com/en-us/uwp/api/windows.services.store.storecollectiondata.campaignid
 [display mode]: https://developer.mozilla.org/en-US/docs/Web/Manifest/display
@@ -266,10 +286,3 @@ is being exposed in this API.
 [Web Install API]: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/WebInstall/explainer.md
 
 ## Open Questions
-
-### What properties should we be returning for browser installation?
-
-Currently, we are returning the `attributionId` property as the sole descriptor for browser acquisition. Is this enough?
-What about the inclusion of an install timestamp or install date as present in the Play Install Referrer API, or instead
-capturing an entire query string in order to give more flexibility on what kind of information is presented in the browser
-acquisition information?
