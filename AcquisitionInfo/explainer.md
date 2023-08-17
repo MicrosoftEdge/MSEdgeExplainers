@@ -169,11 +169,12 @@ initiating a same-domain installation. It may be the case that the intial naviga
 By having a standardized dictionary property (`attributionId`) that the UA is responsible for capturing to keep track of ad attribution,
 it becomes possible for the Acquistion Info API to return attribution information for browser-installed
 web applications as well. This `attributionId` dictionary property could be captured by the UA through a query parameter such
-as `__a_id` in the HTTP header `Referer` field.
+as `__a_id` in the [HTTP header `Referer`][HTTP Referer] field.
+> This solution would require that the referrer policy is not specified to block `referer` information requests.
 
 #### Example same-domain use case
 
-1. User clicks on a Bing ads campaign on `bar.com` that leads them to `foo.com`.
+1. User clicks on a Bing ads campaign on `bar.com` that navigates to `foo.com`.
 The HTTP `Referer` passed to `foo.com` is `bar.com?__a_id=bingAdsAug2023`.
 
 2. User installs the `foo.com` PWA from `foo.com`.
@@ -203,16 +204,22 @@ contained in `referral-info` at install time so that the Acquisition Info API ca
 
 #### Example cross-domain use case
 
-1. User clicks on a Bing ads campaign on `bar.com` that leads them to the Microsoft Store website product landing
-page for `foo.com`. The HTTP `Referer` passed to the Microsoft Store website is `bar.com?__a_id=bingAdsAug2023`.
+1. User clicks on a Bing ads campaign on `bar.com` that navigates to the Microsoft Store website product landing
+page for `foo.com`.
 
-2. User initiates installation of the `foo.com` PWA from the Microsoft Store product page through `navigator.install()`.
-Needed attribution information such as `attributionId`, `httpReferrer`, and `installTimestamp` is passed as an object to the
+2. The query param `__a_id=bingAdsAug2023` is inserted into the HTTP `Referer` passed to the Microsoft Store website on navigation,
+resulting in the `Referer` field `apps.microsoft.com` has access to being `bar.com?__a_id=bingAdsAug2023`.
+
+3. User initiates installation of the `foo.com` PWA from the Microsoft Store product page by clicking install.
+
+4. `navigator.install()` will be used for the install, and the caller checks that there is an `__a_id` in the `Referer`.
+
+5. Needed attribution information such as `attributionId`, `httpReferrer`, and `installTimestamp` is passed as an object to the
 `referral-info` parameter of the `navigator.install()` call.
 
-3. UA captures the referral-info passed to the Web Install API at installation.
+6. UA captures the referral-info passed to the Web Install API at installation.
 
-4. Calling the Acquisition Info API `getDetails()` for `foo.com` PWA produces the following payload.
+7. Calling the Acquisition Info API `getDetails()` for `foo.com` PWA produces the following payload.
 
 ```js
 details = {
@@ -284,5 +291,6 @@ is being exposed in this API.
 [Apple Ads Attribution API]: https://developer.apple.com/documentation/ad_services
 [secure context]: https://w3c.github.io/webappsec-secure-contexts/
 [Web Install API]: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/WebInstall/explainer.md
+[HTTP Referer]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer
 
 ## Open Questions
