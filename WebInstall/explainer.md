@@ -42,25 +42,39 @@ There are several use cases that the Web Install API enables:
 The site can trigger its own installation. The current way of doing this is with the `onbeforeinstallprompt`, and this would be phased out in favor of a unified `install` method for same and cross domains.
 
 ```javascript
-/* tries to install web app in the current domain */
-if ('install' in navigator) {
-    navigator.install()
-    .catch(error => {
-        if (error.name === 'NotAllowedError') {
-            /* No installation origin permissions */
-        } else if (error.name === 'NotSupportedError') {
-            /* The web site is NOT installable */
+/* tries to install the current domain */
+const installApp = async () => {
+    try{
+        if ('install' in navigator) {
+            const appInstalled = await navigator.install();
         }
-    });
-}
+    }
+    catch(err) {
+        console.error(err);
+    }
+};
 
-/* tries to install the web app in the domain in the side panel surface of the UA */
-if ('install' in navigator) {
-    navigator.install({mode: ['side_panel']})
-    .catch(
-        /* redacted same as above */
-    );
-}
+/* tries to install the current domain in the side panel surface of the UA */
+/* more advanced error handling */
+
+const installApp = async () => {
+    try{
+        if ('install' in navigator) {
+            const appInstalled = await navigator.install({mode: 'side_panel'});
+        }
+    }
+    catch(err) {
+        switch(err.message){
+            case 'NotAllowedError':
+                /* No installation origin permissions */
+                break;
+            case 'NotSupportedError':
+                /* The website is not installable */
+                break;
+        }
+    }
+};
+
 ```
 
 ![Same domain install flow](./samedomaininstall.png) 
@@ -79,32 +93,7 @@ When called on the same domain, the **`install()` method will trigger/open the p
 An associated domain (out-of-scope of the PWA) could prompt for the installation of the web app (in a different domain). The typical use case for this is a website of a service that informs their customers about their (PWA) web app.
 
 ```javascript
-/* example of using navigator.install and permissions API */
 
-if('install' in navigator) {
-    //tries to install the PWA that is not in the same scope
-    navigator.install('https://app.contoso.com')
-    .then( installation => {
-        // installation was initiated (prompted) by the UA
-        console.log(`Installation started from ${installation.origin}.`)
-    })
-    .catch(error => {
-        //if the website has no permission to install
-        if (error.name === 'NotAllowedError') {
-            const { state } = await navigator.permissions.query({
-              name: "installation"
-            });
-            //check if permission has been asked
-            switch (state) {
-                case "prompt":
-                    //shows the install button in the web
-                    //this will call the prompt() method of the onbeforeinstallprompt
-                    showInstallButton();
-                break;
-            }
-	    }
-    });
-}
 
 ```
 Manifest file for the Contoso App, allowing installation *ONLY* from contoso.com :
