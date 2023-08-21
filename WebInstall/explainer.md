@@ -101,7 +101,7 @@ An associated domain (out-of-scope of the PWA) could prompt for the installation
           });
           switch (state) {
             case "granted":
-                const value = await install('https://app.contoso.com');
+                const value = await navigator.install('https://app.contoso.com');
               break;
             case "prompt":
               showInstallButton();
@@ -138,7 +138,7 @@ Manifest file for the Contoso App, allowing installation *ONLY* from contoso.com
 
 const installApp = async (url) => {
     try{
-        const value = await install(url);
+        const value = await navigator.install(url);
         return value;
     }
     catch(err){console.error(err.message)}
@@ -176,7 +176,7 @@ To install a PWA, a PWA would use the promise-based method `navigator.install([<
 
 const installApp = async () => {
     try{
-        const value = await install();
+        const value = await navigator.install();
     }
     catch(err){console.error(err.message)}
 };
