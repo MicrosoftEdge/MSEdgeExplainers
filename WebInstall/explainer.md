@@ -93,7 +93,26 @@ When called on the same domain, the **`install()` method will trigger/open the p
 An associated domain (out-of-scope of the PWA) could prompt for the installation of the web app (in a different domain). The typical use case for this is a website of a service that informs their customers about their (PWA) web app.
 
 ```javascript
-
+/* Example that uses the Permissions API to check if the installation permission is set before calling the install method */
+  const installApp = async () => {
+    try{
+        const { state } = await navigator.permissions.query({
+            name: "installation"
+          });
+          switch (state) {
+            case "granted":
+                const value = await install('https://app.contoso.com');
+              break;
+            case "prompt":
+              showInstallButton();
+              break;
+            case "denied":
+              browseToAppStorePage();
+              break;
+          }
+    }
+    catch(err){console.error(err.message)}
+};
 
 ```
 Manifest file for the Contoso App, allowing installation *ONLY* from contoso.com :
@@ -117,21 +136,14 @@ Manifest file for the Contoso App, allowing installation *ONLY* from contoso.com
 ```javascript
 /* tries to install a cross-domain web app */
 
-if('install' in navigator) {
-    //tries to install a cross-domain web app
-    navigator.install('https://www.website.com')
-    .then( installation => {
-        // installation was initiated (prompted) by the UA
-        console.log(`Installation started from ${installation.origin}.`)
-    })
-    .catch(error => {
-        if (error.name === 'NotAllowedError') {
-            /* No installation origin permissions */
-        } else if (error.name === 'NotSupportedError') {
-            /* The target site is not installable */
-        }
-    });
-}
+const installApp = async (url) => {
+    try{
+        const value = await install(url);
+        return value;
+    }
+    catch(err){console.error(err.message)}
+};
+
 ```
 
   ![Install flow from an app repository](./apprepositoryinstallation.png) 
@@ -147,23 +159,33 @@ Additionally for developers, the feature also:
 
 To install a PWA, a PWA would use the promise-based method `navigator.install([<url>][, <params>]]);`. This method will:
 
-* Resolve when an installation prompt has been shown.
+* Resolve when an installation was completed.
     * The success value will be an object that contains:
-     	*  `installed`: *second* promise that will resolve or reject if the application is installed.
-* Be rejected if the prompt is not shown and have a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
+     	*  `mode`: string with the surface-hint where the app was installed.
+* Be rejected if the prompt is not shown or if the app installation did not complete. It'll reject with a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
     * `NotAllowedError`: The `installation` [Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) has been used to block the use of this feature.
     * `NotSupportedError`: the target website is not installable.
     * `InsufficientEngagementError`: the UA's required (if any) [engagement heuristics](https://web.dev/install-criteria/#criteria) have not been met.
+    * `AbortError`: The installation (prompt) was closed/cancelled.
+    * `TimeoutError`: The installation failed due to timeout.
     * `OperationError`: other error.
+	
+    
  ```javascript
-/* example of using navigator.install */
+/* simple example of using navigator.install */
 
-if ('install' in navigator ) {
-    navigator.install('https://www.elk.zone')
-    .then( installation => console.log( `Installation started from ${installation.origin}` ));
-}
+const installApp = async () => {
+    try{
+        const value = await install();
+    }
+    catch(err){console.error(err.message)}
+};
+
 ```
+
 ```javascript
+/* Example of advanced error handling */
+
 (...)
 .catch(error => {
     if(error.name === 'NotSupportedError') {
@@ -179,17 +201,10 @@ if ('install' in navigator ) {
     }
 });
 ```
-If the prompt is shown, there is a second promise (`installed`) that:
-* resolves if the application is installed with an object that contains:
-	* `mode`: string with the surface-hint where the app was installed.
- 	* `campaignId`: string associated campaignId with the installation. 
-* rejects with a `DOMExpception` with a with a value of:
-	* `AbortError`: The installation (prompt) was closed/cancelled.
-	* `TimeoutError`: The installation failed due to timeout.
 
 ![Promises resolve/reject flow](./installPromises.png) 
 
-*The **`installed`** promise that is returned upon a successful prompting will allow for **one** opportunity for the installation origin to get attribution for the install, parse any additional information like ad campaigns, or any other required processing in the origin after a successful installation.*
+Upon a successful installation there is **one** opportunity for the installation origin to get attribution for the install, parse any additional information like ad campaigns, or any other required processing in the origin after a successful installation. Once the promise resolves there is no other way for the origin to get access to the same information.* 
 
 #### Signatures of the `install` method
 The Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
