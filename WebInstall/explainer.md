@@ -101,7 +101,7 @@ An associated domain (out-of-scope of the PWA) could prompt for the installation
           });
           switch (state) {
             case "granted":
-                const value = await navigator.install('https://app.contoso.com');
+                const value = await navigator.install('https://myapp.org');
               break;
             case "prompt":
               showInstallButton();
@@ -115,14 +115,14 @@ An associated domain (out-of-scope of the PWA) could prompt for the installation
 };
 
 ```
-Manifest file for the Contoso App, allowing installation *ONLY* from contoso.com :
+Manifest file for the myapp.org (apps), allowing installation *ONLY* from myapp.com :
 ```json
 {
-    "name": "Contoso App",
+    "name": "My App ORG",
     "display": "standalone",
     "start_url": "/index.html",
     "install_sources": [ 
-	    {"origin": "contoso.com", "inquire": true}   
+	    {"origin": "myapp.com", "inquire": true}   
     ]
 }
 ```
@@ -250,7 +250,7 @@ The `navigator.canInstall([<url>])` is an aysnc method that returns `true` if th
 /* example of using the canInstall method */
 
 if('canInstall' in navigator) {
-    if(navigator.canInstall("https://elk.zone")) {
+    if(await navigator.canInstall("https://elk.zone")) {
         showAppInstallButton();
     }
     else {
