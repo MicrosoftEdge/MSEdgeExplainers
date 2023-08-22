@@ -204,7 +204,7 @@ const installApp = async () => {
 
 ![Promises resolve/reject flow](./installPromises.png) 
 
-Upon a successful installation there is **one** opportunity for the installation origin to get attribution for the install, parse any additional information like ad campaigns, or any other required processing in the origin after a successful installation. Once the promise resolves there is no other way for the origin to get access to the same information.* 
+Upon a successful installation there is **one** opportunity for the installation origin to get attribution for the install. Once the promise resolves there is no other way for the origin to get access to the same information.* 
 
 #### Signatures of the `install` method
 The Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
