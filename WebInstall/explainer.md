@@ -57,7 +57,7 @@ const installApp = async () => {
 /* tries to install the current domain in the side panel surface of the UA */
 /* more advanced error handling */
 
-const installApp = async () => {
+const installAppInSidePanel = async () => {
     try{
         if ('install' in navigator) {
             const appInstalled = await navigator.install({mode: 'side_panel'});
