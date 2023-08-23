@@ -157,7 +157,7 @@ Additionally for developers, the feature also:
 
 ### The `navigator.install` method
 
-To install a PWA, a PWA would use the promise-based method `navigator.install([<url>][, <params>]]);`. This method will:
+To install a PWA, a PWA would use the promise-based method `navigator.install([<url>[, <params>]]);`. This method will:
 
 * Resolve when an installation was completed.
     * The success value will be an object that contains:
