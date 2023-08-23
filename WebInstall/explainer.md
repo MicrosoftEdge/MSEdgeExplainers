@@ -212,7 +212,7 @@ The Web Install API consists of the extension to the navigator interface with th
 
 1. `navigator.install()`: The method receives no parameters and tries to install the current domain as an app. This would replace `beforeinstallprompt` and the current way developers have been controlling the prompt to install apps.
 
-2. `navigator.install(<params>)`: The method receives an object with parameters that it can use to customise a same domain installation. These paramters can be used to hint to the UA that the app should be installed in a surface like a side panel.
+2. `navigator.install(<params>)`: The method receives an object with parameters that it can use to customize a same domain installation. These paramters can be used to hint to the UA that the app should be installed in a surface like a side panel. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
 
 3. `navigator.install(<url>)`: The method receives a parameter which is a url to a web app to install. This can be a cross-domain app and will prompt for installation of the app if the requesting origin has installation permissions (see security section). This is the most common use of the API.
 
