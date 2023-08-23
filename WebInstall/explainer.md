@@ -222,7 +222,7 @@ The Web Install API consists of the extension to the navigator interface with th
 
 The `navigator.install` call can receive an object with a set of parameters that specify different installation behaviours for the app.
 
-* **mode**: Due to the evolving nature of PWAs, there are different surfaces where these can be installed. The optional parameters that can be passed on to the `navigator.install` call can hint to the UA if the app should be installed as a standalone app or as a sidebar bar if supported. `mode` is an array of values that hint to the preferred way of installing the app. Among the values it can have are `default` and `side_panel`. These values will always fallback to a standalone installation.  
+* **mode**: Due to the evolving nature of PWAs, there are different surfaces where these can be installed. The optional parameters that can be passed on to the `navigator.install` call can hint to the UA if the app should be installed as a standalone app or as a sidebar app if supported. `mode` is an array of values that hint to the preferred way of installing the app. Among the values it can have are `default` and `side_panel`. If the requested mode is not supported by the UA, installation will proceed by falling back to a standalone installation.
 
 As an example, you could try to install the elk PWA in a browser that supports a sidebar with this code:
 
