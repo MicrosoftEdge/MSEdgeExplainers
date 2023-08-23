@@ -215,7 +215,7 @@ The Web Install API consists of the extension to the navigator interface with th
 
 3. `navigator.install(<url>)`: The method receives a parameter which is a url to a web app to install. This can be a cross-domain app and will prompt for installation of the app if the requesting origin has installation permissions (see security section). This is the most common use of the API.
 
-4. `navigator.install(<url, <params>)`: This signature of the method includes the optional parameters. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the Params subsection of this specification.
+4. `navigator.install(<url>, <params>)`: This signature of the method includes the optional parameters. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
 
 #### Parameters
 
