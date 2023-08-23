@@ -163,7 +163,8 @@ To install a PWA, a PWA would use the promise-based method `navigator.install([<
     * The success value will be an object that contains:
      	*  `mode`: string with the surface-hint where the app was installed.
 * Be rejected if the prompt is not shown or if the app installation did not complete. It'll reject with a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
-    * `NotAllowedError`: The `installation` [Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) has been used to block the use of this feature.
+    * `NotAllowedError`: The (new) `installation` [Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) has blocked the use of this feature.
+
     * `NotSupportedError`: the target website is not installable.
     * `InsufficientEngagementError`: the UA's required (if any) [engagement heuristics](https://web.dev/install-criteria/#criteria) have not been met.
     * `AbortError`: The installation (prompt) was closed/cancelled.
