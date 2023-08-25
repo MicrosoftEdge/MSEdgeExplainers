@@ -1,3 +1,4 @@
+
 # API for Acquisition Attribution of Web Apps
 
 Author: [Alex Kyereboah](https://github.com/akyereboah_microsoft)
@@ -25,7 +26,7 @@ Campaign ID which identifies the ad campaign source of app acquisition. While
 [Universal Windows Platform (UWP) apps can access this information through a WinRT API][WinRT API],
 the absence of similar functionality for PWAs poses a gap between native applications and
 PWAs. We aim to not only bridge this gap, but to enable similar functionality surrounding attribution
-for browser-installed web applications through the introduction of the Acquisition Info API.
+for browser-installed web applications through the introduction of the **Acquisition Info API**.
 
 ## Goals
 
@@ -36,7 +37,7 @@ from the browser.
 
 1. Define how a UA can retrieve acquisition information from every platform-specific Store.
 
-## Store Use Case (Windows)
+## Store-install Scenario (Windows)
 
 A web app developer has submitted their app to the Microsoft Store, and they have created ad
 campaigns to promote their app.  When a user sees and clicks on an advertisement that leads them to
@@ -51,7 +52,7 @@ decisions.
 ## Proposed Solution
 
 The Acquisition Info API introduces the `navigator.acquisitionInfoProvider` attribute which allows
-developers to access a promise method that can return acquisition information for Store-installed
+developers to access a promise method that can return acquisition information for installed
 web apps. The API will be `undefined` when run as a normal tab in the browser (which explicity excludes
 support for the [`browser` display mode][display mode]). To obtain a valid value, the site needs to run as an
 installed web app. Browser extensions are not eligible to call this API.
@@ -63,7 +64,7 @@ information in native applications beyond the WinRT API solution for Windows pla
 Play Store has the [Play Install Referrer API][Play Install Referrer API] to retrieve referral content from Google Play such as
 referrer URL, while the Apple App Store has the [Apple Ads Attribution API][Apple Ads Attribution API] that provides payloads
 with information such as campaign ID. However, all of these solutions are only available for use by
-native applications and there exists no equivalent for web apps. The AcquisitionInfo API aims to
+native applications and there exists no equivalent for web apps. The Acquisition Info API aims to
 continue efforts to close the gap between native apps and web apps by providing that missing
 functionality.
 
@@ -73,9 +74,6 @@ functionality.
 `navigator`, which provides access to the `getDetails()` method that surfaces various acquisition details,
 including the Campaign ID. There is no need for a parameter input when calling this method,
 as the user agent (UA) is expected to derive application context through the UA or store platform user account.
-We are introducing the layer of `acquisitionInfoProvider` to `navigator` (rather than flattening
-the API as `navigator.getAcquisitionInfoDetails()`) in order to leave the possibility of additional functionality
-attached to the `acquisitionInfoProvider` attribute open.
 
 ```js
 if (navigator.acquisitionInfoProvider === undefined) {
@@ -87,9 +85,13 @@ try {
   // Use the returned dictionary here.
   ...
 } catch (error) {
-  // We encountered a failure while building the object
-  // The method must be recalled at a later time
-  return;
+  if (error.name === 'NetworkError') {
+    // There was a network failure in accessing the Store endpoint. 
+    return;
+  } else if (error.name === 'AccessError') {
+    // There was an error in accessing UA provided offline values.
+    return;
+  }
 }
 ```
 
@@ -167,19 +169,18 @@ installations of web applications, the Acquisition Info API could enable this so
 Currently the main method of installing a PWA through the browser is navigating to the desired web application and
 initiating a same-domain installation. It may be the case that the intial navigation was due to an ad click.
 By having a standardized dictionary property (`attributionId`) that the UA is responsible for capturing to keep track of ad attribution,
-it becomes possible for the Acquistion Info API to return attribution information for browser-installed
-web applications as well. This `attributionId` dictionary property could be captured by the UA through a query parameter such
-as `__a_id` in the [HTTP header `Referer`][HTTP Referer] field.
-> This solution would require that the referrer policy is not specified to block `referer` information requests.
+it becomes possible for the Acquistion Info API to return attribution information for browser-installed web applications as well.
+This `attributionId` dictionary property could be captured by the UA through a query string parameter such
+as `__a_id` in the GET parameters for the website. `httpReferrer` and `installTimestamp` are proposed as properties that should
+also be captured by the UA at install time and are included in every dictionary result for a browser-installed app.
 
 #### Example same-domain use case
 
-1. User clicks on a Bing ads campaign on `bar.com` that navigates to `foo.com`.
-The HTTP `Referer` passed to `foo.com` is `bar.com?__a_id=bingAdsAug2023`.
+1. User clicks on a Bing ads campaign on `bar.com` that navigates to `foo.com?__a_id=bingAdsAug2023`.
 
 2. User installs the `foo.com` PWA from `foo.com`.
 
-3. UA captures the attribution information at the time of installation.
+3. UA captures the attribution information to be eventually returned at the time of installation.
 
 4. Calling the Acquisition Info API `getDetails()` for `foo.com` PWA produces the following payload.
 
@@ -189,7 +190,7 @@ The HTTP `Referer` passed to `foo.com` is `bar.com?__a_id=bingAdsAug2023`.
 details = {
   installSource: "foo.com",
   attributionId: "bingAdsAug2023",
-  httpReferrer: "bar.com?__a_id=bingAdsAug2023",
+  httpReferrer: "bar.com",
   installTimestamp: "2023-08-16 10:30:00 UTC"
 }
 ```
@@ -197,36 +198,42 @@ details = {
 ### Web Install API (Cross-domain installation)
 
 With the addition of the [Web Install API][Web Install API], there exists a possibility of cross-domain
-browser-initiated installations that may have associated attribution information through the new capability
+browser-initiated installations that may have attribution information through the new capability
 of webapps to install other webapps. The Web Install API contains a `referral-info` parameter for its installation
 method, which contains an object that can hold arbitrary attribution information. The UA can capture the information
 contained in `referral-info` at install time so that the Acquisition Info API can return the data later.
 
 #### Example cross-domain use case
 
-1. User clicks on a Bing ads campaign on `bar.com` that navigates to the Microsoft Store website product landing
-page for `foo.com`.
+For example, a user clicks on a Bing ads campaign on `bar.com` that navigates to the Microsoft Store website (`apps.microsoft.com`) product landing
+page for `foo.com`. `foo.com` may have defined that they want the Microsoft Store to also pass the region of installation and version of the app
+being installed as part of the acquisition information. This could be accomplished in the following fashion:
 
-2. The query param `__a_id=bingAdsAug2023` is inserted into the HTTP `Referer` passed to the Microsoft Store website on navigation,
-resulting in the `Referer` field `apps.microsoft.com` has access to being `bar.com?__a_id=bingAdsAug2023`.
+From `apps.microsoft.com`:
 
-3. User initiates installation of the `foo.com` PWA from the Microsoft Store product page by clicking install.
+```js
+if ('install' in navigator) {
+  // Build the referral-info object
+  var referralInfo = {
+    region: "US",
+    installVersion: "1.0.0.0"
+  };
+  // Web install with additional attribution information
+  navigator.install("foo.com", {referral-info: referralInfo});
+}
+```
 
-4. `navigator.install()` will be used for the install, and the caller checks that there is an `__a_id` in the `Referer`.
-
-5. Needed attribution information such as `attributionId`, `httpReferrer`, and `installTimestamp` is passed as an object to the
-`referral-info` parameter of the `navigator.install()` call.
-
-6. UA captures the referral-info passed to the Web Install API at installation.
-
-7. Calling the Acquisition Info API `getDetails()` for `foo.com` PWA produces the following payload.
+Result of a `navigator.acquisitionInfoProvider.getDetails()` call
+from the installed web app, `foo.com`:
 
 ```js
 details = {
   installSource: "apps.microsoft.com",
   attributionId: "bingAdsAug2023",
-  httpReferrer: "",
-  installTimestamp: "2023-08-16 10:30:00 UTC"
+  httpReferrer: "bar.com",
+  installTimestamp: "2023-08-16 10:30:00 UTC",
+  region: "US",
+  installVersion: "1.0.0.0"
 }
 ```
 
@@ -251,6 +258,31 @@ When PWAs are synced across devices for the same user, the UA may make it easier
 the acquisition information that is recorded for the originally acquired application should be maintained to be the same for all
 other installations. This applies to any and all other installation for the same user profile across any other device supported
 by the UA.
+
+## Considered Alternatives
+
+### Flattening the API
+
+Right now, there is only one method available under the `acquisitionInfoProvider` attribute, so it seems a natural course of action
+to remove the inbetween layer of `acquisitionInfoProvider` and instead have a `navigator.getAcquisitionInfoDetails()` method.
+However, doing so eliminates the possibility of future additional functionality attached to the attribute. In this case, ensuring
+all of the acquisition info related methods remain under `acquisitionInfoProvider` provides clean categorization rather than cluttering
+navigator with multiple possible methods.
+
+### Attaching to the Get Installed Related Apps API
+
+The possiblity of attaching acquisition as metadata to the [`navigator.getInstallRelatedApps()`][gIRA] API as it already returns
+installed app data such as `url` and `platform` exists. However, considering the information that the method covers, it isn't
+the correct place to put acquisition related information. It's not a clear user experience mapping to call the Get Installed Related Apps
+API to get acquisition related information. Additionally, since in the proposed solution for the Acquisition Info API a myraid of acquistion
+related attributes is able to be returned, the Get Installed Related Apps API return fields would quickly become overcrowded with unrelated information.
+
+### Non-API web app start-up params
+
+When an installed web application is launched, acquisition information such as campaign ID could be inserted into the launch URL parameters for the web app.
+However, this would mean any networked communications would have to take place during the start-up process of the web application, and acquisition information would
+only be retrievable on the landing page of the installed web application prior to any navigation within the page. The flexibility of the acquisition information would
+also become greatly limited without overcrowding the query parameters.
 
 ## Privacy and Security Considerations
 
@@ -291,6 +323,6 @@ is being exposed in this API.
 [Apple Ads Attribution API]: https://developer.apple.com/documentation/ad_services
 [secure context]: https://w3c.github.io/webappsec-secure-contexts/
 [Web Install API]: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/WebInstall/explainer.md
-[HTTP Referer]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer
+[gIRA]: https://web.dev/get-installed-related-apps/#use
 
 ## Open Questions
