@@ -219,7 +219,7 @@ if ('install' in navigator) {
     installVersion: "1.0.0.0"
   };
   // Web install with additional attribution information
-  navigator.install("foo.com", {referral-info: referralInfo});
+  const appInstalled = await navigator.install("foo.com", {referral-info: referralInfo});
 }
 ```
 
