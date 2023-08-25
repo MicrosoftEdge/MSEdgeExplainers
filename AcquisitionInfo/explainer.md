@@ -190,7 +190,7 @@ also be captured by the UA at install time and are included in every dictionary 
 details = {
   installSource: "foo.com",
   attributionId: "bingAdsAug2023",
-  httpReferrer: "bar.com",
+  httpReferrer: "https://bar.com/",
   installTimestamp: "2023-08-16 10:30:00 UTC"
 }
 ```
@@ -219,7 +219,7 @@ if ('install' in navigator) {
     installVersion: "1.0.0.0"
   };
   // Web install with additional attribution information
-  const appInstalled = await navigator.install("foo.com", {referral-info: referralInfo});
+  const appInstalled = await navigator.install("foo.com", {"referral-info": referralInfo});
 }
 ```
 
@@ -230,7 +230,7 @@ from the installed web app, `foo.com`:
 details = {
   installSource: "apps.microsoft.com",
   attributionId: "bingAdsAug2023",
-  httpReferrer: "bar.com",
+  httpReferrer: "https://bar.com/",
   installTimestamp: "2023-08-16 10:30:00 UTC",
   region: "US",
   installVersion: "1.0.0.0"
