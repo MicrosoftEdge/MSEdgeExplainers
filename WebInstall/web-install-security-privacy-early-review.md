@@ -4,8 +4,9 @@
 
 1. **What information might this feature expose to Web sites or other parties, and for what purposes is that exposure necessary?**
 
-    The feature does not expose any information to web sites or other parties. 
-    
+    The feature confirms to the installing origin (only) if the application was installed. This happens once after the app is installed and is necessary to allow web store fronts to register the acquisition of the app into an account or to modify the UX of the page.
+   
+    It might expose information to the origin if the web app is installed via the `inquire` field. This is ignored if the browser has a "Do Not Track" mode active. 
 
 2. **Do features in your specification expose the minimum amount of information necessary to enable their intended uses?**
 
@@ -21,7 +22,7 @@
 
 5. **Do the features in your specification introduce new state for an origin that persists across browsing sessions?**
 
-    No, this feature does not introduce new states tied to an origin. The API does not know/remember if an application has been installed.
+    No, this feature does not introduce new states tied to an origin.
 
 6. **Do the features in your specification expose information about the underlying platform to origins?**
 
