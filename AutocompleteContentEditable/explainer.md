@@ -22,12 +22,15 @@ The current specification for `autocomplete` allows for the attribute to exist o
 
 ## Featured Use Case
 A developer may use `autocomplete` to advantage of browser-provided writing assistance features like text prediction on `contenteditable` or `textarea` elements.
+
 ### Facebook.com: Writing a post
 ![Writing a post on facebook.com](facebook-post.png)
 
 ### Medium.com: Drafting an article
 ![Drafting an article on medium.com](medium-draft.png)
 
+### Youtube.com: Commenting on a video
+![Commenting on a video on youtube.com](youtube-video-comment.png)
 
 A developer has a set of rich text edit fields built with [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) controls and would like to use `autocomplete` wearing the [*autofill expectation mantle*](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute) to provide browsers with hints for autocompletion values for these fields. One such scenario could be a code editor whose `autocomplete=on` allows the browser to use a built-in code completion package.
 
