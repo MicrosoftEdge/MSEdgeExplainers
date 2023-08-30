@@ -21,6 +21,14 @@ The current specification for `autocomplete` allows for the attribute to exist o
 1. Expand the definition of the `autocomplete` attribute to be inclusive of [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements by adding [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements to the Text and Multiline control groups. [4.10.18.7.1 Autofill](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute)
 
 ## Featured Use Case
+A developer may use `autocomplete` to advantage of browser-provided writing assistance features like text prediction on `contenteditable` or `textarea` elements.
+### Facebook.com: Writing a post
+![Writing a post on facebook.com](facebook-post.png)
+
+### Medium.com: Drafting an article
+![Drafting an article on medium.com](medium-draft.png)
+
+
 A developer has a set of rich text edit fields built with [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) controls and would like to use `autocomplete` wearing the [*autofill expectation mantle*](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute) to provide browsers with hints for autocompletion values for these fields. One such scenario could be a code editor whose `autocomplete=on` allows the browser to use a built-in code completion package.
 
 ```html
