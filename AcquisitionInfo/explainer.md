@@ -76,21 +76,23 @@ including the Campaign ID. There is no need for a parameter input when calling t
 as the user agent (UA) is expected to derive application context through the UA or store platform user account.
 
 ```js
-if (navigator.acquisitionInfoProvider === undefined) {
-  // The Acquisition Info API is not supported in this context.
-  return;
-}
-try {
-  const acquisitionInfoProvider = await navigator.acquisitionInfoProvider.getDetails();
-  // Use the returned dictionary here.
-  ...
-} catch (error) {
-  if (error.name === 'NetworkError') {
-    // There was a network failure in accessing the Store endpoint. 
-    return;
-  } else if (error.name === 'AccessError') {
-    // There was an error in accessing UA provided offline values.
-    return;
+// Detecting if the API is supported in this context.
+if (navigator.acquisitionInfoProvider) {
+  try {
+    let details = await navigator.acquisitionInfoProvider.getDetails();
+    // App may log results here for backend attribution purposes
+    console.log("Install source was: ", details.installSource);
+    consle.log("From campaign: ", details.campaignId);
+    // Use the returned dictionary here.
+    ...
+  } catch (error) {
+    if (error.name === 'NetworkError') {
+      // There was a network failure in accessing the Store endpoint. 
+      return;
+    } else if (error.name === 'AccessError') {
+      // There was an error in accessing UA provided offline values.
+      return;
+    }
   }
 }
 ```
@@ -265,6 +267,18 @@ by the UA.
 
 Right now, there is only one method available under the `acquisitionInfoProvider` attribute, so it seems a natural course of action
 to remove the inbetween layer of `acquisitionInfoProvider` and instead have a `navigator.getAcquisitionInfoDetails()` method.
+
+```js
+// Detecting if the API is supported in this context.
+if (getAcquisitionInfoDetails in navigator) {
+  try {
+    let details = await navigator.getAcquisitionInfoDetails();
+    // Use the returned dictionary here.
+    ...
+  }
+}
+```
+
 However, doing so eliminates the possibility of future additional functionality attached to the attribute. In this case, ensuring
 all of the acquisition info related methods remain under `acquisitionInfoProvider` provides clean categorization rather than cluttering
 navigator with multiple possible methods.
@@ -272,7 +286,16 @@ navigator with multiple possible methods.
 ### Attaching to the Get Installed Related Apps API
 
 The possiblity of attaching acquisition as metadata to the [`navigator.getInstallRelatedApps()`][gIRA] API as it already returns
-installed app data such as `url` and `platform` exists. However, considering the information that the method covers, it isn't
+installed app data such as `url` and `platform` exists.
+
+```js
+const relatedApps = await navigator.getInstalledRelatedApps();
+relatedApps.forEach((app) => {
+  console.log(app.installSource, app.campaignId);
+});
+```
+
+However, considering the information that the method covers, it likely isn't
 the correct place to put acquisition related information. It's not a clear user experience mapping to call the Get Installed Related Apps
 API to get acquisition related information. Additionally, since in the proposed solution for the Acquisition Info API a myraid of acquistion
 related attributes is able to be returned, the Get Installed Related Apps API return fields would quickly become overcrowded with unrelated information.
@@ -289,10 +312,9 @@ also become greatly limited without overcrowding the query parameters.
 1. _Lack of validation_: It is assumed that the install source does not perform any validation
   or sanitation of the acquisition data retrieved itself.
 
-2. _Lack of user control regarding acquisition identifiers_: This solution provides no method for
-   the user to clear, disable, or modify the data retrieved from `navigator.acquisitionInfoProvider.getDetails()`.
-   We recognize that different vendors may have specific preferences and requirements regarding this aspect,
-   so we defer to the individual install sources to handle that implementation.
+2. _User control regarding acquisition information_: For browser installed web apps, it is recommended that the UA clears saved acquisition information
+  if the user clears cached site data. For store installed web apps, we recognize that different vendors may have specific preferences and requirements
+  regarding this aspect, so we defer to the individual install sources for handling of stored acquisition information.
 
 3. _Potential misuse of acquisition identifiers_: Acquisition identifiers could potentially be
    manipulated or obscured by ad networks or referral sources, similar to the existing practices
@@ -326,3 +348,10 @@ is being exposed in this API.
 [gIRA]: https://web.dev/get-installed-related-apps/#use
 
 ## Open Questions
+
+### How should we be filtering the information returned in `getDetails()`?
+
+The flexibility outlined in the current return fields offers a potential vulnerability in not filtering the
+information being surfaced. This means that fields could even contain unintended information.
+If we were to mitigate this in scoping down the fields that are returned down to specific values or lengths,
+what would that look like? What values are we interested in across all platforms?
