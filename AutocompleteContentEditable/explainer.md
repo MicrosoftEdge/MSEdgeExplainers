@@ -13,10 +13,10 @@ This document is a starting point for engaging the community and standards bodie
 * Current version: [Link](#)
 
 ## Introduction
-The current specification for `autocomplete` allows for the attribute to exist on elements of type `<input>`, `<textarea>`, and `<select>`. With the popularity of text controls using an [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host), we should consider allowing [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements to also utilize the `autocomplete`` attribute. While not a common scenario within the scope of form fields, there are applications for text prediction and autofill within [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements.
+The current specification for `autocomplete` allows for the attribute to exist on elements of type `<input>`, `<textarea>`, and `<select>`. With the popularity of text controls using an [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host), we should consider allowing [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements to also utilize the `autocomplete` attribute. While not a common scenario within the scope of form fields, there are applications for text prediction and autofill within [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements.
 
 ## Goals
-Expand the definition of the `autocomplete` attribute to be inclusive of [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements by adding [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements. [4.10.18.7.1 Autofill](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute)
+Expand the definition of the `autocomplete` attribute to include [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements as autocompletion targets. [4.10.18.7.1 Autofill](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute)
 
 ## Use Case
 A developer may use the `autocomplete` attribute to take advantage of browser-provided writing assistance features like text prediction on `contenteditable` elements.
@@ -35,7 +35,7 @@ The `autocomplete` attribute could also be used to enable additional browser-pro
 
 ![Contact details autocomplete example](contact-details-autocomplete-example.png)
 
-A developer may also wish to turn off `autocomplete` for an [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host). For example, the site may wish to provide their own custom writing assistance tools. The developer would be able to achieve this by setting `autocomplete=off`.
+A developer may also turn off `autocomplete` for an [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host). For example, the site may provide their own custom writing assistance tools. The developer would be able to achieve this by setting `autocomplete=off`.
 
 ## Out of Scope
 1. Defining expected user agent behavior or user interface design.
