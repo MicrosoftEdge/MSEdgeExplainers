@@ -32,21 +32,11 @@ A developer may use `autocomplete` to advantage of browser-provided writing assi
 ### Youtube.com: Commenting on a video
 ![Commenting on a video on youtube.com](youtube-video-comment.png)
 
-A developer has a set of rich text edit fields built with [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) controls and would like to use `autocomplete` wearing the [*autofill expectation mantle*](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute) to provide browsers with hints for autocompletion values for these fields. One such scenario could be a code editor whose `autocomplete=on` allows the browser to use a built-in code completion package.
+The `autocomplete` attribute will also allow developers to take advantage of any additional browser-provided writing assistance features in the future. See a hypothetical example below.
 
-```html
-<div id="javascript-code-editor" contenteditable="true" autocomplete="on">
-    <pre>
-        <code>
-            function something() {
-                return 0;
-            }
-        </code>
-    </pre>
-</div>
-```
+![Contact details autocomplete example](contact-details-autocomplete-example.png)
 
-Another scenario would be the ability to turn off autofill for [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements on a per-element basis to fit the needs of the application.
+A developer may also wish to turn off `autocomplete` for [editing hosts](https://html.spec.whatwg.org/multipage/interaction.html#editing-host). For example, the site may wish to provide their own custom writing assistance features. The developer would be able to achieve this with `autocomplete=off`.
 
 ```html
 <div id="rich-text-editor" contenteditable="true" autocomplete="on">
