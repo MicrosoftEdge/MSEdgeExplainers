@@ -43,6 +43,7 @@ function define(template) {
                 this._feedback.style.display = "inline";
             } else if (issue != null && issue.length > 0) {
                 this._badge.setAttribute('href', this.getIssueLink(repo, issue));
+                this._badge.setAttribute('aria-label', `Feedback link for ${heading}`);
 
                 let img = document.createElement('img');
                 if (isUpstream === "false") {
@@ -54,6 +55,7 @@ function define(template) {
                 this._badge.appendChild(img)
             } else {
                 this._badge.setAttribute('href', this.getGenericIssueLink(repo, heading));
+                this._badge.setAttribute('aria-label', `Feedback link for ${heading}`);
 
                 let img = document.createElement('img');
                 if (isUpstream === "false") {
