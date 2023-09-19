@@ -130,8 +130,9 @@ const details = await digitalGoodsService.getDetails(['monthly_subscription']);
 const item = details[0];
 new PaymentRequest(
   [{supportedMethods: 'https://store.microsoft.com/billing',
-    data: {itemId: item.itemId}}]);
+    data: {item_id: item.itemId}}]);
 ```
+>IMPORTANT: Payments targeting to Microsoft Store **MUST** include `item_id` field in the PaymentRequest `data` property, and the value of `item_id` **MUST** be one specific [InAppOfferToken](https://learn.microsoft.com/en-us/uwp/api/windows.services.store.storeproduct.inappoffertoken?view=winrt-22621) of an add-on.
 
 >Note: The PaymentRequest will invoke Microsoft Store payment popup window and disable the normal PWA window until payment popup window is closed.
 Currently only support single item to be purchased at the same time.
