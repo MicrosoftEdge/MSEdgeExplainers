@@ -308,6 +308,6 @@ Many thanks for valuable feedback and advice from:
 - Tarek Kamel
 - Pieter Kasselman
 - Alex Russel
-- Sasha Tokerev
+- Sasha Tokarev
 - Peter Zenzerovich
   
