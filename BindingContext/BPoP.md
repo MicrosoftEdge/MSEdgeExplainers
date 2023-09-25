@@ -302,7 +302,7 @@ We plan to continue the engagement to arrive at a browser standard that would en
 This is a growing list and we acknowledge and thank everyone who helped us shape this proposal.
 Many thanks for valuable feedback and advice from:
 
-- Eric Anderson
+- Erik Anderson
 - Olga Dalton
 - Paul Garner
 - Tarek Kamel
