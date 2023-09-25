@@ -307,7 +307,7 @@ Many thanks for valuable feedback and advice from:
 - Paul Garner
 - Tarek Kamel
 - Pieter Kasselman
-- Alex Russel
+- Alex Russell
 - Sasha Tokarev
 - Peter Zenzerovich
   
