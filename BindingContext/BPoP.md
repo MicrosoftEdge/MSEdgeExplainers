@@ -5,40 +5,45 @@
 - [Will Bartlett](mailto:wibartle@microsoft.com)
 - [Sameera Gajjarapu](mailto:sameera.gajjarapu@microsoft.com)
 
-## Participate
+## Participate (Coming soon)
 - [Issue tracker]
 - [Discussion forum]
 
 ## Table of Contents [if the explainer is longer than one printed page]
 
-[You can generate a Table of Contents for markdown documents using a tool like [doctoc](https://github.com/thlorenz/doctoc).]
+[You can generate a Table of Contents for markdown documents using a tool like [doctoc](https://github.com`/thlorenz/doctoc).]
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-- [Introduction](#introduction)
-- [Goals [or Motivating Use Cases, or Scenarios]](#goals-or-motivating-use-cases-or-scenarios)
-- [Non-goals](#non-goals)
-- [BPoP functionality](#bpop-functionality)
-  - [Usecases](#usecases)
-  - [CNAMEs](#cnames)
-  - [Server activation](#server-activation)
-    - [Header based model:](#header-based-model)
-    - [JS API based model:](#js-api-based-model)
-  - [Browser BPoP proofs](#browser-bpop-proofs)
-- [Detailed design](#detailed-design)
-  - [Storage model](#storage-model)
-  - [Retrieval model](#retrieval-model)
-  - [Application model](#application-model)
-    - [BPoP key verification](#bpop-key-verification)
-    - [BPoP background refresh](#bpop-background-refresh)
-  - [Server challenge](#server-challenge)
-  - [Server update](#server-update)
-- [Considered alternatives](#considered-alternatives)
-  - [TLS Token Binding](#tls-token-binding)
-- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
-- [References & acknowledgements](#references--acknowledgements)
+- [Demonstrating Proof-of-Possession in the Browser Application (for authentication cookies) (BPoP)](#demonstrating-proof-of-possession-in-the-browser-application-for-authentication-cookies-bpop)
+  - [Authors:](#authors)
+  - [Participate (Coming soon)](#participate-coming-soon)
+  - [Table of Contents \[if the explainer is longer than one printed page\]](#table-of-contents-if-the-explainer-is-longer-than-one-printed-page)
+  - [Introduction](#introduction)
+  - [Goals \[or Motivating Use Cases, or Scenarios\]](#goals-or-motivating-use-cases-or-scenarios)
+  - [Non-goals](#non-goals)
+  - [BPoP functionality](#bpop-functionality)
+    - [Usecases](#usecases)
+    - [CNAMEs](#cnames)
+    - [Design proposal](#design-proposal)
+    - [Server activation](#server-activation)
+      - [Header based model:](#header-based-model)
+      - [JS API based model:](#js-api-based-model)
+    - [Browser BPoP proofs](#browser-bpop-proofs)
+  - [Detailed design](#detailed-design)
+    - [Storage model](#storage-model)
+    - [Retrieval model](#retrieval-model)
+    - [Application model](#application-model)
+      - [BPoP key verification](#bpop-key-verification)
+      - [BPoP background refresh](#bpop-background-refresh)
+    - [Server challenge](#server-challenge)
+    - [Server update](#server-update)
+  - [Considered alternatives](#considered-alternatives)
+    - [TLS Token Binding](#tls-token-binding)
+  - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+  - [References \& acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -66,7 +71,10 @@ This document makes direct analogs to DPoP, e.g. defining a "BPoP Proof" to matc
 
 A website that is its own standalone identity provider (i.e. a website that accepts a username and password) could activate BPoP as part of rending the login form. Then, on the subsequent request, when the website verifies the username and password and issues an authentication cookie, the website could also verify the BPoP proof and record the public key associated with the BPoP proof in the authentication cookie. If this website had user submitted content and such content was subsequently used as part of a stored cross site scripting (XSS) attack, this attack would be unable to steal the BPoP private key and thus the attacker would be unable to use any stolen cookies.
 
+BPoP also helps in mitigating the man-in-the-middle attacks where an attacker incercepting the traffic and stealing any artifacts will not be able to apply them without the extra proof we require with this protocol. Same with the on-device attacks which can result in the cookie-jar being stolen, will not be able to use those cookies for acquiring access to other resources.
+
 A website that uses a federated identity provider could activate BPoP as part of redirecting to the federated identity provider. Then, on the response back from the federated identity provider, when the website verifies the federation response and issues an authentication cookie, the website could also verify the BPoP proof and record the public key associated with the BPoP proof in the authentication cookie. If this website were vulnerable to a reflected XSS which stole the authentication cookie, the attacker would be unable to use that stolen cookie, as the attacker would be unable to produce a BPoP proof.
+
 
 BPoP is also not strictly limited to cookies - it can be used to bind any artifact which is issued and accepted by the same web server (e.g. an ASP.NET ViewState).
 
@@ -75,6 +83,15 @@ BPoP is also not strictly limited to cookies - it can be used to bind any artifa
 One prominent place where authentication cookies may be shared with multiple parties is authentication cookies set in a top-level domain (example.com) but shared among sub-domains operated as distinct services. For example, an organization named Example might have distinct sub-domains `support.example.com`, `store.example.com`, and `www.example.com`, each operated as a separate service, but capable of reading a shared authentication cookie in `example.com`. By binding cookies to a public private key pair, signing over the specific origin used in the request, and limiting the authentication cookies so they can only be used with such a signature, BPoP prevents a compromised subdomain like `support.example.com` from being leveraged to attack another subdomain like `store.example.com`.
 
 While it is possible for `example.com` to properly audience constrain cookies today (e.g. by issuing one cookie for each subdomain, rather than one cookie in the top-level domain), doing so in practice has proven to be prohibitively cumbersome for many deployments.
+
+### Design proposal
+
+Here is how BPoP is expected to work end-to-end:
+
+1. Webpage user goes to `example.com`, and initiates login. `example.com` redirects to `login.microsoftonline.com`, using javascript or http headers to active binding for `example.com` cookies.
+2. `login.microsoftonline.com`, shows password prompt, javascript or http header activates binding for eSTS cookie
+3. enter password, ESTS SHR in http request, response contains bound eSTS cookie, redirect to example.com with auth code
+4. `example.com` SHR in http request, response from `example.com` contains bound `example.com` cookie
 
 ### Server activation
 
@@ -209,6 +226,8 @@ BPoP: enabled, SameSite=None
 ```
 
 The latest configuration replaces the previous configuration. Replacement occurs for the entire config, not just for configuration elements who appear in the `BPoP` header.
+
+Please note that this behavior applies only when there is no enterprise policy override. In case if enterprise policy enabled by the browser config, the BPoP behaves as configured by the policy. More details on key management and storage for enterprise use cases are covered later in this document.
 
 ### Retrieval model
 
