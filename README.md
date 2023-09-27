@@ -126,6 +126,8 @@ standards communities. Thanks for your continued interest!
 | [Audio Stream Category](https://w3c.github.io/mst-content-hint/#mediastreamtrack-extension) | [W3C Web Real-Time Communications Working Group](https://www.w3.org/groups/wg/webrtc) |[2023-07-17](AudioStreamCategory/explainer.md) |
 |[Storage Access API](https://github.com/privacycg/storage-access)|[W3C Privacy Community Group](https://privacycg.github.io/)|[2023-07-17](StorageAccessAPI/explainer.md)|
 |[Primitives for Enlightened Experiences on Foldable Devices (CSS parts)](https://github.com/WICG/visual-viewport/blob/gh-pages/segments-explainer/SEGMENTS-EXPLAINER.md)|[Web Incubator Community Group](https://wicg.io/)|[2023-07-17](Foldables/explainer.md)|
+| [Exporting IDs from shadow roots for cross-root ARIA](https://github.com/WICG/aom/blob/gh-pages/exportid-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2023-09-22 |
+
 
 # DevTools 🧰
 
