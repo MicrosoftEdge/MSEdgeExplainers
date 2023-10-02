@@ -71,7 +71,7 @@ application.
 
 ### Display Mode
 
-Add a new `side-panel` display mode which a developer can include in their
+Add a new `side-panel` display override option which a developer can include in their
 `display_override` to indicate support for the side panel.
 
 ```json
@@ -96,6 +96,46 @@ if (window.matchMedia('(display-mode: side-panel)').matches) {
 And when display mode is surfaced generically via request headers, it will
 be detectable there as well (see [crbug.com/1174843](https://crbug.com/1174843),
 [Display Mode Client Hint](https://github.com/WICG/manifest-incubations/blob/gh-pages/display_mode-client-hint.md))
+
+#### Independent Declarations for Side Panel and OS Installation
+
+Much like the [WCO proposal](https://github.com/WICG/window-controls-overlay/blob/main/explainer.md) and the [Tabbed Mode proposal](https://github.com/WICG/manifest-incubations/blob/gh-pages/tabbed-mode-explainer.md), this proposal does not include any modification to the 'display' member of the manifest, so developers will
+still declare support for being hosted in an application window by setting 'display' to something other than 'browser'.
+
+```json
+/* Supports OS installation AND side panel */
+{
+  "display": "standalone",
+  "display_override": ["side-panel"]
+}
+
+/* Supports only side panel */
+{
+  "display": "browser",
+  "display_override": ["side-panel"]
+}
+
+/* Supports only side panel (default value for 'display' is 'browser') */
+{
+  "display_override": ["side-panel"]
+}
+```
+
+#### Preference Between Display Modes
+
+The 'display_override' member will continue to allow a web developer to declare an arbitrary order of preferred display modes. Though it is anticipated that the decision of where to add a site (side panel vs app window) will be influenced primarily by declared support and user choice, the web developer may still declare preference between the two and the UA may use this as desired.
+
+```json
+/* Side panel preferred over an application window */
+"display_override": ["side-panel", "standalone"]
+"display_override": ["side-panel"]
+
+/* Side panel supported, but application window preferred */
+"display_override": ["standalone", "side-panel"]
+
+/* Side panel supported, but not desired */
+"display_override": ["browser", "side-panel"]
+```
 
 ### Additional Configuration
 

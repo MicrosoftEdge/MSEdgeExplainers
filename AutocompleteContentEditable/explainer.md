@@ -2,7 +2,7 @@
 
 Consider all sections required unless otherwise noted.
 
-Authors: [Ben Mathwig](https://github.com/bmathwig)
+Authors: [Ben Mathwig](https://github.com/bmathwig), [Sanket Joshi](https://github.com/sanketj)
 
 ## Status of this Document
 
@@ -13,43 +13,33 @@ This document is a starting point for engaging the community and standards bodie
 * Current version: [Link](#)
 
 ## Introduction
-The current specification for `autocomplete` allows for the attribute to exist on elements of type `<input>`, `<textarea>`, and `<select>`. With the rise in popularity of rich text controls using an [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host), we should consider allowing [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements to also utilize the autocomplete attribute. While not a common scenario within the scope of form fields, there are applications for text hinting and autofill within [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements.
-
+The current specification for `autocomplete` allows for the attribute to exist on elements of type `<input>`, `<textarea>`, and `<select>`. With the popularity of text controls using an [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host), we should consider allowing [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements to also utilize the `autocomplete` attribute. While not a common scenario within the scope of form fields, there are applications for text prediction and autofill within [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements.
 
 ## Goals
+Expand the definition of the `autocomplete` attribute to include [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements as autocompletion targets. [4.10.18.7.1 Autofill](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute)
 
-1. Expand the definition of the `autocomplete` attribute to be inclusive of [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements by adding [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements to the Text and Multiline control groups. [4.10.18.7.1 Autofill](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute)
+## Use Case
+A developer may use the `autocomplete` attribute to take advantage of browser-provided writing assistance features like text prediction on `contenteditable` elements.
 
-## Featured Use Case
-A developer has a set of rich text edit fields built with [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) controls and would like to use `autocomplete` wearing the [*autofill expectation mantle*](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute) to provide browsers with hints for autocompletion values for these fields. One such scenario could be a code editor whose `autocomplete=on` allows the browser to use a built-in code completion package.
+### Facebook.com: Writing a post
+![Writing a post on facebook.com](facebook-post.png)
 
-```html
-<div id="javascript-code-editor" contenteditable="true" autocomplete="on">
-    <pre>
-        <code>
-            function something() {
-                return 0;
-            }
-        </code>
-    </pre>
-</div>
-```
+### Medium.com: Drafting an article
+![Drafting an article on medium.com](medium-draft.png)
 
-Another scenario would be the ability to turn off autofill for [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements on a per-element basis to fit the needs of the application.
+### Youtube.com: Commenting on a video
+![Commenting on a video on youtube.com](youtube-video-comment.png)
 
-```html
-<div id="rich-text-editor" contenteditable="true" autocomplete="on">
-    <!-- Editor Content Here -->
-</div>
 
-<div id="comment-edit-box" contenteditable="true" autocomplete="off">
-    <span>Insert your comments...</span>
-</div>
-```
+The `autocomplete` attribute could also be used to enable additional browser-provided autocompletion features in the future. See a hypothetical example below.
+
+![Contact details autocomplete example](contact-details-autocomplete-example.png)
+
+A developer may also turn off `autocomplete` for an [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host). For example, the site may provide their own custom writing assistance tools. The developer would be able to achieve this by setting `autocomplete=off`.
 
 ## Out of Scope
 1. Defining expected user agent behavior or user interface design.
-1. Adding additional field names to the table for autofill values.
+2. Adding additional field names to the table for autofill values.
 
 ## Proposed Solution
 We propose updating the group definitions in [4.10.18.7.1 Autofill](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute) to include [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements in the *Text* and *Multiline* sections.
@@ -84,20 +74,28 @@ Multiline
     editing host elements
 ```
 
+The text in [4.10.18.7.1 Autofill](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofilling-form-controls:-the-autocomplete-attribute) will also need to be updated to reflect that the `autocomplete` attribute can be used for editing scenarios and not just for form autofill.
+
 ## Privacy and Security Considerations
 ### Privacy
 The following section enumerates the potential security and privacy concerns identified during the development of this proposal and summarizes proposed solutions for each.
 
 | Concern | Description | Proposed Solution |
 | :- | :- | :- |
-| Autofill Data Storage Leak | Increasing the scope of applicable elements for autofill will increase the risk that autofill populates [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements with sensitive information without user consent. | Form field elements like `<input>` already have autofill mechanisms in user agents where sensitive information such as address or phone number. We don't believe there are additional actions to take here and the existing mitigations for other elements still apply |
+| Autofill Data Storage Leak | Increasing the scope of applicable elements for autofill will increase the risk that autofill populates [editing host](https://html.spec.whatwg.org/multipage/interaction.html#editing-host) elements with sensitive information without user consent. | Form field elements like `<input>` already have autofill mechanisms in user agents where sensitive information such as address or phone number. We don't believe there are additional actions to take here and the existing mitigations for other elements still apply. |
 
 ## Potential Extensions
-Autofill is becoming more popular with the rise of advanced text prediction in user agents. One potential extension is to add new field name values to the table to allow for more dynamic autofill population of content.
+One potential extension is to add new field name values to the table to allow for more dynamic autofill population of content.
 
 ## Alternative Solutions
 ### Spellcheck Attribute
-The `spellcheck` attribute could also be used to signal autofill capability for rich text edit elements, but `spellcheck` is already being used to turn off integrated browser features that offer grammar and spelling to use a custom implementation. To avoid compatability issues, this is not a good alternative.
+The `spellcheck` attribute is specifically designed to control the browser's spellcheck and grammar check capabilities, therefore it is not semantically appropriate for control autocompletion.
 
 ### Text Prediction Attribute
-Edge has a `textprediction` attribute implementation that is used to disable Edge's text prediction feature. The presence of this attribute signals to Edge whether an element is eligible for text prediction. While this seems like a natural alternative for this type of autofill, it is non-standard and is currently not on any track for standardization. For this reason, we believe using the existing `autocomplete` attribute will be sufficient.
+A `textprediction` attribute could be introduced that takes `on/off` values, allowing developers to control whether the browser's text prediction is available on a text control. Such an attribute would be specific to text prediction and would not be future proof against additional types of autocompletion that browsers may introduce in the future.
+
+## Open Questions
+### Should the `autocomplete` attribute be supported on [EditContext editable hosts](https://w3c.github.io/edit-context/#dfn-editcontext-editing-host)?
+The [`EditContext` API](https://w3c.github.io/edit-context/) introduces a specialized editing host that enables editing applications to integrate with [text input services](https://w3c.github.io/edit-context/#dfn-text-input-service) without the [pitfalls of the browser's in-built text controls](https://w3c.github.io/edit-context/#background). Many sophisticated editors that could benefit from the `EditContext` API also integrate their own writing assistance features and thus may opt out of browser-powered autocompletion (ex. Google Docs, Word Online). Therefore, it is unclear whether supporting the `autocomplete` attribute on [EditContext editable hosts](https://w3c.github.io/edit-context/#dfn-editcontext-editing-host) will be useful.
+
+Implementation wise, when an `EditContext` is being edited, the UA does not directly update the DOM. Instead, content changes are communicated to the author via [events](https://w3c.github.io/edit-context/#editcontext-events) and the author is expected to commit those changes to the DOM in their custom way. To support browser-powered autocompletion in [EditContext editable hosts](https://w3c.github.io/edit-context/#dfn-editcontext-editing-host), a new type of event may need to be introduced to indicate to authors how/where to place the autocompletion suggestions.

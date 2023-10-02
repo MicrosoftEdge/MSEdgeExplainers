@@ -58,7 +58,7 @@ No distinction.
 
 ## 2.14. How do the features in this specification work in the context of a browser’s Private Browsing or Incognito mode?
 
-There is a concern exposing this information in an Private Browsing window could reveal that a user opened a certain website there. For example, if the user right mouse clicks on a link and selects “Open link in Incognito/InPrivate window”. To mitigate this, the systemEntropy field will always return "normal" in Incognito/InPrivate mode.
+There is a concern that exposing this information in an Private Browsing window could reveal that a user opened a certain website there. For example, if the user right mouse clicks on a link and selects “Open link in Incognito/InPrivate window”. However, such inference suffers from false positives, as the user may have invoked the URL and launched the browser from the OS shell, another non-browser application, or any other non-private browsing mode invocation.
 
 ## 2.15. Does this specification have both "Security Considerations" and "Privacy Considerations" sections?
 
