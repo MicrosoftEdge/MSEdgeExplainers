@@ -88,9 +88,9 @@ While it is possible for `example.com` to properly audience constrain cookies to
 
 Here is how BPoP is expected to work end-to-end:
 
-1. Webpage user goes to `example.com`, and initiates login. `example.com` redirects to `login.microsoftonline.com`, using javascript or http headers to active binding for `example.com` cookies.
-2. `login.microsoftonline.com`, shows password prompt, javascript or http header activates binding for eSTS cookie
-3. enter password, ESTS SHR in http request, response contains bound eSTS cookie, redirect to example.com with auth code
+1. Webpage user goes to `example.com`, and initiates login. `example.com` redirects to `login.microsoftonline.com`, using javascript or http headers to activate binding for `example.com` cookies.
+2. `login.microsoftonline.com`, shows password prompt, javascript or http header activates binding for the cookie.
+3. After the user enters the password,  SHR in http request, response contains bound eSTS cookie, redirect to example.com with auth code
 4. `example.com` SHR in http request, response from `example.com` contains bound `example.com` cookie
 
 ### Server activation
@@ -102,9 +102,9 @@ BPoP is designed to be linked to a classic OAuth session (can be any other authe
 - `SameSite` is an optional token whose value is either `None`, `Lax`, or `Strict` and whose default is `Lax` if omitted.
 - `algs` is a optional string list indicating algorithms supported by the website for BPoP proofs, per [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518). MUST NOT include none or any identifier for a symmetric algorithm (MAC). By default, it is the list `["RS256", "ES256"]`
 - `refresh-in` is an optional number whose value indicates the number of seconds after which the browser should refresh the BPoP proof. The value MUST be an integer greater than 0.
-- `expires-in` is an optional number whose value indicates the number of seconds after which the browser should stop using the BPoP proof. The default is 5 minutes (minimum nonce validity). The value MUST be an integer greater than 0.
+- `expires-in` is an optional number whose value indicates the number of seconds after which the browser should stop using the BPoP proof. The default is 300 seconds (minimum nonce validity). The value MUST be an integer greater than 0.
 
-A web server may also optionally return a `BPoP-Nonce` header, containing a nonce value to be included in BPoP proofs sent to them. The nonce syntax in ABNF used by [RFC6749](https://www.rfc-editor.org/rfc/rfc6749.html) is `nonce = 1*NQCHAR`.
+A web server may also optionally return a `BPoP-Nonce` header, containing a nonce value to be included in BPoP proofs sent to them. The nonce syntax in ABNF used by [RFC6749](https://www.rfc-editor.org/rfc/rfc6749.html) is `nonce = 1*NQCHAR`. 
 
 #### Header based model: 
 
@@ -197,7 +197,7 @@ BPoP: eyJ0eXAiOiJicG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkV
 
 Note: This example can be a CWT instead of a JWT.
 
-The client is expected to cache BPoP proofs and re-use them, until rejected by the server.
+The client is expected to cache BPoP proofs and re-use them, until rejected by the server or until expies-in has been reached.
 
 
 ## Detailed design
@@ -241,6 +241,8 @@ The browser attaches BPoP proofs to a request if there exists a config that eith
 - Has a domain match between the BPoP origin and the canonicalized host of the retrieval's URI and the `subdomains` flag is true
 
 The semantics of `SameSite` match the cookie attributes. That is, if the browser would not attach a cookie with SameSite=Lax to a request, and the server has initialized BPoP with SameSite=Lax, the browser should not attach a BPoP proof to the request.
+
+TBD: Add how `browser-policy` is defined and how it will impact the key management.
 
 ### Application model
 
