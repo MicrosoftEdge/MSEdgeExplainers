@@ -245,8 +245,7 @@ switch (state) {
     "start_url": "/index.html",
     "install_sources": [ 
 	    {"origin": "apps.microsoft.com", "inquire": true},
-	    {"origin": "store.app", "inquire": false},
-        {"origin": "untrustedRepository.com", "inquire": false}
+	    {"origin": "store.app", "inquire": false}
     ]
 }
 ```
