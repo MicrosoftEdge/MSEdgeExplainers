@@ -26,6 +26,7 @@ While this is the general acquisition flow on many platforms, the web does not h
 
 ## Non-goals
 
+* Install same-domain content (see [Web Install - same-domain explainer](./explainer_same_domain.md)).
 * Change the way the UA currently prompts for installation of a web app.
 * Associate ratings and reviews with the installed app ([see Ratings and Reviews API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RatingsAndReviewsPrompt/explainer.md)).
 * Process payments for installation of PWAs ([see Payment Request API](https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API)).
@@ -36,11 +37,11 @@ While this is the general acquisition flow on many platforms, the web does not h
 
 There are two main use cases that the Web Install API enables for cross-domain origins:
 
-### **Web app installation from associated domain** 
+### **Web app installation from associated domain**
 
-An (out-of-scope) domain associated to a web app could prompt for the installation of said web app. The typical use case for this is a marketing website of a service that can offer their customers to install the assocaited web app.
+An (out-of-scope) domain associated to a web app could prompt for the installation of said web app. The typical use case for this is a marketing website that can offer their customers a direct way to install the associated web app.
 
-As an example, a user can navigate to the `streamflix.com` website and find UX that allows them to install the associated application found in `streamflix.app`. 
+As an example, a user can navigate to the `streamflix.com` website and find UX that allows them to install the associated application found in `streamflix.app`.
 
 ```javascript
 /* Example that uses the Permissions API to check if the installation permission is set before calling the install method */
@@ -62,17 +63,18 @@ As an example, a user can navigate to the `streamflix.com` website and find UX t
           }
     }
     catch(err){console.error(err.message)}
-};
-
+  };
 ```
+
 Manifest file for the `streamflix.app`, allowing installation *ONLY* from `streamflix.com` :
+
 ```json
 {
     "name": "Streamflix App",
     "display": "standalone",
     "start_url": "/index.html",
     "install_sources": [ 
-	    {"origin": "streamflix.com", "inquire": true}   
+	    {"origin": "streamflix.com"}   
     ]
 }
 ```
@@ -87,13 +89,14 @@ Manifest file for the `streamflix.app`, allowing installation *ONLY* from `strea
 /* tries to install a cross-domain web app */
 
 const installApp = async (manifest_id) => {
-    try{
+    try {
         const value = await navigator.install(manifest_id);
         return value;
     }
-    catch(err){console.error(err.message)}
+    catch(err) {
+        console.error(err.message);
+    }
 };
-
 ```
 
   ![Install flow from an app repository](./apprepositoryinstallation.png) 
@@ -115,17 +118,16 @@ To install a web app, a web site would use the promise-based method `navigator.i
     * `TimeoutError`: The installation failed due to timeout.
     * `OperationError`: other error.
 	
-    
+
  ```javascript
 /* simple example of using navigator.install */
 
 const installApp = async () => {
     try{
-        const value = await navigator.install('https://streamflix.com');
+        const value = await navigator.install('https://streamflix.app');
     }
     catch(err){console.error(err.message)}
 };
-
 ```
 
 ```javascript
@@ -149,10 +151,11 @@ const installApp = async () => {
 
 ![Promises resolve/reject flow](./installPromises.png) 
 
-Upon a successful installation there is **one** opportunity for the installation origin to get attribution for the install. Once the promise resolves there is no other way for the origin to get access to the same information. 
 
 #### **Signatures of the `install` method (cross-domain)**
-The cross-domain part of the Web Install API consists of the extension to the navigator interface with an `install` method. The install method can be used in two different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
+The cross-domain part of the Web Install API consists of the extension to the navigator interface with an `install` method. The install method can be used in two different ways. 
+
+Unless the UA decides to [gate this functionality behind installation](#gating-capability-behind-installation), the behaviour between calling the `install` method on a tab or on an installed application should not differ.
 
 1. `navigator.install(<manifest_id>)`: The method receives a parameter which is a [manifest id](https://w3c.github.io/manifest/#id-member) to a web app to install. This will prompt for installation of the app if the requesting origin has installation permissions (see [security section](#integration-with-the-permissions-api)). This is the most common use of the API.
 
@@ -162,20 +165,21 @@ The cross-domain part of the Web Install API consists of the extension to the na
 
 The `navigator.install` call can receive an object with a set of parameters that specify different installation behaviours for the app. It is also a way to future-proof the API if additional data were required with the call.
 
-* **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain. 
+* **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain. This information can later be retrieved inside the installed application via the [Acquisition Info API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md). 
 
 #### **Installing the web app**
 
 To install the web app, the process is as follows:
-1. Origin site that triggers the installation must have installation permissions as it tries to install a cross-domain app.
-2. Check if the domain is in the list of [allowed origins](#install-sources-manifest-field) to install said PWA by checking the manifest file.
-3. Prompt the user for install confirmation.
-4. Install the app.
-5. UA default action post-install (generally the app will open). 
+1. User initiates the installation with a user gesture.
+2. Origin site that triggers the installation must have installation permissions as it tries to install a cross-domain app.
+3. Check if the domain is in the list of [allowed origins](#install-sources-manifest-field) to install said PWA by checking the manifest file.
+4. Prompt the user for install confirmation. 
+5. Install the app.
+6. UA default action post-install (generally the app will open). 
    
 ## Relation with other web APIs/features 
 
-* **`navigator.install` and Permissions API:** see [integrations with the Permissions API](https://github.com/edge-microsoft/MSEdgeExplainers-private/edit/luigonza/web-install/WebInstall/explainer.md#integration-with-the-permissions-api).
+* **`navigator.install` and Permissions API:** see [integrations with the Permissions API](#integration-with-the-permissions-api).
 
 * **`navigator.install` and manifest file's `prefer_related_applications`:** When the `related_applications` and `prefer_related_applications` key/values are present in the manifest, the UA should try to handoff the install to the prefered catalog. If this is not possible then it fallback to a default UA install.
 
@@ -186,7 +190,7 @@ In order for an application/site to be installed, it must comply with *installab
 
 Modern browsers allow for different degrees of installation of different types of content, ranging from traditional web sites all the way up to Progressive Web Apps. **The core functionality of the API is that it allows to install *anything* initiated with a user action**.  
 
- As an example, generally this criteria involves one or several of the following requirements:
+ As an example, generally this criteria involves one or several of the following requirements for the site to be installed:
 * served under an *HTTPS connection*
 * have a *web app manifest file* and certain fields like icons and name
 * have a *service worker*
@@ -235,27 +239,26 @@ switch (state) {
 ####  **Install Sources manifest field**
 * A new field called `install_sources` will be added to the manifest file to have a control list of sites that can install the app. In its most restrictive case, the developer can specify to not allow installation from any other origin, in which case the PWA conforms to its usual behaviour of only being able to be installed from its same origin.
 
-    * `inquire` field: If supported by the UA, the `inquire` field in the install sources hints at the UA that it can inform that installation origin if the app is installed. **If the browser has an active 'Do Not Track (DNT)', equivalent 'Global Privacy Control (GPC)' setting, or is in Private browsing mode, or is an opinionated browser towards privacy, the `inquire` field is ignored and installation origins will not be allowed to know if that application is installed.**
+    * **`getInstalledApps()` method: If supported by the UA, the `getInstalledApps` method returns a list of the content that has been installed from that installation origin.** This means the installation origin will be able to know which applications it has installed, until cache is cleared. The method returns a list of manifest ids of content installed from the calling origin. Additionally, if the browser has an active 'Do Not Track (DNT)', equivalent 'Global Privacy Control (GPC)' setting, is in Private browsing mode, or is an opinionated browser towards privacy, this is ignored and installation origins will not be allowed to know if that application is installed.
 
 ```json
-
 {
     "name": "Awesome PWA",
     "display": "standalone",
     "start_url": "/index.html",
     "install_sources": [ 
-	    {"origin": "apps.microsoft.com", "inquire": true},
-	    {"origin": "store.app", "inquire": false}
+	    {"origin": "apps.microsoft.com"},
+	    {"origin": "store.app"}
     ]
 }
 ```
 
 This new manifest field will protect the app from being listed in undesirable repositories and give the developer absolute control about where do they want the PWA to be installed from. At best, the developer can allow the PWA to be installed from any site ("`*`"), at its most restrictive, it can only allow installing from the app's same scope. This field is only for the JS API and does not interfere with existing ways of installing PWAs through mechanisms like enterprise policies.
 
-If no `install_sources` is present in the manifest file, the default should be to not allow an app to be installed from cross-domain sites.
+If no `install_sources` are present in the manifest file, the default should be to not allow an app to be installed from cross-domain sites.
 
 #### **Gating capability behind installation**
-A UA may choose to gate the `navigator.install` capability behind installation of thw web content. This would serve as an additional trust signal from the user towards enabling the functionality. 
+A UA may choose to gate the `navigator.install` capability behind installation of the web content. This would serve as an additional trust signal from the user towards enabling the functionality.
 
 **For cross-domain installs, the user gesture, the new origin permission, the new manifest field the final installation confirmation (current default behaviour in the browser before installing an app) and the optional gated capability work together to minimize the risk of origins spamming the user for unrequested installations**, give developers complete flexibility about where their apps will be installed from and provide the user with an implicit (double: one for the user gesture, the other one from the prompt before installing) confirmation before the app gets installed on their device.
 
@@ -278,8 +281,13 @@ On a successful promise resolution, the origin is returned so the originating we
 * Can we remove power from the developer to query if the app is installed by offloading to the UA the knowledge of which apps are installed?
     * Is there any form of attribute that can be added to a DOM element to signal this distinction/difference?
 
+## Glossary
+* **installation origin**: the origin that initiates the call to the `install` method.
+* **installed origin**: the origin that is installed with the `install` method.
+* **UA**: user agent.
+
 ## Acknowledgements
 
 This explainer takes on the work [previously published by PEConn](https://github.com/PEConn/web-install-explainer/blob/main/explainer.md).
 
-Special thanks to Raunak Oberoi, Patrick Brosset, Alex Russell, Howard Wolosky, Lu Huang, Jonathan Kingston and the [PWA Builder](https://www.pwabuilder.com) team for their input.
+Special thanks to Amanda Baker, Patrick Brosset, Alex Russell, Howard Wolosky, Lu Huang, Jonathan Kingston and the [PWA Builder](https://www.pwabuilder.com) team for their input.

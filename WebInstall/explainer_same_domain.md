@@ -24,6 +24,7 @@ Modern browsers have UX that enable users to *install* web content on their devi
 
 ## Non-goals
 
+* Install cross-domain content (see [Web Install - cross-domain explainer](./explainer_cross_domain.md)).
 * Change the way the UA currently prompts for installation of a web app.
 * Associate ratings and reviews with the installed app ([see Ratings and Reviews API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RatingsAndReviewsPrompt/explainer.md)).
 * Process payments for installation of PWAs ([see Payment Request API](https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API)).
@@ -118,8 +119,6 @@ const installApp = async () => {
 
 ![Promises resolve/reject flow](./installPromises.png) 
 
-Upon a successful installation there is **one** opportunity for the installation origin to get attribution for the install. Once the promise resolves there is no other way for the origin to get access to the same information.
-
 #### **Signatures of the `install` method (same-domain)**
 The same-domain part of the  Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
 
@@ -191,8 +190,12 @@ Thus, a user agent might decide to have only the requirement of HTTPS to allow i
 
 * Should we allow an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to enable cancelling the installation if the process takes too long?
 
+## Glossary
+* **installation origin**: the origin that initiates the call to the `install` method.
+* **installed origin**: the origin that is installed with the `install` method.
+
 ## Acknowledgements
 
 This explainer takes on the work [previously published by PEConn](https://github.com/PEConn/web-install-explainer/blob/main/explainer.md).
 
-Special thanks to Raunak Oberoi, Patrick Brosset, Alex Russell, Howard Wolosky, Lu Huang and the [PWA Builder](https://www.pwabuilder.com) team for their input.
+Special thanks to Amanda Baker, Patrick Brosset, Alex Russell, Howard Wolosky, Lu Huang and the [PWA Builder](https://www.pwabuilder.com) team for their input.
