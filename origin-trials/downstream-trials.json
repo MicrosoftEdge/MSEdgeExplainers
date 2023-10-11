@@ -24,6 +24,13 @@
             "repo": "MicrosoftEdge/MSEdgeExplainers",
             "explainer": "https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-unsanitized/explainer.md",
             "flag": "EdgeClipboardUnsanitizedContent"
+        },{
+            "label": "Acquisition Info API",
+            "expiration": "2024-05-21",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md",
+            "issue": "Acquisition Info",
+            "flag": "msAcquisitionInfo"
         }
     ],
 
