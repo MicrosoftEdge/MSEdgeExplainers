@@ -78,7 +78,7 @@ N/A
 
 ### 3.1. Passive Network Attackers
 
-Apart from the supported clipboard format types, nothing else is exposed by `supports` API.
+No threat.
 
 ### 3.2. Active Network Attackers
 
