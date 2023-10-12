@@ -1,4 +1,4 @@
-# **Web Install API** (*Same-Domain*)
+# **Web Install API** (*Same-Origin*)
 
 Authors: [Diego Gonzalez](https://github.com/diekus)
 
@@ -12,20 +12,20 @@ This document is a starting point for engaging the community and standards bodie
 
 Modern browsers have UX that enable users to *install* web content on their devices. This content ranges from web sites to Progressive Web Apps, and different UAs implement mechanisms and UI affordances that a user can trigger or the UA can signal for this installation to happen.
 
-**The Web Install API** aims to standardize the way installations are invoked by developers, creating an ergonomic, simple and consistent way to get web content installed onto a device. It **allows a web site to install web content** (both from the **same** or [cross](./explainer_cross_domain.md) domain). This capability can be used by a site to install itself when the [installability criteria](#installability-criteria) is met.
+**The Web Install API** aims to standardize the way installations are invoked by developers, creating an ergonomic, simple and consistent way to get web content installed onto a device. It **allows a web site to install web content** (both from the **same** or [cross](./explainer_cross_domain.md) origin). This capability can be used by a site to install itself when some [installability criteria](#installability-criteria), which can vary with different UAs.
 
 ## Goals
 
-* **Enable installation of web apps (same-domain).**
-* Replace `beforeinstallprompt` or associated behaviour (current way to install apps from the same-domain).
+* **Enable installation of web apps (same-origin).**
+* Complement `beforeinstallprompt` for platforms that do not prompt.
 * Allow the web app to report to the installation origin the outcome of the installation.
 * Enable UAs to supress potential installation-prompt spam.
-* Track campaign IDs for marketing campaigns.
 
 ## Non-goals
 
-* Install cross-domain content (see [Web Install - cross-domain explainer](./explainer_cross_domain.md)).
+* Install cross-origin content (see [Web Install - cross-origin explainer](./explainer_cross_domain.md)).
 * Change the way the UA currently prompts for installation of a web app.
+* Replace `beforeinstallprompt` or associated behaviour.
 * Associate ratings and reviews with the installed app ([see Ratings and Reviews API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RatingsAndReviewsPrompt/explainer.md)).
 * Process payments for installation of PWAs ([see Payment Request API](https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API)).
 * List purchased/installed goods from a store ([see Digital Goods API](https://github.com/WICG/digital-goods/blob/main/explainer.md)).
@@ -35,35 +35,32 @@ Modern browsers have UX that enable users to *install* web content on their devi
 ## Use Cases
 
 ### **Installing a web app from the current origin**
-The site can trigger its own installation. The current way of doing this is with the `onbeforeinstallprompt`, and this would be phased out in favor of a unified `install` method for same *and* cross domains.
+The site can trigger its own installation. 
+
+The current way of doing this is with the `onbeforeinstallprompt`. This only works for browsers that support PWAs and prompting. The `navigator.install` method allows a imperative way to install web content, and works for UAs that prompt and don't prompt.
 
 ```javascript
 /* tries to install the current domain */
 const installApp = async () => {
-    try{
-        if ('install' in navigator) {
-            const appInstalled = await navigator.install();
-        }
-    }
-    catch(err) {
+    if ('install' in navigator === false) return; // api not supported
+    try {
+            await navigator.install();
+    } catch(err) {
         switch(err.message){
-            case 'NotAllowedError':
-                /* No installation origin permissions */
+            case 'AbortError':
+                /* Operation was aborted*/
                 break;
-            case 'NotSupportedError':
-                /* The web site does not comply with installability criteria */
-                break;
+           
         }
     }
 };
-
 ```
 
 ![Same domain install flow](./samedomaininstall.png) 
 
-The **`navigator.install()` method will replace `onbeforeinstallprompt` for same domain installation**. When the method is called it will trigger the UA to prompt for the installation of an application. This is analogous to when the end user clicks on an affordance that the UA might have to inform the user of installing. On Edge, Chrome (desktop) and Samsung Internet (mobile), this would be then the user clicks on the 'app available' banner or related UX that appears on the omnibox of the browser. For browsers that do not implement prompting, the expected behaviour is analogous to their installation paradigm. For example, in Safari (desktop) the behaviour might be that the content gets added to the dock as an app.
+The **`navigator.install()` method can overlap with some functionality of `onbeforeinstallprompt` for same-origin installation**. When the method is called it will trigger the UA to prompt for the installation of an application. This is analogous to when the end user clicks on an affordance that the UA might have to inform the user of installing. On Edge, Chrome (desktop) and Samsung Internet (mobile), this would be then the user clicks on the 'app available' banner or related UX that appears on the omnibox of the browser. For browsers that do not implement prompting, the expected behaviour is analogous to their installation paradigm. For example, in Safari (desktop) the behaviour might be that shows a dialog to add the content to the dock as an app.
 
-The threshold for `navigator.install()` to resolve on same-domain installations uses the same checks that `onbeforeinstallprompt` currently has for prompting (if required by the UA). The promise doesn't resolve unless the *installability criteria* is met.
+On UAs that support prompting, the threshold for `navigator.install()` to resolve on same-origin installations uses the same checks that `onbeforeinstallprompt` currently has for prompting (if required by the UA). The promise doesn't resolve unless the *installability criteria* is met. *Note that the criteria defined by UAs varies and can be that there is NO criteria*.
 
 When called on the same domain, the **`install()` method will trigger/open the prompt for installation the same way that using `onbeforeinstallprompt` does right now for browser that prompts.** If the domain is not installable content, then the promise returns a `DOMException` of type 'NotSupportedError'.
 
@@ -76,15 +73,9 @@ To install a web site/app, the site/app would use the promise-based method `navi
 
 * Resolve when an installation was completed.
     * The success value will be an object that contains:
-     	*  `mode`: string with the surface-hint where the app was installed.
+     	*  `url`: url of the installed target.
 * Be rejected if the prompt is not shown or if the app installation did not complete. It'll reject with a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
-    * `NotAllowedError`: The (new) `installation` [Permissions Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) has blocked the use of this feature.
-    * `NotSupportedError`: the target does not comply with the [installability criteria](#installability-criteria).
-    * `InsufficientEngagementError`: the UA's required (if any) [engagement heuristics](https://web.dev/install-criteria/#criteria) have not been met.
-    * `AbortError`: The installation (prompt) was closed/cancelled.
-    * `TimeoutError`: The installation failed due to timeout.
-    * `OperationError`: other error.
-	
+    * `AbortError`: The installation was not completed.
     
  ```javascript
 /* simple example of using navigator.install */
@@ -98,31 +89,12 @@ const installApp = async () => {
 
 ```
 
-```javascript
-/* Example of advanced error handling */
-
-(...)
-.catch(error => {
-    if(error.name === 'NotSupportedError') {
-        // target site is not installable
-        console.log("Target is not an installable content.");
-    }
-    else if (error.name === 'NotAllowedError') {
-        // origin cannot install other webapps.
-        console.log("Origin does not have permissions to install web apps.");
-    }
-    else {
-        console.log(error.message);
-    }
-});
-```
-
 ![Promises resolve/reject flow](./installPromises.png) 
 
-#### **Signatures of the `install` method (same-domain)**
-The same-domain part of the  Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
+#### **Signatures of the `install` method (same-origin)**
+The same-origin part of the  Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
 
-1. `navigator.install()`: The method receives no parameters and tries to install the current domain as an app. This would replace `beforeinstallprompt` and the current way developers have been controlling the prompt to install apps.
+1. `navigator.install()`: The method receives no parameters and tries to install the current origin as an app.
 
 2. `navigator.install(<params>)`: The method receives an object with parameters that it can use to customize a same domain installation. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
 
@@ -130,15 +102,15 @@ The same-domain part of the  Web Install API consists of the extension to the na
 
 The `navigator.install` call can receive an object with a set of parameters that specify different installation behaviours for the app.
 
-* **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain. 
+* **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain regarding the acquisition info. 
 
 #### **Installing the web app**
 
 To install a same domain web site/app, the process is as follows:
-1. Site/app must comply with *[installability criteria](#installability-criteria)*.
-2. Prompt the user for install confirmation.
-3. Install the app.
-4. UA default action post-install (generally the app will open/be added to homescreen/start menu/dock). 
+1. Site/app must comply with *[installability criteria](#installability-criteria), if any*.
+2. Prompt the user for install confirmation. User is given a choice about whether to install the target content or not.
+3. If the users accepts, the content is installed.
+5. UA default action post-install (generally the app will open/be added to homescreen/start menu/dock). 
    
 ## Relation with other web APIs 
 
@@ -156,26 +128,20 @@ relatedApps.forEach((app) => {
 });
 
 ```
-
 ## Installability criteria
-In order for an application/site to be installed, it must comply with *installability criteria*. **This criteria is entirely up to the UA** and can *vary depending on the installation target*. 
+In order for an application/site to be installed, it must comply with *installability criteria*. **This criteria is entirely up to the UA**, can *vary depending on the installation target*, and can be optional. 
 
 Modern browsers allow for different degrees of installation of different types of content, ranging from traditional web sites all the way up to Progressive Web Apps. **The core functionality of the API is that it allows to install *anything* initiated with a user action**.  
 
- As an example, generally this criteria involves one or several of the following requirements:
-* served under an *HTTPS connection*
-* have a *web app manifest file* and certain fields like icons and name
-* have a *service worker*
-
-Thus, a user agent might decide to have only the requirement of HTTPS to allow installation of a web site, or may need as well a manifest file and/or service worker to install a web app.
+A user agent might decide to have only the requirement of HTTPS to allow installation of a web site, or may need as well a manifest file and/or service worker to install a web app or might not require anything at all, allowing the user to install any content they wish.
 
 ## Privacy and Security Considerations
 
-### Avoiding Installation prompt spamming
+### Preventing installation prompt spamming from third parties
 
-* This API can only be invoked in a top-level [secure context](https://w3c.github.io/webappsec-secure-contexts/).
+* This API can only be invoked in a top-level navigable and be invoked from a [secure context](https://w3c.github.io/webappsec-secure-contexts/).
 
-* The biggest risk for the API is installation spamming. To minimize this behaviour, installing a PWA using the Web Install API requires a [user gesture](https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event).  
+* The biggest risk for the API is installation spamming. To minimize this behaviour, installing a PWA using the Web Install API requires a [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event).  
 
 **For same-domain installs, the user gesture and the final installation confirmation (current default behaviour in the browser before installing an app) work together to minimize the risk of origins spamming the user for unrequested installations**. 
 
@@ -198,4 +164,4 @@ Thus, a user agent might decide to have only the requirement of HTTPS to allow i
 
 This explainer takes on the work [previously published by PEConn](https://github.com/PEConn/web-install-explainer/blob/main/explainer.md).
 
-Special thanks to Amanda Baker, Patrick Brosset, Alex Russell, Howard Wolosky, Lu Huang and the [PWA Builder](https://www.pwabuilder.com) team for their input.
+Special thanks to Amanda Baker, Marcos Cáceres, Alex Russell and Howard Wolosky.
