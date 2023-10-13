@@ -95,4 +95,5 @@ No interaction with third-party pages.
 
 ### 3.5. Legitimate Misuse
 
-We don't think there is any risk of legitimate misuse of this API.
+We don't think there is any risk of legitimate misuse of this API. Browser parses the HTML string provided by the web author and creates a well-formed HTML
+document before it writes to the system clipboard. The target apps that reads this data will not be at risk of parsing malformed HTML.
