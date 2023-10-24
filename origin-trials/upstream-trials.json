@@ -43,12 +43,6 @@
       "explainer": "https://github.com/wanderview/quota-storage-partitioning/blob/main/explainer.md"
   },
   {
-      "label": "Document Picture-in-Picture",
-      "expiration": "2023-09-07",
-      "repo": "WICG/document-picture-in-picture",
-      "explainer": "https://github.com/WICG/document-picture-in-picture"
-  },
-  {
       "label": "EditContext",
       "expiration": "2024-03-05",
       "repo": "w3c/edit-context",
@@ -79,34 +73,16 @@
       "explainer": "https://github.com/WICG/nav-speculation/blob/main/no-vary-search.md"
   },
   {
-      "label": "Page Unload Beacon",
-      "expiration": "2023-09-19",
-      "repo": "WICG/unload-beacon",
-      "explainer": "https://chromium.googlesource.com/chromium/src/+/main/docs/experiments/page-unload-beacon.md"
-  },
-  {
       "label": "Payment handler minimal header UX",
       "expiration": "2023-12-07",
       "feedbackLink": "https://bugs.chromium.org/p/chromium/issues/entry?components=Blink%3EPayments",
       "explainer": "https://groups.google.com/a/chromium.org/g/blink-dev/c/NQ-WLvfmPs8"
   },
   {
-      "label": "Privacy Sandbox Relevance and Measurement",
-      "expiration": "2023-09-19",
-      "feedbackLink": "https://developer.chrome.com/blog/privacy-sandbox-unified-origin-trial/#where-can-developers-give-feedback-and-get-support",
-      "explainer": "https://developer.chrome.com/blog/privacy-sandbox-unified-origin-trial/"
-  },
-  {
       "label": "Private Network Access from non-secure contexts",
       "expiration": "2024-02-06",
       "repo": "WICG/private-network-access",
       "explainer": "https://developer.chrome.com/blog/private-network-access-update/"
-  },
-  {
-      "label": "RTCLegacyTrackStats",
-      "expiration": "2023-09-23",
-      "feedbackLink": "https://groups.google.com/a/chromium.org/g/blink-dev/c/NZVXsJQ7tV8",
-      "explainer": "https://w3c.github.io/webrtc-stats/"
   },
   {
       "label": "RTCPeerConnection callback-based getStats() API",
@@ -125,12 +101,6 @@
       "expiration": "2024-04-02",
       "repo": "w3c/ServiceWorker",
       "explainer": "https://github.com/yoshisatoyanagisawa/service-worker-static-routing-api"
-  },
-  {
-      "label": "ServiceWorkerBypassFetchHandlerForMainResources",
-      "expiration": "2023-09-23",
-      "repo": "w3c/ServiceWorker",
-      "explainer": "https://github.com/sisidovski/service-worker-bypass-fetch-handler-for-main-resource"
   },
   {
       "label": "SharedArrayBuffers in non-isolated pages on Desktop platforms",
@@ -155,12 +125,6 @@
       "expiration": "2024-04-30",
       "repo": "WICG/manifest-incubations",
       "explainer": "https://github.com/WICG/manifest-incubations/blob/gh-pages/tabbed-mode-explainer.md"
-  },
-  {
-      "label": "User-Agent Reduction Deprecation",
-      "expiration": "2023-09-23",
-      "repo": "w3ctag/design-reviews",
-      "explainer": "https://docs.google.com/document/d/1d-K43rzfDGxNM4H6Yzh5lV08KJwLsae06i4Q0A8snME"
   },
   {
       "label": "WebAssembly Garbage Collection",
@@ -189,6 +153,41 @@
 ],
 
   "expired": [
-
+    {
+        "label": "Document Picture-in-Picture",
+        "expiration": "2023-09-07",
+        "repo": "WICG/document-picture-in-picture",
+        "explainer": "https://github.com/WICG/document-picture-in-picture"
+    },
+    {
+        "label": "Page Unload Beacon",
+        "expiration": "2023-09-19",
+        "repo": "WICG/unload-beacon",
+        "explainer": "https://chromium.googlesource.com/chromium/src/+/main/docs/experiments/page-unload-beacon.md"
+    },
+    {
+        "label": "Privacy Sandbox Relevance and Measurement",
+        "expiration": "2023-09-19",
+        "feedbackLink": "https://developer.chrome.com/blog/privacy-sandbox-unified-origin-trial/#where-can-developers-give-feedback-and-get-support",
+        "explainer": "https://developer.chrome.com/blog/privacy-sandbox-unified-origin-trial/"
+    },
+    {
+        "label": "RTCLegacyTrackStats",
+        "expiration": "2023-09-23",
+        "feedbackLink": "https://groups.google.com/a/chromium.org/g/blink-dev/c/NZVXsJQ7tV8",
+        "explainer": "https://w3c.github.io/webrtc-stats/"
+    },
+    {
+        "label": "ServiceWorkerBypassFetchHandlerForMainResources",
+        "expiration": "2023-09-23",
+        "repo": "w3c/ServiceWorker",
+        "explainer": "https://github.com/sisidovski/service-worker-bypass-fetch-handler-for-main-resource"
+    },
+    {
+        "label": "User-Agent Reduction Deprecation",
+        "expiration": "2023-09-23",
+        "repo": "w3ctag/design-reviews",
+        "explainer": "https://docs.google.com/document/d/1d-K43rzfDGxNM4H6Yzh5lV08KJwLsae06i4Q0A8snME"
+    }
   ]
 }

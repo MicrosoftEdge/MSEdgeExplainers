@@ -1,12 +1,6 @@
 {
     "active": [
         {
-            "label": "Web Haptics API",
-            "expiration": "2023-12-31",
-            "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "issue": "WebHaptics",
-            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md"
-        },{
             "label": "Digital Goods API",
             "expiration": "2023-12-31",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
@@ -31,6 +25,12 @@
             "issue": "PointerEventDeviceId",
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PointerEventDeviceId/explainer.md",
             "flag": "PointerEventDeviceId"
+        },{
+            "label": "Web Haptics API",
+            "expiration": "2023-12-31",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "issue": "WebHaptics",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md"
         }
     ],
 
