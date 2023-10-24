@@ -19,6 +19,13 @@
             "explainer": "https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-unsanitized/explainer.md",
             "flag": "EdgeClipboardUnsanitizedContent"
         },{
+            "label": "PointerEvent.deviceId",
+            "expiration": "2024-02-14",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "issue": "PointerEventDeviceId",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PointerEventDeviceId/explainer.md",
+            "flag": "PointerEventDeviceId"
+        },{
             "label": "Web Haptics API",
             "expiration": "2023-12-31",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
