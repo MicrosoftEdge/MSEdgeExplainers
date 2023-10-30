@@ -224,7 +224,7 @@ This new manifest field will protect the app from being listed in undesirable re
 If no `install_sources` are present in the manifest file, the default should be to not allow an app to be installed from cross-origin sites.
 
 #### **Gating capability behind installation**
-A UA may choose to gate the `navigator.install` capability behind installation of the web content. This would serve as an additional trust signal from the user towards enabling the functionality.
+A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
 
 **For cross-origin installs, the user gesture, the new origin permission, the new manifest field the final installation confirmation (current default behaviour in the browser before installing an app) and the optional gated capability work together to minimize the risk of origins spamming the user for unrequested installations**, give developers complete flexibility about where their apps will be installed from and provide the user with an implicit (double: one for the user gesture, the other one from the prompt before installing) confirmation before the app gets installed on their device.
 
