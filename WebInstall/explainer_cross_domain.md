@@ -246,7 +246,6 @@ A UA may choose to gate the `navigator.install` capability behind a requirement 
 
 ## Glossary
 * **installation origin**: the origin that initiates the call to the `install` method.
-
 * **UA**: user agent.
 ## Acknowledgements
 

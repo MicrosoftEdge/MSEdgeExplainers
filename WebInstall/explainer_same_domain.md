@@ -62,11 +62,7 @@ The **`navigator.install()` method can overlap with some functionality of `befor
 
 On UAs that support prompting, the threshold for `navigator.install()` to resolve on same-origin installations uses the same checks that `onbeforeinstallprompt` currently has for prompting (if required by the UA). The promise doesn't resolve unless the *installability criteria* is met. *Note that the criteria defined by UAs varies and can be that there is NO criteria*.
 
-<<<<<<< Updated upstream
-When called on the same domain, the **`install()` method will trigger/open the prompt for installation the same way that using `beforeinstallprompt` does right now for a browser that prompts.** If the domain is not installable content, then the promise returns a `DOMException` of type 'NotSupportedError'.
-=======
 When called on the same domain, the **`install()` method will trigger/open the prompt for installation the same way that using `onbeforeinstallprompt` does right now for browser that prompts.** If the domain is not installable content, then the promise returns a `DOMException` of type 'AbortError'.
->>>>>>> Stashed changes
 
 
 ## Proposed Solution
