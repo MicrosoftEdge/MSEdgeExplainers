@@ -102,7 +102,7 @@ The same-origin part of the  Web Install API consists of the extension to the na
 
 The `navigator.install` call can receive an object with a set of parameters that specify different installation behaviours for the app.
 
-* **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain regarding the acquisition info. 
+* **referral-info**: this parameter takes the form of an object that can have arbitrary information desired to be captured at the time of installation. 
 
 #### **Installing the web app**
 
