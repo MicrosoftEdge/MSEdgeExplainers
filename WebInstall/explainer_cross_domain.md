@@ -147,6 +147,12 @@ To install a same domain web site/app, the process is as follows:
 3. Prompt the user for install confirmation. User is given a choice about whether to install the target content or not.
 4. If the users accepts, the content is installed.
 5. UA default action post-install (generally the app will open/be added to homescreen/start menu/dock). 
+ 
+### The `navigator.getInstalledApps` method
+
+If supported by the UA, the `getInstalledApps` method returns a list of the content that has been installed from that installation origin.** This means the installation origin will be able to know which applications it has installed, until cache is cleared. The installation origin *will not* be informed of any apps installed by other means, whether via another installation origin, directly through the browser, or by a native app store. The method returns a list of manifest ids of content installed from the calling origin. Additionally, if the browser has an active 'Do Not Track (DNT)', equivalent 'Global Privacy Control (GPC)' setting, is in Private browsing mode, or is an opinionated browser towards privacy, this is ignored and installation origins will not be allowed to know if that application is installed. 
+
+* The approach for showing which apps have been installed from this origin follows the same API approach where the information is accessible if it matches a [partition key](https://github.com/kyraseevers/Partitioning-visited-links-history#general-api-approach), instead of just the link URL. This ensures installed apps can be seen only from the origin matching all parts of the key. 
 
 ## Relation with other web APIs/features 
 
@@ -205,8 +211,6 @@ switch (state) {
 ####  **Install Sources manifest field**
 * A new field called `install_sources` will be added to the manifest file to have a control list of sites that can install the app. In its most restrictive case, the developer can specify to not allow installation from any other origin, in which case the PWA conforms to its usual behaviour of only being able to be installed from its same origin.
 
-    * **`getInstalledApps()` method: If supported by the UA, the `getInstalledApps` method returns a list of the content that has been installed from that installation origin.** This means the installation origin will be able to know which applications it has installed, until cache is cleared. The installation origin *will not* be informed of any apps installed by other means, whether via another installation origin, directly through the browser, or by a native app store. The method returns a list of manifest ids of content installed from the calling origin. Additionally, if the browser has an active 'Do Not Track (DNT)', equivalent 'Global Privacy Control (GPC)' setting, is in Private browsing mode, or is an opinionated browser towards privacy, this is ignored and installation origins will not be allowed to know if that application is installed.
-
 ```json
 {
     "name": "Awesome PWA",
@@ -235,13 +239,6 @@ A UA may choose to gate the `navigator.install` capability behind a requirement 
 
 ## Open Questions
 
-* Should we enable a [try-before-you-buy](https://github.com/PEConn/web-install-explainer/blob/main/explainer.md#try-before-you-buy) flow scenario for web install?
-
-* Should we provide feedback to the directory?
-
-* Do we need to attribute the source of the installation?
-On a successful promise resolution, the origin is returned so the originating web app can decide to use that information as it pleases.
-
 * Should we allow an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to enable cancelling the installation if the process takes too long?
 
 * Can we remove power from the developer to query if the app is installed by offloading to the UA the knowledge of which apps are installed?
@@ -249,9 +246,8 @@ On a successful promise resolution, the origin is returned so the originating we
 
 ## Glossary
 * **installation origin**: the origin that initiates the call to the `install` method.
-* **installed origin**: the origin that is installed with the `install` method.
-* **UA**: user agent.
 
+* **UA**: user agent.
 ## Acknowledgements
 
 This explainer takes on the work [previously published by PEConn](https://github.com/PEConn/web-install-explainer/blob/main/explainer.md).

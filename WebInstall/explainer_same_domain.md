@@ -12,7 +12,7 @@ This document is a starting point for engaging the community and standards bodie
 
 Modern browsers have UX that enable users to *install* web content on their devices. This content ranges from web sites to Progressive Web Apps, and different UAs implement mechanisms and UI affordances that a user can trigger or the UA can signal for this installation to happen.
 
-**The Web Install API** aims to standardize the way installations are invoked by developers, creating an ergonomic, simple and consistent way to get web content installed onto a device. It **allows a web site to install web content** (both from the **same** or [cross](./explainer_cross_domain.md) origin). This capability can be used by a site to install itself when some [installability criteria](#installability-criteria), which can vary with different UAs.
+**The Web Install API** aims to standardize the way installations are invoked by developers, creating an ergonomic, simple and consistent way to get web content installed onto a device. It **allows a web site to install web content** (both from the **same** or [cross](./explainer_cross_domain.md) origin). This capability can be used by a site to install itself when some [installability criteria](#installability-criteria) is met, which can vary with different UAs.
 
 ## Goals
 
@@ -62,7 +62,11 @@ The **`navigator.install()` method can overlap with some functionality of `befor
 
 On UAs that support prompting, the threshold for `navigator.install()` to resolve on same-origin installations uses the same checks that `onbeforeinstallprompt` currently has for prompting (if required by the UA). The promise doesn't resolve unless the *installability criteria* is met. *Note that the criteria defined by UAs varies and can be that there is NO criteria*.
 
+<<<<<<< Updated upstream
 When called on the same domain, the **`install()` method will trigger/open the prompt for installation the same way that using `beforeinstallprompt` does right now for a browser that prompts.** If the domain is not installable content, then the promise returns a `DOMException` of type 'NotSupportedError'.
+=======
+When called on the same domain, the **`install()` method will trigger/open the prompt for installation the same way that using `onbeforeinstallprompt` does right now for browser that prompts.** If the domain is not installable content, then the promise returns a `DOMException` of type 'AbortError'.
+>>>>>>> Stashed changes
 
 
 ## Proposed Solution
