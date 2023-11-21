@@ -114,7 +114,11 @@ let campaignId = details["campaignId"]; // e.g. adCampaign202306
 
 2. `Policy` - The web app was installed due to an enterprise policy.
 
-3. `<install origin>` - For [same-domain installation](#same-domain-installation), the domain name of the web app.
+3. `Sync` - The web app was installed as part of app sync.
+
+4. `Preinstall` - The web app was preinstalled on the device.
+
+5. `<install origin>` - For [same-domain installation](#same-domain-installation), the domain name of the web app.
 For [cross-domain installation](#web-install-api-cross-domain-installation), the installer's domain name.
 
 While `installSource` remains a required property, depending on the platform of the acquisition the pairs contained within
