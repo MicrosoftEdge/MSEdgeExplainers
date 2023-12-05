@@ -169,12 +169,6 @@
       "explainer": "https://github.com/WICG/manifest-incubations/blob/gh-pages/tabbed-mode-explainer.md"
   },
   {
-      "label": "Third Party Cookie Deprecation",
-      "expiration": "2024-12-27",
-      "repo": "GoogleChromeLabs/privacy-sandbox-dev-support",
-      "explainer": "https://developer.chrome.com/blog/third-party-cookie-deprecation-trial"
-  },
-  {
       "label": "Web App Scope Extensions",
       "expiration": "2024-06-25",
       "repo": "WICG/manifest-incubations",
