@@ -1,4 +1,5 @@
- # HTML Document Subtitle
+# Installed Web App window title (`appTitle`)
+***(formerly HTML Document Subtitle)***
 
 Authors: [Diego Gonzalez](https://github.com/diekus)
 
@@ -20,7 +21,7 @@ This document is a starting point for engaging the community and standards bodie
 
 We want to fix the text that appears on the title bar by giving developers control over the information that appears there. Generally, applications utilize the text in the title bar of the window to specify the application's name and any other contextual information that is important to identify the window in the corresponding's platform UX. As an example, most word processors and image editors would display the name of the application and the name of the document or file that is being edited.
 
-To fix this situation, we require a bucket to store this contextual information. Considering that this information is generally different from what is displayed in the page's title, we propose adding a subtitle definition that can be used for this specific purpose. The source of the title bar in installed web apps would be composed of the app's name as defined in the manifest, and an additional subtitle/detail from a meta tag in the head of the document.
+To fix this situation, we require a bucket to store this contextual information. Considering that this information is generally different from what is displayed in the page's title, we propose adding an `appTitle` definition that can be used for this specific purpose. The source of the title bar in installed web apps would be composed of the app's name as defined in the manifest, and an additional contextual/detail from a meta tag in the head of the document.
 
 ## Goals
 * Align the UI of installed web apps to that of platform specific applications.
@@ -33,27 +34,27 @@ To fix this situation, we require a bucket to store this contextual information.
 ## Use Cases
 This will allow developers 2 cases for the standard title bar.
 1.	Installed web apps that only have the app’s name as define in the manifest file.
-    * Useful to replicate some native experiences that only have the app’s name in the title bar (This is the default behaviour for web apps that do not specify the subtitle meta tag or define it through the JS API).
-2.	Installed Web Apps that have the app’s name and a subtitle or detail as defined in the document’s meta tag.
+    * Useful to replicate some native experiences that only have the app’s name in the title bar (This is the default behaviour for web apps that do not specify the appTitle meta tag or define it through the JS API).
+2.	Installed Web Apps that have the app’s name and a appTitle or detail as defined in the document’s meta tag.
     * Useful for apps that can have multiple instances running with several documents open, such as word processors.
 
 ## Proposed Solution
 
 As defined in the [HTML specification](https://html.spec.whatwg.org/multipage/semantics.html#the-meta-element), “meta element represents various kinds of metadata that cannot be expressed using the title, base, link, style, and script elements”. This is the case for the type of information we want to convey in the particular and novel case of text in the title bar of an installed web app/tab in browser. Following the guidelines of [usage for own metadata](https://html.spec.whatwg.org/multipage/semantics.html#other-metadata-names) names, there can be processing requirements for the UA so a new [standard name](https://html.spec.whatwg.org/#standard-metadata-names) needs to be added to the existing list. 
 
-`<meta name="subtitle" content="additional/secondary text to go in the title bar">`
+`<meta name="appTitle" content="additional/secondary text to go in the title bar">`
 
-This also requires to add an IDL attribute to the WHATWG spec to reflect and expose the subtitle to the document.
+This also requires to add an IDL attribute to the WHATWG spec to reflect and expose the appTitle to the document.
 
-`document.subtitle`
+`document.appTitle`
 
-The following image is a mockup of a PWA using the subtitle API.
+The following image is a mockup of a PWA using the `appTitle` API.
 
 ![image of twitter installed web app with a long text in the title bar](webAppTitleBar2.png)
 
 This is achieved by adding the following meta tag in the head of the page:
 
-`<meta name="subtitle" content="Direct Messages">`
+`<meta name="appTitle" content="Direct Messages">`
 
 ## Privacy and Security Considerations
 
@@ -64,8 +65,6 @@ No considerable privacy concerns are expected, but we welcome community feedback
 
 No self-review for security is currently available, though the W3C TAG's Security and Privacy self-review questionnaire (a suggested prerequisite for TAG review) does have some questions on Security that may be relevant: https://www.w3.org/TR/security-privacy-questionnaire/.
 
-If you believe your explainer may have non-trivial security implications, please reach out to Jun Kokatsu for a review. 
-
 ## Alternative Solutions
 
 * Using a field on the manifest to store the contextual information. This alternative would require constant reading and writing to an external (manifest) file and doesn't necessarily fit semantically with the context of the application's state.
@@ -75,3 +74,4 @@ If you believe your explainer may have non-trivial security implications, please
 ## Open Questions
 
 * The name `subtitle` might be misleading, so there is a possibility of using a more generic name that aligns better with the use of the content. Suggested, `app-title-suffix` and `app-title-custom` work as well. The final value of the meta tag name will likely be different from subtitle.
+    * `subtitle` has been changed to `appTitle`.
