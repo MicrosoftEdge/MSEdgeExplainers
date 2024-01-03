@@ -174,7 +174,7 @@ for (p of purchases) {
 ## Full API interface
 
 ### API for Microsoft Store PWA
-Expected to start Origin Trial in Microsoft Edge 115. This is a non-breaking change, adding new [Service Provider](#dfn-service-provider) support to `windows.getDigitalGoodsService` and new [PMI](#dfn-pmi) support to `window.PaymentRequest`. Use of the new methods/fields will require developers to update supporting code in their apps and follow [Prerequisites](#dfn-pre-requests).
+Started Origin Trial in Microsoft Edge, learn more about how to register: [Use Origin Trials in Microsoft Edge](https://learn.microsoft.com/en-us/microsoft-edge/origin-trials/). This is a non-breaking change, adding new [Service Provider](#dfn-service-provider) support to `windows.getDigitalGoodsService` and new [PMI](#dfn-pmi) support to `window.PaymentRequest`. Use of the new methods/fields will require developers to update supporting code in their apps and follow [Prerequisites](#dfn-pre-requests).
 
 
 ```webidl
@@ -224,5 +224,5 @@ dictionary PurchaseDetails {
 ## <dt id="dfn-pre-requests">Prerequisites to use Digital Goods API on Windows</dt>
 1. To use Digital Goods API on Windows, you will have to publish your PWA to the Microsoft Store: [Publish a Progressive Web App to the Microsoft Store](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/overview?pivots=store-installer-pwa)
 2. Login to [Partner Center](https://partner.microsoft.com/en-us/dashboard/home) and create Add-ons you want to provide in your PWA, see guidance to [create the add-on in Partner Center](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/create-app-submission?pivots=store-installer-add-on).
-3. Register Digital Goods Origin Trial from: [Microsoft Edge Origin Trials Developer Console](https://developer.microsoft.com/en-us/microsoft-edge/origin-trials/)
+3. Register Digital Goods Origin Trial from: [Microsoft Edge Origin Trials](https://developer.microsoft.com/en-us/microsoft-edge/origin-trials/).
 4. To make PWAs using Digital Goods API available to your customers, make sure they have installed Microsoft Edge 115 or higher.
