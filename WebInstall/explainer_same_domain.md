@@ -148,7 +148,7 @@ A user agent might decide to have only the requirement of HTTPS to allow install
 ## Alternative Solutions
 
 * **HTML anchor tag target install
-`<a href="https://airhorner.com" target="_install">honk</a>`:** An alternate solution to allow installation of web apps is by allowing a new target type of `_install` to the HTML anchor tag. This has the benefit of being able to work in environments that have JS disabled and can also be another entry point for installation. While this is an elegant solution, it limits the amount of information a developer can act upon that the promise does provide, such as if the prompt was shown or if the origin has permissions to install apps.
+`<a href="https://airhorner.com" target="_install">honk</a>`:** An alternate solution to allow installation of web apps is by allowing a new target type of `_install` to the HTML anchor tag. This has the benefit of being able to work in environments that have JS disabled and can also be another entry point for installation. An event could be fired if the prompt/installation is successful and provide similar information to the one that the promise returns. Once the API ships this can be a fast follow-up to enable installs in a declarative way.
 
 ## Open Questions
 
