@@ -4,7 +4,7 @@
 
 ### 2.1. What information might this feature expose to Web sites or other parties, and for what purposes is that exposure necessary?
 
-For standard formats, this feature doesn't expose any information about the source and destination apps during copy-paste operation. However, for web custom formats, since it's restricted to a specific set of apps, during paste it could expose the source app where the user copied the data from. When a format is delay rendered, the system clipboard requests the data for that format during paste. The source app must provide the data for the delay rendered format when it is requested by the system clipboard, else, the paste would fail in the destination app.
+For standard formats, this feature doesn't expose any information about the source and destination apps during copy-paste operation. However, for web custom formats, since some apps may use ecosystem-specific web custom formats, during paste it could expose the source app where the user copied the data from. When a format is delay rendered, the system clipboard requests the data for that format during paste. The source app must provide the data for the delay rendered format when it is requested by the system clipboard, else, the paste would fail in the destination app.
 For more discussion, please see https://github.com/w3c/editing/issues/439.
 
 To use delay rendering via the async clipboard API, all the existing restrictions in async clipboard APIs related to secure context, permissions etc apply.
@@ -97,4 +97,6 @@ No interaction with third-party pages.
 
 ### 3.5. Legitimate Misuse
 
-We don't think there is any risk of legitimate misuse of this API. The privacy concern with web custom formats can be mitigated by restricting the web custom formats to a very small number so the authors can't cast a wide net to track all the supported apps. UAs could also choose to trigger the callback after a fixed/variable amount of time regardless of whether the formats were requested by the system clipboard or not. That way the authors can't determine whether the data is being requested as a result of user paste operation.
+The privacy concern with web custom formats can be partially mitigated by restricting the web custom formats to a very small number so the authors can't cast a wide net to track all the supported apps. It doesn't address the core privacy issue where a target app is able to know where the user has copied the data from if there is a limited number of apps that support a web custom format.
+
+UAs could also choose to trigger the callback after a fixed/variable amount of time regardless of whether the formats were requested by the system clipboard or not. That way the authors can't determine whether the data is being requested as a result of user paste operation. This prevents web authors from truly delay rendering the web custom formats and it affects performance as typically web custom formats have high fidelity content.
