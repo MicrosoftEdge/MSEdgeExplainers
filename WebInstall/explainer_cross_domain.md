@@ -35,55 +35,11 @@ While this is the general acquisition flow on many platforms, the web does not h
 
 ## Use Cases
 
-There are two main use cases that the Web Install API enables for cross-origin origins:
-
-### **Web app installation from associated domain**
-
-An (out-of-scope) origin associated to a web app could prompt for the installation of said web app. The typical use case for this is a marketing website that can offer their customers a direct way to install the associated web app.
-
-As an example, a user can navigate to the `streamflix.com` website and find UX that allows them to install the associated application found in `streamflix.app`.
-
-```javascript
-/* Example that uses the Permissions API to check if the installation permission is set before calling the install method */
-  const installApp = async () => {
-    try{
-        const { state } = await navigator.permissions.query({
-            name: "installation"
-          });
-          switch (state) {
-            case "granted":
-                const value = await navigator.install('https://streamflix.app');
-              break;
-            case "prompt":
-              showInstallButton();
-              break;
-            case "denied":
-              browseToAppStorePage();
-              break;
-          }
-    }
-    catch(err){console.error(err.message)}
-  };
-```
-
-Manifest file for the `streamflix.app`, allowing installation *ONLY* from `streamflix.com` :
-
-```json
-{
-    "name": "Streamflix App",
-    "display": "standalone",
-    "start_url": "/index.html",
-    "install_sources": [ 
-	    {"origin": "streamflix.com"}   
-    ]
-}
-```
-
-![Different domain install flow](./difdomaininstall.png) 
+The Web Install API enables installation of cross-origin applications. A website will be able to include a button to install a related application, which can be hosted in another domain. The functionality can also be used to create online repositories of apps, improving discoverability of applications.
 
 ### **Creation of online catalogs**
 
- The other use case for the API is related to the creation of online catalogs. A web site/app can list and install web apps. For example, `store.com` would be able to distribute apps on multiple platforms and multiple devices.
+ Although a website will be able to install a cross-origin application, the most typical use case for the API is related to the creation of online catalogs. A web site/app can list and install web apps. For example, `store.com` would be able to distribute apps on multiple platforms and multiple devices.
 
 ```javascript
 /* tries to install a cross-origin web app */
