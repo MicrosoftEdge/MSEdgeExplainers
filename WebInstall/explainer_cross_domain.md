@@ -150,9 +150,13 @@ To install a same domain web site/app, the process is as follows:
  
 ### The `navigator.getInstalledApps` method
 
-If supported by the UA, the `getInstalledApps` method returns a list of the content that has been installed from that installation origin.** This means the installation origin will be able to know which applications it has installed, until cache is cleared. The installation origin *will not* be informed of any apps installed by other means, whether via another installation origin, directly through the browser, or by a native app store. The method returns a list of manifest ids of content installed from the calling origin. Additionally, if the browser has an active 'Do Not Track (DNT)', equivalent 'Global Privacy Control (GPC)' setting, is in Private browsing mode, or is an opinionated browser towards privacy, this is ignored and installation origins will not be allowed to know if that application is installed. 
+If supported by the UA, the `getInstalledApps` method returns a list of the content that has been installed from *that* installation origin. This is an **async** method of the `navigator` interface that allows the installation origin to know which applications it has installed.
 
-* The approach for showing which apps have been installed from this origin follows the same API approach where the information is accessible if it matches a [partition key](https://github.com/kyraseevers/Partitioning-visited-links-history#general-api-approach), instead of just the link URL. This ensures installed apps can be seen only from the origin matching all parts of the key. 
+This works until cache is cleared. The installation origin *will not* be informed of any apps installed by other means, whether via another installation origin, directly through the browser, or by a native app store. The method returns a list of manifest ids of content installed from the calling origin.
+
+Additionally, if the browser has an active 'Do Not Track (DNT)', equivalent 'Global Privacy Control (GPC)' setting, is in Private browsing mode, or is an opinionated browser towards privacy, this is ignored and installation origins will not be allowed to know if that application is installed. In this case the `navigator.getInstalledApps` will return a `null`.
+
+* The approach for showing which apps have been installed from this origin follows the same API approach where the information is accessible if it matches a [partition key](https://github.com/kyraseevers/Partitioning-visited-links-history#general-api-approach), instead of just the link URL. This ensures installed apps can be seen only from the origin matching all parts of the key.
 
 ## Relation with other web APIs/features 
 
