@@ -27,6 +27,7 @@ While this is the general acquisition flow on many platforms, the web does not h
 ## Non-goals
 
 * Install same-origin content (see [Web Install - same-origin explainer](./explainer_same_domain.md)).
+* Install arbitrary web content that is not an app (target must have a manifest file with [`install_sources`](#install-sources-manifest-field)).
 * Change the way the UA currently prompts for installation of a web app.
 * Associate ratings and reviews with the installed app ([see Ratings and Reviews API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RatingsAndReviewsPrompt/explainer.md)).
 * Process payments for installation of PWAs ([see Payment Request API](https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API)).
@@ -168,6 +169,8 @@ In order for an application/site to be installed, it must comply with *installab
 Modern browsers allow for different degrees of installation of different types of content, ranging from traditional web sites all the way up to Progressive Web Apps. **The core functionality of the API is that it allows to install *anything* initiated with a user action**.
 
 A user agent might decide to have only the requirement of HTTPS to allow installation of a web site, or may need as well a manifest file and/or service worker to install a web app or might not require anything at all, allowing the user to install any content they wish.
+
+For cross-origin content, the target content must have an [`install_sources`](#install-sources-manifest-field) field that allows the installation from the installation origin.
 
 ## Privacy and Security Considerations
 
