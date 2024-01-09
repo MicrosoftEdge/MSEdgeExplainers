@@ -73,7 +73,7 @@ To install a web site/app, the site/app would use the promise-based method `navi
 
 * Resolve when an installation was completed.
     * The success value will be an object that contains:
-     	*  `url`: url of the installed target.
+     	*  `manifest_id`: computed `manifest_id` of the installed application.
 * Be rejected if the prompt is not shown or if the app installation did not complete. It'll reject with a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
     * `AbortError`: The installation was not completed.
     
