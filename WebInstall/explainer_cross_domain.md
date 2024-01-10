@@ -150,7 +150,7 @@ To install a same domain web site/app, the process is as follows:
  
 ### The `navigator.getInstalledApps` method
 
-If supported by the UA, the `getInstalledApps` method returns a list of the content that has been installed from *that* installation origin. This is an **async** method of the `navigator` interface that allows the installation origin to know which applications it has installed.
+If supported by the UA, the `getInstalledApps` method returns a list of the content that has been installed from *that* installation origin which is still installed on the device at the time of execution. This is an **async** method of the `navigator` interface that allows the installation origin to know which applications it has installed.
 
 This works until cache is cleared. The installation origin *will not* be informed of any apps installed by other means, whether via another installation origin, directly through the browser, or by a native app store. The method returns a list of manifest ids of content installed from the calling origin.
 
