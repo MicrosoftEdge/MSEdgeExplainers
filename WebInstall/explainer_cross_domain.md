@@ -66,7 +66,7 @@ const installApp = async (manifest_id) => {
 
 ### The `navigator.install` method
 
-To install a web app, a web site would use the promise-based method `navigator.install([<manifest_id>[, <params>]]);`. This method will:
+To install a web app, a web site would use the promise-based method `navigator.install(<manifest_id>[, <install_url>[, <params>]]);`. This method will:
 
 * Resolve when an installation was completed.
     * The success value will be an object that contains:
@@ -77,22 +77,25 @@ To install a web app, a web site would use the promise-based method `navigator.i
 
 ![Promises resolve/reject flow](./installPromises.png) 
 
-
 #### **Signatures of the `install` method (cross-origin)**
 The cross-origin part of the Web Install API consists of the extension to the navigator interface with an `install` method. This method receives:
-* `manifest_id`: decalres the specific application to be installed. If the content to be installed is not content with a manifest, a `install_url` parameter can be specified.
+* `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. This value must match the id specified in the manifest file. 
+* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. An `install_url` must not redirect nor contain extra content that is not relevant for installation purposes. In the absence of an `install_url`, the value defaults to that of the `manifest_id`.
 * optional [parameters](#parameters).
+
+If the `manifest_id` is the *what* to install, the `install_url` is the *where* to find it.
 
 Unless the UA decides to [gate this functionality behind installation](#gating-capability-behind-installation), the behaviour between calling the `install` method on a tab or on an installed application should not differ. The install method can be used in two different ways.
 
-1. `navigator.install(<manifest_id>)`: The method receives a parameter which is a [manifest id](https://w3c.github.io/manifest/#id-member) to a web app to install. This will prompt for installation of the app if the requesting origin has installation permissions (see [security section](#integration-with-the-permissions-api)). This is the most common use of the API.
+1. `navigator.install(<manifest_id>, <install_url> [, <params>])`: This signature of the method requires the id of the application to be installed (`manifest_id`), and the installation location for the app (`install_url`). This is the most common API use case the API for cross-origin scenarios.
 
-2. `navigator.install(<manifest_id>, <params>)`: This signature of the method includes the optional parameters. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
+2. `navigator.install(<manifest_id> [, <params>])`: The method receives a parameter which is a [manifest id](https://w3c.github.io/manifest/#id-member) to a web app to install. There is no explicit `install_url`, which means it is the same value as the `manifest_id`. This is a shorthand to calling `navigator.install(<manifest_id>, <manifest_id>)`.
+
+In both cases, this will prompt for installation of the app if the requesting origin has installation permissions (see [security section](#integration-with-the-permissions-api)) and the target application has specified this domain in its `install_sources` manifest field.
 
 #### **Parameters**
 
 The `navigator.install` call can receive an object with a set of parameters that specify different installation behaviours for the app. It is also a way to future-proof the API if additional data were required with the call.
-* **install_url**: Provides a url to install if the specified `manifest_id` can't be found. The UA can attempt to install this origin instead. 
 * **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain. This information can later be retrieved inside the installed application via the [Acquisition Info API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md). 
 
 #### **Installing the web app**
@@ -100,7 +103,7 @@ The `navigator.install` call can receive an object with a set of parameters that
 To install a same domain web site/app, the process is as follows:
 1. Origin site that triggers the installation must have installation permissions as it tries to install a cross-origin app.
 2. target site/app must comply with *[installability criteria](#installability-criteria), if any*.
-3. If the target content is a web app with a manifest, check if the domain is in the list of [allowed origins](#install-sources-manifest-field) to install said content. If the target content is not a web app, the UA may offer different UX that informs the user that the target might not integrate with the host OS.
+3. If the target content is a web app with a manifest, check if the domain is in the list of [allowed origins](#install-sources-manifest-field) to install said content. If the target content is not a web app, it can't be installed.
 3. Prompt the user for install confirmation. User is given a choice about whether to install the target content or not.
 4. If the users accepts, the content is installed.
 5. UA default action post-install (generally the app will open/be added to homescreen/start menu/dock). 
