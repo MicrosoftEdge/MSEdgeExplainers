@@ -177,6 +177,9 @@ switch (state) {
 ####  **Install Sources manifest field**
 * A new field called `install_sources` will be added to the manifest file to have a control list of sites that can install the app. In its most restrictive case, the developer can specify to not allow installation from any other origin, in which case the PWA conforms to its usual behaviour of only being able to be installed from its same origin.
 
+##### Allowing installations from any origin
+A new web-manifest boolean key `allow_all_install_sources` signals that the application can be installed from any source. If set to `true`, the `install_sources` list is ignored (if included). If set to `false` or absent, it defers to the origins listed in     `install_sources`.
+
 ```json
 {
     "name": "Awesome PWA",
