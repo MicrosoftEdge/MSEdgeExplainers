@@ -156,7 +156,11 @@ navigator.clipboard.write([clipboardItemInput]);
 
 ## What happens to the clipboard data on Tab/Browser Close?
 
-1. Add a `beforeunload` event listener: A web author could choose to `preventDefault` `beforeunload` event and notify the user that there is some data pending to be written into the clipboard. In this event handler, web authors could use a new clipboard API (like `navigator.clipboard.undelayFormats([""]` or something similar) to write the data for the formats that were delay rendered.
+When a format is delay rendered during the copy operation, the site only provides a callback for this format to the `ClipboardItem`. After the copy operation, if the user decides to close the browser/tab or change the content of the document, then the paste would fail unless the site has a way to track the history of changes or cache the state of the document or write the data for the format by triggering the callback associated with it.
+
+Following is a list of options to mitigate this issue:
+
+1. Add a `beforeunload` event listener: A web author could choose to `preventDefault` the `beforeunload` event and notify the user that there is some data pending to be written into the clipboard. In this event handler, web authors could use a new clipboard API (like `navigator.clipboard.undelayFormats([""])` or something similar) to write the data for the formats that were delay rendered.
 
 e.g.
 ```js
@@ -178,7 +182,7 @@ const beforeUnloadListener = (event) => {
 ```
 
 **Problems with this approach**
-Chrome doesn't allow to customize the message that is shown to the user, so this could be confusing to the user if the default dialog shows up due to formats being delay rendered. Moreover, it's also detrimental to the performance of the site if there is a beforeunload event listener attached.
+Chromium doesn't allow the message that is shown to the user to be customized, so this could be confusing to the user if the default dialog shows up due to formats being delay rendered. Moreover, it's also detrimental to the performance of the site if there is a beforeunload event listener attached.
 Some sites provide options to paste as plain text or html during the paste operation, so if the web author chooses to delay render both formats, but only provide the data for one format in the new web API during `beforeunload` event, then it would be a bad experience for the user if they want to choose the delay rendered format for paste.
 
 2. Browser could choose to trigger all the callbacks before it fires `beforeunload` event so it could populate the data for the delay rendered formats. That way the web authors don't have to register for `beforeunload` event. In this case, a timeout can also be added to prevent sites from abusing the delay rendering of formats.
@@ -186,31 +190,41 @@ Some sites provide options to paste as plain text or html during the paste opera
 **Problems with this approach**
 Could slow down the browser/tab close operation. The timeout is a way to mitigate this performance issue, but it could lead to other problems like the web author may not have enough time to generate the payload for the format, so the clipboard would have empty data for that format.
 
-3. Choose to only keep the formats that are cheaper to produce and remove the rest (the formats that are delay rendered) by performing another clipboard.write operation: Native Excel has some logic to clear the clipboard and write a smaller subset of the initial formats that were on the clipboard when a user decides to close the app. Web authors can do this as well, but it would affect the experience of the user if they are unable to paste the format that has high fidelity content and is delay rendered by the web author. Also, this has to be done during `beforeunload` event which affects performance of the site and slow down browser/tab close operation.
+3. Choose to only keep the formats that are cheaper to produce and remove the rest (the formats that are delay rendered) by performing another clipboard.write operation: Native Excel has some logic to clear the clipboard and write a smaller subset of the initial formats that were on the clipboard when a user decides to close the app. Web authors can do this as well.
 
-4. Throw away all the delay rendered formats and put empty data for those formats in the clipboard: It would be a bad user experience, but a web author could also choose to not populate the formats that were registered for delay rendering.
+**Problems with this approach**
+This would affect the experience of the user if they are unable to paste the format that has high fidelity content and is delay rendered by the web author. Also, this has to be done during `beforeunload` event which affects performance of the site and slow down browser/tab close operation.
 
-5. Browsers could choose to show a confirmation dialog if there is any delay rendered formats in the clipboard: Although it is similar to option 1, here the text of the dialog explicitly mentions delay rendering of formats which is more informative to the the user. This option has similar concerns as option 1, but it does affect navigations, so it slows down browser/tab shutdown behavior.
+4. Throw away all the delay rendered formats and put empty data for those formats in the clipboard.
+
+**Problems with this approach**
+It would be a bad user experience, but a web author could also choose to not populate the formats that were registered for delay rendering.
+
+5. Browsers could choose to show a confirmation dialog if there is any delay rendered formats in the clipboard: Although it is similar to option 1, here the text of the dialog explicitly mentions delay rendering of formats which is more informative to the the user.
+
+**Problems with this approach**
+This option has similar concerns as option 1, but it does affect navigations, so it slows down browser/tab shutdown behavior.
 
 More info [here](https://docs.google.com/document/d/1H6ow7RWa4MeycKP3OQBoMhLuMaJct3jSCWW6apcVu9U/edit?usp=sharing)
 
 ### Proposal
 
-Proposal is a hybrid of options 2 and 4
+Proposal is a hybrid of options 2 and 3
 
-1. At least one built-in format must be written to the clipboard without delay as part of the write operation so there will be some data on the clipboard (could be a low fidelity `text/plain` format) if the browser/tab closes and the site doesn't get a chance to generate the data for the delay rendered formats within the timeout window. If the site only writes one format to the clipboard, then it can't be delay rendered.
+1. At least one built-in format must be written to the clipboard without delay as part of the write operation so there will be some data on the clipboard (could be a low fidelity `text/plain` format) if the browser/tab closes and the site doesn't get a chance to generate the data for the delay rendered formats within the timeout window. If the site only writes one format to the clipboard, then an exception would be thrown to prevent the write operation.
 
 2. If a delay rendered callback is already running before the page unloads, cancel the callback after a timeout period if the callback hasn't completed yet. When the callback is cancelled, set empty data to the clipboard for that delay rendered format.
 
-3. If site registered for `beforeunload` event to run the callback, run the callback but cancel it if it exceeds a timeout period so it doesn't cause delays in navigation.
+3. If the site registered for `beforeunload` event to run the callback, run the callback but cancel it if it exceeds a timeout period so it doesn't cause delays in navigation.
 
 ## Privacy and Security Considerations
 
 ### Privacy
 
-* Delay rendering of web custom formats
+* Delay rendering of Web Custom Formats
 
-  * Web custom formats are specific to an app ecosystem. When a site registers a callback for a web custom format, it doesn't know where the user is going to paste until the user performs the paste in an app that supports pasting of the web custom format that was copied. On paste, when the web custom format is read from the clipboard, the clipboard calls back into the browser to trigger the callback that was registered for this format so it can return the data to the paste target. The site would know the app or have some fuzzy details about the app where the user is pasting the data into.
+  * [Web custom formats](https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-pickling/explainer.md) are specific to an app ecosystem. When a site registers a callback for a web custom format, it doesn't know where the user is going to paste until the user performs the paste in an app that supports pasting of the copied web custom format. On paste, when the web custom format is read from the clipboard, the clipboard calls back into the browser to trigger the callback that was registered for this format so it can return the data to the paste target. By registering delay-rendered custom formats on the clipboard and tracking if and when particular delay render callbacks get called, the site can make some educated guesses about which applications or webpages the user is pasting data into.
+  More details about the issue: https://github.com/w3c/editing/issues/439.
   ![Privacy concern with web custom format](privacy_concern_dcr.png)
 
   * Proposed mitigation
