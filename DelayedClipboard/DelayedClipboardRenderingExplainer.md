@@ -61,8 +61,8 @@ An example of the usage is shown below:
 ```js
 const textBlob = new Blob(['Hello, World!'], {type: 'text/plain'});
 const clipboardItemInput = new ClipboardItem({
-                            'text/plain': Promise.resolve(textBlob), 
-                            'web application/x-custom-format-clipboard-format': Promise.resolve(generateExpensiveCustomFormatBlob),
+                            'text/plain': textBlob,
+                            'web application/x-custom-format-clipboard-format': generateExpensiveCustomFormatBlob,
                            });
 navigator.clipboard.write([clipboardItemInput]);
 ```
@@ -170,7 +170,7 @@ function generateExpensiveCustomFormatBlob() {
 return new Blob....
 }
 const clipboard_item = new ClipboardItem({
-                'text/html': Promise.resolve(generateExpensiveCustomFormatBlob)
+                'text/html': generateExpensiveCustomFormatBlob
                 });
 navigator.clipboard.write([clipboard_item]);
 
@@ -215,7 +215,8 @@ Proposal is a hybrid of options 2 and 3
 
 2. If a delay rendered callback is already running before the page unloads, cancel the callback after a timeout period if the callback hasn't completed yet. When the callback is cancelled, set empty data to the clipboard for that delay rendered format.
 
-3. If the site registered for `beforeunload` event to run the callback, run the callback but cancel it if it exceeds a timeout period so it doesn't cause delays in navigation.
+3. Run the callback before the `beforeunload` event is fired and if it exceeds a timeout period, set empty data to the clipboard for that delay rendered format so it doesn't cause delays in navigation.
+*Issue* This needs more discussion as the specifics of it are still unclear.
 
 ## Privacy and Security Considerations
 
@@ -224,6 +225,10 @@ Proposal is a hybrid of options 2 and 3
 * Delay rendering of Web Custom Formats
 
   * [Web custom formats](https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-pickling/explainer.md) are specific to an app ecosystem. When a site registers a callback for a web custom format, it doesn't know where the user is going to paste until the user performs the paste in an app that supports pasting of the copied web custom format. On paste, when the web custom format is read from the clipboard, the clipboard calls back into the browser to trigger the callback that was registered for this format so it can return the data to the paste target. By registering delay-rendered custom formats on the clipboard and tracking if and when particular delay render callbacks get called, the site can make some educated guesses about which applications or webpages the user is pasting data into.
+
+  *Example*
+  Consider an app WordPerfect that is used by a few dedicated users. It used to be a popular app but now its being used by only a handful of people. A malicious website advertises WebPerfect format on the clipboard using the delay rendering callback on copy. When the user pastes it into WordPerfect app, the clipboard calls back into the browser and the callback gets triggered. The malicious site is now aware of those few users who use the WordPerfect app.
+
   More details about the issue: https://github.com/w3c/editing/issues/439.
   ![Privacy concern with web custom format](privacy_concern_dcr.png)
 
