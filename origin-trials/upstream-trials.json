@@ -1,193 +1,240 @@
 {
   "active": [
     {
-      "label": "Background Blur",
-      "expiration": "2023-11-02",
-      "repo": "w3c/mediacapture-extensions",
-      "explainer": "https://github.com/riju/backgroundBlur/blob/main/explainer.md"
-  },
-  {
+      "label": "Capture all screens",
+      "expiration": "2024-10-29",
+      "repo": "screen-share/capture-all-screens",
+      "explainer": "https://github.com/screen-share/capture-all-screens"
+    },
+    {
+      "label": "Captured Surface Control",
+      "expiration": "2024-10-01",
+      "repo": "screen-share/captured-surface-control",
+      "explainer": "https://github.com/screen-share/captured-surface-control/blob/main/README.md"
+    },
+    {
       "label": "CompressionDictionaryTransport",
       "expiration": "2024-04-30",
       "repo": "WICG/compression-dictionary-transport",
       "explainer": "https://github.com/WICG/compression-dictionary-transport"
-  },
-  {
+    },
+    {
       "label": "Compute Pressure",
-      "expiration": "2024-01-04",
+      "expiration": "2024-05-28",
       "repo": "w3c/compute-pressure",
       "explainer": "https://developer.chrome.com/docs/web-platform/compute-pressure/"
-  },
-  {
+    },
+    {
       "label": "COOP: restrict-properties",
       "expiration": "2024-02-06",
       "feedbackLink": "https://docs.google.com/forms/d/1pJ-c7GlAYrwu95vIg9l1MDpBMhSDDTM4f6GXEIsAod0/edit?resourcekey=0-gDRkC9ScABNyMI9Y_VDA4w",
       "explainer": "https://github.com/hemeryar/coi-with-popups"
-  },
-  {
+    },
+    {
       "label": "Cross App and Web Attribution Measurement",
-      "expiration": "2024-02-06",
+      "expiration": "2024-04-30",
       "repo": "WICG/attribution-reporting-api",
       "explainer": "https://github.com/WICG/attribution-reporting-api/blob/main/app_to_web.md"
-  },
-  {
+    },
+    {
+      "label": "DeprecateUnloadOptOut",
+      "expiration": "2025-02-11",
+      "repo": "fergald/docs",
+      "explainer": "https://github.com/fergald/docs/blob/master/explainers/permissions-policy-deprecate-unload.md"
+    },
+    {
       "label": "DisableThirdPartySessionStoragePartitioningAfterGeneralPartitioning",
       "expiration": "2024-09-03",
       "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_dd2p0f6kgIwZ9D8",
       "explainer": "https://github.com/wanderview/quota-storage-partitioning/blob/main/explainer.md"
-  },
-  {
+    },
+    {
       "label": "DisableThirdPartyStoragePartitioning",
       "expiration": "2024-09-03",
       "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_0qAfKX5h4w9BsVg",
       "explainer": "https://github.com/wanderview/quota-storage-partitioning/blob/main/explainer.md"
-  },
-  {
+    },
+    {
       "label": "EditContext",
       "expiration": "2024-03-05",
       "repo": "w3c/edit-context",
       "explainer": "https://github.com/w3c/edit-context/blob/gh-pages/explainer.md"
-  },
-  {
-      "label": "Explicit Compile Hints with Magic Comments",
-      "expiration": "2023-11-02",
-      "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_9SLyOGnTj2cwo0C",
-      "explainer": "https://docs.google.com/document/d/19xTAM4A75tz0xUq_velMzGA4JHEgXpyflUxXTcuNiyE/edit?usp=sharing"
-  },
-  {
+    },
+    {
+      "label": "ElementCapture",
+      "expiration": "2024-09-03",
+      "repo": "screen-share/element-capture",
+      "explainer": "https://github.com/screen-share/element-capture/blob/main/README.md"
+    },
+    {
       "label": "FedCM IDP Sign-in Status API",
       "expiration": "2024-02-06",
       "repo": "fedidcg/FedCM",
       "explainer": "https://github.com/fedidcg/FedCM/blob/main/proposals/idp-sign-in-status-api.md"
-  },
-  {
+    },
+    {
+      "label": "FetchLater API",
+      "expiration": "2024-09-03",
+      "repo": "WICG/pending-beacon",
+      "explainer": "https://chromium.googlesource.com/chromium/src/+/main/docs/experiments/fetch-later.md"
+    },
+    {
       "label": "Long Animation Frames",
-      "expiration": "2024-03-05",
+      "expiration": "2024-05-28",
       "repo": "w3c/longtasks",
       "explainer": "https://github.com/w3c/longtasks/blob/main/loaf-explainer.md"
-  },
-  {
+    },
+    {
       "label": "No-Vary-Search support in navigation prefetch cache",
-      "expiration": "2024-01-04",
+      "expiration": "2024-03-05",
       "repo": "WICG/nav-speculation",
       "explainer": "https://github.com/WICG/nav-speculation/blob/main/no-vary-search.md"
-  },
-  {
-      "label": "Payment handler minimal header UX",
-      "expiration": "2023-12-07",
-      "feedbackLink": "https://bugs.chromium.org/p/chromium/issues/entry?components=Blink%3EPayments",
-      "explainer": "https://groups.google.com/a/chromium.org/g/blink-dev/c/NQ-WLvfmPs8"
-  },
-  {
+    },
+    {
+      "label": "Open popups as fullscreen windows",
+      "expiration": "2024-04-30",
+      "repo": "w3c/window-management",
+      "explainer": "https://github.com/w3c/window-management/blob/main/EXPLAINER_fullscreen_popups.md"
+    },
+    {
       "label": "Private Network Access from non-secure contexts",
-      "expiration": "2024-02-06",
+      "expiration": "2024-04-30",
       "repo": "WICG/private-network-access",
       "explainer": "https://developer.chrome.com/blog/private-network-access-update/"
-  },
-  {
+    },
+    {
+      "label": "Private Network Access Permission Prompt",
+      "expiration": "2024-04-30",
+      "repo": "WICG/private-network-access",
+      "explainer": "https://github.com/WICG/private-network-access/blob/main/permission_prompt/explainer.md"
+    },
+    {
+      "label": "Protected Audience Bidding & Auction Services",
+      "expiration": "2024-06-25",
+      "repo": "WICG/turtledove",
+      "explainer": "https://github.com/WICG/turtledove/blob/main/FLEDGE_browser_bidding_and_auction_API.md"
+    },
+    {
+      "label": "RTCEncodedFrameSetMetadata",
+      "expiration": "2024-05-28",
+      "repo": "w3c/webrtc-nv-use-cases",
+      "explainer": "about:invalid#zClosurez"
+    },
+    {
       "label": "RTCPeerConnection callback-based getStats() API",
       "expiration": "2024-03-07",
       "feedbackLink": "https://crbug.com/822696",
       "explainer": "https://w3c.github.io/webrtc-stats/"
-  },
-  {
+    },
+    {
       "label": "scheduler.yield()",
-      "expiration": "2024-01-04",
+      "expiration": "2024-03-05",
       "repo": "wicg/scheduling-apis",
       "explainer": "https://github.com/WICG/scheduling-apis/blob/main/implementation-status.md"
-  },
-  {
+    },
+    {
       "label": "ServiceWorker static routing API",
-      "expiration": "2024-04-02",
+      "expiration": "2024-06-25",
       "repo": "w3c/ServiceWorker",
       "explainer": "https://github.com/yoshisatoyanagisawa/service-worker-static-routing-api"
-  },
-  {
+    },
+    {
       "label": "SharedArrayBuffers in non-isolated pages on Desktop platforms",
-      "expiration": "2024-03-07",
+      "expiration": "2024-06-25",
       "feedbackLink": "https://bugs.chromium.org/p/chromium/issues/entry?components=Internals%3ESandbox%3ESiteIsolation",
       "explainer": "https://developer.chrome.com/blog/enabling-shared-array-buffer/"
-  },
-  {
+    },
+    {
+      "label": "Soft Navigation Heuristics",
+      "expiration": "2024-05-28",
+      "repo": "WICG/soft-navigations",
+      "explainer": "https://github.com/WICG/soft-navigations#soft-navigations"
+    },
+    {
       "label": "Speculation Rules - Document rules, response header, deliveryType",
-      "expiration": "2024-01-04",
+      "expiration": "2024-03-05",
       "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_4HePq4hnaw2MZUi",
       "explainer": "https://github.com/WICG/nav-speculation/blob/main/chrome-2023q1-experiment-overview.md"
-  },
-  {
-      "label": "Storage Buckets API",
-      "expiration": "2024-01-04",
-      "repo": "WICG/storage-buckets",
-      "explainer": "https://developer.chrome.com/blog/storage-buckets/"
-  },
-  {
+    },
+    {
+      "label": "StorageAccessAPIBeyondCookies",
+      "expiration": "2024-06-25",
+      "repo": "arichiv/saa-non-cookie-storage",
+      "explainer": "https://arichiv.github.io/saa-non-cookie-storage"
+    },
+    {
       "label": "Tabbed Web Apps",
-      "expiration": "2024-04-30",
+      "expiration": "2024-05-28",
       "repo": "WICG/manifest-incubations",
       "explainer": "https://github.com/WICG/manifest-incubations/blob/gh-pages/tabbed-mode-explainer.md"
-  },
-  {
+    },
+    {
+      "label": "Web App Scope Extensions",
+      "expiration": "2024-06-25",
+      "repo": "WICG/manifest-incubations",
+      "explainer": "https://github.com/WICG/manifest-incubations/blob/gh-pages/scope_extensions-explainer.md"
+    },
+    {
       "label": "WebAssembly Garbage Collection",
       "expiration": "2024-03-05",
       "feedbackLink": "https://bugs.chromium.org/p/v8/issues/list",
       "explainer": "https://github.com/WebAssembly/gc/blob/master/proposals/gc/Overview.md"
-  },
-  {
-      "label": "WebGPU WebCodecs integration",
-      "expiration": "2023-12-07",
-      "repo": "gpuweb/gpuweb",
-      "explainer": "https://gpuweb.github.io/gpuweb/explainer/#image-input"
-  },
-  {
+    },
+    {
+      "label": "WebAssembly JS String Builtins",
+      "expiration": "2024-06-25",
+      "repo": "WebAssembly/js-string-builtins",
+      "explainer": "https://github.com/WebAssembly/js-string-builtins/blob/main/proposals/js-string-builtins/Overview.md"
+    },
+    {
       "label": "WebSQL",
       "expiration": "2024-05-28",
       "feedbackLink": "https://crbug.com/695592",
       "explainer": "https://developer.chrome.com/blog/deprecating-web-sql/"
-  },
-  {
+    },
+    {
       "label": "X-Requested-With in WebView Deprecation",
       "expiration": "2024-06-27",
       "feedbackLink": "https://bugs.chromium.org/p/chromium/issues/entry?template=Webview+Bugs&labels=XRW-Deprecation",
       "explainer": "https://docs.google.com/document/d/e/2PACX-1vSSTEsHVfTXwOW80Tqy4c5TW6wSnt9b8v7-ZWUF3ZqLDs03EatEuyPCqwaUaa2s0a7mFm3Wh61bgVoz/pub"
-  }
-],
-
+    }
+  ],
   "expired": [
     {
-        "label": "Document Picture-in-Picture",
-        "expiration": "2023-09-07",
-        "repo": "WICG/document-picture-in-picture",
-        "explainer": "https://github.com/WICG/document-picture-in-picture"
+      "label": "Document Picture-in-Picture",
+      "expiration": "2023-09-07",
+      "repo": "WICG/document-picture-in-picture",
+      "explainer": "https://github.com/WICG/document-picture-in-picture"
     },
     {
-        "label": "Page Unload Beacon",
-        "expiration": "2023-09-19",
-        "repo": "WICG/unload-beacon",
-        "explainer": "https://chromium.googlesource.com/chromium/src/+/main/docs/experiments/page-unload-beacon.md"
+      "label": "Page Unload Beacon",
+      "expiration": "2023-09-19",
+      "repo": "WICG/unload-beacon",
+      "explainer": "https://chromium.googlesource.com/chromium/src/+/main/docs/experiments/page-unload-beacon.md"
     },
     {
-        "label": "Privacy Sandbox Relevance and Measurement",
-        "expiration": "2023-09-19",
-        "feedbackLink": "https://developer.chrome.com/blog/privacy-sandbox-unified-origin-trial/#where-can-developers-give-feedback-and-get-support",
-        "explainer": "https://developer.chrome.com/blog/privacy-sandbox-unified-origin-trial/"
+      "label": "Privacy Sandbox Relevance and Measurement",
+      "expiration": "2023-09-19",
+      "feedbackLink": "https://developer.chrome.com/blog/privacy-sandbox-unified-origin-trial/#where-can-developers-give-feedback-and-get-support",
+      "explainer": "https://developer.chrome.com/blog/privacy-sandbox-unified-origin-trial/"
     },
     {
-        "label": "RTCLegacyTrackStats",
-        "expiration": "2023-09-23",
-        "feedbackLink": "https://groups.google.com/a/chromium.org/g/blink-dev/c/NZVXsJQ7tV8",
-        "explainer": "https://w3c.github.io/webrtc-stats/"
+      "label": "RTCLegacyTrackStats",
+      "expiration": "2023-09-23",
+      "feedbackLink": "https://groups.google.com/a/chromium.org/g/blink-dev/c/NZVXsJQ7tV8",
+      "explainer": "https://w3c.github.io/webrtc-stats/"
     },
     {
-        "label": "ServiceWorkerBypassFetchHandlerForMainResources",
-        "expiration": "2023-09-23",
-        "repo": "w3c/ServiceWorker",
-        "explainer": "https://github.com/sisidovski/service-worker-bypass-fetch-handler-for-main-resource"
+      "label": "ServiceWorkerBypassFetchHandlerForMainResources",
+      "expiration": "2023-09-23",
+      "repo": "w3c/ServiceWorker",
+      "explainer": "https://github.com/sisidovski/service-worker-bypass-fetch-handler-for-main-resource"
     },
     {
-        "label": "User-Agent Reduction Deprecation",
-        "expiration": "2023-09-23",
-        "repo": "w3ctag/design-reviews",
-        "explainer": "https://docs.google.com/document/d/1d-K43rzfDGxNM4H6Yzh5lV08KJwLsae06i4Q0A8snME"
+      "label": "User-Agent Reduction Deprecation",
+      "expiration": "2023-09-23",
+      "repo": "w3ctag/design-reviews",
+      "explainer": "https://docs.google.com/document/d/1d-K43rzfDGxNM4H6Yzh5lV08KJwLsae06i4Q0A8snME"
     }
   ]
 }
