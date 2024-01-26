@@ -215,8 +215,7 @@ Proposal is a hybrid of options 2 and 3
 
 2. If a delay rendered callback is already running before the page unloads, cancel the callback after a timeout period if the callback hasn't completed yet. When the callback is cancelled, set empty data to the clipboard for that delay rendered format.
 
-3. Run the callback before the `beforeunload` event is fired and if it exceeds a timeout period, set empty data to the clipboard for that delay rendered format so it doesn't cause delays in navigation.
-*Issue* This needs more discussion as the specifics of it are still unclear.
+3. For any delay-rendered format that still hasn't been resolved at the time that the UA would fire `beforeunload`, run its callback before the `beforeunload` event is fired. For any such callback that hasn't completed within a timeout period, set empty data to the clipboard for that delay rendered format so it doesn't cause delays in navigation.
 
 ## Privacy and Security Considerations
 
