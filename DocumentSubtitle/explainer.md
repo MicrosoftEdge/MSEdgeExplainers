@@ -58,12 +58,7 @@ This is achieved by adding the following meta tag in the head of the page:
 
 ## Privacy and Security Considerations
 
-### Privacy
-No considerable privacy concerns are expected, but we welcome community feedback.
-
-### Security
-
-No self-review for security is currently available, though the W3C TAG's Security and Privacy self-review questionnaire (a suggested prerequisite for TAG review) does have some questions on Security that may be relevant: https://www.w3.org/TR/security-privacy-questionnaire/.
+The TAG privacy and security self-review is located [here](https://docs.google.com/document/d/1CwYQEf98fI5z96Y6AsQdSafp70SD5STgepD5Z8cx1HQ/edit?usp=sharing).
 
 ## Alternative Solutions
 
