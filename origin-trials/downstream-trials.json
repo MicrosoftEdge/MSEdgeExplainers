@@ -9,16 +9,10 @@
             "flag": "msAcquisitionInfo"
         },{
             "label": "Digital Goods API",
-            "expiration": "2023-12-31",
+            "expiration": "2024-04-31",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "explainer": "#"
-        },{
-            "label": "SystemEntropy in PerformanceNavigationTiming",
-            "expiration": "2023-11-1",
-            "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md",
-            "issue": "PerformanceNavigationTimingSystemEntropy ",
-            "flag": "MsUserAgentLaunchNavType"
+            "explainer": "#",
+            "flag": "DigitalGoodsV2"
         },{
             "label": "Unsanitized HTML for Async Clipboard API",
             "expiration": "2024-02-29",
@@ -32,6 +26,17 @@
             "issue": "PointerEventDeviceId",
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PointerEventDeviceId/explainer.md",
             "flag": "PointerEventDeviceId"
+        }
+    ],
+
+    "expired": [
+        {
+            "label": "SystemEntropy in PerformanceNavigationTiming",
+            "expiration": "2023-11-1",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md",
+            "issue": "PerformanceNavigationTimingSystemEntropy ",
+            "flag": "MsUserAgentLaunchNavType"
         },{
             "label": "Web Haptics API",
             "expiration": "2023-12-31",
@@ -39,9 +44,5 @@
             "issue": "WebHaptics",
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md"
         }
-    ],
-
-    "expired": [
-
     ]
 }
