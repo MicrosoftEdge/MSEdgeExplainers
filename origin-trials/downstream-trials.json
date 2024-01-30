@@ -14,6 +14,13 @@
             "explainer": "#",
             "flag": "DigitalGoodsV2"
         },{
+            "label": "SystemEntropy in PerformanceNavigationTiming",
+            "expiration": "2023-11-1",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md",
+            "issue": "PerformanceNavigationTimingSystemEntropy ",
+            "flag": "MsUserAgentLaunchNavType"
+        },{
             "label": "Unsanitized HTML for Async Clipboard API",
             "expiration": "2024-02-29",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
@@ -31,13 +38,6 @@
 
     "expired": [
         {
-            "label": "SystemEntropy in PerformanceNavigationTiming",
-            "expiration": "2023-11-1",
-            "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md",
-            "issue": "PerformanceNavigationTimingSystemEntropy ",
-            "flag": "MsUserAgentLaunchNavType"
-        },{
             "label": "Web Haptics API",
             "expiration": "2023-12-31",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
