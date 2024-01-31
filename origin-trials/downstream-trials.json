@@ -33,16 +33,16 @@
             "issue": "PointerEventDeviceId",
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PointerEventDeviceId/explainer.md",
             "flag": "PointerEventDeviceId"
-        }
-    ],
-
-    "expired": [
-        {
+        },{
             "label": "Web Haptics API",
             "expiration": "2023-12-31",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
             "issue": "WebHaptics",
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md"
         }
+    ],
+
+    "expired": [
+
     ]
 }
