@@ -9,9 +9,10 @@
             "flag": "msAcquisitionInfo"
         },{
             "label": "Digital Goods API",
-            "expiration": "2023-12-31",
+            "expiration": "2024-04-31",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "explainer": "#"
+            "explainer": "#",
+            "flag": "DigitalGoodsV2"
         },{
             "label": "SystemEntropy in PerformanceNavigationTiming",
             "expiration": "2023-11-1",
