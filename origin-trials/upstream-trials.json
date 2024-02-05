@@ -116,7 +116,7 @@
     },
     {
       "label": "RTCEncodedFrameSetMetadata",
-      "expiration": "2024-05-28",
+      "expiration": "2024-09-03",
       "repo": "w3c/webrtc-nv-use-cases",
       "explainer": "about:invalid#zClosurez"
     },
