@@ -4,7 +4,7 @@
 
 ### 2.1. What information might this feature expose to Web sites or other parties, and for what purposes is that exposure necessary?
 
-This feature exposes `image/svg+xml` MIME type to the clipboard using the async clipboard API to support copy-paste of SVG images. All the restrictions related to secure context, permission etc apply for reading this format. The format is parsed using the strict HTML processing that strip out security sensitive tags.
+This feature exposes the `image/svg+xml` MIME type to the clipboard using the async clipboard API to support copy-paste of SVG images. All the restrictions related to secure context, permission etc apply for reading this format. The format is parsed using strict HTML processing that strips out security-sensitive tags.
 
 ### 2.2. Do features in your specification expose the minimum amount of information necessary to enable their intended uses?
 
@@ -28,7 +28,7 @@ No.
 
 ### 2.7. Does this specification allow an origin to send data to the underlying platform?
 
-No.
+Yes. This exposes a new `image/svg+xml` MIME type to the clipboard using the existing async clipboard API. The content is processed and security-sensitive content is removed before it gets written to the clipboard.
 
 ### 2.8. Do features in this specification enable access to device sensors?
 
@@ -94,4 +94,4 @@ No interaction with third-party pages.
 
 ### 3.5. Legitimate Misuse
 
-We don't think there is any risk of legitimate misuse of this API. Browser parses the SVG image string provided by the web author before the parsed content is written to the system clipboard. The target apps that reads this data will not be at risk of parsing malformed HTML.
+We don't think there is any risk of legitimate misuse of this API. Browser parses the SVG image string provided by the web author before the parsed content is written to the system clipboard. The target apps that reads this data will not be at risk of parsing malformed SVG images.
