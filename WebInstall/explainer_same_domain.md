@@ -98,7 +98,7 @@ The same-origin part of the  Web Install API consists of the extension to the na
 
 1. `navigator.install([<params>])`: The method receives no parameters and tries to install the current origin as an app. Note that `manifest_id` *is required* for the installation and if the method is called without one it will use the *default* manifest id of the web content which resolves to the document url.
 
-2. `navigator.install(manifest_id, [<params>])`: The method takes a manifest id and tries to install the current origin as an app. If the content being installed has a manifest file, this must match the value in the manifest file. If there is no manifest file present, it must match the document url. The call can also receive an object with parameters that it can use to customize a same domain installation. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
+2. `navigator.install(manifest_id[[, install_url], <params>])`: The method takes a manifest id and optional install url and tries to install the current origin as an app. If the content being installed has a manifest file, this must match the value in the manifest file. If there is no manifest file present, it must match the document url. The call can also receive an object with parameters that it can use to customize a same domain installation. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
 
 #### **Parameters**
 
