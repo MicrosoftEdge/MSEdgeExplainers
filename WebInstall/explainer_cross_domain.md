@@ -80,7 +80,7 @@ To install a web app, a web site would use the promise-based method `navigator.i
 #### **Signatures of the `install` method (cross-origin)**
 The cross-origin part of the Web Install API consists of the extension to the navigator interface with an `install` method. This method receives:
 * `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. This value must match the id specified in the manifest file. 
-* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. An `install_url` must not redirect nor contain extra content that is not relevant for installation purposes. In the absence of an `install_url`, the value defaults to that of the `manifest_id`.
+* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. An `install_url` must not redirect nor contain extra content that is not relevant for installation purposes. In the absence of an `install_url`, the value defaults to that of the manifest's `start_url`.
 * optional [parameters](#parameters).
 
 If the `manifest_id` is the *what* to install, the `install_url` is the *where* to find it.
@@ -89,9 +89,7 @@ Unless the UA decides to [gate this functionality behind installation](#gating-c
 
 1. `navigator.install(<manifest_id>, <install_url> [, <params>])`: This signature of the method requires the id of the application to be installed (`manifest_id`), and the installation location for the app (`install_url`). This is the most common API use case the API for cross-origin scenarios.
 
-2. `navigator.install(<manifest_id> [, <params>])`: The method receives a parameter which is a [manifest id](https://w3c.github.io/manifest/#id-member) to a web app to install. There is no explicit `install_url`, which means it is the same value as the `manifest_id`. This is a shorthand to calling `navigator.install(<manifest_id>, <manifest_id>)`.
-
-In both cases, this will prompt for installation of the app if the requesting origin has installation permissions (see [security section](#integration-with-the-permissions-api)) and the target application has specified this domain in its `install_sources` manifest field.
+This will prompt for installation of the app if the requesting origin has installation permissions (see [security section](#integration-with-the-permissions-api)) and the target application has specified this domain in its `install_sources` manifest field.
 
 #### **Parameters**
 
