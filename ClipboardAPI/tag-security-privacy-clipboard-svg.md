@@ -4,7 +4,7 @@
 
 ### 2.1. What information might this feature expose to Web sites or other parties, and for what purposes is that exposure necessary?
 
-This feature exposes the `image/svg+xml` MIME type to the clipboard using the async clipboard API to support copy-paste of SVG images. All the restrictions related to secure context, permission etc apply for reading this format. The format is parsed using strict HTML processing that strips out security-sensitive tags.
+This feature exposes the `image/svg+xml` MIME type to the clipboard using the async clipboard API to support copy-paste of SVG images. All the restrictions related to secure context, permission etc apply for reading this format. During `write()`, the format is parsed using the `DOMParser` that uses an XML parser to return a well-formed SVG document. During `read()`, `image/svg+xml` is strictly processed by-default using the HTML fragment parser that inlines styles and also strips out security-sensitive tags. If `image/svg+xml` is in the `unsanitized` list, then it's returned without any processing.
 
 ### 2.2. Do features in your specification expose the minimum amount of information necessary to enable their intended uses?
 
@@ -28,7 +28,7 @@ No.
 
 ### 2.7. Does this specification allow an origin to send data to the underlying platform?
 
-Yes. This exposes a new `image/svg+xml` MIME type to the clipboard using the existing async clipboard API. The content is processed and security-sensitive content is removed before it gets written to the clipboard.
+Yes. This exposes a new `image/svg+xml` MIME type to the clipboard using the existing async clipboard API. The content is processed using the `DOMParser` that uses an XML parser to return a well-formed SVG document before it gets written to the clipboard.
 
 ### 2.8. Do features in this specification enable access to device sensors?
 
