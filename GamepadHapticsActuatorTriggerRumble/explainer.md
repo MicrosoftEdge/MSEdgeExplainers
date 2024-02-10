@@ -67,24 +67,18 @@ interface GamepadHapticActuator {
 The trigger-rumble effect could be activated for both triggers of a gamepad at index 0 using the code below (1 second, 50% intensity on left trigger and full on right), given that the device has support for it. Moreover, if the device is not able to play trigger rumble feedback, it should be capable to fallback to dual rumble.
 
 ```js
-let gamepads = navigator.getGamepads();
-if (gamepads.length > 0) {
-  let gamepad = gamepads[0];
-  if (gamepad.vibrationActuator) {
-    if (gamepad.vibrationActuator.canPlay && gamepad.vibrationActuator.canPlay("trigger-rumble")) {
-      gamepad.vibrationActuator.playEffect("trigger-rumble", {
-        duration: 1000,
-        leftTrigger: 0.5,
-        rightTrigger: 1.0,
-      });
-    } else {
-      gamepad.vibrationActuator.playEffect("dual-rumble", {
-        duration: 1000,
-        strongMagnitude: 0.5,
-        weakMagnitude: 1.0,
-      });
-    }
-  }
+const gamepads = navigator.getGamepads();
+const gamepad = gamepads[0];
+
+if (gamepad?.vibrationActuator) {
+  const effectType =  gamepad.vibrationActuator.canPlay("trigger-rumble")
+    ? "trigger-rumble" : "dual-rumble";
+
+  const effectOptions = effectType === "trigger-rumble"
+    ? { duration: 1000, leftTrigger: 0.5, rightTrigger: 1.0 }
+    : { duration: 1000, strongMagnitude: 0.5, weakMagnitude: 1.0 };
+
+  gamepad.vibrationActuator.playEffect(effectType, effectOptions);
 }
 ```
 
