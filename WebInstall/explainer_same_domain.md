@@ -71,7 +71,7 @@ When called on the same domain, the **`install()` method will trigger/open the p
 
 ### The `navigator.install` method
 
-To install a web site/app, the site/app would use the promise-based method `navigator.install(manifest_id [,<params>]);`. This method will:
+To install a web site/app, the site/app would use the promise-based method`navigator.install(manifest_id[[, install_url], <params>])`. This method will:
 
 * Resolve when an installation was completed.
     * The success value will be an object that contains:
