@@ -50,7 +50,7 @@ The LocalFolder directory handle and its contents will have properties different
     // .getDirectoryHandle()
     let opfsRoot = await navigator.storage.getDirectory();
     if (opfsRoot) {
-        let localStorage = await opfsRoot.getDirectoryHandle("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt", {create: false}); 
+        let localFolder = await opfsRoot.getDirectoryHandle("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt", {create: false}); 
     }
 ```
 
@@ -59,7 +59,7 @@ The LocalFolder directory handle and its contents will have properties different
     let opfsRoot = await navigator.storage.getDirectory();
     if (opfsRoot) {
         for await (const [key, value] of opfsRoot.entries()) {
-            if (key == `microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt`) {
+            if (key === 'microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt') {
                 // ...
             }
         }
