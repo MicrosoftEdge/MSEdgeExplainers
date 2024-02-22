@@ -65,7 +65,11 @@ Combined with the Payment Request API, users can purchase digital products from 
 
 ## Usage Examples
 
-The Digital Goods API allows the user agent to provide the above operations, alongside digital store integration via the Payment Request API.
+The Digital Goods API allows the user agent to provide the above operations, alongside digital store integration via the Payment Request API. 
+
+
+> **IMPORTANT**
+If you want to try this API with Microsoft Store, please use the latest Edge Beta/Dev/Canary. The Edge Stable currently does not support Digital Goods API on Windows.
 
 Sites using the proposed API would still need to be configured to work with each individual store they are listed in, but having a standard API means they can potentially have that integration work across multiple browsers. This is similar to how the existing Payment Request API works (sites still need to integrate with each payment provider, e.g., Microsoft Store, but their implementation is browser agnostic).
 
