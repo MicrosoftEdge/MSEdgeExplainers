@@ -11,11 +11,11 @@ This document is a starting point for engaging the community and standards bodie
 * **Current version: this document**
 
 ## Introduction
-[UWP apps](https://learn.microsoft.com/en-us/windows/uwp/get-started/universal-application-platform-guide) often make use of the [`ApplicationData.LocalFolder`](https://learn.microsoft.com/en-us/uwp/api/windows.storage.applicationdata.localfolder) API for access to local storage. This API manages storage in a system file directory unique to the Package Family Name (PFN) of the installed app package. A UWP app distributed by the Microsoft Store may be replaced with a PWA app under the same PFN. When this happens, existing files in the `LocalFolder` directory become inaccessible to the PWA. 
+[UWP apps](https://learn.microsoft.com/en-us/windows/uwp/get-started/universal-application-platform-guide) often make use of the [`ApplicationData.LocalFolder`](https://learn.microsoft.com/en-us/uwp/api/windows.storage.applicationdata.localfolder) API for access to local storage. This API manages storage in a system file directory unique to the [Package Family Name (PFN)](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/package-identity-overview#package-family-name) of the installed app package. A UWP app distributed by the [Microsoft Store](https://apps.microsoft.com/home) may be replaced with a PWA app under the same PFN. When this happens, existing files in the `LocalFolder` directory become inaccessible to the PWA. 
 
-In this explainer, we propose a solution that allows Microsoft Store PWAs to read and delete files from the `LocalFolder` directory belonging to their PFN. This allows apps to provide a more seamless user experience after an update as well as reclaim storage space.
+In this explainer, we propose a solution that allows Microsoft Store PWAs to read and delete files from the `LocalFolder` directory belonging to their PFN. This allows apps to provide a more seamless user experience after an update and to reclaim storage space.
 
-The proposed solution works by making use of the [Origin Private File System (OPFS)](https://web.dev/articles/origin-private-file-system) and the [File System Access API](https://wicg.github.io/file-system-access/). It exposes an app's LocalFolder file system directory as an entry in the app origin's OPFS root directory.
+The proposed solution works by making use of the [Origin Private File System (OPFS)](https://web.dev/articles/origin-private-file-system) and the [File System Access](https://wicg.github.io/file-system-access/) APIs. It exposes an app's `LocalFolder` file system directory as an entry in the app origin's OPFS root directory.
 
 ## Goals
 
@@ -27,25 +27,43 @@ The proposed solution works by making use of the [Origin Private File System (OP
 
 ## Non-goals
 
-* Enable a Microsoft Store PWA to create new files or modify existing files in its LocalFolder directory.
-* Support web apps not installed and managed by the Microsoft Store.
+* Enable a Microsoft Store PWA to create new files or modify existing files in its `LocalFolder` directory.
+* Support web apps not installed or managed by the Microsoft Store.
 * Support web apps on non-Windows platforms.
 * Standardization as a web specification.
-* Introduce a non-standard Web API
+* Introduce a non-standard JavaScript API.
 
 ## Proposed Solution 
 
 ### Existing behavior
 
-[`navigator.storage.getDirectory()`](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/getDirectory) is an existing API that returns a promise to a [`FileSystemDirectoryHandle`] (https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle) representing the root of the origin's OPFS storage space. By default, an origin's OPFS root directory will have no entries.
+[`navigator.storage.getDirectory()`](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/getDirectory) is an existing API that returns a promise to a [FileSystemDirectoryHandle](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle) which represents the root of directory the origin's OPFS storage space. By default, an origin's OPFS root directory will have no entries.
 
 ### New behavior
 
-Within a Microsoft Store PWA context, the directory handle for OPFS root will contain an additional entry that represents the app's LocalFolder location. This entry can be retrieved as a [`FileSystemDirectoryHandle`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle) by calling [`.entries()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/entries) or [`.getDirectoryHandle(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getDirectoryHandle) on the OPFS root directory handle.
+Within a Microsoft Store PWA context, the directory handle for OPFS root will contain an additional entry that represents the app's `LocalFolder` directory. This entry can be retrieved as a [`FileSystemDirectoryHandle`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle) by calling [`.entries()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/entries) or [`.getDirectoryHandle(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getDirectoryHandle) on the OPFS root directory handle.
 
+Unlike all other OPFS handles, the `LocalFolder` directory handle and its contents will have [`read`](https://wicg.github.io/file-system-access/#dom-filesystempermissionmode-read) permission instead of [`readwrite`](https://wicg.github.io/file-system-access/#dom-filesystempermissionmode-readwrite) permission by default and will not be able to gain `readwrite` permission.
 
-The LocalFolder directory handle and its contents will have properties different from other OPFS directory handles - they will only have read and delete permissions instead of read and write permissions.
+#### Entry name
 
+The LocalFolder entry within the OPFS root directory can be found under the name `microsoft_store_app_local_folder_{PFN}` where `{PFN}` is the Package Family Name of the app.
+
+#### Deletion
+
+Despite having only `read` permission, a `FileSystemHandle` to `LocalFolder` or its contents will allow their [`remove()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle/remove) and [`removeEntry(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry) methods to successfully delete files and directories. 
+
+<!-- All contents in `LocalFolder` can be deleted while the `LocalFolder` folder cannot itself be deleted - this is to mimic the effects of the UWP [`ClearAsync(...)`](https://learn.microsoft.com/en-us/uwp/api/windows.storage.applicationdata.clearasync?view=winrt-22621#windows-storage-applicationdata-clearasync(windows-storage-applicationdatalocality)) API. -->
+
+#### Storage quota and eviction
+
+As the `LocalFolder` directory is in a system file directory separate from Chromium's underlying storage location for OPFS, whether an entry for `LocalFolder` is presented in OPFS root's entries does not affect the available storage estimate returned by [`navigator.storage.estimate()`](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/estimate). As `LocalFolder` takes up space on disk, clearing `LocalFolder` can increase the estimate of available storage.
+
+In Chromium, the underlying storage for OPFS does participate in [eviction](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria#when_is_data_evicted) if an origin is not marked as [persistent](https://storage.spec.whatwg.org/#persistence). As the `LocalFolder` directory is in a system file directory separate from OPFS's underlying storage, it will not be affected by origin based storage eviction.
+
+### Examples
+
+#### Searching for LocalFolder
 ```JS
     // .getDirectoryHandle()
     let opfsRoot = await navigator.storage.getDirectory();
@@ -53,6 +71,9 @@ The LocalFolder directory handle and its contents will have properties different
         let localFolder = await opfsRoot.getDirectoryHandle("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt", {create: false}); 
     }
 ```
+*Example: looking for the `LocalFolder` entry under the OPFS root directory.*
+
+*Note: the `create` option must be `false` to determine if the system `LocalFolder` was found. We will not disallow the app code from creating a directory handle of the same name in actual OPFS storage.*
 
 ```JS
     // .entries()
@@ -65,10 +86,12 @@ The LocalFolder directory handle and its contents will have properties different
         }
     }
 ```
+*Example: Looking for the `LocalFolder` entry through iterating entries under the OPFS root directory.*
 
-### Deleting files
+### Deleting LocalFolder and its contents 
 
-LocalStorage contents can be cleared by calling `.removeEntry(...)` from the OPFS root directory handle.  While you cannot delete the entry itself, you can delete all of its contents.
+`LocalFolder` and its contents can be cleared by calling `.remove()` or `.removeEntry(...)` on the OPFS root directory handle. 
+
 ```JS
     let opfsRoot = await navigator.storage.getDirectory();
     if (opfsRoot) {
@@ -76,7 +99,16 @@ LocalStorage contents can be cleared by calling `.removeEntry(...)` from the OPF
     }
 ```
 
-Alternatively, contents in LocalFolder can be deleted by calling `remove()` on file and directory handles directory.  Again, the entry itself will not be deleted, but its contents will be.
+Calling `.remove()` on the OPFS root directory handle clears all of its contents, after which a new empty OPFS is created.
+
+```JS
+    let opfsRoot = await navigator.storage.getDirectory();
+    if (opfsRoot) {
+        await opfsRoot.remove(); 
+    }
+```
+
+Alternatively, LocalFolder and its contents can be deleted by calling `.remove()` on either file or directory handles.
 
 ```JS
     let localStorage = await opfsRoot.getDirectoryHandle("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt", {create: false}); 
@@ -86,19 +118,17 @@ Alternatively, contents in LocalFolder can be deleted by calling `remove()` on f
     }
 ```
 
-### Entry name
-
-The LocalFolder entry within the OPFS root directory can be found under the name `microsoft_store_app_local_folder_{PFN}` where `{PFN}` is the Package Family Name of the app.
-
 ### Microsoft Store PWA context
+
+An entry for `LocalFolder` will only be visible in the Microsoft Store PWA context.
 
 To be in a Microsoft Store app context, `navigator.storage.getDirectory()` must be called from:
 * Within a top level document
 * Within a web app window of a Microsoft Store installed PWA
 * From the main thread and not a Web Worker
 
-### Avoiding collisions
-To avoid collisions, the LocalFolder entry under the OPFS root directory is assigned a specific name that contains the Package Family Name. If an entry with the same name already exists under the OPFS root directory, an entry representing the LocalFolder directory will not be made visible until the existing entry is renamed or otherwise removed.
+### Avoiding name collisions
+To avoid name collisions, the LocalFolder entry under the OPFS root directory is assigned a specific name that contains the Package Family Name. If an entry with the same name already exists under the OPFS root directory, an entry representing the LocalFolder directory will not be made visible until the existing entry is renamed or otherwise removed. 
 
 ## Similar storage folders
 
@@ -126,4 +156,4 @@ We considered a solution that migrates the contents of the LocalFolder directory
 
 1. As a security precaution, the LocalFolder directory handle and its contents should not allow modifying or creating new files. This prevents the creation of executable files and the creation of files outside of the LocalFolder directory.
 
-1. Any existing data in the LocalFolder directory can be accessed by the same app PFN that created it without prompting the user for additional permissions or input. This is allowed as the user has consented to the app's use of local storage through app installation from the Microsoft Store.
+1. Any existing data in the LocalFolder directory can be accessed by the same app PFN that created it without prompting the user for additional permissions or input. We considered this as a privacy concern but decided that it is acceptable as the user consented to the app's use of local storage through app installation from the Microsoft Store. It is also acceptable for a newer version of the app to read and delete this data.
