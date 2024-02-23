@@ -169,6 +169,12 @@
       "explainer": "https://github.com/WebAssembly/gc/blob/master/proposals/gc/Overview.md"
     },
     {
+      "label": "WebAssembly JavaScript Promise Integration",
+      "expiration": "2024-10-29",
+      "repo": "WebAssembly/js-promise-integration",
+      "explainer": "https://github.com/WebAssembly/js-promise-integration"
+    },
+    {
       "label": "WebAssembly JS String Builtins",
       "expiration": "2024-06-25",
       "repo": "WebAssembly/js-string-builtins",
