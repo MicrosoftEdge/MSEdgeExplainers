@@ -106,7 +106,7 @@
       "label": "RTCEncodedFrameSetMetadata",
       "expiration": "2024-09-03",
       "repo": "w3c/webrtc-nv-use-cases",
-      "explainer": "about:invalid#zClosurez"
+      "explainer": " https://github.com/palak8669/webrtc-encoded-transform/blob/create-encoded-explainer/create-encoded-explainer.md"
     },
     {
       "label": "RTCPeerConnection callback-based getStats() API",
