@@ -18,18 +18,19 @@ In embedded web experiences, the top-level frame grants iframes access to system
 - Independent Choice: Each iframe independently chooses its own media device. The top-level frame cannot directly influence or view this selection due to browser security restrictions (cross-origin boundary).
 - Unsynchronized Changes: When the top-level frame changes its media device, the iframes remain unaware unless they communicate using methods like postMessage. This lack of automatic synchronization can lead to inconsistencies and a disjointed user experience.
 
-We’d like to propose a new API to set the default audio output device for the current top frame and of its sub frames.
+We’d like to propose a new API to set the default audio output device for the current top frame and all of its sub frames.
 
 ## Goals
 
 - Developers can modify the default audio output for the top-level frame page.
 - Developers can modify the default audio output for the sub frame pages.
-- Developers can modify the default audio output for the top-level frame and all other sub frames from the same-origin sub frame.
-- Any media element or audio context can continue to override this default setting using the existing setSinkId API.
+- Developers can modify the default audio output for the top-level frame and all other sub frames from any same-origin sub frame.
+- Any media element or audio context can continue to override this default setting using the existing setSinkId API (cross-origin iframes continue to need 'speaker_selection' permission to call setSinkId).
 
 ## Non Goals
 - A change notification for default audio output is not in scope of this project.
 - Any permission policy requirement for calling the API is not in scope of this project.
+- A change of the sinkId property for default device id, which continue to return default device id by using an empty string.
 
 ## Use Cases
 
@@ -40,17 +41,17 @@ Communication apps may also include a variety of other applications embedded ins
 
 ### 2nd case
 A User:
-A user actively engages in online meetings using a browser communication app. During these meetings, the presenter embeds live PowerPoint presentations within iframes. These embedded presentations often include crucial content from video share site.
-However, a user faces a delightful dilemma: her children are playing in the backyard, and she wants to play music for them using a Bluetooth speaker. To achieve this, she cleverly configures her system settings:
+A user actively engages in online meetings using a browser communication app. During these meetings, the presenter embeds slide show presentation app within iframes. These embedded presentations often include crucial content from video share site.
+However, a user faces a delightful dilemma: her children are playing in the backyard, and she wants to play music for them using a Bluetooth speaker. To achieve this, she cleverly configures her audio output by using the new API what we propose here through the presentation web app and system settings:
 
 - Bluetooth Speaker: A user sets the system default audio output to the Bluetooth speaker, ensuring her children enjoy their music outdoors.
 
-- Computer Speaker: Simultaneously, she selects the computer speaker as the communication app’s default audio output through communication app's speaker selection UI. This way, she can listen to both the video share site content within the live PowerPoint page and the presenter’s voice during her online meetings.
+- Computer Speaker: Simultaneously, she selects the computer speaker as the communication app’s default audio output through communication app's speaker selection UI. This way, she can listen to both the video share site content within the presentation page and the presenter’s voice during her online meetings.
 
 A user’s multitasking prowess ensures a harmonious blend of work, family, and entertainment!
 
 A developer:
-A developer: Developers of communication app can provide audio output selection UI on their top level page that enable the user to select which audio output device to use in both the top level app and all sub frames.
+A developer: Developers of communication apps can provide audio output selection UI on their top level page that enable the user to select which audio output device to use in both the top level app and all sub frames.
 
 ## Proposed Solution
 
