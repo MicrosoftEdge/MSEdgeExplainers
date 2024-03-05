@@ -86,13 +86,13 @@
     },
     {
       "label": "Private Network Access from non-secure contexts",
-      "expiration": "2024-04-30",
+      "expiration": "2024-09-03",
       "repo": "WICG/private-network-access",
       "explainer": "https://developer.chrome.com/blog/private-network-access-update/"
     },
     {
       "label": "Private Network Access Permission Prompt",
-      "expiration": "2024-04-30",
+      "expiration": "2024-05-28",
       "repo": "WICG/private-network-access",
       "explainer": "https://github.com/WICG/private-network-access/blob/main/permission_prompt/explainer.md"
     },
