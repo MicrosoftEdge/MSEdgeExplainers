@@ -50,10 +50,12 @@ Unlike all other OPFS handles, the `LocalFolder` directory handle and its conten
 
 An entry for `LocalFolder` will only be visible in the Microsoft Store PWA context and when the [`related_applications`](https://developer.mozilla.org/en-US/docs/Web/Manifest/related_applications) field in the app's web app manifest is configured correctly. 
 
-To be in a Microsoft Store app context, `navigator.storage.getDirectory()` must be called from:
-* A top level document
-* A document with a URL within the [scope](https://w3c.github.io/manifest/#understanding-scope) of a Microsoft Store installed PWA
-* From the main thread and not a Web Worker
+To be in a Microsoft Store PWA context:
+* The PWA must be installed locally from the Microsoft Store
+* `navigator.storage.getDirectory()` must be called from:
+    * A top level document
+    * From the main thread and not a Web Worker
+    * A document with a URL within the [scope](https://w3c.github.io/manifest/#understanding-scope) of the PWA
 
 In order to opt in to enabling `LocalFolder` access, the app needs to configure `related_applications` in its web app manifest to [identify the PFN of its Windows app package](https://web.dev/articles/get-installed-related-apps#tell_your_website_about_your_windows_app). 
 
