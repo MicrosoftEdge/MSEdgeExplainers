@@ -34,12 +34,12 @@ We’d like to propose a new API to set the default audio output device for the 
 
 ## Use Cases
 
-### 1st case
+### Case 1: Communication app that wants to route all audio to a phone headset
 Communication app customers may use external headsets for calls, separate from their computer’s default audio option. For instance, they might have their default setup to play music through speakers, but would always want to have (potentially private) calls through a Bluetooth headset. Today, many communication apps have a setting for customers to pick their preferred output device.
 
 Communication apps may also include a variety of other applications embedded inside of it. These embedded applications may play audio during a meeting in addition to the normal audio of the call. For example, like when a video is embedded in a slide show presentation application.
 
-### 2nd case
+### Case 2: Using a single device to play separate audio streams to two different listeners
 A User:
 A user actively engages in online meetings using a browser communication app. During these meetings, the presenter embeds slide show presentation app within iframes. These embedded presentations often include crucial content from video share site.
 However, a user faces a delightful dilemma: her children are playing in the backyard, and she wants to play music for them using a Bluetooth speaker. To achieve this, she cleverly configures her audio output by using the new API what we propose here through the presentation web app and system settings:
@@ -51,7 +51,7 @@ However, a user faces a delightful dilemma: her children are playing in the back
 A user’s multitasking prowess ensures a harmonious blend of work, family, and entertainment!
 
 A developer:
-A developer: Developers of communication apps can provide audio output selection UI on their top level page that enable the user to select which audio output device to use in both the top level app and all sub frames.
+Developers of communication apps can provide audio output selection UI on their top level page that enable the user to select which audio output device to use in both the top level app and all sub frames.
 
 ## Proposed Solution
 
