@@ -85,6 +85,7 @@ As the `LocalFolder` directory is in a system file directory separate from Chrom
 In Chromium, the underlying storage for OPFS does participate in [eviction](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria#when_is_data_evicted) if an origin is not marked as [persistent](https://storage.spec.whatwg.org/#persistence). As the `LocalFolder` directory is in a system file directory separate from OPFS's underlying storage, it will not be affected by origin based storage eviction.
 
 #### Avoiding name collisions
+
 To avoid name collisions, the LocalFolder entry under the OPFS root directory is assigned a specific name that contains the Package Family Name. If an entry with the same name already exists under the OPFS root directory, an entry representing the LocalFolder directory will not be made visible until the existing entry is renamed or otherwise removed. 
 
 ### Examples
