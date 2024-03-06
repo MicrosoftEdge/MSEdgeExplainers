@@ -1,6 +1,6 @@
 # Set Default Audio Output Device
 
-Author: [Sunggook Chue] [Ravikiran Ramachandra] [Steve Becker] [Andy Luhrs]
+Authors: Sunggook Chue, Ravikiran Ramachandra, Steve Becker, Andy Luhrs
 
 ## Status of this Document
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -11,12 +11,12 @@ Current version: this document
 
 ## Introduction
 
-Setting Audio Output Device In Frames
+Sites that embed third-party content they don't fully control would like the ability to influence which device audio gets routed for their entire page in response to a user stating they have a preferred device. To enable that, this proposal allows controlling the default audio output device for the entire page, including subframes.
 
 In embedded web experiences, the top-level frame grants iframes access to system media devices like microphones, cameras and speakers. This is typically done through the permission policy (https://developer.mozilla.org/en-US/docs/Web/HTTP/Permissions_Policy) in the iframe tag. However, this access comes with two key challenges:
 
-- Independent Choice: Each iframe independently chooses its own media device. The top-level frame cannot directly influence or view this selection due to browser security restrictions (cross-origin boundary).
-- Unsynchronized Changes: When the top-level frame changes its media device, the iframes remain unaware unless they communicate using methods like postMessage. This lack of automatic synchronization can lead to inconsistencies and a disjointed user experience.
+- Independent choice: Each iframe independently chooses its own media device. The top-level frame cannot directly influence or view this selection due to browser security restrictions (cross-origin boundary).
+- Unsynchronized changes: When the top-level frame changes its media device, the iframes remain unaware unless they communicate using methods like postMessage. This lack of automatic synchronization can lead to inconsistencies and a disjointed user experience.
 
 We’d like to propose a new API to set the default audio output device for the current top frame and all of its sub frames.
 
@@ -29,8 +29,8 @@ We’d like to propose a new API to set the default audio output device for the 
 
 ## Non Goals
 - A change notification for default audio output is not in scope of this project.
-- Any permission policy requirement for calling the API is not in scope of this project.
-- A change of the sinkId property for default device id, which continue to return default device id by using an empty string.
+- Requiring a permission policy for calling the API. Since permission is gated on the speaker_selection permission, access to the API is already reasonably constrained.
+- A change of the sinkId property for the default device ID. It will continue to return the existing default device ID (an empty string).
 
 ## Use Cases
 
