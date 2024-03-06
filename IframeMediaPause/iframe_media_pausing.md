@@ -10,11 +10,7 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-An HTML document can embed other HTML documents using iframes. Moreover, the embedded document itself can also embed other documents, and so on. Since each document can contain many iframes, we end up with a tree-like nesting structure, where the top-level document is the root. Moreover, documents embedding documents from other origins (CORS) have limited control over them and cannot access the embedded HTML documents. 
-
-A website can dynamically modify an embedded iframe using JavaScript when reacting to user input. There could be scenarios where the document loaded in an iframe has many resources and initializing it might require a considerable amount of time. Let’s suppose that, when reacting to some type of user input, the embedder decides to not render the iframe by setting its CSS "display" property to "none". Voila! The iframe has vanished while the resources are still loaded. However, what if this iframe’s document was also playing some kind of audible media? The iframe will not be rendered anymore, but the audio keeps playing. 
-
-Some websites, like [YouTube](https://developers.google.com/youtube/iframe_api_reference) and [Vimeo](https://github.com/vimeo/player.js/), offer APIs that the embedding document can call to control the media in a directly embedded iframe – i.e. a "child" iframe. However, it wouldn’t work if the embedding document were trying to control a more distant iframe, like a grandchild iframe; unless the child iframe shares the same origin of the parent iframe and/or also provides an API to communicate with its parent.
+Web applications that host embedded media content via iframes may wish to respond to application input by temporarily hiding the media content. These applications may not want to unload the entire iframe when it's not rendered since it could generate user-perceptible performance and experience issues when showing the media content again. At the same time, the user could have a negative experience if the media continues to play and emit audio when not rendered. This proposal aims to provide web applications with the ability to control embedded media content in such a way that guarantees their users have a good experience when the iframe's render status is changed.
 
 ## Goals
 
@@ -31,7 +27,7 @@ There are scenarios where a website might want to just not render an iframe. For
 
 ## Proposed solution: media-playback-while-not-rendered Permission Policy
 
-We could create new "media-playback-while-not-rendered" [Permission Policy](https://www.w3.org/TR/permissions-policy/) that would pause any media being played by iframes which are not currently [rendered](https://html.spec.whatwg.org/multipage/rendering.html#being-rendered). This would apply whenever the iframe’s `"display"` CSS property is set to `"none"`.
+We propose creating a new "media-playback-while-not-rendered" [Permission Policy](https://www.w3.org/TR/permissions-policy/) that would pause any media being played by iframes which are not currently [rendered](https://html.spec.whatwg.org/multipage/rendering.html#being-rendered). This would apply whenever the iframe’s `"display"` CSS property is set to `"none"`.
 
 This policy will have a default value of '*', meaning that all of the nested iframes are allowed to play media when not rendered. The example below show how this permission policy could be used to prevent all the nested iframes from playing media. By doing it this way, even other iframes embedded by "foo.media.com" shouldn’t be allowed to play media if not rendered.
 
@@ -48,11 +44,25 @@ This policy will have a default value of '*', meaning that all of the nested ifr
 </html>
 ```
 
+Similarly, the top-level document is also capable of setting this policy on itself by setting the `Permissions-Policy` HTTP header. In the example below, lets' consider a top-level document served by `example.com`. Given the current `Permissions-Policy` HTTP header setup, only iframes that have the same origin as the top-level document (`example.com`) will be able to enable the `media-playback-while-not-rendered` policy.
+
+`example.com`:
+
+```HTTP
+Permissions-Policy: media-playback-while-not-rendered=(self)
+```
+
+```HTML
+<iframe src="https://foo.media.com" allow="media-playback-while-not-rendered 'none'"></iframe>
+```
+
+In this case, `example.com` serves a document that embeds an iframe with a document from `https://foo.media.com`. Since the HTTP header only allows documents from `https://example.com` to inherit `media-playback-while-not-rendered`, the iframe will not be able to use the feature.
+
 In the past, the ["execution-while-not-rendered" and "execution-while-out-of-viewport"](https://wicg.github.io/page-lifecycle/#feature-policies) permission policies have been proposed as additions to the Page Lifecycle draft specification. However, these policies freeze all iframe JavaScript execution when not rendered, which is not desirable for the featured use case. Moreover, this proposal has not been adopted or standardized.
 
 ## Interoperability with other Web API's
 
-Given that there exists many ways for a website to render audio in the broader Web Platform, this proposal has points of contact with many API's. To be more specific, there are two scenarios where this interaction might happen:
+Given that there exists many ways for a website to render audio in the broader web platform, this proposal has points of contact with many API's. To be more specific, there are two scenarios where this interaction might happen:
 - Scenario 1: When the iframe is not rendered and it attempts to play audio; and
 - Scenario 2: When the iframe is already playing audio and stops rendering. Once rendering again, to resume playback, we recommend that websites wait for a new user gesture to do so.
 
@@ -84,7 +94,7 @@ if (startPlayPromise !== undefined) {
 ```
 <*Snippet extracted from [MDN](https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide)*>
 
-For the scenario 2, when the iframe is not rendered anymore, the media should be [paused](https://html.spec.whatwg.org/multipage/media.html#dom-media-pause) and a [`pause`](https://html.spec.whatwg.org/multipage/media.html#event-media-pause) event should be thrown.  
+For the scenario 2, when the iframe is not rendered anymore, the media should be [paused](https://html.spec.whatwg.org/multipage/media.html#dom-media-pause) and a [`pause`](https://html.spec.whatwg.org/multipage/media.html#event-media-pause) event should be dispatched.  
 
 ### Web Audio API
 
