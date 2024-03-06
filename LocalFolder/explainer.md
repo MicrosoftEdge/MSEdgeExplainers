@@ -90,6 +90,7 @@ To avoid name collisions, the LocalFolder entry under the OPFS root directory is
 ### Examples
 
 #### Searching for LocalFolder
+
 ```JS
     // .getDirectoryHandle()
     let opfsRoot = await navigator.storage.getDirectory();
