@@ -122,10 +122,10 @@ To avoid name collisions, the LocalFolder entry under the OPFS root directory is
 
 | Action | Result |
 |--------|--------|
-| `.remove()` on OPFS root handle | Will not enumerate or clear LocalFolder. |
-| `.removeEntry(...)` on OPFS root handle, selecting `LocalFolder`'s name| Will clear `LocalFolder` contents but leave the `LocalFolder` directory unchanged |
-| `.remove()` on `LocalFolder`'s handle | Will clear `LocalFolder` contents but leave the `LocalFolder` directory unchanged |
-| `.remove()` or `.removeEntry(...)` on any handle within `LocalFolder` | Selected handle will be removed as usual according to the [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API) |
+| `.remove()` on OPFS root handle | Will not enumerate or clear LocalFolder even if the [`recursive`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry#recursive) option is used. |
+| `.removeEntry(...)` on OPFS root handle, selecting `LocalFolder`'s name| Will clear `LocalFolder` contents but leave the `LocalFolder` directory unchanged. |
+| `.remove()` on `LocalFolder`'s handle | Will clear `LocalFolder` contents but leave the `LocalFolder` directory unchanged. |
+| `.remove()` or `.removeEntry(...)` on any handle within `LocalFolder` | Selected handle will be removed as usual according to the [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API). |
 
 ```JS
     let opfsRoot = await navigator.storage.getDirectory();
@@ -189,17 +189,17 @@ We considered a solution that migrates the contents of the LocalFolder directory
 
 ## Privacy risks
 
-1. `LocalFolder` data in the file system can be accessed by a PWA through a Web API without prompting the user for permission. 
+1. `LocalFolder` data in the file system can be accessed by a PWA through a Web API without prompting the user for permission. There could be personally identifiable information (PII) contained within this data.  
 
-1. Third party scripts can use the presence of `LocalFolder` data to determine if that particular Windows Store app is installed on the client machine. This information could potentially be used for fingerprinting. 
-    * Inspecting `display-mode` is an existing method to check if a site is installed locally as an app but this method does not work when the user navigates the site in a normal browesr tab.  
-    * The fingerprinting surface does not increase significantly as there is any existing method to determine if apps are installed. 
+1. Third party scripts can use the presence of a `LocalFolder` entry to determine if a particular Windows Store app is installed on the client machine. This information could potentially be used for fingerprinting. 
+    * Inspecting `display-mode` is an existing method to check if a site is installed locally as an app but this method does not work when the user navigates the site in a normal browser tab or fullscreen.  
+    * The fingerprinting surface increases but not significantly as there is an existing method to determine if apps are installed. 
     * As the installed app information would be different for each site, it cannot be easily used in a comparable fingerprint from different sites. 
     * App installation status changes due to user actions and cannot be reliably used to form a stable fingerprint identifying the client. 
 
 ### Mitigations
 
-1. The user consented to the app's use of local storage through app installation from the Microsoft Store. We think it is acceptable for a newer version of this app to access the data previously created using the same PFN.
+1. The user consented to the app's use of local storage through app installation from the Microsoft Store. We think it is acceptable for a newer version of this app to access the data previously created using the same PFN. The app (both the UWP and PWA implementation) has permission from the user to store and access the data even if it contains PII. The app needs to take care to protect user data.
 
 1. Requiring the app to include the `related_applications` in its web app manifest limits the risk to apps that publicly declares a relation to a Windows app package. 
 
