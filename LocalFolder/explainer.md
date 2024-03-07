@@ -57,7 +57,7 @@ To be in a Microsoft Store PWA context:
     * From the main thread and not a Web Worker
     * A document with a URL within the [scope](https://w3c.github.io/manifest/#understanding-scope) of the PWA
 
-In order to opt in to enabling `LocalFolder` access, the app needs to configure `related_applications` in its web app manifest to [identify the PFN of its Windows app package](https://web.dev/articles/get-installed-related-apps#tell_your_website_about_your_windows_app). 
+In order to opt in to enabling `LocalFolder` access, the app needs to configure `related_applications` in its web app manifest to [identify the PFN of its Windows app package](https://web.dev/articles/get-installed-related-apps#tell_your_website_about_your_windows_app). Only the web app manifest part of the configuration needed to support `getInstalledRelatedApps` is needed here to enable `LocalFolder` access.
 
 ```JSON
     "related_applications": [{
