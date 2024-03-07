@@ -5,9 +5,9 @@ Authors: Sunggook Chue, Ravikiran Ramachandra, Steve Becker, Andy Luhrs
 ## Status of this Document
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-This document status: Active
-Expected venue: [WebRTC WG](https://www.w3.org/groups/wg/webrtc)
-Current version: this document
+* This document status: Active  
+* Expected venue: [WebRTC WG](https://www.w3.org/groups/wg/webrtc)  
+* Current version: this document  
 
 ## Introduction
 
