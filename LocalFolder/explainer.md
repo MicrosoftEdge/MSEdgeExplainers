@@ -24,7 +24,8 @@ The proposed solution works by making use of the [Origin Private File System (OP
    * delete any file or sub-directory in its `LocalFolder` directory. 
 * Avoid prompting end users to provide input or confirmation.
 * Avoid naming collisions with other OPFS root entries. 
-* Require apps to opt in using the [`related_applications`](https://www.w3.org/TR/appmanifest/#related_applications-member) web app manifest field.
+* Ensure that new behavior described here is only exposed to apps that opt in. 
+* Avoid introducing a new Web API that is only available on the Edge browser.
 
 ## Non-goals
 
@@ -32,7 +33,6 @@ The proposed solution works by making use of the [Origin Private File System (OP
 * Support web apps not installed or managed by the Microsoft Store.
 * Support web apps on non-Windows platforms.
 * Standardization as a web specification.
-* Introduce a non-standard JavaScript API to the Edge browser.
 
 ## Proposed Solution 
 
