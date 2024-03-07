@@ -145,7 +145,9 @@ window.speechSynthesis.speak(utterance);
 
 ### Interoperability with autoplay
 
-If an iframe with the permission policy property set to `allow="media-playback-while-not-rendered 'none'; autoplay *"` stops being rendered, the `media-playback-while-not-rendered` permission policy should take precedence and no media should be played while it remains not rendered. At the same time, if the iframe already has `autoplay` permission either through the `autoplay` permission policy or the user agent own criteria, then this permission state shouldn't reset. This means that an iframe which had a `HTMLMediaElement` media playback paused because the iframe itself stopped being rendered should be allowed to call `HTMLMediaElement.play()` to resume playback without requiring a new user gesture.
+This proposal does not affect autoplay behavior unless the element is not rendered, in which case all autoplay behavior should be blocked and all media playback should be paused. 
+
+For example, if an iframe with the permission policy property set to `allow="media-playback-while-not-rendered 'none'; autoplay *"` stops being rendered, the `media-playback-while-not-rendered` permission policy should take precedence and no media should be played while it remains not rendered. At the same time, if the iframe is rendered and already has `autoplay` permission either through the `autoplay` permission policy or the user agent's own criteria, then this permission state shouldn't reset when the iframe becomes not rendered. 
 
 The same behavior should happen if the [`autoplay`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#autoplay) property has been set in a HTMLMediaElement. 
 
