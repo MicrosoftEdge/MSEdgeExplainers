@@ -42,9 +42,9 @@ The proposed solution works by making use of the [Origin Private File System (OP
 
 ### New behavior
 
-When configured correctly, the directory handle for OPFS root will contain an additional entry that represents the app's `LocalFolder` directory. This entry can be retrieved as a [`FileSystemDirectoryHandle`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle) by calling [`.entries()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/entries) or [`.getDirectoryHandle(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getDirectoryHandle) on the OPFS root directory handle.
+When configured correctly, the directory handle for OPFS root will contain an additional entry that represents the app's `LocalFolder` directory. This entry can be retrieved as a `FileSystemDirectoryHandle` by calling [`.entries()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/entries) or [`.getDirectoryHandle(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getDirectoryHandle) on the OPFS root directory handle.
 
-Unlike all other OPFS handles, the `LocalFolder` directory handle and its contents will have [`read`](https://wicg.github.io/file-system-access/#dom-filesystempermissionmode-read) permission instead of [`readwrite`](https://wicg.github.io/file-system-access/#dom-filesystempermissionmode-readwrite) permission by default and will not be able to gain `readwrite` permission.
+Like other OPFS handles, the `LocalFolder` directory handle and its contents will have [`readwrite`](https://wicg.github.io/file-system-access/#dom-filesystempermissionmode-readwrite) permission by default. Unlike other handles with `readwrite` permission, a [FileSystemFileHandle](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle) from `LocalFolder` will always throw a [`NoModificationAllowedError`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable#nomodificationallowederror) exception if [`createWritable()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable#exceptions) is used. This allows data in `LocalFolder` to be read and cleared but not created or edited.
 
 #### Configuration 
 
@@ -74,9 +74,7 @@ The LocalFolder entry within the OPFS root directory can be found under the name
 
 #### Deletion
 
-Despite having only `read` permission, a `FileSystemHandle` to `LocalFolder` or its contents will allow their [`remove()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle/remove) and [`removeEntry(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry) methods to successfully delete files and directories. 
-
-Contents in `LocalFolder` can be deleted while the `LocalFolder` entry cannot itself be deleted - this is to mimic the effects of the WinRT [`ClearAsync(...)`](https://learn.microsoft.com/en-us/uwp/api/windows.storage.applicationdata.clearasync?view=winrt-22621#windows-storage-applicationdata-clearasync(windows-storage-applicationdatalocality)) API.
+A `FileSystemHandle` to `LocalFolder` or its contents will allow their [`remove()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle/remove) and [`removeEntry(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry) methods to successfully delete files and directories. Contents in `LocalFolder` can be deleted while the `LocalFolder` entry cannot itself be deleted - this is to mimic the effects of the WinRT [`ClearAsync(...)`](https://learn.microsoft.com/en-us/uwp/api/windows.storage.applicationdata.clearasync?view=winrt-22621#windows-storage-applicationdata-clearasync(windows-storage-applicationdatalocality)) API.
 
 #### Storage quota and eviction
 
