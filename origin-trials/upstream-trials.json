@@ -19,6 +19,12 @@
       "explainer": "https://github.com/WICG/compression-dictionary-transport"
     },
     {
+      "label": "CompressionDictionaryTransport V2",
+      "expiration": "2024-08-06",
+      "repo": "WICG/compression-dictionary-transport",
+      "explainer": "https://github.com/WICG/compression-dictionary-transport"
+    },
+    {
       "label": "Compute Pressure",
       "expiration": "2024-05-28",
       "repo": "w3c/compute-pressure",
@@ -49,12 +55,6 @@
       "explainer": "https://github.com/wanderview/quota-storage-partitioning/blob/main/explainer.md"
     },
     {
-      "label": "EditContext",
-      "expiration": "2024-03-05",
-      "repo": "w3c/edit-context",
-      "explainer": "https://github.com/w3c/edit-context/blob/gh-pages/explainer.md"
-    },
-    {
       "label": "ElementCapture",
       "expiration": "2024-09-03",
       "repo": "screen-share/element-capture",
@@ -71,12 +71,6 @@
       "expiration": "2024-05-28",
       "repo": "w3c/longtasks",
       "explainer": "https://github.com/w3c/longtasks/blob/main/loaf-explainer.md"
-    },
-    {
-      "label": "No-Vary-Search support in navigation prefetch cache",
-      "expiration": "2024-03-05",
-      "repo": "WICG/nav-speculation",
-      "explainer": "https://github.com/WICG/nav-speculation/blob/main/no-vary-search.md"
     },
     {
       "label": "Open popups as fullscreen windows",
@@ -109,18 +103,6 @@
       "explainer": " https://github.com/palak8669/webrtc-encoded-transform/blob/create-encoded-explainer/create-encoded-explainer.md"
     },
     {
-      "label": "RTCPeerConnection callback-based getStats() API",
-      "expiration": "2024-03-07",
-      "feedbackLink": "https://crbug.com/822696",
-      "explainer": "https://w3c.github.io/webrtc-stats/"
-    },
-    {
-      "label": "scheduler.yield()",
-      "expiration": "2024-03-05",
-      "repo": "wicg/scheduling-apis",
-      "explainer": "https://github.com/WICG/scheduling-apis/blob/main/implementation-status.md"
-    },
-    {
       "label": "ServiceWorker static routing API",
       "expiration": "2024-06-25",
       "repo": "w3c/ServiceWorker",
@@ -139,14 +121,8 @@
       "explainer": "https://github.com/WICG/soft-navigations#soft-navigations"
     },
     {
-      "label": "Speculation Rules - Document rules, response header, deliveryType",
-      "expiration": "2024-03-05",
-      "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_4HePq4hnaw2MZUi",
-      "explainer": "https://github.com/WICG/nav-speculation/blob/main/chrome-2023q1-experiment-overview.md"
-    },
-    {
       "label": "StorageAccessAPIBeyondCookies",
-      "expiration": "2024-06-25",
+      "expiration": "2024-08-06",
       "repo": "arichiv/saa-non-cookie-storage",
       "explainer": "https://arichiv.github.io/saa-non-cookie-storage"
     },
@@ -161,12 +137,6 @@
       "expiration": "2024-10-01",
       "repo": "WICG/manifest-incubations",
       "explainer": "https://github.com/WICG/manifest-incubations/blob/gh-pages/scope_extensions-explainer.md"
-    },
-    {
-      "label": "WebAssembly Garbage Collection",
-      "expiration": "2024-03-05",
-      "feedbackLink": "https://bugs.chromium.org/p/v8/issues/list",
-      "explainer": "https://github.com/WebAssembly/gc/blob/master/proposals/gc/Overview.md"
     },
     {
       "label": "WebAssembly JavaScript Promise Integration",
