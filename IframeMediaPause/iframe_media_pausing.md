@@ -94,11 +94,13 @@ if (startPlayPromise !== undefined) {
 ```
 <*Snippet extracted from [MDN](https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide)*>
 
-For the scenario 2, when the iframe is not rendered anymore, the media should be [paused](https://html.spec.whatwg.org/multipage/media.html#dom-media-pause) and a [`pause`](https://html.spec.whatwg.org/multipage/media.html#event-media-pause) event should be dispatched.  
+For the scenario 2, when the iframe is not rendered anymore, the user agent must run the same steps as it would if the [`pause()`](https://html.spec.whatwg.org/multipage/media.html#dom-media-pause) method was invoked on the media element.
 
 ### Web Audio API
 
-The Web Audio API renders audio through an [AudioContext](https://webaudio.github.io/web-audio-api/#AudioContext) object. For scenario 1, if the iframe is not rendered, attempting to start audio from an `AudioContext` shouldn't output anything and put it into a suspended state. It would be recommended for the iframe to wait for a new user interaction event to resume playback - e.g., `click`.
+The Web Audio API renders audio through an [AudioContext](https://webaudio.github.io/web-audio-api/#AudioContext) object. We propose that the `AudioContext` shouldn't be [allowed to start](https://webaudio.github.io/web-audio-api/#allowed-to-start) whenever it is not rendered and dissalowed by the `media-playback-while-not-rendered` policy.
+
+For scenario 1, if the iframe is not rendered, any `AudioContext` will not be [allowed to start](https://webaudio.github.io/web-audio-api/#allowed-to-start). Therefore, attempting to [create](https://webaudio.github.io/web-audio-api/#dom-audiocontext-audiocontext) a new `AudioContext` or start playback by calling `resume()`[https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume] shouldn't output any audio and put the `AudioContext` into a [`"suspended"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-suspended) state. It would be recommended for the iframe to wait for a new user interaction event before calling `resume()`[https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume] - e.g., `click`.
 
 ```js
 // AudioContext being create in a not rendered iframe, where
@@ -121,7 +123,7 @@ oscillator.start(0);
 console.log(audioCtx.state)
 ```
 
-Similarly, for scenario 2, when the iframe is not rendered, the audio context state should change to `'suspended'` and the website can monitor this by listening to the [`statechange`](https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange) event. Then, when the iframe is rendered again, it should wait for a new user interaction, like in the first scenario, to resume playback.
+Similarly, for scenario 2, when the iframe is not rendered, the user agent should run the [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) steps and set. The audio context state should change to `'suspended'` and the website can monitor this by listening to the [`statechange`](https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange) event. Then, when the iframe is rendered again, it should wait for a new user interaction, like in the first scenario, to resume playback.
 
 ### Web Speech API
 
