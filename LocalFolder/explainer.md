@@ -168,7 +168,7 @@ We considered a solution that migrates the contents of the LocalFolder directory
 
 1. A malicious party could attempt to gain access to files outside of the boundary of the `LocalFolder` directory.
 
-1. A malicious party could create executable files on the file system.
+1. A malicious party could create executable files on a user-visible part of the file system without requiring the user to provide input through a file picker UI. 
 
 1. Third party scripts could read data in `LocalFolder` even though the app developer is not aware of this feature. 
 
@@ -178,7 +178,7 @@ We considered a solution that migrates the contents of the LocalFolder directory
 
 1. The `FileSystemHandle` design does not support walking up the directory structure.
 
-1. The `LocalFolder` directory handle and its contents will not allow the modification of existing files or creation of new files. This prevents the creation of executable files and the creation of files outside of the LocalFolder directory. Additionally, the implementation of the File System Access API in Chromium prevents creation of some executable file types.
+1. The `LocalFolder` directory handle and its contents will not allow the modification of existing files or creation of new files. This prevents the creation of executable files and the creation of files outside of the LocalFolder directory. Additionally, the implementation of the File System Access API in Chromium prevents creation of some executable file extensions.
 
 1. The app has to opt in explictly using the `related_applications` field in the web app manifest. The app developer must understand the risks involved and be responsible for the actions of third party scripts used. Most apps that do not intend to access `LocalFolder` will not expose it unknowingly to third parties.
 
