@@ -14,31 +14,12 @@
             "explainer": "#",
             "flag": "DigitalGoodsV2"
         },{
-            "label": "SystemEntropy in PerformanceNavigationTiming",
-            "expiration": "2023-11-1",
-            "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md",
-            "issue": "PerformanceNavigationTimingSystemEntropy ",
-            "flag": "MsUserAgentLaunchNavType"
-        },{
-            "label": "Unsanitized HTML for Async Clipboard API",
-            "expiration": "2024-02-29",
-            "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "explainer": "https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-unsanitized/explainer.md",
-            "flag": "EdgeClipboardUnsanitizedContent"
-        },{
             "label": "PointerEvent.deviceId",
-            "expiration": "2024-02-14",
+            "expiration": "2024-07-01",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
             "issue": "PointerEventDeviceId",
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PointerEventDeviceId/explainer.md",
             "flag": "PointerEventDeviceId"
-        },{
-            "label": "Web Haptics API",
-            "expiration": "2023-12-31",
-            "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "issue": "WebHaptics",
-            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md"
         }
     ],
 
