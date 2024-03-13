@@ -123,7 +123,7 @@ oscillator.start(0);
 console.log(audioCtx.state)
 ```
 
-Similarly, for scenario 2, when the iframe is not rendered, the user agent should run the [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) steps and set. The audio context state should change to `'suspended'` and the website can monitor this by listening to the [`statechange`](https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange) event. Then, when the iframe is rendered again, it should wait for a new user interaction, like in the first scenario, to resume playback.
+Similarly, for scenario 2, when the iframe is not rendered, the user agent should run the [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) steps. The audio context state should change to `'suspended'` and the website can monitor this by listening to the [`statechange`](https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange) event. Then, when the iframe is rendered again, it should wait for a new user interaction, like in the first scenario, to resume playback.
 
 ### Web Speech API
 
