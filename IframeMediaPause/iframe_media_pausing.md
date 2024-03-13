@@ -98,7 +98,7 @@ For the scenario 2, when the iframe is not rendered anymore, the user agent must
 
 ### Web Audio API
 
-The Web Audio API renders audio through an [AudioContext](https://webaudio.github.io/web-audio-api/#AudioContext) object. We propose that the `AudioContext` shouldn't be [allowed to start](https://webaudio.github.io/web-audio-api/#allowed-to-start) whenever it is not rendered and dissalowed by the `media-playback-while-not-rendered` policy.
+The Web Audio API renders audio through an [AudioContext](https://webaudio.github.io/web-audio-api/#AudioContext) object. We propose that the `AudioContext` shouldn't be [allowed to start](https://webaudio.github.io/web-audio-api/#allowed-to-start) whenever it is not rendered and disallowed by the `media-playback-while-not-rendered` policy.
 
 For scenario 1, if the iframe is not rendered, any `AudioContext` will not be [allowed to start](https://webaudio.github.io/web-audio-api/#allowed-to-start). Therefore, attempting to [create](https://webaudio.github.io/web-audio-api/#dom-audiocontext-audiocontext) a new `AudioContext` or start playback by calling `resume()`[https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume] shouldn't output any audio and put the `AudioContext` into a [`"suspended"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-suspended) state. It would be recommended for the iframe to wait for a new user interaction event before calling `resume()`[https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume] - e.g., `click`.
 
