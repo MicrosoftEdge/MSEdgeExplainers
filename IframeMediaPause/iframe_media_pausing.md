@@ -197,7 +197,7 @@ This proposal does not affect autoplay behavior unless the element is not render
 
 For example, if an iframe with the permission policy property set to `allow="media-playback-while-not-rendered 'none'; autoplay *"` stops being rendered, the `media-playback-while-not-rendered` permission policy should take precedence and no media should be played while it remains not rendered. At the same time, if the iframe is rendered and already has `autoplay` permission either through the `autoplay` permission policy or the user agent's own criteria, then this permission state shouldn't reset when the iframe becomes not rendered. 
 
-The same behavior should happen if the [`autoplay`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#autoplay) property has been set in a HTMLMediaElement. 
+Likewise, if the [`autoplay`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#autoplay) property has been set in a HTMLMediaElement, and the element stops being rendered, no media should be played while it remains not rendered. Similarly, re-rendering the HTMLMediaElement shouldn't reset any already granted autoplay permission.
 
 ### Interoperability with `execution-while-not-rendered` and `execution-while-out-of-viewport`
 
