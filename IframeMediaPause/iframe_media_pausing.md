@@ -62,7 +62,7 @@ In the past, the ["execution-while-not-rendered" and "execution-while-out-of-vie
 
 ## Interoperability with other Web API's
 
-Given that there exists many ways for a website to render audio in the broader web platform, this proposal has points of contact with many API's. To be more specific, there are two scenarios where this interaction might happen:
+Given that there exists many ways for a website to render audio in the broader web platform, this proposal has points of contact with many API's. To be more specific, there are two scenarios where this interaction might happen. Let's consider an iframe, which is not allowed to play `media-playback-while-not-rendered`:
 - Scenario 1: When the iframe is not rendered and it attempts to play audio; and
 - Scenario 2: When the iframe is already playing audio and stops rendering. Once rendering again, to resume playback, we recommend that websites wait for a new user gesture to do so.
 
@@ -75,6 +75,7 @@ The following subsections covers how this proposal could interact with Web APIs 
 HTMLMediaElement media playback is started and paused, respectively, with the [`play`](https://html.spec.whatwg.org/multipage/media.html#dom-media-play) and [`pause`](https://html.spec.whatwg.org/multipage/media.html#dom-media-pause) methods. For scenario 1, the media element shouldn't be [allowed to play](https://html.spec.whatwg.org/multipage/media.html#allowed-to-play) and `play` should return a promise rejected with `"NotAllowedError"`. In this case, the website could easily handle this like shown below.
 
 ```js
+const videoElem = document.querySelector("video"); 
 let startPlayPromise = videoElem.play();
 
 if (startPlayPromise !== undefined) {
@@ -94,7 +95,17 @@ if (startPlayPromise !== undefined) {
 ```
 <*Snippet extracted from [MDN](https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide)*>
 
-For the scenario 2, when the iframe is not rendered anymore, the user agent must run the same steps as it would if the [`pause()`](https://html.spec.whatwg.org/multipage/media.html#dom-media-pause) method was invoked on the media element.
+For the scenario 2, when the iframe is not rendered anymore, the user agent must run the same steps as it would if the [`pause()`](https://html.spec.whatwg.org/multipage/media.html#dom-media-pause) method was invoked on the media element. Documents should listen for the [`pause`](https://html.spec.whatwg.org/multipage/media.html#event-media-pause) events and treat it as if the user had paused it.
+
+```js
+const videoElem = document.querySelector("video"); 
+
+videoElem.addEventListener("pause", (event) => {
+  // Video has been paused, because either pause() has been called or
+  // the document is not-rendered.
+  console.log("Video paused");
+});
+```
 
 ### Web Audio API
 
@@ -103,7 +114,7 @@ The Web Audio API renders audio through an [AudioContext](https://webaudio.githu
 For scenario 1, if the iframe is not rendered, any `AudioContext` will not be [allowed to start](https://webaudio.github.io/web-audio-api/#allowed-to-start). Therefore, attempting to [create](https://webaudio.github.io/web-audio-api/#dom-audiocontext-audiocontext) a new `AudioContext` or start playback by calling `resume()`[https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume] shouldn't output any audio and put the `AudioContext` into a [`"suspended"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-suspended) state. It would be recommended for the iframe to wait for a new user interaction event before calling `resume()`[https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume] - e.g., `click`.
 
 ```js
-// AudioContext being create in a not rendered iframe, where
+// AudioContext being created in a not rendered iframe, where
 // media-playback-while-not-rendered is not allowed. 
 let audioCtx = new AudioContext();
 let oscillator = audioCtx.createOscillator();
@@ -124,6 +135,41 @@ console.log(audioCtx.state)
 ```
 
 Similarly, for scenario 2, when the iframe is not rendered, the user agent should run the [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) steps. The audio context state should change to `'suspended'` and the website can monitor this by listening to the [`statechange`](https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange) event. Then, when the iframe is rendered again, it should wait for a new user interaction, like in the first scenario, to resume playback.
+
+```js
+let audioCtx = new AudioContext();
+let oscillator = audioCtx.createOscillator();
+oscillator.connect(audioCtx.destination);
+
+const playback_control_btn = document.querySelector("playback_control_button");
+playback_control_btn.textContent = "start";
+playback_control_btn.addEventListener('click', () => {
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume().then(() => {
+      console.log("Context resumed");
+      playback_control_btn.textContent = "suspend";
+    });
+  } else if (audioCtx.state === "running") {
+    audioCtx.suspend().then(() => {
+      console.log("Context suspended");
+      playback_control_btn.textContent = "resume";
+    });
+  }
+})
+
+audioCtx.addEventListener("statechange", (event) => {
+  if(audioCtx.state === "suspended"){
+    // Context has been suspended, because either suspend() has been
+    // called or the document is not-rendered.
+    console.log("Context suspended");
+    playback_control_btn.textContent = "resume";
+  }
+});
+
+oscillator.start(0);
+console.log(audioCtx.state)
+
+```
 
 ### Web Speech API
 
