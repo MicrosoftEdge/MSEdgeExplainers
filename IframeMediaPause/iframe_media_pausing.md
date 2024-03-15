@@ -64,9 +64,9 @@ In the past, the ["execution-while-not-rendered" and "execution-while-out-of-vie
 
 Given that there exists many ways for a website to render audio in the broader web platform, this proposal has points of contact with many API's. To be more specific, there are two scenarios where this interaction might happen. Let's consider an iframe, which is not allowed to play `media-playback-while-not-rendered`:
 - Scenario 1: When the iframe is not rendered and it attempts to play audio; and
+  - Callers should treat this scenario as if they weren't allowed to start media playback. Like when the [`autoplay` permission policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/autoplay) is set to `'none'` for an iframe. 
 - Scenario 2: When the iframe is already playing audio and stops being rendered during media playback. Once rendering again, to resume playback, we recommend that websites wait for a new user gesture to do so.
-
-For the first scenario, the APIs should behave as if they didn't have permission in the first place to play audio. Like when the [`autoplay` permission policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/autoplay) is set to `'none'` for an iframe. Regarding the second scenario, we propose that the API's behave as if the user had paused the media playback.
+  - Callers should treat this scenario as if the user had paused media playback. 
 
 The following subsections covers how this proposal could interact with Web APIs that render audio.
 
@@ -193,11 +193,8 @@ window.speechSynthesis.speak(utterance);
 
 ### Interoperability with autoplay
 
-This proposal does not affect autoplay behavior unless the element is not rendered, in which case all autoplay behavior should be blocked and all media playback should be paused. 
-
-For example, if an iframe with the permission policy property set to `allow="media-playback-while-not-rendered 'none'; autoplay *"` stops being rendered, the `media-playback-while-not-rendered` permission policy should take precedence and no media should be played while it remains not rendered. At the same time, if the iframe is rendered and already has `autoplay` permission either through the `autoplay` permission policy or the user agent's own criteria, then this permission state shouldn't reset when the iframe becomes not rendered. 
-
-Likewise, if the [`autoplay`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio#autoplay) property has been set in a HTMLMediaElement, and the element stops being rendered, no media should be played while it remains not rendered. Similarly, re-rendering the HTMLMediaElement shouldn't reset any already granted autoplay permission.
+This proposal does not affect autoplay behavior unless the media-playing iframe is not rendered. If the frame is not rendered, all media playback 
+must be paused. If a frame that is not rendered has autoplay permission, the autoplay permission should continue to be respected if/when the frame becomes rendered in the future.
 
 ### Interoperability with `execution-while-not-rendered` and `execution-while-out-of-viewport`
 
