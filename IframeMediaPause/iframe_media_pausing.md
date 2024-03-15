@@ -65,7 +65,7 @@ In the past, the ["execution-while-not-rendered" and "execution-while-out-of-vie
 Given that there exists many ways for a website to render audio in the broader web platform, this proposal has points of contact with many API's. To be more specific, there are two scenarios where this interaction might happen. Let's consider an iframe, which is not allowed to play `media-playback-while-not-rendered`:
 - Scenario 1: When the iframe is not rendered and it attempts to play audio; and
   - Callers should treat this scenario as if they weren't allowed to start media playback. Like when the [`autoplay` permission policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/autoplay) is set to `'none'` for an iframe. 
-- Scenario 2: When the iframe is already playing audio and stops being rendered during media playback. Once rendering again, to resume playback, we recommend that websites wait for a new user gesture to do so.
+- Scenario 2: When the iframe is already playing audio and stops being rendered during media playback. 
   - Callers should treat this scenario as if the user had paused media playback. 
 
 The following subsections covers how this proposal could interact with Web APIs that render audio.
@@ -134,7 +134,7 @@ oscillator.start(0);
 console.log(audioCtx.state)
 ```
 
-Similarly, for scenario 2, when the iframe becomes not rendered during audio playback, the user agent should run the [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) steps. The audio context state should change to `'suspended'` and the website can monitor this by listening to the [`statechange`](https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange) event. Then, when the iframe is rendered again, it should wait for a new user interaction, like in the first scenario, to resume playback.
+Similarly, for scenario 2, when the iframe becomes not rendered during audio playback, the user agent should run the [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) steps. The audio context state should change to `'suspended'` and the website can monitor this by listening to the [`statechange`](https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange) event.
 
 ```js
 let audioCtx = new AudioContext();
@@ -193,8 +193,7 @@ window.speechSynthesis.speak(utterance);
 
 ### Interoperability with autoplay
 
-This proposal does not affect autoplay behavior unless the media-playing iframe is not rendered. If the frame is not rendered, all media playback 
-must be paused. If a frame that is not rendered has autoplay permission, the autoplay permission should continue to be respected if/when the frame becomes rendered in the future.
+This proposal does not affect autoplay behavior unless the media-playing iframe is not rendered. If the frame is not rendered, all media playback must be paused. If a frame that is not rendered has autoplay permission, the autoplay permission should continue to be respected if/when the frame becomes rendered in the future.
 
 ### Interoperability with `execution-while-not-rendered` and `execution-while-out-of-viewport`
 
