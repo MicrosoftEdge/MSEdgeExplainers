@@ -48,9 +48,9 @@ The Web Install API enables installation of cross-origin applications. A website
 const installApp = async (manifest_id) => {
     if ('install' in navigator === false) return; // api not supported
     try {
-            await navigator.install(manifest_id);
+	await navigator.install(manifest_id);
     } catch(err) {
-        switch(err.message){
+        switch(err.name){
             case 'AbortError':
                 /* Operation was aborted*/
                 break;
