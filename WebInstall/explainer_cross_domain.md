@@ -45,10 +45,10 @@ The Web Install API enables installation of cross-origin applications. A website
 ```javascript
 /* tries to install a cross-origin web app */
 
-const installApp = async (manifest_id) => {
+const installApp = async (manifest_id, install_url) => {
     if ('install' in navigator === false) return; // api not supported
     try {
-            await navigator.install(manifest_id);
+            await navigator.install(manifest_id, install_url);
     } catch(err) {
         switch(err.message){
             case 'AbortError':
@@ -190,7 +190,7 @@ A new web-manifest boolean key `allow_all_install_sources` signals that the appl
 }
 ```
 
-This new manifest field will protect the app from being listed in undesirable repositories and give the developer absolute control about where do they want the PWA to be installed from. At best, the developer can allow the PWA to be installed from any site ("`*`"), at its most restrictive, it can only allow installing from the app's same scope. This field is only for the JS API and does not interfere with existing ways of installing PWAs through mechanisms like enterprise policies.
+This new manifest field will protect the app from being listed in undesirable repositories and give the developer absolute control about where do they want the PWA to be installed from. At best, the developer can allow the PWA to be installed from any site ("`allow_all_install_sources: true`"), at its most restrictive, it can only allow installing from the app's same scope. This field is only for the JS API and does not interfere with existing ways of installing PWAs through mechanisms like enterprise policies.
 
 If no `install_sources` are present in the manifest file, the default should be to not allow an app to be installed from cross-origin sites.
 
