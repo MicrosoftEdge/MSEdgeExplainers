@@ -73,6 +73,12 @@
       "explainer": "https://github.com/w3c/longtasks/blob/main/loaf-explainer.md"
     },
     {
+      "label": "Mutation Events Deprecation Trial",
+      "expiration": "2025-05-13",
+      "feedbackLink": "https://crbug.com/new",
+      "explainer": "https://developer.chrome.com/blog/mutation-events-deprecation"
+    },
+    {
       "label": "Open popups as fullscreen windows",
       "expiration": "2024-04-30",
       "repo": "w3c/window-management",
@@ -146,7 +152,7 @@
     },
     {
       "label": "WebAssembly JS String Builtins",
-      "expiration": "2024-06-25",
+      "expiration": "2024-10-01",
       "repo": "WebAssembly/js-string-builtins",
       "explainer": "https://github.com/WebAssembly/js-string-builtins/blob/main/proposals/js-string-builtins/Overview.md"
     },
