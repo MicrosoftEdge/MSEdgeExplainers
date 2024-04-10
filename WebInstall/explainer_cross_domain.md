@@ -207,7 +207,7 @@ To ensure that the developer can have control of where their app can be installe
     "name": "Awesome PWA",
     "display": "standalone",
     "start_url": "/index.html",
-    "all_all_install_sources": "true"
+    "allow_all_install_sources": "true"
 }
 ```
 
