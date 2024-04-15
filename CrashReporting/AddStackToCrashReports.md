@@ -1,6 +1,10 @@
 # Call stacks in crash reports from unresponsive web pages
 
-Authors: [Seth Brenith](https://github.com/sethbrenith), [Issack John](https://github.com/issackjohn)
+## Authors: 
+
+- [Seth Brenith](https://github.com/sethbrenith)
+- [Issack John](https://github.com/issackjohn)
+- [Andy Luhrs](https://github.com/aluhrs13)
 
 ## Participate
 - [Issue tracker](https://issues.chromium.org/issues/40268201)
@@ -84,3 +88,11 @@ This is a new mechanism that could allow a website to collect data about its use
 ### Security
 
 Just like `Error.prototype.stack`, information must be omitted about any cross-domain scripts that were not loaded with CORS.
+
+## References & acknowledgements
+
+Many thanks for valuable feedback and advice from:
+
+- [Ian Clelland](https://github.com/clelland)
+- [Choongwoo Han](https://github.com/tunz)
+- [Sulekha Kulkarni](https://github.com/sulekhark)
