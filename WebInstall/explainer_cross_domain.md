@@ -172,35 +172,21 @@ switch (state) {
     break;
 }
 ```
-####  **Install Sources manifest field**
+####  **Controlling default installation sources**
 
-The default behaviour of the cross-origin Web Install API can be to allow installations from any origin or from no origin. *This default is defined by the implementer*. The `install_sources` field in the manifest file specifies detailed origin installation permission allowing finer control by the web app on which origin(s) can install it.
+The default behaviour of a UA for the cross-origin Web Install API can be to allow installations from any origin or from no origin. *This default is defined by the implementer*. An implementer may choose to:
 
-* **Cross-origin installations ON by default**: If the default behaviour is that an origin can be installed from any origin, then any origin can install an app from a different origin. In the presence of an `installed_sources` field, then the default is inverted and only the subset of origins specified in its value can install the app.
+* ALLOW cross-origin installations by default.
+* DENY cross-origin installations by default.
 
-* **Cross-origin installations OFF by default**: If the implementer decides to make the default behaviour of cross-origin installations OFF by default, then no third party origin can install the web application. This is the most restrictive case, and the web app conforms to its usual behaviour of only being able to be installed from its same origin. If there is an `install_sources` field present in the manifest file, then only the specific set of origins specified in that value can install the app.
+This affects if an origin must be listed in the `install_sources` of an app to be able to install it.
 
-In both cases, the `install_sources` field overrides the default behaviour adopted by the UA and allows only the specified origins to installed the application.
+##### Overriding the default UA behaviour
 
-This field is only for the JS API and does not interfere with existing ways of installing PWAs through mechanisms like enterprise policies.
+A developer can have full control of where their app can be installed from, independent of the implementor's default behaviour. A new web-manifest boolean key `allow_all_install_sources` can tell the UA that the application can be installed from any or no other origin. This overrides the default implementation by the UA.
 
-```json
-{
-    "name": "Awesome PWA",
-    "display": "standalone",
-    "start_url": "/index.html",
-    "install_sources": [ 
-	    {"origin": "apps.microsoft.com"},
-	    {"origin": "store.app"}
-    ]
-}
-```
-
-##### Controlling installations from any origin
-To ensure that the developer can have control of where their app can be installed from independent of the implementors default behaviour, a new web-manifest boolean key `allow_all_install_sources` can tell the UA that the application can be installed from any or no other origin.
-
-* if set to `true`, the `install_sources` list is ignored (if included) and the app can be installed from any origin.
-* if set to `false`, the `install_sources` list is ignored (if included) and the app can be installed only from the same-origin it is hosted.
+* if set to `true`, then cross-origin installations can enabled by default.
+* if set to `false`, only same-origin installations are allowed, unless the invoking installation-origin is listed in the application's `install_sources`.
 
 ```json
 {
@@ -210,6 +196,26 @@ To ensure that the developer can have control of where their app can be installe
     "allow_all_install_sources": "true"
 }
 ```
+
+##### Fine tuning installation sources for an application
+
+In both cases of the default UA behaviour, developers can use the `install_sources` manifest field to have fine control over which specific origins can or can't install the application.
+
+
+```json
+{
+    "name": "Awesome PWA",
+    "display": "standalone",
+    "start_url": "/index.html",
+    "install_sources": [ 
+	    {"origin": "https://apps.microsoft.com", "action": "allow"},
+	    {"origin": "https://store.app", "action": "allow"}
+      {"origin": "https://anotherstore.com", "action": "deny"}
+    ]
+}
+```
+
+This field is only for the JS API and does not interfere with existing ways of installing PWAs through mechanisms like enterprise policies.
 
 #### **Gating capability behind installation**
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
