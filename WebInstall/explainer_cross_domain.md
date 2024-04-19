@@ -219,7 +219,7 @@ If no `install_sources` are present in the manifest file, the default should be 
 ```
 >>>>>>> Stashed changes
 
-##### Fine tunning installation sources for an application
+##### Fine tuning installation sources for an application
 
 In both cases of the default UA behaviour, developers can use the `install_sources` manifest field to have fine control over which specific origins can or can't install the application.
 
