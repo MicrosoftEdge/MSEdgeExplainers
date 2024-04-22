@@ -44,7 +44,7 @@ This configuration point allows the website owners to control whether JavaScript
 
 Example.
 ```
-Document-policy: include-js-call-stacks-in-crash-reports
+Document-Policy: include-js-call-stacks-in-crash-reports
 ```
 
 
