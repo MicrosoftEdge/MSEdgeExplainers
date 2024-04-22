@@ -1,30 +1,30 @@
 # ![Microsoft Edge Logo](https://avatars0.githubusercontent.com/u/11354582?s=75)Microsoft Edge Explainers
 
-Welcome! This repo is home to "explainers" and related documents originating 
+Welcome! This repo is home to "explainers" and related documents originating
 from the Microsoft Edge team.
 
 #### Jump to section: [Active Explainers](#active-explainers-) | [Alumni](#alumni-) | [DevTools](https://github.com/MicrosoftEdge/DevTools/tree/main/explainers) | [Other documents](#other-documents) | [Withdrawn](#withdrawn)
 
 ## Introduction
 
-[Explainers](https://w3ctag.github.io/explainers) are documents focused on 
-describing a user/ developer/ customer problem (at a high level) and exploring 
-potential solutions. These documents are starting points for engaging in discussion 
-with you and other members of the community. Explainers should address their 
+[Explainers](https://w3ctag.github.io/explainers) are documents focused on
+describing a user/ developer/ customer problem (at a high level) and exploring
+potential solutions. These documents are starting points for engaging in discussion
+with you and other members of the community. Explainers should address their
 stated problems in clear and easy to understand language. Proposed solutions
 should be easy to follow and not too deep in technical details. When you read
-an explainer, we hope the stated problem is compelling and you can form an 
+an explainer, we hope the stated problem is compelling and you can form an
 opinion for whether the proposed solution would address the problem.
 
 ### Please provide feedback
 
-We are looking for feedback! Are the stated problems relevant to you? 
+We are looking for feedback! Are the stated problems relevant to you?
 How have they impacted your experience? Do the proposed solutions seem reasonable?
 Do they follow good [web principles](https://w3ctag.github.io/design-principles/)?
 Would they solve a problem you currently have? (We love to hear that; tell
 us more about your scenario!) Do you have related use-cases we hadn't considered?
 
-We appreciate you taking the time to offer feedback; it helps to improve the 
+We appreciate you taking the time to offer feedback; it helps to improve the
 explainers, validate the problem and solutions they describe, and show evidence
 that there is potential momentum to move an idea to the next stage. We desire
 to see all our explainers make the journey to become cross-browser supported
@@ -32,7 +32,7 @@ web standards.
 
 **[Start a new issue here](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new)**,
 or [join in the discussion](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/)
-on existing issues. We also welcome PRs on the explainer documents themselves. 
+on existing issues. We also welcome PRs on the explainer documents themselves.
 Note: we use labels to filter the issues to specific explainers.
 
 ### Have a product bug?
@@ -50,7 +50,7 @@ These are the proposals we are currently investigating in this repo. Use the
 links below to read the explainers, review the current issues, and file new
 issues specifically for the given explainer(s). We hope they will all "graduate"
 and begin their journey along the standards-track as they gain sufficient interest;
-each explainer has a "status of this document" section that indicates 
+each explainer has a "status of this document" section that indicates
 what standards venue they expect to go to next (if known). When they graduate,
 we move them into the [Alumni section](#alumni-) below.
 
@@ -64,7 +64,6 @@ we move them into the [Alumni section](#alumni-) below.
 | [WritingSuggestions attribute](WritingSuggestions/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WritingSuggestions">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/WritingSuggestions?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=sajos&labels=WritingSuggestions&template=WritingSuggestions-edit-host.md&title=%5BWritingSuggestions%5D+Issue) | HTML/Editing |
 | [Source Hashes in Stack Traces](DevTools/SourceHash/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Source+hash"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Source+hash?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=robpaveza&labels=Source+hash&title=%5BSource+Hashes%5D+%3CTITLE+HERE%3E) | JavaScript |
 | [PerformanceNavigationTiming User Agent Launch](PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Perf%20timing%20during%20browser%20start">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Perf%20timing%20during%20browser%20start?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dylank%2C+hemingzh&labels=Perf+timing+during+browser+start&template=performance-timing-during-browser-start.md&title=%5BPerf+Timing+during+launch%5D+%3CTITLE+HERE%3E) | Performance |
-| [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PerformanceNavigationTiming%20for%20Protocol%20Launch">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PerformanceNavigationTiming%20for%20Protocol%20Launch?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=atulkatti&labels=PerformanceNavigationTiming+for+Protocol+Launch&template=performancenavigationtiming-protocol-launch-timing-information.md&title=) | Performance |
 | [Trust Token Issuer Redemption Statistics](TrustTokenExtensions/IssuerRedemptionStatistics.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Trust%20Token%20Issuer%20Redemption%20Statistics">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Trust%20Token%20Issuer%20Redemption%20Statistics?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=Brandr0id%2C+erik-anderson&labels=Trust+Token+Issuer+Redemption+Statistics&template=trust-token-issuer-redemption-statistics.md&title=%5BTrust+Token+Issuer+Redemption+Statistics%5D+%3CTITLE+HERE%3E) | Privacy |
 | [Browser Binding Context](BindingContext/explainer.md) | <a href=https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Browser%20Binding%20Context%20BPoP> ![Github issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Browser%20Binding%20Context%20BPoP?label=issues)</a> | [New issue....](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=sameerag&labels=Browser+Binding+Context+BPoP&template=browser-binding-context-bpop.md&title=%5Browser+Binding+Context+BPoP%5D+%3CTITLE+HERE%3E) | Privacy |
 | [Acquisition Info](AcquisitionInfo/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Acquisition%20Info"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Acquisition%20Info?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kyerebo&labels=Acquisition+Info&template=acquisition-info.md&title=%5BAcquisition+Info%5D+%3CTITLE+HERE%3E) | PWA |
@@ -83,7 +82,7 @@ we move them into the [Alumni section](#alumni-) below.
 
 # Alumni 🎓
 
-Awesome! These explainers have moved on to bigger and better things! We've 
+Awesome! These explainers have moved on to bigger and better things! We've
 archived the original explainers here for posterity and updated their document
 status section to help you find where the latest discussions are happening.
 Please continue to participate and follow the links below to the current
@@ -135,7 +134,7 @@ standards communities. Thanks for your continued interest!
 # DevTools 🧰
 
 ⭐Our DevTools explainers have moved to
-[their own repo](https://github.com/MicrosoftEdge/DevTools/tree/main/explainers) for improved tracking 
+[their own repo](https://github.com/MicrosoftEdge/DevTools/tree/main/explainers) for improved tracking
 and update frequency!⭐
 
 For explainers that were hosted in this repo, an achived copy remains here, and the related explainers
@@ -161,7 +160,7 @@ link to their new location.
 
 # Other Documents
 
-A collection of explainers documenting platform enhancements (not web 
+A collection of explainers documenting platform enhancements (not web
 developer-facing features), implementation designs, and other public documents
 related to the construction of Microsoft Edge.
 
@@ -229,4 +228,7 @@ We'd love to hear your feedback!
 | [First Run Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | | 2023-07-17 |
 | [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) | This specification has since been superceded by the Web Haptics or HapticsDevice API | 2023-07-17 |
 | [Version History](VersionHistory/explainer.md) | | 2023-07-17 |
-| [Confirmation of Action](Accessibility/ConfimrationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)| 2023-11-13 |
+| [Confirmation of Action](Accessibility/ConfimrationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)|
+| [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) |  | 2024-04-22 |
+
+2024-4-22 |
