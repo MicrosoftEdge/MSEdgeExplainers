@@ -83,7 +83,7 @@ Some sites may be sending their reports to a third-party service and not wish to
 
 #### Does this affect user privacy?
 
-This is a new mechanism that could allow a website to collect data about its users. However, websites already have a great deal of power to collect data if they choose (including much more detailed data than is exposed by this proposal), and the sites are responsible for respecting their users' privacy settings.
+This adds a mechanism that could allow website owners to learn about an extension that a user is running if the page reports a crash while code from the extension's content script is on the stack.
 
 ### Security
 
