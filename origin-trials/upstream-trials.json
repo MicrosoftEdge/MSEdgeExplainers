@@ -43,6 +43,12 @@
       "explainer": "https://github.com/fergald/docs/blob/master/explainers/permissions-policy-deprecate-unload.md"
     },
     {
+      "label": "Desktop PWA App Title",
+      "expiration": "2024-10-01",
+      "repo": "MicrosoftEdge/MSEdgeExplainers",
+      "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/DocumentSubtitle/explainer.md"
+    },
+    {
       "label": "DisableThirdPartySessionStoragePartitioningAfterGeneralPartitioning",
       "expiration": "2024-09-03",
       "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_dd2p0f6kgIwZ9D8",
@@ -61,10 +67,22 @@
       "explainer": "https://github.com/screen-share/element-capture/blob/main/README.md"
     },
     {
+      "label": "FedCM Button Mode API",
+      "expiration": "2024-10-01",
+      "feedbackLink": "https://issues.chromium.org/issues/new?component=1456331&template=1937104",
+      "explainer": "https://github.com/yi-gu/FedCM/blob/main/explorations/HOWTO-chrome.md#button-flow"
+    },
+    {
       "label": "FetchLater API",
       "expiration": "2024-09-03",
       "repo": "WICG/pending-beacon",
       "explainer": "https://chromium.googlesource.com/chromium/src/+/main/docs/experiments/fetch-later.md"
+    },
+    {
+      "label": "Foldable APIs",
+      "expiration": "2024-10-29",
+      "repo": "w3c/device-posture",
+      "explainer": "https://github.com/w3c/device-posture/blob/gh-pages/README.md"
     },
     {
       "label": "Long Animation Frames",
@@ -85,6 +103,12 @@
       "explainer": "https://github.com/w3c/window-management/blob/main/EXPLAINER_fullscreen_popups.md"
     },
     {
+      "label": "Prefixed Video fullscreen API deprecation",
+      "expiration": "2025-02-11",
+      "feedbackLink": "https://issues.chromium.org/issues/40352864",
+      "explainer": "https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API"
+    },
+    {
       "label": "Private Network Access from non-secure contexts",
       "expiration": "2024-09-03",
       "repo": "WICG/private-network-access",
@@ -98,7 +122,7 @@
     },
     {
       "label": "Protected Audience Bidding & Auction Services",
-      "expiration": "2024-06-25",
+      "expiration": "2024-10-01",
       "repo": "WICG/turtledove",
       "explainer": "https://github.com/WICG/turtledove/blob/main/FLEDGE_browser_bidding_and_auction_API.md"
     },
@@ -116,9 +140,15 @@
     },
     {
       "label": "SharedArrayBuffers in non-isolated pages on Desktop platforms",
-      "expiration": "2024-06-25",
+      "expiration": "2025-02-18",
       "feedbackLink": "https://bugs.chromium.org/p/chromium/issues/entry?components=Internals%3ESandbox%3ESiteIsolation",
       "explainer": "https://developer.chrome.com/blog/enabling-shared-array-buffer/"
+    },
+    {
+      "label": "Skip Preload Scanning",
+      "expiration": "2025-01-14",
+      "feedbackLink": "https://issues.chromium.org/issues/330802493",
+      "explainer": "https://docs.google.com/document/d/1wiaTL5TeONTZamycMVMjo76nMcbhHNYznQy7I_zCVRY/edit#heading=h.7nki9mck5t64"
     },
     {
       "label": "Soft Navigation Heuristics",
@@ -164,7 +194,7 @@
     },
     {
       "label": "X-Requested-With in WebView Deprecation",
-      "expiration": "2024-06-27",
+      "expiration": "2025-09-16",
       "feedbackLink": "https://bugs.chromium.org/p/chromium/issues/entry?template=Webview+Bugs&labels=XRW-Deprecation",
       "explainer": "https://docs.google.com/document/d/e/2PACX-1vSSTEsHVfTXwOW80Tqy4c5TW6wSnt9b8v7-ZWUF3ZqLDs03EatEuyPCqwaUaa2s0a7mFm3Wh61bgVoz/pub"
     }
