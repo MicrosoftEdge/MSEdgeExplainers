@@ -229,6 +229,6 @@ We'd love to hear your feedback!
 | [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) | This specification has since been superceded by the Web Haptics or HapticsDevice API | 2023-07-17 |
 | [Version History](VersionHistory/explainer.md) | | 2023-07-17 |
 | [Confirmation of Action](Accessibility/ConfimrationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)| 2023-11-13 |
-| [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) | | 2024-04-22 |
+| [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTimingProtocolLaunchExtensions/explainer.md) | | 2024-04-22 |
 
 
