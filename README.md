@@ -228,7 +228,7 @@ We'd love to hear your feedback!
 | [First Run Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | | 2023-07-17 |
 | [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) | This specification has since been superceded by the Web Haptics or HapticsDevice API | 2023-07-17 |
 | [Version History](VersionHistory/explainer.md) | | 2023-07-17 |
-| [Confirmation of Action](Accessibility/ConfimrationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)|
-| [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) |  | 2024-04-22 |
+| [Confirmation of Action](Accessibility/ConfimrationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)| 2023-11-13 |
+| [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) | | 2024-04-22 |
 
-2024-4-22 |
+
