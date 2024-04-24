@@ -8,13 +8,6 @@
             "issue": "Acquisition Info",
             "flag": "msAcquisitionInfo"
         },{
-            "label": "PointerEvent.deviceId",
-            "expiration": "2024-07-01",
-            "repo": "MicrosoftEdge/MSEdgeExplainers",
-            "issue": "PointerEventDeviceId",
-            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PointerEventDeviceId/explainer.md",
-            "flag": "PointerEventDeviceId"
-        },{
           "label": "HTML+IDL `handwriting` attribute",
           "expiration": "2024-11-14",
           "repo": "MicrosoftEdge/MSEdgeExplainers",
