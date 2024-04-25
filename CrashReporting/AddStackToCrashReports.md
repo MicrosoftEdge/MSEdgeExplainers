@@ -87,7 +87,7 @@ This adds a mechanism that could allow website owners to learn about an extensio
 
 ### Security
 
-Just like `Error.prototype.stack`, information must be omitted about any cross-domain scripts that were not loaded with CORS.
+Just like `Error.prototype.stack`, stack frames from cross-domain scripts that were not loaded with CORS must be omitted.
 
 ## References & acknowledgements
 
