@@ -16,7 +16,7 @@ Enabling JavaScript call stacks in crash reports from unresponsive pages can pro
 
 Alternatively, You may enable the feature using one of the following the command line flags: 
 - `--enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports`
-- `--enable-features=experimental-web-platform-features`.
+- `--enable-experimental-web-platform-features`.
 
 ## Using the API
 
