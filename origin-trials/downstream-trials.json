@@ -22,7 +22,7 @@
             "flag": "PointerEventDeviceId"
         },{
           "label": "HTML+IDL `handwriting` attribute",
-          "expiration": "2024-08-22",
+          "expiration": "2024-11-14",
           "repo": "MicrosoftEdge/MSEdgeExplainers",
           "issue": "Handwriting",
           "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Handwriting/explainer.md",
