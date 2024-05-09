@@ -7,17 +7,23 @@
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md",
             "issue": "Acquisition Info",
             "flag": "msAcquisitionInfo"
-        },{
-          "label": "HTML+IDL `handwriting` attribute",
-          "expiration": "2024-11-14",
-          "repo": "MicrosoftEdge/MSEdgeExplainers",
-          "issue": "Handwriting",
-          "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Handwriting/explainer.md",
-          "flag": "MsHTMLElementHandwriting"
-      }
+        },
+        {
+            "label": "HTML+IDL `handwriting` attribute",
+            "expiration": "2024-11-14",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "issue": "Handwriting",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Handwriting/explainer.md",
+            "flag": "MsHTMLElementHandwriting"
+        },
+        {
+            "label": "Web App LocalFolder Access",
+            "expiration": "2024-10-24",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalFolder/explainer.md",
+            "issue": "LocalFolder Access",
+            "flag": "WebAppLocalFolder"
+        }
     ],
-
-    "expired": [
-
-    ]
+    "expired": []
 }
