@@ -8,7 +8,7 @@
     },
     {
       "label": "Captured Surface Control",
-      "expiration": "2024-10-01",
+      "expiration": "2024-12-02",
       "repo": "screen-share/captured-surface-control",
       "explainer": "https://github.com/screen-share/captured-surface-control/blob/main/README.md"
     },
@@ -55,6 +55,12 @@
       "explainer": "https://github.com/screen-share/element-capture/blob/main/README.md"
     },
     {
+      "label": "FedCM as a trust signal for the Storage Access API",
+      "expiration": "2024-10-01",
+      "repo": "explainers-by-googlers/storage-access-for-fedcm",
+      "explainer": "https://github.com/explainers-by-googlers/storage-access-for-fedcm"
+    },
+    {
       "label": "FedCM Button Mode API",
       "expiration": "2024-10-01",
       "feedbackLink": "https://issues.chromium.org/issues/new?component=1456331&template=1937104",
@@ -77,6 +83,12 @@
       "expiration": "2024-05-28",
       "repo": "w3c/longtasks",
       "explainer": "https://github.com/w3c/longtasks/blob/main/loaf-explainer.md"
+    },
+    {
+      "label": "Media Previews Opt Out",
+      "expiration": "2025-08-19",
+      "feedbackLink": "https://issues.chromium.org/330762482",
+      "explainer": "https://docs.google.com/document/d/1ZnX2JROjr9l4y2_OPMpfVlLOo-A5cQzD4mWarj9kXQ0/edit?usp=sharing"
     },
     {
       "label": "Mutation Events Deprecation Trial",
