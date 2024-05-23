@@ -22,7 +22,7 @@ Web applications may suffer from bimodal distribution in page load performance, 
 
 In these scenarios, content the web app attempts to load will be in competition with other work happening on the system. This makes it difficult to detect if performance issues exist within web applications themselves, or because of external factors.
 
-This is a pain point for pinned Progressive Web Apps that will often require a cold start of the user agent. Teams we have worked with have been surprised at the difference between real-world dashboard metrics and what they observe in page profiling tools. Without more information, it is challenging for developers to understand if (and when) their applications may be misbehaving or are simply being loaded in a contended period. To address this, we propose adding new information to the existing Web Performance APIs.
+Teams we have worked with have been surprised at the difference between real-world dashboard metrics and what they observe in page profiling tools. Without more information, it is challenging for developers to understand if (and when) their applications may be misbehaving or are simply being loaded in a contended period. To address this, we propose adding new information to the existing Web Performance APIs.
 
 
 [Performance Navigation Timing](https://w3c.github.io/navigation-timing/#dom-performancenavigationtiming) provides a variety of performance measurements. A typical response for `performance.getEntriesByType("navigation")` will produce something like:

@@ -4,7 +4,7 @@ Questions from https://www.w3.org/TR/security-privacy-questionnaire/
 
 ## 2.1. What information might this feature expose to Web sites or other parties, and for what purposes is that exposure necessary?
 
-It exposes a new field on the PerformanceNavigationTiming object to allow developers to discern if the page load occured while the user agent was in a non-optimal performance state.
+It exposes a new field on the PerformanceNavigationTiming object to allow developers to discern if the navigation timings are representative for their web application.
 
 ## 2.2. Do features in your specification expose the minimum amount of information necessary to enable their intended uses?
 
@@ -24,7 +24,8 @@ No.
 
 ## 2.6. Do the features in your specification expose information about the underlying platform to origins?
 
-This API exposes a new means for sites to infer whether the site was launched while the user agent was running under non-optimal performance conditions. Sites could infer that their site is set as the user’s home page. However, since this is the only information that a site can figure out about itself, and not information that other applications can find out, we do not consider this a significant concern given the benefit this change will provide. Additionally, such inference suffers from false positives, as the user may have invoked the URL and launched the browser from the OS shell or another non-browser application.
+This API coalesces multiple pieces of information into a single value. Sites might attempt to
+infer on a specific dimension. For example, this value could be coupled with the results of AdBlocker detection scripts to infer that more extensions are installed. However, this does not expose any other information about the extensions that maybe installed. Due to the noise added into this new field, this inference suffers from significant false positives.
 
 An analysis of fingerprinting capability provided by this surface suggests fairly limited impact.
 
@@ -58,7 +59,9 @@ No distinction.
 
 ## 2.14. How do the features in this specification work in the context of a browser’s Private Browsing or Incognito mode?
 
-There is a concern that exposing this information in an Private Browsing window could reveal that a user opened a certain website there. For example, if the user right mouse clicks on a link and selects “Open link in Incognito/InPrivate window”. However, such inference suffers from false positives, as the user may have invoked the URL and launched the browser from the OS shell, another non-browser application, or any other non-private browsing mode invocation.
+No distinction.
+
+There is a concern that exposing this information in an Private Browsing window, because it could indicate that a user visited a specific website there, since extensions are usually off by default in Private Browsing mode (thus eliminating one contributing factor). However, this inference is not reliable, because a 'low' confidence result can have many causes, and the result has noise added to it.
 
 ## 2.15. Does this specification have both "Security Considerations" and "Privacy Considerations" sections?
 
@@ -96,4 +99,4 @@ Not applicable
 
 ## 3.5 Legitimate Misuse
 
-Because navigations can be script-initiated (iframes, prerenders) the entropy state will be empty for all non-top-level navigation. This avoids this value being used as a proxy for querying the system entropy in real time.
+Not applicable
