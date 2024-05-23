@@ -25,7 +25,8 @@ No.
 ## 2.6. Do the features in your specification expose information about the underlying platform to origins?
 
 This API coalesces multiple pieces of information into a single value. Sites might attempt to
-infer on a specific dimension. For example, this value could be coupled with the results of AdBlocker detection scripts to infer that more extensions are installed. However, this does not expose any other information about the extensions that maybe installed. Due to the noise added into this new field, this inference suffers from significant false positives.
+infer on a specific dimension. For example, this value could be coupled with the results of AdBlocker detection scripts to infer that more extensions are installed. However, this does not expose any other information about the extensions that may be installed. Due to the noise added into this new field, this inference suffers from significant false positives.
+
 
 An analysis of fingerprinting capability provided by this surface suggests fairly limited impact.
 
