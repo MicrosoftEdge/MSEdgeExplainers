@@ -62,7 +62,7 @@ No distinction.
 
 No distinction.
 
-There is a concern that exposing this information in an Private Browsing window, because it could indicate that a user visited a specific website there, since extensions are usually off by default in Private Browsing mode (thus eliminating one contributing factor). However, this inference is not reliable, because a 'low' confidence result can have many causes, and the result has noise added to it.
+There is a concern that exposing this information in a Private Browsing window could indicate that a user visited a specific website there, since extensions are usually off by default in Private Browsing mode (thus eliminating one contributing factor). However, this inference is not reliable, because a 'low' confidence result can have many causes, and the result has noise added to it.
 
 ## 2.15. Does this specification have both "Security Considerations" and "Privacy Considerations" sections?
 
