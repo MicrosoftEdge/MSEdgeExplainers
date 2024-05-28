@@ -1,15 +1,15 @@
 ### Questions from https://www.w3.org/TR/security-privacy-questionnaire/
 
 # 2. Questions to Consider
-## 2.1. What information does this feature expose, and for what purposes?
+## 2.1. What information might this feature expose to Web sites or other parties, and for what purposes is that exposure necessary?
 This feature exposes JavaScript call stacks at the time of a crash to website developers. This information is necessary for diagnosing and resolving issues that may cause a page to become unresponsive due to JavaScript execution.
-## 2.2. Do features in your specification expose the minimum amount of information necessary to implement the intended functionality?
+## 2.2. Do features in your specification expose the minimum amount of information necessary to enable their intended uses?
 Yes, the feature is designed to include JavaScript call stacks and only when developers opt-in to receive them.
-## 2.3. Do the features in your specification expose personal information, personally-identifiable information (PII), or information derived from either?
-No, this feature only includes JavaScript call stacks at the time of the crash.
+## 2.3. How do the features in your specification deal with personal information, personally-identifiable information (PII), or information derived from them?
+This feature does not expose any personal or personally identifiable information. It only includes JavaScript call stacks at the time of the crash.
 ## 2.4. How do the features in your specification deal with sensitive information?
 The feature does not deal with sensitive information.
-## 2.5. Do the features in your specification introduce state that persists across browsing sessions?
+## 2.5. Do the features in your specification introduce new state for an origin that persists across browsing sessions?
 No, the feature does not introduce new persistent state for an origin. It only reports the JavaScript call stacks at the time of a crash, which does not persist across sessions.
 ## 2.6. Do the features in your specification expose information about the underlying platform to origins?
 No, the feature does not expose any information about the underlying platform.
@@ -33,9 +33,7 @@ The feature should function the same way in Private Browsing or Incognito mode a
 Yes, the specification has both "Security Considerations" and "Privacy Considerations" sections.
 ## 2.16. Do features in your specification enable origins to downgrade default security protections?
 No, the feature does not enable origins to downgrade default security protections.
-## 2.17 What happens when a document that uses your feature is kept alive in BFCache (instead of getting destroyed) after navigation, and potentially gets reused on future navigations back to the document?
-The feature should handle documents in the BFCache the same way as "fully active" ones, including their call stacks in crash reports if they get reused on future navigations back to the document.
-## 2.18. What happens when a document that uses your feature gets disconnected?
-If a document using this feature gets disconnected, the feature should still function. The generation of the crash report, including the JavaScript call stack, does not rely on the document being connected. However, the delivery of the crash report would be affected by the document's network status.
-## 2.19. What should this questionnaire have asked?
+## 2.17 How does your feature handle non-"fully active" documents?
+The JavaScript call stack is only collected for visible tabs, such as the current active page the user is on. Therefore, non-"fully active" documents, such as those in the background or in the BFCache, will not trigger the javascript call stack collection unless they become active and then deemed unresponsive.
+## 2.18. What should this questionnaire have asked?
 N/A
