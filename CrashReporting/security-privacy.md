@@ -12,7 +12,7 @@ The feature does not deal with sensitive information.
 ## 2.5. Do the features in your specification introduce new state for an origin that persists across browsing sessions?
 No, the feature does not introduce new persistent state for an origin. It only reports the JavaScript call stacks at the time of a crash, which does not persist across sessions.
 ## 2.6. Do the features in your specification expose information about the underlying platform to origins?
-No, the feature does not expose any information about the underlying platform.
+Yes, extension code injected into the main world may be visible. The JavaScript call stack may include frames from browser extensions if the call stack is collected and code from the extension's content script is on the stack. This could potentially expose the fact that a user is running a specific extension.
 ## 2.7. Does this specification allow an origin to send data to the underlying platform?
 No, the feature does not allow an origin to send data to the underlying platform.
 ## 2.8. Do features in this specification enable access to device sensors?
