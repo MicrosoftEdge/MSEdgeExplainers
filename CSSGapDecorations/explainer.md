@@ -5,7 +5,21 @@
 - [Kevin Babbitt](https://github.com/kbabbitt)
 
 ## Participate
-- Issue tracker: TBD
+
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSGapDecorations)
+
+## Status of this Document
+
+This document is intended as a starting point for engaging the community and
+standards bodies in developing collaborative solutions fit for standardization.
+As the solutions to problems described in this document progress along the
+standards-track, we will retain this document as an archive and use this section
+to keep the community up-to-date with the most current standards venue and
+content location of future work and discussions.
+
+* This document status: **Active**
+* Expected venue: [CSS Working Group](https://www.w3.org/Style/CSS/)
+* Current version: this document
 
 ## Table of Contents
 
@@ -17,6 +31,7 @@
 - [CSS Gap Decorations Level 1](#css-gap-decorations-level-1)
   - [Authors](#authors)
   - [Participate](#participate)
+  - [Status of this Document](#status-of-this-document)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
   - [Goals](#goals)
