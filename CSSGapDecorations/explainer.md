@@ -128,7 +128,8 @@ Unless otherwise noted, corresponding `row-` and `column-` properties should be
 assumed to have identical syntax. Maintaining symmetry between `row-` and
 `column-` properties is important for responsive flex and masonry scenarios.
 
-For property grammar details, please see the [draft specification](draft-spec/index.html).
+For property grammar details, please see the
+[draft specification](https://kbabbitt.github.io/css-gap-decorations/).
 
 ### Placement of gap decorations
 
