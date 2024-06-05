@@ -6,8 +6,7 @@
 
 ## Participate
 
-- [Issue
-  tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSGapDecorations)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSGapDecorations)
 
 ## Status of this Document
 
