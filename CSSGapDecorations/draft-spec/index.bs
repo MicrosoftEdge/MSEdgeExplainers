@@ -6,7 +6,7 @@ Status: UD
 Group: csswg
 Work Status: exploring
 Repository: MicrosoftEdge/MSEdgeExplainers
-URL: https://github.com/MicrosoftEdge/MSEdgeExplainers/CSSGapDecorations/
+URL: https://github.com/MicrosoftEdge/MSEdgeExplainers/CSSGapDecorations/draft-spec/
 Editor: Kevin Babbitt, Microsoft, https://github.com/kbabbitt, w3cid 124689
 Abstract: This module introduces several properties to add row and column gap decorations to container layout types such as grid and flex.
 </pre>
