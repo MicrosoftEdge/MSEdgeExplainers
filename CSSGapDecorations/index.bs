@@ -1,15 +1,17 @@
 <pre class='metadata'>
-Title: CSS Foo Module Level 1
-Shortname: css-foo
+Title: CSS Gap Decorations Module Level 1
+Shortname: css-gap-decoration
 Level: 1
-Status: ED
+Status: UD
 Group: csswg
-TR: https://www.w3.org/TR/css-foo/
-ED: https://drafts.csswg.org/css-foo/
 Work Status: exploring
-Editor: Name1, Company1, http://example.com/contact
-Editor: Name2, Company2, name2@example.com
-Abstract: This module introduces the 'foo' property and related values, which do bar and baz.
+Repository: MicrosoftEdge/MSEdgeExplainers
+URL: https://github.com/MicrosoftEdge/MSEdgeExplainers/CSSGapDecorations/
+Editor: Kevin Babbitt, Microsoft, https://github.com/kbabbitt, w3cid 124689
+Abstract: This module introduces several properties to add row and column gap decorations to container layout types such as grid and flex.
+</pre>
+<pre class='anchors'>
+urlPrefix: https://tabatkins.github.io/specs/css-masonry/; type: dfn; spec: CSS-MASONRY; text: masonry containers
 </pre>
 
 Introduction {#intro}
@@ -17,13 +19,13 @@ Introduction {#intro}
 
 	<em>This section is not normative.</em>
 
-	Due to the need to have example specifications,
-	the CSS community found a great need to have a 'foo' property.
-	This specifications addresses this need in
-	a very simply way.
-	While it provides a very limited set of features for authors,
-	it effectively demonstrates how to write a CSS specification.
-
+	[[CSS-MULTICOL-1#column-gaps-and-rules]] allows for rules to be drawn
+	between columns in a <a>multicol container</a>. This specification expands
+	upon the 'column-rule-width', 'column-rule-style', and 'column-rule-color'
+	properties, adding equivalents in the row direction, expanding their
+	application to other container layouts, and giving advanced control over
+	where and how gap decorations are painted.
+	
 Value Definitions {#values}
 ---------------------------
 
@@ -37,91 +39,17 @@ Value Definitions {#values}
 	also accept the <a>CSS-wide keywords</a> as their property value.
 	For readability they have not been repeated explicitly.
 
-Sample section {#sample-topic}
-==============================
+Defining gap decoration areas {#gap-decoration-areas}
+=====================================================
 
-	Look at the mark-up in this section for examples.
-	See the <a href="https://github.com/tabatkins/bikeshed/blob/master/README.md">documentation</a> for more precise instructions.
-	The companion of this template shows the <a href="Overview.html">processed result</a>.
-
-	To refer to HTML, use [[HTML]] (note the double square brackets in the source).
-	To make a normative reference,
-	insert a “!”, like this:
-	[[!CSS-SYNTAX-3]]
-	The currently available <a href="https://www.w3.org/Style/Group/css3-src/biblio.ref">list of bibliographic data</a> can of course be extended.
-
-	We write about a property such as 'foo' like this
-	and about a piece of CSS code like this: ''foo: bar''.
-	(Note that if it looks like a "property: value",
-	it'll automatically link to the property.)
-	Inline HTML and XML are similar,
-	but use the CODE element: <code class=lang-html>&lt;blockquote&gt;...&lt;/blockquote&gt;</code>
-	and <code class=lang-xml>&lt;r:xyz&gt;...&lt;/r:xyz&gt;</code>.
-
-	Note: Note that the property will automatically be linked to its definition.
-
-	To define <dfn export>terms</dfn> into the <dfn export id="dfn-index">index</dfn>,
-	there are many <dfn export lt="variant">variants</dfn>,
-	but hopefully the <dfn export title="simple|simpler|simplest">simplest</dfn>
-	will be the most common.
-	Note that you need to explicitly export any plain <{dfn}>s you want to be linkable from other specs,
-	but all other types of definition automatically export themselves.
-
-	Note: Note that you can add non-normative notes like this.
-
-	Of course, multi-paragraph notes are also possible: just enclose them in a <{div}>:
-
-	<div class=note>
-		Note that this note is a multi-paragraph note.
-
-		It doesn't <em>need</em> to have two paragraphs, but it could.
-	</div>
-
-	<details class=note>
-		<summary>A longer note</summary>
-
-		When you want to insert a longer note
-		to provide some useful explanation,
-		but the note itself is not critical to the section it's placed in,
-		use a <{details}> note instead.
-
-		This will hide the note by default,
-		so it's less distracting to the flow of the section.
-		(At least, in browsers that support <{details}>;
-		legacy browsers will get something like a normal note.)
-	</details>
-
-	Displayed examples come in eight different types:
-	CSS examples that need no separate paragraph of explanation are put in a simple PRE:
-
-	<pre class="example lang-css">
-		EM { font-style: italic }
-	</pre>
-
-	CSS examples that need extra text need a DIV.
-
-	<div class=example>
-		The following example is the same as the previous one,
-		but now it is explained:
-
-		<pre class="lang-css">EM { font-style: italic }</pre>
-	</div>
-
-	Illegal CSS examples (examples of errors) are the same,
-	but with class "illegal example".
-	Examples of HTML and XML code have class "html" and "xml" respectively,
-	but are otherwise ditto.
-
-	A formal definition of a property looks like this:
-
-Internal display model: the 'foo' property {#the-foo-property}
---------------------------------------------------------------
+Grid gap decoration areas: The 'grid-column-rule-area' and 'grid-row-rule-area' properties {#grid-column-row-rule-area}
+-----------------------------------------------------------------------------------------------------------------------
 
 	<pre class='propdef'>
-		Name: foo
-		Value: inline-inside | block-inside | table | ruby | icon
-		Initial: text
-		Applies to: all elements
+		Name: grid-column-rule-area, grid-row-rule-area
+		Value: [ <<grid-line>> [ / <<grid-line>> ]{0,3} ]#
+		Initial: 1 / 1 / -1 / -1
+		Applies to: <a>grid containers</a>
 		Inherited: no
 		Percentages: n/a
 		Computed value: specified value
@@ -129,98 +57,289 @@ Internal display model: the 'foo' property {#the-foo-property}
 		Canonical order: per grammar
 	</pre>
 
-	<dl dfn-type="value" dfn-for="foo">
-		<dt><dfn>value-name</dfn>
-		<dd>
-			Define values using a <{dl}>.
-			Note that the <{dl}> wrapper
-			specifies the default <{dfn}> type and what property it's for,
-			so you don't have to repeat that information in each individual definition.
-	</dl>
+	A list of grid line tuples, as in the 'grid-area' property, that define
+	portions of the grid over which gap decorations are painted.
 
-	<dfn>Cross-references</dfn> are created by enclosing a term or phrase in &lt;dfn>
-	(like the word <a>cross-references</a> earlier in this sentence).
-	Then an &lt;a> without an <code>href=""</code> attribute
-	with the same text content will automatically be linked.
-	Both &lt;dfn>s and &lt;a>s are typed,
-	which allows the same text to appear as different types of terms without a collision.
-	The type can often be inferred,
-	but sometimes it needs to be specified,
-	like when you're linking to a {{Foo}} WebIDL interface.
-	(Here, we're using the <em>IDL</em> linking shorthand
-	to make it clear that this is one of the IDL types.)
+Color, style, and width {#color-style-width}
+============================================
 
-	And a figure with a caption is done like this:
+Gap decoration color: The 'column-rule-color' and 'row-rule-color' properties {#column-row-rule-color}
+------------------------------------------------------------------------------------------------------
 
-	<figure>
-		<img src="images/corner.png" alt="A table with a caption above it; both have margins and the margins between them are collapsed, as is normal for vertical margins.">
-
-		<figcaption>
-			Just a random image.
-			Use SVG if you can.
-			Otherwise, W3C prefers PNG over GIF (obviously, since PNG is a W3C Rec).
-		</figcaption>
-	</figure>
-
-	Don't forget to write the alt.
-
-	Issue: An open issue or editorial remark is OK in a WD,
-	but they should be resolved/removed before the document goes to &ldquo;CR&rdquo;
-	(Candidate Recommendation).
-	Use <code class=lang-html>class="issue"</code> on an element,
-	or begin a paragraph with &ldquo;Issue:&rdquo;.
-
-	Issue:
-	Inline issues will be copied into an <a href="#issues-index">Issues Index</a> at the end of the document,
-	for easy reference.
-
-	<pre class='idl'>
-		/* Write WebIDL in a &lt;pre class="idl"> as plain text. */
-		interface Foo {
-			readonly attribute CSSOMString bar;
-			boolean baz(FooDict Arg1, (CSSOMString or Foo) Arg2);
-		};
-
-		dictionary FooDict {
-			sequence&lt;Foo> foos;
-			boolean bar;
-			CSSOMString baz = "qux";
-		};
+	<pre class='propdef'>
+		Name: column-rule-color, row-rule-color
+		Value: [ <<line-color-list>> | <<auto-line-color-list>> ]#
+		Initial: curerentcolor
+		Applies to: <a>grid containers</a>, <a>flex containers</a>, <a>multicol containers</a>, and <a>masonry containers</a>
+		Inherited: no
+		Animation type: by computed value type
 	</pre>
 
-Shorthands and Descriptors {#shorthands}
-----------------------------------------
+	<pre class='prod'>
+		<dfn>&lt;line-color-list&gt;</dfn>          = [ <<line-color-or-repeat>> ]+
 
-Shorthand properties have a smaller set of values to provide:
+		<dfn>&lt;auto-line-color-list&gt;</dfn>     = [ <<line-color-or-repeat>> ]*
+									               <<auto-repeat-line-color>>
+									               [ <<line-color-or-repeat>> ]*
 
-<pre class="propdef shorthand">
-Name: shorthand-foo
-Value: foo | bar | baz
-</pre>
+		<dfn>&lt;line-color-or-repeat&gt;</dfn>     = [ <<color>> | <<repeat-line-color>> ]
 
-Adding new values to an existing property? Use a partial:
+		<dfn>&lt;repeat-line-color&gt;</dfn>        = repeat( [ <<integer [1,∞]>> ] , [ <<color>> ]+ )
 
-<pre class="propdef partial">
-Name: foo
-New values: another-icon
-</pre>
+		<dfn>&lt;auto-repeat-line-color&gt;</dfn>   = repeat( auto , [ <<color>> ]+ )
+	</pre>
 
-Or when defining a descriptor, use a descdef block (partials work here, too):
+Gap decoration style: The 'column-rule-style' and 'row-rule-style' properties {#column-row-rule-style}
+------------------------------------------------------------------------------------------------------
 
-<pre class=descdef>
-Name: descriptor-foo
-Value: more | values
-Initial: values
-For: @some-at-rule
-</pre>
+	<pre class='propdef'>
+		Name: column-rule-style, row-rule-style
+		Value: [ <<line-style-list>> | <<auto-line-style-list>> ]#
+		Initial: none
+		Applies to: <a>grid containers</a>, <a>flex containers</a>, <a>multicol containers</a>, and <a>masonry containers</a>
+		Inherited: no
+		Animation type: discrete
+	</pre>
 
-(A required descriptor can use `Initial: n/a</code>.)
+	<pre class='prod'>
+		<dfn>&lt;line-style-list&gt;</dfn>          = [ <<line-style-or-repeat>> ]+
+
+		<dfn>&lt;auto-line-style-list&gt;</dfn>     = [ <<line-style-or-repeat>> ]*
+									               <<auto-repeat-line-style>>
+									               [ <<line-style-or-repeat>> ]*
+
+		<dfn>&lt;line-style-or-repeat&gt;</dfn>     = [ <<line-style>> | <<repeat-line-style>> ]
+
+		<dfn>&lt;repeat-line-style&gt;</dfn>        = repeat( [ <<integer [1,∞]>> ] , [ <<line-style>> ]+ )
+
+		<dfn>&lt;auto-repeat-line-style&gt;</dfn>   = repeat( auto , [ <<line-style>> ]+ )
+	</pre>
+
+Gap decoration width: The 'column-rule-width' and 'row-rule-width' properties {#column-row-rule-width}
+------------------------------------------------------------------------------------------------------
+	<pre class='propdef'>
+		Name: column-rule-width, row-rule-width
+		Value: [ <<line-width-list>> | <<auto-line-width-list>> ]#
+		Initial: medium
+		Applies to: <a>grid containers</a>, <a>flex containers</a>, <a>multicol containers</a>, and <a>masonry containers</a>
+		Inherited: no
+		Computed value: absolute length, [=snapped as a border width=]; ''0'' if the rule style is ''border-style/none'' or ''css-backgrounds-3/hidden''
+		Animation type: by computed value type
+	</pre>
+
+	<pre class='prod'>
+		<dfn>&lt;line-width-list&gt;</dfn>          = [ <<line-width-or-repeat>> ]+
+
+		<dfn>&lt;auto-line-width-list&gt;</dfn>     = [ <<line-width-or-repeat>> ]*
+									               <<auto-repeat-line-width>>
+									               [ <<line-width-or-repeat>> ]*
+
+		<dfn>&lt;line-width-or-repeat&gt;</dfn>     = [ <<line-width>> | <<repeat-line-width>> ]
+
+		<dfn>&lt;repeat-line-width&gt;</dfn>        = repeat( [ <<integer [1,∞]>> ] , [ <<line-width>> ]+ )
+
+		<dfn>&lt;auto-repeat-line-width&gt;</dfn>   = repeat( auto , [ <<line-width>> ]+ )
+	</pre>
+
+Gap decoration shorthands: The 'column-rule' and 'row-rule' properties {#gap-decoration-shorthands}
+---------------------------------------------------------------------------------------------------
+
+	<pre class='propdef shorthand'>
+		Name: column-rule, row-rule
+		Value: [ <<gap-rule-list>> | <<auto-gap-rule-list>> ]#
+	</pre>
+
+	<pre class='prod'>
+		<dfn>&lt;gap-rule-list&gt;</dfn>        = <<gap-rule-or-repeat>> [ / <<gap-rule-or-repeat>> ]*
+
+		<dfn>&lt;auto-gap-rule-list&gt;</dfn>   = [ [ <<gap-rule-or-repeat>> ] / ]*
+								             <<auto-repeat-gap-rule>>
+								             [ / [ <<gap-rule-or-repeat>> ] ]*
+
+		<dfn>&lt;gap-rule-or-repeat&gt;</dfn>   = [ <<gap-rule>> | <<repeat-gap-rule>> ]
+
+		<dfn>&lt;repeat-gap-rule&gt;</dfn>      = repeat( [ <<integer [1,∞]>> ] , [ <<gap-rule>> ]# )
+
+		<dfn>&lt;auto-repeat-gap-rule&gt;</dfn> = repeat( auto , [ <<gap-rule>> ]# )
+
+		<dfn>&lt;gap-rule&gt;</dfn>             = [ <<line-width>> || <<line-style>> || <<color>> ]
+	</pre>
+
+Bi-directional gap decoration shorthands: The 'gap-rule-color', 'gap-rule-style', and 'gap-rule-width' properties {#gap-rule-color-style-width}
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+	<pre class='propdef shorthand'>
+		Name: gap-rule-color
+		Value: <<'column-rule-color'>>
+		Inherited: no
+		Applies to: Same as 'column-rule-color' and 'row-rule-color'
+	</pre>
+
+	<pre class='propdef shorthand'>
+		Name: gap-rule-style
+		Value: <<'column-rule-style'>>
+		Inherited: no
+		Applies to: Same as 'column-rule-style' and 'row-rule-style'
+	</pre>
+
+	<pre class='propdef shorthand'>
+		Name: gap-rule-width
+		Value: <<'column-rule-width'>>
+		Inherited: no
+		Applies to: Same as 'column-rule-width' and 'row-rule-width'
+	</pre>
+
+Gap decoration segment painting {#segment-painting}
+===================================================
+
+	By default, gap decorations are painted as continuous segments that extend
+	as far as possible along the centerline of a given gap. The decoration is
+	painted from one gap T intersection to another, with both endpoints at the
+	centers of the T crossings and the decoration proceeding along the stems of
+	both Ts. In grid layout, row decorations are painted on top of column
+	decorations by default; this behavior may be changed using the
+	'gap-rule-paint-order' property.
+
+Gap decoration segment length: The 'column-rule-outset' and 'row-rule-outset' properties {#column-row-rule-outset}
+------------------------------------------------------------------------------------------------------------------
+
+	Authors may specify that decorations are instead segmented between all gap
+	intersections. In such cases, each segment starts at the edge of a given gap
+	intersection and proceeds to the edge of the next gap intersection. The
+	endpoints may be offset from those endpoints using the 'column-rule-outset'
+	and 'row-rule-outset' properties.
+
+	<pre class='propdef'>
+		Name: column-rule-outset, row-rule-outset
+		Value: [ <<length-percentage>> | ''join'' ]#
+		Initial: ''join''
+		Applies to: <a>grid containers</a>, <a>flex containers</a>, <a>multicol containers</a>, and <a>masonry containers</a>
+		Inherited: no
+		Percentages: refer to the gap width in the perpendicular direction
+		Animation type: by computed value type
+	</pre>
+
+	<dl dfn-type="value" dfn-for="column-rule-outset, row-rule-outset">
+		<dt><dfn>join</dfn>
+		<dd>
+			"Joins together" segments to give the "T intersections" behavior
+			described above. To facilitate animation effects, ''join'' computes
+			to ''50%''.
+		</dd>
+		<dt><dfn><<length-percentage>></dfn>
+		<dd>
+			Each segment starts at the edge of a given gap intersection and
+			proceeds to the edge of the next gap intersection, modified by the
+			value given. Positive values extend into the neighboring
+			intersection; negative values recede from it. These offsets also
+			apply at the edges of the container, where negative values may
+			extend into the padding area.
+		</dd>
+	</dl>
+
+Interaction with spanning items in Grid: The 'grid-column-rule-break', 'grid-row-rule-break', and 'grid-rule-break' properties {#grid-rule-break}
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
+	<pre class='propdef'>
+		Name: grid-column-rule-break, grid-row-rule-break
+		Value: [ span | none ]#
+		Initial: span
+		Applies to: <a>grid containers</a>
+		Inherited: no
+		Animation type: discrete
+	</pre>
+
+	<dl dfn-type="value" dfn-for="grid-column-rule-break, grid-row-rule-break">
+		<dt><dfn>span</dfn>
+		<dd>
+			Gives either the "T intersections" or "all intersections" behavior
+			described previously, depending on the value of the
+			'column-rule-outset' or 'row-rule-outset' property.
+		</dd>
+		<dt><dfn>none</dfn>
+		<dd>
+			Causes gap decorations to cross behind spanning items and receive
+			the "T intersection" behavior described previously at the edges of
+			the gap decoration area.
+		</dd>
+	</dl>
+
+	<pre class='propdef shorthand'>
+		Name: grid-rule-break
+		Value: [ span | none ]#
+		Applies to: Same as 'grid-column-rule-break' and 'grid-row-rule-break'
+	</pre>
+
+Gap decoration paint order: The 'gap-rule-paint-order' property {#gap-rule-paint-order}
+---------------------------------------------------------------------------------------
+	<pre class='propdef'>
+		Name: gap-rule-paint-order
+		Value: [ row-over-column | column-over-row | main-over-cross | cross-over-main ]#
+		Initial: main-over-cross
+		Applies to: <a>grid containers</a>, <a>flex containers</a>, <a>multicol containers</a>, and <a>masonry containers</a>
+		Inherited: no
+		Animation type: discrete
+	</pre>
+
+Direction-relative properties {#direction-relative}
+===================================================
+
+	These are designed to enable scenarios where authors wish to switch
+	'flex-direction' based on space constraints or other factors.
+
+Direction-relative decoration colors: The 'main-rule-color' and 'cross-rule-color' properties {#main-cross-rule-color}
+----------------------------------------------------------------------------------------------------------------------
+	<pre class='propdef'>
+		Name: main-rule-color, cross-rule-color
+		Value: <<'column-rule-color'>>
+		Initial: curerentcolor
+		Applies to: Same as 'column-rule-color' and 'row-rule-color'
+		Inherited: no
+		Animation type: by computed value type
+	</pre>
+
+Direction-relative decoration styles: The 'main-rule-style' and 'cross-rule-style' properties {#main-cross-rule-style}
+----------------------------------------------------------------------------------------------------------------------
+	<pre class='propdef'>
+		Name: main-rule-style, cross-rule-style
+		Value: <<'column-rule-style'>>
+		Initial: none
+		Applies to: Same as 'column-rule-style' and 'row-rule-style'
+		Inherited: no
+		Animation type: discrete
+	</pre>
+
+Direction-relative decoration width: The 'main-rule-width' and 'cross-rule-width' properties {#main-cross-rule-width}
+----------------------------------------------------------------------------------------------------------------------
+	<pre class='propdef'>
+		Name: main-rule-width, cross-rule-width
+		Value: <<'column-rule-width'>>
+		Initial: medium
+		Applies to: Same as 'column-rule-width' and 'row-rule-width'
+		Inherited: no
+		Animation type: by computed value type
+	</pre>
+
+Direction-relative decoration shorthands: The 'main-rule' and 'cross-rule' properties {#main-cross-rule}
+--------------------------------------------------------------------------------------------------------
+	<pre class='propdef shorthand'>
+		Name: main-rule, cross-rule
+		Value: <<'column-rule'>>
+		Applies to: Same as 'column-rule' and 'row-rule'
+	</pre>
+
+Direction-relative segment lengths: The 'main-rule-outset' and 'cross-rule-outset' properties {#main-cross-rule-outset}
+-----------------------------------------------------------------------------------------------------------------------
+	<pre class='propdef'>
+		Name: main-rule-outset, cross-rule-outset
+		Value: <<'column-rule-outset'>>
+		Initial: join
+		Applies to: Same as 'column-rule-outset' and 'row-rule-outset'
+		Inherited: no
+		Animation type: by computed value type
+	</pre>
 
 <h2 class=no-num id=privacy>Privacy Considerations</h2>
-
-Horizontal review wants Security and Privacy sections to be separate.
-
-Suggested text for new specifications:
 
 No new privacy considerations have been reported on this specification.
 
