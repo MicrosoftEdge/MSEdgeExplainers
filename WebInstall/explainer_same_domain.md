@@ -37,20 +37,21 @@ Modern browsers have UX that enable users to *install* web content on their devi
 ### **Installing a web app from the current origin**
 The site can trigger its own installation. 
 
-The current way of doing this is with the `onbeforeinstallprompt`. This only works for browsers that support PWAs and prompting. The `navigator.install` method allows a imperative way to install web content, and works for UAs that prompt and don't prompt.
+The current way of supporting installation is vai the `onbeforeinstallprompt` event, which only works in browsers that have a prompting UI affordace. 
+
+The `navigator.install()` method allows a imperative way to install web content, and works for UAs that prompt and don't prompt:
 
 ```javascript
 /* tries to install the current domain */
 const installApp = async () => {
-    if ('install' in navigator === false) return; // api not supported
+    if (!navigator.install) return; // api not supported
     try {
-            await navigator.install();
+        await navigator.install();
     } catch(err) {
-        switch(err.message){
+        switch(err.name){
             case 'AbortError':
                 /* Operation was aborted*/
                 break;
-           
         }
     }
 };
