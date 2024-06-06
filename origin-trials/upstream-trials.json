@@ -19,12 +19,6 @@
       "explainer": "https://github.com/WICG/compression-dictionary-transport"
     },
     {
-      "label": "Compute Pressure",
-      "expiration": "2024-05-28",
-      "repo": "w3c/compute-pressure",
-      "explainer": "https://developer.chrome.com/docs/web-platform/compute-pressure/"
-    },
-    {
       "label": "DeprecateUnloadOptOut",
       "expiration": "2025-02-11",
       "repo": "fergald/docs",
@@ -49,6 +43,12 @@
       "explainer": "https://github.com/wanderview/quota-storage-partitioning/blob/main/explainer.md"
     },
     {
+      "label": "DisableThirdPartyStoragePartitioning2",
+      "expiration": "2025-03-18",
+      "repo": "miketaylr/partitioned-storage-deprecation-trial-feedback",
+      "explainer": "https://github.com/wanderview/quota-storage-partitioning/blob/main/explainer.md"
+    },
+    {
       "label": "ElementCapture",
       "expiration": "2024-09-03",
       "repo": "screen-share/element-capture",
@@ -67,6 +67,12 @@
       "explainer": "https://github.com/yi-gu/FedCM/blob/main/explorations/HOWTO-chrome.md#button-flow"
     },
     {
+      "label": "FedCM Continuation API bundle",
+      "expiration": "2024-12-03",
+      "repo": "fedidcg/FedCM",
+      "explainer": "https://github.com/fedidcg/FedCM/blob/main/explorations/HOWTO-chrome.md#continuation-api"
+    },
+    {
       "label": "FetchLater API",
       "expiration": "2024-09-03",
       "repo": "WICG/pending-beacon",
@@ -77,12 +83,6 @@
       "expiration": "2024-10-29",
       "repo": "w3c/device-posture",
       "explainer": "https://github.com/w3c/device-posture/blob/gh-pages/README.md"
-    },
-    {
-      "label": "Long Animation Frames",
-      "expiration": "2024-05-28",
-      "repo": "w3c/longtasks",
-      "explainer": "https://github.com/w3c/longtasks/blob/main/loaf-explainer.md"
     },
     {
       "label": "Media Previews Opt Out",
@@ -97,6 +97,12 @@
       "explainer": "https://developer.chrome.com/blog/mutation-events-deprecation"
     },
     {
+      "label": "Page-embedded Permission Control (Camera/Mic)",
+      "expiration": "2025-02-18",
+      "repo": "WICG/PEPC",
+      "explainer": "https://github.com/WICG/PEPC/blob/main/explainer.md"
+    },
+    {
       "label": "Prefixed Video fullscreen API deprecation",
       "expiration": "2025-02-11",
       "feedbackLink": "https://issues.chromium.org/issues/40352864",
@@ -107,12 +113,6 @@
       "expiration": "2024-09-03",
       "repo": "WICG/private-network-access",
       "explainer": "https://developer.chrome.com/blog/private-network-access-update/"
-    },
-    {
-      "label": "Private Network Access Permission Prompt",
-      "expiration": "2024-05-28",
-      "repo": "WICG/private-network-access",
-      "explainer": "https://github.com/WICG/private-network-access/blob/main/permission_prompt/explainer.md"
     },
     {
       "label": "Protected Audience Bidding & Auction Services",
@@ -145,12 +145,6 @@
       "explainer": "https://docs.google.com/document/d/1wiaTL5TeONTZamycMVMjo76nMcbhHNYznQy7I_zCVRY/edit#heading=h.7nki9mck5t64"
     },
     {
-      "label": "Soft Navigation Heuristics",
-      "expiration": "2024-05-28",
-      "repo": "WICG/soft-navigations",
-      "explainer": "https://github.com/WICG/soft-navigations#soft-navigations"
-    },
-    {
       "label": "StorageAccessAPIBeyondCookies",
       "expiration": "2024-08-06",
       "repo": "arichiv/saa-non-cookie-storage",
@@ -179,12 +173,6 @@
       "expiration": "2024-10-01",
       "repo": "WebAssembly/js-string-builtins",
       "explainer": "https://github.com/WebAssembly/js-string-builtins/blob/main/proposals/js-string-builtins/Overview.md"
-    },
-    {
-      "label": "WebSQL",
-      "expiration": "2024-05-28",
-      "feedbackLink": "https://crbug.com/695592",
-      "explainer": "https://developer.chrome.com/blog/deprecating-web-sql/"
     },
     {
       "label": "X-Requested-With in WebView Deprecation",
