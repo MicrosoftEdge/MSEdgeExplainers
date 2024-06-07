@@ -45,10 +45,10 @@ The Web Install API enables installation of cross-origin applications. A website
 ```javascript
 /* tries to install a cross-origin web app */
 
-const installApp = async (manifest_id) => {
+const installApp = async (manifest_id, install_url) => {
     if ('install' in navigator === false) return; // api not supported
     try {
-            await navigator.install(manifest_id);
+        await navigator.install(manifest_id, install_url);
     } catch(err) {
         switch(err.message){
             case 'AbortError':
@@ -121,6 +121,10 @@ Additionally, if the browser has an active 'Do Not Track (DNT)', equivalent 'Glo
 * **`navigator.install` and Permissions API:** see [integrations with the Permissions API](#integration-with-the-permissions-api).
 
 * **`navigator.install` and manifest file's `prefer_related_applications`:** When the `related_applications` and `prefer_related_applications` key/values are present in the manifest, the UA should try to handoff the install to the prefered catalog. If this is not possible then it fallback to a default UA install.
+
+* **`navigator.getInstalledApps` and `getInstalledRelatedApps`:** `getInstalledApps` is called from an origin and can list applications that are installed on the device originating from the current site. `getInstalledRelatedApps` on the other hand is called from a web app and returns which alternate versions of an app (platform specific versions for example) are already installed on the device. 
+    * `getInstalledApps` can be used to change install UX in online stores if an app is already installed (changing the text on a button from "Install" to "Open" for example).
+    * `getInstalledRelatedApps` can be used to "mute" notifications or hide install UI for a web application if an alternate version of the app is already installed (avoid duplicate notifications if a user has a web version and a platform-specific version of the same app for exmaple).
 
 * **`navigator.install` and `side-panel` display-mode:** Due to the evolving nature of web apps, there are different surfaces where these can be installed. If the target of `navigator.install` call has a manifest file with a `display_override` member that includes a [`side-panel` value](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/SidePanel/explainer.md), this can hint to the UA that the app can be installed as a sidebar app if supported.
 
@@ -208,9 +212,9 @@ In both cases of the default UA behaviour, developers can use the `install_sourc
     "display": "standalone",
     "start_url": "/index.html",
     "install_sources": [ 
-	    {"origin": "https://apps.microsoft.com", "action": "allow"},
-	    {"origin": "https://store.app", "action": "allow"}
-      {"origin": "https://anotherstore.com", "action": "deny"}
+        {"origin": "https://apps.microsoft.com", "action": "allow"},
+        {"origin": "https://store.app", "action": "allow"}
+        {"origin": "https://anotherstore.com", "action": "deny"}
     ]
 }
 ```
@@ -233,6 +237,9 @@ A UA may choose to gate the `navigator.install` capability behind a requirement 
 
 * Can we remove power from the developer to query if the app is installed by offloading to the UA the knowledge of which apps are installed?
     * Is there any form of attribute that can be added to a DOM element to signal this distinction/difference?
+
+* Should `getInstalledApps` and `getInstalledRelatedApps` be merged together?
+    See [this issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/804).
 
 ## Glossary
 * **installation origin**: the origin that initiates the call to the `install` method.

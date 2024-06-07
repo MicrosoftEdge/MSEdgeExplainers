@@ -37,20 +37,21 @@ Modern browsers have UX that enable users to *install* web content on their devi
 ### **Installing a web app from the current origin**
 The site can trigger its own installation. 
 
-The current way of doing this is with the `onbeforeinstallprompt`. This only works for browsers that support PWAs and prompting. The `navigator.install` method allows a imperative way to install web content, and works for UAs that prompt and don't prompt.
+The current way of supporting installation is vai the `onbeforeinstallprompt` event, which only works in browsers that have a prompting UI affordace. 
+
+The `navigator.install()` method allows a imperative way to install web content, and works for UAs that prompt and don't prompt:
 
 ```javascript
 /* tries to install the current domain */
 const installApp = async () => {
-    if ('install' in navigator === false) return; // api not supported
+    if (!navigator.install) return; // api not supported
     try {
-            await navigator.install();
+        await navigator.install();
     } catch(err) {
-        switch(err.message){
+        switch(err.name){
             case 'AbortError':
                 /* Operation was aborted*/
                 break;
-           
         }
     }
 };
@@ -71,7 +72,7 @@ When called on the same domain, the **`install()` method will trigger/open the p
 
 ### The `navigator.install` method
 
-To install a web site/app, the site/app would use the promise-based method `navigator.install(manifest_id, [<params>]);`. This method will:
+To install a web site/app, the site/app would use the promise-based method`navigator.install(manifest_id[[, install_url], <params>])`. This method will:
 
 * Resolve when an installation was completed.
     * The success value will be an object that contains:
@@ -96,7 +97,7 @@ const installApp = async () => {
 #### **Signatures of the `install` method (same-origin)**
 The same-origin part of the  Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
 
-1. `navigator.install([<params>])`: The method receives no parameters and tries to install the current origin as an app. Note that `manifest_id` *is required* for the installation and if the method is called without one it will use the *default* manifest id of the web content which resolves to the document url.
+1. `navigator.install([<params>])`: The method receives no parameters and tries to install the current origin as an app. Note that `manifest_id` *is required* for the installation and if the method is called without one it will use the *default* manifest id of the web content. The default manifest id resolves to the `start_url` if defined, or the document url if not defined.
 
 2. `navigator.install(manifest_id[[, install_url], <params>])`: The method takes a manifest id and optional install url and tries to install the current origin as an app. If the content being installed has a manifest file, this must match the value in the manifest file. If there is no manifest file present, it must match the document url. The call can also receive an object with parameters that it can use to customize a same domain installation. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
 
@@ -118,7 +119,7 @@ To install a same domain web site/app, the process is as follows:
 
 * **`navigator.install` and manifest file's `prefer_related_applications`:** When the `related_applications` and `prefer_related_applications` key/values are present in the manifest, the UA should try to handoff the install to the prefered catalog. If this is not possible then it fallback to a default UA install.
 
-* **`navigator.install()` and getInstalledRelatedApps():** If a web app tries to install itself (same domain install) it can first use the `getInstalledRelatedApps()` to check if it is already install and hide the installation UI.
+* **`navigator.install()` and getInstalledRelatedApps():** If a web app tries to install itself (same domain install) it can first use the `getInstalledRelatedApps()` to check if it is already installed and hide the installation UI.
 
 ```javascript
 
