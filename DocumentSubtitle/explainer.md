@@ -57,7 +57,7 @@ This is achieved by adding the following meta tag in the head of the page:
 
 The TAG privacy and security self-review is located [here](https://docs.google.com/document/d/1CwYQEf98fI5z96Y6AsQdSafp70SD5STgepD5Z8cx1HQ/edit?usp=sharing).
 
-## Alternative Solutions
+## Considered Alternatives
 
 * Using a field on the manifest to store the contextual information. This alternative would require constant reading and writing to an external (manifest) file and doesn't necessarily fit semantically with the context of the application's state.
 * Let the developer update the value of the title once the web application is installed. This might be problematic as  many websites still rely on the title (generally displayed in the tab on the browser) for when there is new notifications or certain events on the page. For instance, messaging apps can update the title every time a new message comes in to show number of unread messages. Additionally, in the case that a title didn't change on a web site, once a PWA is installed, if the user opens the web app in the browser through the `...` menu the original/current state title would have to be restored.
