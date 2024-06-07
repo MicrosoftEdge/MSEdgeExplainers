@@ -44,11 +44,8 @@ As defined in the [HTML specification](https://html.spec.whatwg.org/multipage/se
 
 `<meta name="app-title" content="additional/secondary text to go in the title bar">`
 
-This also requires to add an IDL attribute to the WHATWG spec to reflect and expose the app-title to the document.
 
-`document.appTitle`
-
-The following image is a mockup of a PWA using the `app-title` API.
+The following image is a mockup of a PWA using the `app-title` meta-tag.
 
 ![image of twitter installed web app with a long text in the title bar](webAppTitleBar2.png)
 
@@ -64,7 +61,8 @@ The TAG privacy and security self-review is located [here](https://docs.google.c
 
 * Using a field on the manifest to store the contextual information. This alternative would require constant reading and writing to an external (manifest) file and doesn't necessarily fit semantically with the context of the application's state.
 * Let the developer update the value of the title once the web application is installed. This might be problematic as  many websites still rely on the title (generally displayed in the tab on the browser) for when there is new notifications or certain events on the page. For instance, messaging apps can update the title every time a new message comes in to show number of unread messages. Additionally, in the case that a title didn't change on a web site, once a PWA is installed, if the user opens the web app in the browser through the `...` menu the original/current state title would have to be restored.
-* Use a media query to determine when an app is running in `standalone` mode to change the text that appears on the title of the document: This approach has several disadvantages, starting by having limited accessibility to the contextual information when you compare it to having the data in a defined bucket. It also requires JavaScript to match a media query and change the name of the document's title. This in return means the title must be stored or lost to make space for the new contextual subtitle. This can involve using local storage to cache the previous text, which is cumbersome and should be avoided.   
+* Use a media query to determine when an app is running in `standalone` mode to change the text that appears on the title of the document: This approach has several disadvantages, starting by having limited accessibility to the contextual information when you compare it to having the data in a defined bucket. It also requires JavaScript to match a media query and change the name of the document's title. This in return means the title must be stored or lost to make space for the new contextual subtitle. This can involve using local storage to cache the previous text, which is cumbersome and should be avoided.
+* Use a third-party meta-data vocabulary like OpenGraph or schema.org to specify text on the title bar of an installed web app. We don't consider this to be relevant as web apps are already a native concept to the platform. These meta-data vocabularies aim to enable web pages to "become a rich object in a social graph" or be a "thing". That is not the intention of this feature, and therefore the use of `og:title` or schema.org's `name` do not fit the intended purpose.
            
 ## Open Questions
 
