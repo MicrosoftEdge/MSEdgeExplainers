@@ -1,10 +1,10 @@
-# ariaNotify
+# ARIA Notify
 
 Authors: [Doug Geoffray](), [Alison Maher](), [Sara Tang](https://github.com/sartang), [Travis Leithead](https://github.com/travisleithead), [Daniel Libby](https://github.com/dlibby-)
 
-## Introduction 
-### Abstract 
+## Introduction
 
+### Abstract
 For people who are blind or have low vision, identifying dynamic changes (non-user-initiated) in the content of a web
 app is very challenging. ARIA live regions are the only mechanism available today that communicate content changes down
 to the accessibility layer so that users can hear about them. ARIA live regions are inconsistently implemented, have
@@ -162,7 +162,7 @@ as the concept of [earcons](https://en.wikipedia.org/wiki/Earcon)). Without addi
 options can be offered: options that apply to all `ariaNotify` notifications universally or customization on a
 per-notification-string basis. 
 
-To aid in customization, `ariaNotify` provides a method to give context of the notification (`notificationID`). This
+To aid in customization, `ariaNotify` provides a method to give context of the notification (`notificationId`). This
 explainer provides a set of potential suggestions but allows for arbitrary non-localized strings to be used by the
 content author. All strings will be processed by the user agent according to a fixed algorithm ([ASCII
 encode](https://infra.spec.whatwg.org/#ascii-encode), then [ASCII
@@ -170,11 +170,11 @@ lowercase](https://infra.spec.whatwg.org/#ascii-lowercase), and finally, [strip 
 whitespace](https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace)) before the notification is sent
 to the platform API (invalid strings will throw an exception). 
 
-When no `notificationID` is explicitly provided by the content author, the `notificationID` is set to `notify` by
+When no `notificationId` is explicitly provided by the content author, the `notificationId` is set to `notify` by
 default.
 
-To specify a `notificationID`, pass the string as the second parameter.  Alternatively, the `notificationID` may be
-expressed in an object form with property `notificationID`. For example: 
+To specify a `notificationId`, pass the string as the second parameter.  Alternatively, the `notificationId` may be
+expressed in an object form with property `notificationId`. For example: 
 
 #### Example 2
 ```
@@ -185,11 +185,11 @@ document.ariaNotify(
 // ... 
 myfile.asyncFileUpload().then( () => { 
     document.ariaNotify( "File untitled-1 uploaded.", { 
-         notificationID: "task-progress-finished" } ); 
+         notificationId: "task-progress-finished" } ); 
 }); 
 ```
 
-Screen readers may allow their users to filter out these task-progress `notificationID`, may make these notifications
+Screen readers may allow their users to filter out these task-progress `notificationId`, may make these notifications
 only available at particular verbosity levels, or may replace the output strings with audio cues. 
 
 ### Managing pending notifications 
@@ -206,7 +206,7 @@ notifications). This is determined using the `priority` and `interrupt` properti
 More specifically, the `priority` property can be used to ensure the notification is placed ahead of lesser priority
 notifications. 
 
-`Priority` indicates where the screen reader should add the notification in relationship to any existing pending
+`priority` indicates where the screen reader should add the notification in relationship to any existing pending
 notifications: 
  - `important` 
    - Screen reader should add this string to the end of any other pending important notifications but before all
@@ -217,14 +217,14 @@ notifications:
 #### Example 3
 ```
 // Dispatch a notification updating background task status -- low priority
-Document.ariaNotify( "Background task completed",
+document.ariaNotify( "Background task completed",
     { "priority":"none",
-      "notificationID":"StatusUpdate" }); 
+      "notificationId":"StatusUpdate" }); 
 
 // Dispatch a high priority notification that data may be lost
-Document.ariaNotify("Unable to save changes, lost connection to server",
+document.ariaNotify("Unable to save changes, lost connection to server",
     { "priority":"important",
-      "notificationID":"ServerError" }); 
+      "notificationId":"ServerError" }); 
 ```
 
 Assuming the initial low priority string hasn't already started to be acted upon (spoken/brailled), the high priority
@@ -237,21 +237,21 @@ the user first.
 // User has initiated an action which starts a generation process of data.
 // During the status of the generation, a more critical status needs to be
 // sent to the user 
-Document.querySelector("#dataStatus")
+document.querySelector("#dataStatus")
         .ariaNotify( "generating content",
-            { "notificationID":"statusUpdate" }); 
+            { "notificationId":"statusUpdate" }); 
 
-Document.querySelector("#dataStatus")
+document.querySelector("#dataStatus")
         .ariaNotify( "processing data ", 
-            { "notificationID":"statusUpdate" }); 
+            { "notificationId":"statusUpdate" }); 
 
-Document.querySelector("#dataStatus")
+document.querySelector("#dataStatus")
         .ariaNotify( "counting items ",
-            { "notificationID":"statusUpdate" } ); 
+            { "notificationId":"statusUpdate" } ); 
 
-Document.ariaNotify( " server connection lost ",
+document.ariaNotify( " server connection lost ",
             { "priority":"important",  
-              "notificationID":"serverStatus" } ); 
+              "notificationId":"serverStatus" } ); 
 ```
 
 As content is being generated, the user is informed of that status. When something more serious occurs, such as losing
@@ -290,12 +290,12 @@ scenario (a progress bar which reports its status at every percent increment):
 let percent = 0; 
 function simulateProgress() { 
   percent += 1; 
-  UpdateProgressBarVisual(percent); 
+  updateProgressBarVisual(percent); 
   // Report progress to ariaNotify. interrupt:none will cause each percent
   // update to be fully spoken 
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}", 
-            { "notificationID": "progressBar", 
+            { "notificationId": "progressBar", 
               "priority":"none",
               "interrupt":"none" });
 }
@@ -317,13 +317,13 @@ first part of each/some percentage until the last is processed where the user wi
 let percent = 0; 
 function simulateProgress() { 
   percent += 1; 
-  UpdateProgressBarVisual(percent);
+  updateProgressBarVisual(percent);
   // Report progress to ariaNotify. interrupt all will cause each percentage
   // update to interrupt any existing percentage that may be speaking, flush any
   // pending percentages, and add the latest 
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}",
-            { "notificationID":"progressBar",
+            { "notificationId":"progressBar",
               "priority":"none",
               "interrupt":"all" });
  }
@@ -348,13 +348,13 @@ speak, and the process will repeat. Finally, the last percentage "Progress is 10
 let percent = 0; 
 function simulateProgress() { 
   percent += 1; 
-  UpdateProgressBarVisual(percent); 
+  updateProgressBarVisual(percent); 
   // Report progress to ariaNotify. interrupt pending will allow the current
   // percentage to finish speaking, flush any pending percentages, and add the
   // latest 
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}",
-              { "notificationID":"progressBar", 
+              { "notificationId":"progressBar", 
                 "priority":"none",
                 "interrupt":"pending" }); 
 }
@@ -387,7 +387,7 @@ directly to ARIA live regions.
 In the case of browsers that do not yet support `ariaNotify`, we propose the following fallback mechanism using the same
 backend as the existing ARIA live regions: 
  - The message payload for `ariaNotify` is equivalent to the contents of an ARIA live region. 
- - The `notificationID` is dropped entirely. 
+ - The `notificationId` is dropped entirely. 
  - `"priority: important"` and `"priority: none"` correspond to `aria-live="assertive"` and `aria-live="polite"` ARIA
  live attributes, respectively. 
  - ARIA live regions do not support interruptibility, so all behavior of `interrupt` defaults to `none`.  
@@ -420,13 +420,13 @@ if ("ariaNotify" in element) {
 ```
 
 ## Open Issues 
-### Predefined notificationIDs 
-The use of `notificationIDs` give the screen reader contextual information regarding the notification which allows for
+### Predefined notificationIds 
+The use of `notificationId` give the screen reader contextual information regarding the notification which allows for
 creative approaches to dispatching the information to their users. The question then arises of whether the API should
-create a predetermined set of `notificationID` names for common/expected scenarios or whether having predefined names is
+create a predetermined set of `notificationId` names for common/expected scenarios or whether having predefined names is
 pointless given no matter the list, it will always fall short. 
 
-Possible examples of predefined notificationIDs could be something like: 
+Possible examples of predefined notificationIds could be something like: 
  - Recent action completion status: `action-completion-success`, `action-completion-warning`,
  `action-completion-failure` 
  - Async/indeterminate task progress: `task-progress-started`, `task-progress-ongoing`, `task-progress-blocked`,
@@ -492,9 +492,9 @@ See Security and Privacy section for additional details.
 
 **Are Element-level notifications really necessary?**
 
-Adding ariaNotify to Elements was driven by several goals: 
+Adding `ariaNotify` to Elements was driven by several goals: 
  - Resolve the question of how language input should be provided. To keep the API simple, we are able to leverage the
- lang attribute that is used to override the document language for specific subtrees. ariaNotify can use the nearest
+ lang attribute that is used to override the document language for specific subtrees. `ariaNotify` can use the nearest
  ancestor element's lang attribute as a language hint (or the document's default language). 
  - Screen readers can filter/prioritize notifications based on the element associated with the notification queue. E.g.,
  the element's current visibility in the User Agent, the element's proximity to the focused element.  (Same potential
@@ -504,15 +504,15 @@ Adding ariaNotify to Elements was driven by several goals:
 
 Screen reader users can customize the verbosity of the information (and context) that is read to them via settings.
 Screen reader vendors can also adapt the screen reader on a per site or per app basis for the best experience of their
-users. ariaNotify offers notificationID as a mechanism to allow screen reader vendors or users to customize not only the
-general use of ariaNotify on websites, but also individual notifications by notificationID (or specific notification
+users. `ariaNotify` offers `notificationId` as a mechanism to allow screen reader vendors or users to customize not only the
+general use of `ariaNotify` on websites, but also individual notifications by notificationId (or specific notification
 string instances in the limit). 
 
 **Tooling help**
 
 It's very difficult today to test that ARIA live regions are working and how they are working. Tooling, [such as the
 work proposed here](https://docs.google.com/document/d/1ZRBC4VJwsb-dlLmcZJgYlz1qn7MmDwNKkyfbd8nbLEA/edit), should be
-available for content authors to validate the behavior of both ARIA live regions and ariaNotify.
+available for content authors to validate the behavior of both ARIA live regions and `ariaNotify`.
 
 ## Alternate Solutions 
  The design of this API is loosely inspired by the [UIA Notification API](https://docs.microsoft.com/en-us/windows/win32/api/uiautomationcoreapi/nf-uiautomationcoreapi-uiaraisenotificationevent). 
@@ -535,7 +535,7 @@ available for content authors to validate the behavior of both ARIA live regions
  browser's trusted UI. 
     - Mitigations should be applied to suppress notifications when focus moves outside of the web content. 
     - Additional mitigations to block certain trusted phrases related to the browser's trusted UI could be considered.
-    - Implementations may choose to audibly differentiate notification phrases coming from ariaNotify in order to make it
+    - Implementations may choose to audibly differentiate notification phrases coming from `ariaNotify` in order to make it
     clear that they are content author controlled. 
  4. **Secure Context.** Does it make sense to offer this feature only to Secure Contexts? Should usage of this API be
  automatically granted to 3rd party browsing contexts? Currently thinking "no" in order to have maximum possibility of
@@ -545,3 +545,4 @@ available for content authors to validate the behavior of both ARIA live regions
  #2.7](https://www.w3.org/TR/security-privacy-questionnaire/#send-to-platform)) Should there be a practical limit on the
  amount of text that can be sent in one parameter to the API? Just like multiple-call DoS attacks, one call with an
  enormous amount of text could tie up an AT or cause a hang as data is marshalled across boundaries.
+ 
