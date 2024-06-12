@@ -23,6 +23,14 @@
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalFolder/explainer.md",
             "issue": "LocalFolder Access",
             "flag": "WebAppLocalFolder"
+        },
+        {
+            "label": "Digital Goods API",
+            "expiration": "2024-12-31",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PwaDigitalGoods/explainer.md",
+            "issue": "Digital Goods API",
+            "flag": "DigitalGoodsV2"
         }
     ],
     "expired": []
