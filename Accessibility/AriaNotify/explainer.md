@@ -426,7 +426,7 @@ creative approaches to dispatching the information to their users. The question 
 create a predetermined set of `notificationId` names for common/expected scenarios or whether having predefined names is
 pointless given no matter the list, it will always fall short. 
 
-Possible examples of predefined notificationIds could be something like: 
+Possible examples of predefined `notificationId` could be something like: 
  - Recent action completion status: `action-completion-success`, `action-completion-warning`,
  `action-completion-failure` 
  - Async/indeterminate task progress: `task-progress-started`, `task-progress-ongoing`, `task-progress-blocked`,
@@ -505,7 +505,7 @@ Adding `ariaNotify` to Elements was driven by several goals:
 Screen reader users can customize the verbosity of the information (and context) that is read to them via settings.
 Screen reader vendors can also adapt the screen reader on a per site or per app basis for the best experience of their
 users. `ariaNotify` offers `notificationId` as a mechanism to allow screen reader vendors or users to customize not only the
-general use of `ariaNotify` on websites, but also individual notifications by notificationId (or specific notification
+general use of `ariaNotify` on websites, but also individual notifications by `notificationId` (or specific notification
 string instances in the limit). 
 
 **Tooling help**
