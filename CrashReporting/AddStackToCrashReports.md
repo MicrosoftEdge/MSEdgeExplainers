@@ -88,7 +88,7 @@ Wasm stack frames will be supported. Typically the format is `${url}:wasm-functi
 
 #### Why require opt-in?
 
-Some sites may be sending their reports to a third-party service and not wish to expose information about their site code to that third party. This feature would also increase the size of reports, adding two propertyies that existing servers might not handle correctly, and include data that users might not have consented to send.
+Some sites may be sending their reports to a third-party service and not wish to expose information about their site code to that third party. This feature would also increase the size of reports, adding two properties that existing servers might not handle correctly, and include data that users might not have consented to send.
 
 #### Does this affect user privacy?
 
