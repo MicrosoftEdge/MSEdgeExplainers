@@ -19,6 +19,12 @@
       "explainer": "https://github.com/WICG/compression-dictionary-transport"
     },
     {
+      "label": "CompressionDictionaryTransport V3",
+      "expiration": "2024-12-03",
+      "repo": "WICG/compression-dictionary-transport",
+      "explainer": "https://github.com/WICG/compression-dictionary-transport"
+    },
+    {
       "label": "DeprecateUnloadOptOut",
       "expiration": "2025-02-11",
       "repo": "fergald/docs",
@@ -85,6 +91,12 @@
       "explainer": "https://github.com/w3c/device-posture/blob/gh-pages/README.md"
     },
     {
+      "label": "Keyboard-focusable scroll containers Opt Out",
+      "expiration": "2025-03-18",
+      "feedbackLink": "https://issues.chromium.org/issues/new?component=1363614&template=1922340",
+      "explainer": "https://developer.chrome.com/blog/keyboard-focusable-scrollers"
+    },
+    {
       "label": "Media Previews Opt Out",
       "expiration": "2025-08-19",
       "feedbackLink": "https://issues.chromium.org/330762482",
@@ -110,7 +122,7 @@
     },
     {
       "label": "Private Network Access from non-secure contexts",
-      "expiration": "2024-09-03",
+      "expiration": "2025-03-17",
       "repo": "WICG/private-network-access",
       "explainer": "https://developer.chrome.com/blog/private-network-access-update/"
     },
@@ -152,7 +164,7 @@
     },
     {
       "label": "Tabbed Web Apps",
-      "expiration": "2024-08-06",
+      "expiration": "2024-12-02",
       "repo": "WICG/manifest-incubations",
       "explainer": "https://github.com/WICG/manifest-incubations/blob/gh-pages/tabbed-mode-explainer.md"
     },
