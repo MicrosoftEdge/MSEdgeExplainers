@@ -10,7 +10,7 @@ This document is a starting point for engaging the community and standards bodie
 
 * This document status: **ARCHIVED**
 * Current venue: [W3C Web Incubator Community Group](https://wicg.io/)
-* Current version: [Pointer Event Device Properties](https://github.com/WICG/pointer-event-extensions/blob/main/pointer-event-device-id-explainer.md)
+* Current version: [Pointer Event Persistent Device Id](https://github.com/WICG/pointer-event-extensions/blob/main/pointer-event-device-id-explainer.md)
 
 ## Introduction
 As devices with advanced pen input capabilities are becoming increasingly prevalent, it is important that the web platform continues to evolve to fully support these advanced features in order to unlock rich experiences for both end users and developers. One such advancement is the ability for a device's digitizer to recognize more than one pen device interacting with it simultaneously. In this Explainer, we propose an extension to the `PointerEvent` interface to include a new attribute, `deviceId`, that represents a session-persistent, document isolated, unique identifier that a developer can reliably use to identify individual pens interacting with the page.
