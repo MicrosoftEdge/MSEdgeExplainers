@@ -56,7 +56,7 @@
     },
     {
       "label": "ElementCapture",
-      "expiration": "2024-09-03",
+      "expiration": "2025-03-18",
       "repo": "screen-share/element-capture",
       "explainer": "https://github.com/screen-share/element-capture/blob/main/README.md"
     },
@@ -139,12 +139,6 @@
       "explainer": " https://github.com/palak8669/webrtc-encoded-transform/blob/create-encoded-explainer/create-encoded-explainer.md"
     },
     {
-      "label": "ServiceWorker static routing API",
-      "expiration": "2024-06-25",
-      "repo": "w3c/ServiceWorker",
-      "explainer": "https://github.com/yoshisatoyanagisawa/service-worker-static-routing-api"
-    },
-    {
       "label": "SharedArrayBuffers in non-isolated pages on Desktop platforms",
       "expiration": "2025-02-18",
       "feedbackLink": "https://bugs.chromium.org/p/chromium/issues/entry?components=Internals%3ESandbox%3ESiteIsolation",
@@ -176,7 +170,7 @@
     },
     {
       "label": "WebAssembly JavaScript Promise Integration",
-      "expiration": "2024-10-29",
+      "expiration": "2025-02-18",
       "repo": "WebAssembly/js-promise-integration",
       "explainer": "https://github.com/WebAssembly/js-promise-integration"
     },
