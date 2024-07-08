@@ -89,12 +89,19 @@ enum NavigationConfidence {
     "high",
     "low"
 };
+
+interface PerformanceNavigationTimingConfidence {
+    readonly attribute double randomizedTriggerRate;
+    readonly attribute NavigationConfidence value;
+    [CallWith=ScriptState] object toJSON();
+};
+
 ```
 
 The payload of a performance.getEntriesByType("navigation") call would then look like:
 
 ```javascript
-confidence: "high"
+confidence: {value: "high", randomizedTriggerRate: 0.5}
 connectEnd: 126.19999998807907
 connectStart: 126.19999998807907
 <snip>
@@ -242,7 +249,7 @@ interface PerformanceNavigationTimingAdditionalData {
 };
 ```
 
-There would be 2*4*4*4*4=512 possible states encodable, and we'd need to apply kary-randomized response.The flip probability for kary-randomized response is p = k / (k - 1 + exp(epsilon)). This is ~99.6% for k=512 and an epsilon value of 1.1. There are a few options we could consider:
+There would be 2 * 4 * 4 * 4 * 4 = 512 possible states encodable, and we'd need to apply kary-randomized response.The flip probability for kary-randomized response is p = k / (k - 1 + exp(epsilon)). This is ~99.6% for k=512 and an epsilon value of 1.1. There are a few options we could consider:
 
 1. We could consider regressing the privacy bar, by protecting these attributes separately, but differential privacy algorithms are composable resulting in significantly reduced privacy for the user.
 2. Choose a different privacy mechanism than randomized response. This may come at a cost of complexity (both in the mechanism and in the debiasing step).

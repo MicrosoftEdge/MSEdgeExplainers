@@ -50,7 +50,7 @@ const installApp = async (manifest_id, install_url) => {
     try {
         await navigator.install(manifest_id, install_url);
     } catch(err) {
-        switch(err.message){
+        switch(err.name){
             case 'AbortError':
                 /* Operation was aborted*/
                 break;
