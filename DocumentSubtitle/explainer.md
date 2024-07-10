@@ -11,8 +11,6 @@ This document is a starting point for engaging the community and standards bodie
     
 ## Introduction
 
-
-
 **Installed web apps cannot provide dynamic/controllable contextual information in their title bar**. Contextual information can be the name of an open document, the section of an app or any other information that can be relevant to the running installed PWA. Having this information in the title bar can be useful to identify the open window when selecting among open apps in surfaces like the Alt+Tab action on Windows (and similar actions on macOS and Linux to jump between open apps).
 
  The current behavior is that an installed web application will put the app's name from the manifest and append the page’s inner text from the `<title>` HTML tag in the head of the page. This often can create awkward titles for some web apps. For instance, some social networking apps change the title of the page to the content it is displaying itself, creating a title that is often too long and not good to identify the installed web app window. See the image below as reference:
