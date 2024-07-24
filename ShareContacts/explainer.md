@@ -86,6 +86,6 @@ The `contacts` interface seems like a correct location for the `share` method, b
 
 ## Open Questions
 
-* Should we align the content of the contcts with the information provided in the Contact Picker API?
+* Should we align the content of the contacts with the information provided in the Contact Picker API?
 
 ## Acknowledgements
