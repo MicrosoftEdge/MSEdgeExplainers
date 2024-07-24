@@ -69,7 +69,7 @@ TODO: investigate how this works on the native side
 
 ### Extending the Web Share API
 
-The [Web Share API](https://w3c.github.io/web-share/) allows a web site to share content to an arbitrary destination of the user's choice. At first it was considered extending the API to insclude sharing contacts, but the scope of sharing contacts to the platform's contact repository is inherently a different one from the one Web Share solves. Additionally, this API does not resolve the second part of the feature, regarding how the web app acts when a contact is invoked from the OS surface it appears.
+The [Web Share API](https://w3c.github.io/web-share/) allows a web site to share content to an arbitrary destination of the user's choice. At first it was considered extending the API to include sharing contacts, but the scope of sharing contacts to the platform's contact repository is inherently a different one from the one Web Share solves. Additionally, this API does not resolve the second part of the feature, regarding how the web app acts when a contact is invoked from the OS surface it appears.
 
 ### Extending the Web Share Target API
 
