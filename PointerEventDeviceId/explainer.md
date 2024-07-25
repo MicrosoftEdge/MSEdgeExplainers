@@ -8,9 +8,9 @@ Authors: [Ben Mathwig](https://github.com/bmathwig), [Sahir Vellani](https://git
 
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-* This document status: **Active**
-* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/)
-* Current version: [Pointer Event Device Id](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PointerEventDeviceId/explainer.md)
+* This document status: **ARCHIVED**
+* Current venue: [W3C Web Incubator Community Group](https://wicg.io/)
+* Current version: [Pointer Event Persistent Device Id](https://github.com/WICG/pointer-event-extensions/blob/main/pointer-event-device-id-explainer.md)
 
 ## Introduction
 As devices with advanced pen input capabilities are becoming increasingly prevalent, it is important that the web platform continues to evolve to fully support these advanced features in order to unlock rich experiences for both end users and developers. One such advancement is the ability for a device's digitizer to recognize more than one pen device interacting with it simultaneously. In this Explainer, we propose an extension to the `PointerEvent` interface to include a new attribute, `deviceId`, that represents a session-persistent, document isolated, unique identifier that a developer can reliably use to identify individual pens interacting with the page.

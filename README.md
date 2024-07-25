@@ -1,30 +1,30 @@
 # ![Microsoft Edge Logo](https://avatars0.githubusercontent.com/u/11354582?s=75)Microsoft Edge Explainers
 
-Welcome! This repo is home to "explainers" and related documents originating 
+Welcome! This repo is home to "explainers" and related documents originating
 from the Microsoft Edge team.
 
 #### Jump to section: [Active Explainers](#active-explainers-) | [Alumni](#alumni-) | [DevTools](https://github.com/MicrosoftEdge/DevTools/tree/main/explainers) | [Other documents](#other-documents) | [Withdrawn](#withdrawn)
 
 ## Introduction
 
-[Explainers](https://w3ctag.github.io/explainers) are documents focused on 
-describing a user/ developer/ customer problem (at a high level) and exploring 
-potential solutions. These documents are starting points for engaging in discussion 
-with you and other members of the community. Explainers should address their 
+[Explainers](https://w3ctag.github.io/explainers) are documents focused on
+describing a user/ developer/ customer problem (at a high level) and exploring
+potential solutions. These documents are starting points for engaging in discussion
+with you and other members of the community. Explainers should address their
 stated problems in clear and easy to understand language. Proposed solutions
 should be easy to follow and not too deep in technical details. When you read
-an explainer, we hope the stated problem is compelling and you can form an 
+an explainer, we hope the stated problem is compelling and you can form an
 opinion for whether the proposed solution would address the problem.
 
 ### Please provide feedback
 
-We are looking for feedback! Are the stated problems relevant to you? 
+We are looking for feedback! Are the stated problems relevant to you?
 How have they impacted your experience? Do the proposed solutions seem reasonable?
 Do they follow good [web principles](https://w3ctag.github.io/design-principles/)?
 Would they solve a problem you currently have? (We love to hear that; tell
 us more about your scenario!) Do you have related use-cases we hadn't considered?
 
-We appreciate you taking the time to offer feedback; it helps to improve the 
+We appreciate you taking the time to offer feedback; it helps to improve the
 explainers, validate the problem and solutions they describe, and show evidence
 that there is potential momentum to move an idea to the next stage. We desire
 to see all our explainers make the journey to become cross-browser supported
@@ -32,7 +32,7 @@ web standards.
 
 **[Start a new issue here](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new)**,
 or [join in the discussion](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/)
-on existing issues. We also welcome PRs on the explainer documents themselves. 
+on existing issues. We also welcome PRs on the explainer documents themselves.
 Note: we use labels to filter the issues to specific explainers.
 
 ### Have a product bug?
@@ -50,26 +50,26 @@ These are the proposals we are currently investigating in this repo. Use the
 links below to read the explainers, review the current issues, and file new
 issues specifically for the given explainer(s). We hope they will all "graduate"
 and begin their journey along the standards-track as they gain sufficient interest;
-each explainer has a "status of this document" section that indicates 
+each explainer has a "status of this document" section that indicates
 what standards venue they expect to go to next (if known). When they graduate,
 we move them into the [Alumni section](#alumni-) below.
 
 | Explainer | Issues | Feedback | Group |
 | --------- | ------ | -------- | -------- |
+| [CSS Gap Decorations](CSSGapDecorations/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSGapDecorations">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSSGapDecorations?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kbabbitt&labels=CSSGapDecorations&template=css-gap-decorations.md&title=%5BCSS+Gap+Decorations%5D+%3CTITLE+HERE%3E) | CSS |
 | [Highlight Events](highlight/events-explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HighlightEvents">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/HighlightEvents?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=sanketj&labels=HighlightEvents&template=highlight-events.md&title=%5BHighlight+Events%5D+%3CTITLE+HERE%3E) | Editing |
 | [Pen Events](PenEvents/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Events"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Pen%20Events?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Pen+Events&template=pen-events.md&title=%5BPenEvents%5D+%3CTITLE+HERE%3E) | Editing |
 | [Pen Action](PenAction/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Pen%20Action"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Pen%20Action?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=BoCupp-Microsoft%2C+gked&labels=Pen+Action&template=pen-action.md&title=%5Bpen-action%5D+%3CTITLE+HERE%3E) | Editing |
 | [Delayed Clipboard Rendering](DelayedClipboard/DelayedClipboardRenderingExplainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Delayed%20Clipboard%20Rendering"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Delayed%20Clipboard%20Rendering?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=anaskim&labels=Delayed+Clipboard+Rendering&template=delayed-clipboard-rendering.md&title=%5BDelayed+Clipboard+Rendering%5D+%3CTITLE+HERE%3E) | Editing |
 | [Iframe Media Playback Pause](IframeMediaPause/iframe_media_pausing.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Iframe%20Media%20Playback%20Pause">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Iframe%20Media%20Playback%20Pause?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=gabrielbrito&labels=Iframe+Media+Playback+Pause&title=%5BIframe+Media+Playback+Pause%5D+%3CTITLE+HERE%3E) | HTML |
-| [WritingSuggestions attribute](WritingSuggestions/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/WritingSuggestions">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/WritingSuggestions?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=sajos&labels=WritingSuggestions&template=WritingSuggestions-edit-host.md&title=%5BWritingSuggestions%5D+Issue) | HTML/Editing |
 | [Source Hashes in Stack Traces](DevTools/SourceHash/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Source+hash"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Source+hash?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=robpaveza&labels=Source+hash&title=%5BSource+Hashes%5D+%3CTITLE+HERE%3E) | JavaScript |
+| [Call Stacks in Crash Reports](CrashReporting/AddStackToCrashReports.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Call+stacks+in+crash+reports"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Call%20stacks%20in%20crash%20reports?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=issackjohn&labels=Call+stacks+in+crash+reports&template=call-stacks-in-crash-reports.md&title=%5BCall+Stacks+In+Crash+Reports%5D+%3CTITLE+HERE%3E) | Performance |
 | [PerformanceNavigationTiming User Agent Launch](PerformanceNavigationTiming%20for%20User%20Agent%20Launch/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Perf%20timing%20during%20browser%20start">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Perf%20timing%20during%20browser%20start?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=dylank%2C+hemingzh&labels=Perf+timing+during+browser+start&template=performance-timing-during-browser-start.md&title=%5BPerf+Timing+during+launch%5D+%3CTITLE+HERE%3E) | Performance |
-| [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTiming%20changes%20for%20protocol%20launch/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PerformanceNavigationTiming%20for%20Protocol%20Launch">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PerformanceNavigationTiming%20for%20Protocol%20Launch?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=atulkatti&labels=PerformanceNavigationTiming+for+Protocol+Launch&template=performancenavigationtiming-protocol-launch-timing-information.md&title=) | Performance |
 | [Trust Token Issuer Redemption Statistics](TrustTokenExtensions/IssuerRedemptionStatistics.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Trust%20Token%20Issuer%20Redemption%20Statistics">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Trust%20Token%20Issuer%20Redemption%20Statistics?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=Brandr0id%2C+erik-anderson&labels=Trust+Token+Issuer+Redemption+Statistics&template=trust-token-issuer-redemption-statistics.md&title=%5BTrust+Token+Issuer+Redemption+Statistics%5D+%3CTITLE+HERE%3E) | Privacy |
 | [Browser Binding Context](BindingContext/explainer.md) | <a href=https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Browser%20Binding%20Context%20BPoP> ![Github issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Browser%20Binding%20Context%20BPoP?label=issues)</a> | [New issue....](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=sameerag&labels=Browser+Binding+Context+BPoP&template=browser-binding-context-bpop.md&title=%5Browser+Binding+Context+BPoP%5D+%3CTITLE+HERE%3E) | Privacy |
 | [Acquisition Info](AcquisitionInfo/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Acquisition%20Info"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Acquisition%20Info?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kyerebo&labels=Acquisition+Info&template=acquisition-info.md&title=%5BAcquisition+Info%5D+%3CTITLE+HERE%3E) | PWA |
+| [ApplicationData.LocalFolder Access](LocalFolder/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/LocalFolder%20Access">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/LocalFolder%20Access?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=luhuangMSFT&labels=LocalFolder+Access&template=local-folder-access.md&title=%5BLocalFolder+Access%5D+%3CTITLE+HERE%3E) | PWA |
 | [Document Subtitle](DocumentSubtitle/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Document%20Subtitle">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Document%20Subtitle?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=diekus&labels=Document+Subtitle&template=document-subtitle.md&title=%5BDocument+Subtitle%5D+%3CTITLE+HERE%3E) | PWA |
-| [PointerEvent DeviceId](PointerEventDeviceId) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PointerEventDeviceId">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/PointerEventDeviceId?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=PointerEventDeviceId&template=pointerevent-deviceid.md&title=%5BPointerEvent+Device+ID%5D+%3CTITLE+HERE%3E) | PWA |
 | [Ratings & Reviews Prompt](RatingsAndReviewsPrompt/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Ratings%20and%20Reviews">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Ratings%20and%20Reviews?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=aarongustafson%2C+diekus&labels=Ratings+and+Reviews&template=ratings-and-reviews-prompt.md&title=%5BRatings+and+Reviews+Prompt%5D+%3CTITLE+HERE%3E) | PWA |
 | [URL Protocol Handler Registration for PWAs](URLProtocolHandler/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/URLProtocolHandler">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/URLProtocolHandler?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=fabiorocha%2C+connor-moody%2C+samtan-msft&labels=URLProtocolHandler&template=url-protocol-handler-registration.md&title=%5BURL+Protocol+Handler+Registration%5D+%3CTITLE+HERE%3E) | PWA |
 | [Web Install API](WebInstall/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Web%20Install%20API">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Web%20Install?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=diekus&labels=Web+Install+API&template=web-install-api.md&title=%5BWeb+Install%5D+%3CTITLE+HERE%3E) | PWA |
@@ -77,11 +77,13 @@ we move them into the [Alumni section](#alumni-) below.
 | [Calling Notifications](Notifications/notifications_actions_customization.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Calling%20Notifications">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Calling%20Notifications?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=jungkees%2C+gabrielsanbrito%2C+SteveBeckerMSFT&labels=Calling+Notifications&template=calling-notifications.md&title=%5BCalling+Notifications%5D+%3CTITLE+HERE%3E) | Web Applications |
 | [Web Haptics API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HapticsDevice%20API">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/HapticsDevice%20API?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=bmathwig&labels=HapticsDevice+API&template=hapticsdevice-api.md&title=%5BHapticsDevice%5D+Issue) | Web Applications |
 | [Split Tab Navigation](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/SplitTab/NavigationInSplitTab/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Split%20Tab">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Split%20Tab?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=xuzhengyi1995&labels=Split+Tab&template=split-tab.md&title=%Split+Tab%5D+Issue) | Web Applications |
+| [Set Default Audio Output Device](SetDefaultSinkId/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SetDefaultSinkId"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/SetDefaultSinkId?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kyerebo&labels=SetDefaultSinkId&template=setDefaultSinkId.md&title=%5BSetDefaultSinkId%5D+Issue) | WebRTC |
+| [Handwriting attribute](Handwriting/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Handwriting"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Handwriting?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=adettenb&labels=Handwriting&template=Handwriting.md&title=%5BHandwriting%5D+Issue) | HTML |
 
 
 # Alumni 🎓
 
-Awesome! These explainers have moved on to bigger and better things! We've 
+Awesome! These explainers have moved on to bigger and better things! We've
 archived the original explainers here for posterity and updated their document
 status section to help you find where the latest discussions are happening.
 Please continue to participate and follow the links below to the current
@@ -128,12 +130,15 @@ standards communities. Thanks for your continued interest!
 |[Storage Access API](https://github.com/privacycg/storage-access)|[W3C Privacy Community Group](https://privacycg.github.io/)|[2023-07-17](StorageAccessAPI/explainer.md)|
 |[Primitives for Enlightened Experiences on Foldable Devices (CSS parts)](https://github.com/WICG/visual-viewport/blob/gh-pages/segments-explainer/SEGMENTS-EXPLAINER.md)|[Web Incubator Community Group](https://wicg.io/)|[2023-07-17](Foldables/explainer.md)|
 | [Exporting IDs from shadow roots for cross-root ARIA](https://github.com/WICG/aom/blob/gh-pages/exportid-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2023-09-22 |
+| [writingsuggestions attribute](https://html.spec.whatwg.org/#writing-suggestions) | [WHATWG](https://whatwg.org/) | [2024-03-12](WritingSuggestions/explainer.md)
+| [PointerEvent DeviceId](https://github.com/WICG/pointer-event-extensions/blob/main/pointer-event-device-id-explainer.md) | [W3C Web Incubator Community Group](https://wicg.io/) | [2024-01-11](PointerEventDeviceId/explainer.md) |
+| [Gamepad Trigger Rumble](https://w3c.github.io/gamepad/#dom-gamepadhapticactuator) | [W3C Web Applications Working Group](https://www.w3.org/groups/wg/webapps/) | [2024-04-10](GamepadHapticsActuatorTriggerRumble/explainer.md) |
 
 
 # DevTools 🧰
 
 ⭐Our DevTools explainers have moved to
-[their own repo](https://github.com/MicrosoftEdge/DevTools/tree/main/explainers) for improved tracking 
+[their own repo](https://github.com/MicrosoftEdge/DevTools/tree/main/explainers) for improved tracking
 and update frequency!⭐
 
 For explainers that were hosted in this repo, an achived copy remains here, and the related explainers
@@ -159,7 +164,7 @@ link to their new location.
 
 # Other Documents
 
-A collection of explainers documenting platform enhancements (not web 
+A collection of explainers documenting platform enhancements (not web
 developer-facing features), implementation designs, and other public documents
 related to the construction of Microsoft Edge.
 
@@ -225,6 +230,8 @@ We'd love to hear your feedback!
 | [Time-limited Permissions](TimeLimitedPermissions/Explainer.md) | | 2023-07-17 |
 | [Cache API Response Metadata](CacheAPIResponseMetadata/explainer.md) | | 2023-07-17 |
 | [First Run Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | | 2023-07-17 |
-| [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) | This specification has since been superceded by the Web Haptics or HapticsDevice API | 2023-07-17 |
 | [Version History](VersionHistory/explainer.md) | | 2023-07-17 |
 | [Confirmation of Action](Accessibility/ConfimrationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)| 2023-11-13 |
+| [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTimingProtocolLaunchExtensions/explainer.md) | | 2024-04-22 |
+
+
