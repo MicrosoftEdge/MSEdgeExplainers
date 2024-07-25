@@ -131,7 +131,8 @@ standards communities. Thanks for your continued interest!
 |[Primitives for Enlightened Experiences on Foldable Devices (CSS parts)](https://github.com/WICG/visual-viewport/blob/gh-pages/segments-explainer/SEGMENTS-EXPLAINER.md)|[Web Incubator Community Group](https://wicg.io/)|[2023-07-17](Foldables/explainer.md)|
 | [Exporting IDs from shadow roots for cross-root ARIA](https://github.com/WICG/aom/blob/gh-pages/exportid-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2023-09-22 |
 | [writingsuggestions attribute](https://html.spec.whatwg.org/#writing-suggestions) | [WHATWG](https://whatwg.org/) | [2024-03-12](WritingSuggestions/explainer.md)
-| [PointerEvent DeviceId](https://github.com/WICG/pointer-event-extensions/blob/main/pointer-event-device-id-explainer.md) | [W3C Web Incubator Community Group](https://wicg.io/) | [2024-01-11](PointerEventDeviceId/explainer.md)
+| [PointerEvent DeviceId](https://github.com/WICG/pointer-event-extensions/blob/main/pointer-event-device-id-explainer.md) | [W3C Web Incubator Community Group](https://wicg.io/) | [2024-01-11](PointerEventDeviceId/explainer.md) |
+| [Gamepad Trigger Rumble](https://w3c.github.io/gamepad/#dom-gamepadhapticactuator) | [W3C Web Applications Working Group](https://www.w3.org/groups/wg/webapps/) | [2024-04-10](GamepadHapticsActuatorTriggerRumble/explainer.md) |
 
 
 # DevTools 🧰
@@ -229,7 +230,6 @@ We'd love to hear your feedback!
 | [Time-limited Permissions](TimeLimitedPermissions/Explainer.md) | | 2023-07-17 |
 | [Cache API Response Metadata](CacheAPIResponseMetadata/explainer.md) | | 2023-07-17 |
 | [First Run Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | | 2023-07-17 |
-| [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) | This specification has since been superceded by the Web Haptics or HapticsDevice API | 2023-07-17 |
 | [Version History](VersionHistory/explainer.md) | | 2023-07-17 |
 | [Confirmation of Action](Accessibility/ConfimrationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)| 2023-11-13 |
 | [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTimingProtocolLaunchExtensions/explainer.md) | | 2024-04-22 |
