@@ -1,8 +1,14 @@
 {
   "active": [
     {
+      "label": "Call stacks in crash reports",
+      "expiration": "2025-03-18",
+      "repo": "WICG/crash-reporting",
+      "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/CrashReporting/AddStackToCrashReports.md"
+    },
+    {
       "label": "Capture all screens",
-      "expiration": "2024-10-29",
+      "expiration": "2025-02-17",
       "repo": "screen-share/capture-all-screens",
       "explainer": "https://github.com/screen-share/capture-all-screens"
     },
@@ -37,6 +43,18 @@
       "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/DocumentSubtitle/explainer.md"
     },
     {
+      "label": "Digital Credentials API",
+      "expiration": "2025-04-15",
+      "repo": "WICG/digital-credentials",
+      "explainer": "https://wicg.github.io/digital-credentials"
+    },
+    {
+      "label": "DisableStandardizedBrowserZoom",
+      "expiration": "2025-04-15",
+      "repo": "w3c/csswg-drafts",
+      "explainer": "https://github.com/w3c/csswg-drafts/pull/9699"
+    },
+    {
       "label": "DisableThirdPartySessionStoragePartitioningAfterGeneralPartitioning",
       "expiration": "2024-09-03",
       "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_dd2p0f6kgIwZ9D8",
@@ -61,6 +79,12 @@
       "explainer": "https://github.com/screen-share/element-capture/blob/main/README.md"
     },
     {
+      "label": "Explicit Compile Hints with Magic Comments",
+      "expiration": "2025-02-17",
+      "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_9SLyOGnTj2cwo0C",
+      "explainer": "https://docs.google.com/document/d/19xTAM4A75tz0xUq_velMzGA4JHEgXpyflUxXTcuNiyE/edit?usp=sharing"
+    },
+    {
       "label": "FedCM as a trust signal for the Storage Access API",
       "expiration": "2024-10-01",
       "repo": "explainers-by-googlers/storage-access-for-fedcm",
@@ -68,7 +92,7 @@
     },
     {
       "label": "FedCM Button Mode API",
-      "expiration": "2024-10-01",
+      "expiration": "2025-01-13",
       "feedbackLink": "https://issues.chromium.org/issues/new?component=1456331&template=1937104",
       "explainer": "https://github.com/yi-gu/FedCM/blob/main/explorations/HOWTO-chrome.md#button-flow"
     },
@@ -77,6 +101,12 @@
       "expiration": "2024-12-03",
       "repo": "fedidcg/FedCM",
       "explainer": "https://github.com/fedidcg/FedCM/blob/main/explorations/HOWTO-chrome.md#continuation-api"
+    },
+    {
+      "label": "FedCM Multiple Identity Providers",
+      "expiration": "2025-03-18",
+      "repo": "fedidcg/FedCM",
+      "explainer": "https://github.com/fedidcg/FedCM/issues/319#issuecomment-1270753874"
     },
     {
       "label": "FetchLater API",
@@ -128,7 +158,7 @@
     },
     {
       "label": "Protected Audience Bidding & Auction Services",
-      "expiration": "2024-10-01",
+      "expiration": "2025-01-13",
       "repo": "WICG/turtledove",
       "explainer": "https://github.com/WICG/turtledove/blob/main/FLEDGE_browser_bidding_and_auction_API.md"
     },
@@ -176,9 +206,15 @@
     },
     {
       "label": "WebAssembly JS String Builtins",
-      "expiration": "2024-10-01",
+      "expiration": "2025-01-13",
       "repo": "WebAssembly/js-string-builtins",
       "explainer": "https://github.com/WebAssembly/js-string-builtins/blob/main/proposals/js-string-builtins/Overview.md"
+    },
+    {
+      "label": "WebGPU Subgroups Features",
+      "expiration": "2025-02-18",
+      "feedbackLink": "https://crbug.com/tint",
+      "explainer": "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md"
     },
     {
       "label": "X-Requested-With in WebView Deprecation",
