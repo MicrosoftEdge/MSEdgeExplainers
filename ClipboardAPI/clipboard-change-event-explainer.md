@@ -65,9 +65,21 @@ Apps like Excel online, may support paste operation in multiple formats. Within 
 The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI immediately. 
 
 ### 2.3 Scenario: Excel online - wait for long copy operation   
-Excel online may perform some network calls on user copy operations. The data retrieved from the network calls can be written to clipboard. If a paste operation is invoked
-before the network call completes, it will have to wait for the copy network call to complete. The completion of all post copy user operations can be notified using the clipboard change event if the copy and paste
-both happen in separate documents. However, the page focus constraints in the async clipboard API might cause issues when writing to clipboard from an inactive document.
+
+Excel online may perform some network calls on user copy operations e.g. when user copies a range of data which is not fully loaded on the client, say by "selecting all" rows in a document. The data retrieved from the network calls will eventually be written to the clipboard. If a paste operation is invoked in another document before the network call completes, the app would want to wait for the copy network call to complete before pasting. This completion of network calls can be notified to the pasting document using the clipboard change event, especially when the copy and paste both happen in separate documents. 
+
+![Excel online scenario](image-3.png)
+1. User selects a large range of data in Excel Online and triggers a copy to clipboard.
+2. Excel Online initiates network calls to fetch the data.
+3. User switches to a different document
+4. User tries to paste the data into that document before the network call completes.
+5. The paste operation waits for the network call to complete.
+6. On network call completion, the fetched data is written to the clipboard.
+7. Clipboard change event notifies the pasting document when the data is ready.
+8. Data is finally pasted in the document
+
+
+However, the page focus constraints in the async clipboard API will cause issues when writing to clipboard from an inactive document.
 
 ### 2.4 Alternative to inefficient polling of clipboard
 Today, a web-app can still monitor the system clipboard by polling and reading the clipboard through async clipboard API at regular intervals. 
@@ -80,8 +92,10 @@ We should still monitor the clipboard only when absolutely required - i.e. there
 ```javascript
   function callback(event) {
       // Read clipboard contents using navigator.clipboard
+      navigator.clipboard.readText().then(text => console.log(text));
   }
 
+  // Add event listener for clipboard change
   navigator.clipboard.addEventListener("clipboardchange", callback);
 ```
 
@@ -89,30 +103,29 @@ We should still monitor the clipboard only when absolutely required - i.e. there
 
 ### 4.1 User permission requirement
 
-#### Option 1: clipboard-read permission required
-Since clipboard is a privacy sensitive data, we should protect the access to clipboard change event using a user permission - clipboard-read.
-The web author should ensure that the site has the permission before it starts listening to this event.
-We should consider logging a warning message in case the web author starts listening to clipboardchange without acquiring the permissions since web developers might miss taking the permissions flow into their user experience.
+#### 4.1.1 Option A: clipboard-read permission required
+Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read. The web author should ensure that the site has the permission before it starts listening to this event. We should consider logging a warning message if the web author starts listening to clipboardchange without acquiring the permissions since web developers might miss integrating the permissions flow into their user experience.
 
 ##### Pros:
 1. More defensive approach, guards against potential misuse of clipboard change event
+2. Ensures user consent before accessing clipboard data.
 
 ##### Cons:
 1. Not a clear user flow for requesting permissions.
 2. Additional complexity for both implementation and web authors.
 
-#### Option 2: No permission required
-Since there is no data being sent as part of clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents got changed.
-This will simply user flow as they don't need to explicitly ask for permissions before listening to the event.
+#### 4.1.2 Option B: No permission required
+Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event.
 
 ##### Pros:
 1. Simpler implementation and user experience
 
 ##### Cons:
-1. Open to privacy attacks which simply 
+1. Open to privacy attacks which simply monitor clipboard changes without user consent.
+2. May violate privacy regulations in certain jurisdictions.
 
 ### 4.2 Page focus requirement
-As per the current spec, we should not fire "clipboardchange" event when a page is not is focus. This is in-line with the current behavior where async clipboard API is not accessible unless the given page is in focus. However, a web-author would be interested to know if the clipboard got changed when the page regains focus. Hence, for the duration when a page was out of focus, if the browser recorded any clipboard change activity, then upon regaining focus to that page, we fire a single clipboard change event. Since this is a collapsible event, we need to fire a single event incase there were multiple clipboard change events recorded when the page was out of focus.
+As per the current spec, we should not fire "clipboardchange" event when a page is not is focus. This is in-line with the current behavior where async clipboard API is not accessible unless the given page is in focus. We do fire the event when a page regains focus. (incase the clipboard contents changed meanwhile)
 
 #### Option 1: Page required to be in focus to receive event
 
@@ -123,24 +136,26 @@ As per the current spec, we should not fire "clipboardchange" event when a page 
 
 ##### Cons:
 1. Might restrict web app scenarios which need to listen to clipboardchange events in the background.
+2. Could result in a less responsive user experience if clipboard changes are detected with a delay.
 
 
 #### Option 2: No focus requirement
 
 ##### Pros:
-1. Opens possibility to more user scenarios (TODO - find examples) 
+1. Opens possibility for more user scenarios (TODO - find examples) 
 
 ##### Cons:
 1. Might be open to misuse (TODO - find examples)
-2. Not much useful since reading the clipboard through async clipboard API would require page focus anyways.
+2. Not much useful unless page focus requirement is removed from the async read/write clipboard API.
+3. Could lead to higher resource consumption due to continuous monitoring.
 
 ### 4.3 Event bound to 
 Window - Since this is a system level event
 
-### 4.4 Event bubbles?  
+### 4.4 Event bubbles
 No since it is bound to document only
 
-### 4.5 Event actions?
+### 4.5 Event actions
 None - this event simply communicates with a web app that the system clipboard got changed. Hence performing “preventDefault” for this event has no effect.
 
 ### 4.6 Event handler additional arguments 
@@ -152,20 +167,28 @@ None - it is expected that the web app calls Async API to read the clipboard and
 
 ##### Pros:
 1. Listening to change from a single source of truth, will cover all cases
+2. Immediate detection of clipboard changes, providing real-time updates.
+3. Simplifies the logic for detecting changes, as it relies on the OS's native capabilities.
 
 ##### Cons:
-1. Might need polling for some OS
+1. Might need polling for some OS like MacOS
+2. Increased complexity in handling different OS-specific APIs.
+3. Potential security concerns with direct OS-level access.
+4. Higher resource consumption due to continuous monitoring in case of polling.
 
 
 ### 5.2 Design choice 2: With page focus restrictions, check clipboard hash change on regain focus event
 
 ##### Pros:
 1. Less dependency on OS level APIs, no need for polling on problematic OS like MacOS
+2. Reduces the need for continuous monitoring, saving system resources.
+3. Simplifies cross-platform implementation by relying on browser events.
 
 ##### Cons:
 1. In case system clipboard is changed in background from a native app, then we won't know about it until next focus.
 2. Page focus event can happen frequently, checking clipboard hash/sequence number might have perf impact
 3. Dependency on page focus requirement, if changed in future, complete re-implementation would be required.
+4. Increased complexity in handling edge cases where focus changes rapidly.
 
 
 ## 6 References & acknowledgements
