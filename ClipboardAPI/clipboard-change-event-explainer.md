@@ -39,9 +39,14 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
   - [4.6 Event handler additional arguments](#46-event-handler-additional-arguments)
 - [5. Detailed design discussion](#5-detailed-design-discussion)
   - [5.1 Listen to clipboard change directly from the OS](#51-listen-to-clipboard-change-directly-from-the-os)
-    - [5.1.1 APIs provided by all OS to listen to clipboardchange event:](#511-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
       - [Pros:](#pros-1)
       - [Cons:](#cons-1)
+    - [5.1.1 APIs provided by all OS to listen to clipboardchange event:](#511-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
+      - [Windows](#windows)
+      - [MacOS](#macos)
+      - [Linux X11/Wayland](#linux-x11wayland)
+      - [Android / iOS](#android--ios)
+      - [ChromeOS](#chromeos)
   - [5.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus](#52-considered-alternative-given-the-page-focus-restrictions-check-clipboard-hash-change-when-page-regains-focus)
       - [Pros:](#pros-2)
       - [Cons:](#cons-2)
@@ -160,13 +165,6 @@ To optimize system resource consumption, we can ensure to only listen to the OS 
 High level design doc available [here](https://docs.google.com/document/d/1bY2pzV6PSX56fiFcrXEgOjpFen07xaxmnsM5dqXFE1U/edit#heading=h.i1vomwqlf6kt)
 
 
-#### 5.1.1 APIs provided by all OS to listen to clipboardchange event:
-Windows: We can use the [AddClipboardFormatListener](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-addclipboardformatlistener) function (winuser.h) which posts a [WM_CLIPBOARDUPDATE](https://learn.microsoft.com/en-us/windows/win32/dataxchg/wm-clipboardupdate) message whenever the clipboard changes. 
-MacOS: No API provided, need to poll OS clipboard for changes
-Linux X11/Wayland: TODO
-Android / iOS: TODO
-ChromeOS: TODO
-
 ##### Pros:
 1. Listening to change from a single source of truth, will cover all cases
 2. Immediate detection of clipboard changes, providing real-time updates.
@@ -176,6 +174,18 @@ ChromeOS: TODO
 1. Might need polling for some OS like MacOS
 2. Higher resource consumption due to continuous monitoring in case of polling.
 
+#### 5.1.1 APIs provided by all OS to listen to clipboardchange event:
+
+##### Windows 
+We can use the [AddClipboardFormatListener](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-addclipboardformatlistener) function (winuser.h) which posts a [WM_CLIPBOARDUPDATE](https://learn.microsoft.com/en-us/windows/win32/dataxchg/wm-clipboardupdate) message whenever the clipboard changes. 
+##### MacOS 
+No API provided, need to poll OS clipboard for changes
+##### Linux X11/Wayland
+TODO
+##### Android / iOS
+TODO
+##### ChromeOS
+TODO
 
 ### 5.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus
 On page focus event, we can check the current hash of the clipboard (using SequenceNumber API, readily available for all OS) and compare it with the previously stored hash to infer if the clipboard changed. This is an alternative to directly using OS provided APIs for monitoring clipboard. For clipboard changes occurring within the browser, we can easily obtain the clipboard change event from the renderer process.
