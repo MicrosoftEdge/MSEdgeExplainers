@@ -77,6 +77,18 @@ Upon detecting the change, the application can automatically send the new clipbo
 ### 2.2 Scenario: Show available paste formats in web based editors
 Web based editors like Excel Online, Word Online may support paste operation in multiple formats. Within the UI, it may show the available formats on the UI (like csv, image, plain text). The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed. 
 
+#### 2.2.1 Copy multiple cells in a spreadsheet
+![alt text](copy-cells.png)
+#### 2.2.2 Expected - Multiple paste options available
+![alt text](multi-formats-true.png)
+#### 2.2.3 Copy plain text from Notepad
+![alt text](copy-plain-notepad.png)
+#### 2.2.4 Expected - Only single paste format available
+![alt text](single-format-true.png)
+#### 2.2.5 Actual - Multiple paste formats available
+Without monitoring clipboard, the web app can't update the available paste formats on the UI.
+![alt text](multi-format-false.png)
+
 Similarly UI elements which depend on clipboard state, like "Paste image from clipboard" in an web based image editor, can be enabled/disabled using the clipboardchange event based on weather correct data format is present in clipboard or not.
 
 ## 3. Motivation - Alternative to inefficient polling of clipboard
