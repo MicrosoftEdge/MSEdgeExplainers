@@ -120,9 +120,7 @@ Additionally we must ensure that we monitor the clipboard only when absolutely r
 #### 5.1.1 Approach 1 - clipboard-read permission required to listen to clipboardchange event
 Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read. The web author should ensure that the site has the permission before it starts listening to this event otherwise the provided event handler won't be invoked whenever the clipboard changes. We should consider logging a warning message if the web author starts listening to clipboardchange without acquiring the permissions since web developers might miss integrating the permissions flow into their user experience.
 
-Users can request permissions in two ways:
-1. By performing a read operation like read or readText using Async clipboard API.
-2. By explicitly requesting "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158)
+Users can request permissions in two ways - 1) By performing a read operation like read or readText using Async clipboard API. 2) By explicitly requesting "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158)
 
 ##### Pros
 1. More defensive approach, guards against potential misuse of clipboard change event.
@@ -134,7 +132,7 @@ Users can request permissions in two ways:
 
 To simply further, we can prompt user for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners.
 
-#### 5.1.2 Approach 2 - Considered alternative: No permission required
+#### 5.1.2 Approach 2 - No permission required
 Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event.
 
 ##### Pros
@@ -210,9 +208,10 @@ High level design doc available [here](https://docs.google.com/document/d/1bY2pz
 | Android / iOS | TBD                                                                                                                                                                                                                                                                                                                         |
 
 ### 6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus
-On page focus event, we can check the current hash of the clipboard (using [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber)) and compare it with the previously stored hash to infer if the clipboard changed. This is an alternative to directly using OS provided APIs for monitoring clipboard. For clipboard changes occurring within the browser, we can easily obtain the clipboard change event from the renderer process.
+On page focus event, we can check the current hash of the clipboard (using a [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber)) and compare it with the previously stored hash to infer if the clipboard changed. This is an alternative to directly using OS provided APIs for monitoring clipboard. For clipboard changes occurring within the browser, we can easily obtain the clipboard change event from the renderer process.
 
-However, this approach will not cover all scenarios as discussed below:
+#### 6.2.1 Platform support for getting clipboard SequenceNumber/Version number
+For Mac and Windows, sequence number is represented by a system-provided signature of the clipboard and on ChromeOS, Linux and Android, a new number is generated every time the system clipboard changes. Chromium already has an [internal cross-platform implementation to retrieve clipboard sequence number](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/clipboard/clipboard.h;drc=3c3f08441ba5bf5d49fbdb51410b28e54c4753fb;l=154).
 
 ##### Pros:
 1. Less dependency on OS level APIs, no need for polling where OS level API for clipboard change event is not provided.
@@ -220,9 +219,9 @@ However, this approach will not cover all scenarios as discussed below:
 3. Simplifies cross-platform implementation by relying on browser events.
 
 ##### Cons:
-1. In case system clipboard is changed in background from a native app, then we won't know about it until next focus.
-2. Page focus event can happen frequently, checking clipboard hash/sequence number might have perf impact.
-3. Dependency on page focus requirement - if we remove the page focus requirement in future, then we would need to fallback to using OS APIs for getting clipboard change event leading to some re-implementation.
+1. In case system clipboard is changed in background from a native app, then the web app won't know about it until the next page focus action.
+2. Page focus event can happen frequently, checking clipboard hash/sequence number might have perf impact even though checking the sequence number should be a constant time operation. Accurate performance analysis of this approach is a TODO.
+3. Dependency on page focus requirement - if we remove the page focus requirement in future, then we would need to re-implement a different design for monitoring system clipboard. Hence during the implementation, we need to ensure that the OS clipboard change detection module is decoupled from the rest of the modules.
 
 ## 7. References & acknowledgements
 
