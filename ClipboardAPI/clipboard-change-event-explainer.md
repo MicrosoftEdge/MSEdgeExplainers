@@ -60,17 +60,17 @@ The clipboardchange event fires whenever the system clipboard contents are chang
 ### 2.1 Scenario: Sync clipboard with a remote desktop
 When a user copies text or an image on their local machine, the web-based remote desktop application can detect this clipboard change event through the browser's Clipboard API. Upon detecting the change, the application can automatically send the new clipboard content to the remote desktop environment.
 
-![](sync-clipboard-scenario.png)
+![](img/sync-clipboard-scenario.png)
 
 
 ### 2.2 Scenario: Show available paste formats in web based editors
 Web based editors like Excel Online, Word Online may support paste operation in multiple formats. Within the UI, it may show the available formats like csv, image or plain text. The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed. 
 
 #### 2.2.1 Copy multiple cells in a spreadsheet should show multiple paste options
-![](paste-format-1.png)
+![](img/paste-format-1.png)
 
 #### 2.2.2 Copy plain text should show only single paste option
-![](paste-format-2.png)
+![](img/paste-format-2.png)
 
 Similarly UI elements which depend on clipboard state, like "Paste image from clipboard" in an web based image editor, can be enabled/disabled using the clipboardchange event based on weather correct data format is present in clipboard or not.
 
