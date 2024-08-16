@@ -127,11 +127,11 @@ As per the [current spec](https://www.w3.org/TR/clipboard-apis/#clipboard-event-
 #### 5.2.1 Approach 1 - Page required to be in focus to receive event
 
 ##### Pros
-1. More defensive and prevents background scripts from misuse of clipboardchange events.
-  1.a) Example - Malicious scripts can detect when a cryptocurrency wallet address is copied to clipboard and replace it with attacker's address and that way redirect payment to attacker's account.  
-  1.b) Example - Passwords / authentication keys / access tokens are frequently copied to clipboard and can be retrieved by malicious scripts reading clipboard in background.
-2. Can simplify implementation since browsers can simply check for clipboard change on page focus. However, this needs to be further investigated.
-3. This is in-line with current async clipboard focus APIs which require focus to access.
+1. More defensive and prevents background scripts from misuse of clipboardchange events.\
+1.a) Example - Malicious scripts can detect when a cryptocurrency wallet address is copied to clipboard and replace it with attacker's address and that way redirect payment to attacker's account.  
+1.b) Example - Passwords / authentication keys / access tokens are frequently copied to clipboard and can be retrieved by malicious scripts reading clipboard in background.
+3. Can simplify implementation since browsers can simply check for clipboard change on page focus. However, this needs to be further investigated.
+4. This is in-line with current async clipboard focus APIs which require focus to access.
 
 ##### Cons
 1. Might restrict web app scenarios which need to listen to clipboardchange events in the background.
