@@ -12,20 +12,12 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [1. Introduction](#1-introduction)
 - [2. User scenarios](#2-user-scenarios)
   - [2.1 Scenario: Sync clipboard with a remote desktop](#21-scenario-sync-clipboard-with-a-remote-desktop)
-    - [2.1.1 User copies text from any app within their local machine](#211-user-copies-text-from-any-app-within-their-local-machine)
-    - [2.1.2 Using the remote desktop client web app, the user performs a paste operation within the remote desktop OS](#212-using-the-remote-desktop-client-web-app-the-user-performs-a-paste-operation-within-the-remote-desktop-os)
-    - [2.1.3 With clipboard monitoring (using clipboardchange event or polling), the local machine's clipboard content is pasted](#213-with-clipboard-monitoring-using-clipboardchange-event-or-polling-the-local-machines-clipboard-content-is-pasted)
-    - [2.1.4 Without clipboard monitoring, the remote desktop's clipboard content is pasted](#214-without-clipboard-monitoring-the-remote-desktops-clipboard-content-is-pasted)
   - [2.2 Scenario: Show available paste formats in web based editors](#22-scenario-show-available-paste-formats-in-web-based-editors)
-    - [2.2.1 Copy multiple cells in a spreadsheet](#221-copy-multiple-cells-in-a-spreadsheet)
-    - [2.2.2 Expected - Multiple paste options available](#222-expected---multiple-paste-options-available)
-    - [2.2.3 Copy plain text from Notepad](#223-copy-plain-text-from-notepad)
-    - [2.2.4 Expected - Only single paste format available](#224-expected---only-single-paste-format-available)
-    - [2.2.5 Actual - Multiple paste formats available](#225-actual---multiple-paste-formats-available)
+    - [2.2.1 Copy multiple cells in a spreadsheet should show multiple paste options](#221-copy-multiple-cells-in-a-spreadsheet-should-show-multiple-paste-options)
+    - [2.2.2 Copy plain text should show only single paste option](#222-copy-plain-text-should-show-only-single-paste-option)
 - [3. Motivation - Alternative to inefficient polling of clipboard](#3-motivation---alternative-to-inefficient-polling-of-clipboard)
 - [4. Example javascript code for detecting clipboard changes:](#4-example-javascript-code-for-detecting-clipboard-changes)
 - [5. Event spec details and open questions](#5-event-spec-details-and-open-questions)
@@ -33,7 +25,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
     - [5.1.1 Approach 1 - clipboard-read permission required to listen to clipboardchange event](#511-approach-1---clipboard-read-permission-required-to-listen-to-clipboardchange-event)
       - [Pros](#pros)
       - [Cons](#cons)
-    - [5.1.2 Approach 2 - Considered alternative: No permission required](#512-approach-2---considered-alternative-no-permission-required)
+    - [5.1.2 Approach 2 - No permission required](#512-approach-2---no-permission-required)
       - [Pros](#pros-1)
       - [Cons](#cons-1)
     - [5.1.3 Conclusion](#513-conclusion)
@@ -52,6 +44,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
       - [Cons:](#cons-1)
     - [6.1.1 APIs provided by all OS to listen to clipboardchange event:](#611-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
   - [6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus](#62-considered-alternative-given-the-page-focus-restrictions-check-clipboard-hash-change-when-page-regains-focus)
+    - [6.2.1 Platform support for getting clipboard SequenceNumber/Version number](#621-platform-support-for-getting-clipboard-sequencenumberversion-number)
       - [Pros:](#pros-2)
       - [Cons:](#cons-2)
 - [7. References & acknowledgements](#7-references--acknowledgements)
@@ -65,35 +58,19 @@ The clipboardchange event fires whenever the system clipboard contents are chang
 ## 2. User scenarios
 
 ### 2.1 Scenario: Sync clipboard with a remote desktop
-When a user copies text or an image on their local machine, the web-based remote desktop application can detect this clipboard change event through the browser's Clipboard API.
-Upon detecting the change, the application can automatically send the new clipboard content to the remote desktop environment.
+When a user copies text or an image on their local machine, the web-based remote desktop application can detect this clipboard change event through the browser's Clipboard API. Upon detecting the change, the application can automatically send the new clipboard content to the remote desktop environment.
 
-#### 2.1.1 User copies text from any app within their local machine
-![alt text](text_copy.png)
+![](sync-clipboard-scenario.png)
 
-#### 2.1.2 Using the remote desktop client web app, the user performs a paste operation within the remote desktop OS
-![alt text](paste-initiate.png)
-
-#### 2.1.3 With clipboard monitoring (using clipboardchange event or polling), the local machine's clipboard content is pasted
-![alt text](paste-correct.png)
-
-#### 2.1.4 Without clipboard monitoring, the remote desktop's clipboard content is pasted
-![alt text](paste-incorrect.png)
 
 ### 2.2 Scenario: Show available paste formats in web based editors
-Web based editors like Excel Online, Word Online may support paste operation in multiple formats. Within the UI, it may show the available formats on the UI (like csv, image, plain text). The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed. 
+Web based editors like Excel Online, Word Online may support paste operation in multiple formats. Within the UI, it may show the available formats like csv, image or plain text. The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed. 
 
-#### 2.2.1 Copy multiple cells in a spreadsheet
-![alt text](copy-cells.png)
-#### 2.2.2 Expected - Multiple paste options available
-![alt text](multi-formats-true.png)
-#### 2.2.3 Copy plain text from Notepad
-![alt text](copy-plain-notepad.png)
-#### 2.2.4 Expected - Only single paste format available
-![alt text](single-format-true.png)
-#### 2.2.5 Actual - Multiple paste formats available
-Without monitoring clipboard, the web app can't update the available paste formats on the UI.
-![alt text](multi-format-false.png)
+#### 2.2.1 Copy multiple cells in a spreadsheet should show multiple paste options
+![](paste-format-1.png)
+
+#### 2.2.2 Copy plain text should show only single paste option
+![](paste-format-2.png)
 
 Similarly UI elements which depend on clipboard state, like "Paste image from clipboard" in an web based image editor, can be enabled/disabled using the clipboardchange event based on weather correct data format is present in clipboard or not.
 
