@@ -9,9 +9,9 @@ Previous authors: [Ben Mathwig](https://github.com/bmathwig)
 
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-* This document status: **Active**
-* Expected venue: [WHATWG](https://whatwg.org/)
-* Current version: [Link](#)
+* This document status: **ARCHIVED**
+* Current venue: [WHATWG](https://whatwg.org/) | [whatwg/html](https://github.com/whatwg/html)
+* Current version: [writingsuggestions attribute](https://html.spec.whatwg.org/#writing-suggestions)
 
 ## Introduction
 UAs are starting to provide writing suggestions to users as they type on various editable fields across the web (see the [use case](#use-case) section below). While this is
