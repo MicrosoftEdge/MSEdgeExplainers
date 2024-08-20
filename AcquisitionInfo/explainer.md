@@ -225,7 +225,7 @@ if ('install' in navigator) {
     installVersion: "1.0.0.0"
   };
   // Web install with additional attribution information
-  const appInstalled = await navigator.install("foo.com", {"referral-info": referralInfo});
+  const appInstalled = await navigator.install("https://www.foo.com/app", "https://www.foo.com/install_url", {"referral-info": referralInfo});
 }
 ```
 
@@ -264,6 +264,32 @@ When PWAs are synced across devices for the same user, the UA may make it easier
 the acquisition information that is recorded for the originally acquired application should be maintained to be the same for all
 other installations. This applies to any and all other installation for the same user profile across any other device supported
 by the UA.
+
+For example, a user may discover App A through an ad campaign run on the Microsoft Store. The user proceeds to install App A on
+Device A. Running `getDetails()` from the newly acquired app would return the following:
+
+```js
+details = {
+  installSource: "apps.microsoft.com",
+  attributionId: "adCampaign",
+  ...
+} 
+```
+
+The same user logs in on Device B and logs into the profile that installed App A on Device A. Sync would install App A once again
+but on Device B, at which point the `getDetails()` payload would return the following:
+
+```js
+details = {
+  installSource: "Sync",
+  attributionId: "adCampaign",
+  ...
+} 
+```
+
+While the `installSource` changes to correctly reflect the app's new install source, the `attributionId` stays the same. This
+ensures that we are able to accurately track which users were impacted by which acquisition campaigns even across devices where
+synced applications are installed.
 
 ## Considered Alternatives
 
