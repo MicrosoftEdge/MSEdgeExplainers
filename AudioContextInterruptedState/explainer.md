@@ -2,8 +2,8 @@
 
 ## Authors:
 
-- Gabriel Santana Brito
-- Steve Becker
+- [Gabriel Santana Brito](https://github.com/gabrielsanbrito)
+- [Steve Becker](https://github.com/SteveBeckerMSFT)
 
 ## Participate
 - https://github.com/WebAudio/web-audio-api/issues/2392
