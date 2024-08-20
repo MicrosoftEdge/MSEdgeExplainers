@@ -1,4 +1,4 @@
-# Clipboardchange event explainer document
+# clipboardchange event API explainer
 
 ## Authors:
 - Rohan Raja (roraja@microsoft.com)
@@ -18,6 +18,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
   - [2.2 Scenario: Show available paste formats in web based editors](#22-scenario-show-available-paste-formats-in-web-based-editors)
     - [2.2.1 Copy multiple cells in a spreadsheet should show multiple paste options](#221-copy-multiple-cells-in-a-spreadsheet-should-show-multiple-paste-options)
     - [2.2.2 Copy plain text should show only single paste option](#222-copy-plain-text-should-show-only-single-paste-option)
+    - [2.2.3 Multiple paste options in Google sheets](#223-multiple-paste-options-in-google-sheets)
 - [3. Motivation - Alternative to inefficient polling of clipboard](#3-motivation---alternative-to-inefficient-polling-of-clipboard)
 - [4. Example javascript code for detecting clipboard changes:](#4-example-javascript-code-for-detecting-clipboard-changes)
 - [5. Event spec details and open questions](#5-event-spec-details-and-open-questions)
@@ -53,12 +54,12 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 
 ## 1. Introduction
 
-The clipboardchange event fires whenever the system clipboard contents are changed. This allows web-apps like remote desktop clients to stay in sync with the system clipboard. It provides an efficient alternative to polling the clipboard for changes.
+The clipboardchange event fires whenever the system clipboard contents are changed. This allows web-apps like remote desktop clients to be notified and respond to changes to the system clipboard. It provides an efficient alternative to polling the clipboard for changes.
 
 ## 2. User scenarios
 
 ### 2.1 Scenario: Sync clipboard with a remote desktop
-When a user copies text or an image on their local machine, the web-based remote desktop application can detect this clipboard change event through the browser's Clipboard API. Upon detecting the change, the application can automatically send the new clipboard content to the remote desktop environment.
+When a user copies text or an image on their local machine, the web-based remote desktop application can detect that clipboard contents have changed by listening for the `clipboardchange` event. Upon detecting the change, the application can re-read the clipboard and send the updated clipboard content to the remote desktop environment.
 
 ![](img/sync-clipboard-scenario.png)
 
@@ -71,6 +72,9 @@ Web based editors like Excel Online, Word Online may support paste operation in 
 
 #### 2.2.2 Copy plain text should show only single paste option
 ![](img/paste-format-2.png)
+
+#### 2.2.3 Multiple paste options in Google sheets
+![](img/google-sheets.png)
 
 Similarly UI elements which depend on clipboard state, like "Paste image from clipboard" in an web based image editor, can be enabled/disabled using the clipboardchange event based on weather correct data format is present in clipboard or not.
 
@@ -97,7 +101,13 @@ Additionally we must ensure that we monitor the clipboard only when absolutely r
 #### 5.1.1 Approach 1 - clipboard-read permission required to listen to clipboardchange event
 Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read. The web author should ensure that the site has the permission before it starts listening to this event otherwise the provided event handler won't be invoked whenever the clipboard changes. We should consider logging a warning message if the web author starts listening to clipboardchange without acquiring the permissions since web developers might miss integrating the permissions flow into their user experience.
 
-Users can request permissions in two ways - 1) By performing a read operation like read or readText using Async clipboard API. 2) By explicitly requesting "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158)
+Web apps can request for necessary permissions in the following ways: 
+
+1) By performing a read operation using one of [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api). 
+
+2) By explicitly requesting "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158)
+
+3) The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners.
 
 ##### Pros
 1. More defensive approach, guards against potential misuse of clipboard change event.
@@ -105,9 +115,7 @@ Users can request permissions in two ways - 1) By performing a read operation li
 
 ##### Cons
 1. Not a clear user flow for requesting permissions.
-2. Additional complexity for both implementation and web authors.
-
-To simply further, we can prompt user for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners.
+2. Introduces additional complexity for both implementation and web authors.
 
 #### 5.1.2 Approach 2 - No permission required
 Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event.
@@ -151,21 +159,24 @@ As per the [current spec](https://www.w3.org/TR/clipboard-apis/#clipboard-event-
 We favour Approach 1 - Page required to be in focus to receive event, since this approach reduces the possibility of misusing the clipboard change event in privacy related attacks.
 
 ### 5.3 Event details 
-"clipboardchange" is a system level event, hence it is not bound to any DOM element. Therefore, there is no bubbling associated with the event. This event simply signifies that the system clipboard got changed. Hence performing “preventDefault” for this event has no effect since there are no actions associated with it. The event does not provide any additional arguments in the callback handler - it is expected that the web app calls Async API to read the clipboard and get the changed clipboard contents within the callback.
+Since the clipboardchange event is not triggered by a user action and the event is not associated to any DOM element, hence this event doesn't bubbles and is not cancellable.
+
+There are two ways to get the changed clipboard data within the event handler:
+
+1. Async Clipboard API - The [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) can be used to get the current contents of the system clipboard.
+
+2. DataTransfer API - The clipboardchange event is a [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) that includes a [DataTransfer](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) object. This keeps the interface of this event consistent with other clipboard related events like [cut](https://w3c.github.io/clipboard-apis/#clipboard-event-cut), [copy](https://w3c.github.io/clipboard-apis/#clipboard-event-copy) or [paste](https://w3c.github.io/clipboard-apis/#clipboard-event-paste) events. The [getData](https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata) method of DataTransfer interface can be used to retrieve the clipboard contents of a specific format. However, it is recommended to use the Async Clipboard API because it is asynchronous and prevents the page from freezing when reading large clipboard contents.
 
 ## 6. Detailed design discussion
 
 ### 6.1 Listen to clipboard change directly from the OS
-In this approach, the browser process can have a singleton service which listens to clipboard change event using OS specific APIs. If the platform doesn't provide any OS specific APIs, then we can consider polling to obtain the clipboard change event. 
+In this approach, a singleton service within the browser listens to clipboard change events using OS-specific APIs. If the platform doesn't provide any OS-specific APIs, polling can be used to detect clipboard changes.
 
-The browser process can then forward the clipboard change event to all listening renderer processes and fire the event after performing the page focus and user permissions check. In case the page is out of focus, the renderer process won't dispatch the event right away but will set an internal flag which will cause the renderer process to dispatch a "clipboardchange" event as soon as the page regains focus. 
+The service can then forward the clipboard change event to all interested pages and fire the event after performing the necessary focus and user permissions checks. If the page is out of focus, the event won't be dispatched immediately but an internal flag will be set to dispatch a "clipboardchange" event as soon as the page regains focus.
 
-We can further optimize the page out of focus scenario as follows - when the page looses focus, we stop listening to clipboardchange event from the OS. Then upon regain of focus, we firstly check if the clipboard got changed by comparing clipboard hash using [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber) and then fire a clipboardchange event if the hash is different from the previously stored one. Secondly, we restart listening to the clipboardchange event from the OS. This will help reduce system resource consumption since the browser won't need process every clipboard change event which is occurring in the OS, while the browser is not in focus.
+To optimize for pages out of focus, we can stop listening to clipboard change events from the OS when the page loses focus. Upon regaining focus, we first check if the clipboard has changed by comparing clipboard hashes using the [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber). If the hash is different from the previously stored one, a clipboardchange event is fired. We then restart listening to clipboard change events from the OS. This reduces system resource consumption since the browser won't need to process every clipboard change event occurring in the OS while the browser is not in focus.
 
-Moreover, we can ensure to only listen to the OS clipboard when there is at least one renderer process interested in the event.
-
-High level design doc available [here](https://docs.google.com/document/d/1bY2pzV6PSX56fiFcrXEgOjpFen07xaxmnsM5dqXFE1U/edit#heading=h.i1vomwqlf6kt)
-
+Additionally, we ensure to only listen to the OS clipboard when there is at least one page interested in the event.
 
 ##### Pros:
 1. Will provide clipboard change events with minimal resource consumptions since we are using OS level APIs to monitor the clipboard.
@@ -185,7 +196,7 @@ High level design doc available [here](https://docs.google.com/document/d/1bY2pz
 | Android / iOS | TBD                                                                                                                                                                                                                                                                                                                         |
 
 ### 6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus
-On page focus event, we can check the current hash of the clipboard (using a [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber)) and compare it with the previously stored hash to infer if the clipboard changed. This is an alternative to directly using OS provided APIs for monitoring clipboard. For clipboard changes occurring within the browser, we can easily obtain the clipboard change event from the renderer process.
+On page focus event, we can check the current hash of the clipboard (using a [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber)) and compare it with the previously stored hash to infer if the clipboard changed. This is an alternative to directly using OS provided APIs for monitoring clipboard. For clipboard changes occurring within the browser, we can easily obtain the clipboard change event from within the browser.
 
 #### 6.2.1 Platform support for getting clipboard SequenceNumber/Version number
 For Mac and Windows, sequence number is represented by a system-provided signature of the clipboard and on ChromeOS, Linux and Android, a new number is generated every time the system clipboard changes. Chromium already has an [internal cross-platform implementation to retrieve clipboard sequence number](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/clipboard/clipboard.h;drc=3c3f08441ba5bf5d49fbdb51410b28e54c4753fb;l=154).
