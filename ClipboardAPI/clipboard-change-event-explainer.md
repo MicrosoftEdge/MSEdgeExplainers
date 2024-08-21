@@ -99,7 +99,7 @@ Additionally we must ensure that we monitor the clipboard only when absolutely r
 ### 5.1 User permission requirement
 
 #### 5.1.1 Approach 1 - clipboard-read permission required to listen to clipboardchange event
-Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read. The web author should ensure that the site has the permission before it starts listening to this event otherwise the provided event handler won't be invoked whenever the clipboard changes. We should consider logging a warning message if the web author starts listening to clipboardchange without acquiring the permissions since web developers might miss integrating the permissions flow into their user experience.
+Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read. The web author should ensure that the site has the permission before it starts listening to this event otherwise the provided event handler won't be invoked whenever the clipboard changes. To check if the current user has clipboard-read permissions for the site, the [query](https://www.w3.org/TR/permissions/#query-method) method of the [Permissions API](https://www.w3.org/TR/permissions/#permissions-api) can be used. We should consider logging a warning message if the web author starts listening to clipboardchange without acquiring the permissions since web developers might miss integrating the permissions flow into their user experience.
 
 Web apps can request for necessary permissions in the following ways: 
 
@@ -115,7 +115,7 @@ Web apps can request for necessary permissions in the following ways:
 
 ##### Cons
 1. Not a clear user flow for requesting permissions.
-2. Introduces additional complexity for both implementation and web authors.
+2. Adds complexity for web authors, as they must create a scenario to request clipboard-read permission from the user.
 
 #### 5.1.2 Approach 2 - No permission required
 Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event.
