@@ -16,8 +16,8 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 - [2. User scenarios](#2-user-scenarios)
   - [2.1 Scenario: Sync clipboard with a remote desktop](#21-scenario-sync-clipboard-with-a-remote-desktop)
   - [2.2 Scenario: Show available paste formats in web based editors](#22-scenario-show-available-paste-formats-in-web-based-editors)
-    - [2.2.1 Copy multiple cells in a spreadsheet should show multiple paste options](#221-copy-multiple-cells-in-a-spreadsheet-should-show-multiple-paste-options)
-    - [2.2.2 Copy plain text should show only single paste option](#222-copy-plain-text-should-show-only-single-paste-option)
+    - [2.2.1 Copy multiple cells should show multiple paste options in Excel online](#221-copy-multiple-cells-should-show-multiple-paste-options-in-excel-online)
+    - [2.2.2 Copy plain text should show only single paste option in Excel online](#222-copy-plain-text-should-show-only-single-paste-option-in-excel-online)
     - [2.2.3 Multiple paste options in Google sheets](#223-multiple-paste-options-in-google-sheets)
 - [3. Motivation - Alternative to inefficient polling of clipboard](#3-motivation---alternative-to-inefficient-polling-of-clipboard)
 - [4. Example javascript code for detecting clipboard changes:](#4-example-javascript-code-for-detecting-clipboard-changes)
@@ -37,18 +37,22 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
     - [5.2.2 Approach 2 - No focus requirement](#522-approach-2---no-focus-requirement)
       - [Pros:](#pros)
       - [Cons:](#cons)
-    - [5.2.3 Conclusion](#523-conclusion)
+    - [5.2.3 Approach 3 - Transient user activation](#523-approach-3---transient-user-activation)
+      - [Pros:](#pros-1)
+      - [Cons:](#cons-1)
+    - [5.2.4 Conclusion](#524-conclusion)
   - [5.3 Event details](#53-event-details)
 - [6. Detailed design discussion](#6-detailed-design-discussion)
   - [6.1 Listen to clipboard change directly from the OS](#61-listen-to-clipboard-change-directly-from-the-os)
-      - [Pros:](#pros-1)
-      - [Cons:](#cons-1)
-    - [6.1.1 APIs provided by all OS to listen to clipboardchange event:](#611-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
-  - [6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus](#62-considered-alternative-given-the-page-focus-restrictions-check-clipboard-hash-change-when-page-regains-focus)
-    - [6.2.1 Platform support for getting clipboard SequenceNumber/Version number](#621-platform-support-for-getting-clipboard-sequencenumberversion-number)
       - [Pros:](#pros-2)
       - [Cons:](#cons-2)
-- [7. References & acknowledgements](#7-references--acknowledgements)
+  - [6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus](#62-considered-alternative-given-the-page-focus-restrictions-check-clipboard-hash-change-when-page-regains-focus)
+      - [Pros:](#pros-3)
+      - [Cons:](#cons-3)
+- [7 Appendix](#7-appendix)
+  - [7.1 APIs provided by all OS to listen to clipboardchange event:](#71-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
+  - [7.2 Platform support for getting clipboard SequenceNumber/Version number](#72-platform-support-for-getting-clipboard-sequencenumberversion-number)
+- [8. References & acknowledgements](#8-references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -65,18 +69,16 @@ When a user copies text or an image on their local machine, the web-based remote
 
 
 ### 2.2 Scenario: Show available paste formats in web based editors
-Web based editors like Excel Online, Word Online may support paste operation in multiple formats. Within the UI, it may show the available formats like csv, image or plain text. The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed. 
+Web based editors like Word Online, Excel Online, Google Sheets, etc. may support paste operations in multiple formats. Within the UI, it may show the available formats like csv, image or plain text. The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed.
 
-#### 2.2.1 Copy multiple cells in a spreadsheet should show multiple paste options
+#### 2.2.1 Copy multiple cells should show multiple paste options in Excel online
 ![](img/paste-format-1.png)
 
-#### 2.2.2 Copy plain text should show only single paste option
+#### 2.2.2 Copy plain text should show only single paste option in Excel online
 ![](img/paste-format-2.png)
 
 #### 2.2.3 Multiple paste options in Google sheets
 ![](img/google-sheets.png)
-
-Similarly UI elements which depend on clipboard state, like "Paste image from clipboard" in an web based image editor, can be enabled/disabled using the clipboardchange event based on weather correct data format is present in clipboard or not.
 
 ## 3. Motivation - Alternative to inefficient polling of clipboard
 Today, a web-app can monitor the system clipboard by polling and reading the clipboard through async clipboard API at regular intervals.
@@ -101,21 +103,16 @@ Additionally we must ensure that we monitor the clipboard only when absolutely r
 #### 5.1.1 Approach 1 - clipboard-read permission required to listen to clipboardchange event
 Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read. The web author should ensure that the site has the permission before it starts listening to this event otherwise the provided event handler won't be invoked whenever the clipboard changes. To check if the current user has clipboard-read permissions for the site, the [query](https://www.w3.org/TR/permissions/#query-method) method of the [Permissions API](https://www.w3.org/TR/permissions/#permissions-api) can be used. We should consider logging a warning message if the web author starts listening to clipboardchange without acquiring the permissions since web developers might miss integrating the permissions flow into their user experience.
 
-Web apps can request for necessary permissions in the following ways: 
+Web apps can request for the clipboard-read permissions by performing a read operation using one of [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api). 
 
-1) By performing a read operation using one of [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api). 
-
-2) By explicitly requesting "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158)
-
-3) The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners.
+In future, we may have additional ways of prompting the user for permissions - 1) By explicitly requesting for "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158). 2) The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners.
 
 ##### Pros
-1. More defensive approach, guards against potential misuse of clipboard change event.
+1. This approach aligns with the security model for other clipboard APIs and similar APIs that allow access to sensitive information.
 2. Ensures user consent before accessing clipboard data.
 
 ##### Cons
-1. Not a clear user flow for requesting permissions.
-2. Adds complexity for web authors, as they must create a scenario to request clipboard-read permission from the user.
+1. This approach imposes a small restriction on web authors as they have to call a clipboard read API method before starting to listen for the clipboardchange event.
 
 #### 5.1.2 Approach 2 - No permission required
 Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event.
@@ -135,11 +132,8 @@ As per the [current spec](https://www.w3.org/TR/clipboard-apis/#clipboard-event-
 #### 5.2.1 Approach 1 - Page required to be in focus to receive event
 
 ##### Pros
-1. More defensive and prevents background scripts from misuse of clipboardchange events.\
-1.a) Example - Malicious scripts can detect when a cryptocurrency wallet address is copied to clipboard and replace it with attacker's address and that way redirect payment to attacker's account.  
-1.b) Example - Passwords / authentication keys / access tokens are frequently copied to clipboard and can be retrieved by malicious scripts reading clipboard in background.
-3. Can simplify implementation since browsers can simply check for clipboard change on page focus. However, this needs to be further investigated.
-4. This is in-line with current async clipboard focus APIs which require focus to access.
+1. This is in-line with current async clipboard focus APIs which require focus to access.
+2. Can simplify implementation since browsers can simply check for clipboard change on page focus. However, this needs to be further investigated.
 
 ##### Cons
 1. Might restrict web app scenarios which need to listen to clipboardchange events in the background.
@@ -152,11 +146,24 @@ As per the [current spec](https://www.w3.org/TR/clipboard-apis/#clipboard-event-
 
 ##### Cons:
 1. Might be open to misuse - a web app will be able to monitor the clipboard even when the user is interacting with other applications / pages.
-2. Not much useful unless the page focus requirement is removed from the async read/write clipboard API.
+2. May not be useful unless the page focus requirement is also removed from the async read/write clipboard API.
 3. Could lead to higher resource consumption due to continuous monitoring. E.g. if a large number of pages are listening to the clipboardchange event, when the clipboard is changed, then all the pages will receive the event at once, which might put load on the system.
 
-#### 5.2.3 Conclusion
-We favour Approach 1 - Page required to be in focus to receive event, since this approach reduces the possibility of misusing the clipboard change event in privacy related attacks.
+#### 5.2.3 Approach 3 - Transient user activation
+This approach allows the clipboardchange event to be fired for a short duration after the user loses page focus, such as up to 5 seconds. This ensures that clipboard changes occurring immediately after focus loss are still captured, enhancing user experience without compromising security.
+
+##### Pros:
+1. Clipboard changes occurring immediately after the user loses focus are still captured, ensuring the web app can respond promptly when the user returns.
+Example: A web app can pre-process clipboard data while the user is in another application, reducing wait time when the user comes back.
+2. Limits the duration for which clipboard monitoring is allowed after focus loss, reducing the risk of prolonged unauthorized access.
+
+##### Cons:
+1. The short duration might not be sufficient for some use cases where clipboard changes occur after the specified time.
+2. Still requires monitoring for a brief period after focus loss, which could lead to resource usage if many pages implement this.
+Example: Multiple tabs monitoring clipboard changes for 5 seconds could still cause a temporary spike in resource usage.
+
+#### 5.2.4 Conclusion
+We favour Approach 1 - Page required to be in focus to receive event, since this approach is inline with the current Async clipboard APIs and also reduces the possibility of misusing the clipboard change event in privacy related attacks.
 
 ### 5.3 Event details 
 Since the clipboardchange event is not triggered by a user action and the event is not associated to any DOM element, hence this event doesn't bubbles and is not cancellable.
@@ -165,7 +172,7 @@ There are two ways to get the changed clipboard data within the event handler:
 
 1. Async Clipboard API - The [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) can be used to get the current contents of the system clipboard.
 
-2. DataTransfer API - The clipboardchange event is a [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) that includes a [DataTransfer](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) object. This keeps the interface of this event consistent with other clipboard related events like [cut](https://w3c.github.io/clipboard-apis/#clipboard-event-cut), [copy](https://w3c.github.io/clipboard-apis/#clipboard-event-copy) or [paste](https://w3c.github.io/clipboard-apis/#clipboard-event-paste) events. The [getData](https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata) method of DataTransfer interface can be used to retrieve the clipboard contents of a specific format. However, it is recommended to use the Async Clipboard API because it is asynchronous and prevents the page from freezing when reading large clipboard contents.
+2. DataTransfer API - The clipboardchange event is a [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) that includes a [DataTransfer](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) object. This keeps the interface of this event consistent with other clipboard related events like [cut](https://w3c.github.io/clipboard-apis/#clipboard-event-cut), [copy](https://w3c.github.io/clipboard-apis/#clipboard-event-copy) or [paste](https://w3c.github.io/clipboard-apis/#clipboard-event-paste) events. The [getData](https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata) method of DataTransfer interface can be used to retrieve the clipboard contents of a specific format.
 
 ## 6. Detailed design discussion
 
@@ -185,7 +192,22 @@ Additionally, we ensure to only listen to the OS clipboard when there is at leas
 ##### Cons:
 1. Might need polling for some OS like MacOS which can lead to higher resource consumption due to continuous monitoring
 
-#### 6.1.1 APIs provided by all OS to listen to clipboardchange event:
+### 6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus
+For clipboard changes occurring within the browser, we should be able to detect and fire 'clipboardchange' event. For clipboard changes occurring from a different application, we simply need to ensure that the 'clipboardchange' event is fired when the web page regains focus. On page focus event, we can check the current hash of the clipboard (using a [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win31/api/winuser/nf-winuser-getclipboardsequencenumber)) and compare it with the previously stored hash to infer if the clipboard changed and subsequently fire the event. However, in case the web app is currently in focus and the system clipboard is changed in background from a native application, then the web app won't be notified about it. Hence the previous design approach (6.1) is preferred for implementation. 
+
+##### Pros:
+1. Less dependency on OS level APIs, no need for polling where OS level API for clipboard change event is not provided.
+2. Reduces the need for continuous monitoring, saving system resources.
+3. Simplifies cross-platform implementation by relying on browser events.
+
+##### Cons:
+1. Doesn't capture all cases where a system clipboard can be changed.
+2. Page focus event can happen frequently, checking clipboard hash/sequence number might have perf impact even though checking the sequence number should be a constant time operation. Accurate performance analysis of this approach is a TODO.
+3. Dependency on page focus requirement - if we remove the page focus requirement in future, then we would need to re-implement a different design for monitoring system clipboard. Hence during the implementation, we need to ensure that the OS clipboard change detection module is decoupled from the rest of the modules.
+
+## 7 Appendix
+
+### 7.1 APIs provided by all OS to listen to clipboardchange event:
 
 | OS            | API                                                                                                                                                                                                                                                                                                                         |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -195,23 +217,10 @@ Additionally, we ensure to only listen to the OS clipboard when there is at leas
 | ChromeOS      | TBD                                                                                                                                                                                                                                                                                                                         |
 | Android / iOS | TBD                                                                                                                                                                                                                                                                                                                         |
 
-### 6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus
-On page focus event, we can check the current hash of the clipboard (using a [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber)) and compare it with the previously stored hash to infer if the clipboard changed. This is an alternative to directly using OS provided APIs for monitoring clipboard. For clipboard changes occurring within the browser, we can easily obtain the clipboard change event from within the browser.
-
-#### 6.2.1 Platform support for getting clipboard SequenceNumber/Version number
+### 7.2 Platform support for getting clipboard SequenceNumber/Version number
 For Mac and Windows, sequence number is represented by a system-provided signature of the clipboard and on ChromeOS, Linux and Android, a new number is generated every time the system clipboard changes. Chromium already has an [internal cross-platform implementation to retrieve clipboard sequence number](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/clipboard/clipboard.h;drc=3c3f08441ba5bf5d49fbdb51410b28e54c4753fb;l=154).
 
-##### Pros:
-1. Less dependency on OS level APIs, no need for polling where OS level API for clipboard change event is not provided.
-2. Reduces the need for continuous monitoring, saving system resources.
-3. Simplifies cross-platform implementation by relying on browser events.
-
-##### Cons:
-1. In case system clipboard is changed in background from a native app, then the web app won't know about it until the next page focus action.
-2. Page focus event can happen frequently, checking clipboard hash/sequence number might have perf impact even though checking the sequence number should be a constant time operation. Accurate performance analysis of this approach is a TODO.
-3. Dependency on page focus requirement - if we remove the page focus requirement in future, then we would need to re-implement a different design for monitoring system clipboard. Hence during the implementation, we need to ensure that the OS clipboard change detection module is decoupled from the rest of the modules.
-
-## 7. References & acknowledgements
+## 8. References & acknowledgements
 
 Many thanks for valuable feedback and advice from:
 
