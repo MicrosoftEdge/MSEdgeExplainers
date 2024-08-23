@@ -122,9 +122,10 @@ Since no data is being sent as part of the clipboardchange event, it can be argu
 
 ##### Cons
 1. Open to privacy attacks which simply monitor clipboard changes without user consent.
+Example - Untrusted sites can perform phishing attacks like - A user copies a URL to share with a friend, but the clipboard content is replaced with a phishing link that looks similar to the original URL.
 
 #### 5.1.3 Conclusion
-We favour Approach 1 i.e. having clipboard-read permission required to listen to clipboardchange event, because it has more provisions which safegaurds user privacy.
+We favour Approach 1 i.e. having clipboard-read permission required to listen to clipboardchange event, because it has more provisions which safeguards user privacy.
 
 ### 5.2 Page focus requirement
 As per the [current spec](https://www.w3.org/TR/clipboard-apis/#clipboard-event-clipboardchange), we should not fire "clipboardchange" event when a page is not is focus. This is in-line with the current behavior where async clipboard API is not accessible unless the given page is in focus. We do fire "clipboardchange" event when the page regains focus, incase the clipboard contents had changed when the page was out of focus. Note that even if the clipboard had changed multiple times while the page was out of focus, we will only fire a single "clipboardchange" event when the page regains focus. This is because the event is designed to indicate that the clipboard contents are different from what they were when the page lost focus, rather than tracking every individual change that occurred while the page was out of focus.
@@ -163,7 +164,7 @@ Example: A web app can pre-process clipboard data while the user is in another a
 Example: Multiple tabs monitoring clipboard changes for 5 seconds could still cause a temporary spike in resource usage.
 
 #### 5.2.4 Conclusion
-We favour Approach 1 - Page required to be in focus to receive event, since this approach is inline with the current Async clipboard APIs and also reduces the possibility of misusing the clipboard change event in privacy related attacks.
+We favour Approach 1 - Page required to be in focus to receive event, since this approach is inline with the current Async clipboard APIs and also reduces the possibility of misusing the clipboard change event in privacy related attacks. Also the approach has relatively lower resource usage.
 
 ### 5.3 Event details 
 Since the clipboardchange event is not triggered by a user action and the event is not associated to any DOM element, hence this event doesn't bubbles and is not cancellable.
