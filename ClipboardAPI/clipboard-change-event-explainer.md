@@ -113,8 +113,7 @@ Since no data is being sent as part of the clipboardchange event, it can be argu
 1. Simpler implementation and user experience
 
 ##### Cons
-1. Open to privacy attacks which simply monitor clipboard changes without user consent.
-Example - Untrusted sites can perform phishing attacks like - A user copies a URL to share with a friend, but the clipboard content is replaced with a phishing link that looks similar to the original URL.
+1. This can cause user privacy violation - a site will be able to monitor the clipboard - a privileged OS component - without the user explicitly allowing it. (Though the author would only know that the clipboard changed, but wouldn't have any details about the payload)
 
 #### 5.1.3 Conclusion
 We favour Approach 1 i.e. having clipboard-read permission required to listen to clipboardchange event, because it has more provisions which safeguards user privacy.
