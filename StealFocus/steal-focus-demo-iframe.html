@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>Iframed Page</h1>
+  <p>This page will steal focus after the countdown</p>
+  <p id="countdown">3</p>
+  <input id="input" type="text">
+  <script>
+    var countdown = 3;
+    var interval = setInterval(function () {
+      countdown--;
+      document.getElementById("countdown").textContent = countdown;
+      if (countdown === 0) {
+        clearInterval(interval);
+        document.getElementById("input").focus();
+      }
+    }, 1000);
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    input {
+      font-size: 1.5em;
+      padding: 0.5em;
+      width: 50%;
+    }
+    input:focus {
+      outline: 2px solid blue;
+    }
+  </style>
+</body>
+</html>

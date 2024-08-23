@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>Focus Steal Sample</h1>
+  <p>Click on the "Load frame" button below to see focus being stole by the iframed page. You will see the focus rect move into the frame after it loads.</p>
+  <button onclick="loadFrame()">Load frame</button>
+  <iframe id="frame" width="100%" height="300"></iframe>
+  <script>
+    function loadFrame() {
+      document.getElementById("frame").src = "./steal-focus-demo-iframe.html";
+    }
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    button {
+      font-size: 1.5em;
+      padding: 0.5em;
+      margin-bottom: 0.5em;
+    }
+    button:focus {
+      outline: 2px solid blue;
+    }
+  </style>
+</body>
+</html>
