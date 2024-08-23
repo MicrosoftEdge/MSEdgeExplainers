@@ -42,17 +42,9 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
       - [Cons:](#cons-1)
     - [5.2.4 Conclusion](#524-conclusion)
   - [5.3 Event details](#53-event-details)
-- [6. Detailed design discussion](#6-detailed-design-discussion)
-  - [6.1 Listen to clipboard change directly from the OS](#61-listen-to-clipboard-change-directly-from-the-os)
-      - [Pros:](#pros-2)
-      - [Cons:](#cons-2)
-  - [6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus](#62-considered-alternative-given-the-page-focus-restrictions-check-clipboard-hash-change-when-page-regains-focus)
-      - [Pros:](#pros-3)
-      - [Cons:](#cons-3)
-- [7 Appendix](#7-appendix)
-  - [7.1 APIs provided by all OS to listen to clipboardchange event:](#71-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
-  - [7.2 Platform support for getting clipboard SequenceNumber/Version number](#72-platform-support-for-getting-clipboard-sequencenumberversion-number)
-- [8. References & acknowledgements](#8-references--acknowledgements)
+- [6 Appendix](#6-appendix)
+  - [6.1 APIs provided by all OS to listen to clipboardchange event:](#61-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
+- [7 References & acknowledgements](#7-references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -175,40 +167,10 @@ There are two ways to get the changed clipboard data within the event handler:
 
 2. DataTransfer API - The clipboardchange event is a [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) that includes a [DataTransfer](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) object. This keeps the interface of this event consistent with other clipboard related events like [cut](https://w3c.github.io/clipboard-apis/#clipboard-event-cut), [copy](https://w3c.github.io/clipboard-apis/#clipboard-event-copy) or [paste](https://w3c.github.io/clipboard-apis/#clipboard-event-paste) events. The [getData](https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata) method of DataTransfer interface can be used to retrieve the clipboard contents of a specific format.
 
-## 6. Detailed design discussion
 
-### 6.1 Listen to clipboard change directly from the OS
-In this approach, a singleton service within the browser listens to clipboard change events using OS-specific APIs. If the platform doesn't provide any OS-specific APIs, polling can be used to detect clipboard changes.
+## 6 Appendix
 
-The service can then forward the clipboard change event to all interested pages and fire the event after performing the necessary focus and user permissions checks. If the page is out of focus, the event won't be dispatched immediately but an internal flag will be set to dispatch a "clipboardchange" event as soon as the page regains focus.
-
-To optimize for pages out of focus, we can stop listening to clipboard change events from the OS when the page loses focus. Upon regaining focus, we first check if the clipboard has changed by comparing clipboard hashes using the [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber). If the hash is different from the previously stored one, a clipboardchange event is fired. We then restart listening to clipboard change events from the OS. This reduces system resource consumption since the browser won't need to process every clipboard change event occurring in the OS while the browser is not in focus.
-
-Additionally, we ensure to only listen to the OS clipboard when there is at least one page interested in the event.
-
-##### Pros:
-1. Will provide clipboard change events with minimal resource consumptions since we are using OS level APIs to monitor the clipboard.
-2. Will cover all cases that can trigger a system clipboard change since we are monitoring clipboard at the OS level.
-
-##### Cons:
-1. Might need polling for some OS like MacOS which can lead to higher resource consumption due to continuous monitoring
-
-### 6.2 Considered alternative: Given the page focus restrictions, check clipboard hash change when page regains focus
-For clipboard changes occurring within the browser, we should be able to detect and fire 'clipboardchange' event. For clipboard changes occurring from a different application, we simply need to ensure that the 'clipboardchange' event is fired when the web page regains focus. On page focus event, we can check the current hash of the clipboard (using a [SequenceNumber API](https://learn.microsoft.com/en-us/windows/win31/api/winuser/nf-winuser-getclipboardsequencenumber)) and compare it with the previously stored hash to infer if the clipboard changed and subsequently fire the event. However, in case the web app is currently in focus and the system clipboard is changed in background from a native application, then the web app won't be notified about it. Hence the previous design approach (6.1) is preferred for implementation. 
-
-##### Pros:
-1. Less dependency on OS level APIs, no need for polling where OS level API for clipboard change event is not provided.
-2. Reduces the need for continuous monitoring, saving system resources.
-3. Simplifies cross-platform implementation by relying on browser events.
-
-##### Cons:
-1. Doesn't capture all cases where a system clipboard can be changed.
-2. Page focus event can happen frequently, checking clipboard hash/sequence number might have perf impact even though checking the sequence number should be a constant time operation. Accurate performance analysis of this approach is a TODO.
-3. Dependency on page focus requirement - if we remove the page focus requirement in future, then we would need to re-implement a different design for monitoring system clipboard. Hence during the implementation, we need to ensure that the OS clipboard change detection module is decoupled from the rest of the modules.
-
-## 7 Appendix
-
-### 7.1 APIs provided by all OS to listen to clipboardchange event:
+### 6.1 APIs provided by all OS to listen to clipboardchange event:
 
 | OS            | API                                                                                                                                                                                                                                                                                                                         |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -218,10 +180,7 @@ For clipboard changes occurring within the browser, we should be able to detect 
 | ChromeOS      | TBD                                                                                                                                                                                                                                                                                                                         |
 | Android / iOS | TBD                                                                                                                                                                                                                                                                                                                         |
 
-### 7.2 Platform support for getting clipboard SequenceNumber/Version number
-For Mac and Windows, sequence number is represented by a system-provided signature of the clipboard and on ChromeOS, Linux and Android, a new number is generated every time the system clipboard changes. Chromium already has an [internal cross-platform implementation to retrieve clipboard sequence number](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/clipboard/clipboard.h;drc=3c3f08441ba5bf5d49fbdb51410b28e54c4753fb;l=154).
-
-## 8. References & acknowledgements
+## 7 References & acknowledgements
 
 Many thanks for valuable feedback and advice from:
 
