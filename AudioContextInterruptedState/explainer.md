@@ -10,11 +10,11 @@
 
 ## Introduction
 
-The [Web Audio API](https://webaudio.github.io/web-audio-api/) is widely used to add advanced audio capabilities to web applications, like web-based games and music applications. One of the API's features is the [AudioContext interface](https://webaudio.github.io/web-audio-api/#AudioContext), which represents an audio graph. An `AudioContext` can find itself in one of three states: [`"suspended"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-suspended), [`"running"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-running), or [`"closed"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-closed). Once an `AudioContext` is in the `"running"` state, it can only pause media playback by transitioning to the `"suspended"` state when, and only when, user code calls [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) on this `AudioContext`. However, there are situations where we might want to let the User Agent (UA) decide when to interrupt playback - e.g., the proposed [`"media-playback-while-not-visible"`](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/IframeMediaPause/iframe_media_pausing.md) permission policy and the proposed [Audio Session API](https://w3c.github.io/audio-session/); or during a phone call, where the calling application will need exclusive access to the audio hardware. To support these scenarios, we propose adding a new `"interrupted"` state to the [`AudioContextState`](https://webaudio.github.io/web-audio-api/#enumdef-audiocontextstate) enum.
+The [Web Audio API](https://webaudio.github.io/web-audio-api/) is widely used to add advanced audio capabilities to web applications, like web-based games and music applications. One of the API's features is the [AudioContext interface](https://webaudio.github.io/web-audio-api/#AudioContext), which represents an audio graph. An `AudioContext` can find itself in one of three states: [`"suspended"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-suspended), [`"running"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-running), or [`"closed"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-closed). Once an `AudioContext` is in the `"running"` state, it can only pause media playback by transitioning to the `"suspended"` state when, and only when, user code calls [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) on this `AudioContext`. However, there are situations where we might want to let the User Agent (UA) decide when to interrupt playback - e.g., the proposed [`"media-playback-while-not-visible"`](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/IframeMediaPause/iframe_media_pausing.md) permission policy, the proposed [Audio Session API](https://w3c.github.io/audio-session/), or during a phone call where the calling application will need exclusive access to the audio hardware. To support these scenarios, we propose adding a new `"interrupted"` state to the [`AudioContextState`](https://webaudio.github.io/web-audio-api/#enumdef-audiocontextstate) enum.
 
 ## Goals
 
-The main goal of this proposal is to allow the UA to be able to interrupt `AudioContext` playback when needed, given that there are a couple of user scenarios - e.g., incoming phone calls - and proposed web API's that could make good use of this functionality.
+The main goal of this proposal is to allow the UA to be able to interrupt `AudioContext` playback when needed, given that there are a couple of user scenarios - e.g., incoming phone calls, screen lock, etc - and proposed web API's that could make good use of this functionality.
 
 ### "media-playback-while-not-visible" permission policy
 
@@ -57,7 +57,7 @@ With the addition of the `"interrupted"` state, the following state transitions 
 - `"interrupted"` -> `"closed"`.
   - The `AudioContext`'s state should move immediately to `"closed"` when `AudioContext.close()` is called.
 
-The state transition from `"suspended"` to `"interrupted"` should not happen automatically, due to privacy concerns. Doing this transition automatically every time an interruption occurs might unnecessarily expose too much information to web pages - e.g., when a phone call comes in. Given this, what should happen if an interruption happens while the `AudioContext` is in the `"suspended"` state? In this case, an internal boolean flag, let's say `"is_interrupted"`, should be set and the AudioContext should remain in the `"suspended"` state, even though it is interrupted behind the curtains. However, calling [`AudioContext.resume()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume) should trigger the state change from `"suspended"` to `"interrupted"` if the interruption is still active. Therefore, while in the `"suspended"` state with an ongoing interruption:
+The state transition from `"suspended"` to `"interrupted"` should not happen automatically, due to privacy concerns. Doing this transition automatically every time an interruption occurs might unnecessarily expose too much information to web pages - e.g., when a phone call comes in. To prevent fingerprinting in this scenario, an internal boolean flag, let's say `"is_interrupted"`, should be set and the AudioContext should remain in the `"suspended"` state, even though it is interrupted behind the curtains. However, calling [`AudioContext.resume()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume) should trigger the state change from `"suspended"` to `"interrupted"` if the interruption is still active. Therefore, while in the `"suspended"` state with an ongoing interruption:
 - Calling `AudioContext.resume()` would return a rejected promise and transition to the `"interrupted"` state;
 - Calling `AudioContext.suspend()` is a NOOP;
 
@@ -198,7 +198,8 @@ We first considered in the [`"media-playback-while-not-visible"`](https://github
 
 ## Stakeholder Feedback / Opposition
 
-- Chromium : No signals
+- Chromium : Positive
+  - Chromium engineers have shown support for this feature in the [github WebAudio repository](https://github.com/WebAudio/web-audio-api/issues/2392#issuecomment-844465877).
 - WebKit : Positive
   - This feature is shipped in Safari:
     - [[MDN] Resuming interrupted play states in iOS Safari](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/state#resuming_interrupted_play_states_in_ios_safari)
@@ -209,4 +210,5 @@ We first considered in the [`"media-playback-while-not-visible"`](https://github
 
 Many thanks for valuable feedback and advice from:
 - [Erik Anderson](https://github.com/erik-anderson)
+- [Rahul Singh](https://github.com/rahulsingh-msft)
 - [Sunggook Chue](https://github.com/sunggook)
