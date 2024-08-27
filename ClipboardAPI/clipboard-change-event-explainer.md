@@ -23,7 +23,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 - [4. Example javascript code for detecting clipboard changes:](#4-example-javascript-code-for-detecting-clipboard-changes)
 - [5. Event spec details and open questions](#5-event-spec-details-and-open-questions)
   - [5.1 User permission requirement](#51-user-permission-requirement)
-    - [5.1.1 Approach 1 - clipboard-read permission required to listen to clipboardchange event](#511-approach-1---clipboard-read-permission-required-to-listen-to-clipboardchange-event)
+    - [5.1.1 Approach 1 (Preferred) - clipboard-read permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-read-permission-required-to-listen-to-clipboardchange-event)
       - [Pros](#pros)
       - [Cons](#cons)
     - [5.1.2 Approach 2 - No permission required](#512-approach-2---no-permission-required)
@@ -31,7 +31,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
       - [Cons](#cons-1)
     - [5.1.3 Conclusion](#513-conclusion)
   - [5.2 Page focus requirement](#52-page-focus-requirement)
-    - [5.2.1 Approach 1 - Page required to be in focus to receive event](#521-approach-1---page-required-to-be-in-focus-to-receive-event)
+    - [5.2.1 Approach 1 (Preferred) - Page required to be in focus to receive event](#521-approach-1-preferred---page-required-to-be-in-focus-to-receive-event)
       - [Pros](#pros-2)
       - [Cons](#cons-2)
     - [5.2.2 Approach 2 - No focus requirement](#522-approach-2---no-focus-requirement)
@@ -92,7 +92,7 @@ Additionally we must ensure that we monitor the clipboard only when absolutely r
 
 ### 5.1 User permission requirement
 
-#### 5.1.1 Approach 1 - clipboard-read permission required to listen to clipboardchange event
+#### 5.1.1 Approach 1 (Preferred) - clipboard-read permission required to listen to clipboardchange event
 Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read. The web author should ensure that the site has the permission before it starts listening to this event otherwise the provided event handler won't be invoked whenever the clipboard changes. To check if the current user has clipboard-read permissions for the site, the [query](https://www.w3.org/TR/permissions/#query-method) method of the [Permissions API](https://www.w3.org/TR/permissions/#permissions-api) can be used. We should consider logging a warning message if the web author starts listening to clipboardchange without acquiring the permissions since web developers might miss integrating the permissions flow into their user experience.
 
 Web apps can request for the clipboard-read permissions by performing a read operation using one of [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api). 
@@ -121,7 +121,7 @@ We favour Approach 1 i.e. having clipboard-read permission required to listen to
 ### 5.2 Page focus requirement
 As per the [current spec](https://www.w3.org/TR/clipboard-apis/#clipboard-event-clipboardchange), we should not fire "clipboardchange" event when a page is not is focus. This is in-line with the current behavior where async clipboard API is not accessible unless the given page is in focus. We do fire "clipboardchange" event when the page regains focus, incase the clipboard contents had changed when the page was out of focus. Note that even if the clipboard had changed multiple times while the page was out of focus, we will only fire a single "clipboardchange" event when the page regains focus. This is because the event is designed to indicate that the clipboard contents are different from what they were when the page lost focus, rather than tracking every individual change that occurred while the page was out of focus.
 
-#### 5.2.1 Approach 1 - Page required to be in focus to receive event
+#### 5.2.1 Approach 1 (Preferred) - Page required to be in focus to receive event
 
 ##### Pros
 1. This is in-line with current async clipboard focus APIs which require focus to access.
@@ -160,12 +160,9 @@ We favour Approach 1 - Page required to be in focus to receive event, since this
 ### 5.3 Event details 
 Since the clipboardchange event is not triggered by a user action and the event is not associated to any DOM element, hence this event doesn't bubbles and is not cancellable.
 
-There are two ways to get the changed clipboard data within the event handler:
+To get the changed clipboard data within the event handler, the [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) can be used to get the current contents of the system clipboard.
 
-1. Async Clipboard API - The [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) can be used to get the current contents of the system clipboard.
-
-2. DataTransfer API - The clipboardchange event is a [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) that includes a [DataTransfer](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) object. This keeps the interface of this event consistent with other clipboard related events like [cut](https://w3c.github.io/clipboard-apis/#clipboard-event-cut), [copy](https://w3c.github.io/clipboard-apis/#clipboard-event-copy) or [paste](https://w3c.github.io/clipboard-apis/#clipboard-event-paste) events. The [getData](https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata) method of DataTransfer interface can be used to retrieve the clipboard contents of a specific format.
-
+Considered alternative - DataTransfer API: As per the current spec, the clipboardchange event is a [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) that includes a [DataTransfer](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) object. This is similar to other clipboard related events like [cut](https://w3c.github.io/clipboard-apis/#clipboard-event-cut), [copy](https://w3c.github.io/clipboard-apis/#clipboard-event-copy) or [paste](https://w3c.github.io/clipboard-apis/#clipboard-event-paste) events. The [getData](https://html.spec.whatwg.org/multipage/dnd.html#dom-datatransfer-getdata) method of DataTransfer interface can be used to retrieve the clipboard contents of a specific format. However this is not preferred since 1. It is not expected to change the clipboard contents within a clipboardchange event handler 2. It would be inefficient to attach clipboard contents for all formats on every clipboardchange event, especially if the content is large in size and multiple sites are listening for the event. Therefore, the only way to read clipboard contents within a clipboardchange event handler would be using the Async Clipboard APIs.
 
 ## 6 Appendix
 
