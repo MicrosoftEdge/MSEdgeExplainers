@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard Format Checker</title>
+    <script>
+        const isClipboardChangeEventAvailable = false;
+
+        async function checkClipboard() {
+            try {
+                const clipboardItems = await navigator.clipboard.read();
+                let formats = {};
+
+                for (const item of clipboardItems) {
+                    if (item.types.includes('text/plain')) formats.text = true;
+                    if (item.types.includes('image/png') || item.types.includes('image/jpeg')) formats.img = true;
+                    if (item.types.includes('text/html')) formats.html = true;
+                }
+
+                document.getElementById('pasteText').disabled = !formats.text;
+                document.getElementById('pasteImg').disabled = !formats.img;
+                document.getElementById('pasteHtml').disabled = !formats.html;
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+            }
+        }
+
+
+        if(isClipboardChangeEventAvailable){
+
+          // Try to read the clipboard to trigger a permissions prompt if required.
+          navigator.clipboard.readText().then(() => {
+
+            // Invoke the on clipboardchange handler on page load to initialize current UI state
+            checkClipboard();
+
+            // Start listening to the clipboardchange event
+            navigator.clipboard.addEventListener("clipboardchange", checkClipboard);
+          });
+
+        }
+        else{
+          // Invoke the on clipboardchange handler on page load to initialize current UI state
+          checkClipboard();
+          // Since clipboardchange event is not available, fallback to polling
+          setInterval(checkClipboard, 2000);
+        }
+    </script>
+</head>
+<body>
+    <h1>Clipboard Format Checker</h1>
+    <button id="pasteText" disabled>Paste as Text</button>
+    <button id="pasteImg" disabled>Paste as Image</button>
+    <button id="pasteCsv" disabled>Paste as CSV</button>
+    <button id="pasteHtml" disabled>Paste as HTML</button>
+</body>
+</html>
