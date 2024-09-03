@@ -272,7 +272,7 @@ Device A. Running `getDetails()` from the newly acquired app would return the fo
 details = {
   installSource: "apps.microsoft.com",
   attributionId: "adCampaign",
-  ...
+  ... // Additional attribution information
 } 
 ```
 
@@ -283,13 +283,15 @@ but on Device B, at which point the `getDetails()` payload would return the foll
 details = {
   installSource: "Sync",
   attributionId: "adCampaign",
-  ...
+  sync: true,
+  ... // Additional attribution information
 } 
 ```
 
-While the `installSource` changes to correctly reflect the app's new install source, the `attributionId` stays the same. This
-ensures that we are able to accurately track which users were impacted by which acquisition campaigns even across devices where
-synced applications are installed.
+While the `installSource` changes to correctly reflect the app's new install source, the `attributionId` and *any other attribution
+information* that existed on Device A is passed on. Addtionally, a boolean property called `sync` is added to the dictionary which
+indicates that the app in question is a synced application brought over from a previous device. This ensures that we are able to
+accurately track which users were historically impacted by which acquisition campaigns, even across devices.
 
 ## Considered Alternatives
 
