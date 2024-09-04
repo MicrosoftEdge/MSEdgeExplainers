@@ -281,17 +281,17 @@ but on Device B, at which point the `getDetails()` payload would return the foll
 
 ```js
 details = {
-  installSource: "Sync",
+  installSource: "apps.microsoft.com",
   attributionId: "adCampaign",
   sync: true,
   ... // Additional attribution information
 } 
 ```
 
-While the `installSource` changes to correctly reflect the app's new install source, the `attributionId` and *any other attribution
-information* that existed on Device A is passed on. Addtionally, a boolean property called `sync` is added to the dictionary which
-indicates that the app in question is a synced application brought over from a previous device. This ensures that we are able to
-accurately track which users were historically impacted by which acquisition campaigns, even across devices.
+The `installSource`, `attributionId`, and *any other attribution information* that existed on Device A is passed on. Addtionally,
+a boolean property called `sync` is added to the dictionary which indicates that the app in question is a synced application
+brought over from a previous device. This ensures that we are able to accurately track which users were historically impacted
+by which acquisition campaigns, even across devices.
 
 ## Considered Alternatives
 
