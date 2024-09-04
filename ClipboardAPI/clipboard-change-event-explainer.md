@@ -59,7 +59,7 @@ The clipboardchange event fires whenever the system clipboard contents are chang
 ## 2. User scenarios
 
 ### 2.1 Scenario: Sync clipboard with a remote desktop
-When a user copies text or an image on their local machine, the web-based remote desktop application can detect that clipboard contents have changed by listening for the `clipboardchange` event. Upon detecting the change, the application can re-read the clipboard and send the updated clipboard content to the remote desktop environment.
+When a user copies text or an image on their local machine, a web-based remote desktop application can detect that clipboard contents have changed by listening for the `clipboardchange` event. Upon detecting the change (which happens when 'clipboardchange' event is triggered on the web app when the page regains focus), the application can re-read the clipboard and send the updated clipboard content to the remote desktop environment.
 
 ![](img/sync-clipboard-scenario.png)
 
@@ -169,7 +169,7 @@ Example: Multiple tabs monitoring clipboard changes for 5 seconds could still ca
 We favour Approach 1 - Page required to be in focus to receive event, since this approach is inline with the current Async clipboard APIs and also reduces the possibility of misusing the clipboard change event in privacy related attacks. Also the approach has relatively lower resource usage.
 
 ### 5.3 Event details 
-Since the clipboardchange event is not triggered by a user action and the event is not associated to any DOM element, hence this event doesn't bubbles and is not cancellable.
+Since the clipboardchange event is not triggered by a user action and the event is not associated to any DOM element, hence this event doesn't bubble up and is not cancellable.
 
 To get the changed clipboard data within the event handler, the [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) can be used to get the current contents of the system clipboard.
 
