@@ -7,6 +7,12 @@
       "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/CrashReporting/AddStackToCrashReports.md"
     },
     {
+      "label": "Canvas 2D Triangle Mesh",
+      "expiration": "2025-06-10",
+      "repo": "fserb/canvas2D",
+      "explainer": "https://github.com/fserb/canvas2D/blob/master/spec/mesh2d.md"
+    },
+    {
       "label": "Capture all screens",
       "expiration": "2025-02-17",
       "repo": "screen-share/capture-all-screens",
@@ -14,15 +20,9 @@
     },
     {
       "label": "Captured Surface Control",
-      "expiration": "2024-12-02",
+      "expiration": "2025-03-17",
       "repo": "screen-share/captured-surface-control",
       "explainer": "https://github.com/screen-share/captured-surface-control/blob/main/README.md"
-    },
-    {
-      "label": "CompressionDictionaryTransport V2",
-      "expiration": "2024-08-06",
-      "repo": "WICG/compression-dictionary-transport",
-      "explainer": "https://github.com/WICG/compression-dictionary-transport"
     },
     {
       "label": "CompressionDictionaryTransport V3",
@@ -55,18 +55,6 @@
       "explainer": "https://github.com/w3c/csswg-drafts/pull/9699"
     },
     {
-      "label": "DisableThirdPartySessionStoragePartitioningAfterGeneralPartitioning",
-      "expiration": "2024-09-03",
-      "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_dd2p0f6kgIwZ9D8",
-      "explainer": "https://github.com/wanderview/quota-storage-partitioning/blob/main/explainer.md"
-    },
-    {
-      "label": "DisableThirdPartyStoragePartitioning",
-      "expiration": "2024-09-03",
-      "feedbackLink": "https://google.qualtrics.com/jfe/form/SV_0qAfKX5h4w9BsVg",
-      "explainer": "https://github.com/wanderview/quota-storage-partitioning/blob/main/explainer.md"
-    },
-    {
       "label": "DisableThirdPartyStoragePartitioning2",
       "expiration": "2025-03-18",
       "repo": "miketaylr/partitioned-storage-deprecation-trial-feedback",
@@ -86,7 +74,7 @@
     },
     {
       "label": "FedCM as a trust signal for the Storage Access API",
-      "expiration": "2024-10-01",
+      "expiration": "2024-12-02",
       "repo": "explainers-by-googlers/storage-access-for-fedcm",
       "explainer": "https://github.com/explainers-by-googlers/storage-access-for-fedcm"
     },
@@ -98,7 +86,7 @@
     },
     {
       "label": "FedCM Continuation API bundle",
-      "expiration": "2024-12-03",
+      "expiration": "2025-01-14",
       "repo": "fedidcg/FedCM",
       "explainer": "https://github.com/fedidcg/FedCM/blob/main/explorations/HOWTO-chrome.md#continuation-api"
     },
@@ -110,9 +98,15 @@
     },
     {
       "label": "FetchLater API",
-      "expiration": "2024-09-03",
+      "expiration": "2025-03-17",
       "repo": "WICG/pending-beacon",
       "explainer": "https://chromium.googlesource.com/chromium/src/+/main/docs/experiments/fetch-later.md"
+    },
+    {
+      "label": "FileSystemObserver interface",
+      "expiration": "2025-05-13",
+      "repo": "whatwg/fs",
+      "explainer": "https://github.com/whatwg/fs/blob/main/proposals/FileSystemObserver.md"
     },
     {
       "label": "Foldable APIs",
@@ -125,6 +119,12 @@
       "expiration": "2025-03-18",
       "feedbackLink": "https://issues.chromium.org/issues/new?component=1363614&template=1922340",
       "explainer": "https://developer.chrome.com/blog/keyboard-focusable-scrollers"
+    },
+    {
+      "label": "Limit Third Party Cookies",
+      "expiration": "2025-01-14",
+      "repo": "privacysandbox/privacy-sandbox-dev-support",
+      "explainer": "https://developers.google.com/privacy-sandbox/3pcd/prepare/debug"
     },
     {
       "label": "Media Previews Opt Out",
@@ -179,12 +179,6 @@
       "expiration": "2025-01-14",
       "feedbackLink": "https://issues.chromium.org/issues/330802493",
       "explainer": "https://docs.google.com/document/d/1wiaTL5TeONTZamycMVMjo76nMcbhHNYznQy7I_zCVRY/edit#heading=h.7nki9mck5t64"
-    },
-    {
-      "label": "StorageAccessAPIBeyondCookies",
-      "expiration": "2024-08-06",
-      "repo": "arichiv/saa-non-cookie-storage",
-      "explainer": "https://arichiv.github.io/saa-non-cookie-storage"
     },
     {
       "label": "Tabbed Web Apps",
