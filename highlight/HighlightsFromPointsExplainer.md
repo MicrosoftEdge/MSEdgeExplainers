@@ -1,6 +1,6 @@
 # HighlightsFromPoint API Explainer
 
-Authors: [Stephanie Zhang](https://github.com/anaskim), [Sanket Joshi](https://github.com/sanketj)
+Authors: [Stephanie Zhang](https://github.com/stephanieyzhang), [Sanket Joshi](https://github.com/sanketj)
 
 Previous authors: [Dan Clark](https://github.com/dandclark), [Luis Sánchez Padilla](https://github.com/luisjuansp)
 
