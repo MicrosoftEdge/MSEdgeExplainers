@@ -1,4 +1,8 @@
-# Events for Highlighted Ranges
+# HighlightsFromPoint API Explainer
+
+Authors: [Stephanie Zhang](https://github.com/anaskim), [Sanket Joshi](https://github.com/sanketj)
+
+Previous authors: [Dan Clark](https://github.com/dandclark), [Luis Sánchez Padilla](https://github.com/luisjuansp)
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -18,11 +22,10 @@ Here are some inspirational examples of how users may interact with highlighted 
 
 
 ## Proposal
-The highlightsFromPoint() API is designed to enhance user interaction with highlighted content on web pages. Highlights are used to visually distinguish specific ranges within a document, such as comments, search results, or spelling errors. This API aims to provide a robust mechanism for identifying and interacting with these highlights, addressing challenges related to multiple overlapping highlights, event coordination, shadow DOM handling, and performance optimization.
+The highlightsFromPoint() API is designed to enhance user interaction with highlighted content on web pages. Highlights are used to visually distinguish specific ranges within a document, such as comments, search results, or spelling errors. This API aims to provide a robust mechanism for identifying and interacting with these highlights, addressing challenges related to multiple overlapping highlights, shadow DOM handling, and performance optimization.
 
 ### Key Considerations 
-- **Multiple Overlapping Highlights**: When multiple highlights overlap (e.g., from a spell-checker and a find-on-page feature), it's crucial to identify all highlights at a specific point. This allows web developers to determine which highlight should receive the event first, ensuring the correct highlight responds to user interactions.
-- **Event Coordination**: Different features might create highlights independently. This API provides a way to coordinate events between these highlights, ensuring each highlight can handle events appropriately without conflicts.
+- **Multiple Overlapping Highlights**: When multiple highlights overlap from different features (e.g., a spell-checker and a find-on-page feature), it's crucial to identify all highlights at a specific point. This ensures that all relevant highlights are accurately identified, enabling web developers to handle overlapping highlights more effectively.
 - **Shadow DOM Handling**: Highlights within shadow DOMs require special handling to maintain encapsulation. The method can be designed to respect shadow DOM boundaries, ensuring highlights inside shadows are managed correctly. This helps maintain the integrity of the shadow DOM while still allowing highlights to be identified and interacted with.
 - **Performance Optimization**: By providing a dedicated API for hit-testing highlights, the method can optimize performance. Instead of relying on more complex and potentially slower methods to determine which highlights are under a specific point, this method offers a streamlined and efficient way to perform this task, improving overall performance.
 
@@ -39,8 +42,6 @@ dictionary HighlightsFromPointOptions {
   sequence<ShadowRoot> shadowRoots = [];
 };
 ```
-
-### Example
 
 ## Alternative Solutions
 While exploring the implementation of the `highlightsFromPoint()` API, we considered adding it to the `DocumentOrShadowRoot` interface. However, we decided against this approach due to the complexities involved in managing shadow DOM encapsulation and to ensure consistency with existing APIs like `caretPositionFromPoint()` and `getHTML()`, which face similar encapsulation challenges.
