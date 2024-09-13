@@ -12,43 +12,40 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [clipboardchange event API explainer](#clipboardchange-event-api-explainer)
-  - [Authors:](#authors)
-  - [Participate](#participate)
-  - [Table of Contents](#table-of-contents)
-  - [1. Introduction](#1-introduction)
-  - [2. User scenarios](#2-user-scenarios)
-    - [2.1 Scenario: Sync clipboard with a remote desktop](#21-scenario-sync-clipboard-with-a-remote-desktop)
-    - [2.2 Scenario: Show available paste formats in web based editors](#22-scenario-show-available-paste-formats-in-web-based-editors)
-      - [2.2.1 Copy multiple cells should show multiple paste options in Excel online](#221-copy-multiple-cells-should-show-multiple-paste-options-in-excel-online)
-      - [2.2.2 Copy plain text should show only single paste option in Excel online](#222-copy-plain-text-should-show-only-single-paste-option-in-excel-online)
-      - [2.2.3 Multiple paste options in Google sheets](#223-multiple-paste-options-in-google-sheets)
-  - [3. Motivation - Alternative to inefficient polling of clipboard](#3-motivation---alternative-to-inefficient-polling-of-clipboard)
-  - [4. Example javascript code for detecting clipboard changes:](#4-example-javascript-code-for-detecting-clipboard-changes)
-  - [5. Event spec details and open questions](#5-event-spec-details-and-open-questions)
-    - [5.1 User permission requirement](#51-user-permission-requirement)
-      - [5.1.1 Approach 1 (Preferred) - clipboard-read permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-read-permission-required-to-listen-to-clipboardchange-event)
-        - [Pros](#pros)
-        - [Cons](#cons)
-      - [5.1.2 Approach 2 - No permission required](#512-approach-2---no-permission-required)
-        - [Pros](#pros-1)
-        - [Cons](#cons-1)
-      - [5.1.3 Conclusion](#513-conclusion)
-    - [5.2 Page focus requirement](#52-page-focus-requirement)
-      - [5.2.1 Approach 1 (Preferred) - Page required to be in focus to receive event](#521-approach-1-preferred---page-required-to-be-in-focus-to-receive-event)
-        - [Pros](#pros-2)
-        - [Cons](#cons-2)
-      - [5.2.2 Approach 2 - No focus requirement](#522-approach-2---no-focus-requirement)
-        - [Pros:](#pros-3)
-        - [Cons:](#cons-3)
-      - [5.2.3 Approach 3 - Transient user activation](#523-approach-3---transient-user-activation)
-        - [Pros:](#pros-4)
-        - [Cons:](#cons-4)
-      - [5.2.4 Conclusion](#524-conclusion)
-    - [5.3 Event details](#53-event-details)
-  - [6 Appendix](#6-appendix)
-    - [6.1 APIs provided by all OS to listen to clipboardchange event:](#61-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
-  - [7 References \& acknowledgements](#7-references--acknowledgements)
+- [1. Introduction](#1-introduction)
+- [2. User scenarios](#2-user-scenarios)
+  - [2.1 Scenario: Sync clipboard with a remote desktop](#21-scenario-sync-clipboard-with-a-remote-desktop)
+  - [2.2 Scenario: Show available paste formats in web based editors](#22-scenario-show-available-paste-formats-in-web-based-editors)
+    - [2.2.1 Copy multiple cells should show multiple paste options in Excel online](#221-copy-multiple-cells-should-show-multiple-paste-options-in-excel-online)
+    - [2.2.2 Copy plain text should show only single paste option in Excel online](#222-copy-plain-text-should-show-only-single-paste-option-in-excel-online)
+    - [2.2.3 Multiple paste options in Google sheets](#223-multiple-paste-options-in-google-sheets)
+- [3. Motivation - Alternative to inefficient polling of clipboard](#3-motivation---alternative-to-inefficient-polling-of-clipboard)
+- [4. Example javascript code for detecting clipboard changes:](#4-example-javascript-code-for-detecting-clipboard-changes)
+- [5. Event spec details and open questions](#5-event-spec-details-and-open-questions)
+  - [5.1 User permission requirement](#51-user-permission-requirement)
+    - [5.1.1 Approach 1 (Preferred) - clipboard-read permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-read-permission-required-to-listen-to-clipboardchange-event)
+      - [Pros](#pros)
+      - [Cons](#cons)
+      - [5.1.1.1 Permissions policy integration in iframe and fencedframe](#5111-permissions-policy-integration-in-iframe-and-fencedframe)
+    - [5.1.2 Approach 2 - No permission required](#512-approach-2---no-permission-required)
+      - [Pros](#pros-1)
+      - [Cons](#cons-1)
+    - [5.1.3 Conclusion](#513-conclusion)
+  - [5.2 Page focus requirement](#52-page-focus-requirement)
+    - [5.2.1 Approach 1 (Preferred) - Page required to be in focus to receive event](#521-approach-1-preferred---page-required-to-be-in-focus-to-receive-event)
+      - [Pros](#pros-2)
+      - [Cons](#cons-2)
+    - [5.2.2 Approach 2 - No focus requirement](#522-approach-2---no-focus-requirement)
+      - [Pros:](#pros)
+      - [Cons:](#cons)
+    - [5.2.3 Approach 3 - Transient user activation](#523-approach-3---transient-user-activation)
+      - [Pros:](#pros-1)
+      - [Cons:](#cons-1)
+    - [5.2.4 Conclusion](#524-conclusion)
+  - [5.3 Event details](#53-event-details)
+- [6 Appendix](#6-appendix)
+  - [6.1 APIs provided by all OS to listen to clipboardchange event:](#61-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
+- [7 References & acknowledgements](#7-references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -108,17 +105,34 @@ Since the clipboard contains privacy-sensitive data, we should protect access to
 
 Web apps can request for the clipboard-read permissions by performing a read operation using one of [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api). 
 
+Reading the clipboard before listening to "clipboardchange" event fits into the typical use case of monitoring clipboard changes - before initiating listening to clipboard, a web page would likely execute the same logic which is executed when a clipboardchange event is triggered. Example - in Scenario 2.2, on page load complete, the web app would likely highlight the paste formats available on the UI as per the current clipboard contents which is the same logic that is executed on "clipboardchange" event. This logic would involve reading the clipboard hence it can be a way to prompt for the "clipboard-read" permissions before starting to listen to the event.
+
 In future, we may have additional ways of prompting the user for permissions - 1) By explicitly requesting for "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158). 2) The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners. 3) The user can be prompted for permissions just before the browser dispatches the "clipboardchange" event. This way, the permissions prompt would appear only when required by the browser however web authors won't have control over when the prompt would be triggered which might not be desirable.  
 
+
 ##### Pros
-1. This approach aligns with the security model for other clipboard APIs and similar APIs that allow access to sensitive information.
-2. Ensures user consent before accessing clipboard data.
+1. Since clipboard can be changed by a user action, the information regarding when the clipboard has changed can be considered a user private data. Having the permissions check ensures that this privacy sensitive information is protected by user consent.
+2. This approach aligns with the security model for other clipboard APIs.
 
 ##### Cons
 1. This approach imposes a small restriction on web authors as they have to call a clipboard read API method before starting to listen for the clipboardchange event.
 
+##### 5.1.1.1 Permissions policy integration in iframe and fencedframe
+
+Listening to "clipboardchange" event within a cross-origin iframe can be enabled with [Permissions Policy](https://www.w3.org/TR/permissions-policy) which allows for selectively enabling and disabling specific browser features and APIs. Specifically, "clipboard-read" permission needs to be passed to the "allow" attribute of the iframe, similar to how this is required for accessing async clipboard read APIs within a cross-origin iframe.
+
+```html
+<iframe
+    src="https://other-domain.com/will-monitor-clipboard.html"
+    allow="clipboard-read;"
+>
+</iframe>
+```
+
+This event is not accessible within a "fencedframe" since the clipboard and the clipboardchange event could be used as a communication channel between the host and the fencedframe, so constitute a privacy threat.
+
 #### 5.1.2 Approach 2 - No permission required
-Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event.
+Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event. It can also be noted that there is no identified incremental security risk in providing the "clipboardchange" event to web authors since this event doesn't allow the site to modify the system in any way - it simply tells when the clipboard contents have changed.
 
 ##### Pros
 1. Simpler implementation and user experience
