@@ -10,7 +10,7 @@
 
 [`IndexedDB`](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) is a transactional database for client-side storage.  Each record in the database contains a key-value pair.  [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) enumerates database record values sorted by key in ascending order.  [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) enumerates database record primary keys sorted by key in ascending order.
 
-This explainer proposes a new operation, `getAllEntries()`, which combines [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) with [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) to enumerate both primary keys and values at the same time.  For an [`IDBIndex`](https://developer.mozilla.org/en-US/docs/Web/API/IDBIndex), `getAllEntries()` also provides the record's index key in addition to the primary key and value.  Lastly, `getAllEntries()` offers a new option to enumerate records in sorted by key in descending order.
+This explainer proposes a new operation, `getAllEntries()`, which combines [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) with [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) to enumerate both primary keys and values at the same time.  For an [`IDBIndex`](https://developer.mozilla.org/en-US/docs/Web/API/IDBIndex), `getAllEntries()` also provides the record's index key in addition to the primary key and value.  Lastly, `getAllEntries()` offers a new option to enumerate records sorted by key in descending order.
 
 ## WebIDL
 
@@ -23,7 +23,8 @@ dictionary IDBGetAllEntriesOptions {
 
 [Exposed=(Window,Worker)]
 partial interface IDBObjectStore {
-  // After `getAllEntries()` completes, the `IDBRequest::result` property contains an array of entries:
+  // After the `getAllEntries()` request completes, the `IDBRequest::result` property
+  // contains an array of entries:
   // `[[primaryKey1, value1], [primaryKey2, value2], ... ]`  
   [NewObject, RaisesException]
   IDBRequest getAllEntries(optional IDBGetAllEntriesOptions options = {});
@@ -47,9 +48,9 @@ For batched record iteration, for example, retrieving N records at a time, the p
 
 ## Key scenarios
 
-### Batched record iteration a.k.a. paginated cursors
+### Support paginated cursors using batched record iteration
 
-Many scenarios read N database records at a time, waiting to read the next batch of records until needed.  For example, a UI may display N records, starting with the last record in descending order.  As the user scrolls, the UI will display new content by reading the next N records.  
+Many scenarios read N database records at a time, waiting to read the next batch of records until needed.  For example, a UI may display N records, starting with the last record in descending order.  As the user scrolls, the UI will display new content by reading the next N records.
 
 To support this access pattern, the UI calls `getAllEntries()` with the options `direction: 'prev'` and `count: N` to retrieve N records at a time in descending order.  After the initial batch, the UI must specify the upper bound of the next batch using the primary key or index key from the `getAllEntries()` results of the previous batch.
 
@@ -114,10 +115,8 @@ function reverse_idb_index_iterator(
     
     if (entries.length > 0) {
       // Store the upper bound for the next iteration.
-      const last_entry_array_index = (entries.length - 1);
-      const last_entry = entries[last_entry_array_index];
-      const last_entry_index_key = last_entry[2];
-      next_upper_bound = last_entry_index_key;
+      const last_entry = entries[entries.length-1];
+      next_upper_bound = /*index_key=*/last_entry[2];
     } else {
       // We've iterated through all the database records!
       done = true;
@@ -126,7 +125,7 @@ function reverse_idb_index_iterator(
   };
 };
 
-// Get the last 5 records in the 'IDBIndex'.
+// Get the last 5 records in the `IDBIndex` named `my_index`.
 const reverse_iterator = new reverse_idb_index_iterator(
   database, 'my_object_store', 'my_index', /*batch_size=*/5);
 
