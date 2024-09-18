@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,7 +21,7 @@
                         document.getElementById('clipboardText').innerText = text;
                         formats.text = true;
                     }
-                    else{
+                    else {
                         document.getElementById('clipboardText').innerText = "N/A";
                     }
                     if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
@@ -29,7 +30,7 @@
                         document.getElementById('clipboardImg').innerHTML = `<img src="${imgUrl}" alt="Clipboard Image" width="150">`;
                         formats.img = true;
                     }
-                    else{
+                    else {
                         document.getElementById('clipboardImg').innerText = "N/A";
                     }
                     if (item.types.includes('text/html')) {
@@ -38,7 +39,7 @@
                         document.getElementById('clipboardHtml').innerText = html;
                         formats.html = true;
                     }
-                    else{
+                    else {
                         document.getElementById('clipboardHtml').innerText = "N/A";
                     }
                 }
@@ -52,48 +53,49 @@
         }
 
 
-        if(isClipboardChangeEventAvailable){
+        if (isClipboardChangeEventAvailable) {
 
-          // Try to read the clipboard to trigger a permissions prompt if required.
-          navigator.clipboard.readText().then(() => {
+            // Try to read the clipboard to trigger a permissions prompt if required.
+            navigator.clipboard.readText().then(() => {
 
-            console.log("Clipboard read permission granted");
+                console.log("Clipboard read permission granted");
 
-            // Invoke the on clipboardchange handler on page load to initialize current UI state
-            checkClipboard();
+                // Invoke the on clipboardchange handler on page load to initialize current UI state
+                checkClipboard();
 
-            // Start listening to the clipboardchange event
-            navigator.clipboard.addEventListener("clipboardchange", checkClipboard);
-          });
+                // Start listening to the clipboardchange event
+                navigator.clipboard.addEventListener("clipboardchange", checkClipboard);
+            });
 
         }
-        else{
-          // Invoke the on clipboardchange handler on page load to initialize current UI state
-          checkClipboard();
-          // Since clipboardchange event is not available, fallback to polling
-          setInterval(checkClipboard, 2000);
+        else {
+            // Invoke the on clipboardchange handler on page load to initialize current UI state
+            checkClipboard();
+            // Since clipboardchange event is not available, fallback to polling
+            setInterval(checkClipboard, 2000);
         }
     </script>
 </head>
+
 <body>
     <h1>Clipboardchange event demo app - Paste formats viewer</h1>
     <p>
-        This HTML application demonstrates the use of the clipboardchange event to monitor 
-        and display clipboard data in various formats. The app listens for changes to the 
-        clipboard using the clipboardchange event. It then displays the clipboard data in a table 
+        This HTML application demonstrates the use of the clipboardchange event to monitor
+        and display clipboard data in various formats. The app listens for changes to the
+        clipboard using the clipboardchange event. It then displays the clipboard data in a table
         with columns for Text, Image, and HTML formats.
-        <br/>
+        <br />
         When the clipboard content changes, the app updates the table to show the current clipboard data.
-        The app includes buttons for pasting clipboard data as Text, Image, and HTML. 
+        The app includes buttons for pasting clipboard data as Text, Image, and HTML.
         These buttons are initially disabled and are enabled based on the available clipboard formats.
 
     </p>
-    <hr/>
+    <hr />
     <button id="pasteText" disabled>Paste as Text</button>
     <button id="pasteImg" disabled>Paste as Image</button>
     <button id="pasteHtml" disabled>Paste as HTML</button>
-    <br/>
-    <hr/>
+    <br />
+    <hr />
     <table border="1">
         <thead>
             <tr>
@@ -111,4 +113,5 @@
         </tbody>
     </table>
 </body>
+
 </html>

@@ -26,7 +26,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
     - [5.1.1 Approach 1 (Preferred) - clipboard-read permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-read-permission-required-to-listen-to-clipboardchange-event)
       - [Pros](#pros)
       - [Cons](#cons)
-      - [5.1.1.1 Permissions policy integration in iframe and fencedframe](#5111-permissions-policy-integration-in-iframe-and-fencedframe)
+      - [5.1.1.1 Permissions policy integration in cross-origin iframes](#5111-permissions-policy-integration-in-cross-origin-iframes)
     - [5.1.2 Approach 2 - No permission required](#512-approach-2---no-permission-required)
       - [Pros](#pros-1)
       - [Cons](#cons-1)
@@ -45,7 +45,10 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
   - [5.3 Event details](#53-event-details)
 - [6 Appendix](#6-appendix)
   - [6.1 APIs provided by all OS to listen to clipboardchange event:](#61-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
-- [7 References & acknowledgements](#7-references--acknowledgements)
+- [7 Open issues](#7-open-issues)
+  - [7.1 Future permission prompting mechanisms](#71-future-permission-prompting-mechanisms)
+  - [7.2 Fencedframe](#72-fencedframe)
+- [8 References & acknowledgements](#8-references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -105,9 +108,6 @@ Since the clipboard contains privacy-sensitive data, we should protect access to
 
 Web apps can request for the clipboard-read permissions by performing a read operation using one of [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api). Reading the clipboard before starting to listen to clipboard changes (to build the intial state) is a typical sequence of actions in web apps that would use the "clipboardchange" event.
 
-In future, we may have additional ways of prompting the user for permissions - 1) By explicitly requesting for "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158). 2) The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners. 3) The user can be prompted for permissions just before the browser dispatches the "clipboardchange" event. This way, the permissions prompt would appear only when required by the browser however web authors won't have control over when the prompt would be triggered which might not be desirable.  
-
-
 ##### Pros
 1. Since clipboard can be changed by a user action, the information regarding when the clipboard has changed can be considered a user private data. Having the permissions check ensures that this privacy sensitive information is protected by user consent.
 2. This approach aligns with the security model for other clipboard APIs.
@@ -115,7 +115,7 @@ In future, we may have additional ways of prompting the user for permissions - 1
 ##### Cons
 1. This approach imposes a small restriction on web authors as they have to call a clipboard read API method before starting to listen for the clipboardchange event.
 
-##### 5.1.1.1 Permissions policy integration in iframe and fencedframe
+##### 5.1.1.1 Permissions policy integration in cross-origin iframes
 
 Listening to "clipboardchange" event within a cross-origin iframe can be enabled with [Permissions Policy](https://www.w3.org/TR/permissions-policy) which allows for selectively enabling and disabling specific browser features and APIs. Specifically, "clipboard-read" permission needs to be passed to the "allow" attribute of the iframe, similar to how this is required for accessing async clipboard read APIs within a cross-origin iframe.
 
@@ -126,8 +126,6 @@ Listening to "clipboardchange" event within a cross-origin iframe can be enabled
 >
 </iframe>
 ```
-
-This event is not accessible within a "fencedframe" since the clipboard and the clipboardchange event could be used as a communication channel between the host and the fencedframe, so constitute a privacy threat.
 
 #### 5.1.2 Approach 2 - No permission required
 Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event. It can also be noted that there is no identified incremental security risk in providing the "clipboardchange" event to web authors since this event doesn't allow the site to modify the system in any way - it simply tells when the clipboard contents have changed.
@@ -148,7 +146,6 @@ As per the [current spec](https://www.w3.org/TR/clipboard-apis/#clipboard-event-
 
 ##### Pros
 1. This is in-line with current async clipboard focus APIs which require focus to access.
-2. Can simplify implementation since browsers can simply check for clipboard change on page focus. However, this needs to be further investigated.
 
 ##### Cons
 1. Might restrict web app scenarios which need to listen to clipboardchange events in the background.
@@ -199,7 +196,17 @@ Considered alternative - DataTransfer API: As per the current spec, the clipboar
 | ChromeOS      | TBD                                                                                                                                                                                                                                                                                                                         |
 | Android / iOS | TBD                                                                                                                                                                                                                                                                                                                         |
 
-## 7 References & acknowledgements
+## 7 Open issues
+
+### 7.1 Future permission prompting mechanisms
+
+In future, we may have additional ways of prompting the user for permissions - 1) By explicitly requesting for "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158). 2) The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners. 3) The user can be prompted for permissions just before the browser dispatches the "clipboardchange" event. This way, the permissions prompt would appear only when required by the browser however web authors won't have control over when the prompt would be triggered which might not be desirable.  
+
+### 7.2 Fencedframe
+
+The clipboardchange event could be used as a communication channel between the host and the fencedframe, constituting a privacy threat. Hence the feasibility of this event within a fencedframe needs to be discussed.
+
+## 8 References & acknowledgements
 
 Many thanks for valuable feedback and advice from:
 
