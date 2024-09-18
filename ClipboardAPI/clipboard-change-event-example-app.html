@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clipboard Format Checker</title>
+    <script>
+        const isClipboardChangeEventAvailable = true;
+
+        async function checkClipboard() {
+            try {
+                console.log("Clipboard changed!");
+                const clipboardItems = await navigator.clipboard.read();
+                let formats = {};
+
+                for (const item of clipboardItems) {
+                    if (item.types.includes('text/plain')) {
+                        const textBlob = await item.getType('text/plain');
+                        const text = await textBlob.text();
+                        document.getElementById('clipboardText').innerText = text;
+                        formats.text = true;
+                    }
+                    else {
+                        document.getElementById('clipboardText').innerText = "N/A";
+                    }
+                    if (item.types.includes('image/png') || item.types.includes('image/jpeg')) {
+                        const imgBlob = await item.getType(item.types.find(type => type.startsWith('image/')));
+                        const imgUrl = URL.createObjectURL(imgBlob);
+                        document.getElementById('clipboardImg').innerHTML = `<img src="${imgUrl}" alt="Clipboard Image" width="150">`;
+                        formats.img = true;
+                    }
+                    else {
+                        document.getElementById('clipboardImg').innerText = "N/A";
+                    }
+                    if (item.types.includes('text/html')) {
+                        const htmlBlob = await item.getType('text/html');
+                        const html = await htmlBlob.text();
+                        document.getElementById('clipboardHtml').innerText = html;
+                        formats.html = true;
+                    }
+                    else {
+                        document.getElementById('clipboardHtml').innerText = "N/A";
+                    }
+                }
+
+                document.getElementById('pasteText').disabled = !formats.text;
+                document.getElementById('pasteImg').disabled = !formats.img;
+                document.getElementById('pasteHtml').disabled = !formats.html;
+            } catch (err) {
+                console.error('Failed to read clipboard contents: ', err);
+            }
+        }
+
+
+        if (isClipboardChangeEventAvailable) {
+
+            // Try to read the clipboard to trigger a permissions prompt if required.
+            navigator.clipboard.readText().then(() => {
+
+                console.log("Clipboard read permission granted");
+
+                // Invoke the on clipboardchange handler on page load to initialize current UI state
+                checkClipboard();
+
+                // Start listening to the clipboardchange event
+                navigator.clipboard.addEventListener("clipboardchange", checkClipboard);
+            });
+
+        }
+        else {
+            // Invoke the on clipboardchange handler on page load to initialize current UI state
+            checkClipboard();
+            // Since clipboardchange event is not available, fallback to polling
+            setInterval(checkClipboard, 2000);
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Clipboardchange event demo app - Paste formats viewer</h1>
+    <p>
+        This HTML application demonstrates the use of the clipboardchange event to monitor
+        and display clipboard data in various formats. The app listens for changes to the
+        clipboard using the clipboardchange event. It then displays the clipboard data in a table
+        with columns for Text, Image, and HTML formats.
+        <br />
+        When the clipboard content changes, the app updates the table to show the current clipboard data.
+        The app includes buttons for pasting clipboard data as Text, Image, and HTML.
+        These buttons are initially disabled and are enabled based on the available clipboard formats.
+
+    </p>
+    <hr />
+    <button id="pasteText" disabled>Paste as Text</button>
+    <button id="pasteImg" disabled>Paste as Image</button>
+    <button id="pasteHtml" disabled>Paste as HTML</button>
+    <br />
+    <hr />
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Text</th>
+                <th>Image</th>
+                <th>HTML</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="clipboardText">N/A</td>
+                <td id="clipboardImg">N/A</td>
+                <td id="clipboardHtml">N/A</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
