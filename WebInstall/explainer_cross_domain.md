@@ -54,13 +54,13 @@ const installApp = async (manifest_id, install_url) => {
             case 'AbortError':
                 /* Operation was aborted*/
                 break;
-           
+
         }
     }
 };
 ```
 
-  ![Install flow from an app repository](./apprepositoryinstallation.png) 
+  ![Install flow from an app repository](./apprepositoryinstallation.png)
 
 ## Proposed Solution
 
@@ -75,12 +75,12 @@ To install a web app, a web site would use the promise-based method `navigator.i
     * `AbortError`: The installation (prompt) was closed/cancelled.
 
 
-![Promises resolve/reject flow](./installPromises.png) 
+![Promises resolve/reject flow](./installPromises.png)
 
 #### **Signatures of the `install` method (cross-origin)**
 The cross-origin part of the Web Install API consists of the extension to the navigator interface with an `install` method. This method receives:
-* `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. This value must match the id specified in the manifest file. 
-* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. An `install_url` must not redirect nor contain extra content that is not relevant for installation purposes. In the absence of an `install_url`, the value defaults to that of the manifest's `start_url`.
+* `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. This value must match the id specified in the manifest file.
+* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. An `install_url` must not redirect nor contain extra content that is not relevant for installation purposes.
 * optional [parameters](#parameters).
 
 If the `manifest_id` is the *what* to install, the `install_url` is the *where* to find it.
@@ -94,7 +94,7 @@ This will prompt for installation of the app if the requesting origin has instal
 #### **Parameters**
 
 The `navigator.install` call can receive an object with a set of parameters that specify different installation behaviours for the app. It is also a way to future-proof the API if additional data were required with the call.
-* **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain. This information can later be retrieved inside the installed application via the [Acquisition Info API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md). 
+* **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain. This information can later be retrieved inside the installed application via the [Acquisition Info API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md).
 
 #### **Installing the web app**
 
@@ -104,8 +104,8 @@ To install a same domain web site/app, the process is as follows:
 3. If the target content is a web app with a manifest, check if the domain is in the list of [allowed origins](#install-sources-manifest-field) to install said content. If the target content is not a web app, it can't be installed.
 3. Prompt the user for install confirmation. User is given a choice about whether to install the target content or not.
 4. If the users accepts, the content is installed.
-5. UA default action post-install (generally the app will open/be added to homescreen/start menu/dock). 
- 
+5. UA default action post-install (generally the app will open/be added to homescreen/start menu/dock).
+
 ### The `navigator.getInstalledApps` method
 
 If supported by the UA, the `getInstalledApps` method returns a list of the content that has been installed from *that* installation origin which is still installed on the device at the time of execution. This is an **async** method of the `navigator` interface that allows the installation origin to know which applications it has installed.
@@ -116,13 +116,13 @@ Additionally, if the browser has an active 'Do Not Track (DNT)', equivalent 'Glo
 
 * The approach for showing which apps have been installed from this origin follows the same API approach where the information is accessible if it matches a [partition key](https://github.com/kyraseevers/Partitioning-visited-links-history#general-api-approach), instead of just the link URL. This ensures installed apps can be seen only from the origin matching all parts of the key.
 
-## Relation with other web APIs/features 
+## Relation with other web APIs/features
 
 * **`navigator.install` and Permissions API:** see [integrations with the Permissions API](#integration-with-the-permissions-api).
 
 * **`navigator.install` and manifest file's `prefer_related_applications`:** When the `related_applications` and `prefer_related_applications` key/values are present in the manifest, the UA should try to handoff the install to the prefered catalog. If this is not possible then it fallback to a default UA install.
 
-* **`navigator.getInstalledApps` and `getInstalledRelatedApps`:** `getInstalledApps` is called from an origin and can list applications that are installed on the device originating from the current site. `getInstalledRelatedApps` on the other hand is called from a web app and returns which alternate versions of an app (platform specific versions for example) are already installed on the device. 
+* **`navigator.getInstalledApps` and `getInstalledRelatedApps`:** `getInstalledApps` is called from an origin and can list applications that are installed on the device originating from the current site. `getInstalledRelatedApps` on the other hand is called from a web app and returns which alternate versions of an app (platform specific versions for example) are already installed on the device.
     * `getInstalledApps` can be used to change install UX in online stores if an app is already installed (changing the text on a button from "Install" to "Open" for example).
     * `getInstalledRelatedApps` can be used to "mute" notifications or hide install UI for a web application if an alternate version of the app is already installed (avoid duplicate notifications if a user has a web version and a platform-specific version of the same app for exmaple).
 
@@ -146,7 +146,7 @@ For cross-origin content, the target content must have an [`install_sources`](#i
 
 * This API can only be invoked in a top-level navigable and be invoked from a [secure context](https://w3c.github.io/webappsec-secure-contexts/).
 
-* The biggest risk for the API is installation spamming. To minimize this behaviour, installing a PWA using the Web Install API requires a [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event).   
+* The biggest risk for the API is installation spamming. To minimize this behaviour, installing a PWA using the Web Install API requires a [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event).
 
 * A new permission type will be introduced for an origin, that would allow it to install web apps. The first time a website requests to install an app (use the API) the UA will prompt the user to confirm that the website can install other apps into the device. This prompt is similar to that of other permissions like geolocation or camera/microphone. The UA can decide how to implement this prompt.
 
@@ -211,7 +211,7 @@ In both cases of the default UA behaviour, developers can use the `install_sourc
     "name": "Awesome PWA",
     "display": "standalone",
     "start_url": "/index.html",
-    "install_sources": [ 
+    "install_sources": [
         {"origin": "https://apps.microsoft.com", "action": "allow"},
         {"origin": "https://store.app", "action": "allow"}
         {"origin": "https://anotherstore.com", "action": "deny"}
