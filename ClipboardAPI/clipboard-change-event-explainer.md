@@ -211,6 +211,7 @@ The clipboardchange event could be used as a communication channel between the h
 Many thanks for valuable feedback and advice from:
 
 - Luke Klimek (zgroza@chromium.org)
+- Mike Jackson (mjackson@microsoft.com)
 - Prashant Nevase (pnevase@microsoft.com)
 - Rakesh Goulikar (ragoulik@microsoft.com)
 - Sanket Joshi (sajos@microsoft.com)
