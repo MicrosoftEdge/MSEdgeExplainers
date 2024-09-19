@@ -50,7 +50,7 @@ The Web Install API enables installation of cross-origin web applications. A web
 
 ### **Websites installing their web apps**
 
-Picture a user browsing on their favorite video streaming web app. The user might browse to this web app daily, yet not be aware that there is a way that they can get the app directly from the app's UI. This could be through a button that the webapp would be able to implement, that would trigger the installation.
+Picture a user browsing on their favorite video streaming web app. The user might browse to this web app daily, yet not be aware that there is a way that they can install the app directly from the app's UI. This could be through a button that the webapp would be able to implement, that would trigger the installation.
 
 The website can also provide a way to directly acquire other applications it might offer, like a dedicated "kids" version of the app, or a "sports" version of the app. The developer is in control and can effectively advertise and control their applications, which having to redirect users to platform-specific propriatery repositories, which is what happens now. 
 
