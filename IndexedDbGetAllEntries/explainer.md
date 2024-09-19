@@ -16,8 +16,14 @@ This explainer proposes a new operation, `getAllEntries()`, which combines [`get
 
 ```js
 dictionary IDBGetAllEntriesOptions {
-  any query = null; // A key or an `IDBKeyRange` identifying the records to retrieve.
+  // A key or an `IDBKeyRange` identifying the records to retrieve.
+  any query = null;
+
+  //  The maximum number of results to retrieve.
   [EnforceRange] unsigned long count;
+
+  // Determines how to enumerate and sort results.
+  // Use 'prev' to enumerate and sort results by key in descending order.
   IDBCursorDirection direction = 'next';
 }; 
 
