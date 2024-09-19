@@ -36,7 +36,7 @@ Moreover, the **Web Install API feature is beneficial for app discovery**: it al
 ## Non-goals
 
 * Install same-origin content (see [Web Install - same-origin explainer](./explainer_same_domain.md)).
-* Install arbitrary web content that is not an app (target must have a manifest file and an id). [Reasons expanded here](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
+* Install arbitrary web content that is not an app (target must have a manifest file and an `id` or `start_url`). [Reasons expanded here](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
 * Change the way the UA currently prompts for installation of a web app.
 * Associate ratings and reviews with the installed app ([see Ratings and Reviews API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RatingsAndReviewsPrompt/explainer.md)).
 * Process payments for installation of PWAs ([see Payment Request API](https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API)).
