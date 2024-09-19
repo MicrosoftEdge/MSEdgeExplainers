@@ -120,7 +120,7 @@ The `navigator.install` call can receive an object with a set of parameters that
 
 To install a same domain web site/app, the process is as follows:
 1. Origin site that triggers the installation must have installation permissions as it tries to install a cross-origin app.
-2. target site/app must comply with *[installability criteria](#installability-criteria), if any*.
+2. Target site/app must comply with *[installability criteria](#installability-criteria), if any*.
 3. If the target content is not a web app, it can't be installed.
 4. Prompt the user for install confirmation. User is given a choice about whether to install the target content or not.
 5. If the users accepts, the content is installed.
