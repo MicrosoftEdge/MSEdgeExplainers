@@ -16,7 +16,7 @@ The acquisition of an web app can originate via multiple user flows that general
 
 The current alternative to the Web Install API implies the user needs to rely on search engines, app stores, proprietary protocols, proprietary "smart" banners, UA prompts, hidden UX and other means that take the user out of their navigating context. They also represent additional steps towards the acquisition of the app.
 
-Inherently, these alternative user flows to "install" an app rely on multi-step processes that at best require a couple of clicks to navigate to an origin and install it, and at worst involve the user searching on browser menus for a way to add the app to their device. The Web platform is not capable of providing a seamless, consistent experience that allows users to discover and acquire applications in a frictionless manner. Every additional step in the acquisition funnel for web apps comes with an additional drop off rate as well. 
+Inherently, these alternative user flows to "install" an app rely on multi-step processes that at best require a couple of clicks to navigate to an origin and install it, and at worst involve the user searching on browser menus for a way to add the app to their device. The web platform is not capable of providing a seamless, consistent experience that allows users to discover and acquire applications in a frictionless manner. Every additional step in the acquisition funnel for web apps comes with an additional drop off rate as well. 
 
 Moreover, the **Web Install API feature is beneficial for app discovery**: it allows developers to create their own acquisition mechanism and tailor it to benefit users that:
 * might not know that a web app exists for the current origin.
@@ -36,7 +36,7 @@ Moreover, the **Web Install API feature is beneficial for app discovery**: it al
 ## Non-goals
 
 * Install same-origin content (see [Web Install - same-origin explainer](./explainer_same_domain.md)).
-* Install arbitrary web content that is not an app (target must have a manifest file and an id). [Reasons expanded here](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
+* Install arbitrary web content that is not an app (target must have a manifest file and an `id` or `start_url`). [Reasons expanded here](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
 * Change the way the UA currently prompts for installation of a web app.
 * Associate ratings and reviews with the installed app ([see Ratings and Reviews API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RatingsAndReviewsPrompt/explainer.md)).
 * Process payments for installation of PWAs ([see Payment Request API](https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API)).
@@ -50,7 +50,7 @@ The Web Install API enables installation of cross-origin web applications. A web
 
 ### **Websites installing their web apps**
 
-Picture a user browsing on their favorite video streaming web app. The user might browse to this web app daily, yet not be aware that there is a way that they can get the app directly from the app's UI. This could be through a button that the webapp would be able to implement, that would trigger the installation.
+Picture a user browsing on their favorite video streaming web app. The user might browse to this web app daily, yet not be aware that there is a way that they can install the app directly from the app's UI. This could be through a button that the webapp would be able to implement, that would trigger the installation.
 
 The website can also provide a way to directly acquire other applications it might offer, like a dedicated "kids" version of the app, or a "sports" version of the app. The developer is in control and can effectively advertise and control their applications, which having to redirect users to platform-specific propriatery repositories, which is what happens now. 
 
@@ -120,7 +120,7 @@ The `navigator.install` call can receive an object with a set of parameters that
 
 To install a cross domain web site/app, the process is as follows:
 1. Origin site that triggers the installation must have installation permissions as it tries to install a cross-origin app.
-2. target site/app must comply with *[installability criteria](#installability-criteria), if any*.
+2. Target site/app must comply with *[installability criteria](#installability-criteria), if any*.
 3. If the target content is not a web app, it can't be installed.
 4. Prompt the user for install confirmation. User is given a choice about whether to install the target content or not.
 5. If the users accepts, the content is installed.
