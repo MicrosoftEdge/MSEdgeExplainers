@@ -10,16 +10,25 @@ This document is a starting point for engaging the community and standards bodie
 
 ##  Introduction
 
-Current paradigms of application discovery involve a user going to an application repository to search and install apps. These repositories are generally curated and have a level of trust associated by the user. They play a vital role in allowing a user to acquire high quality apps. Application repositories are valuable because they help developers acquire users, which incentivises developers to create better apps on the web platform.
+As Web applications are becoming more ubiquitous, there are growing needs to aid discovery and distribution of said applications. **The Web Install API provides a way to democratise and decentralise web application acquisition**, by enabling ["do-it-yourself" developers to have control](https://www.w3.org/TR/ethical-web-principles/#control) over the application discovery and distribution process, providing them with the tools they need to allow a web site to install a web app.
 
-While this is the general acquisition flow on many platforms, the web does not have the ability to replicate this scenario because it can not install applications. This makes it impossible for a web app (repository, catalog, store) to install and distribute other applications.
+The acquisition of an web app can originate via multiple user flows that generally involve search, navigation, and ultimately trust that the UA will prompt or provide some sort of UX that support "[installing](https://web.dev/articles/install-criteria)/[adding](https://support.apple.com/en-gb/guide/safari/ibrw9e991864/mac)" the desired app. There are multiple use cases for this feature, as seen in the [use case](#use-cases) section, but *the core concept is the installation of a web app directly from a web page*.
 
-**The Web Install API** addresses this shortcoming in the platform. It **allows a web site to install a web app *([same](./explainer_same_domain.md) or **cross** origin)*. This functionality allows the creation of web based catalogs that can install PWAs directly from the web and into multiple platforms.**
+The current alternative to the Web Install API implies the user needs to rely on search engines, app stores, proprietary protocols, proprietary "smart" banners, UA prompts, hidden UX and other means that take the user out of their navigating context. They also represent additional steps towards the acquisition of the app.
+
+Inherently, these alternative user flows to "install" an app rely on multi-step processes that at best require a couple of clicks to navigate to an origin and install it, and at worst involve the user searching on browser menus for a way to add the app to their device. The Web platform is not capable of providing a seamless, consistent experience that allows users to discover and acquire applications in a frictionless manner. Every additional step in the acquisition funnel for web apps comes with an additional drop off rate as well. 
+
+Moreover, the **Web Install API feature is beneficial for app discovery**: it allows developers to create their own acquisition mechanism and tailor it to benefit users that:
+* might not know that a web app exists for the current origin.
+* don't understand what the icon/prompt in the omnibox does.
+* don't know how to deep search several layers of browser UX to add the app to their devices.
+* don't use app stores to discover new app experiences.
+
 
 ## Goals
 
 * **Enable installation of web apps (cross-origin).**
-* Allow a ***vetted* installation origin** to know if the web app is installed (see *[`install_sources`](#install-sources-manifest-field) new manifest field*).
+
 * Allow the web app to report to the installation origin the outcome of the installation.
 * Enable UAs to [supress potential installation-prompt spam](#avoiding-installation-prompt-spamming).
 * Track campaign IDs for marketing campaigns (with the [Acquisition Info API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md)).
@@ -27,20 +36,31 @@ While this is the general acquisition flow on many platforms, the web does not h
 ## Non-goals
 
 * Install same-origin content (see [Web Install - same-origin explainer](./explainer_same_domain.md)).
-* Install arbitrary web content that is not an app (target must have a manifest file with [`install_sources`](#install-sources-manifest-field)).
+* Install arbitrary web content that is not an app (target must have a manifest file and an id). [Reasons expanded here](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
 * Change the way the UA currently prompts for installation of a web app.
 * Associate ratings and reviews with the installed app ([see Ratings and Reviews API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RatingsAndReviewsPrompt/explainer.md)).
 * Process payments for installation of PWAs ([see Payment Request API](https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API)).
 * List purchased/installed goods from a store ([see Digital Goods API](https://github.com/WICG/digital-goods/blob/main/explainer.md)).
 * Installing content that does not pass the installability criteria (see *[installability criteria](#installability-criteria)*).
+* Define what "installation" means. This is up to each platform and overall we refer to the acquisition of an app onto a device.
 
 ## Use Cases
 
-The Web Install API enables installation of cross-origin applications. A website will be able to include a button to install a related application, which can be hosted in another domain. The functionality can also be used to create online repositories of apps, improving discoverability of applications.
+The Web Install API enables installation of cross-origin web applications. A website will be able to include a button to install an application, which can be hosted in another domain. These are some examples of use cases enabled by the new API.
+
+### **Websites installing their web apps**
+
+Picture a user browsing on their favorite video streaming web app. The user might browse to this web app daily, yet not be aware that there is a way that they can get the app directly from the app's UI. This could be through a button that the webapp would be able to implement, that would trigger the installation.
+
+The website can also provide a way to directly acquire other applications it might offer, like a dedicated "kids" version of the app, or a "sports" version of the app. The developer is in control and can effectively advertise and control their applications, which having to redirect users to platform-specific propriatery repositories, which is what happens now. 
+
+### **SERP app install**
+
+Developers of Search Engines could use the API to include a way to directly install an origin that is an application. A new feature could be offered by search engines that could see them offering a frictionless way to acquire an app that a user is searching for. This could also aid discovery as a user might not be aware that a specific origin has an associated web application they could acquire.
 
 ### **Creation of online catalogs**
 
- Although a website will be able to install a cross-origin application, the most typical use case for the API is related to the creation of online catalogs. A web site/app can list and install web apps. For example, `store.com` would be able to distribute apps on multiple platforms and multiple devices.
+ Another potential use case for the API is related to the creation of online catalogs. A web site/app can list and install web apps. A unique aspect of this approach is that since the applications that are installed are web apps, this could enable a new set of true cross-device, cross-platform app repositories.
 
 ```javascript
 /* tries to install a cross-origin web app */
@@ -87,7 +107,7 @@ If the `manifest_id` is the *what* to install, the `install_url` is the *where* 
 
 Unless the UA decides to [gate this functionality behind installation](#gating-capability-behind-installation), the behaviour between calling the `install` method on a tab or on an installed application should not differ. The install method can be used in two different ways.
 
-1. `navigator.install(<manifest_id>, <install_url> [, <params>])`: This signature of the method requires the id of the application to be installed (`manifest_id`), and the installation location for the app (`install_url`). This is the most common API use case the API for cross-origin scenarios.
+1. `navigator.install(manifest_id, <install_url> [, <params>])`: This signature of the method requires the id of the application to be installed (`manifest_id`), and the installation location for the app (`install_url`). This is the most common API use case the API for cross-origin scenarios.
 
 This will prompt for installation of the app if the requesting origin has installation permissions (see [security section](#integration-with-the-permissions-api)) and the target application has specified this domain in its `install_sources` manifest field.
 
@@ -101,10 +121,10 @@ The `navigator.install` call can receive an object with a set of parameters that
 To install a same domain web site/app, the process is as follows:
 1. Origin site that triggers the installation must have installation permissions as it tries to install a cross-origin app.
 2. target site/app must comply with *[installability criteria](#installability-criteria), if any*.
-3. If the target content is a web app with a manifest, check if the domain is in the list of [allowed origins](#install-sources-manifest-field) to install said content. If the target content is not a web app, it can't be installed.
-3. Prompt the user for install confirmation. User is given a choice about whether to install the target content or not.
-4. If the users accepts, the content is installed.
-5. UA default action post-install (generally the app will open/be added to homescreen/start menu/dock).
+3. If the target content is not a web app, it can't be installed.
+4. Prompt the user for install confirmation. User is given a choice about whether to install the target content or not.
+5. If the users accepts, the content is installed.
+6. UA default action post-install (generally the app will open/be added to homescreen/start menu/dock).
 
 ### The `navigator.getInstalledApps` method
 
@@ -134,8 +154,6 @@ In order for an application/site to be installed, it must comply with *installab
 Modern browsers allow for different degrees of installation of different types of content, ranging from traditional web sites all the way up to Progressive Web Apps. **The core functionality of the API is that it allows to install *anything* initiated with a user action**.
 
 A user agent might decide to have only the requirement of HTTPS to allow installation of a web site, or may need as well a manifest file and/or service worker to install a web app or might not require anything at all, allowing the user to install any content they wish.
-
-For cross-origin content, the target content must have an [`install_sources`](#install-sources-manifest-field) field that allows the installation from the installation origin.
 
 ## Privacy and Security Considerations
 
@@ -176,50 +194,6 @@ switch (state) {
     break;
 }
 ```
-####  **Controlling default installation sources**
-
-The default behaviour of a UA for the cross-origin Web Install API can be to allow installations from any origin or from no origin. *This default is defined by the implementer*. An implementer may choose to:
-
-* ALLOW cross-origin installations by default.
-* DENY cross-origin installations by default.
-
-This affects if an origin must be listed in the `install_sources` of an app to be able to install it.
-
-##### Overriding the default UA behaviour
-
-A developer can have full control of where their app can be installed from, independent of the implementor's default behaviour. A new web-manifest boolean key `allow_all_install_sources` can tell the UA that the application can be installed from any or no other origin. This overrides the default implementation by the UA.
-
-* if set to `true`, then cross-origin installations can enabled by default.
-* if set to `false`, only same-origin installations are allowed, unless the invoking installation-origin is listed in the application's `install_sources`.
-
-```json
-{
-    "name": "Awesome PWA",
-    "display": "standalone",
-    "start_url": "/index.html",
-    "allow_all_install_sources": "true"
-}
-```
-
-##### Fine tuning installation sources for an application
-
-In both cases of the default UA behaviour, developers can use the `install_sources` manifest field to have fine control over which specific origins can or can't install the application.
-
-
-```json
-{
-    "name": "Awesome PWA",
-    "display": "standalone",
-    "start_url": "/index.html",
-    "install_sources": [
-        {"origin": "https://apps.microsoft.com", "action": "allow"},
-        {"origin": "https://store.app", "action": "allow"}
-        {"origin": "https://anotherstore.com", "action": "deny"}
-    ]
-}
-```
-
-This field is only for the JS API and does not interfere with existing ways of installing PWAs through mechanisms like enterprise policies.
 
 #### **Gating capability behind installation**
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
