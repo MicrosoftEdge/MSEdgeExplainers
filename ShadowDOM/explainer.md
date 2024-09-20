@@ -1,4 +1,4 @@
-# Sharing styles in shadow DOM
+# Declarative shadow DOM style sharing 
 
 ## Authors
 
