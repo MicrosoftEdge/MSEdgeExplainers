@@ -90,7 +90,7 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
   between the parent document and the shadow root in order to provide a cohesive look and feel for
   end users across different websites. Let's take a look at this simple media control widget: 
   
-  ![image](.images/mediacontrol.jpeg)
+  ![image](images/mediacontrol.jpeg)
   
   In this example, the global styles in the parent document provide basic styling for the page
   layout and the controls. This ensures that the controls used within the shadow DOM adhere to the 
