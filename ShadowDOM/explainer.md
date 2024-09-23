@@ -260,11 +260,6 @@ Another advantage of this proposal is that it can allow multiple module specifie
 </my-element>
 ```
 
-Lastly, This proposal also lines up with the existing [CSS Module Scripts](https://web.dev/articles/css-module-scripts) for imperative Shadow DOM: 
-```html
-import sheet from './styles.css' assert { type: 'css' }; 
-shadowRoot.adoptedStyleSheets = [sheet];
-```
 ## Alternate proposals
 ### [Layer and adoptStyles](https://github.com/w3c/csswg-drafts/issues/10176#proposal)
 This proposal adds the  `adoptStyles` attribute to the template element, enabling its shadow root to adopt styles from outside of the shadow DOM. 
