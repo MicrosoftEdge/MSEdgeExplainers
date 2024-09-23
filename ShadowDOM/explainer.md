@@ -394,7 +394,7 @@ The following table compares pros and cons of the various proposals:
 * `cloneNode` – there are several complications with cloneNode 
 
 ## References and acknowledgements
-Many thansk for valuable feedback and advice from other contributors:
+Many thanks for valuable feedback and advice from other contributors:
 - Alison Maher
 - Kurt Catti-Schmidt
 - Daniel Clark
