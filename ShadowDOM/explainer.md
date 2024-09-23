@@ -20,7 +20,7 @@ to keep the community up-to-date with the most current standards venue and
 content location of future work and discussions.
 
 * This document status: **Active**
-* Expected venue: [HTML Working Group](https://www.w3.org/groups/wg/htmlwg/)
+* Expected venue: [Web Components CG](https://w3c.github.io/webcomponents-cg/)
 * Current version: this document
 ## Table of Contents
   - [Authors](#authors)
@@ -29,7 +29,7 @@ content location of future work and discussions.
   - [Background](#background)
   - [Problem](#problem)
   - [Goals](#goals)
-  - [Out of scope](#out-of-scope)
+  - [Non-goals](#non-goals)
   - [Use case](#use-case)
     - [Media site control widgets](#media-site-control-widgets)
     - [Anywhere web components are used](#anywhere-web-components-are-used)
