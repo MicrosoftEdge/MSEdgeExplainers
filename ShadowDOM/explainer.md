@@ -176,11 +176,11 @@ Developers can create stylesheets that can be applied to multiple shadow roots, 
 
 Step 1: Create a new Constructable Stylesheet: 
 ```js
-const constStylesheet = new CSSStyleSheet(); 
+const constructableStylesheet = new CSSStyleSheet(); 
 ```
 Step 2: Add styles to the Constructable Stylesheet: 
 ```js
-constStylesheet.replaceSync(` 
+constructableStylesheet.replaceSync(` 
   .my-button { 
     background-color: #0074D9; 
   } 
@@ -188,7 +188,7 @@ constStylesheet.replaceSync(`
 ```
 Step 3: Attach the Constructable Stylesheet to the shadow root: 
 ```js
-shadow.adoptedStyleSheets = [constStylesheet]; 
+shadow.adoptedStyleSheets = [constructableStylesheet]; 
 ```
 The downside of this approach is a potential FOUC, where the element is initially painted without styles, and then repainted with the Constructable Stylesheet. 
 
