@@ -4,6 +4,7 @@
 
 - Kurt Catti-Schmidt
 - Daniel Clark
+- Alex Russell
 - Tien Mai
 
 ## Participate
@@ -44,12 +45,12 @@ content location of future work and discussions.
 With the use of web components in web development, web authors often encounter challenges in managing styles, such as distributing global styles into shadow roots and sharing styles across different shadow roots. Markup-based shadow DOM, or [Declarative shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom), is a new concept that makes it easier and more efficient to create a shadow DOM definition directly in HTML, without needing JavaScript for setup. [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) provides isolation for CSS, JavaScript, and HTML. Each shadow root has its own separate scope, which means styles defined inside one shadow root do not affect another or the main document. 
 
 ## Problem
-Declarative Shadow DOM doesn't have an equivalent to Imperative Shadow DOM’s `adoptedStylesheets` attribute, which is a gap in the currently exposed functionality. As a result, any complex styling that would normally be accomplished via shared stylesheets will either require JavaScript (which goes against the goal of markup-based shadow DOM) or will require a <link> tag referencing an external file.  
+Sites that make use of Declarative Shadow DOM (DSD) have reported that the lack of a way to reference repeated stylesheets creates large payloads that add large amounts of latency. Authors have repeatedly asked for a way to reference stylesheets from other DSD instances in the same way that frameworks leverage internal data structures to share constructable style sheets via `adoptedStyleSheets`. This Explainer explores several potential solutions.
 
 Relying on JavaScript for styling is not ideal for DSD for several reasons: 
 * One of the main goals of DSD is to not rely on JavaScript [for performance and accessibility purposes](https://web.dev/articles/declarative-shadow-dom).
 * Adding stylesheets via script may cause an FOUC (Flash of Unstyled Content).
-* The current `adoptedStylesheets` attribute only supports Constructable Stylesheets, not inline stylesheets or stylesheets from <link> tags [(note that the working groups have recently decided to lift this restriction)](https://github.com/w3c/csswg-drafts/issues/10013#issuecomment-2165396092). 
+* The current `adoptedStylesheets` property only supports Constructable Stylesheets, not inline stylesheets or stylesheets from <link> tags [(note that the working groups have recently decided to lift this restriction)](https://github.com/w3c/csswg-drafts/issues/10013#issuecomment-2165396092). 
 
 While referencing an external file via the <link> tag for shared styles in DSD works today [(and is currently recommended by DSD implementors)](https://web.dev/articles/declarative-shadow-dom#server-rendering_with_style), it is not ideal for several reasons: 
 * If the linked stylesheet has not been downloaded and parsed, there may be an FOUC.
@@ -79,7 +80,7 @@ This document explores several proposals that would allow developers to apply st
 * Ensure styles don't automatically apply to the main document or any shadow root 
 * Allow web authors to selectively pass in global styles from the parent document
 
-## Out of scope 
+## Non-goals
 Some developers have expressed interest in CSS selectors crossing through the Shadow DOM, as discussed in [issue 909](https://github.com/WICG/webcomponents/issues/909#issuecomment-1977487651). While this scenario is related to sharing styles with Shadow DOM elements, it is solving a different problem and should be addressed separately.
 
 ## Use case     
@@ -128,8 +129,8 @@ class MediaControl extends HTMLElement {
         // Create elements
 
         // Style the elements within the shadow DOM
-        const style = document.createElement('style');
-        style.textContent = `
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(`
             .media-control-container {
                 display: flex;
                 flex-direction: column;
@@ -148,9 +149,14 @@ class MediaControl extends HTMLElement {
                 cursor: pointer;
                 margin: 5px;
             }
-        ;
+        `);
+        shadow.adoptedStyleSheets.push(sheet);
+
+        // Initialize content from template here
     }
 }
+customElements.define("media-control", MediaControl);
+document.body.appendChild(document.createElement("media-control"));
 ```
 Both the controls in the parent document and the controls inside the media control widget share the same base styles for cursor and margin. 
 
@@ -233,7 +239,7 @@ parsing HTML inside the <template>. -->
 ```
 In this example we’ve leveraged the module system to implement declarative template refs. 
 
-Another advantage of this proposal is that it can allow multiple module specifiers in the `adoptedstylesheets` attribute: 
+Another advantage of this proposal is that it can allow multiple module specifiers in the `adoptedstylesheets` property: 
 ```html
 <script type="css-module" specifier="/foo.css">  
   #content {  
@@ -301,7 +307,7 @@ The method aims to support both declarative and imperative shadow trees and work
 Since CSS is scoped per Shadow Root, nested Shadow DOM elements would need to inherit at each level. 
 
 ### [`@Sheet`](https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1407059971)
-This proposal builds on [using multiple sheets per file](https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1407059971) that introduces a new `@sheet` rule to address the difficulties arising when using JavaScript modules to manage styles. The main idea is to enhance the way CSS is imported, managed, and bundled in JavaScript by allowing multiple named stylesheets to exist within a single CSS file. We can expand on this proposal to allow stylesheets being directly specified within the HTML markup using attributes `adoptedStylesheets` without requiring JavaScript: 
+This proposal builds on [using multiple sheets per file](https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1407059971) that introduces a new `@sheet` rule to address the difficulties arising when using JavaScript modules to manage styles. The main idea is to enhance the way CSS is imported, managed, and bundled in JavaScript by allowing multiple named stylesheets to exist within a single CSS file. We can expand on this proposal to allow stylesheets being directly specified within the HTML markup using `adoptedStylesheets` property without requiring JavaScript: 
 
 ```html
 <style> 
@@ -314,7 +320,7 @@ This proposal builds on [using multiple sheets per file](https://github.com/w3c/
 </template> 
  ```
 
-In this example, developers could define styles in a `<style>` block using an `@sheet` rule to create named style sheets. The `adoptedStylesheets` attribute allows Shadow DOMs to specify which stylesheets they want to adopt without impacting the main document, improving ergonomics.  
+In this example, developers could define styles in a `<style>` block using an `@sheet` rule to create named style sheets. The `adoptedStylesheets` property allows Shadow DOMs to specify which stylesheets they want to adopt without impacting the main document, improving ergonomics.  
 
 The JavaScript version of this could also support CSS modules: 
 ```js
@@ -340,7 +346,7 @@ shadow.adoptedStyleSheets = [sheet1, sheet2];
 This approach could be combined with other approaches listed in this document. Note that `@sheet` is not implemented by any rendering engine as of September 2024. 
 
 ### [Id-based `adoptedstylesheet` attribute on template](https://github.com/WICG/webcomponents/issues/939#issue-971914425) 
-This proposal will add a new markup-based `adoptedstylesheets` attribute that closely matches the existing JavaScript property.  The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object. 
+This proposal will add a new markup-based `adoptedstylesheets` property that closely matches the existing JavaScript property.  The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object. 
 ```html
 <style type="css" id="shared_shadow_styles"> 
     :host {  
@@ -354,7 +360,7 @@ or
 ```html
 <link rel=”stylesheet” href=”styles.css” id=”external_shared_shadow_styles”>
 ```
-Web authors can use the `adoptedstylesheets` attribute on the `<template>` element to associate the stylesheets with a declarative shadow root. 
+Web authors can use the `adoptedstylesheets` property on the `<template>` element to associate the stylesheets with a declarative shadow root. 
 ```html
 <template shadowrootmode="open" adoptedstylesheets="shared_shadow_styles, external_shared_shadow_styles">  
       <!-- -->  
@@ -366,7 +372,7 @@ One limitation of this approach is that shared styles that need to be applied ex
 
 A challenge that arises is dealing with scopes and idrefs. If a declarative stylesheet can only be used within a single scope, it ends up being as limited as a regular `<style>` tag since it would need to be duplicated for every scope. A cross-scope idref system would enable nested shadow roots to access global stylesheets. This proposal recommends adding a new cross-scope ID `xid` attribute that SSR code would generate to be used with the first scope and referenced in later scope. See example in [Declarative CSS Module Scripts](https://github.com/WICG/webcomponents/issues/939#issue-971914425) 
 
-The script version of this already exists via the [adoptedStylesheets](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/adoptedStyleSheets) attribute: 
+The script version of this already exists via the [adoptedStylesheets](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/adoptedStyleSheets) property: 
 ```html
 import sheet from './styles.css' assert { type: 'css' }; // or new CSSStyleSheet(); 
 shadowRoot.adoptedStyleSheets = [sheet];
