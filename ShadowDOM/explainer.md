@@ -323,7 +323,7 @@ This proposal builds on [using multiple sheets per file](https://github.com/w3c/
 In this example, developers could define styles in a `<style>` block using an `@sheet` rule to create named style sheets. The `adoptedStylesheets` property allows Shadow DOMs to specify which stylesheets they want to adopt without impacting the main document, improving ergonomics.  
 
 The JavaScript version of this could also support CSS modules: 
-```js
+```css
 @sheet sheet1 { 
   :host { 
     display: block; 
@@ -336,7 +336,8 @@ The JavaScript version of this could also support CSS modules:
     color: blue; 
   } 
 } 
-
+```
+```html
 <script> 
 import {sheet1, sheet2} from './styles1and2.css' assert {type: 'css'}; 
 ... 
