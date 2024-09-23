@@ -30,7 +30,6 @@ content location of future work and discussions.
   - [Goals](#goals)
   - [Out of scope](#out-of-scope)
   - [Use case](#use-case)
-    - [Search result page](#search-result-page)
     - [Media site control widgets](#media-site-control-widgets)
     - [Anywhere web components are used](#anywhere-web-components-are-used)
   - [Alternatives to using style in DSD](#alternatives-to-using-style-in-dsd)
@@ -75,20 +74,15 @@ While this approach is acceptable for a single component, a rich web application
 This document explores several proposals that would allow developers to apply styles to DSD without relying on JavaScript and avoiding duplication. 
 
 ## Goals 
-* Provide a mechanism for styles to be cached and reused in markup-based shadow DOM 
-* Ensures styles don't automatically apply to the main document or any shadow root 
-* Allows web authors to selectively pass in global styles from the parent document
-* Integration and consistency with existing script-based `adoptedStylesheets`
+* Allow the reuse of styles in markup-based shadow DOM without requiring JavaScript
+* Allow reuse of styles in markup-based shadow DOM without requiring external network requests
+* Ensure styles don't automatically apply to the main document or any shadow root 
+* Allow web authors to selectively pass in global styles from the parent document
 
 ## Out of scope 
 Some developers have expressed interest in CSS selectors crossing through the Shadow DOM, as discussed in [issue 909](https://github.com/WICG/webcomponents/issues/909#issuecomment-1977487651). While this scenario is related to sharing styles with Shadow DOM elements, it is solving a different problem and should be addressed separately.
 
-## Use case   
-### Search result page 
-When search engines, such as Microsoft Bing, return search results, the search result pages display unique CSS styles for the "right rail" sections (highlighted in red), which inherits numerous global styles while also possessing a lot of very specific CSS that does not apply to anything else on the page. The existing HTML structure requires the browser to parse hundreds of kilobytes of CSS before getting to the first visual HTML elements on the page, resulting in poor page performance.  Due to the limitation of style sharing in Declarative shadow DOM, it is not possible to selectively share styles between the parent document and shadow roots. 
-
-<image src="images/bing serp.png">
-  
+## Use case     
 ### Media site control widgets
   Sharing styles between the parent document and shadow root is also fairly common for media site
   control widgets such as play/pause buttons, volume sliders, and progress bars, to share styles
