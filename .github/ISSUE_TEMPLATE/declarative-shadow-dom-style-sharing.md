@@ -1,8 +1,8 @@
 ---
-name: Declarative DOM Style Sharing
+name: Declarative Shadow DOM Style Sharing
 about: new issue
-title: "[Declarative DOM Style Sharing] <TITLE HERE>"
-labels: DeclarativeDOMStyleSharing
+title: "[Declarative Shadow DOM Style Sharing] <TITLE HERE>"
+labels: DeclarativeShadowDOMStyleSharing
 assignees: phumai
 
 ---
