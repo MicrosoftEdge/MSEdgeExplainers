@@ -83,7 +83,12 @@ This document explores several proposals that would allow developers to apply st
 ## Non-goals
 Some developers have expressed interest in CSS selectors crossing through the Shadow DOM, as discussed in [issue 909](https://github.com/WICG/webcomponents/issues/909#issuecomment-1977487651). While this scenario is related to sharing styles with Shadow DOM elements, it is solving a different problem and should be addressed separately.
 
-## Use case     
+## Use case    
+### Pages with sub-sections
+In some web pages with sub-sections that feature unique CSS styles distinct from the rest of the page, a combination of inherited global styles and highly specific CSS is used, which applies only to those sub-sections. The regular HTML structure often forces the browser to process CSS before rendering the first visual elements. When there is a significant number of styles, it can negatively impact page performance. Due to the limitations in style sharing with Declarative Shadow DOM, web authors cannot selectively share styles between the parent document and shadow roots. Here is an example of a search result page with a sub-section:
+
+![image](images/bingserp.png)
+
 ### Media site control widgets
   Sharing styles between the parent document and shadow root is also fairly common for media site
   control widgets such as play/pause buttons, volume sliders, and progress bars, to share styles
