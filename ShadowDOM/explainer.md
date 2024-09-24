@@ -4,11 +4,11 @@
 
 - Kurt Catti-Schmidt
 - Daniel Clark
-- Alex Russell
 - Tien Mai
 
 ## Participate
 - [Discussion forum](https://github.com/WICG/webcomponents/issues/939)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DeclarativeShadowDOMStyleSharing)
 
 ## Status of this Document
 
@@ -392,6 +392,5 @@ The following table compares pros and cons of the various proposals:
 ## References and acknowledgements
 Many thanks for valuable feedback and advice from other contributors:
 - Alison Maher
-- Kurt Catti-Schmidt
-- Daniel Clark
+- Alex Russell
 - Justin Fagnani
