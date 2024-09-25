@@ -85,9 +85,115 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
 
 ## Use case    
 ### Pages with sub-sections
-In some web pages with sub-sections that feature unique CSS styles distinct from the rest of the page, a combination of inherited global styles and highly specific CSS is used, which applies only to those sub-sections. The regular HTML structure often forces the browser to process CSS before rendering the first visual elements. When there is a significant number of styles, it can negatively impact page performance. Due to the limitations in style sharing with Declarative Shadow DOM, web authors cannot selectively share styles between the parent document and shadow roots. Here is an example of a search result page with a sub-section:
+In some web pages with sub-sections that feature unique CSS styles distinct from the rest of the page, a combination of inherited global styles and highly specific CSS is used, which applies only to those sub-sections. The regular HTML structure often forces the browser to process CSS before rendering the first visual elements. When there is a significant number of styles, it can negatively impact page performance. Due to the limitations in style sharing with Declarative Shadow DOM, web authors cannot selectively share styles between the parent document and shadow roots. Here is an example of a web page with global, shared and unique styles:
 
-![image](images/bingserp.png)
+![image](images/webpagewithsubsection.png)
+
+In this example, CSS variables such as `--font-family` and `--text-color` were added to the global styles, which are used in the main document and within the shadow DOM.
+
+```html
+<head>
+    <style>
+        /* Global styles that are inherited across the entire document */
+        :root {
+            --font-family: 'Arial', sans-serif;
+            --background-color: #f4f4f9;
+            --text-color: #333;
+            --section-bg-color: #ffffff;
+            --section-border-color: #ccc;
+            --heading-color: #333;
+            --paragraph-color: #555;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        h1 {
+            color: var(--heading-color);
+            font-size: 2em;
+        }
+
+        p {
+            color: var(--paragraph-color);
+        }
+
+        .section {
+            background-color: var(--section-bg-color);
+            border: 1px solid var(--section-border-color);
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <h1>Web Page with Global, Shared, and Unique Styles</h1>
+
+    <!-- A regular section that inherits global styles -->
+    <div class="section">
+        <h2>Section 1</h2>
+        <p>This section uses the global styles defined in the document.</p>
+    </div>
+</body>
+
+```
+
+ Meanwhile, the shadow DOM section uses shared styles defined in the parent document, but also has its unique styles
+```js
+        // Creating a shadow DOM host
+        const shadowHost = document.createElement('div');
+        document.body.appendChild(shadowHost);
+
+        // Attaching shadow root
+        const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+
+        // Defining shadow DOM content with shared and unique styles
+        shadowRoot.innerHTML = `
+```
+
+```html
+            <style>
+                /* Shared styles: inheriting global styles using CSS variables */
+                .shared-sub-section {
+                    background-color: var(--section-bg-color);
+                    border: 1px solid var(--section-border-color);
+                    padding: 20px;
+                    margin: 20px 0;
+                    font-family: var(--font-family);
+                    color: var(--text-color);
+                }
+
+                /* Specific styles for the shadow DOM sub-section */
+                .shared-sub-section {
+                    background-color: #f0f8ff;
+                    border: 2px solid #4682b4;
+                }
+
+                .shared-sub-section h2 {
+                    color: #4682b4;
+                }
+
+                .shared-sub-section p {
+                    color: #696969;
+                }
+            </style>
+
+            <!-- Shadow DOM content -->
+            <div class="shared-sub-section">
+                <h2>Shadow DOM with Shared and Unique Styles</h2>
+                <p>This sub-section shares global styles using CSS variables but also applies its own unique styles inside the shadow DOM.</p>
+            </div>
+        `;
+    
+```
 
 ### Media site control widgets
   Sharing styles between the parent document and shadow root is also fairly common for media site
