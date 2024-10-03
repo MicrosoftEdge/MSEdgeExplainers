@@ -109,9 +109,11 @@ videoElem.addEventListener("pause", (event) => {
 
 ### Web Audio API
 
+_This Web Audio API integration is dependent on the successful specification and implementation of the new AudioContextState `"interrupted"` proposed in this [explainer][`"interrupted"`]._
+
 The Web Audio API renders audio through an [AudioContext](https://webaudio.github.io/web-audio-api/#AudioContext) object. We propose that the `AudioContext` shouldn't be [allowed to start](https://webaudio.github.io/web-audio-api/#allowed-to-start) whenever it is not rendered and disallowed by the `media-playback-while-not-visible` policy.
 
-For scenario 1, if the iframe is not rendered, any `AudioContext` will not be [allowed to start](https://webaudio.github.io/web-audio-api/#allowed-to-start). Therefore, attempting to [create](https://webaudio.github.io/web-audio-api/#dom-audiocontext-audiocontext) a new `AudioContext` or start playback by calling [`resume()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume) shouldn't output any audio and put the `AudioContext` into a [`"suspended"`](https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-suspended) state. It would be recommended for the iframe to wait for a new user interaction event before calling [`resume()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume) - e.g., `click`.
+For scenario 1, if the iframe is not rendered, any `AudioContext` will not be [allowed to start]. Therefore, [creating][AudioContext constructor] a new `AudioContext` should initially put it into the [`"suspended"`] state. Consequently, attempting to start playback by calling [`resume()`] shouldn't output any audio and move the `AudioContext` to the [`"interrupted"`] state. In this case, the webpage can then listen to [`statechange`] events to determine when the interruption is over.
 
 ```js
 // AudioContext being created in a not rendered iframe, where
@@ -120,55 +122,65 @@ let audioCtx = new AudioContext();
 let oscillator = audioCtx.createOscillator();
 oscillator.connect(audioCtx.destination);
 
-const resume_button = document.querySelector("resume_button");
-resume_button.addEventListener('click', () => {
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume().then(() => {
-      console.log("Context resumed");
-    });
-  }
-})
+audioCtx.onStateChange = () => {
+  console.log(audioCtx.state);
+}
 
-oscillator.start(0);
 // should print 'suspended'
 console.log(audioCtx.state)
+oscillator.start(0);
+// `audioCtx.onStateChange` should print 'interrupted'
 ```
 
-Similarly, for scenario 2, when the iframe becomes not rendered during audio playback, the user agent should run the [`suspend()`](https://webaudio.github.io/web-audio-api/#dom-audiocontext-suspend) steps. The audio context state should change to `'suspended'` and the website can monitor this by listening to the [`statechange`](https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange) event.
+Similarly, for scenario 2, when the iframe becomes not rendered during audio playback, the user agent should interrupt the `AudioContext` by moving it to the [`"interrupted"`] state. Likewise, when the interruption is over, the UA should move the `AudioContext` back to the [`"running"`] state. Webpages can monitor these transitions by listening to the [`statechange`] event.
 
-```js
-let audioCtx = new AudioContext();
-let oscillator = audioCtx.createOscillator();
-oscillator.connect(audioCtx.destination);
+The snippet below show this could work for scenario 2. Let's assume that the `AudioContext` in the iframe is [allowed to start]. When the web page is initialized, the `AudioContext` will be able to play audio and will transition to the [`"running"`] state. If the user clicks on the `"iframe_visibility_btn"`, the frame will get hidden and the `AudioContext` should be put in the [`"interrupted"`] state. Likewise, pressing again the button will show the iframe again and audio playback will be resumed.
 
-const playback_control_btn = document.querySelector("playback_control_button");
-playback_control_btn.textContent = "start";
-playback_control_btn.addEventListener('click', () => {
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume().then(() => {
-      console.log("Context resumed");
-      playback_control_btn.textContent = "suspend";
-    });
-  } else if (audioCtx.state === "running") {
-    audioCtx.suspend().then(() => {
-      console.log("Context suspended");
-      playback_control_btn.textContent = "resume";
-    });
-  }
-})
+```html
+<!-- audio_context_iframe.html -->
+<html>
+  <body>
+    <script>
+      let audioCtx = new AudioContext();
+      let oscillator = audioCtx.createOscillator();
+      oscillator.connect(audioCtx.destination);
 
-audioCtx.addEventListener("statechange", (event) => {
-  if(audioCtx.state === "suspended"){
-    // Context has been suspended, because either suspend() has been
-    // called or the document is not-rendered.
-    console.log("Context suspended");
-    playback_control_btn.textContent = "resume";
-  }
-});
+      audioCtx.onStateChange = () => {
+        console.log(audioCtx.state);
+      }
 
-oscillator.start(0);
-console.log(audioCtx.state)
+      oscillator.start(0);
+    </script>
+  </body>
+</html>
 
+<!-- Top-level document -->
+<html>
+  <body>
+    <iframe id="media_frame"
+            src="audio_context_iframe.html" 
+            allow="media-playback-while-not-visible 'none'">
+    </iframe>
+    <button id="iframe_visibility_btn">Hide Iframe</button>
+    <script>
+      const BTN_HIDE_DISPLAY_NONE_STR = 'Hide Iframe';
+      const BTN_SHOW_DISPLAY_NONE_STR = 'Show Iframe';
+      const iframe_visibility_btn = "iframe_visibility_btn"
+
+      let display_btn = document.getElementById(iframe_visibility_btn);
+      display_btn.innerHTML = BTN_HIDE_DISPLAY_NONE_STR;
+      display_btn.addEventListener('click', () => {
+        if (display_btn.innerHTML == BTN_HIDE_DISPLAY_NONE_STR){
+          iframe.style.setProperty('display', 'none')
+          display_btn.innerHTML = BTN_SHOW_DISPLAY_NONE_STR
+        } else {
+          iframe.style.setProperty('display', 'block')
+          display_btn.innerHTML = BTN_HIDE_DISPLAY_NONE_STR
+        }
+      });
+    </script>
+  </body>
+</html>
 ```
 
 ### Web Speech API
@@ -245,3 +257,11 @@ Similarly to the [HTMLMediaElement.muted](https://html.spec.whatwg.org/multipage
 ```
 
 This alternative was not selected as the preferred one, because we think that pausing media playback is preferable to just muting it.
+
+[AudioContext constructor]: https://webaudio.github.io/web-audio-api/#dom-audiocontext-audiocontext
+[allowed to start]: https://webaudio.github.io/web-audio-api/#allowed-to-start
+[`"interrupted"`]: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AudioContextInterruptedState/explainer.md
+[`statechange`]: https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange
+[`"suspended"`]: https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-suspended
+[`resume()`]: https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume
+[`"running"`]: https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-running
