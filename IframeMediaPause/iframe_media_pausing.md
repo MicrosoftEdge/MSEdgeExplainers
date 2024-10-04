@@ -27,7 +27,7 @@ There are scenarios where a website might want to just not render an iframe. For
 
 ## Proposed solution: media-playback-while-not-visible Permission Policy
 
-We propose creating a new "media-playback-while-not-visible" [Permission Policy](https://www.w3.org/TR/permissions-policy/) that would pause any media being played by iframes which are not currently rendered. For example, this would apply whenever the iframe’s `"display"` CSS property is set to `"none"` or when the the `"visibility"` property is set to `"hidden"` or `"collapse"`.
+We propose creating a new "media-playback-while-not-visible" [permission policy] that would pause any media being played by iframes which are not currently rendered. For example, this would apply whenever the iframe’s `"display"` CSS property is set to `"none"` or when the the `"visibility"` property is set to `"hidden"` or `"collapse"`.
 
 This policy will have a default value of '*', meaning that all of the nested iframes are allowed to play media when not rendered. The example below show how this permission policy could be used to prevent all the nested iframes from playing media. By doing it this way, even other iframes embedded by "foo.media.com" shouldn’t be allowed to play media if not rendered.
 
@@ -58,13 +58,13 @@ Permissions-Policy: media-playback-while-not-visible=(self)
 
 In this case, `example.com` serves a document that embeds an iframe with a document from `https://foo.media.com`. Since the HTTP header only allows documents from `https://example.com` to inherit `media-playback-while-not-visible`, the iframe will not be able to use the feature.
 
-In the past, the ["execution-while-not-rendered" and "execution-while-out-of-viewport"](https://wicg.github.io/page-lifecycle/#feature-policies) permission policies have been proposed as additions to the Page Lifecycle draft specification. However, these policies freeze all iframe JavaScript execution when not rendered, which is not desirable for the featured use case. Moreover, this proposal has not been adopted or standardized.
+In the past, the `"execution-while-not-rendered"` and `"execution-while-out-of-viewport"` permission policies have been proposed as additions to the [Page Lifecycle API] draft specification. However, these policies freeze all iframe JavaScript execution when not rendered, which is not desirable for the featured use case. Moreover, this proposal has not been adopted or standardized.
 
 ## Interoperability with other Web API's
 
 Given that there exists many ways for a website to render audio in the broader web platform, this proposal has points of contact with many API's. To be more specific, there are two scenarios where this interaction might happen. Let's consider an iframe, which is not allowed to play `media-playback-while-not-visible`:
 - Scenario 1: When the iframe is not rendered and it attempts to play audio; and
-  - Callers should treat this scenario as if they weren't allowed to start media playback. Like when the [`autoplay` permission policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/autoplay) is set to `'none'` for an iframe. 
+  - Callers should treat this scenario as if they weren't allowed to start media playback. Like when the [`autoplay` permission policy] is set to `'none'` for an iframe. 
 - Scenario 2: When the iframe is already playing audio and stops being rendered during media playback. 
   - Callers should treat this scenario as if the user had paused media playback. 
 
@@ -72,7 +72,7 @@ The following subsections covers how this proposal could interact with Web APIs 
 
 ### HTMLMediaElements
 
-HTMLMediaElement media playback is started and paused, respectively, with the [`play`](https://html.spec.whatwg.org/multipage/media.html#dom-media-play) and [`pause`](https://html.spec.whatwg.org/multipage/media.html#dom-media-pause) methods. For scenario 1, the media element shouldn't be [allowed to play](https://html.spec.whatwg.org/multipage/media.html#allowed-to-play) and `play` should return a promise rejected with `"NotAllowedError"`. In this case, the website could easily handle this like shown below.
+HTMLMediaElement media playback is started and paused, respectively, with the [`play()`] and [`pause()`] methods. For scenario 1, the media element shouldn't be [allowed to play] and `play()` should return a promise rejected with `"NotAllowedError"`. In this case, the website could easily handle this like shown below.
 
 ```js
 const videoElem = document.querySelector("video"); 
@@ -185,9 +185,9 @@ The snippet below show this could work for scenario 2. Let's assume that the `Au
 
 ### Web Speech API
 
-The [Web Speech API](https://wicg.github.io/speech-api/) proposes a [SpeechSynthesis interface](https://wicg.github.io/speech-api/#tts-section). The latter interface allows websites to create text-to-speech output by calling [`window.speechSynthesis.speak`](https://wicg.github.io/speech-api/#dom-speechsynthesis-speak) with a [`SpeechSynthesisUtterance`](https://wicg.github.io/speech-api/#speechsynthesisutterance), which represents the text-to-be-said.
+The [Web Speech API] proposes a [SpeechSynthesis interface]. The latter interface allows websites to create text-to-speech output by calling [`window.speechSynthesis.speak`] with a [`SpeechSynthesisUtterance`], which represents the text-to-be-said.
 
-For both scenarios, the iframe should listen for utterance errors when calling `window.speechSynthesis.speak()`. For scenario 1 it should fail with a [`"not-allowed"`](https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-not-allowed) SpeechSyntesis error; and, for scenario 2, it should fail with an [`"interrupted"`](https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-interrupted) error.
+For both scenarios, the iframe should listen for utterance errors when calling `window.speechSynthesis.speak()`. For scenario 1 it should fail with a [`"not-allowed"` SpeechSynthesisErrorCode]; and, for scenario 2, it should fail with an [`"interrupted"` SpeechSynthesisErrorCode].
 
 ```js
 let utterance = new SpeechSynthesisUtterance('blabla');
@@ -211,12 +211,12 @@ This proposal does not affect autoplay behavior unless the media-playing iframe 
 
 Both `execution-while-not-rendered` and `execution-while-out-of-viewport` permission policies should take precedence over `media-playback-while-not-visible`. Therefore, in the case that we have an iframe with colliding permissions for the same origin, `media-playback-while-not-visible` should only be considered if the iframe is allowed to execute. The user agent should perform the following checks:
 
-1. If the origin is not [allowed to use](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#allowed-to-use) the [`"execution-while-not-rendered"`](https://wicg.github.io/page-lifecycle/#execution-while-not-rendered) feature, then:
-    1. If the iframe is not [being rendered](https://html.spec.whatwg.org/multipage/rendering.html#being-rendered), freeze execution of the iframe context and return. 
-2. If the origin is not [allowed to use](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#allowed-to-use) the [`"execution-while-out-of-viewport"`](https://wicg.github.io/page-lifecycle/#execution-while-out-of-viewport) feature, then:
-    1. If the iframe does not intersect the [viewport](https://www.w3.org/TR/CSS2/visuren.html#viewport), freeze execution of the iframe context and return.
-3. If the origin is not [allowed to use](https://html.spec.whatwg.org/multipage/iframe-embed-object.html#allowed-to-use) the [`"media-playback-while-not-visible"`](#proposed-solution-media-playback-while-not-visible-permission-policy) feature, then:
-    1. If the iframe is not [being rendered](https://html.spec.whatwg.org/multipage/rendering.html#being-rendered), pause all media playback from the iframe context and return.
+1. If the origin is not [allowed to use] the [`"execution-while-not-rendered"`] feature, then:
+    1. If the iframe is not [being rendered], freeze execution of the iframe context and return. 
+2. If the origin is not [allowed to use] the [`"execution-while-out-of-viewport"`] feature, then:
+    1. If the iframe does not intersect the [viewport], freeze execution of the iframe context and return.
+3. If the origin is not [allowed to use] the [`"media-playback-while-not-visible"`](#proposed-solution-media-playback-while-not-visible-permission-policy) feature, then:
+    1. If the iframe is not [being rendered], pause all media playback from the iframe context and return.
 
 ## Alternative Solutions
 
@@ -259,9 +259,31 @@ Similarly to the [HTMLMediaElement.muted](https://html.spec.whatwg.org/multipage
 This alternative was not selected as the preferred one, because we think that pausing media playback is preferable to just muting it.
 
 [AudioContext constructor]: https://webaudio.github.io/web-audio-api/#dom-audiocontext-audiocontext
+[allowed to play]: https://html.spec.whatwg.org/multipage/media.html#allowed-to-play
 [allowed to start]: https://webaudio.github.io/web-audio-api/#allowed-to-start
+[allowed to use]: https://html.spec.whatwg.org/multipage/iframe-embed-object.html#allowed-to-use
+[`autoplay` permission policy]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/autoplay
+[being rendered]: https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
+[`"execution-while-not-rendered"`]: https://wicg.github.io/page-lifecycle/#execution-while-not-rendered
+[`"execution-while-out-of-viewport"`]: https://wicg.github.io/page-lifecycle/#execution-while-out-of-viewport
 [`"interrupted"`]: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AudioContextInterruptedState/explainer.md
+[`"interrupted"` SpeechSynthesisErrorCode]: ttps://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-interrupted
+[`"not-allowed"` SpeechSynthesisErrorCode]: https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-not-allowed
+[Page Lifecycle API]: https://wicg.github.io/page-lifecycle/#feature-policies
+[permission policy]: https://www.w3.org/TR/permissions-policy/
+[`pause()`]: https://html.spec.whatwg.org/multipage/media.html#dom-media-pause
+[`play()`]: https://html.spec.whatwg.org/multipage/media.html#dom-media-play
+[`SpeechSynthesisUtterance`]: https://wicg.github.io/speech-api/#speechsynthesisutterance
+[SpeechSynthesis interface]: https://wicg.github.io/speech-api/#tts-section
 [`statechange`]: https://webaudio.github.io/web-audio-api/#eventdef-baseaudiocontext-statechange
 [`"suspended"`]: https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-suspended
 [`resume()`]: https://webaudio.github.io/web-audio-api/#dom-audiocontext-resume
 [`"running"`]: https://webaudio.github.io/web-audio-api/#dom-audiocontextstate-running
+[viewport]: https://www.w3.org/TR/CSS2/visuren.html#viewport
+[Web Speech API]: https://wicg.github.io/speech-api/
+[`window.speechSynthesis.speak`]: https://wicg.github.io/speech-api/#dom-speechsynthesis-speak
+
+
+The [Web Speech API](https://wicg.github.io/speech-api/) proposes a [SpeechSynthesis interface](https://wicg.github.io/speech-api/#tts-section). The latter interface allows websites to create text-to-speech output by calling [`window.speechSynthesis.speak`](https://wicg.github.io/speech-api/#dom-speechsynthesis-speak) with a [`SpeechSynthesisUtterance`](https://wicg.github.io/speech-api/#speechsynthesisutterance), which represents the text-to-be-said.
+
+For both scenarios, the iframe should listen for utterance errors when calling `window.speechSynthesis.speak()`. For scenario 1 it should fail with a [`"not-allowed" SpeechSynthesisErrorCode`](https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-not-allowed) SpeechSyntesis error; and, for scenario 2, it should fail with an [`"interrupted" SpeechSynthesisErrorCode`](https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-interrupted) error.
