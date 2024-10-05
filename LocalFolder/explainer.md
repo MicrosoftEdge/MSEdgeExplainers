@@ -44,7 +44,7 @@ The proposed solution works by making use of the [Origin Private File System (OP
 
 When configured correctly, the directory handle for OPFS root will contain an additional entry that represents the app's `LocalFolder` directory. This entry can be retrieved as a `FileSystemDirectoryHandle` by calling [`.entries()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/entries) or [`.getDirectoryHandle(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getDirectoryHandle) on the OPFS root directory handle.
 
-Like other OPFS handles, the `LocalFolder` directory handle and its contents will have [`readwrite`](https://wicg.github.io/file-system-access/#dom-filesystempermissionmode-readwrite) permission by default. Unlike other handles with `readwrite` permission, a [FileSystemFileHandle](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle) from `LocalFolder` will always throw a [`NoModificationAllowedError`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable#nomodificationallowederror) DOMException if [`createWritable()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable#exceptions) is used, or if [`getFileHandle()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getFileHandle) or [`getDirectoryHandle()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getDirectoryHandle) is used with the `create` option being true. This allows data in `LocalFolder` to be read and cleared but not created or edited.
+Like other OPFS handles, the `LocalFolder` directory handle and its contents will have [`readwrite`](https://wicg.github.io/file-system-access/#dom-filesystempermissionmode-readwrite) permission by default. Unlike other handles with `readwrite` permission, a [FileSystemFileHandle](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle) from `LocalFolder` will always throw a [`NoModificationAllowedError`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable#nomodificationallowederror) DOMException if [`createWritable()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemFileHandle/createWritable#exceptions) is used, or if [`getFileHandle()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getFileHandle) or [`getDirectoryHandle()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/getDirectoryHandle) is used with the `create` option being true. This allows data in `LocalFolder` to be read and deleted but not created or edited.
 
 #### Configuration 
 
@@ -74,13 +74,21 @@ The LocalFolder entry within the OPFS root directory can be found under the name
 
 #### Deletion
 
-Contents in `LocalFolder` can be deleted while the `LocalFolder` entry cannot itself be deleted - this is to mimic the effects of the WinRT [`ClearAsync(...)`](https://learn.microsoft.com/en-us/uwp/api/windows.storage.applicationdata.clearasync?view=winrt-22621#windows-storage-applicationdata-clearasync(windows-storage-applicationdatalocality)) API.
+Contents in `LocalFolder` can be deleted while the `LocalFolder` entry cannot itself be deleted - this is to mimic the effects of the WinRT [`ClearAsync(...)`](https://learn.microsoft.com/en-us/uwp/api/windows.storage.applicationdata.clearasync?view=winrt-22621#windows-storage-applicationdata-clearasync(windows-storage-applicationdatalocality)) API. `LocalFolder`'s contents can be deleted by calling [`FileSystemHandle:remove()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle/remove) or [`FileSystemDirectoryHandle:removeEntry()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry). 
 
-Both [`FileSystemHandle: remove()`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle/remove) and [`FileSystemDirectoryHandle: removeEntry(...)`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry) methods can be used on child handles to delete files and directories within the `LocalFolder` directory. Only `FileSystemDirectoryHandle: removeEntry(...)` should be used on the `LocalFolder` root directory handle. 
+See example usage in [section below](#deleting-localfolder-and-its-contents).
+
+| Action | Result |
+|--------|--------|
+| `.remove()` on OPFS root handle | Will not enumerate or delete `LocalFolder` even if the [`recursive`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle/remove#recursive) option is used. |
+| `.removeEntry(...)` on OPFS root handle using `LocalFolder`'s correct entry name | Will not enumerate or delete `LocalFolder` even if the [`recursive`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry#recursive) option is used. No DOMException will be thrown. This is consistent with calling .removeEntry() on names that cannot be found. |
+| `.remove()` on `LocalFolder`'s handle | Will throw an [`InvalidModificationError`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException#invalidmodificationerror) DOMException. Has no effect on `LocalFolder` directory and its contents. |
+| `.remove()` or `.removeEntry(...)` on any handle within `LocalFolder` | Identified handles will be removed.  |
+------------------
 
 #### Storage quota and eviction
 
-As the `LocalFolder` directory is in a system file directory separate from Chromium's storage location for OPFS, whether an entry for `LocalFolder` is presented in OPFS root's entries does not affect the available storage estimate returned by [`navigator.storage.estimate()`](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/estimate). As `LocalFolder` takes up space on disk, clearing `LocalFolder` can increase the estimate of available storage.
+As the `LocalFolder` directory is in a system file directory separate from Chromium's storage location for OPFS, whether an entry for `LocalFolder` is presented in OPFS root's entries does not affect the available storage estimate returned by [`navigator.storage.estimate()`](https://developer.mozilla.org/en-US/docs/Web/API/StorageManager/estimate). As `LocalFolder` takes up space on disk, clearing the contents of `LocalFolder` can increase the estimate of available storage.
 
 In Chromium, the underlying storage for OPFS does participate in [eviction](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria#when_is_data_evicted) if an origin is not marked as [persistent](https://storage.spec.whatwg.org/#persistence). As the `LocalFolder` directory is in a system file directory separate from OPFS's underlying storage, it will not be affected by origin based storage eviction.
 
@@ -93,56 +101,37 @@ To avoid name collisions, the LocalFolder entry under the OPFS root directory is
 #### Searching for LocalFolder
 
 ```JS
-    // .getDirectoryHandle()
+    // Using .getDirectoryHandle()
     let opfsRoot = await navigator.storage.getDirectory();
-    if (opfsRoot) {
-        let localFolder = await opfsRoot.getDirectoryHandle("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt", {create: false}); 
-    }
+    let localFolder = await opfsRoot.getDirectoryHandle("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt"); 
 ```
 *Example: looking for the `LocalFolder` entry under the OPFS root directory.*
 
-*Note: the `create` option should be `false` to determine if the system `LocalFolder` is present. If it is true, `getDirectoryHandle` will always return a valid handle as it could create a directory handle of the same name in actual OPFS storage.*
+*Note: the `create` parameter should be `{create:false}` to determine if the system `LocalFolder` is present. If `create` is true, `getDirectoryHandle` will always return a valid handle as it creates a directory handle of the same name in actual OPFS storage. If omitted, `create` is false by default.*
 
 ```JS
     // .entries()
     let opfsRoot = await navigator.storage.getDirectory();
-    if (opfsRoot) {
-        for await (const [key, value] of opfsRoot.entries()) {
-            if (key === 'microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt') {
-                // ...
-            }
+    for await (const [key, value] of opfsRoot.entries()) {
+        if (key === 'microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt') {
+            // ...
         }
     }
 ```
-*Example: Looking for the `LocalFolder` entry by iterating entries under the OPFS root directory.*
+*Example: Looking for the `LocalFolder` entry by iterating through entries under the OPFS root directory.*
 
 #### Deleting LocalFolder and its contents 
 
-`LocalFolder`'s contents can be cleared by calling `.remove()` or `.removeEntry(...)` on [FileSystemHandles](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemHandle). 
-
-| Action | Result |
-|--------|--------|
-| `.remove()` on OPFS root handle | Will not enumerate or clear `LocalFolder` even if the [`recursive`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry#recursive) option is used. |
-| `.removeEntry(...)` on OPFS root handle, selecting `LocalFolder`'s name| Will not enumerate or clear `LocalFolder` even if the `recursive` option is used. |
-| `.remove()` on `LocalFolder`'s handle | Will throw an `InvalidModificationError` DOMException. Has no effect on `LocalFolder` directory and its contents. |
-| `.remove()` or `.removeEntry(...)` on any handle within `LocalFolder` | Selected handle will be removed as usual according to the [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API). |
-
 ```JS
-    let opfsRoot = await navigator.storage.getDirectory();
-    if (opfsRoot) {
-        await opfsRoot.removeEntry("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt", { recursive: true }); 
-    }
-```
-
-*Note: The [`recursive`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry#recursive) option should be `true` to clear handles within `LocalFolder`'s sub-directories (if any) recursively. By default, it is `false`.* 
-
-```JS
-    let localStorage = await opfsRoot.getDirectoryHandle("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt", {create: false}); 
-
+    let localStorage = await opfsRoot.getDirectoryHandle("microsoft_store_app_local_folder_APPID.37853FC22B2CE_6rarf9sa4v8jt"); 
     for await (const [key, value] of localStorage.entries()) {
         value.remove({ recursive: true });
     }
 ```
+*Example: deleting contents of `LocalFolder` by calling `.remove()` on its child handles.*
+
+*Note: The [`recursive`](https://developer.mozilla.org/en-US/docs/Web/API/FileSystemDirectoryHandle/removeEntry#recursive) parameter needs to be `true` to delete sub-directories recursively. By default, it is `false`. It has no effect on file handles.* 
+
 
 ## Similar storage folders
 
