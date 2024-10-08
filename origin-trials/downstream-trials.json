@@ -9,6 +9,14 @@
             "flag": "msAcquisitionInfo"
         },
         {
+            "label": "Ad Selection API",
+            "expiration": "2025-10-01",
+            "repo": "WICG/privacy-preserving-ads",
+            "explainer": "https://github.com/WICG/privacy-preserving-ads",
+            "issue": "Ad Selection API",
+            "flag": "AdSelectionAPI"
+        },
+        {
             "label": "HTML+IDL `handwriting` attribute",
             "expiration": "2024-11-14",
             "repo": "MicrosoftEdge/MSEdgeExplainers",
