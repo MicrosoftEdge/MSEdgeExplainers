@@ -10,7 +10,7 @@
         },
         {
             "label": "Ad Selection API",
-            "expiration": "2025-10-01",
+            "expiration": "2025-07-15",
             "repo": "WICG/privacy-preserving-ads",
             "explainer": "https://github.com/WICG/privacy-preserving-ads",
             "issue": "Ad Selection API",
