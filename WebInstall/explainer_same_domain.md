@@ -42,11 +42,11 @@ The current way of supporting installation is vai the `onbeforeinstallprompt` ev
 The `navigator.install` method allows a imperative way to install web content, and works for UAs that prompt and don't prompt:
 
 ```javascript
-/* tries to install the current domain */
+/* tries to install the current document */
 const installApp = async () => {
     if (!navigator.install) return; // api not supported
     try {
-        await navigator.install('content_id_123');
+        await navigator.install();
     } catch(err) {
         switch(err.name){
             case 'AbortError':
@@ -61,7 +61,7 @@ const installApp = async () => {
 
 The **`navigator.install` method can overlap with some functionality of `beforeinstallprompt` for same-origin installation**. When the method is called it will trigger the UA to prompt for the installation of an application. This is analogous to when the end user clicks on an affordance that the UA might have to inform the user of installing. On Edge, Chrome (desktop) and Samsung Internet (mobile), this would be when the user clicks on the 'app available' banner or related UX that appears on the omnibox of the browser. For browsers that do not implement prompting, the expected behaviour is analogous to their installation paradigm. For example, in Safari (desktop) the behaviour might be that it shows a dialog to add the content to the dock as an app.
 
-On UAs that support prompting, the threshold for `navigator.install` to resolve on same-origin installations uses the same checks that `onbeforeinstallprompt` currently has for prompting (if required by the UA). The promise doesn't resolve unless the *installability criteria* is met. *Note that the criteria defined by UAs varies and can be that there is NO criteria*.
+On UAs that support prompting, the threshold for `navigator.install` to resolve on same-origin installations uses the same checks that `onbeforeinstallprompt` currently has for prompting (if required by the UA). The promise doesn't resolve unless the *installability criteria* is met. *Note that the criteria defined by UAs varies and can be that there is NO criteria aside from requiring an id in the site's manifest*.
 
 When called on the same domain, the **`install` method will trigger/open the prompt for installation the same way that using `onbeforeinstallprompt` does right now for browser that prompts.** If there is an error with the installation, then the promise returns a `DOMException` of type 'AbortError'. 
 
@@ -72,7 +72,7 @@ When called on the same domain, the **`install` method will trigger/open the pro
 
 ### The `navigator.install` method
 
-To install a web site/app, the site/app would use the promise-based method`navigator.install(<id>[[, install_url], <params>])`. This method will:
+To install a web site/app, the site/app would use the promise-based method `navigator.install(id, install_url, [<params>])`. This method will:
 
 * Resolve when an installation was completed.
     * The success value will be an object that contains:
@@ -85,7 +85,7 @@ To install a web site/app, the site/app would use the promise-based method`navig
 
 const installApp = async () => {
     try{
-        const value = await navigator.install('content_id_123');
+        const value = await navigator.install();
     }
     catch(err){console.error(err.message)}
 };
@@ -96,8 +96,10 @@ const installApp = async () => {
 #### **Signatures of the `install` method (same-origin)**
 The same-origin part of the  Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
 
-1. `navigator.install(id[[, install_url], <params>])`: The method takes an id (and optional install url) and tries to install the current origin. If the content being installed has a manifest file, this `id` must match the value in the manifest file. If there is no manifest file present, this `id` will act as the app id for the installed content. This is relevant since if the installed content were to be given a manifest file and made into an application, there is a way to automatically update the app going forward. 
-The call can also receive an object with parameters that it can use to customize a same domain installation. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
+1. `navigator.install()`: The method takes no parameters and tries to install the current document. If the content to be installed does not link to a manifest with a valid id, then installation will fail.
+2. `navigator.install(id, install_url, [<params>])`: The method takes an id and install url and tries to install the web content at `install_url`. If the content to be installed does not have a linked manifest that specifies an id, and the provided `id` parameter does not match the computed id, then installation will fail.
+
+Both calls can also receive an object with parameters that they can use to customize a same domain installation. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
 
 #### **Parameters**
 
