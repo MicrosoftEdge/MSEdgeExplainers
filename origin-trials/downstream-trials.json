@@ -39,6 +39,14 @@
             "explainer": "https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PwaDigitalGoods/explainer.md",
             "issue": "Digital Goods API",
             "flag": "DigitalGoodsV2"
+        },
+        {
+            "label": "Ms High Contrast Deprecation",
+            "expiration": "2025-06-12",
+            "repo": "MicrosoftEdge/MSEdgeExplainers",
+            "explainer": "https://blogs.windows.com/msedgedev/2024/04/29/deprecating-ms-high-contrast/",
+            "issue": "MS High Contrast",
+            "flag": "MsHighContrastDeprecation"
         }
     ],
     "expired": []
