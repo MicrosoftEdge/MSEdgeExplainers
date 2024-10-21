@@ -37,7 +37,7 @@ Modern browsers have UX that enable users to *install* web content on their devi
 ### **Installing a web app from the current origin**
 The site can trigger its own installation. 
 
-The current way of supporting installation is vai the `onbeforeinstallprompt` event, which only works in browsers that have a prompting UI affordace. 
+The current way of supporting installation is via the `onbeforeinstallprompt` event, which only works in browsers that have a prompting UI affordance. 
 
 The `navigator.install` method allows a imperative way to install web content, and works for UAs that prompt and don't prompt:
 
@@ -64,8 +64,6 @@ The **`navigator.install` method can overlap with some functionality of `beforei
 On UAs that support prompting, the threshold for `navigator.install` to resolve on same-origin installations uses the same checks that `onbeforeinstallprompt` currently has for prompting (if required by the UA). The promise doesn't resolve unless the *installability criteria* is met. *Note that the criteria defined by UAs varies and can be that there is NO criteria aside from requiring an id in the site's manifest*.
 
 When called on the same domain, the **`install` method will trigger/open the prompt for installation the same way that using `onbeforeinstallprompt` does right now for browser that prompts.** If there is an error with the installation, then the promise returns a `DOMException` of type 'AbortError'. 
-
-*Any same-origin content can be installed even if it is **NOT** an application.*
 
 
 ## Proposed Solution
@@ -97,7 +95,7 @@ const installApp = async () => {
 The same-origin part of the  Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
 
 1. `navigator.install()`: The method takes no parameters and tries to install the current document. If the content to be installed does not link to a manifest with a valid id, then installation will fail.
-2. `navigator.install(id, install_url, [<params>])`: The method takes an id and install url and tries to install the web content at `install_url`. If the content to be installed does not have a linked manifest that specifies an id, and the provided `id` parameter does not match the computed id, then installation will fail.
+2. `navigator.install(id, install_url, [<params>])`: The method takes an id and install url and tries to install the web content at `install_url`. If the content to be installed does not link to a manifest OR if the manifest does not include a valid id OR if the id parameter does not match either the declared or resolved manifest id, then installation will fail.
 
 Both calls can also receive an object with parameters that they can use to customize a same domain installation. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
 
@@ -117,7 +115,7 @@ To install a same domain web site/app, the process is as follows:
    
 ## Relation with other web APIs 
 
-* **`navigator.install` and manifest file's `prefer_related_applications`:** When the `related_applications` and `prefer_related_applications` key/values are present in the manifest, the UA should try to handoff the install to the prefered catalog. If this is not possible then it fallback to a default UA install.
+* **`navigator.install` and manifest file's `prefer_related_applications`:** When the `related_applications` and `prefer_related_applications` key/values are present in the manifest, the UA should try to handoff the install to the preferred catalog. If this is not possible then it fallback to a default UA install.
 
 * **`navigator.install` and getInstalledRelatedApps():** If a web app tries to install itself (same domain install) it can first use the `getInstalledRelatedApps()` to check if it is already installed and hide the installation UI.
 
@@ -160,8 +158,10 @@ A user agent might decide to have only the requirement of HTTPS to allow install
 * Should we allow an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to enable cancelling the installation if the process takes too long?
 
 ## Glossary
-* **installation origin**: the origin that initiates the call to the `install` method.
-* **installed origin**: the origin that is installed with the `install` method.
+* **Installation origin**: The origin that initiates the call to the `install` method.
+* **Installed origin**: The origin that is installed with the `install` method.
+* **Declared manifest id**: The id as it is declared in the manifest. See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/Manifest/id) for more info.
+* **Resolved manifest id**: The processed id after it is resolved against the `start_url`'s origin. Since the declared id is resolved against an origin, this will take the form of a url (e.g. "https://example.com/my_app"), although it may not point to a valid resource. See [W3 manifest spec](https://www.w3.org/TR/appmanifest/#id-member) for detailed parsing info.
 
 ## Acknowledgements
 
