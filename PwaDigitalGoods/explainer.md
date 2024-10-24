@@ -14,7 +14,7 @@ This document is a starting point for engaging the community and standards bodie
 The [Digital Goods API](https://wicg.github.io/digital-goods/) allows web applications to get information about their digital products and their user’s purchases managed by a digital store. The user agent abstracts connections to the store and the [Payment Request API](https://www.w3.org/TR/payment-request/) is used to make purchases.
 
 ### Relation to [Digital Goods API](https://wicg.github.io/digital-goods/) proposal
-This explainer contains the implementation of standard Digital Goods API to support in app purchase for PWAs in the Microsoft Store.
+This explainer contains the implementation of standard Digital Goods API to support in app purchase for PWAs in the Microsoft Store. [Developer Guide](#dfn-developer-guide) helps you mitigate between Microsoft Store and Google Play. 
 
 ## Goals
 
@@ -123,7 +123,9 @@ The item’s `price` is a <code>[PaymentCurrencyAmount](https://www.w3.org/TR/pa
 
 ### Making a purchase
 
-The purchase flow itself uses the [Payment Request API](https://w3c.github.io/payment-request/). We don’t show the full payment request code here, but note that the item ID for any items the user chooses to purchase should be sent in the `data` field of a `modifiers` entry for the given payment method, in a manner specific to the store. For example:
+The purchase flow itself uses the [Payment Request API](https://w3c.github.io/payment-request/). 
+
+You must use the Microsoft Store billing payment method, by setting https://store.microsoft.com/billing as the identifier, and adding the product sku in as a data member. We don’t show the full payment request code here, but note that the item ID for any items the user chooses to purchase should be sent in the data field of a modifiers entry for the given payment method, in a manner specific to the store. For example:
 
 ```js
 const details = await digitalGoodsService.getDetails(['monthly_subscription']);
@@ -221,7 +223,7 @@ dictionary PurchaseDetails {
 };
 ```
 
-## <dt id="dfn-developer guide">Understanding and Proper Usage of the Digital Goods API in Microsoft Store vs. Google Play</dt>
+## <dt id="dfn-developer-guide">Understanding and Proper Usage of the Digital Goods API in Microsoft Store vs. Google Play</dt>
 In this guide, we will highlight key behavioral differences between the API's implementation in the Microsoft Store and Google Play, ensuring a smooth transition and optimal use across both platforms.
 
 ## <dt id="dfn-pre-requests">Prerequisites to use Digital Goods API on Windows</dt>
