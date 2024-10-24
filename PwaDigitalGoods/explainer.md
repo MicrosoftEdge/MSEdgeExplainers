@@ -130,9 +130,9 @@ const details = await digitalGoodsService.getDetails(['monthly_subscription']);
 const item = details[0];
 new PaymentRequest(
   [{supportedMethods: 'https://store.microsoft.com/billing',
-    data: {item_id: item.itemId}}]);
+    data: {sku: item.itemId}}]);
 ```
->**IMPORTANT**: Payments targeting to Microsoft Store **MUST** include `item_id` field in the PaymentRequest `data` property, and the value of `item_id` **MUST** be one specific [InAppOfferToken](https://learn.microsoft.com/en-us/uwp/api/windows.services.store.storeproduct.inappoffertoken?view=winrt-22621) of an add-on. This is a short-term requirement, and we will likely remove this requirement in the future.
+>**IMPORTANT**: Payments targeting to Microsoft Store **MUST** include `sku` field in the PaymentRequest `data` property, and the value of `sku` **MUST** be one specific [InAppOfferToken](https://learn.microsoft.com/en-us/uwp/api/windows.services.store.storeproduct.inappoffertoken?view=winrt-22621) of an add-on. This is a short-term requirement, and we will likely remove this requirement in the future.
 
 >Note: The PaymentRequest will invoke Microsoft Store payment popup window and disable the normal PWA window until payment popup window is closed.
 Currently only support single item to be purchased at the same time.
@@ -220,6 +220,9 @@ dictionary PurchaseDetails {
   required DOMString purchaseToken;
 };
 ```
+
+## <dt id="dfn-developer guide">Understanding and Proper Usage of the Digital Goods API in Microsoft Store vs. Google Play</dt>
+In this guide, we will highlight key behavioral differences between the API's implementation in the Microsoft Store and Google Play, ensuring a smooth transition and optimal use across both platforms.
 
 ## <dt id="dfn-pre-requests">Prerequisites to use Digital Goods API on Windows</dt>
 1. To use Digital Goods API on Windows, you will have to publish your PWA to the Microsoft Store: [Publish a Progressive Web App to the Microsoft Store](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/overview?pivots=store-installer-pwa)
