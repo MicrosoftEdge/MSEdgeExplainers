@@ -14,7 +14,7 @@ This document is a starting point for engaging the community and standards bodie
 The [Digital Goods API](https://wicg.github.io/digital-goods/) allows web applications to get information about their digital products and their user’s purchases managed by a digital store. The user agent abstracts connections to the store and the [Payment Request API](https://www.w3.org/TR/payment-request/) is used to make purchases.
 
 ### Relation to [Digital Goods API](https://wicg.github.io/digital-goods/) proposal
-This explainer contains the implementation of standard Digital Goods API to support in app purchase for PWAs in the Microsoft Store. [Usage in Microsoft Store vs. Google Play](#dfn-developer-guide) helps you mitigate between Microsoft Store and Google Play. 
+This explainer contains the implementation of standard Digital Goods API to support in app purchase for PWAs in the Microsoft Store. [Usage in Microsoft Store vs. Google Play](#dfn-developer-guide) details the differences in integrating with between Microsoft Store and Google Play. 
 
 ## Goals
 
