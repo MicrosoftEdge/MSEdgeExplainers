@@ -14,7 +14,7 @@ This document is a starting point for engaging the community and standards bodie
 The [Digital Goods API](https://wicg.github.io/digital-goods/) allows web applications to get information about their digital products and their user’s purchases managed by a digital store. The user agent abstracts connections to the store and the [Payment Request API](https://www.w3.org/TR/payment-request/) is used to make purchases.
 
 ### Relation to [Digital Goods API](https://wicg.github.io/digital-goods/) proposal
-This explainer contains the implementation of standard Digital Goods API to support in app purchase for PWAs in the Microsoft Store.
+This explainer contains the implementation of standard Digital Goods API to support in app purchase for PWAs in the Microsoft Store. [Usage in Microsoft Store vs. Google Play](#dfn-developer-guide) details the differences in integrating with Microsoft Store and Google Play. 
 
 ## Goals
 
@@ -123,16 +123,18 @@ The item’s `price` is a <code>[PaymentCurrencyAmount](https://www.w3.org/TR/pa
 
 ### Making a purchase
 
-The purchase flow itself uses the [Payment Request API](https://w3c.github.io/payment-request/). We don’t show the full payment request code here, but note that the item ID for any items the user chooses to purchase should be sent in the `data` field of a `modifiers` entry for the given payment method, in a manner specific to the store. For example:
+The purchase flow itself uses the [Payment Request API](https://w3c.github.io/payment-request/). 
+
+You must use the Microsoft Store billing payment method, by setting https://store.microsoft.com/billing as the identifier, and adding the product sku in as a data member. We don’t show the full payment request code here, but note that the item ID for any items the user chooses to purchase should be sent in the data field of a modifiers entry for the given payment method, in a manner specific to the store. For example:
 
 ```js
 const details = await digitalGoodsService.getDetails(['monthly_subscription']);
 const item = details[0];
 new PaymentRequest(
   [{supportedMethods: 'https://store.microsoft.com/billing',
-    data: {item_id: item.itemId}}]);
+    data: {sku: item.itemId}}]);
 ```
->**IMPORTANT**: Payments targeting to Microsoft Store **MUST** include `item_id` field in the PaymentRequest `data` property, and the value of `item_id` **MUST** be one specific [InAppOfferToken](https://learn.microsoft.com/en-us/uwp/api/windows.services.store.storeproduct.inappoffertoken?view=winrt-22621) of an add-on. This is a short-term requirement, and we will likely remove this requirement in the future.
+>**IMPORTANT**: Payments targeting to Microsoft Store **MUST** include `sku` field in the PaymentRequest `data` property, and the value of `sku` **MUST** be one specific [InAppOfferToken](https://learn.microsoft.com/en-us/uwp/api/windows.services.store.storeproduct.inappoffertoken?view=winrt-22621) of an add-on. This is a short-term requirement, and we will likely remove this requirement in the future.
 
 >Note: The PaymentRequest will invoke Microsoft Store payment popup window and disable the normal PWA window until payment popup window is closed.
 Currently only support single item to be purchased at the same time.
@@ -220,6 +222,15 @@ dictionary PurchaseDetails {
   required DOMString purchaseToken;
 };
 ```
+
+## <dt id="dfn-developer-guide">Understanding and Proper Usage of the Digital Goods API in Microsoft Store vs. Google Play</dt>
+In this guide, we will highlight two key behavioral differences between the API's implementation in the Microsoft Store and Google Play, ensuring a smooth transition and optimal use across both platforms.
+### Product type 
+The Microsoft Store supports four [add-on types](https://learn.microsoft.com/en-us/windows/uwp/monetize/in-app-purchases-and-trials#basic-concepts): Durable, Developer-managed consumable, Store-managed consumable and Subscription. But Digital Goods API only have two kinds of `ItemType`. So currently we only support Developer-managed Consumable as "product", and Durable as "subscription".
+### Purchase management
+Unlike Google Play, the Microsoft Store does not provide a `purchaseToken` to uniquely identify each purchase made by customers. As a result, the `purchaseToken` field that we pass to the `listPurchases`, `listPurchaseHistory`, and `consume` methods is the Product ID of the corresponding add-on, rather than an identifier for each individual purchase. 
+
+Lets go through an example to illustrate how to manage purchase and add-on status in such situation. If you want to submit an add-on that can be purchased multiple times and consumed asynchronously, in the Microsoft Store, this requires submitting a "Developer-managed consumable" add-on. In terms of digital goods, this is considered a "product". Once a user pays for a "Developer-managed consumable" product by Payment Request, you should confirm that the payment is success by calling `listPurchases`, then grant user the entitlement and call `consume` right after that. This allows the product to be purchased again. After consuming the product, you'll need to update your secure backend server to reflect the actual number of add-ons the user currently owns. From the Store's perspective, the user consumes the add-on immediately, but the actual add-on quantity owned by the user is managed by your backend server.
 
 ## <dt id="dfn-pre-requests">Prerequisites to use Digital Goods API on Windows</dt>
 1. To use Digital Goods API on Windows, you will have to publish your PWA to the Microsoft Store: [Publish a Progressive Web App to the Microsoft Store](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/overview?pivots=store-installer-pwa)
