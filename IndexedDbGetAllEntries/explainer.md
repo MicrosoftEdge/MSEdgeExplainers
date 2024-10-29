@@ -18,7 +18,7 @@ This explainer proposes a new operation, `getAllRecords()`, which combines [`get
 
 Decrease the latency of database read operations. By retrieving the primary key, value and index key for database records through a single operation, `getAllRecords()` reduces the number of JavaScript events required to read records. Each JavaScript event runs as a task on the main JavaScript thread. These tasks can introduce overhead when reading records requires a sequence of tasks that go back and forth between the main JavaScript thread and the IndexedDB I/O thread.
 
-For batched record iteration, for example, retrieving N records at a time, the primary and index keys provided by `getAllRecords()` can eliminate the need for an [`IDBCursor`](https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor), which further reduces the number of JavaScript events required. To read the next N records, instead of advancing a cursor to determine the range of the next batch, getAllRecords() can use the primary key or the index key retrieved by the results from the previous batch.
+For batched record iteration, for example, retrieving *N* records at a time, the primary and index keys provided by `getAllRecords()` can eliminate the need for an [`IDBCursor`](https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor), which further reduces the number of JavaScript events required. To read the next *N* records, instead of advancing a cursor to determine the range of the next batch, getAllRecords() can use the primary key or the index key retrieved by the results from the previous batch.
 
 ## `IDBObject::getAllRecords()` and `IDBIndex::getAllRecords()`
 
@@ -113,9 +113,9 @@ const entry_iterator = map.entries(); // Enumerate both index keys and values.
 
 ### Support paginated cursors using batch record iteration
 
-Many scenarios read N database records at a time, waiting to read the next batch of records until needed.  For example, a UI may display N records, starting with the last record in descending order.  As the user scrolls, the UI will display new content by reading the next N records.
+Many scenarios read *N* database records at a time, waiting to read the next batch of records until needed.  For example, a UI may display *N* records, starting with the last record in descending order.  As the user scrolls, the UI will display new content by reading the next *N* records.
 
-To support this access pattern, the UI calls `getAllRecords()` with the options `direction: 'prev'` and `count: N` to retrieve N records at a time in descending order.  After the initial batch, the UI must specify the upper bound of the next batch using the primary key or index key from the `getAllRecords()` results of the previous batch.
+To support this access pattern, the UI calls `getAllRecords()` with the options `direction: 'prev'` and `count: N` to retrieve *N* records at a time in descending order.  After the initial batch, the UI must specify the upper bound of the next batch using the primary key or index key from the `getAllRecords()` results of the previous batch.
 
 ```js
 // This example uses the `get_all_records_with_promise()` helper defined above.
