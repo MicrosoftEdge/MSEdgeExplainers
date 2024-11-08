@@ -1,8 +1,11 @@
 # HTML Attribute to Allow/Disallow Handwriting Input (i.e., "ink to text")
 
 # Outdated
+
 This explainer has been replaced with [HandwritingIntentCSSValue](Handwriting/HandwritingIntentCSSValue.md) which proposes a new keyword for the `touch-action` CSS attribute.
+
 ---
+
 
 Consider all sections required unless otherwise noted.
 
