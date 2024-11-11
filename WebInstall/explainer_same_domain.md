@@ -84,10 +84,11 @@ To install a web site/app, the site/app would use the promise-based method`navig
 /* simple example of using navigator.install */
 
 const installApp = async () => {
-    try{
+    try {
         const value = await navigator.install('content_id_123');
+    } catch(err) {
+        console.error(err.message);
     }
-    catch(err){console.error(err.message)}
 };
 
 ```
