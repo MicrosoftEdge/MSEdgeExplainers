@@ -7,7 +7,7 @@ from the Microsoft Edge team.
 
 ## Introduction
 
-[Explainers](https://w3ctag.github.io/explainers) are documents focused on
+[Explainers](https://tag.w3.org/explainers/) are documents focused on
 describing a user/ developer/ customer problem (at a high level) and exploring
 potential solutions. These documents are starting points for engaging in discussion
 with you and other members of the community. Explainers should address their
