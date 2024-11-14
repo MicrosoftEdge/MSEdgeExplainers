@@ -222,23 +222,6 @@ An inline CSS module script could also be imported in a JavaScript module in the
 ```html
 import styles from '/foo.css' with { type: 'css' };
 ```
-
-An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances: 
-```html
-<template type="module" specifier="/foo.html"> 
-<!-- This template defines an HTML module whose contents are given by the markup 
-     placed here, inserted into the module map with the specifier "/foo.html" --> 
-... 
-</template> 
-<my-element> 
-  <!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by 
-cloning the contents of the HTML module given by the "/foo.html" specifier, instead of 
-parsing HTML inside the <template>. --> 
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="/foo.css" shadowroothtml="/foo.html"></template> 
-</my-element>
-```
-In this example we’ve leveraged the module system to implement declarative template refs. 
-
 Another advantage of this proposal is that it can allow multiple module specifiers in the `adoptedstylesheets` property: 
 ```html
 <script type="css-module" specifier="/foo.css">  
@@ -259,6 +242,52 @@ Another advantage of this proposal is that it can allow multiple module specifie
   </template>  
 </my-element>
 ```
+
+## Other declarative modules
+An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances: 
+```html
+<template type="module" specifier="/foo.html"> 
+<!-- This template defines an HTML module whose contents are given by the markup 
+     placed here, inserted into the module map with the specifier "/foo.html" --> 
+... 
+</template> 
+<my-element> 
+<!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by 
+cloning the contents of the HTML module given by the "/foo.html" specifier, instead of 
+parsing HTML inside the <template>. --> 
+  <template shadowrootmode="open" shadowrootadoptedstylesheets="/foo.css" shadowroothtml="/foo.html"></template> 
+</my-element>
+```
+
+In this example we’ve leveraged the module system to implement declarative template refs. 
+
+This approach could also be expanded to SVG modules, similar to the HTML Modules example above. 
+
+```html
+<template type="module" specifier="/foo.svg"> 
+<!-- This template defines an SVG module whose contents are given by the SVG markup 
+     placed here, inserted into the module map with the specifier "/foo.svg" --> 
+... 
+</template> 
+<my-element> 
+<!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by 
+cloning the contents of the SVG module given by the "/foo.svg" specifier, instead of 
+parsing SVG inside the <template>. --> 
+  <template shadowrootmode="open" shadowrootadoptedstylesheets="/foo.css" shadowroothtml="/foo.html"></template> 
+</my-element>
+```
+SVG makes heavy use of IDREF's, for example `href` on `<use>` and SVG filters. Per existing Shadow DOM behavior, these IDREF's would be scoped per shadow root. 
+
+CSS Modules are not the only type of module - there are also JavasScript, JSON, SVG, HTML, and WASM that need to be considered. 
+
+| Module type    | Script Module                                            | Declarative Module                                                                  |
+| -------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------|
+| JavaScript     | `import { foo } from "./bar.js";`                        | TODO                                                                                |
+| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<script type="css-module" specifier="/bar.css">  ... </script>`                    |
+| JSON           | `import foo from "./bar.json" with { type: "json" };`    | TODO                                                                                |
+| HTML           | `import {foo} from  "bar.html" with {type: "html"};`     | `<template type="module" specifier="/foo.html"> `                                   |
+| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<template type="module" specifier="/foo.svg">`                                     |
+| WASM           | TODO                                                     | TODO                                                                                |
 
 ## Alternate proposals
 ### [Layer and adoptStyles](https://github.com/w3c/csswg-drafts/issues/10176#proposal)
@@ -310,7 +339,7 @@ This proposal builds on [using multiple sheets per file](https://github.com/w3c/
   @sheet sheet2 { *: color: blue; } 
 </style> 
 
-<template shadowrootmode="open" adoptedStylesheets="sheet1, sheet2"> 
+<template shadowrootmode="open" adoptedstylesheets="sheet1, sheet2"> 
   <span>I'm in the shadow DOM</span> 
 </template> 
  ```
@@ -339,7 +368,55 @@ import {sheet1, sheet2} from './styles1and2.css' assert {type: 'css'};
 shadow.adoptedStyleSheets = [sheet1, sheet2]; 
 </script>
 ```
-This approach could be combined with other approaches listed in this document. Note that `@sheet` is not implemented by any rendering engine as of September 2024. 
+This approach could be combined with other approaches listed in this document. 
+
+The specification of `@sheet` could be modified to split the *definition* of stylesheets from the *application* of the style rules. With this modification, `@sheet` would *define* a stylesheet with its own set of rules, but not  *apply* the rules automatically. This would allow for defining stylesheets in a light DOM context and applying them only to the shadow roots. 
+
+With this behavior, the following example would have a a gray background and blue text only within the Shadow DOM: 
+```html
+<style> 
+  @sheet sheet1 { *: background-color: gray; } 
+  @sheet sheet2 { *: color: blue; } 
+</style> 
+<span>I am in the light DOM</span>
+<template shadowrootmode="open" adoptedstylesheets="sheet1, sheet2"> 
+  <span>I'm in the shadow DOM</span> 
+</template> 
+ ```
+
+The light DOM could opt into particular stylesheets defined by `@sheet` via existing mechanisms such as `@import`: 
+
+```html
+<style> 
+  @sheet sheet1 { *: background-color: gray; } 
+  @sheet sheet2 { *: color: blue; } 
+  @import sheet("sheet1"); 
+  @import sheet("sheet2"); 
+</style> 
+ ```
+
+A similar mechanism for `@sheet` was proposed in [this](https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-2016582527) comment. 
+
+Stylesheets can be adopted though multiple layers of Shadow DOM as shown in the following example: 
+
+```html
+<style> 
+  @sheet sheet1 { *: color: blue; } 
+</style> 
+<span>I am in the light DOM</span>
+<template shadowrootmode="open" adoptedstylesheets="sheet1"> 
+  <span>I'm in the first layer of the shadow DOM and my text should be blue</span> 
+  <template shadowrootmode="open" adoptedstylesheets="sheet1"> 
+    <span>I'm in the second layer of the shadow DOM and my text should be blue</span> 
+    <template shadowrootmode="open"> 
+      <span>I'm in the third layer of the shadow DOM and my text should not be blue because this layer doesn't have `adoptedstylesheets`</span> 
+    </template> 
+  </template> 
+</template> 
+ ```
+Text within both shadow roots in the above example should be blue due to the `adoptedstylesheets` at each Shadow DOM layer. Note that it is not currently possible to export stylesheets *out* of shadow roots. 
+
+Note that `@sheet` is not implemented by any rendering engine as of September 2024. 
 
 ### [Id-based `adoptedstylesheet` attribute on template](https://github.com/WICG/webcomponents/issues/939#issue-971914425) 
 This proposal will add a new markup-based `adoptedstylesheets` property that closely matches the existing JavaScript property.  The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object. 
@@ -348,7 +425,7 @@ This proposal will add a new markup-based `adoptedstylesheets` property that clo
     :host {  
       color: red  
     }  
-</style>
+</style> 
 ```
 
 or 
@@ -362,7 +439,7 @@ Web authors can use the `adoptedstylesheets` property on the `<template>` elemen
       <!-- -->  
 </template>
 ```
-One requirement of this approach is that the current `adoptedStylesheets` JavaScript property would need to lift the “constructable” requirement for `adoptedStylesheets`. This was recently agreed upon by the CSSWG but has not been implemented yet: [ Can we lift the restriction on constructed flag for adoptedStylesheets?](https://github.com/w3c/csswg-drafts/issues/10013#issuecomment-2165396092)
+One requirement of this approach is that the current `adoptedStylesheets` JavaScript property would need to lift the “constructable” requirement for `adoptedStylesheets`. This was recently agreed upon by the CSSWG but has not been implemented yet: [ Can we lift the restriction on constructed flag for adoptedStylesheets?](https://github.com/w3c/csswg-drafts/issues/10013#issuecomment-2165396092) 
 
 One limitation of this approach is that shared styles that need to be applied exclusively to shadow roots (and not the main document) will need to include a CSS `:host` selector. This is not necessary for JavaScript-based adopedStylesheets but will be necessary for declarative stylesheets, as there is currently no way in HTML to create stylesheets without applying them to the document they are defined in. This could also be addressed via a new type value on `<style>` tags and rel value on `<link>` tags, potentially `“adopted-css”`. 
 
@@ -371,8 +448,37 @@ A challenge that arises is dealing with scopes and idrefs. If a declarative styl
 The script version of this already exists via the [adoptedStylesheets](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/adoptedStyleSheets) property: 
 ```html
 import sheet from './styles.css' assert { type: 'css' }; // or new CSSStyleSheet(); 
-shadowRoot.adoptedStyleSheets = [sheet];
+shadowRoot.adoptedStyleSheets = [sheet]; 
 ```
+
+## Polyfills
+
+Web developers often seek polyfills to allow them to use new web platform features while falling back gracefully in user agents where such features are not supported. A common strategy is to use JavaScript for polyfills. An example of this could be the following: 
+
+```html
+<script> 
+  function supportsDeclarativeAdoptedStyleSheets() { 
+    return document.createElement('template')["adoptedStyleSheets"] == undefined; 
+  } 
+
+  if (!supportsDeclarativeAdoptedStyleSheets()) { 
+    // AdoptedStyleSheets is not supported on <template> - apply polyfill. This polyfill could be an injected <link> tag. 
+  } 
+</script> 
+```
+
+For the Declarative CSS Modules approach, [one suggestion](https://github.com/whatwg/html/issues/10673#issuecomment-2453512552) is to bind the `<link>` tag's `href` attribute value to the CSS module identifier and add a new attribute (`noadoptedstylesheets`) to avoid double-applying stylesheets. 
+
+This suggestion looks like the following: 
+
+```html
+<my-element> 
+   <template shadowrootmode="open" adoptedstylesheets="/foo.css"> 
+       <link rel="stylesheet" href="/foo.css" noadoptedstylesheets> <!-- no-op on browsers that support adoptedstylesheets on <template> tags --> 
+   </template> 
+</my-element> 
+```
+
 ## Summary
 The following table compares pros and cons of the various proposals: 
 <image src="images/summary.png">
