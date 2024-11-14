@@ -2,7 +2,7 @@
 
 # Outdated
 
-This explainer has been replaced with [HandwritingIntentCSSValue](Handwriting/HandwritingIntentCSSValue.md) which proposes a new keyword for the `touch-action` CSS attribute.
+As of November 14th 2024, this explainer has been replaced with [HandwritingIntentCSSValue](Handwriting/HandwritingIntentCSSValue.md) which proposes a new keyword for the `touch-action` CSS attribute.
 
 ---
 
