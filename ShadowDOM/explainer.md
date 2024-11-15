@@ -280,14 +280,14 @@ SVG makes heavy use of IDREF's, for example `href` on `<use>` and SVG filters. P
 
 CSS Modules are not the only type of module - there are also JavasScript, JSON, SVG, HTML, and WASM that need to be considered. 
 
-| Module type    | Script Module                                            | Declarative Module                                                                  |
-| -------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------|
-| JavaScript     | `import { foo } from "./bar.js";`                        | TODO                                                                                |
-| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<script type="css-module" specifier="/bar.css">  ... </script>`                    |
-| JSON           | `import foo from "./bar.json" with { type: "json" };`    | TODO                                                                                |
-| HTML           | `import {foo} from  "bar.html" with {type: "html"};`     | `<template type="module" specifier="/foo.html"> `                                   |
-| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<template type="module" specifier="/foo.svg">`                                     |
-| WASM           | TODO                                                     | TODO                                                                                |
+| Module type    | Script Module                                            | Declarative Module                                                        |
+| -------------- | -------------------------------------------------------- | --------------------------------------------------------------------------|
+| JavaScript     | `import { foo } from "./bar.js";`                        | TODO                                                                      |
+| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<template shadowrootmode="open" adoptedstylesheets="/foo.css">`          |
+| JSON           | `import foo from "./bar.json" with { type: "json" };`    | TODO                                                                      |
+| HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<template shadowrootmode="open" shadowroothtml="/foo.html"></template> ` |
+| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<template shadowrootmode="open" shadowrootsvg="/foo.svg"></template> `   |
+| WASM           | TODO                                                     | TODO                                                                      |
 
 ## Alternate proposals
 ### [Layer and adoptStyles](https://github.com/w3c/csswg-drafts/issues/10176#proposal)
@@ -372,7 +372,7 @@ This approach could be combined with other approaches listed in this document.
 
 The specification of `@sheet` could be modified to split the *definition* of stylesheets from the *application* of the style rules. With this modification, `@sheet` would *define* a stylesheet with its own set of rules, but not  *apply* the rules automatically. This would allow for defining stylesheets in a light DOM context and applying them only to the shadow roots. 
 
-With this behavior, the following example would have a a gray background and blue text only within the Shadow DOM: 
+With this behavior, the following example would have a gray background and blue text only within the Shadow DOM: 
 ```html
 <style> 
   @sheet sheet1 { *: background-color: gray; } 
@@ -405,12 +405,21 @@ Stylesheets can be adopted though multiple layers of Shadow DOM as shown in the 
 </style> 
 <span>I am in the light DOM</span>
 <template shadowrootmode="open" adoptedstylesheets="sheet1"> 
+  <style>
+    @import sheet("sheet1"); 
+  </style>
   <span>I'm in the first layer of the shadow DOM and my text should be blue</span> 
   <template shadowrootmode="open" adoptedstylesheets="sheet1"> 
+    <style>
+      @import sheet("sheet1"); 
+    </style>
     <span>I'm in the second layer of the shadow DOM and my text should be blue</span> 
     <template shadowrootmode="open"> 
       <span>I'm in the third layer of the shadow DOM and my text should not be blue because this layer doesn't have `adoptedstylesheets`</span> 
     </template> 
+  </template> 
+  <template shadowrootmode="open" adoptedstylesheets="sheet1"> 
+    <span>I'm also in the second layer of the shadow DOM and my text should not be blue because I didn't `@import` the adopted stylesheet, even though I specified it via `adoptedstylesheets`</span> 
   </template> 
 </template> 
  ```
@@ -458,7 +467,7 @@ Web developers often seek polyfills to allow them to use new web platform featur
 ```html
 <script> 
   function supportsDeclarativeAdoptedStyleSheets() { 
-    return document.createElement('template')["adoptedStyleSheets"] == undefined; 
+    return document.createElement('template').adoptedStyleSheets != undefined; 
   } 
 
   if (!supportsDeclarativeAdoptedStyleSheets()) { 
@@ -467,7 +476,7 @@ Web developers often seek polyfills to allow them to use new web platform featur
 </script> 
 ```
 
-For the Declarative CSS Modules approach, [one suggestion](https://github.com/whatwg/html/issues/10673#issuecomment-2453512552) is to bind the `<link>` tag's `href` attribute value to the CSS module identifier and add a new attribute (`noadoptedstylesheets`) to avoid double-applying stylesheets. 
+There was also a [suggestion](https://github.com/whatwg/html/issues/10673#issuecomment-2453512552) for adding browser support to enable falling back to a normal `<link>` tag without the use of script, by binding the `<link>` tag's `href` attribute value to the CSS module identifier and adding a new attribute (`noadoptedstylesheets`) to avoid double-applying stylesheets. 
 
 This suggestion looks like the following: 
 
