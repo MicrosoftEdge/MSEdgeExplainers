@@ -397,7 +397,7 @@ The light DOM could opt into particular stylesheets defined by `@sheet` via exis
 
 A similar mechanism for `@sheet` was proposed in [this](https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-2016582527) comment.
 
-Stylesheets can be adopted though multiple layers of Shadow DOM as shown in the following example:
+Stylesheets defined via `@sheet` are not global - they are scoped per shadow root. Nested shadow roots may share stylesheets between shadow roots by passing down the identifier at each layer via `adoptedstylesheets` and using `@import` to apply the stylesheet, as illustrated in the following example:
 
 ```html
 <style>
