@@ -94,8 +94,8 @@ const installApp = async () => {
 #### **Signatures of the `install` method (same-origin)**
 The same-origin part of the  Web Install API consists of the extension to the navigator interface with the install method. The install method can be used in several different ways. There is no difference in behaviour when this is called from a standalone window or a tab.
 
-1. `navigator.install(<params>)`: The method takes no parameters and tries to install the current document. If the content to be installed does not link to a manifest with an explicitly defined `id` value, then installation will fail.
-2. `navigator.install(id, install_url, [<params>])`: The method takes an id and install url and tries to install the web content at `install_url`. If the content to be installed does not link to a manifest OR if the manifest does not include a valid id OR if the id parameter does not match either the declared or resolved manifest id, then installation will fail.
+1. `navigator.install(<params>)`: The method takes no parameters and tries to install the current document. Installation will proceed as long as the current document links to a manifest that includes a declared id.
+2. `navigator.install(id, install_url, [<params>])`: The method takes an id and install url and tries to install the web content at `install_url`. Installation will proceed as long as the target web app has a declared id in its manifest and the `id` parameter either matches the declared or resolved manifest id.
 
 Both calls can also receive an object with parameters that they can use to customize a same domain installation. These parameters alter how the app is installed and are defined in an object. More information about the parameters is found in the [Parameters](#parameters) subsection of this specification.
 
