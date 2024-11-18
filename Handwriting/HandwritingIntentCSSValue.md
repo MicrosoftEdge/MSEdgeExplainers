@@ -11,9 +11,9 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-Multiple platforms have implemented API support for handwriting gestures on touch devices. In these platforms, the OS takes the gestures a user performed (via touch or stylus) and after applying some character recognition technology to the user's handwriting introduces text to the corresponding text editable input.
+Multiple platforms have implemented an API to support handwriting gestures on touch devices. In these platforms, the O.S. takes the gestures a user performed (via touch or stylus) and after applying some character recognition technology to the user's handwriting introduces text to the corresponding text editable input.
 
-Web browsers who integrate this capability have to contend with other [user agent](https://w3c.github.io/pointerevents/#dfn-user-agent) defined touch behavior, for example, to determine if the gesture is intended to be a scroll or if it should be interpreted as handwriting. Whenever a user starts handwriting near a text editable input field the browser must first discern the user's intention, then change focus to the most appropriate editable input and then fire [pointer](https://w3c.github.io/pointerevents/#dfn-pointer) events.
+Web browsers that integrate this capability have to contend with other [user agent](https://w3c.github.io/pointerevents/#dfn-user-agent) defined touch behavior, for example, to determine if the gesture is intended to be a scroll or if it should be interpreted as handwriting. Whenever a user starts handwriting near a text editable input field the browser must first discern the user's intention, then change focus to the most appropriate editable input and then emit [pointer](https://w3c.github.io/pointerevents/#dfn-pointer) events.
 
 However, browsers that recognize handwriting behave differently from those that don’t, and handwriting input isn’t always desirable for every application.
 
@@ -47,9 +47,9 @@ Some scenarios where a website or application may want to disable handwriting in
 
 Introduce a new value, `handwriting`, to the CSS property `touch-action` which allows authors to specify whether an element should allow handwriting input. 
 
-The `touch-action` CSS property is used by authors to define for whether user agents should execute their [direct manipulation](https://w3c.github.io/pointerevents/#dfn-direct-manipulation) behavior for touch and pen gestures. When the spec was written this only included panning and zooming. The `manipulation` value for `touch-action` will be expanded to also indicate that the user agent may consider handwriting interactions on the element.
+The `touch-action` CSS property is used by authors to define for whether user agents should execute their [direct manipulation](https://w3c.github.io/pointerevents/#dfn-direct-manipulation) behavior for touch and pen gestures. When the spec was written this only included panning and zooming, which were addressed jointly via the `manipulation` keyword. This change would modify the meaning of the `manipulation` value for `touch-action` to also indicate that the user agent may consider handwriting interactions on the element.
 
-When the `touch-action` CSS property is specified for an Element, only the mentioned behaviors will be enabled on the Element and all the possible `touch-action` values that are not explicitly mentioned are then disabled for the Element.
+When the `touch-action` CSS property is specified for an element, only the mentioned behaviors will be enabled on the element and all the possible `touch-action` values that are not explicitly mentioned are then disabled for the element.
 
 Authors are used to the [recommended practice of adding touch-action: none](https://w3c.github.io/pointerevents/#example_10) to elements over which they wish to handle all events themselves.
 
@@ -66,25 +66,23 @@ Authors are used to the [recommended practice of adding touch-action: none](http
 }
 </style>
 
-<textarea class="handwritable"></textarea>                                         <!-- the computed handwriting value is true -->
-<textarea class="not-handwritable"></textarea>                                         <!-- the computed handwriting value is false -->
-
+<textarea class="handwritable"></textarea>                    <!-- the computed handwriting value is true -->
+<textarea class="not-handwritable"></textarea>                <!-- the computed handwriting value is false -->
 <textarea></textarea>                                         <!-- the computed handwriting value is true -->
 <textarea style="touch-action:handwriting;"></textarea>       <!-- the computed handwriting value is true -->
 <textarea style="touch-action:pan-x;"></textarea>             <!-- the computed handwriting value is false -->
 <textarea style="touch-action:pan-x handwriting;"></textarea> <!-- the computed handwriting value is true -->
 <textarea style="touch-action:manipulation;"></textarea>      <!-- the computed handwriting value is true -->
 
-
-<div style="touch-action:pan-x;">
+<!-- Having a parent that disables handwriting causes all its children to lose handwriting capabilities -->
+<div style="touch-action:pan-x;">                             <!-- the computed handwriting value is false -->
   <textarea></textarea>                                       <!-- the computed handwriting value is false -->
-  <textarea style="touch-action:handwriting;"></textarea>     <!-- the computed handwriting value is true -->
-  <textarea style="touch-action:pan-y;"></textarea>           <!-- the computed handwriting value is false -->
+  <textarea style="touch-action:handwriting;"></textarea>     <!-- the computed handwriting value is false -->
 </div>
 
-<div class="not-handwritable">
-  <textarea></textarea>                                       <!-- the computed handwriting value is false -->
-  <textarea class="handwritable"></textarea>     <!-- the computed handwriting value is true -->
+<div class="handwritable">
+  <textarea></textarea>                                       <!-- the computed handwriting value is true -->
+  <textarea class="not-handwritable"></textarea>              <!-- the computed handwriting value is false -->
 </div>
 ```
 
@@ -96,16 +94,14 @@ The `handwriting` keyword indicates whether an element and the element's descend
 
 All CSS properties have computed values for all elements. The enablement of handwriting in a given `element` can be determined by running the following steps:
 
-1. If the computed value for `touch-action` on `element` does not contain the `handwriting` or `manipulation` keyword, **disable handwriting**.
-2. If the computed value for `touch-action` on `element` does contain the `handwriting` or `manipulation` keyword, **enable handwriting**.
-3. If the computed value for `touch-action` on `element` is `auto`, search `element`'s parent chain for an ancestor with a non-`auto` computed value for `touch-action`. Apply steps 1 and 2 to the computed value for `touch-action` on the lowest such ancestor.
-4. If the computed value for `touch-action` on `element` and all of its ancestors is `auto`, **enable handwriting**.
+1. If the computed value for `touch-action` on `element` and all of its ancestors include either keyword `auto`, `handwriting`, or `manipulation`, **enable handwriting**.
+2. If the computed value for `touch-action` on `element` or any of its ancestors does not include either keyword `auto`, `handwriting`, or `manipulation`, **disable handwriting**.
 
 ### Caveats
 
 A few pain points have been brought up that are worth discussion:
-* Web pages who currently have the `touch-action` property set for different Elements will lose the handwriting capabilities on this element even if they don't want to disable it. When the new keyword ships, the absence of the value will be interpreted as the author of the webpage intently disabling handwriting.
-* Authors who specify `touch-action: manipulation` will be enabling `handwriting`, even when they might not want the behavior enabled in their webpage. These authors would then need to update their webpages to explicitly mention which behaviors they want, i.e. : `touch-action: pan-x pan-y pinch-zoom`.
+* Web pages that currently have the `touch-action` property set for different elements will lose the handwriting capabilities on this element even if they don't want to disable it. When the new keyword ships, the absence of the value will be interpreted as the author of the webpage intentionally disabling handwriting.
+* Authors that specify `touch-action: manipulation` will be enabling `handwriting`, even when they might not want the behavior enabled in their webpage. These authors would then need to update their webpages to explicitly mention which behaviors they want, i.e. : `touch-action: pan-x pan-y pinch-zoom`.
 
 ## Privacy and Security Considerations
 
@@ -125,7 +121,7 @@ The proposal is for this to be an CSS property.
 The [first proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Handwriting/explainer.md) was to add the handwriting functionality as an HTML+IDL attribute, but after some discussion it was decided that the better option was to implement the functionality in the `touch-action` CSS attribute. [ [1](https://groups.google.com/a/chromium.org/g/blink-dev/c/0r_tV6k0NyA?pli=1)]] [[2](https://github.com/w3c/pointerevents/issues/516)]
 
 * [Pro] If users or organizations disable CSS for their browsers there would need to be another mechanism to disable handwriting input.
-* [Pro] All websites who currently use `touch-action` won't have to update their rules if they want handwriting to be enabled.
+* [Pro] All websites that currently use `touch-action` won't have to update their rules if they want handwriting to be enabled.
 * [Pro] An HTML attribute can be exposed to JavaScript as a IDL attribute which may be more ergonomic.
 * [Con] Developers would have to keep track of both the `touch-action` CSS property and new HTML attribute in order to completely declare the desired behavior of their webpages.
  * [Con] CSS pattern matching is a powerful tool and may be more ergonomic for some use cases.
@@ -138,7 +134,7 @@ The [first proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main
 * `touch-action: none + HTML handwriting=false` disables handwriting.
 * `touch-action: pan-x pan-y + HTML handwriting=false` disables handwriting.
 * `touch-action: pan-x pan-y + HTML handwriting=true` enables handwriting.
-*  `touch-action: none + handwriting=true` disables handwriting? enables handwriting?
+* `touch-action: none + handwriting=true` disables handwriting? enables handwriting?
 
 The last entry that fails is equivalent of `touch-action: handwriting`. In order to implement this handwriting control mechanism, the `touch-action:none;` recommendation would have to be modified.
 
@@ -157,20 +153,31 @@ The last entry that fails is equivalent of `touch-action: handwriting`. In order
 ### Why not extend a different attribute or property?
 [HTML]  [inputmode](https://www.w3.org/TR/2002/WD-xforms-20020821/sliceE.html):
 * Related to but distinct from `<input>`  `type`. Is only concerned with virtual keyboard inputs.
+
 [CSS]  [pointer-events](https://w3c.github.io/pointerevents/#pointerevent-interface):
 * Is concerned with whether an element or visual components of an element can be the target of a pointer event, not what kinds of pointer devices can be used.
 
 ## References and acknowledgements
 
-* @**[flackr](https://github.com/flackr)**, @**[mustaqahmed](https://github.com/mustaqahmed)**, @**[adettenb](https://github.com/adettenb)**, @**[patrickhlauke](https://github.com/patrickhlauke)**, @**[ogerchikov](https://github.com/ogerchikov)** for carrying forward the discussion.
-* Previous explainer: [Handwriting Explainer](Handwriting/explainer.md)
-* Existing discussion: https://github.com/w3c/pointerevents/issues/516, https://www.w3.org/2024/11/06-pointerevents-minutes.html
+* @**[flackr](https://github.com/flackr)**, @**[mustaqahmed](https://github.com/mustaqahmed)**, @**[adettenb](https://github.com/adettenb)**, @**[patrickhlauke](https://github.com/patrickhlauke)**, @**[ogerchikov](https://github.com/ogerchikov)** for helping build this proposal and providing feedback.
+* **Claire Chambers**, @**[dandclark](https://github.com/dandclark)**, @**[kbabbitt](https://github.com/kbabbitt)**, @**[sanketj](https://github.com/sanketj)** and  **Sam Fortiner** , for helping with the [HTML+IDL explainer](Handwriting/explainer.md). Their feedback has been invaluable for completing these documents, and much of it carried over into this document.
 
 ## Stakeholder Feedback / Opposition
 
-None other than the discussion linked in the **References and Acknowledgements** section
+* Existing discussion: https://github.com/w3c/pointerevents/issues/516, https://www.w3.org/2024/11/06-pointerevents-minutes.html, https://github.com/w3c/pointerevents/issues/512
+
+Summary of the feedback on the current proposal:
+
+* `touch-action` in its current state may not be flexible enough for developers needs.
+    - The property name, while clearly communicated in the Spec, isn't specific to touch behaviors as it includes stylus/pen actions as well.
+    - Developers may want granular control over input type in addition to "actions".
+    - Developers may want granular control to specify "action" precedence (handwriting then scrolling, or vice versa).
+- Concerns with how handwriting and panning can intuitively co-exist, since it's possible a scrollable page with `touch-action: handwriting pan-y` may be unable to be panned. e.g., when the entire document is editable.
 
 ## References
-* [Input Method Editors (IME)]()
+
 * [Composition Event Types](https://w3c.github.io/uievents/#events-composition-types)
 * [Pointer Events](https://w3c.github.io/pointerevents/)
+* [Determining supported direct manipulation behavior](https://w3c.github.io/pointerevents/#determining-supported-direct-manipulation-behavior)
+* [Previous HTML+IDL explainer](Handwriting/explainer.md)
+
