@@ -160,7 +160,7 @@ The last entry that fails is equivalent of `touch-action: handwriting`. In order
 ## References and acknowledgements
 
 * @**[flackr](https://github.com/flackr)**, @**[mustaqahmed](https://github.com/mustaqahmed)**, @**[adettenb](https://github.com/adettenb)**, @**[patrickhlauke](https://github.com/patrickhlauke)**, @**[ogerchikov](https://github.com/ogerchikov)** for helping build this proposal and providing feedback.
-* **Claire Chambers**, @**[dandclark](https://github.com/dandclark)**, @**[kbabbitt](https://github.com/kbabbitt)**, @**[sanketj](https://github.com/sanketj)** and  **Sam Fortiner** , for helping with the [HTML+IDL explainer](Handwriting/explainer.md). Their feedback has been invaluable for completing these documents, and much of it carried over into this document.
+* **Claire Chambers**, @**[dandclark](https://github.com/dandclark)**, @**[kbabbitt](https://github.com/kbabbitt)**, @**[sanketj](https://github.com/sanketj)** and  **@[sfortiner](https://github.com/sfortiner)** , for helping with the [HTML+IDL explainer](Handwriting/explainer.md). Their feedback has been invaluable for completing these documents, and much of it carried over into this document.
 
 ## Stakeholder Feedback / Opposition
 
