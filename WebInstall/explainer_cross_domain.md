@@ -107,7 +107,7 @@ If the `manifest_id` is the *what* to install, the `install_url` is the *where* 
 
 Unless the UA decides to [gate this functionality behind installation](#gating-capability-behind-installation), the behaviour between calling the `install` method on a tab or on an installed application should not differ. The install method can be used in two different ways.
 
-1. `navigator.install(manifest_id, <install_url> [, <params>])`: This signature of the method takes an id and install url and tries to install the web content at install_url. Installation will proceed if the following are true: a. The target web app links to a manifest. b. The target web app's manifest includes either an id or start_url. c. The id parameter matches the declared or resolved id of the target web app. This is the most common API use case the API for cross-origin scenarios.
+1. `navigator.install(manifest_id, <install_url> [, <params>])`: The method takes an id and install url and tries to install the web content at `install_url`. Installation will proceed if the following are true: a. The target web app links to a manifest. b. The target web app's manifest includes either an `id` or `start_url`. c. The `id` parameter matches the declared or resolved id of the target web app. This is the most common API use case the API for cross-origin scenarios.
 
 This will prompt for installation of the app if the requesting origin has installation permissions (see [security section](#integration-with-the-permissions-api)).
 
