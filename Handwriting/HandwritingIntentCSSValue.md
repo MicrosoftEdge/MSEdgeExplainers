@@ -180,4 +180,5 @@ Summary of the feedback on the current proposal:
 * [Pointer Events](https://w3c.github.io/pointerevents/)
 * [Determining supported direct manipulation behavior](https://w3c.github.io/pointerevents/#determining-supported-direct-manipulation-behavior)
 * [Previous HTML+IDL explainer](Handwriting/explainer.md)
+* [Pull request updating the touch-action spec](https://github.com/w3c/pointerevents/pull/525)
 
