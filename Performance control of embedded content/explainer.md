@@ -7,24 +7,24 @@
 - [Alex Russell](https://github.com/slightlyoff)
 
 ## Introduction
-This document proposes platform functionality to give embedders (browsers, websites, hosting applications) the ability to put constraints on resources allocated to embedees (iframes, browsers tabs, WebViews) to minimize the performance impact that embedded web content can have on an user’s device. Additionally, violations of the constraints will be reported to the embedder to inform and improve the ecosystem.  
+This document proposes platform functionality to give embedders (browsers, websites, hosting applications) the ability to put constraints on resources allocated to embedees (iframes, browsers tabs, WebViews) to minimize the performance impact that embedded web content can have on an user’s device. Additionally, violations of the constraints will be reported to the embedder to inform and improve the ecosystem.
 
-Embedder developers can do this by enabling various categories of criteria that constrain performance impacting features on the embedee.  
+Embedder developers can do this by enabling various categories of criteria that constrain performance impacting features on the embedee.
 
 ## Goals
 With global web usage continuing to rise and more companies relying on the web as a primary platform to deliver their applications, performance has become a critical factor for success. As more users access websites through mobile devices and lower-powered hardware, the need for fast responsive web experiences is non-negotiable[^1],[^2].
 When it comes to optimizing performance, websites and apps are limited by the performance of the external content they embed, these can be 3rd party sites, 3rd party apps, and even content from other organizations within a company. As a result, being able to control the performance of embedded content is crucial to improving the overall performance of a site or app.
 This proposal has two primary goals:
 1.	Improve users’ satisfaction with their OS, browser, and applications via formalizing methods of constraining the resources available to web content.
-2.	Provide information to help developers improve the performance of web sites and apps through reporting when performance is negatively impacting end-users and/or applications hosting the site in a frame. 
+2.	Provide information to help developers improve the performance of web sites and apps through reporting when performance is negatively impacting end-users and/or applications hosting the site in a frame.
 
 ### Scenarios
 * Embedded widgets: Weather forecast, stock tickets, etc.
-* Embedded Ads: Embedded ads from networks like Google AdSense or Bing Ads. 
-* Embedded calendars: Embedding calendars from services like Outlook Calendar, Google Calendar, etc. 
+* Embedded Ads: Embedded ads from networks like Google AdSense or Bing Ads.
+* Embedded calendars: Embedding calendars from services like Outlook Calendar, Google Calendar, etc.
 
 ## Proposed Solution
-There are four categories (A, B, C, D) of performance impacting criteria that developers can enforce on embedded content. Based on the scenarios, the app can emable all or one of the categories. 
+There are four categories (A, B, C, D) of performance impacting criteria that developers can enforce on embedded content. Based on the scenarios, the app can enable all or some of the categories.
 
 | **Perf. Category** | **Criteria** | **Handling violations** |
 | -------------  | -------- | ------------------- |
@@ -34,13 +34,13 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 | **D: Script**<br>**Description:** Strict JavaScript restrictions. | **-Additional JS limits:**<br>* Long tasks in the main thread.<br>* High CPU usage.<br>* Workers with long tasks that exceed Xms.<br> | - Report violations via Reporting API.<br>- Stopping JavaScript if [in the background]. |
 
 ### Discussion of different categories
-**A: Basic – Basic web development best practices that are scenario-agnostic:** This category covers fundamental web development best practices to ensure that websites are optimized for performance across all environments. This includes compressing text resources such as HTML, CSS JavaScript, and JSON to reduce load times and bandwidth usage, and compressing assets larger than 100KB that are embedded via `data: URLs` as they can slow down page rendering and increase resource consumption. Additionally, images should be served in modern, efficient formats, with any image files exceeding 500KB considered oversized and requiring optimization. Web fonts must also be kept under 300KB to avoid unnecessarily delaying page rendering. 
+**A: Basic – Basic web development best practices that are scenario-agnostic:** This category covers fundamental web development best practices to ensure that websites are optimized for performance across all environments. This includes compressing text resources such as HTML, CSS JavaScript, and JSON to reduce load times and bandwidth usage, and compressing assets larger than 100KB that are embedded via `data: URLs` as they can slow down page rendering and increase resource consumption. Additionally, images should be served in modern, efficient formats, with any image files exceeding 500KB considered oversized and requiring optimization. Web fonts must also be kept under 300KB to avoid unnecessarily delaying page rendering.
 
-**B: Early-script – JavaScript constraints to enhance performance and minimize impact on user experience before interaction begins:** This category focuses on JavaScript development best practices that can be done to minimize performance issues before user interaction begins. This includes capping JavaScript resources loaded initially to avoid overwhelming devices with limited processing power or bandwidth, and serving JavaScript with constrained content-length headers to ensure predictable resource delivery and prevent bloated downloads. Additionally, animations that don’t run on the compositor thread should be avoided, as they can trigger costly layout recalculations and choppy user experiences, especially during page load or scroll events. 
+**B: Early-script – JavaScript constraints to enhance performance and minimize impact on user experience before interaction begins:** This category focuses on JavaScript development best practices that can be done to minimize performance issues before user interaction begins. This includes capping JavaScript resources loaded initially to avoid overwhelming devices with limited processing power or bandwidth, and serving JavaScript with constrained content-length headers to ensure predictable resource delivery and prevent bloated downloads. Additionally, animations that don’t run on the compositor thread should be avoided, as they can trigger costly layout recalculations and choppy user experiences, especially during page load or scroll events.
 
-**C: Globals – Overall media and system resource usage constraints:** This category entails imposing limits on overall media and system resource usage during interactions to help prevent websites from over-consuming resources and degrading user experiences. This includes capping total media usage and iframe count/nesting to avoid excessive memory consumption and rendering issues because it can slow down the page and make it unresponsive, particularly on lower-end devices or in resource-constrained environments.  
+**C: Globals – Overall media and system resource usage constraints:** This category entails imposing limits on overall media and system resource usage during interactions to help prevent websites from over-consuming resources and degrading user experiences. This includes capping total media usage and iframe count/nesting to avoid excessive memory consumption and rendering issues because it can slow down the page and make it unresponsive, particularly on lower-end devices or in resource-constrained environments.
 
-**D: Script – Strict JavaScript restrictions:** This category enforces restrictions on more complex JavaScript to further enhance performance. This includes limiting long tasks running on the main thread as they block the event loop and degrade interactivity leading to slow response times, and capping high CPU usage tasks, particularly those involving workers that exceed certain execution times, to ensure they don’t monopolize system resources. These restrictions ensure that JavaScript execution remains lightweight and efficient, preventing detrimental performance impacts on the user experience.  
+**D: Script – Strict JavaScript restrictions:** This category enforces restrictions on more complex JavaScript to further enhance performance. This includes limiting long tasks running on the main thread as they block the event loop and degrade interactivity leading to slow response times, and capping high CPU usage tasks, particularly those involving workers that exceed certain execution times, to ensure they don’t monopolize system resources. These restrictions ensure that JavaScript execution remains lightweight and efficient, preventing detrimental performance impacts on the user experience.
 
 ## What should be standardized?
 | **Layer of configuration** | **Standardize?** | **Notes** |
@@ -69,7 +69,7 @@ This enables each document to:
 * Negotiate constraints (see discussion section) for each subresource.
 
 **Example**
-A feeds app embeds content from different sources, through iframes. To cap the performance impact of the embedded content, the host application aligns with its producers on guidelines and best practices for the embeddees to be loaded into the experience, requiring the content to be served with an agreed upon subset of policies (categories above). 
+A feeds app embeds content from different sources, through iframes. To cap the performance impact of the embedded content, the host application aligns with its producers on guidelines and best practices for the embeddees to be loaded into the experience, requiring the content to be served with an agreed upon subset of policies (categories above).
 The host app serves its main document with Document Policy directives to enforce on embedded content:<br>
 `Require-Document-Policy: basic, early-script, globals, script`
 
@@ -96,7 +96,7 @@ Document Policy allows for a single value for each configuration point. Since th
  Document Policy establish a mechanism for agreement of embedder and embedee about the policies to be applied. An embeddee which doesn’t agree to the embedder’s policies will not be loaded. However, this is only an agreement from the parties involved. Actual enforcement of the policy is to be defined by such policy.
 
 #### \<per document constraints>
-\<constraints are applied at document level, setting a required policy requires the same policy for each document on its own, not as part of a global budget/constraint. Best way to cap total resources/complexity is likely through frame depth restriction> 
+\<constraints are applied at document level, setting a required policy requires the same policy for each document on its own, not as part of a global budget/constraint. Best way to cap total resources/complexity is likely through frame depth restriction>
 
 ### Open questions
 
