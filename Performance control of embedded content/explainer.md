@@ -7,7 +7,7 @@
 - [Alex Russell](https://github.com/slightlyoff)
 
 ## Introduction
-This document proposes platform functionality to give embedders (browsers, websites, hosting applications) the ability to put constraints on resources allocated to embedees (iframes, browsers tabs, WebViews) to minimize the performance impact that embedded web content can have on an user’s device. Additionally, violations of the constraints will be reported to the embedder to inform and improve the ecosystem.
+This document proposes platform functionality to give embedders (browsers, websites, hosting applications) the ability to put constraints on resources allocated to embedees (iframes, browsers, tabs, WebViews) to minimize the performance impact that embedded web content can have on an user’s device. Additionally, violations of the constraints will be reported to the embedder to inform and improve the ecosystem.
 
 Embedder developers can do this by enabling various categories of criteria that constrain performance impacting features on the embedee.
 
