@@ -148,5 +148,10 @@ Using Document Policy for this proposal has limitations and challenges, includin
 #### Levels vs categories
 It was considere to have a single configuration point based on “levels” which would restrictions on top of each other, but this was discarded due to increased difficulty to introduce new values in the future.
 
+## Acknowledgements 
+Many thanks for the valuable feedback and advice from:
+* [Limin Zhu](https://github.com/liminzhu)
+
+
 [^1]: https://infrequently.org/2023/02/the-market-for-lemons/
 [^2]: https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/page-load-time-statistics/
