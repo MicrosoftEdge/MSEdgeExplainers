@@ -5,6 +5,8 @@
 - Kurt Catti-Schmidt
 - Daniel Clark
 - Tien Mai
+- Alison Maher
+- Andy Luhrs
 
 ## Participate
 - [Discussion forum](https://github.com/WICG/webcomponents/issues/939)
@@ -243,6 +245,20 @@ Another advantage of this proposal is that it can allow multiple module specifie
 </my-element>
 ```
 
+### Scoping
+
+The module map exists today as a global registry per document, not scoped to a particular shadow root. Many developers have expressed interest in such a global map for sharing stylesheets, as it allows for nested shadow roots to access a base set of shared styles without needing to redefine them at each level of shadow root nesting.
+
+A global map does come with some tradeoffs, particularly when names collide. With a global map, nested shadow roots could override entries from parent shadow roots, which could be undesirable.
+
+### `<script>` vs `<style>` For CSS Modules
+
+This document uses the `<script>` tag for defining CSS modules. Developer feedback has shown a preference for using the `<style>` tag for CSS Modules. This makes sense for CSS Modules in isolation, but does not align with other types of modules. The table in the [next section](#other-declarative-modules) details other module types and demonstrates the degree of consistency achieved with `<script>`.  Developer feedback is important and should be considered, even at the potential expense of consistency.
+
+### Behavior with script disabled
+
+User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not.
+
 ## Other declarative modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
 ```html
@@ -282,12 +298,12 @@ CSS Modules are not the only type of module - there are also JavasScript, JSON, 
 
 | Module type    | Script Module                                            | Declarative Module                                                        |
 | -------------- | -------------------------------------------------------- | --------------------------------------------------------------------------|
-| JavaScript     | `import { foo } from "./bar.js";`                        | TODO                                                                      |
-| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<template shadowrootmode="open" adoptedstylesheets="/foo.css">`          |
-| JSON           | `import foo from "./bar.json" with { type: "json" };`    | TODO                                                                      |
-| HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<template shadowrootmode="open" shadowroothtml="/foo.html"></template> ` |
-| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<template shadowrootmode="open" shadowrootsvg="/foo.svg"></template> `   |
-| WASM           | TODO                                                     | TODO                                                                      |
+| JavaScript     | `import { foo } from "./bar.js";`                        | `<script type="script-module" specifier="/bar.js"></script>`              |
+| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<script type="css-module" specifier="/bar.css"></script>`                |
+| JSON           | `import foo from "./bar.json" with { type: "json" };`    | `<script type="json-module" specifier="/bar.json"></script>`              |
+| HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<script type="html-module" specifier="/bar.html"></script>`              |
+| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<script type="svg-module" specifier="/bar.svg"></script>`                |
+| WASM           | `import {foo} from "bar.wasm" with {type: "wasm"};`      | `<script type="wasm-module" specifier="/bar.wasm"></script>`              |
 
 ## Alternate proposals
 ### [Layer and adoptStyles](https://github.com/w3c/csswg-drafts/issues/10176#proposal)
