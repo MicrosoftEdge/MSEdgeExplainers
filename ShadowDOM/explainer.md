@@ -253,11 +253,28 @@ A global map does come with some tradeoffs, particularly when names collide. Wit
 
 ### `<script>` vs `<style>` For CSS Modules
 
-This document uses the `<script>` tag for defining CSS modules. Developer feedback has shown a preference for using the `<style>` tag for CSS Modules. This makes sense for CSS Modules in isolation, but does not align with other types of modules. The table in the [next section](#other-declarative-modules) details other module types and demonstrates the degree of consistency achieved with `<script>`.  Developer feedback is important and should be considered, even at the potential expense of consistency.
+This document uses the `<script>` tag for defining CSS Modules. Developer feedback has shown a preference for using the `<style>` tag when defining a CSS Module. This makes sense for CSS Modules in isolation, but does not align with other types of modules. The table in the [next section](#other-declarative-modules) details other module types and demonstrates the degree of consistency achieved with `<script>`.  Developer feedback is important and should be considered, even at the potential expense of consistency.
+
+This is an example of a CSS Module defined with the `<style>` tag:
+```html
+<style type="css-module" specifier="/foo.css">
+  #content {
+    color: red;
+  }
+</style>
+
+<my-element>
+  <template shadowrootmode="open" adoptedstylesheets="/foo.css">
+    <!-- ... -->
+  </template>
+</my-element>
+```
+
+A compromise could be to support both `<script>` tags and `<style>` tags.
 
 ### Behavior with script disabled
 
-User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not.
+User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not been verified yet.
 
 ## Other declarative modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
