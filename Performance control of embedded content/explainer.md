@@ -146,9 +146,9 @@ Using Document Policy for this proposal has limitations and challenges, includin
 * Changes to iframe HTML element represent additional standards work.
 
 #### Levels vs categories
-It was considere to have a single configuration point based on “levels” which would restrictions on top of each other, but this was discarded due to increased difficulty to introduce new values in the future.
+It was considered to have a single configuration point based on “levels” which would restrictions on top of each other, but this was discarded due to increased difficulty to introduce new values in the future.
 
-## Acknowledgements 
+## Acknowledgements
 Many thanks for the valuable feedback and advice from:
 * [Limin Zhu](https://github.com/liminzhu)
 
