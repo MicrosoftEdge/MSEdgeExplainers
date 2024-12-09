@@ -18,6 +18,9 @@ This proposal has two primary goals:
 1.	Improve users’ satisfaction with their OS, browser, and applications via formalizing methods of constraining the resources available to web content.
 2.	Provide information to help developers improve the performance of web sites and apps through reporting when performance is negatively impacting end-users and/or applications hosting the site in a frame.
 
+## Non-goals
+The key factor of this solution is there are categories of focused, perf impacting features that developers can choose to enforce restrictions on their apps. The threshold and limits and specific criteria within a category may evolve over time and is determined by the platform. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.**
+
 ### Scenarios
 * Embedded widgets: Weather forecast, stock tickets, etc.
 * Embedded Ads: Embedded ads from networks like Google AdSense or Bing Ads.
@@ -51,9 +54,6 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 | **Limits for each criteria** | Yes | Some of the limits have been determined based on observations, use cases, etc. This should also be browser agnostic so embedee developers know what the expectations are. |
 | **Reporting violations** | Yes | Similar to mechanism for setting restrictions, embedder developers should have the same expectations on getting violations across all browsers their site/app runs on. |
 | **How violations are handled** | No | Embedder developers should be able to opt into default behavior when restrictions are violated. There is a plethora of things that can happen when restrictions are violated. Different levels of standardization can happen here. The web platform can provide a default option for how violations are handled e.g. standard can be “some UI indicator is shown when violations are made” but it doesn’t have to be a standard what exactly is the UI. |
-
-## Non-goals
-The key factor of this solution is there are categories of focused, perf impacting features that developers can choose to enforce restrictions on their apps. The threshold and limits and specific criteria within a category may evolve over time and is determined by the platform. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.**
 
 ## Proposed API Solution
 Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points, one for each of the categories above:
