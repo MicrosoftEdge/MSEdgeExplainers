@@ -97,12 +97,12 @@ All CSS properties have computed values for all elements. The enablement of hand
 1. If the computed value for `touch-action` on `element` and all of its ancestors include either keyword `auto`, `handwriting`, or `manipulation`, **enable handwriting**.
 2. If the computed value for `touch-action` on `element` or any of its ancestors does not include either keyword `auto`, `handwriting`, or `manipulation`, **disable handwriting**.
 
-### Caveats
+### Caveats / Cons
 
 A few pain points have been brought up that are worth discussion:
 * Web pages that currently have the `touch-action` property set for different elements will lose the handwriting capabilities on this element even if they don't want to disable it. When the new keyword ships, the absence of the value will be interpreted as the author of the webpage intentionally disabling handwriting.
 * Authors that specify `touch-action: manipulation` will be enabling `handwriting`, even when they might not want the behavior enabled in their webpage. These authors would then need to update their webpages to explicitly mention which behaviors they want, i.e. : `touch-action: pan-x pan-y pinch-zoom`.
-
+*   Using `touch-action` restricts handwriting implementations to touch controls (such as stylus and touch), even though a platform could support handwriting capabilities for other controls, like mouse pointer events.
 ## Privacy and Security Considerations
 
 ### Privacy
@@ -113,12 +113,13 @@ Since the proposed property should not interact with other HTML or IDL attribute
 
 There are no known security impacts of the features in this specification.
 
-## Alternative Solutions
+# Alternative Solutions
 
-The proposal is for this to be an CSS property.
 ## Why not an HTML+IDL attribute?
 
-The [first proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Handwriting/explainer.md) was to add the handwriting functionality as an HTML+IDL attribute, but after some discussion it was decided that the better option was to implement the functionality in the `touch-action` CSS attribute. [ [1](https://groups.google.com/a/chromium.org/g/blink-dev/c/0r_tV6k0NyA?pli=1)]] [[2](https://github.com/w3c/pointerevents/issues/516)]
+The [first proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Handwriting/explainer.md) was to add the handwriting functionality as an HTML+IDL attribute which would allow authors to specify whether an element should permit handwriting by adding a new `handwriting(= true|= false|<blank>)` (`<blank>` implying `= true`) attribute to HTML elements.
+
+After some discussion [[1](https://groups.google.com/a/chromium.org/g/blink-dev/c/0r_tV6k0NyA?pli=1)]] [[2](https://github.com/w3c/pointerevents/issues/516)], it became apparent that implementing the functionality in the `touch-action` CSS attribute was the better alternative. The discussion is still ongoing, and we are open to considering different alternatives.
 
 * [Pro] If users or organizations disable CSS for their browsers there would need to be another mechanism to disable handwriting input.
 * [Pro] All websites that currently use `touch-action` won't have to update their rules if they want handwriting to be enabled.
@@ -126,8 +127,7 @@ The [first proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main
 * [Con] Developers would have to keep track of both the `touch-action` CSS property and new HTML attribute in order to completely declare the desired behavior of their webpages.
  * [Con] CSS pattern matching is a powerful tool and may be more ergonomic for some use cases.
 
-
-#### Why not an HTML+IDL attribute that interacts with `touch-action`?
+### Why not an HTML+IDL attribute that interacts with `touch-action`?
 
 `touch-action:none;` is the accepted and recommended way of disabling all types of touch interaction with the elements. The HTML attribute would not be able to override the `touch-action` property in these scenarios. By accepting touch-action as a filter, developers would lose the flexibility of disabling scrolling while enabling handwriting. Consider the following scenarios:
 
