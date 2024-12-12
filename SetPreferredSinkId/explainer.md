@@ -1,13 +1,13 @@
-# Set Default Audio Output Device
+# Set Preferred Audio Output Device
 
 Authors: Sunggook Chue, Ravikiran Ramachandra, Steve Becker, Andy Luhrs
 
 ## Status of this Document
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-* This document status: Active  
-* Expected venue: [WebRTC WG](https://www.w3.org/groups/wg/webrtc)  
-* Current version: this document  
+* This document status: Active
+* Expected venue: [WebRTC WG](https://www.w3.org/groups/wg/webrtc)
+* Current version: this document
 
 ## Introduction
 
@@ -53,14 +53,14 @@ Developers of communication apps can provide audio output selection UI on their 
 
 ## Proposed Solution
 
-New method `setDefaultSinkId(deviceId)` on the [MediaDevices API](https://www.w3.org/TR/mediacapture-streams/#mediadevices),
+New method `setPreferredSinkId(deviceId)` on the [MediaDevices API](https://www.w3.org/TR/mediacapture-streams/#mediadevices),
 where `deviceId` is the [media device identifier](https://www.w3.org/TR/mediacapture-streams/#dom-mediadeviceinfo-deviceid)
 
 ```js
 [Exposed=Window, SecureContext]
 interface MediaDevices : EventTarget {
   ...
-  Promise<void> setDefaultSinkId(DOMString deviceId);
+  Promise<void> setPreferredSinkId(DOMString deviceId);
 };
 
 deviceId:
@@ -116,10 +116,10 @@ Remember to call this API within a secure context (using HTTPS).
 
     ...
 
-    // setDefaultSinkId will change the audio output device for the entire frame that includes subframes.
+    // setPreferredSinkId will change the audio output device for the entire frame that includes subframes.
 
-    // If selectedDeviceId is empty string, "", then setDefaultsinkId will revert to using the system default device.
-    await navigator.mediaDevices.setDefaultSinkId(selectedDeviceId);
+    // If selectedDeviceId is empty string, "", then setPreferredSinkId will revert to using the system default device.
+    await navigator.mediaDevices.setPreferredSinkId(selectedDeviceId);
 
     // It does not have to call audioContext.setSinkId in order to change audioContext's audio device output.
   </script>
@@ -139,7 +139,7 @@ Remember to call this API within a secure context (using HTTPS).
   <script>
     const videoElem = document.getElementById('videoElem');
 
-    // videoElem.sinkId === selectedDeviceId after calling setDefaultSinkId.
+    // videoElem.sinkId === selectedDeviceId after calling setPreferredSinkId.
   </script>
 </body>
 ```
@@ -155,14 +155,14 @@ No considerable security concerns are expected, but we welcome community feedbac
 Discussion: https://github.com/w3c/mediacapture-output/issues/63
 
 ## Alternative Solutions
-An alternative solution involves introducing a similar API to setSinkId specifically for the HTMLIFrameElement. This enhancement would allow the parent frame to modify the default audio output for its sub frames. Let’s call this new API HTMLIFrameElement::setDefaultSinkId(deviceId) or HTMLIFrameElement::setDefaultSinkId(AudioSinkOptions).
+An alternative solution involves introducing a similar API to setSinkId specifically for the HTMLIFrameElement. This enhancement would allow the parent frame to modify the default audio output for its sub frames. Let’s call this new API HTMLIFrameElement::setPreferredSinkId(deviceId) or HTMLIFrameElement::setPreferredSinkId(AudioSinkOptions).
 
 ```js
 
 [Exposed=Window]
 interface HTMLIFrameElement : EventTarget {
   ...
-  void setDefaultSinkId(DOMString deviceId);
+  void setPreferredSinkId(DOMString deviceId);
 };
 
 deviceId:
@@ -173,8 +173,8 @@ deviceId:
 ```
 
 Here are the key points of this approach:
-* Functionality: The setDefaultSinkId API can be invoked from any frame, enabling changes across all child frames within the sub frame hierarchy. However, it does not alter the audio output of the frame from which it is called. Therefore, developers must still manage their own frame’s audio output using setSinkId for relevant media elements and audio contexts.
-* Potential Benefit: By utilizing {type: 'none'} as a parameter for setDefaultSinkId, we could easily support a ‘muted’ feature for iframes. This would enhance flexibility in muting audio within the iframe context. ( {type : ‘none} scheme is already supported from AudioContext::setSinkId)
+* Functionality: The setPreferredSinkId API can be invoked from any frame, enabling changes across all child frames within the sub frame hierarchy. However, it does not alter the audio output of the frame from which it is called. Therefore, developers must still manage their own frame’s audio output using setSinkId for relevant media elements and audio contexts.
+* Potential Benefit: By utilizing {type: 'none'} as a parameter for setPreferredSinkId, we could easily support a ‘muted’ feature for iframes. This would enhance flexibility in muting audio within the iframe context. ( {type : ‘none} scheme is already supported from AudioContext::setSinkId)
 * Drawback: The frame itself must explicitly call setSinkId for any specific audio outputs it requires in the current frame.
 
 In summary, the pros of this alternative include muting capabilities while maintaining the responsibility for individual frame audio settings.
