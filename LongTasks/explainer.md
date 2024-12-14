@@ -164,7 +164,7 @@ However, identifying whether task 3 qualifies as a "long task" is challenging wi
 
 We propose extending the Long Tasks API to support Web Workers, enabling developers to use the API within Web Workers to identify long tasks blocking the worker thread. To adapt the API for Web Workers, the `PerformanceLongTaskTiming` interface needs to be updated to account for long tasks in worker threads.
 
-The primary change would be within the `TaskAttributionTiming` interface, where certain properties should reflect the worker context instead of the main thread.
+The primary change would be within the `TaskAttributionTiming` interface, where certain properties should reflect the worker context instead of the main thread. Therefore, it will provide the details about assoicated postMessage event and its target worker, which help Web developer easily figure out where the long task is orignated and where the code is. This is not function levle like LoAF, but the source URL is still useful to find the source code location.
 
 ## `TaskAttributionTiming` Interface Changes
 
