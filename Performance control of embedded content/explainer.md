@@ -58,13 +58,10 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 ## Proposed API Solution
 Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points, one for each of the categories above:
 
-A: `basic`
-
-B: `early-script`
-
-C: `globals`
-
-D: `script`
+* A: `basic`
+* B: `early-script`
+* C: `globals`
+* D: `script`
 
 > **Note:** Names here are only monikers and expected to change.
 
