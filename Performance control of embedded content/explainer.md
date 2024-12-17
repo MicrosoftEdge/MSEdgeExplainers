@@ -82,7 +82,7 @@ Alternatively, the app can set any policy subset to individual frames:<br>
 <iframe policy=”basic, early-script”>
 ```
 
-As a result, requests to embedded content will be sent with `Sec-Required-Document-Policy` header matching the top-level document’s requested configuration. Per Document Policy design, embeddees receiving this request header must opt in for their content to be loaded, with the option to specify a reporting endpoint:
+As a result, requests to embedded content will be sent with [`Sec-Required-Document-Policy` header](https://wicg.github.io/document-policy/#sec-required-document-policy-http-header) matching the top-level document’s requested configuration. Per Document Policy design, embeddees receiving this request header must opt in for their content to be loaded, with the option to specify a reporting endpoint:
 
 ```
 Document-Policy: basic, early-script, globals, script, *; report-to=endpoint
@@ -105,7 +105,7 @@ Despite this limitation, Document Policy allows policy negotation which would al
 Document Policy proposes a mechanism for policy negotiation. An embeddee which doesn’t agree to the embedder’s policies will not be loaded. This document makes a distinction between this _negotiation_ (which might result in an embedee failing to load), and _enforcement_. Enforcement of the policy (what will happen when a violation occurs) is to be defined by each aspect of the proposed configuration points.
 
 #### Open question: required policy and report-only mode
-It is unclear from the Document Policy explainer whether a report-only header in an embedded document satifies the requirements set by `Sec-Required-Document-Policy` header.
+It is unclear from the Document Policy explainer whether a report-only header in an embedded document satifies the requirements set by [`Sec-Required-Document-Policy` header](https://wicg.github.io/document-policy/#sec-required-document-policy-http-header).
 
 
 ## Security and Privacy Considerations
