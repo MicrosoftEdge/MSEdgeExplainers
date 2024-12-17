@@ -67,7 +67,7 @@ Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/do
 
 This enables each document to:
 * Self-impose performance constraints.
-* Negotiate constraints (see discussion section) for each subresource.
+* Negotiate constraints (see [discussion section](#opt-in-and-policy-negotiation)) for each subresource.
 
 **Example**
 A feeds app embeds content from different sources, through iframes. To cap the performance impact of the embedded content, the host application aligns with its producers on guidelines and best practices for the embeddees to be loaded into the experience, requiring the content to be served with an agreed upon subset of policies (categories above).
