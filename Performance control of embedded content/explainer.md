@@ -71,7 +71,14 @@ This enables each document to:
 
 **Example**
 A feeds app embeds content from different sources, through iframes. To cap the performance impact of the embedded content, the host application aligns with its producers on guidelines and best practices for the embeddees to be loaded into the experience, requiring the content to be served with an agreed upon subset of policies (categories above).
-The host app serves its main document with Document Policy directives to enforce on embedded content:<br>
+
+The host app serves its main document with Document Policy directives to enforce on embedded content. In the most simple case, the app opts in to a single category:<br>
+```
+Require-Document-Policy: basic
+```
+
+But it can opt in to more of them, each through its own Document Policy configuration point:
+
 ```
 Require-Document-Policy: basic, early-script, globals, script
 ```
