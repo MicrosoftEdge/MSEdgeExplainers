@@ -85,8 +85,8 @@ Require-Document-Policy: basic, early-script, globals, script
 
 Alternatively, the app can set any policy subset to individual frames:<br>
 ```
-<iframe policy=”basic”>
-<iframe policy=”basic, early-script”>
+<iframe policy="basic">
+<iframe policy="basic, early-script">
 ```
 
 As a result, requests to embedded content will be sent with [`Sec-Required-Document-Policy` header](https://wicg.github.io/document-policy/#sec-required-document-policy-http-header) matching the top-level document’s requested configuration. Per Document Policy design, embeddees receiving this request header must opt in for their content to be loaded, with the option to specify a reporting endpoint:
@@ -134,14 +134,33 @@ As called out in the [Never Slow Mode explainer](https://github.com/slightlyoff/
 ## Alternatives considered
 
 ### Custom attributes and headers
-Using Document Policy for this proposal has limitations and challenges, including 3pp violation reporting, opt-in requirement, budget-based state leaks. A custom mechanism was briefly considered, but the following outline the reasons for moving away from such an approach:
+We considered a functionally equivalent, more scoped custom mechanism involving HTTP headers and a frame tag attribute, for example:
 
-*	Re-defines a mechanism for a problem already in the scope of Document Policy.
-* The challenges in Document Policy are still applicable with a custom mechanism.
-* Changes to iframe HTML element represent additional standards work.
+```
+Performance-Control: basic
+```
+
+```
+<iframe performance-control="basic">
+```
+
+However, this approach meant re-defining a solution for a problem already in the scope of Document Policy, with the same challenges still applying: handling of 3pp violation reports, opt-in requirement and budget-based state leaks.
+
+Furthermore, these challenges arise from the nature of the embedded-embeddee relationship where constraints are proposed. Any solution to this problem will need to address them.
 
 ### Levels vs categories
-It was considered to have a single configuration point based on “levels” which would restrictions on top of each other, but this was discarded due to increased difficulty to introduce new values in the future.
+We considered having a single Document Policy configuration point based on “levels” which would compound restrictions on top of each other, but this was discarded due to increased difficulty to introduce new values in the future.
+
+For example, with the "levels" approach, each category would map to a level and be included in the level above:
+
+| Level | Category mapping |
+|---|---|
+| level 1 | `basic` |
+| level 2 | `basic` + `early-script` |
+| level 3 | `basic` + `early-script` + `globals` |
+| level 4 | `basic` + `early-script` + `globals` + `script` |
+
+With this approach, adding a new group of constraints would only be possible by adding a new level with all previously defined constraints, or by redefining existing levels. We consider this to be an unnecessary limitation.
 
 ## Open Issues
 
