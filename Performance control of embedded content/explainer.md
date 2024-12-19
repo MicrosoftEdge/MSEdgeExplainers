@@ -101,7 +101,7 @@ Reporting-Endpoints: endpoint="https://example.com/reports"
 Document Policy allows for a single value for each configuration point. Since the categories proposed by this solution are independent of each other, this necessitates multiple configuration points.
 
 #### Opt-in and policy negotiation
-Document Policy requires that each document opts in to the policies to be applied on such document. While this is a limitation to amount of control the embedder can have over the embeddee's performance, we consider this behavior from Document Policy as necessary due to the following reasons:
+Document Policy requires that each document opts in to the policies to be applied on a given document. While this is a limitation to amount of control the embedder can have over the embeddee's performance, we consider this behavior as necessary due to the following reasons:
 
 * **Control flow alteration.** Direct enforcement would allow for a document to impose changes to the control flow of unwitting embedded third parties.
 * **Potential for side-channel attacks.** See more details in Security and Privacy Considerations.
@@ -118,12 +118,12 @@ It is unclear from the Document Policy explainer whether a report-only header in
 ## Security and Privacy Considerations
 
 ### Global budgets and side-channel attacks
-The criteria proposed in this document includes budgets which are shared globally across documents. This could allow for documents to learn things about cross-origin documents, as described in the [Never Slow Mode explainer](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits). We consider the same alternatives as NSM as viable for this proposal:
+The proposed criteria include budgets which are shared globally across documents. This could allow for documents to learn things about cross-origin documents, as described in the [Never Slow Mode explainer](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits). We consider the same alternatives introduced for NSM as viable for this proposal:
   * Require CORS
   * Fuzzy budgeting
 
 ### Frame depth
-As called out in the [Never Slow Mode explainer](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits), a limit greater than 2 would expose the depth in the treee of a document.
+As called out in the [Never Slow Mode explainer](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits), a limit greater than 2 would expose the depth in the tree of a document.
 
 ## Dependencies on non-stable features
 * Document Policy ([explainer](https://wicg.github.io/document-policy/))
@@ -134,7 +134,7 @@ As called out in the [Never Slow Mode explainer](https://github.com/slightlyoff/
 ## Alternatives considered
 
 ### Custom attributes and headers
-Using Document Policy for this proposal has limitations and challenges, including 3pp violation reporting, opt-in requirement, budget-based state leaks. A custom mechanism was briefly considered, but the following was determined for such approach:
+Using Document Policy for this proposal has limitations and challenges, including 3pp violation reporting, opt-in requirement, budget-based state leaks. A custom mechanism was briefly considered, but the following outline the reasons for moving away from such an approach:
 
 *	Re-defines a mechanism for a problem already in the scope of Document Policy.
 * The challenges in Document Policy are still applicable with a custom mechanism.
@@ -146,15 +146,15 @@ It was considered to have a single configuration point based on “levels” whi
 ## Open Issues
 
 ### Per-document constraints
-Document Policy directives are effective on a per-document basis. This generally makes it harder for constraints to have the desired impact to improve performance. In this document, we propose capping the overall complexity and resources through frame depth and count restrictions.
+Document Policy directives are effective on a per-document basis. This generally makes it harder for constraints to have the desired impact to improve performance, as the overall cap on resources increases with the complexity of the page. We propose capping the overall complexity and resources through frame depth and count restrictions to avoid an unbound upper limit to page resource consumption.
 
-What would be the appropriate frame count and depth limit? See related discussion in Security and Privacy Considerations.
+What would be the appropriate frame count and depth limit? See related discussion in [Security and Privacy Considerations](#frame-depth).
 
 ### Open question: how to evolve best practices?
 Performance categories introduced in this proposal are based on the idea of taking the burden of determining performance best practices off of individual site and app developers. However, best practices evolve with time, and for these policies to achieve their goal, the criteria needs to evolve with them. Changing the criteria for what constitutes a policy violation would introduce compatibility issues for anyone opting-in, as things which are allowed today might not be allowed in the future. We need to define a mechanism in which this evolution can happen in a controlled manner, or decide whether it's a reasonable trade off for developers opting in to be expected to keep up with the platform as best practices evolve.
 
 ### Reporting 3pp violations to embedder
-Embedders are best equipped to influence change in the performance when they are aware of where the issues are. While Document Policy provides a Reporting API integration, this only reports violations to the endpoint of the document where the violation occurs. Embedders do not receive reports that the embedded content has incurred policy violations, which is a limitation. Currently under consideration: send a minimal report to the embedder when a violation occurs in the embedded document.
+Embedders are best equipped to influence change in the performance when they are aware of where the issues are. While Document Policy provides a Reporting API integration, this only reports violations to the endpoint of the document where the violation occurs. Embedders do not receive reports that the embedded content has incurred policy violations, which is a limitation. We are currently considering sending a minimal report to the embedder when a violation occurs in the embedded document.
 
 ### Interaction with Heavy Ad Interventions
 
