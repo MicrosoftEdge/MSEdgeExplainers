@@ -113,13 +113,13 @@ The following examples use a stylesheet saved as `sheet.css` with the following 
 div { color: blue; } 
 
 @sheet bar { div { color: red; } }
-```css
+```
 
 This can then be imported via Javascript as follows:
 
 ```js
 import foo, { bar } from 'sheet.css' with { type: 'css' }
-```js
+```
 
 `foo` will reference style rules outside of any `@sheet` blocks as a Default Import (in this case, the `div { color: blue; } ` rule).
 
@@ -129,13 +129,13 @@ Named imports may be renamed as part of this import process:
 
 ```js
 import foo, { bar as baz } from 'sheet.css' with { type: 'css' }
-```js
+```
 
 The default import may be omitted, importing only the named `@sheet`:
 
 ```js
 import { bar } from 'sheet.css' with { type: 'css' }
-```js
+```
 
 Any of these `import` examples can be then used to set the `adoptedStyleSheets` attribute on a Shadow DOM node:
 
@@ -143,7 +143,7 @@ Any of these `import` examples can be then used to set the `adoptedStyleSheets` 
 import { bar } from 'sheet.css' with { type: 'css' }
 document.adoptedStyleSheets = [bar];
 shadowRoot.adoptedStyleSheets = [bar];
-```js
+```
 
 #### Performance
 
@@ -160,13 +160,13 @@ div { color: blue; }
 
 @sheet foo { div { color: red; } }
 @sheet bar { div { font-family: sans-serif; } }
-```css
+```
 
 ```js
 // The following two imports should only make a single network request.
 import { foo } from 'sheet.css' with { type: 'css' };
 import { bar } from 'sheet.css' with { type: 'css' }
-```js
+```
 
 ```html
 <style>
@@ -174,13 +174,13 @@ import { bar } from 'sheet.css' with { type: 'css' }
 @import "sheet.css#foo";
 @import "sheet.css#bar";
 </style>
-```html
+```
 
 ```html
 <!-- The following two link tags should only make a single network request. -->
 <link rel="stylesheet href="sheet.css#foo" />
 <link rel="stylesheet href="sheet.css#bar" />
-```html
+```
 
 Dan's notes:
 ```
