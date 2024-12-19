@@ -199,9 +199,26 @@ a more convenient way to write @import url("data:...");, with the potential to h
 
 #### Interaction with CSSOM
 
-This expands the CSSOM `CSSStyleSheet` definition with a dictionary of nested `CSSStyleSheet` objects, keyed by name.
 
-TODO: Add IDL for this.
+Named `@sheet` references augment the [existing](https://drafts.csswg.org/cssom/#stylesheet) `StyleSheet` interface with an optional `name` attribute reflecting the `@sheet` identifier:
+
+```
+[Exposed=Window]
+interface StyleSheet {
+  readonly attribute DOMString? name;
+};
+```
+*Open issue: Should this overload the existing `title` attribute instead?*
+
+This also expands the [existing](https://drafts.csswg.org/cssom/#cssstylesheet) CSSOM `CSSStyleSheet` definition with a `StyleSheetList` of nested `CSSStyleSheet` objects to access nested `@sheet` references:
+
+```
+[Exposed=Window]
+interface CSSStyleSheet : StyleSheet {
+  [SameObject] readonly attribute StyleSheetList nestedStyleSheets;
+};
+```
+*Open issue: The name `nestedStyleSheets` is up for discussion*
 
 ### Tab's questions
 ```TODO
@@ -246,10 +263,10 @@ in which case you should link to any active discussion threads.]
 
 ## Open Issues
 
-1. Whether rules are applied automatically for `@sheet` definitions. The CSS Working Group did not have a consensus.
-2. Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions.
+1. Whether rules are applied automatically for `@sheet` definitions, or whether they need to be imported to apply. The CSS Working Group did not have a consensus.
+2. Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).
 3. Behavior of `@import` - should this be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached.
-4. What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved.
+4. What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved. Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition may override it.
 
 ## References & acknowledgements
 
