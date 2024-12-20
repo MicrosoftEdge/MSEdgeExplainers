@@ -88,8 +88,8 @@ Authors are used to the [recommended practice of adding touch-action: none](http
 
 ### Keywords and States
 
- The `touch-action` attribute accepts the following keywords:
-> Value: `auto` | `none` | [ [ `pan-x` | `pan-left` | `pan-right` ] | [ `pan-y` | `pan-up` | `pan-down` ] ] | `manipulation`
+ The `touch-action` attribute currently accepts the following keywords:
+> Value: `auto` | `none` | [ [ `pan-x` | `pan-left` | `pan-right` ] | [ `pan-y` | `pan-up` | `pan-down` ] ] | `pinch-zoom` | `manipulation`
 
 The `handwriting` keyword indicates whether an element and the element's descendants will allow handwriting input when supported by the user agent. Handwriting will only be allowed for an element when its computed `touch-action` includes the `handwriting` keyword. By default, `auto` and `manipulation` will include the `handwriting` keyword.
 
@@ -108,7 +108,7 @@ A few pain points have been brought up that are worth discussion:
 * Web pages that currently have the `touch-action` property set for different elements will lose the handwriting capabilities on this element even if they don't want to disable it. When the new keyword ships, the absence of the value will be interpreted as the author of the webpage intentionally disabling handwriting.
 * Authors that specify `touch-action: manipulation` will be enabling `handwriting`, even when they might not want the behavior enabled in their webpage. These authors would then need to update their webpages to explicitly mention which behaviors they want, i.e. : `touch-action: pan-x pan-y pinch-zoom`.
 *   Using `touch-action` restricts handwriting implementations to touch input devices (such as stylus and touch), even though a platform could support handwriting capabilities for other controls, like mouse pointer events.
-	* `touch-action` determines the behavior of touch input devices indistinctly of which device is being used, either touch or stylus. In the future, these input devices might be separated into two different CSS attributes to allow things like, say, enable panning with finger touch events and only enable handwriting with a stylus.  
+	* `touch-action` determines which behaviors are allowed for touch input devices regardless of which device is being used, either touch or stylus. In the future, these input devices might be separated into two different CSS attributes to allow things like, say, enable panning with finger touch events and only enable handwriting with a stylus.  
 ## Privacy and Security Considerations
 
 ### Privacy
@@ -167,7 +167,7 @@ The last entry that fails is equivalent of `touch-action: handwriting`. In order
 ## References and acknowledgements
 
 * @**[flackr](https://github.com/flackr)**, @**[mustaqahmed](https://github.com/mustaqahmed)**, @**[adettenb](https://github.com/adettenb)**, @**[patrickhlauke](https://github.com/patrickhlauke)**, @**[ogerchikov](https://github.com/ogerchikov)** for helping build this proposal and providing feedback.
-* **Claire Chambers**, @**[dandclark](https://github.com/dandclark)**, @**[kbabbitt](https://github.com/kbabbitt)**, @**[sanketj](https://github.com/sanketj)** and  **@[sfortiner](https://github.com/sfortiner)** , for helping with the [HTML+IDL explainer](Handwriting/explainer.md). Their feedback has been invaluable for completing these documents, and much of it carried over into this document.
+* **Claire Chambers**, @**[dandclark](https://github.com/dandclark)**, @**[kbabbitt](https://github.com/kbabbitt)**, @**[sanketj](https://github.com/sanketj)** and  **@[sfortiner](https://github.com/sfortiner)** , for helping with the [HTML+IDL explainer](explainer.md). Their feedback has been invaluable for completing these documents, and much of it carried over into this document.
 
 ## Stakeholder Feedback / Opposition
 
