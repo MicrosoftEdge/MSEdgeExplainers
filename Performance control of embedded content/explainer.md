@@ -17,13 +17,13 @@ With global web usage continuing to rise and more companies relying on the web a
 When it comes to optimizing performance, websites and apps are limited by the performance of the external content they embed; these can be 3rd party sites, 3rd party apps, and even content from other organizations within a company. As a result, being able to control the performance of embedded content is crucial to improving the overall performance of a site or app.
 
 This proposal has two primary goals:
-1.	Improve users’ satisfaction with their OS, browser, and applications via formalizing methods of constraining the resources available to web content, while removing the burden of determining individual contraints from web developers.
+1.	Improve users’ satisfaction with their OS, browser, and applications via formalizing methods of constraining the resources available to web content, while removing the burden of determining individual constraints from web developers.
 2.	Provide information to help developers improve the performance of web sites and apps through reporting when performance is negatively impacting end-users and/or applications hosting the site in a frame.
 
 ## Non-goals
-The key factor of this solution is there are categories of focused, perf impacting features that developers can choose to enforce restrictions on their apps. The threshold and limits and specific criteria within a category may evolve over time and is determined by the platform. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.**
+The key factor of this solution is there are categories of focused, perf impacting features that developers can choose to enforce restrictions on their apps. The threshold/limits and specific criteria within a category may evolve over time and is determined by the platform. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.**
 
-### Scenarios
+## Scenarios
 * Embedded widgets: Weather forecast, stock tickets, etc.
 * Embedded Ads: Embedded ads from networks.
 * Embedded calendars: Embedding calendars from services.
@@ -108,13 +108,13 @@ Document Policy requires that each document opts in to the policies to be applie
 * **Control flow alteration.** Direct enforcement would allow for a document to impose changes to the control flow of unwitting embedded third parties.
 * **Potential for side-channel attacks.** See more details in Security and Privacy Considerations.
 
-Despite this limitation, Document Policy allows policy negotation which would allow the embedder to require the relevant policies in this proposal. Through this mechanism, the embedder can still require conformance from the embedee to be loaded, while keeping the embeddee in charge of its own control flow.
+Despite this limitation, Document Policy allows policy negotiation which would allow the embedder to require the relevant policies in this proposal. Through this mechanism, the embedder can still require conformance from the embedee to be loaded, while keeping the embeddee in charge of its own control flow.
 
 #### Negotiation vs enforcement
 Document Policy proposes a mechanism for policy negotiation. An embeddee which doesn’t agree to the embedder’s policies will not be loaded. This document makes a distinction between this _negotiation_ (which might result in an embedee failing to load), and _enforcement_. Enforcement of the policy (what will happen when a violation occurs) is to be defined by each aspect of the proposed configuration points.
 
 #### Open question: required policy and report-only mode
-It is unclear from the Document Policy explainer whether a report-only header in an embedded document satifies the requirements set by [`Sec-Required-Document-Policy` header](https://wicg.github.io/document-policy/#sec-required-document-policy-http-header).
+It is unclear from the Document Policy explainer whether a report-only header in an embedded document satisfies the requirements set by [`Sec-Required-Document-Policy` header](https://wicg.github.io/document-policy/#sec-required-document-policy-http-header).
 
 
 ## Security and Privacy Considerations
@@ -146,11 +146,11 @@ Performance-Control: basic
 <iframe performance-control="basic">
 ```
 
-However, this approach meant re-defining a solution for a problem already in the scope of Document Policy, with the same challenges still applying: handling of 3pp violation reports, opt-in requirement and budget-based state leaks.
+However, this approach meant re-defining a solution for a problem already in the scope of Document Policy, with the same challenges still applying: handling of 3rd party violation reports, opt-in requirement and budget-based state leaks.
 
-Furthermore, these challenges arise from the nature of the embedded-embeddee relationship where constraints are proposed. Any solution to this problem will need to address them.
+Furthermore, these challenges arise from the nature of the embedder-embedee relationship where constraints are proposed. Any solution to this problem will need to address them.
 
-### Levels vs categories
+### Levels vs. categories
 We considered having a single Document Policy configuration point based on “levels” which would compound restrictions on top of each other, but this was discarded due to increased difficulty to introduce new values in the future.
 
 For example, with the "levels" approach, each category would map to a level and be included in the level above:
@@ -174,14 +174,24 @@ What would be the appropriate frame count and depth limit? See related discussio
 ### Open question: how to evolve best practices?
 Performance categories introduced in this proposal are based on the idea of taking the burden of determining performance best practices off of individual site and app developers. However, best practices evolve with time, and for these policies to achieve their goal, the criteria needs to evolve with them. Changing the criteria for what constitutes a policy violation would introduce compatibility issues for anyone opting-in, as things which are allowed today might not be allowed in the future. We need to define a mechanism in which this evolution can happen in a controlled manner, or decide whether it's a reasonable trade off for developers opting in to be expected to keep up with the platform as best practices evolve.
 
-### Reporting 3pp violations to embedder
+### Reporting 3rd party violations to embedder
 Embedders are best equipped to influence change in the performance when they are aware of where the issues are. While Document Policy provides a Reporting API integration, this only reports violations to the endpoint of the document where the violation occurs. Embedders do not receive reports that the embedded content has incurred policy violations, which is a limitation. We are currently considering sending a minimal report to the embedder when a violation occurs in the embedded document.
 
 ### Interaction with Heavy Ad Interventions
 
-## Acknowledgements
+## References & acknowledgements
+
+This proposal has been inspired by and builds on the incredible work done in:
+* [Never-Slow Mode](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file)
+* [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md)
+* [Heavy Ad Interventions](https://developer.chrome.com/blog/heavy-ad-interventions)
+
 Many thanks for the valuable feedback and advice from:
 * [Limin Zhu](https://github.com/liminzhu)
+* [Sam Fortiner](https://github.com/sfortiner)
+* [Alison Maher](https://github.com/alisonmaher) 
+* [Mike Jackson](https://github.com/mwjacksonmsft)
+* [Erik Anderson](https://github.com/erik-anderson)
 
 
 [^1]: https://infrequently.org/2023/02/the-market-for-lemons/
