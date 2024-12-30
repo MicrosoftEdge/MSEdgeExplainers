@@ -13,7 +13,9 @@ Embedder developers can do this by enabling various categories of criteria that 
 
 ## Goals
 With global web usage continuing to rise and more companies relying on the web as a primary platform to deliver their applications, performance has become a critical factor for success. As more users access websites through mobile devices and lower-powered hardware, the need for fast responsive web experiences is non-negotiable[^1],[^2].
-When it comes to optimizing performance, websites and apps are limited by the performance of the external content they embed, these can be 3rd party sites, 3rd party apps, and even content from other organizations within a company. As a result, being able to control the performance of embedded content is crucial to improving the overall performance of a site or app.
+
+When it comes to optimizing performance, websites and apps are limited by the performance of the external content they embed; these can be 3rd party sites, 3rd party apps, and even content from other organizations within a company. As a result, being able to control the performance of embedded content is crucial to improving the overall performance of a site or app.
+
 This proposal has two primary goals:
 1.	Improve users’ satisfaction with their OS, browser, and applications via formalizing methods of constraining the resources available to web content, while removing the burden of determining individual contraints from web developers.
 2.	Provide information to help developers improve the performance of web sites and apps through reporting when performance is negatively impacting end-users and/or applications hosting the site in a frame.
@@ -23,8 +25,8 @@ The key factor of this solution is there are categories of focused, perf impacti
 
 ### Scenarios
 * Embedded widgets: Weather forecast, stock tickets, etc.
-* Embedded Ads: Embedded ads from networks like Google AdSense or Bing Ads.
-* Embedded calendars: Embedding calendars from services like Outlook Calendar, Google Calendar, etc.
+* Embedded Ads: Embedded ads from networks.
+* Embedded calendars: Embedding calendars from services.
 
 ## Proposed Solution
 There are four categories (A, B, C, D) of performance impacting criteria that developers can enforce on embedded content. Based on the scenarios, the app can enable all or some of the categories.
