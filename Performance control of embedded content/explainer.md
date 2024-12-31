@@ -9,7 +9,11 @@
 ## Introduction
 This document proposes platform functionality to give embedders (browsers, websites, hosting applications) the ability to put constraints on resources allocated to embedees (iframes, browsers, tabs, WebViews) to minimize the performance impact that embedded web content can have on an user’s device. Additionally, violations of the constraints will be reported to the embedder to inform and improve the ecosystem.
 
-Embedder developers can do this by enabling various categories of criteria that constrain performance impacting features on the embedee.
+Embedder developers can do this by enabling various categories of criteria that constrain performance impacting features on the embedee. If those constraints are violated, they are reported to the embedder and embedee to:
+1.  Inform the embedder so it can make decisions accordingly, to make the right tradeoffs for their app and give their users an optimal experience.
+2.  Inform the embedee so they can be aware of issues and learn about improvement opportunities. 
+
+Additionally, embedders can opt into default behavior the platform makes to address violations.
 
 ## Goals
 With global web usage continuing to rise and more companies relying on the web as a primary platform to deliver their applications, performance has become a critical factor for success. As more users access websites through mobile devices and lower-powered hardware, the need for fast responsive web experiences is non-negotiable[^1],[^2].
@@ -44,7 +48,7 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 | **D: Script**<br>**Description:** Strict JavaScript restrictions. | **-Additional JS limits:**<br>* Long tasks in the main thread.<br>* High CPU usage.<br>* Workers with long tasks that exceed ?ms.<br> | - Report violations via Reporting API.<br>- Stopping JavaScript if [no user interaction/running in the background]. |
 
 ### Discussion of different categories
-**A: Basic – Basic web development best practices that are scenario-agnostic:** This category covers fundamental web development best practices to ensure that websites are optimized for performance across all environments. This includes compressing text resources such as HTML, CSS JavaScript, and JSON to reduce load times and bandwidth usage, and compressing assets larger than 100KB that are embedded via `data: URLs` as they can slow down page rendering and increase resource consumption. Additionally, images should be served in modern, efficient formats, with any image files exceeding 500KB considered oversized and requiring optimization. Web fonts must also be kept under 300KB to avoid unnecessarily delaying page rendering.
+**A: Basic – Basic web development best practices that are scenario-agnostic:** This category covers fundamental web development best practices to ensure that websites are optimized for performance across all environments. This includes compressing text resources such as HTML, CSS JavaScript, and JSON to reduce load times and bandwidth usage, and compressing assets larger than ?KB that are embedded via `data: URLs` as they can slow down page rendering and increase resource consumption. Additionally, images should be served in modern, efficient formats, with any image files exceeding ?KB considered oversized and requiring optimization. Web fonts must also be kept under ?KB to avoid unnecessarily delaying page rendering.
 
 **B: Early-script – JavaScript constraints to enhance performance and minimize impact on user experience before interaction begins:** This category focuses on JavaScript development best practices that can be done to minimize performance issues before user interaction begins. This includes capping JavaScript resources loaded initially to avoid overwhelming devices with limited processing power or bandwidth, and serving JavaScript with constrained content-length headers to ensure predictable resource delivery and prevent bloated downloads. Additionally, animations that don’t run on the compositor thread should be avoided, as they can trigger costly layout recalculations and choppy user experiences, especially during page load or scroll events.
 
