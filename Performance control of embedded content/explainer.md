@@ -23,10 +23,15 @@ This proposal has two primary goals:
 ## Non-goals
 The key factor of this solution is there are categories of focused, perf impacting features that developers can choose to enforce restrictions on their apps. The threshold/limits and specific criteria within a category may evolve over time and is determined by the platform. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.**
 
-## Scenarios
-* Embedded widgets: Weather forecast, stock tickets, etc.
-* Embedded Ads: Embedded ads from networks.
-* Embedded calendars: Embedding calendars from services.
+## Use cases and scenarios
+
+Embedded content can unintentionally or deliberately consume disproportionate resources on a device, resulting in a negative user experience. This impact may result in visibly slow-loading websites that frustrate users or less apparent issues like increased battery drain and excessive network bandwidth consumption. Some examples include:
+1. **Embedded widgets (weather forecast, stock tickets, social media, etc.)**
+  * Heavy video and animation widget: A feeds app has a weather widget that contains complex animations, high-definition videos, and auto-play functionality for different weather conditions (heavy snowfall or pouring rain) without user interaction. This leads to significant battery drain due to prolonged hardware activity and excessive bandwidth consumption from streaming or rendering large assets. To address this issue, the feeds app may set constraints such as asset size limits, require assets are zipped, and require video/animations to pause when user is not interacting with them. 
+2. **Embedded ads from external providers**
+  * Cryptojacking ads: A site is using a 3rd party ad provider however the ad contains malicious code designed to run cryptocurrency mining scripts in the background using the user's CPU or GPU resources without their knowledge. This drains the device resources and impacts performance. To avoid such issues, the website owner (embedder) could set performance constraints on the ad by limiting the JavaScript execution or restricting excessive network or CPU usage. 
+3. Embedded calendars from services
+  * Calendar with a heavy framework: An app embeds a calendar to display upcoming events however the embedded calendar loads a full-featured JavaScript framework like Angular or React just to render a simple monthly view. Poorly optimized code results in unnecessary large network payloads and inefficient rendering, causing visible lag during simple user interactions (scrolling or mouse movements). To address these issues, the app can set constraints on the embedded calendar for loading and JavaScript execution times. Through the reporting mechanism, the embedded app may learn that they can make optimizations such as reducing the bundle size, avoiding the need for full frameworks, and use simple solutions for rendering the calendar. 
 
 ## Proposed Solution
 There are four categories (A, B, C, D) of performance impacting criteria that developers can enforce on embedded content. Based on the scenarios, the app can enable all or some of the categories.
