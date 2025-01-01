@@ -7,6 +7,7 @@
 - [Alex Russell](https://github.com/slightlyoff)
 
 ## Introduction
+
 This document proposes platform functionality to give embedders (browsers, websites, hosting applications) the ability to put constraints on resources allocated to embedees (iframes, browsers, tabs, WebViews) to minimize the performance impact that embedded web content can have on an user’s device. Additionally, violations of the constraints will be reported to the embedder to inform and improve the ecosystem.
 
 Embedder developers can do this by enabling various categories of criteria that constrain performance impacting features on the embedee. If those constraints are violated, they are reported to the embedder and embedee to:
@@ -16,6 +17,7 @@ Embedder developers can do this by enabling various categories of criteria that 
 Additionally, embedders can opt into default behavior the platform makes to address violations.
 
 ## Goals
+
 With global web usage continuing to rise and more companies relying on the web as a primary platform to deliver their applications, performance has become a critical factor for success. As more users access websites through mobile devices and lower-powered hardware, the need for fast responsive web experiences is non-negotiable[^1],[^2].
 
 When it comes to optimizing performance, websites and apps are limited by the performance of the external content they embed; these can be 3rd party sites, 3rd party apps, and even content from other organizations within a company. As a result, being able to control the performance of embedded content is crucial to improving the overall performance of a site or app.
@@ -25,11 +27,13 @@ This proposal has two primary goals:
 2.	Provide information to help developers improve the performance of web sites and apps through reporting when performance is negatively impacting end-users and/or applications hosting the site in a frame.
 
 ## Non-goals
-The key factor of this solution is there are categories of focused, perf impacting features that developers can choose to enforce restrictions on their apps. The threshold/limits and specific criteria within a category may evolve over time and is determined by the platform. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.**
+
+1. Granular control of limits or individual criteria within a category. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.** The key factor of this solution is there are predefined categories of focused, perf impacting features that embedder developers can choose to enforce restrictions on the embedded content in their app/site. This is to simplify the process and remove the burden from the embedder developer to determine individual constraints. 
 
 ## Use cases and scenarios
 
 Embedded content can unintentionally or deliberately consume disproportionate resources on a device, resulting in a negative user experience. This impact may result in visibly slow-loading websites that frustrate users or less apparent issues like increased battery drain and excessive network bandwidth consumption. Some examples include:
+
 1. **Embedded widgets (weather forecast, stock tickets, social media, etc.)**
   * Heavy video and animation widget: A feeds app has a weather widget that contains complex animations, high-definition videos, and auto-play functionality for different weather conditions (heavy snowfall or pouring rain) without user interaction. This leads to significant battery drain due to prolonged hardware activity and excessive bandwidth consumption from streaming or rendering large assets. To address this issue, the feeds app may set constraints such as asset size limits, require assets are zipped, and require video/animations to pause when user is not interacting with them. 
 2. **Embedded ads from external providers**
@@ -38,7 +42,8 @@ Embedded content can unintentionally or deliberately consume disproportionate re
   * Calendar with a heavy framework: An app embeds a calendar to display upcoming events however the embedded calendar loads a full-featured JavaScript framework like Angular or React just to render a simple monthly view. Poorly optimized code results in unnecessary large network payloads and inefficient rendering, causing visible lag during simple user interactions (scrolling or mouse movements). To address these issues, the app can set constraints on the embedded calendar for loading and JavaScript execution times. Through the reporting mechanism, the embedded app may learn that they can make optimizations such as reducing the bundle size, avoiding the need for full frameworks, and use simple solutions for rendering the calendar. 
 
 ## Proposed Solution
-> **Note:** This proposal is grounded in experience working with embedded web content and evaluation of numerous websites. We've identified recurring issues that can lead well-intentioned web content to unintentionally deliver suboptimal user experiences. The categories and criteria are open to modification and the limits will be determined based on data, from sources like the [Web Almanac](https://almanac.httparchive.org/en/2024/), and feedback from experts. 
+
+> **Note:** This proposal is grounded in experience working with embedded web content and evaluation of numerous websites. We've identified recurring issues that can lead well-intentioned web content to unintentionally deliver suboptimal user experiences. The categories and criteria are open to modification and the limits will be determined based on data, from sources like the [Web Almanac](https://almanac.httparchive.org/en/2024/), and feedback from experts. Additionally, the threshold/limits and specific criteria within a category may evolve over time and is determined by the platform.
 
 There are four categories (A, B, C, D) of performance impacting criteria that developers can enforce on embedded content. Based on the scenarios, the app can enable all or some of the categories.
 
@@ -50,6 +55,7 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 | **D: Script**<br>**Description:** Strict JavaScript restrictions. | **-Additional JS limits:**<br>* Long tasks in the main thread.<br>* High CPU usage.<br>* Workers with long tasks that exceed ?ms.<br> | - Report violations via Reporting API.<br>- Stopping JavaScript if [no user interaction/running in the background]. |
 
 ### Discussion of different categories
+
 **A: Basic – Basic web development best practices that are scenario-agnostic:** This category encompasses fundamental web development best practices to ensure websites are optimized for performance across various environments. These tasks are typically simple to implement but are frequently overlooked, leading to significant performance issues.
 
 **B: Early-script – JavaScript constraints to enhance performance and minimize impact on user experience before interaction begins:** This category focuses on JavaScript development best practices that can be done to minimize performance issues before user interaction begins. This includes capping JavaScript resources loaded initially to avoid overwhelming devices with limited processing power or bandwidth, and serving JavaScript with constrained content-length headers to ensure predictable resource delivery and prevent bloated downloads. Additionally, animations that don’t run on the compositor thread should be avoided, as they can trigger costly layout recalculations and choppy user experiences, especially during page load or scroll events.
@@ -59,6 +65,7 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 **D: Script – Strict JavaScript restrictions:** This category enforces restrictions on more complex JavaScript to further enhance performance. This includes limiting long tasks running on the main thread as they block the event loop and degrade interactivity leading to slow response times, and capping high CPU usage tasks, particularly those involving workers that exceed certain execution times, to ensure they don’t monopolize system resources. These restrictions ensure that JavaScript execution remains lightweight and efficient, preventing detrimental performance impacts on the user experience.
 
 ## What should be standardized?
+
 There are various layers of configuration that can happen and we need to ensure alignment on what should be a web standard vs. what is left to browsers to determine. Here is a discussion of what we propose:
 
 | **Layer of configuration** | **Standardize?** | **Notes** |
@@ -71,6 +78,7 @@ There are various layers of configuration that can happen and we need to ensure 
 | **How violations are handled** | No | Embedder developers should be able to opt into default behavior when restrictions are violated. There is a plethora of things that can happen when restrictions are violated. Different levels of standardization can happen here. The web platform can provide a default option for how violations are handled e.g. standard can be “some UI indicator is shown when violations are made” but it doesn’t have to be a standard what exactly is the UI. |
 
 ## Proposed API Solution
+
 Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points, one for each of the categories above:
 
 * A: `basic`
