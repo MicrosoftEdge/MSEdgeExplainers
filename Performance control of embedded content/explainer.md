@@ -200,6 +200,11 @@ Embedders are best equipped to influence change in the performance when they are
 
 ### Interaction with Heavy Ad Interventions
 
+
+### Open question: how can we ensure fair restrictions for various types of devices (e.g. low end vs. high end devices)?
+
+### Open question: how to determine categories/criteria/limits for desktop vs. mobile?
+
 ## References & acknowledgements
 
 This proposal has been inspired by and builds on the incredible work done in:
