@@ -59,6 +59,8 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 **D: Script – Strict JavaScript restrictions:** This category enforces restrictions on more complex JavaScript to further enhance performance. This includes limiting long tasks running on the main thread as they block the event loop and degrade interactivity leading to slow response times, and capping high CPU usage tasks, particularly those involving workers that exceed certain execution times, to ensure they don’t monopolize system resources. These restrictions ensure that JavaScript execution remains lightweight and efficient, preventing detrimental performance impacts on the user experience.
 
 ## What should be standardized?
+There are various layers of configuration that can happen and we need to ensure alignment on what should be a web standard vs. what is left to browsers to determine. Here is a discussion of what we propose:
+
 | **Layer of configuration** | **Standardize?** | **Notes** |
 | -------------------------- | ---------------- | --------- |
 | **Different categorizations of features:** Currently there are four and can expand in the future with new categories. | Yes | There needs to be alignment within the web community on what the key factors are that we want to allow restrictions for. This allows site developers to be on the same page and make tradeoffs accordingly. The definition for each category and number of categories need to be standardized. Standardizing this gives site developers an opportunity to optimize their performance regardless of the browser their end users are on. |
