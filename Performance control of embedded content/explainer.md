@@ -12,7 +12,7 @@ This document proposes platform functionality to give embedders (browsers, websi
 
 Embedder developers can do this by enabling various categories of criteria that constrain performance impacting features on the embedee. If those constraints are violated, they are reported to the embedder and embedee to:
 1.  Inform the embedder so it can make decisions accordingly, to make the right tradeoffs for their app and give their users an optimal experience.
-2.  Inform the embedee so they can be aware of issues and learn about improvement opportunities. 
+2.  Inform the embedee so they can be aware of issues and learn about improvement opportunities.
 
 Additionally, embedders can opt into default behavior the platform makes to address violations.
 
@@ -28,24 +28,38 @@ This proposal has two primary goals:
 
 ## Non-goals
 
-1. Granular control of limits or individual criteria within a category. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.** The key factor of this solution is there are predefined categories of focused, perf impacting features that embedder developers can choose to enforce restrictions on the embedded content in their app/site. This is to simplify the process and remove the burden from the embedder developer to determine individual constraints. 
+1. Granular control of limits or individual criteria within a category. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.** The key factor of this solution is there are predefined categories of focused, perf impacting features that embedder developers can choose to enforce restrictions on the embedded content in their app/site. This is to simplify the process and remove the burden from the embedder developer to determine individual constraints.
 
 ## Use cases and scenarios
 
 Embedded content can unintentionally or deliberately consume disproportionate resources on a device, resulting in a negative user experience. This impact may result in visibly slow-loading websites that frustrate users or less apparent issues like increased battery drain and excessive network bandwidth consumption. Some examples include:
 
 1. **Embedded widgets (weather forecast, stock tickets, social media, etc.)**
-  * Heavy video and animation widget: A feeds app has a weather widget that contains complex animations, high-definition videos, and auto-play functionality for different weather conditions (heavy snowfall or pouring rain) without user interaction. This leads to significant battery drain due to prolonged hardware activity and excessive bandwidth consumption from streaming or rendering large assets. To address this issue, the feeds app may set constraints such as asset size limits, require assets are zipped, and require video/animations to pause when user is not interacting with them. 
+  * Heavy video and animation widget: A feeds app has a weather widget that contains complex animations, high-definition videos, and auto-play functionality for different weather conditions (heavy snowfall or pouring rain) without user interaction. This leads to significant battery drain due to prolonged hardware activity and excessive bandwidth consumption from streaming or rendering large assets. To address this issue, the feeds app may set constraints such as asset size limits, require assets are zipped, and require video/animations to pause when user is not interacting with them.
 2. **Embedded ads from external providers**
-  * Cryptojacking ads: A site is using a 3rd party ad provider however the ad contains malicious code designed to run cryptocurrency mining scripts in the background using the user's CPU or GPU resources without their knowledge. This drains the device resources and impacts performance. To avoid such issues, the website owner (embedder) could set performance constraints on the ad by limiting the JavaScript execution or restricting excessive network or CPU usage. 
+  * Cryptojacking ads: A site is using a 3rd party ad provider however the ad contains malicious code designed to run cryptocurrency mining scripts in the background using the user's CPU or GPU resources without their knowledge. This drains the device resources and impacts performance. To avoid such issues, the website owner (embedder) could set performance constraints on the ad by limiting the JavaScript execution or restricting excessive network or CPU usage.
 3. **Embedded calendars from services**
-  * Calendar with a heavy framework: An app embeds a calendar to display upcoming events however the embedded calendar loads a full-featured JavaScript framework like Angular or React just to render a simple monthly view. Poorly optimized code results in unnecessary large network payloads and inefficient rendering, causing visible lag during simple user interactions (scrolling or mouse movements). To address these issues, the app can set constraints on the embedded calendar for loading and JavaScript execution times. Through the reporting mechanism, the embedded app may learn that they can make optimizations such as reducing the bundle size, avoiding the need for full frameworks, and use simple solutions for rendering the calendar. 
+  * Calendar with a heavy framework: An app embeds a calendar to display upcoming events however the embedded calendar loads a full-featured JavaScript framework like Angular or React just to render a simple monthly view. Poorly optimized code results in unnecessary large network payloads and inefficient rendering, causing visible lag during simple user interactions (scrolling or mouse movements). To address these issues, the app can set constraints on the embedded calendar for loading and JavaScript execution times. Through the reporting mechanism, the embedded app may learn that they can make optimizations such as reducing the bundle size, avoiding the need for full frameworks, and use simple solutions for rendering the calendar.
 
 ## Proposed Solution
 
 > **Note:** This proposal is grounded in experience working with embedded web content and evaluation of numerous websites. We've identified recurring issues that can lead well-intentioned web content to unintentionally deliver suboptimal user experiences. The categories and criteria are open to modification and the limits will be determined based on data, from sources like the [Web Almanac](https://almanac.httparchive.org/en/2024/), and feedback from experts. Additionally, the threshold/limits and specific criteria within a category may evolve over time and is determined by the platform.
 
-There are four categories (A, B, C, D) of performance impacting criteria that developers can enforce on embedded content. Based on the scenarios, the app can enable all or some of the categories.
+Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points, one for each of the following performance-impacting categories:
+
+* A: `basic`
+* B: `early-script`
+* C: `globals`
+* D: `script`
+
+> **Note:** Names here are only monikers and expected to change.
+
+This enables each document to:
+* Self-impose performance constraints.
+* Negotiate constraints (see [discussion section](#opt-in-and-policy-negotiation)) for each subresource.
+
+
+### Categories and criteria
 
 | **Perf. Category** | **Criteria** | **Handling violations** |
 | -------------  | -------- | ------------------- |
@@ -64,35 +78,8 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 
 **D: Script – Strict JavaScript restrictions:** This category enforces restrictions on more complex JavaScript to further enhance performance. This includes limiting long tasks running on the main thread as they block the event loop and degrade interactivity leading to slow response times, and capping high CPU usage tasks, particularly those involving workers that exceed certain execution times, to ensure they don’t monopolize system resources. These restrictions ensure that JavaScript execution remains lightweight and efficient, preventing detrimental performance impacts on the user experience.
 
-### What should be standardized?
+### Example
 
-There are various layers of configuration that can happen and we need to ensure alignment on what should be a web standard vs. what is left to browsers to determine. Here is a discussion of what we propose:
-
-| **Layer of configuration** | **Standardize?** | **Notes** |
-| -------------------------- | ---------------- | --------- |
-| **Different categorizations of features:** Currently there are four and can expand in the future with new categories. | Yes | There needs to be alignment within the web community on what the key factors are that we want to allow restrictions for. This allows site developers to be on the same page and make tradeoffs accordingly. The definition for each category and number of categories need to be standardized. Standardizing this gives site developers an opportunity to optimize their performance regardless of the browser their end users are on. |
-| **Mechanism to set restrictions:** How site embedder set constraints. | Yes | Related to the different categories, the mechanism should be the same across browsers so that sites work agnostic of the browser. |
-| **Criteria for each category** | Yes | Currently, the criteria for each category is determined from observations and learnings from customer engagements. This may change or evolve with time. This should be standardized so that developers know what the expectations are across all browsers and the web platform. |
-| **Limits for each criteria** | Yes | Some of the limits have been determined based on observations, use cases, etc. This should also be browser agnostic so embedee developers know what the expectations are. |
-| **Reporting violations** | Yes | Similar to mechanism for setting restrictions, embedder developers should have the same expectations on getting violations across all browsers their site/app runs on. |
-| **How violations are handled** | No | Embedder developers should be able to opt into default behavior when restrictions are violated. There is a plethora of things that can happen when restrictions are violated. Different levels of standardization can happen here. The web platform can provide a default option for how violations are handled e.g. standard can be “some UI indicator is shown when violations are made” but it doesn’t have to be a standard what exactly is the UI. |
-
-## Proposed API Solution
-
-Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points, one for each of the categories above:
-
-* A: `basic`
-* B: `early-script`
-* C: `globals`
-* D: `script`
-
-> **Note:** Names here are only monikers and expected to change.
-
-This enables each document to:
-* Self-impose performance constraints.
-* Negotiate constraints (see [discussion section](#opt-in-and-policy-negotiation)) for each subresource.
-
-**Example**
 A feeds app embeds content from different sources, through iframes. To cap the performance impact of the embedded content, the host application aligns with its producers on guidelines and best practices for the embeddees to be loaded into the experience, requiring the content to be served with an agreed upon subset of policies (categories above).
 
 The host app serves its main document with Document Policy directives to enforce on embedded content. In the most simple case, the app opts in to a single category:<br>
@@ -136,6 +123,20 @@ Document Policy proposes a mechanism for policy negotiation. An embeddee which d
 
 #### Open question: required policy and report-only mode
 It is unclear from the Document Policy explainer whether a report-only header in an embedded document satisfies the requirements set by [`Sec-Required-Document-Policy` header](https://wicg.github.io/document-policy/#sec-required-document-policy-http-header).
+
+
+### What should be standardized?
+
+There are various layers of configuration that can happen and we need to ensure alignment on what should be a web standard vs. what is left to browsers to determine. Here is a discussion of what we propose:
+
+| **Layer of configuration** | **Standardize?** | **Notes** |
+| -------------------------- | ---------------- | --------- |
+| **Different categorizations of features:** Currently there are four and can expand in the future with new categories. | Yes | There needs to be alignment within the web community on what the key factors are that we want to allow restrictions for. This allows site developers to be on the same page and make tradeoffs accordingly. The definition for each category and number of categories need to be standardized. Standardizing this gives site developers an opportunity to optimize their performance regardless of the browser their end users are on. |
+| **Mechanism to set restrictions:** How site embedder set constraints. | Yes | Related to the different categories, the mechanism should be the same across browsers so that sites work agnostic of the browser. |
+| **Criteria for each category** | Yes | Currently, the criteria for each category is determined from observations and learnings from customer engagements. This may change or evolve with time. This should be standardized so that developers know what the expectations are across all browsers and the web platform. |
+| **Limits for each criteria** | Yes | Some of the limits have been determined based on observations, use cases, etc. This should also be browser agnostic so embedee developers know what the expectations are. |
+| **Reporting violations** | Yes | Similar to mechanism for setting restrictions, embedder developers should have the same expectations on getting violations across all browsers their site/app runs on. |
+| **How violations are handled** | No | Embedder developers should be able to opt into default behavior when restrictions are violated. There is a plethora of things that can happen when restrictions are violated. Different levels of standardization can happen here. The web platform can provide a default option for how violations are handled e.g. standard can be “some UI indicator is shown when violations are made” but it doesn’t have to be a standard what exactly is the UI. |
 
 
 ## Security and Privacy Considerations
@@ -192,8 +193,37 @@ Document Policy directives are effective on a per-document basis. This generally
 
 What would be the appropriate frame count and depth limit? See related discussion in [Security and Privacy Considerations](#frame-depth).
 
-### Open question: how to evolve best practices?
-Performance categories introduced in this proposal are based on the idea of taking the burden of determining performance best practices off of individual site and app developers. However, best practices evolve with time, and for these policies to achieve their goal, the criteria needs to evolve with them. Changing the criteria for what constitutes a policy violation would introduce compatibility issues for anyone opting-in, as things which are allowed today might not be allowed in the future. We need to define a mechanism in which this evolution can happen in a controlled manner, or decide whether it's a reasonable trade off for developers opting in to be expected to keep up with the platform as best practices evolve.
+### Criteria and category definition, evolution
+This proposal provides an affordance for web developers to gain back control over the performance of their web property. A set of performance-impacting criteria was derived from [Never Slow Mode](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits) and experience in the field (see note in [Proposed Solution](#proposed-solution)). These criteria were then grouped into buckets, taking into account their overall impact, stage in the document lifetime and estimated effort from the developer to fix.
+
+The result is a set of criteria mapped to a smaller set of policies/categories. This mapping is an explicit design choice to remove the burden of determining criteria from individual sites and app developers.
+
+We expect these criteria and their specific limits to evolve with the web, which poses the question of how to best evolve the API. We are considering the following options:
+
+1. **Define once, no changes**
+    **Pros**
+    * Web developers can anticipate and address violations.
+    * Consistent behavior after site opts into the policy.
+
+    **Cons**
+    * Criteria fixed to today's recommendations.
+
+2. **Updating criteria under the same category tags**
+    **Pros**
+    * Sites opting in are kept to the latest criteria under each category.
+
+    **Cons**
+    * Sites subject to changing platform behavior.
+    * Actual criteria and limits are fragmented with the web.
+
+3. **Updated criteria under new category tags**
+    **Pros**
+    * Web developers can anticipate and address violations.
+
+    **Cons**
+    * Requires changes from sites each time there's a change in a category.
+
+An ideal mechanism would allow for this evolution go happen in a controlled, predictable manner. An open point for discussion is whether it's a reasonable trade off for developers opting in to be expected to keep up with the platform as criteria evolves.
 
 ### Reporting 3rd party violations to embedder
 Embedders are best equipped to influence change in the performance when they are aware of where the issues are. While Document Policy provides a Reporting API integration, this only reports violations to the endpoint of the document where the violation occurs. Embedders do not receive reports that the embedded content has incurred policy violations, which is a limitation. We are currently considering sending a minimal report to the embedder when a violation occurs in the embedded document.
@@ -215,7 +245,7 @@ This proposal has been inspired by and builds on the incredible work done in:
 Many thanks for the valuable feedback and advice from:
 * [Limin Zhu](https://github.com/liminzhu)
 * [Sam Fortiner](https://github.com/sfortiner)
-* [Alison Maher](https://github.com/alisonmaher) 
+* [Alison Maher](https://github.com/alisonmaher)
 * [Mike Jackson](https://github.com/mwjacksonmsft)
 * [Erik Anderson](https://github.com/erik-anderson)
 
