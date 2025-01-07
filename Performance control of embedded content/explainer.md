@@ -24,7 +24,7 @@ When it comes to optimizing performance, websites and apps are limited by the pe
 
 This proposal has two primary goals:
 1.	Improve users’ satisfaction with their OS, browser, and applications via formalizing methods of constraining the resources available to web content, while removing the burden of determining individual constraints from web developers.
-2.	Provide information to help developers improve the performance of web sites and apps through reporting when performance is negatively impacting end-users and/or applications hosting the site in a frame.
+2.	Provide information to help developers understand the performance of web sites and apps through reporting when performance is negatively impacting end-users and/or applications hosting the site in a frame.
 
 ## Non-goals
 
