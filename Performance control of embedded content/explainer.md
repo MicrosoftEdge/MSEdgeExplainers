@@ -45,7 +45,21 @@ Embedded content can unintentionally or deliberately consume disproportionate re
 
 > **Note:** This proposal is grounded in experience working with embedded web content and evaluation of numerous websites. We've identified recurring issues that can lead well-intentioned web content to unintentionally deliver suboptimal user experiences. The categories and criteria are open to modification and the limits will be determined based on data, from sources like the [Web Almanac](https://almanac.httparchive.org/en/2024/), and feedback from experts. Additionally, the threshold/limits and specific criteria within a category may evolve over time and is determined by the platform.
 
-There are four categories (A, B, C, D) of performance impacting criteria that developers can enforce on embedded content. Based on the scenarios, the app can enable all or some of the categories.
+Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points, one for each of the following performance-impacting categories:
+
+* A: `basic`
+* B: `early-script`
+* C: `globals`
+* D: `script`
+
+> **Note:** Names here are only monikers and expected to change.
+
+This enables each document to:
+* Self-impose performance constraints.
+* Negotiate constraints (see [discussion section](#opt-in-and-policy-negotiation)) for each subresource.
+
+
+### Categories and criteria
 
 | **Perf. Category** | **Criteria** | **Handling violations** |
 | -------------  | -------- | ------------------- |
@@ -64,35 +78,8 @@ There are four categories (A, B, C, D) of performance impacting criteria that de
 
 **D: Script – Strict JavaScript restrictions:** This category enforces restrictions on more complex JavaScript to further enhance performance. This includes limiting long tasks running on the main thread as they block the event loop and degrade interactivity leading to slow response times, and capping high CPU usage tasks, particularly those involving workers that exceed certain execution times, to ensure they don’t monopolize system resources. These restrictions ensure that JavaScript execution remains lightweight and efficient, preventing detrimental performance impacts on the user experience.
 
-### What should be standardized?
+### Example
 
-There are various layers of configuration that can happen and we need to ensure alignment on what should be a web standard vs. what is left to browsers to determine. Here is a discussion of what we propose:
-
-| **Layer of configuration** | **Standardize?** | **Notes** |
-| -------------------------- | ---------------- | --------- |
-| **Different categorizations of features:** Currently there are four and can expand in the future with new categories. | Yes | There needs to be alignment within the web community on what the key factors are that we want to allow restrictions for. This allows site developers to be on the same page and make tradeoffs accordingly. The definition for each category and number of categories need to be standardized. Standardizing this gives site developers an opportunity to optimize their performance regardless of the browser their end users are on. |
-| **Mechanism to set restrictions:** How site embedder set constraints. | Yes | Related to the different categories, the mechanism should be the same across browsers so that sites work agnostic of the browser. |
-| **Criteria for each category** | Yes | Currently, the criteria for each category is determined from observations and learnings from customer engagements. This may change or evolve with time. This should be standardized so that developers know what the expectations are across all browsers and the web platform. |
-| **Limits for each criteria** | Yes | Some of the limits have been determined based on observations, use cases, etc. This should also be browser agnostic so embedee developers know what the expectations are. |
-| **Reporting violations** | Yes | Similar to mechanism for setting restrictions, embedder developers should have the same expectations on getting violations across all browsers their site/app runs on. |
-| **How violations are handled** | No | Embedder developers should be able to opt into default behavior when restrictions are violated. There is a plethora of things that can happen when restrictions are violated. Different levels of standardization can happen here. The web platform can provide a default option for how violations are handled e.g. standard can be “some UI indicator is shown when violations are made” but it doesn’t have to be a standard what exactly is the UI. |
-
-## Proposed API Solution
-
-Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points, one for each of the categories above:
-
-* A: `basic`
-* B: `early-script`
-* C: `globals`
-* D: `script`
-
-> **Note:** Names here are only monikers and expected to change.
-
-This enables each document to:
-* Self-impose performance constraints.
-* Negotiate constraints (see [discussion section](#opt-in-and-policy-negotiation)) for each subresource.
-
-**Example**
 A feeds app embeds content from different sources, through iframes. To cap the performance impact of the embedded content, the host application aligns with its producers on guidelines and best practices for the embeddees to be loaded into the experience, requiring the content to be served with an agreed upon subset of policies (categories above).
 
 The host app serves its main document with Document Policy directives to enforce on embedded content. In the most simple case, the app opts in to a single category:<br>
@@ -136,6 +123,20 @@ Document Policy proposes a mechanism for policy negotiation. An embeddee which d
 
 #### Open question: required policy and report-only mode
 It is unclear from the Document Policy explainer whether a report-only header in an embedded document satisfies the requirements set by [`Sec-Required-Document-Policy` header](https://wicg.github.io/document-policy/#sec-required-document-policy-http-header).
+
+
+### What should be standardized?
+
+There are various layers of configuration that can happen and we need to ensure alignment on what should be a web standard vs. what is left to browsers to determine. Here is a discussion of what we propose:
+
+| **Layer of configuration** | **Standardize?** | **Notes** |
+| -------------------------- | ---------------- | --------- |
+| **Different categorizations of features:** Currently there are four and can expand in the future with new categories. | Yes | There needs to be alignment within the web community on what the key factors are that we want to allow restrictions for. This allows site developers to be on the same page and make tradeoffs accordingly. The definition for each category and number of categories need to be standardized. Standardizing this gives site developers an opportunity to optimize their performance regardless of the browser their end users are on. |
+| **Mechanism to set restrictions:** How site embedder set constraints. | Yes | Related to the different categories, the mechanism should be the same across browsers so that sites work agnostic of the browser. |
+| **Criteria for each category** | Yes | Currently, the criteria for each category is determined from observations and learnings from customer engagements. This may change or evolve with time. This should be standardized so that developers know what the expectations are across all browsers and the web platform. |
+| **Limits for each criteria** | Yes | Some of the limits have been determined based on observations, use cases, etc. This should also be browser agnostic so embedee developers know what the expectations are. |
+| **Reporting violations** | Yes | Similar to mechanism for setting restrictions, embedder developers should have the same expectations on getting violations across all browsers their site/app runs on. |
+| **How violations are handled** | No | Embedder developers should be able to opt into default behavior when restrictions are violated. There is a plethora of things that can happen when restrictions are violated. Different levels of standardization can happen here. The web platform can provide a default option for how violations are handled e.g. standard can be “some UI indicator is shown when violations are made” but it doesn’t have to be a standard what exactly is the UI. |
 
 
 ## Security and Privacy Considerations
