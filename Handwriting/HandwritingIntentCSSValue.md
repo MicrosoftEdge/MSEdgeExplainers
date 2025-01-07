@@ -93,8 +93,6 @@ Authors are used to the [recommended practice of adding touch-action: none](http
 
 The `handwriting` keyword indicates whether an element and the element's descendants will allow handwriting input when supported by the user agent. Handwriting will only be allowed for an element when its computed `touch-action` includes the `handwriting` keyword. By default, `auto` and `manipulation` will include the `handwriting` keyword.
 
-Note that `touch-action` does not indicate that some actions should take precedence over others, so discerning which interaction the pointer events should trigger will be the responsibility of the User Agent. For example, differentiating between a _pan-*_ gesture and a _handwriting_ gesture if both are available. 
-
 #### Keyword interactions
 
 Distinction between gesture intentions is left to the User Agent, and determining whether a user intends to pan, zoom or write is beyond the scope of this keyword which only determines if the feature is available. In scenarios where both `handwriting` and `pan-*` are enabled (such as `auto` or `manipulation`, etc.) the User Agent will be responsible for determining which action takes place.
