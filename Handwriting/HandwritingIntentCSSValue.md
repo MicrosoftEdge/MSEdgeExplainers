@@ -107,7 +107,7 @@ All CSS properties have computed values for all elements. The enablement of hand
 A few pain points have been brought up that are worth discussion:
 * Web pages that currently have the `touch-action` property set for different elements will lose the handwriting capabilities on this element even if they don't want to disable it. When the new keyword ships, the absence of the value will be interpreted as the author of the webpage intentionally disabling handwriting.
 * Authors that specify `touch-action: manipulation` will be enabling `handwriting`, even when they might not want the behavior enabled in their webpage. These authors would then need to update their webpages to explicitly mention which behaviors they want, i.e. : `touch-action: pan-x pan-y pinch-zoom`.
-*   Using `touch-action` restricts handwriting implementations to touch input devices (such as stylus and touch), even though a platform could support handwriting capabilities for other controls, like mouse pointer events.
+*   Using `touch-action` restricts handwriting implementations to touch input devices (such as stylus and touch), even though a platform could support handwriting capabilities for other devices, like mouse pointer events.
 	* `touch-action` determines which behaviors are allowed for touch input devices regardless of which device is being used, either touch or stylus. In the future, these input devices might be separated into two different CSS attributes to allow things like, say, enable panning with finger touch events and only enable handwriting with a stylus.  
 ## Privacy and Security Considerations
 
@@ -127,11 +127,15 @@ The proposal is for this to be an CSS property.
 The [first proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Handwriting/explainer.md) was to add the handwriting functionality as an HTML+IDL attribute which would allow authors to specify whether an element should permit handwriting by adding a new `handwriting(= true|= false|<blank>)` (`<blank>` implying `= true`) attribute to HTML elements. The main arguments to implement the handwriting HTML attribute **over** a css property are: 
 * [Pro] If users or organizations disable CSS for their browsers there would need to be another mechanism to disable handwriting input.
 * [Pro] All websites that currently use `touch-action` won't have to update their rules if they want handwriting to be enabled (see **# Caveats / Cons**).
+* [Pro] Straightforward to use for the developers.
+* [Pro] Does not differentiate between touch and other devices.
 
 After some discussion [[1](https://groups.google.com/a/chromium.org/g/blink-dev/c/0r_tV6k0NyA?pli=1)] [[2](https://github.com/w3c/pointerevents/issues/516)], it became apparent that implementing the functionality in the `touch-action` CSS attribute was the better alternative. The main arguments in favor of `touch-action` were:
 
 * Authors are used to the [recommended practice of adding touch-action: none](https://w3c.github.io/pointerevents/#example_10) to elements over which they wish to handle all events themselves. In order to allow sites for which authors following this recommended practice to continue working, we should treat stylus handwriting as a "direct manipulation" action, which is similarly prevented by touch-action.
-* If implemented as an HTML attribute, `touch-action`'s interaction with the attribute would have to be clearly defined and possibly clash with authors' expectations (see following section). 
+* If implemented as an HTML attribute, `touch-action`'s interaction with the attribute would have to be clearly defined and possibly clash with authors' expectations (see following section). See the following quote from the [discussion](https://groups.google.com/a/chromium.org/g/blink-dev/c/0r_tV6k0NyA/m/dkpayEBmBAAJ): 
+
+> [...] For use cases where the author wants to handle the pointerevents themselves (e.g. in order to accept free-form drawing) they should be using touchaction or preventDefault on the events to tell the browser they are handling them. They shouldn't have to recognize that if there happens to be an input field underneath or nearby that they need to disable handwriting on it. The developer authoring the drawing widget may not be aware that it may be on top of or near an input element, and it seems bad if they need to find such elements and disable handwriting on them."
 
 
 ### Why not an HTML+IDL attribute that interacts with `touch-action`?
