@@ -5,6 +5,8 @@
 - Andy Luhrs
 - Kurt Catti-Schmidt
 
+Much of this explainer is consolidating and iterating on a CSSWG discussion around [Justin Fagnani](https://github.com/justinfagnani)'s proposal for multiple stylesheets in a single file [here](https://github.com/w3c/csswg-drafts/issues/5629).
+
 ## Participate
 - [Issue tracker](https://github.com/w3c/csswg-drafts/issues/5629)
 - [Discussion forum](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/AtSheet)
@@ -28,6 +30,8 @@ When developing web components, web authors often encounter challenges with dist
 Additionally, bundling of stylesheets is difficult for developers who are distributing web components. They either need to ship many small stylesheets, or use workarounds like `@import url("data...")` which are suboptimal for performance and don't interact well with other patterns.
 
 We propose an enhancement to allow declaration of new stylesheets via an `@sheet` CSS block, and using existing mechanisims such as `@import` and `<link>` to apply those shared styles to DSDs without the use of Javascript.
+
+We're currently investigating this and [Declarative CSS modules](/ShadowDOM/explainer.md) in parallel, and anticipate that we'll be prioritizing only one of these two in the immediate future.
 
 ## Goals
 * Allow the reuse of styles in markup-based shadow DOM without requiring JavaScript.
@@ -76,8 +80,7 @@ This will import only this rules for "sheet1" - in this case, the rules for the 
 This will also import only this rules for "sheet1" - in this case, the rules for the `:host` selector, and will *not* import any rules from styles1and2.css outside of "sheet1".
 
 ## Proposal - Importing a base set of inline styles into a Declarative Shadow DOM
-Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM, and vice versa.
-**TODO: point to frament-only identifiers docs**
+Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM.
 
 ```html
 <style>
@@ -145,13 +148,7 @@ shadowRoot.adoptedStyleSheets = [bar];
 
 #### Performance
 
-This will be a performance-neutral feature, and use of it may allow for developers to reduce the number of network requests.
-
-We should ensure that the following scenarios behave as expected:
-
-1. Multiple imports of different sheets from the same file produce a single network request.
-
-The following examples use a stylesheet saved as `sheet.css` with the following contents:
+This will be a performance-neutral feature, and use of it may allow for developers to reduce the number of network requests. We should ensure that multiple imports of different sheets from the same file produce a single network request. The following examples use a stylesheet saved as `sheet.css` with the following contents:
 
 ```css
 div { color: blue; } 
@@ -233,9 +230,9 @@ interface CSSStyleSheet : StyleSheet {
 ## References & acknowledgements
 Many thanks for valuable feedback and advice from:
 
-- Tab Atkins Jr.
+- Alison Maher
 - Daniel Clark
 - Justin Fagnani
-- Westbrook Johnson
-- Alison Maher
+- Tab Atkins Jr.
 - Tien Mai
+- Westbrook Johnson
