@@ -76,7 +76,8 @@ This will import only this rules for "sheet1" - in this case, the rules for the 
 This will also import only this rules for "sheet1" - in this case, the rules for the `:host` selector, and will *not* import any rules from styles1and2.css outside of "sheet1".
 
 ## Proposal - Importing a base set of inline styles into a Declarative Shadow DOM
-Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM.
+Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM, and vice versa.
+**TODO: point to frament-only identifiers docs**
 
 ```html
 <style>
@@ -175,8 +176,8 @@ import { bar } from 'sheet.css' with { type: 'css' }
 
 ```html
 <!-- The following two link tags should only make a single network request. -->
-<link rel="stylesheet href="sheet.css#foo" />
-<link rel="stylesheet href="sheet.css#bar" />
+<link rel="stylesheet" href="sheet.css#foo" />
+<link rel="stylesheet" href="sheet.css#bar" />
 ```
 
 #### Interaction with CSSOM
@@ -212,7 +213,23 @@ interface CSSStyleSheet : StyleSheet {
 2. Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).
 3. Behavior of `@import` - should this be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached.
 4. What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved. Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition may override it.
+5. Do we want to be able to access sheets declared in shadow DOM from light DOM? For example:
+```html
+<template shadowrootmode="open">
+  <style>
+  @sheet sheet1 {
+    * {
+      font-family: sans-serif;
+    }
+  }
+  </style>
+  <link rel="stylesheet" href="#sheet1" />
+  <span>I'm in the shadow DOM</span>
+</template>
 
+<link rel="stylesheet" href="#sheet1" />
+<span>I'm in the light DOM</span>
+```
 ## References & acknowledgements
 Many thanks for valuable feedback and advice from:
 
