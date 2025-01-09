@@ -47,18 +47,20 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
 ## Proposal - `@sheet`
 Create a new `@sheet` CSS block, for separating style sheets with named identifiers.
 
-styles1and2.css:
+All examples use a stylesheet cased as `sheet.css` with the following contents:
 ```css
-@sheet sheet1 {
-  :host {
-    display: block;
-    background: red;
-  }
+div {
+  color: blue;
 }
 
-@sheet sheet2 {
-  p {
-    color: blue;
+@sheet foo {
+  div {
+    color: red;
+  }
+}
+@sheet bar {
+  div {
+    font-family: sans-serif;
   }
 }
 ```
@@ -66,41 +68,41 @@ styles1and2.css:
 ## Proposal - Importing a specific sheet via `@import`
 ```html
 <style>
-  @import sheet("styles1and2.css#sheet1");
+  @import sheet("sheet.css#foo");
 </style>
 ```
 
-This will import only this rules for "sheet1" - in this case, the rules for the `:host` selector, and will *not* import any rules from styles1and2.css outside of "sheet1".
+This will import only this rules for `foo` - in this case, the rules for the `:host` selector, and will *not* import any rules from `sheet.css` outside of "foo".
 
 ## Proposal - Importing a specific sheet via the `<link>` tag
 ```html
-<link rel="stylesheet" href="styles1and2.css#sheet1" />
+<link rel="stylesheet" href="sheet.css#sheet1" />
 ```
 
-This will also import only this rules for "sheet1" - in this case, the rules for the `:host` selector, and will *not* import any rules from styles1and2.css outside of "sheet1".
+This will also import only this rules for "foo" - in this case, the rules for the `:host` selector, and will *not* import any rules from `sheet.css` outside of "foo".
 
 ## Proposal - Importing a base set of inline styles into a Declarative Shadow DOM
 Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM.
 
 ```html
 <style>
-@sheet sheet1 {
-  * {
-    font-family: sans-serif;
+@sheet foo {
+  div {
+    color: red;
   }
 }
 </style>
 <template shadowrootmode="open">
-  <link rel="stylesheet" href="#sheet1" />
+  <link rel="stylesheet" href="#foo" />
   <span>I'm in the shadow DOM</span>
 </template>
 ```
 or imported from JS:
 ```html
 <script>
-  import {sheet1} from './styles1and2.css' with {type: 'css'};
+  import {foo} from './sheet.css' with {type: 'css'};
   ...
-  shadow.adoptedStyleSheets = [sheet2];
+  shadow.adoptedStyleSheets = [foo];
 </script>
 ```
 
@@ -108,28 +110,20 @@ or imported from JS:
 
 #### Named Imports with Imperative Shadow DOM
 
-The following examples use a stylesheet saved as `sheet.css` with the following contents:
-
-```css
-div { color: blue; } 
-
-@sheet bar { div { color: red; } }
-```
-
-This can then be imported via Javascript as follows:
+`sheet.js` can also be imported via Javascript as follows:
 
 ```js
-import foo, { bar } from 'sheet.css' with { type: 'css' }
+import baz, { bar } from 'sheet.css' with { type: 'css' }
 ```
 
-`foo` will reference style rules outside of any `@sheet` blocks as a Default Import (in this case, the `div { color: blue; } ` rule).
+`baz` will reference style rules outside of any `@sheet` blocks as a Default Import (in this case, the `div { color: blue; } ` rule).
 
 `bar` will reference style rules within the `@sheet bar` block as a Named Import (in this case, the `div { color: red; }  ` rule).
 
 Named imports may be renamed as part of this import process:
 
 ```js
-import foo, { bar as baz } from 'sheet.css' with { type: 'css' }
+import baz, { bar as renamed } from 'sheet.css' with { type: 'css' }
 ```
 
 The default import may be omitted, importing only the named `@sheet`:
@@ -148,14 +142,7 @@ shadowRoot.adoptedStyleSheets = [bar];
 
 #### Performance
 
-This will be a performance-neutral feature, and use of it may allow for developers to reduce the number of network requests. We should ensure that multiple imports of different sheets from the same file produce a single network request. The following examples use a stylesheet saved as `sheet.css` with the following contents:
-
-```css
-div { color: blue; } 
-
-@sheet foo { div { color: red; } }
-@sheet bar { div { font-family: sans-serif; } }
-```
+This will be a performance-neutral feature, and use of it may allow for developers to reduce the number of network requests. We should ensure that multiple imports of different sheets from the same file produce a single network request. 
 
 ```js
 // The following two imports should only make a single network request.
