@@ -76,7 +76,7 @@ This will import only this rules for `foo` - in this case, the rules for the `:h
 
 ## Proposal - Importing a specific sheet via the `<link>` tag
 ```html
-<link rel="stylesheet" href="sheet.css#sheet1" />
+<link rel="stylesheet" href="sheet.css#foo" />
 ```
 
 This will also import only this rules for "foo" - in this case, the rules for the `:host` selector, and will *not* import any rules from `sheet.css` outside of "foo".
