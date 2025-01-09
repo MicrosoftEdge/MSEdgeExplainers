@@ -201,17 +201,17 @@ interface CSSStyleSheet : StyleSheet {
 ```html
 <template shadowrootmode="open">
   <style>
-  @sheet sheet1 {
-    * {
-      font-family: sans-serif;
+  @sheet foo {
+    div {
+      color: red;
     }
   }
   </style>
-  <link rel="stylesheet" href="#sheet1" />
+  <link rel="stylesheet" href="#foo" />
   <span>I'm in the shadow DOM</span>
 </template>
 
-<link rel="stylesheet" href="#sheet1" />
+<link rel="stylesheet" href="#foo" />
 <span>I'm in the light DOM</span>
 ```
 ## References & acknowledgements
