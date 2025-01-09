@@ -72,14 +72,14 @@ div {
 </style>
 ```
 
-This will import only this rules for `foo` - in this case, the rules for the `:host` selector, and will *not* import any rules from `sheet.css` outside of "foo".
+This will import only this rules for `foo` - in this case, the `div { color: red; }` rule, and will *not* import any rules from `sheet.css` outside of "foo".
 
 ## Proposal - Importing a specific sheet via the `<link>` tag
 ```html
 <link rel="stylesheet" href="sheet.css#foo" />
 ```
 
-This will also import only this rules for "foo" - in this case, the rules for the `:host` selector, and will *not* import any rules from `sheet.css` outside of "foo".
+This will also import only this rules for "foo" - in this case, the `div { color: red; }` rule, and will *not* import any rules from `sheet.css` outside of "foo".
 
 ## Proposal - Importing a base set of inline styles into a Declarative Shadow DOM
 Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM.
