@@ -8,8 +8,8 @@
 Much of this explainer is consolidating and iterating on a CSSWG discussion around [Justin Fagnani](https://github.com/justinfagnani)'s proposal for multiple stylesheets in a single file [here](https://github.com/w3c/csswg-drafts/issues/5629).
 
 ## Participate
-- [Issue tracker](https://github.com/w3c/csswg-drafts/issues/5629)
-- [Discussion forum](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/AtSheet)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/AtSheet)
+- [Discussion forum](https://github.com/w3c/csswg-drafts/issues/5629)
 
 ## Status of this Document
 
@@ -25,11 +25,11 @@ content location of future work and discussions.
 * Current version: this document
 
 ## Introduction
-When developing web components, web authors often encounter challenges with distributing global styles into shadow roots and sharing styles across different shadow roots. Declarative shadow DOM (DSD) enables creation of shadow DOM without JS, but adding styles to DSD requires the developer to either use JS to put a shared stylesheet into `adoptedStyleSheets`, or to duplicate the styles in a `<style>` element for each component instance.
+When developing web components, web authors often encounter challenges with distributing global styles into shadow roots and sharing styles across different shadow roots. Declarative shadow DOM (DSD) enables creation of shadow DOM without JavaScript. However, adding styles to DSD requires the developer to either use JavaScript to put a shared stylesheet into `adoptedStyleSheets`, or to duplicate the styles in a `<style>` element for each component instance.
 
 Additionally, bundling of stylesheets is difficult for developers who are distributing web components. They either need to ship many small stylesheets, or use workarounds like `@import url("data...")` which are suboptimal for performance and don't interact well with other patterns.
 
-We propose an enhancement to allow declaration of new stylesheets via an `@sheet` CSS block, and using existing mechanisims such as `@import`, `<link>`, and CSS module script `import` to apply those shared styles to DSDs without the use of Javascript.
+We propose an enhancement to allow the declaration of new stylesheets via an `@sheet` CSS block and using existing mechanisims such as `@import`, `<link>`, and CSS module script `import` to apply those shared styles to DSDs without the use of JavaScript.
 
 We're currently investigating this and [Declarative CSS modules](/ShadowDOM/explainer.md) in parallel, and anticipate that we'll be prioritizing only one of these two in the immediate future.
 
@@ -47,7 +47,7 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
 ## Proposal - `@sheet`
 Create a new `@sheet` CSS block, for separating style sheets with named identifiers.
 
-All examples use a stylesheet cased as `sheet.css` with the following contents:
+
 ```css
 div {
   color: blue;
@@ -58,31 +58,33 @@ div {
     color: red;
   }
 }
+
 @sheet bar {
   div {
     font-family: sans-serif;
   }
 }
 ```
+This stylesheet will create three CSS sheets - The default sheet, `foo`, and `bar`. All following examples will use this stylesheet with the name of `sheet.css`.
 
-## Proposal - Importing a specific sheet via `@import`
+### Importing a specific sheet via `@import`
 ```html
 <style>
   @import sheet("sheet.css#foo");
 </style>
 ```
 
-This will import only this rules for `foo` - in this case, the `div { color: red; }` rule, and will *not* import any rules from `sheet.css` outside of "foo".
+This will import only the rules for `foo` - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
 
-## Proposal - Importing a specific sheet via the `<link>` tag
+### Importing a specific sheet via the `<link>` tag
 ```html
 <link rel="stylesheet" href="sheet.css#foo" />
 ```
 
-This will also import only this rules for "foo" - in this case, the `div { color: red; }` rule, and will *not* import any rules from `sheet.css` outside of "foo".
+This will also import only this rules for "foo" - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
 
-## Proposal - Importing a base set of inline styles into a Declarative Shadow DOM
-Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM.
+### Importing a base set of inline styles into a Declarative Shadow DOM
+Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM:
 
 ```html
 <style>
@@ -97,7 +99,7 @@ Shadow DOM isolates styles, but fragment identifiers are global. This enables De
   <span>I'm in the shadow DOM</span>
 </template>
 ```
-or imported from JS:
+or imported from JavaScript:
 ```html
 <script>
   import {foo} from './sheet.css' with {type: 'css'};
@@ -110,9 +112,9 @@ or imported from JS:
 
 #### Named Imports with Imperative Shadow DOM
 
-`sheet.js` can also be imported via Javascript as follows:
+`sheet.JavaScript` can also be imported via JavaScript as follows:
 
-```js
+```JavaScript
 import baz, { bar } from 'sheet.css' with { type: 'css' }
 ```
 
@@ -122,19 +124,21 @@ import baz, { bar } from 'sheet.css' with { type: 'css' }
 
 Named imports may be renamed as part of this import process:
 
-```js
+```JavaScript
 import baz, { bar as renamed } from 'sheet.css' with { type: 'css' }
 ```
 
+`bar` will be renamed to `renamed`.
+
 The default import may be omitted, importing only the named `@sheet`:
 
-```js
+```JavaScript
 import { bar } from 'sheet.css' with { type: 'css' }
 ```
 
-Any of these `import` examples can be then used to set the `adoptedStyleSheets` attribute on a Shadow DOM node:
+Any of these `import` examples can then be used to set the `adoptedStyleSheets` attribute on a Shadow DOM node:
 
-```js
+```JavaScript
 import { bar } from 'sheet.css' with { type: 'css' }
 document.adoptedStyleSheets = [bar];
 shadowRoot.adoptedStyleSheets = [bar];
@@ -142,9 +146,9 @@ shadowRoot.adoptedStyleSheets = [bar];
 
 #### Performance
 
-This will be a performance-neutral feature, and use of it may allow for developers to reduce the number of network requests. We should ensure that multiple imports of different sheets from the same file produce a single network request. 
+This will be a performance-neutral feature, but developers can utilize this feature to reduce the number of network requests. We should ensure that multiple imports of different sheets from the same file produce a single network request. 
 
-```js
+```JavaScript
 // The following two imports should only make a single network request.
 import { foo } from 'sheet.css' with { type: 'css' };
 import { bar } from 'sheet.css' with { type: 'css' }
@@ -175,7 +179,7 @@ interface StyleSheet {
   readonly attribute DOMString? name;
 };
 ```
-*Open issue: Should this overload the existing `title` attribute instead?*
+*Open issue: 
 
 This also expands the [existing](https://drafts.csswg.org/cssom/#cssstylesheet) CSSOM `CSSStyleSheet` definition with a `StyleSheetList` of nested `CSSStyleSheet` objects to access nested `@sheet` references:
 
@@ -185,11 +189,11 @@ interface CSSStyleSheet : StyleSheet {
   [SameObject] readonly attribute StyleSheetList nestedStyleSheets;
 };
 ```
-*Open issue: The name `nestedStyleSheets` is up for discussion*
 
 ## Considered alternatives
 
-1. [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) are another mechanism for sharing styles between Declarative Shadow DOM and light DOM without the use of Javascript.
+1. [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) are another mechanism for sharing styles between Declarative Shadow DOM and light DOM without the use of JavaScript.
+2. Some additional alternatives to parts of the problems discussed here are discussed in the [Alternate proposals](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md#alternate-proposals) section of that explainer.
 
 ## Open Issues
 
@@ -201,11 +205,11 @@ interface CSSStyleSheet : StyleSheet {
 ```html
 <template shadowrootmode="open">
   <style>
-  @sheet foo {
-    div {
-      color: red;
+    @sheet foo {
+      div {
+        color: red;
+      }
     }
-  }
   </style>
   <link rel="stylesheet" href="#foo" />
   <span>I'm in the shadow DOM</span>
@@ -214,6 +218,9 @@ interface CSSStyleSheet : StyleSheet {
 <link rel="stylesheet" href="#foo" />
 <span>I'm in the light DOM</span>
 ```
+6. The name `nestedStyleSheets` is up for discussion.
+7. Should we add `name` to the `StyleSheet` interface or  overload the existing `title` attribute instead?
+
 ## References & acknowledgements
 Many thanks for valuable feedback and advice from:
 
