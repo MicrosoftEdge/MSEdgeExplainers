@@ -146,9 +146,11 @@ shadowRoot.adoptedStyleSheets = [bar];
 
 #### Performance
 
-This will be a performance-neutral feature, but developers can utilize this feature to reduce the number of network requests. We should ensure that multiple imports of different sheets from the same file produce a single network request.
+`@sheet` has several performance benefits. The primary benefit is reduced network requests, as it allows mutliple stylesheets to be downloaded in one network request.
 
-Using `@sheet` may also yield some benefits to file compression. With a dictionary-based compression scheme, if two stylesheets contain many similar tokens, combining them via `@sheet` and then compressing could yield a higher compression ratio than compressing them separately.
+`@sheet` can also reduce the work done by the style engine. Currently, Declarative Shadow DOM requires either a) that style rules are duplicated within shadow roots, or b) entire stylesheets are shared via `<link>` tags. `@sheet` allows for granular control over style rules shared between the parent document and shadow roots without additional network requests or duplicated styles.
+
+Using `@sheet` may also yield some benefits to file compression. With a dictionary-based compression scheme, if two stylesheets contain many similar tokens (e.g. CSS rules and selectors), combining them via `@sheet` and then compressing may yield a higher compression ratio than compressing them as separate files.
 
 ```JavaScript
 // The following two imports should only make a single network request.
