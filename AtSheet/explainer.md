@@ -49,10 +49,6 @@ Create a new `@sheet` CSS block, for separating style sheets with named identifi
 
 
 ```css
-div {
-  color: blue;
-}
-
 @sheet foo {
   div {
     color: red;
@@ -63,6 +59,10 @@ div {
   div {
     font-family: sans-serif;
   }
+}
+
+div {
+  color: blue;
 }
 ```
 This stylesheet will create three CSS sheets - The default sheet, `foo`, and `bar`. All following examples will use this stylesheet with the name of `sheet.css`.
@@ -199,8 +199,8 @@ interface CSSStyleSheet : StyleSheet {
 
 1. Whether rules are applied automatically for `@sheet` definitions, or whether they need to be imported to apply. The CSS Working Group did not have a consensus.
 2. Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).
-3. Behavior of `@import` - should this be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached.
-4. What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved. Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition may override it.
+3. Behavior of `@import` - should `@import` be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached.
+4. What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved. Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition from an external CSS file may override it.
 5. Do we want to be able to access sheets declared in shadow DOM from light DOM? For example:
 ```html
 <template shadowrootmode="open">
@@ -220,6 +220,23 @@ interface CSSStyleSheet : StyleSheet {
 ```
 6. The name `nestedStyleSheets` is up for discussion.
 7. Should we add `name` to the `StyleSheet` interface or  overload the existing `title` attribute instead?
+8. If a stylesheet contains named `@sheet` references *and* rules outside of the `@sheet` references, what happens in all cases when a fragment identifier is *not* specified? For example:
+
+sheet.css:
+
+```html
+@sheet foo {
+  color: red;
+}
+color: blue;
+```
+
+```html
+<style>
+  @import "sheet.css" /* Does the @sheet "foo" get dropped? */
+</style>
+<link rel="stylesheet" href="sheet.css"> <!-- Does the @sheet "foo" get dropped? -->
+```
 
 ## References & acknowledgements
 Many thanks for valuable feedback and advice from:
