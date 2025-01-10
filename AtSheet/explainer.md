@@ -29,7 +29,7 @@ When developing web components, web authors often encounter challenges with dist
 
 Additionally, bundling of stylesheets is difficult for developers who are distributing web components. They either need to ship many small stylesheets, or use workarounds like `@import url("data...")` which are suboptimal for performance and don't interact well with other patterns.
 
-We propose an enhancement to allow declaration of new stylesheets via an `@sheet` CSS block, and using existing mechanisims such as `@import` and `<link>` to apply those shared styles to DSDs without the use of Javascript.
+We propose an enhancement to allow declaration of new stylesheets via an `@sheet` CSS block, and using existing mechanisims such as `@import`, `<link>`, and CSS module script `import` to apply those shared styles to DSDs without the use of Javascript.
 
 We're currently investigating this and [Declarative CSS modules](/ShadowDOM/explainer.md) in parallel, and anticipate that we'll be prioritizing only one of these two in the immediate future.
 
