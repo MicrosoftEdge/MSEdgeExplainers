@@ -146,7 +146,9 @@ shadowRoot.adoptedStyleSheets = [bar];
 
 #### Performance
 
-This will be a performance-neutral feature, but developers can utilize this feature to reduce the number of network requests. We should ensure that multiple imports of different sheets from the same file produce a single network request. 
+This will be a performance-neutral feature, but developers can utilize this feature to reduce the number of network requests. We should ensure that multiple imports of different sheets from the same file produce a single network request.
+
+Using `@sheet` may also yield some benefits to file compression. With a dictionary-based compression scheme, if two stylesheets contain many similar tokens, combining them via `@sheet` and then compressing could yield a higher compression ratio than compressing them separately.
 
 ```JavaScript
 // The following two imports should only make a single network request.
@@ -199,7 +201,7 @@ interface CSSStyleSheet : StyleSheet {
 
 1. Whether rules are applied automatically for `@sheet` definitions, or whether they need to be imported to apply. The CSS Working Group did not have a consensus.
 2. Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).
-3. Behavior of `@import` - should `@import` be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached.
+3. Behavior of `@import` - should `@import` be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached. This was briefly discussed in this CSSWG conversation: https://lists.w3.org/Archives/Public/www-style/2023Apr/0004.html
 4. What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved. Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition from an external CSS file may override it.
 5. Do we want to be able to access sheets declared in shadow DOM from light DOM? For example:
 ```html
