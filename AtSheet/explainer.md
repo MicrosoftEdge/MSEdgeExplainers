@@ -84,7 +84,7 @@ This will import only the rules for `foo` - in this case, the `div { color: red;
 This will also import only this rules for "foo" - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
 
 ### Importing a base set of inline styles into a Declarative Shadow DOM
-Shadow DOM isolates styles, but fragment identifiers are global. This enables Declarative Shadow DOM to import `@sheet` references from the light DOM:
+Shadow DOM isolates styles, but fragment identifiers from the light DOM are global and referenceable from shadow DOM (but not vice versa). This enables Declarative Shadow DOM to import `@sheet` references from the light DOM:
 
 ```html
 <style>
