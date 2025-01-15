@@ -160,9 +160,9 @@ import { bar } from 'sheet.css' with { type: 'css' }
 
 ```html
 <style>
-/* The following two imports should only make a single network request. */
-@import "sheet.css#foo";
-@import "sheet.css#bar";
+  /* The following two imports should only make a single network request. */
+  @import "sheet.css#foo";
+  @import "sheet.css#bar";
 </style>
 ```
 
@@ -183,7 +183,6 @@ interface StyleSheet {
   readonly attribute DOMString? name;
 };
 ```
-*Open issue: 
 
 This also expands the [existing](https://drafts.csswg.org/cssom/#cssstylesheet) CSSOM `CSSStyleSheet` definition with a `StyleSheetList` of nested `CSSStyleSheet` objects to access nested `@sheet` references:
 
@@ -204,7 +203,7 @@ interface CSSStyleSheet : StyleSheet {
 1. Whether rules are applied automatically for `@sheet` definitions, or whether they need to be imported to apply. The CSS Working Group did not have a consensus.
 2. Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).
 3. Behavior of `@import` - should `@import` be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached. This was briefly discussed in this CSSWG conversation: https://lists.w3.org/Archives/Public/www-style/2023Apr/0004.html
-4. What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved. Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition from an external CSS file may override it.
+4. What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved (https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1498299448). Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition from an external CSS file may override it.
 5. Do we want to be able to access sheets declared in shadow DOM from light DOM? For example:
 ```html
 <template shadowrootmode="open">
@@ -223,16 +222,20 @@ interface CSSStyleSheet : StyleSheet {
 <span>I'm in the light DOM</span>
 ```
 6. The name `nestedStyleSheets` is up for discussion.
-7. Should we add `name` to the `StyleSheet` interface or  overload the existing `title` attribute instead?
+7. Should we add `name` to the `StyleSheet` interface or overload the existing `title` attribute instead?
 8. If a stylesheet contains named `@sheet` references *and* rules outside of the `@sheet` references, what happens in all cases when a fragment identifier is *not* specified? For example:
 
 sheet.css:
 
-```html
+```css
 @sheet foo {
-  color: red;
+  div{
+    color: red;
+  }
 }
-color: blue;
+div {
+  color: blue;
+}
 ```
 
 ```html
