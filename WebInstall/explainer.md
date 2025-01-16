@@ -9,11 +9,11 @@ This document is a starting point for engaging the community and standards bodie
 
 ##  Introduction
 
-As Web applications are becoming more ubiquitous, there are growing needs to aid discovery and distribution of said applications. **The Web Install API provides a way to democratise and decentralise web application acquisition**, by enabling ["do-it-yourself" developers to have control](https://www.w3.org/TR/ethical-web-principles/#control) over the application discovery and distribution process, providing them with the tools they need to allow a web site to install a web app.
+As Web applications are becoming more ubiquitous, there are growing needs to aid discovery and distribution of said applications. **The Web Install API provides a way to democratise and decentralise web application acquisition**, by enabling ["do-it-yourself" developers to have control](https://www.w3.org/TR/ethical-web-principles/#control) over the application discovery and distribution process, providing them with the tools they need to allow a web site to install a web app. This means end users have the option to more easily discover new applications and experiences that they can acquire with reduced friction.
 
 The acquisition of an web app can originate via multiple user flows that generally involve search, navigation, and ultimately trust that the UA will prompt or provide some sort of UX that support "[installing](https://web.dev/articles/install-criteria)/[adding](https://support.apple.com/en-gb/guide/safari/ibrw9e991864/mac)" the desired app. There are multiple use cases for this feature, as seen in the [use case](#use-cases) section, but *the core concept is the installation of a web app directly from a web page*.
 
-The Web Install API aims to standardize the way installations are invoked by *end users*, creating an ergonomic, simple and consistent way to get web content installed onto a device. The current "alternatives" to the Web Install API imply the user to rely on search engines, app stores, proprietary protocols, proprietary "smart" banners, UA prompts, hidden UX and other means that take the user out of their navigating context. They also represent additional steps towards the acquisition of the app.
+The Web Install API **aims to standardize the way installations are invoked by *end users***, creating an ergonomic, simple and consistent way to get web content installed onto a device. The current "alternatives" to the Web Install API imply the user to rely on search engines, app stores, proprietary protocols, proprietary "smart" banners, UA prompts, hidden UX and other means that take the user out of their navigating context. They also represent additional steps towards the acquisition of the app.
 
 Inherently, these alternative user flows to "install" an app rely on multi-step processes that at best require a couple of clicks to navigate to an origin and install it, and at worst involve the user searching on browser menus for a way to add the app to their device. The web platform is not capable of providing a seamless, consistent experience that allows users to discover and acquire applications in a frictionless manner. Every additional step in the acquisition funnel for web apps comes with an additional drop off rate as well. 
 
@@ -33,7 +33,7 @@ Moreover, the **Web Install API feature is beneficial for app discovery**: it al
 
 ## Non-goals
 
-* Install arbitrary web content that is not an app (target must have a manifest file or computed manifest `id`). [Reasons expanded here](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
+* Install arbitrary web content that is not an app (target must have a manifest file or [processed manifest `id`](#glossary)). [Reasons expanded here](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
 * Change the way the UA currently prompts for installation of a web app.
 * Associate ratings and reviews with the installed app ([see Ratings and Reviews API explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/RatingsAndReviewsPrompt/explainer.md)).
 * Process payments for installation of PWAs ([see Payment Request API](https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API)).
@@ -66,7 +66,7 @@ Picture a user browsing on their favorite video streaming web app. The user migh
 
 ### **Suite of Web Apps**
 
-Building on the previous use case, the website can also provide a way to directly acquire other applications it might offer, like a dedicated "kids" version of the app, or a "sports" version of the app. Another example would be a family of software applications, like a productivity or photography suite. The developer is in control and can effectively advertise and control their applications, which having to redirect users to platform-specific propriatery repositories, which is what happens now.
+Building on the previous use case, the website can also provide a way to directly acquire other applications it might offer, like a dedicated "kids" version of the app, or a "sports" version of the app. Another example would be a family of software applications, like a productivity or photography suite. The developer is in control and can effectively advertise and control their applications, without having to redirect users to platform-specific propriatery repositories, which is what happens now.
 
 
 > **Note:**
@@ -86,24 +86,6 @@ Developers of Search Engines could use the API to include a way to directly inst
  > **Note:**
 >This is enabled by the installation of a *background document*.
 
-```javascript
-/* tries to install a cross-origin web app */
-
-const installApp = async (manifest_id, install_url) => {
-    if ('install' in navigator === false) return; // api not supported
-    try {
-        await navigator.install(manifest_id, install_url);
-    } catch(err) {
-        switch(err.name){
-            case 'AbortError':
-                /* Operation was aborted*/
-                break;
-
-        }
-    }
-};
-```
-
   ![Install flow from an app repository](./apprepositoryinstallation.png)
 
 ## Proposed Solution
@@ -114,17 +96,17 @@ To install a web app, a web site would use the promise-based method `navigator.i
 
 * Resolve when an installation was completed.
     * The success value will be an object that contains:
-        *  `id`: string with the computed `manifest_id` of the installed app.
-* Be rejected if the prompt is not shown or if the app installation did not complete. It'll reject with a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
-    * `AbortError`: The installation (prompt) was closed/cancelled.
-    * `DataError`: There is no manifest file present, there is no `id` field defined in the manifest or there is a mismatch between the `id` passed as a parameter and the computed `id`. 
+        *  `id`: string with the processed `manifest_id` of the installed app.
+* Be rejected if the app installation did not complete. It'll reject with a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
+    * `AbortError`: The installation/UX/permission (prompt) was closed/cancelled.
+    * `DataError`: There is no manifest file present, there is no `id` field defined in the manifest or there is a mismatch between the `id` passed as a parameter and the processed `id`. 
 
 
 #### **Signatures of the `install` method**
 The Web Install API consists of the extension to the navigator interface with an `install` method. This method has 3 different signatures that can be used in different scenarios. The possible parameters it may receive are:
 
-* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. An `install_url` must not redirect nor contain extra content that is not relevant for installation purposes.
-* `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. This value must match the id specified in the manifest file to form the computed id once an application is installed.
+* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. In an ideal scenario, an `install_url` must not redirect nor contain extra content that is not relevant for installation purposes.
+* `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. This value must match the id specified in the manifest file to form the processed id once an application is installed.
 * optional [parameters](#parameters).
 
 The `manifest_id` is the *what* to install, the `install_url` is the *where* to find it.
@@ -152,12 +134,12 @@ This signature can be used to install the current or a background document.
 
 ##### **Two parameters `navigator.install(<install_url>, <manifest_id>)`**
 
-This signature is intended to install background documents that don't necessarily have an explicit `id` value defined in the manigfest file.
+This signature is intended to install background documents that don't necessarily have an explicit `id` value defined in the manifest file.
 
 *Requirements:*
 * `<install_url>` must be a valid URL.
 * The document present at `<install_url>` must link to a manifest file.
-* The `<manifest_id>` parameter must match the resulting string (https://www.w3.org/TR/appmanifest/#example-resulting-ids) after processing the `id` member.
+* The `<manifest_id>` parameter must match the processed string after processing the `id` member.
 
 > **Note:** according to the manifest spec, if there is no `id` member present, the processed string resolves to that of the `start_url`.
 
@@ -182,7 +164,7 @@ To install an application with the Web Install API, the process is as follows:
 #### Background Document (1 param)
 
 1. User gesture activates code that calls the `install(<install_url>)` method.
-2. If the `<install_url>` is in a different origin than the invoking document, the UA asks for permission to perform cross-origin installs. Else reject with `AbortError`. 
+2. If the `<install_url>` is not the current document, the UA asks for permission to perform installations. Else reject with `AbortError`. 
 3. UA tires to fetch the background document present at the `<install_url>` and its manifest file.
 4. If fetched document has a manifest file, continue. Else reject with `DataError`.
 5. If manifest file linked to the fetched document has an `id` field defined, continue. Else reject with `DataError`.
@@ -192,12 +174,48 @@ To install an application with the Web Install API, the process is as follows:
 #### Background Document (2 param)
 
 1. User gesture activates code that calls the `install(<install_url>, <manifest_id>)` method. 
-2. If the `<install_url>` is in a different origin than the invoking document, the UA asks for permission to perform cross-origin installs. Else reject with `AbortError`.
+2. If the `<install_url>` is not the current document, the UA asks for permission to perform installations. Else reject with `AbortError`. 
 3. UA tires to fetch the background document present at the `<install_url>` and its manifest file.
 4. If fetched document has a manifest file, continue. Else reject with `DataError`.
 5. If `<manifest_id>` matches the processed `id` from the manifest of the fetched document, continue. Else reject with `DataError`.
 6. UA shows the acquisition confirmation UX (prompt/dialog). If the user accepts, continue. Else reject with `AbortError`.
 7. Promise resolves with processed `id` of installed app and application follows the platform's post-install UX (adds to Dock/opens app/adds to mobile app drawer).
+
+### Sample code
+
+```javascript
+/* tries to install the current domain */
+const installApp = async () => {
+    if (!navigator.install) return; // api not supported
+    try {
+        await navigator.install('content_id_123');
+    } catch(err) {
+        switch(err.name){
+            case 'AbortError':
+                /* Operation was aborted*/
+                break;
+        }
+    }
+};
+```
+
+```javascript
+/* tries to install a cross-origin web app */
+
+const installApp = async (manifest_id, install_url) => {
+    if ('install' in navigator === false) return; // api not supported
+    try {
+        await navigator.install(manifest_id, install_url);
+    } catch(err) {
+        switch(err.name){
+            case 'AbortError':
+                /* Operation was aborted*/
+                break;
+
+        }
+    }
+};
+```
 
 ### The `navigator.getInstalledApps` method
 
@@ -205,20 +223,8 @@ TODO - can we associate this method with a domain???
 
 * The approach for showing which apps have been installed from this origin follows the same API approach where the information is accessible if it matches a [partition key](https://github.com/kyraseevers/Partitioning-visited-links-history#general-api-approach), instead of just the link URL. This ensures installed apps can be seen only from the origin matching all parts of the key.
 
-## Relation with other web APIs/features
-
-* **`navigator.install` and Permissions API:** see [integrations with the Permissions API](#integration-with-the-permissions-api).
-
-* **`navigator.install` and manifest file's `prefer_related_applications`:** When the `related_applications` and `prefer_related_applications` key/values are present in the manifest, the UA should try to handoff the install to the prefered catalog. If this is not possible then it fallback to a default UA install.
-
-* **`navigator.getInstalledApps` and `getInstalledRelatedApps`:** `getInstalledApps` is called from an origin and can list applications that are installed on the device originating from the current site. `getInstalledRelatedApps` on the other hand is called from a web app and returns which alternate versions of an app (platform specific versions for example) are already installed on the device.
-    * `getInstalledApps` can be used to change install UX in online stores if an app is already installed (changing the text on a button from "Install" to "Open" for example).
-    * `getInstalledRelatedApps` can be used to "mute" notifications or hide install UI for a web application if an alternate version of the app is already installed (avoid duplicate notifications if a user has a web version and a platform-specific version of the same app for exmaple).
-
-* **`navigator.install` and `side-panel` display-mode:** Due to the evolving nature of web apps, there are different surfaces where these can be installed. If the target of `navigator.install` call has a manifest file with a `display_override` member that includes a [`side-panel` value](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/SidePanel/explainer.md), this can hint to the UA that the app can be installed as a sidebar app if supported.
-
 ## Installability criteria & Web app manifest `id`
-To install content using the Web Install API, the document (current or background) must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed/computed web app manifest `id` will serve as the installed application's unique identifier. 
+To install content using the Web Install API, the document (current or background) must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. 
 
 The importance of `id`s for installed content is to avoid cases where multiple *same* apps are installed with no way to update them. More details can be found in [this document](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
 
@@ -244,7 +250,9 @@ A website that wants to install apps will require this new permission and will o
 The installation permission for an origin should be time-limited and expire after a period of time defined by the UA. After the permission expires the UA will prompt again for permission from the user.
 
 ###  New "installation" Permission for origin
-A new permission that can be associated with an origin means a new integration with the [Permissions API](https://www.w3.org/TR/permissions/). The install API will make available the "installation" [PermissionDescriptor](https://www.w3.org/TR/permissions/#dom-permissiondescriptor) as a new [*powerful feature*](https://www.w3.org/TR/permissions/#dfn-specifies-a-powerful-feature). This would make it possible to know programmatically if `install` would be blocked.
+A new "installation" permission is required if the content that is installing is not the current document. This permission is associated to the origin.
+
+This results in a new integration with the [Permissions API](https://www.w3.org/TR/permissions/). The install API will make available the "installation" [PermissionDescriptor](https://www.w3.org/TR/permissions/#dom-permissiondescriptor) as a new [*powerful feature*](https://www.w3.org/TR/permissions/#dfn-specifies-a-powerful-feature). This would make it possible to know programmatically if `install` would be blocked.
 
 ```javascript
 /* example of querying for the state of an installation permission using the Permission API  */
@@ -266,14 +274,19 @@ switch (state) {
 }
 ```
 
-> **Note:** The "installation" permission is only required if the content that is installing is cross-origin.
+> **Note:** A permission prompt will appear for origins that do not have the capability to install apps if the invoking document is not the current one. Even if the installation is of a "[background document](#background-document-1-param)" in the same origin, for consistency the origin must have the permission to install apps. The only cases that will not prompt for the permission are the installation of the "[current document](#current-document)" or a "[background document](#background-document-1-param)" in an origin that already has installation permissions.
+
+### Rejecting promise with `AbortError` and `DataError`
+
+To protect the users privacy, the API does not create any new error names for the `DOMException`, instead it uses 2 common existing names: `AbortError` and `DataError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
+
 
 ### **Gating capability behind installation**
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
 
 **For cross-origin installs, the user gesture, the new origin permission, and the final installation confirmation (current default behaviour in the browser before installing an app) and the optional gated capability work together to minimize the risk of origins spamming the user for unrequested installations**, give developers complete flexibility about where their apps will be installed from and provide the user with an implicit (double: one for the user gesture, the other one from the prompt before installing) confirmation before the app gets installed on their device.
 
-## Alternative Solutions
+## Considered Alternative Solutions
 
 ### Declarative install
 
@@ -288,10 +301,14 @@ Pros:
 Cons: 
 * Takes the user out of the current context.
 * Limits the amount of information a developer can act upon that the promise provide, such as if the prompt was shown or if the origin has permissions to install apps.
-* Can get wordy quickly when passing multiple parameters.
+* Can become cumbersome when specifying the parameters in the tag.
 * Can't easily pass additional information like the referral-info. 
 
 The declarative solution is a simple and effective solution and future entry point for the API. It should be considered for a v2 of the capability. For the current solution, we've decided to go with an imperative implementation since it allows more control over the overall installation UX.
+
+### `install_sources` manifest field
+
+The `install_sources` was a new manifest field that specified which domains could install the application. This concept was removed after the TPAC 2024 breakout sessions over concerns that it might centralise control in favor of big app repositories. This is also based on a previous notion of same/cross origin installations, which has been updated to current/background documents and does not represent a 1:1 analogy, making this concept unsuited for the new shape of the API.
 
 ## Open Questions
 
@@ -306,14 +323,19 @@ The declarative solution is a simple and effective solution and future entry poi
     See [this issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/804).
 
 ## Glossary
-* **installation origin**: the origin that initiates the call to the `install` method.
-* **UA**: user agent.
+
+* **UA:** user agent.
+* **UX:** user experience.
+* **`id`:** identifier. depending on the context it refers to the field in the manifest file or the `processed id`.
+* **`<install_url>`:** [parameter](#signatures-of-the-install-method) for the install method for an URL to the install document that has the manifest file of the app to install.
+* **`<manifest_id>`:** [parameter](#signatures-of-the-install-method) for the install method that represents a processed id.
+* **`processed (manifest) id`:** The resulting `id` string after it has been [processed](https://www.w3.org/TR/appmanifest/#example-resulting-ids) according to the manifest specification.
+
 ## Acknowledgements
 
 This explainer takes on a reimagination of a capability [previously published by PEConn](https://github.com/PEConn/web-install-explainer/blob/main/explainer.md).
 
 Throughout the development of this capability we've revceived a lot of feedback and support from lots of people. We've like to give a special thanks to Amanda Baker, Kristin Lee, Marcos Cáceres, Daniel Murphy, Alex Russell, Howard Wolosky, Lu Huang and Daniel Appelquist for their input.
-
 
 ## Feedback
 For suggestions and comments, please file an [issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=diekus&labels=Web+Install+API&projects=&template=web-install-api.md&title=%5BWeb+Install%5D+%3CTITLE+HERE%3E).
