@@ -115,11 +115,13 @@ Unless the UA decides to [gate this functionality behind installation](#gating-c
 
 ##### **Zero parameters `navigator.install()`**
 
-This signature of the method does not require any parameters. This is a simple and ergonomic way to install the current document. Since the document is already loaded, all the required information to install the application is already available.
+This signature of the method does not require any parameters. This is a simple and ergonomic way to install the [current document](#current-document). Since the document is already loaded, all the required information to install the application is already available.
 
 *Requirements:*
 * The current document must link to a manifest file.
 * The manifest file must have an `id` value defined.
+
+> **Note:** This signature can't install background documents. 
 
 ##### **One parameter `navigator.install(<install_url>)`**
 
@@ -148,6 +150,8 @@ This signature is intended to install background documents that don't necessaril
 
 The `navigator.install` call can receive an object with a set of parameters that specify different installation behaviours for the app. It is also a way to future-proof the API if additional data were required with the call.
 * **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain. This information can later be retrieved inside the installed application via the [Acquisition Info API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md).
+
+> **Note:** Three signatures exist to accommodate all possibilities of existing apps. We acknowledge that only around 4% (as of 2024) of web apps have defined `id`s in their manifest. We also know that `id`s are a crucial part to support to avoid situations of multiple *same* applications with no path to being updated. For apps that have an `id` defined in their manifest, the 1 param signature is useful. For apps that do not define the `id` field, they can be installed with the 2 parameter signature. 
 
 ### **Installing the web app**
 
