@@ -1,21 +1,207 @@
-# IndexedDB: getAllEntries()
+# IndexedDB: getAllRecords()
 
 ## Author:
+
 - [Steve Becker](https://github.com/SteveBeckerMSFT)
 
 ## Participate
+
 - https://github.com/w3c/IndexedDB/issues/206
 
 ## Introduction
 
-[`IndexedDB`](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) is a transactional database for client-side storage.  Each record in the database contains a key-value pair.  [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) enumerates database record values sorted by key in ascending order.  [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) enumerates database record primary keys sorted by key in ascending order.
+[`IndexedDB`](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) is a transactional database for client-side storage. Each record in the database contains a key-value pair. [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) enumerates database record values sorted by key in ascending order. [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) enumerates database record primary keys sorted by key in ascending order.
 
-This explainer proposes a new operation, `getAllEntries()`, which combines [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) with [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) to enumerate both primary keys and values at the same time.  For an [`IDBIndex`](https://developer.mozilla.org/en-US/docs/Web/API/IDBIndex), `getAllEntries()` also provides the record's index key in addition to the primary key and value.  Lastly, `getAllEntries()` offers a new option to enumerate records sorted by key in descending order.
+This explainer proposes a new operation, `getAllRecords()`, which combines [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) with [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) to enumerate both primary keys and values at the same time. For an [`IDBIndex`](https://developer.mozilla.org/en-US/docs/Web/API/IDBIndex), `getAllRecords()` also provides the record's index key in addition to the primary key and value. Lastly, `getAllRecords()` offers a new direction option to enumerate records sorted by key in descending order.
+
+## Goals
+
+Decrease the latency of database read operations. By retrieving the primary key, value and index key for database records through a single operation, `getAllRecords()` reduces the number of JavaScript events required to read records. Each JavaScript event runs as a task on the main JavaScript thread. These tasks can introduce overhead when reading records requires a sequence of tasks that go back and forth between the main JavaScript thread and the IndexedDB I/O thread.
+
+For batched record iteration, for example, retrieving *N* records at a time, the primary and index keys provided by `getAllRecords()` can eliminate the need for an [`IDBCursor`](https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor), which further reduces the number of JavaScript events required. To read the next *N* records, instead of advancing a cursor to determine the range of the next batch, getAllRecords() can use the primary key or the index key retrieved by the results from the previous batch.
+
+## `IDBObject::getAllRecords()` and `IDBIndex::getAllRecords()`
+
+This explainer proposes adding `getAllRecords()` to both [`IDBObjectStore`](https://www.w3.org/TR/IndexedDB/#idbobjectstore) and [`IDBIndex`](https://www.w3.org/TR/IndexedDB/#idbindex). `getAllRecords()` creates a new `IDBRequest` that queries its `IDBObjectStore` or `IDBIndex` owner. The `IDBRequest` completes with an array of `IDBRecord` results. Each `IDBRecord` contains the `key`, `primaryKey` and `value` attributes. For `IDBIndex`, `key` is the record's index key. For `IDBObjectStore`, both `key` and `primaryKey` return the same value. The pre-existing [`IDBCursorWithValue`](https://www.w3.org/TR/IndexedDB/#idbcursorwithvalue) interface contains the same attributes and values for both `IDBObjectStore` and `IDBIndex`. However, unlike `getAllRecords()`, a cursor may only read one record at a time.
+
+## Key scenarios
+
+### Read multiple database records through a single request
+
+```js
+// Define a helper that creates a basic read transaction using `getAllRecords()`.
+// Wraps the transaction in a promise that resolves with the query results or
+// rejects after an error.  Queries `object_store_name` unless `optional_index_name`
+// is defined.
+async function get_all_records_with_promise(
+  database,
+  object_store_name,
+  query_options,
+  optional_index_name
+) {
+  return await new Promise((fulfill, reject) => {
+    // Create a read-only transaction.
+    const read_transaction = database.transaction(
+      object_store_name,
+      "readonly"
+    );
+
+    // Get the object store or index to query.
+    const object_store = read_transaction.objectStore(object_store_name);
+    let query_target = object_store;
+    if (optional_index_name) {
+      query_target = object_store.index(optional_index_name);
+    }
+
+    // Start the getAllRecords() request.
+    const request = query_target.getAllRecords(query_options);
+
+    // Resolve promise with results after success.
+    request.onsuccess = (event) => {
+      fulfill(request.result);
+    };
+
+    // Reject promise with error after failure.
+    request.onerror = () => {
+      reject(request.error);
+    };
+    read_transaction.onerror = () => {
+      reject(read_transaction.error);
+    };
+  });
+}
+
+// Read the first 5 records from an object store in the database.
+const records = await get_all_records_with_promise(
+  database,
+  kObjectStoreName,
+  /*query_options=*/ { count: 5 }
+);
+console.log(
+  "The second record in the database contains: " +
+    `primaryKey: ${records[1].primaryKey}, key: ${records[1].key}, value: ${records[1].value}`
+);
+```
+
+### Read multiple database records into a Map
+
+Developers may use the results from `getAllRecords()` to construct a new [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) that contains a key-value pair for each database record returned by the query.
+
+```js
+// This example uses the `get_all_records_with_promise()` helper defined above.
+//
+// Read the last 9 records from an index.
+const records = await get_all_records_with_promise(
+  database,
+  kObjectStoreName,
+  /*query_options=*/ { count: 9, direction: 'prev' },
+  kIndexName
+);
+
+// Map the record's index key to the record's value
+const map = new Map(records.map(({ key, value }) => [key, value]));
+
+// Returns the database record value for the index `key` when the record exists 
+// in `map`.
+const value = map.get(key);
+
+// Use the following to create an iterator for each database record in `map`:
+const index_key_iterator = map.keys();
+const value_iterator = map.values();
+const entry_iterator = map.entries(); // Enumerate both index keys and values.
+```
+
+### Support paginated cursors using batch record iteration
+
+Many scenarios read *N* database records at a time, waiting to read the next batch of records until needed.  For example, a UI may display *N* records, starting with the last record in descending order.  As the user scrolls, the UI will display new content by reading the next *N* records.
+
+To support this access pattern, the UI calls `getAllRecords()` with the options `direction: 'prev'` and `count: N` to retrieve *N* records at a time in descending order.  After the initial batch, the UI must specify the upper bound of the next batch using the primary key or index key from the `getAllRecords()` results of the previous batch.
+
+```js
+// This example uses the `get_all_records_with_promise()` helper defined above.
+//
+// Create a batch iterator where each call to `next()` retrieves `batch_size` database 
+// records in `direction` order from `object_store_name` or `optional_index_name`.
+async function* idb_batch_record_iterator(
+  database,
+  object_store_name,
+  direction,
+  batch_size,
+  optional_index_name
+) {
+  let is_done = false;
+  
+  // Begin the iteration unbounded to retrieve the first or last `batch_size` records.
+  let query;
+  
+  while (!is_done) {
+    const records = await get_all_records_with_promise(
+      database,
+      object_store_name,
+      /*query_options=*/ { query, count: batch_size, direction },
+      optional_index_name
+    );
+
+    if (records.length < batch_size) {
+      // We've iterated through all the database records!
+      is_done = true;
+      return records;
+    }
+
+    // Store the lower or upper bound for the next iteration.
+    const last_record = records[records.length - 1];
+    if (direction === "next" || direction === "nextunique") {
+      query = IDBKeyRange.lowerBound(last_record.key, /*exclusive=*/ true);
+    } else { // direction === 'prev' || direction === 'prevunique'
+      query = IDBKeyRange.upperBound(last_record.key, /*exclusive=*/ true);
+    }
+    yield records;
+  }
+}
+
+// Create a reverse iterator that reads 5 records from an index at a time.
+const reverse_iterator = idb_batch_record_iterator(
+  database,
+  "my_object_store",
+  /*direction=*/ "prev",
+  /*batch_size=*/ 5,
+  "my_index"
+);
+
+// Get the last 5 records.
+let results = await reverse_iterator.next();
+let records = results.value;
+console.log(
+  "The first record contains: " +
+    `primaryKey: ${records[0].primaryKey}, key: ${records[0].key}, value: ${records[0].value}`
+);
+
+// Get the next batch of 5 records.
+if (!results.done) {
+  results = await reverse_iterator.next();
+}
+```
+
+## Considered alternatives
+
+### `getAllEntries()`
+
+Similar to `getAllRecords()` but [provides results as an array of entries](https://github.com/w3c/IndexedDB/issues/206#issuecomment-566205600).  Each entry is a two or three element array containing the record's key, value and optional index key.  For example:
+
+`IDBObjectStore` entries provide array values with two elements:  `[ [primaryKey1, value1], [primaryKey2, value2], ... ]`
+
+`IDBIndex` entries provide array values with three elements: `[ [primaryKey1, value1, indexKey1], [primaryKey2, value2, indexKey2], ... ]`
+
+Developers may directly use the entry results to construct a `Map` or `Object` since the entry results are inspired by ECMAScript's [Map.prototype.entries()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/entries).  However, `getAllEntries()` has unusual ergonomics, requiring indices like `0` and `1` to access the record properties like `key` and `value`.  Also, IndexedDB database records do not map cleanly to ECMAScript entries.  For `IDBIndex`, the results contain a third element for index key.  For an alternate form, `[[ indexKey1, [ primaryKey1, value1]], [ indexKey2, [ primaryKey2, value2]], ... ]`, the index key cannot always serve as the entry's key since the index key may not be unique across all records.
+
+### Adding direction to `getAll()` and `getAllKeys()`
+
+This will be pursued separately.  Join the discussion at https://github.com/w3c/IndexedDB/issues/130.  Providing the direction option on `getAllKeys()` might be useful for reverse iteration scenarios that don't need to load every value enumerated.
 
 ## WebIDL
 
 ```js
-dictionary IDBGetAllEntriesOptions {
+dictionary IDBGetAllRecordsOptions {
   // A key or an `IDBKeyRange` identifying the records to retrieve.
   any query = null;
 
@@ -25,161 +211,39 @@ dictionary IDBGetAllEntriesOptions {
   // Determines how to enumerate and sort results.
   // Use 'prev' to enumerate and sort results by key in descending order.
   IDBCursorDirection direction = 'next';
-}; 
+};
+
+interface IDBRecord {
+  // For `IDBIndex` records, `key` is the index key.  For `IDBObjectStore`
+  // records, `key` is the same as `primaryKey`.
+  readonly attribute any key;
+  readonly attribute any primaryKey;
+  readonly attribute any value;
+};
 
 [Exposed=(Window,Worker)]
 partial interface IDBObjectStore {
-  // After the `getAllEntries()` request completes, the `IDBRequest::result` property
-  // contains an array of entries:
-  // `[[primaryKey1, value1], [primaryKey2, value2], ... ]`  
+  // After the `getAllRecords()` request completes, the `IDBRequest::result` property
+  // contains an array of records:
+  // `[[primaryKey1, value1], [primaryKey2, value2], ... ]`
   [NewObject, RaisesException]
-  IDBRequest getAllEntries(optional IDBGetAllEntriesOptions options = {});
+  IDBRequest getAllRecords(optional IDBGetAllRecordsOptions options = {});
 }
 
 [Exposed=(Window,Worker)]
 partial interface IDBIndex {
-  // Produces the same type of results as `IDBObjectStore::getAllEntries()` above, 
+  // Produces the same type of results as `IDBObjectStore::getAllRecords()` above,
   // but each entry also includes the record's index key at array index 2:
   // `[[primaryKey1, value1, indexKey1], [primaryKey2, value2, indexKey2], ... ]`
   [NewObject, RaisesException]
-  IDBRequest getAllEntries(optional IDBGetAllEntriesOptions options = {});
+  IDBRequest getAllRecords(optional IDBGetAllRecordsOptions options = {});
 }
-```
-
-## Goals
-
-Decrease the latency of database read operations.  By retrieving the primary key, value and index key for database records through a single operation, `getAllEntries()` reduces the number of JavaScript events required to read records.  Each JavaScript event runs as a task on the main JavaScript thread.  These tasks can introduce overhead when reading records requires a sequence of tasks that go back and forth between the main JavaScript thread and the IndexedDB I/O thread.
-
-For batched record iteration, for example, retrieving N records at a time, the primary and index keys provided by `getAllEntries()` can eliminate the need for an [`IDBCursor`](https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor), which further reduces the number of JavaScript events required.  To read the next N records, instead of advancing a cursor to determine the range of the next batch, getAllEntries() can use the primary key or the index key retrieved by the results from the previous batch.
-
-## Key scenarios
-
-### Support paginated cursors using batched record iteration
-
-Many scenarios read N database records at a time, waiting to read the next batch of records until needed.  For example, a UI may display N records, starting with the last record in descending order.  As the user scrolls, the UI will display new content by reading the next N records.
-
-To support this access pattern, the UI calls `getAllEntries()` with the options `direction: 'prev'` and `count: N` to retrieve N records at a time in descending order.  After the initial batch, the UI must specify the upper bound of the next batch using the primary key or index key from the `getAllEntries()` results of the previous batch.
-
-```js
-// Define a helper that creates a basic read transaction using `getAllEntries()`.
-// Wraps the transaction in a promise that resolves with the query results or 
-// rejects after an error.  Queries `object_store_name` unless `optional_index_name`
-// is defined.
-async function get_all_entries_with_promise(
-  database, object_store_name, query_options, optional_index_name) {
-  return await new Promise((fulfill, reject) => {
-    // Create a read-only transaction.
-    const read_transaction = database.transaction(object_store_name, 'readonly');
-    const object_store = read_transaction.objectStore(object_store_name);
-    
-    let query_target = object_store;
-    if (optional_index_name) {
-      query_target = object_store.index(optional_index_name);
-    }
-
-    // Start the `getAllEntries()` request.
-    const request = query_target.getAllEntries(query_options);
-
-    // Resolve the promise with the array of entries after success.
-    request.onsuccess = event => {
-      fulfill(request.result);
-    };
-
-    // Reject promise with an error after failure.
-    request.onerror = () => { reject(request.error); };
-    read_transaction.onerror = () => { reject(read_transaction.error); };
-  });
-}
-
-// Create a simple reverse iterator where each call to `next()` retrieves
-// `batch_size` database records in descending order from an `IDBIndex` with 
-// unique keys.
-function reverse_idb_index_iterator(
-  database, object_store_name, index_name, batch_size) {
-  // Define iterator state. 
-  let done = false;
-
-  // Begin the iteration unbounded to retrieve the last records in the 'IDBIndex'.
-  let next_upper_bound = null;
-
-  // Gets the next `batch_size` entries.
-  this.next = async function () {
-    if (done) {
-      return [];
-    }
-
-    let query;
-    if (next_upper_bound) {
-      query = IDBKeyRange.upperBound(next_upper_bound, /*is_exclusive=*/true);
-    } else {
-      // The very first query retrieves the last `batch_size` records.
-    }
-
-    const entries = await get_all_entries_with_promise(
-      database, object_store_name, 
-      /*options=*/{ query, count: batch_size, direction: 'prev' }, index_name);
-    
-    if (entries.length > 0) {
-      // Store the upper bound for the next iteration.
-      const last_entry = entries[entries.length-1];
-      next_upper_bound = /*index_key=*/last_entry[2];
-    } else {
-      // We've iterated through all the database records!
-      done = true;
-    }
-    return entries;
-  };
-};
-
-// Get the last 5 records in the `IDBIndex` named `my_index`.
-const reverse_iterator = new reverse_idb_index_iterator(
-  database, 'my_object_store', 'my_index', /*batch_size=*/5);
-
-let results = await reverse_iterator.next();
-
-// Get the next batch of 5 records.
-results = await reverse_iterator.next();
-``` 
-
-### Read query results into a Map or Object
-
-Developers may use the results from `getAllEntries()` to construct a new [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) or [`Object`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) that contains a key-value pair for each database record returned by the query.
-
-```js
-// These examples use the `get_all_entries_with_promise()` helper defined above.
-// 
-// Example 1: Read the first 5 database records from the `IDBObjectStore` into a `Map`.
-const result_map = new Map(
-  await get_all_entries_with_promise(
-    database, 'my_object_store', /*query_options=*/{ count: 5 }));
-
-// Returns the database record value for `key` when the record exists in `result_map`.
-let value = result_map.get(key); 
-
-// Use the following to create an iterator for each database record in `result_map`:
-const primary_key_iterator = result_map.keys();
-const value_iterator = result_map.values();  
-const entry_iterator = result_map.entries(); // Enumerate both primary keys and values.
-
-// Example 2: Read the database records from range `min_key` to `max_key` into an `Object`.
-const result_object = Object.fromEntries(
-  await get_all_entries_with_promise(
-    database, 'my_object_store', /*query_options=*/{ query: IDBKeyRange.bound(min_key, max_key) }));
-
-// Returns the database record value for `key` when the record exists in `result_object`.
-value = result_object[key];
-
-// Use the following to create an array containing each database record in `result_object`:
-const keys = Object.keys(result_object);
-const values = Object.values(result_object);
-const entries = Object.entries(result_object); // Produces the same array of key/value pairs
-                                               // as `IDBObjectStore::getAllEntries()`.
 ```
 
 ## Stakeholder Feedback / Opposition
 
 - Web Developers: Positive
-  - Developers have reported the limitations addressed by `getAllEntries()`.  A few examples:
+  - Developers have reported the limitations addressed by `getAllRecords()`. A few examples:
     - ["You cannot build a paginated cursor in descending order."](https://nolanlawson.com/2021/08/22/speeding-up-indexeddb-reads-and-writes/)
     - ["An example where getAll() could help but needs to retrieve the index key and primary key."](https://stackoverflow.com/questions/44349168/speeding-up-indexeddb-search-with-multiple-workers)
 - Chromium: Positive
@@ -188,7 +252,7 @@ const entries = Object.entries(result_object); // Produces the same array of key
 
 ## References & acknowledgements
 
-Special thanks to [Joshua Bell](https://github.com/inexorabletash) who proposed `getAllEntries()` in the [W3C IndexedDB issue](https://github.com/w3c/IndexedDB/issues/206).
+Special thanks to [Joshua Bell](https://github.com/inexorabletash) who proposed `getAllRecords()` in the [W3C IndexedDB issue](https://github.com/w3c/IndexedDB/issues/206).
 
 Many thanks for valuable feedback and advice from:
 
