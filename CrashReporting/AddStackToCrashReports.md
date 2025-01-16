@@ -28,10 +28,19 @@ Web sites can contain bugs or inefficiencies that cause the page or an iframe wi
 
 ## Proposal
 
-If a site opts in, crash reports uploaded by the Crash Reporting API may include the JavaScript call stack, in a new property on `CrashReportBody`:
+If a site opts in, crash reports uploaded by the Crash Reporting API may include the JavaScript call stack and script hashes, in new properties on `CrashReportBody`:
 
 ```
 readonly attribute DOMString? stack;
+readonly attribute DOMString? sourceModules;
+```
+
+## Source Modules
+
+In addition to the JavaScript call stack, we propose adding a `sourceModules` field to the `CrashhReportBody`. This field will contain information about the source modules present in the call stack. Each source module will be a Source mapping URL or URL and a SHA-256 hash of the source. This will allow developers to indentify the exact version of the code that was running when the crash occured. The field may look something like this:
+
+```
+"https://example.com/script.js f3a2b4c5d6e7f8g9123456k3l4m5n6o7p8q9r0s1abcdefw5x6y7z8a9b0c1d2e3\n"
 ```
 
 ### How to opt in?
@@ -79,7 +88,7 @@ Wasm stack frames will be supported. Typically the format is `${url}:wasm-functi
 
 #### Why require opt-in?
 
-Some sites may be sending their reports to a third-party service and not wish to expose information about their site code to that third party. This feature would also increase the size of reports, add a property that existing servers might not handle correctly, and include data that users might not have consented to send.
+Some sites may be sending their reports to a third-party service and not wish to expose information about their site code to that third party. This feature would also increase the size of reports, adding two properties that existing servers might not handle correctly, and include data that users might not have consented to send.
 
 #### Does this affect user privacy?
 
@@ -87,7 +96,7 @@ This adds a mechanism that could allow website owners to learn about an extensio
 
 ### Security
 
-Just like `Error.prototype.stack`, stack frames from cross-domain scripts that were not loaded with CORS must be omitted.
+Just like `Error.prototype.stack`, stack frames & script hashes from cross-domain scripts that were not loaded with CORS must be omitted.
 
 ## References & acknowledgements
 
