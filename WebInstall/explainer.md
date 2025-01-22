@@ -221,12 +221,6 @@ const installApp = async (manifest_id, install_url) => {
 };
 ```
 
-### The `navigator.getInstalledApps` method
-
-TODO - can we associate this method with a domain???
-
-* The approach for showing which apps have been installed from this origin follows the same API approach where the information is accessible if it matches a [partition key](https://github.com/kyraseevers/Partitioning-visited-links-history#general-api-approach), instead of just the link URL. This ensures installed apps can be seen only from the origin matching all parts of the key.
-
 ## Installability criteria & Web app manifest `id`
 To install content using the Web Install API, the document (current or background) must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. 
 
@@ -325,6 +319,12 @@ The `install_sources` was a new manifest field that specified which domains coul
 
 * Should `getInstalledApps` and `getInstalledRelatedApps` be merged together?
     See [this issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/804).
+
+## Future Work
+
+This API is the first step in allowing the Web platform to provide application lifecycle management. Related future work might include the capability to know which apps have been installed and a way to uninstall applications.
+
+A [declarative version](#declarative-install) of the Install API is also possible to be part of a future version of the API. This provides another entry point to the install capability.
 
 ## Glossary
 
