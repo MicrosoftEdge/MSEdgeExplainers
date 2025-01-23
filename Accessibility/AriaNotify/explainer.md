@@ -133,7 +133,7 @@ is there a way to know that a screen reader is available at all! Well-designed w
 provide appropriate notifications for accessibility whether or not their users require a screen reader or not. 
 
 #### Example 1
-```
+```js
 // Dispatch a message associated with the document: 
 document.ariaNotify( "John Doe is connected" ); 
 
@@ -177,7 +177,7 @@ To specify a `type`, pass the string as the second parameter.  Alternatively, th
 expressed in an object form with property `type`. For example: 
 
 #### Example 2
-```
+```js
 // Notify of a long-running async task starting and ending 
 document.ariaNotify(
     "Uploading file untitled-1 to the cloud.",
@@ -215,7 +215,7 @@ notifications:
    - Screen reader should add this string to the end of all pending notifications. 
 
 #### Example 3
-```
+```js
 // Dispatch a notification updating background task status -- normal/low priority
 document.ariaNotify( "Background task completed",
     { "priority":"normal",
@@ -233,7 +233,7 @@ notification. This ensures that important messages that the user should be aware
 the user first. 
 
 #### Example 4
-```
+```js
 // User has initiated an action which starts a generation process of data.
 // During the status of the generation, a more critical status needs to be
 // sent to the user 
@@ -286,7 +286,7 @@ scenario (a progress bar which reports its status at every percent increment):
 #### Example 5.1
 `interrupt:none` - Every progress bar percentage from 1% to 100% will be spoken. 
 
-```
+```js
 let percent = 0; 
 function simulateProgress() { 
   percent += 1; 
@@ -313,7 +313,7 @@ Because the percentage is likely updating before each percentage fully speaks, t
 first part of each/some percentage until the last is processed where the user will hear the full string "Progress is
 100". 
 
-```
+```js
 let percent = 0; 
 function simulateProgress() { 
   percent += 1; 
@@ -344,7 +344,7 @@ skipped. A slower speech rate will cause more percentages to be ignored. A faste
 percentages to be spoken. When the current percentage fully speaks, the next percentage that was allowed to be held will
 speak, and the process will repeat. Finally, the last percentage "Progress is 100" will be spoken.  
 
-```
+```js
 let percent = 0; 
 function simulateProgress() { 
   percent += 1; 
@@ -397,7 +397,7 @@ to achieve similar behavior. There are cases where we will not be able to get th
 regions:
 
 #### Example 6 
-```
+```js
 element.ariaNotify("This message is normal.",
     { "priority": "normal",
       "interrupt": "none"}); 
@@ -413,7 +413,7 @@ case that the web browser does not yet support `ariaNotify`, it is the responsib
 fallback to ARIA live regions.  The above conversion may serve as a guide on how to do so. One can detect whether or not
 `ariaNotify` is supported by checking if the method exists on the document or element in question: 
 
-```
+```js
 if ("ariaNotify" in element) { 
   element.ariaNotify(...); 
 } 
@@ -457,27 +457,21 @@ Opportunities exist to mitigate against these possibilities:
  primitives to limit usage of this API to only actions taken by the user. 
 
 ## Future considerations 
-1. `ariaNotify` can be extended in the future to handle more functionality as needs arise. Two possible examples are
-provided below.There may be a need for a web author to supply a Braille specific string separate from the speech string.
+`ariaNotify` can be extended in the future to handle more functionality as needs arise. 
+### Braille and Pronunciations
+There may be a need for a web author to supply a Braille specific string separate from the speech string. For example, an author could supply "3 stars" as the speech string to indicate a retail item's rating. However, to better map within a Braille display, the author could supply `***` as a Braille alternative string. The API could easily be extended by adding another optional property for Braille strings. For example: 
 
-    For example, an author could supply "3 stars" as the speech string to indicate a retail item's rating. However, to better map within a Braille display, the author could supply `***` as a Braille alternative string. 
-
-    The API could easily be extended by adding another optional property for Braille strings. For example: 
-
-```
+```js
 document.ariaNotify( "3 stars", {"braille":"***"} );
 ```
 
-2. There may also be a use case where an author would want to allow the speech string to be marked up to guarantee a
+There may also be a use case where an author would want to allow the speech string to be marked up to guarantee a
 specific pronunciation. This can be useful in cases where the speech engine may not produce the best experience for the
 user.
 
-    For example, maybe you would like "911" pronounce as "9 1 1" in some cases. Or in a spreadsheet, you may want to hear "a
-1" spoken with a long "a" sound instead of a short "a" sound (i.e. "ay 1" as opposed to  "uh 1").  
+For example, maybe you would like "911" pronounce as "9 1 1" in some cases. Or in a spreadsheet, you may want to hear "a 1" spoken with a long "a" sound instead of a short "a" sound (i.e. "ay 1" as opposed to  "uh 1"). The API could easily be extended by adding another property for strings marked up with, say, SSML: 
 
-    The API could easily be extended by adding another property for strings marked up with, say, SSML: 
-
-```
+```js
 document.ariaNotify( "911", {"SSML":"<say-as
 interpret-as=\x22\"""digits\x22""">911" });
 ``` 
