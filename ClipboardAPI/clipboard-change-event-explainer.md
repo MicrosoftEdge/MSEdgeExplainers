@@ -28,7 +28,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
     - [4.1 Paste options detection](#41-paste-options-detection)
   - [5. Event spec details and open questions](#5-event-spec-details-and-open-questions)
     - [5.1 User permission requirement](#51-user-permission-requirement)
-      - [5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-monitoring permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-readclipboard-monitoring-permission-required-to-listen-to-clipboardchange-event)
+      - [5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-monitor permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-readclipboard-monitor-permission-required-to-listen-to-clipboardchange-event)
         - [5.1.1.1 Support for browsers which don't have permission model for clipboard APIs](#5111-support-for-browsers-which-dont-have-permission-model-for-clipboard-apis)
         - [5.1.1.2 Acquiring the clipboard-read / clipboard-monitor permission](#5112-acquiring-the-clipboard-read--clipboard-monitor-permission)
         - [Pros](#pros)
@@ -74,11 +74,11 @@ When a user copies text or an image on their local machine, a web-based remote d
 
 
 ### 2.2 Scenario: Show available paste formats in web based editors
-Web-based editors like Word Online, Excel Online, Google Sheets, and similar applications support paste operations in multiple formats, such as CSV, images, HTML, and plain text. These editors may have separate paste functionality depending on the data type which is pasted, hence the web UI might have different paste buttons for each data type.
+Web-based editors like Word Online, Excel Online, Google Sheets, and similar applications support paste operations in multiple formats, such as CSV, images, HTML, and plain text. These editors may have separate paste functionality depending on the data type which is pasted, hence the web UI might have different paste buttons for each data type. The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed.
 
-Web based editors like Word Online, Excel Online, Google Sheets, etc. may support paste operations in multiple formats. Within the web UI, it may show the available formats that can be pasted like csv, image or plain text. The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed.
+**Example scenario with clipboardchange event**: Imagine a user working on a report in Word Online. They copy a table from Excel, which is available in multiple formats: plain text, HTML, and CSV. As soon as the user copies the table, the `clipboardchange` event fires, and Word Online's UI updates to show buttons for "Paste as Text," "Paste as HTML," and "Paste as CSV." The user can then choose the most suitable format for their report with a single click, streamlining their workflow. 
 
-Example Scenario: Imagine a user working on a report in Word Online. They copy a table from Excel, which is available in multiple formats: plain text, HTML, and CSV. As soon as the user copies the table, the `clipboardchange` event fires, and Word Online's UI updates to show buttons for "Paste as Text," "Paste as HTML," and "Paste as CSV." The user can then choose the most suitable format for their report with a single click, streamlining their workflow. If the user had instead copied plain text and had the web page not been notified about this change, the web page would have continued showing the "Paste as HTML" and "Paste as image" options. Clicking on say "Paste as image" would have led to a scenario showing some kind of error message. This unnecessary error scenario can be avoided by monitoring the clipboard and disabling un-needed data type buttons upon clipboard change.
+**Scenario without clipboardchange event**: If the user copies plain text then without clipboardchange notification, the web page would continue showing the "Paste as HTML" and "Paste as image" options. Clicking on "Paste as image" would require the web page to show some kind of error message. This unnecessary error scenario can be avoided by monitoring the clipboard and disabling the un-needed data type buttons upon clipboard change, which would prevent user clicking the invalid type button in the first place.
 
 #### 2.2.1 Copy multiple cells should show multiple paste options in Excel online
 ![](img/paste-format-1.png)
@@ -116,7 +116,7 @@ A sample web application which demonstrates the usage of "clipboardchange" event
 
 ### 5.1 User permission requirement
 
-#### 5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-monitoring permission required to listen to clipboardchange event
+#### 5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-monitor permission required to listen to clipboardchange event
 Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read or clipboard-monitor depending on the user agent. For browsers like Chromium which already protect clipboard access using "clipboard-read", the clipboardchange API can be gated with the same "clipboard-read" permission.
 
 ##### 5.1.1.1 Support for browsers which don't have permission model for clipboard APIs
@@ -212,7 +212,7 @@ Considered alternative - DataTransfer object: The [getData](https://html.spec.wh
 
 #### 5.3.2 Clipboard data types
 
-The clipboard data types available in the clipboard (that are accessible via async clipboard read API) after the clipboardchange event can be accessed via "event.clipboardData.types" property. The clipboard types are part of the event payload since the types are limited and they also won't introduce privacy concerns since it would be very hard to distinguish a user based on this information.
+The data types available in the clipboard (that are accessible via async clipboard read API) after the clipboardchange event can be accessed in the event payload via "event.clipboardData.types" property. The clipboard types are part of the event payload since the types are limited which won't cause any data bloating. Further, this should not introduce privacy concerns since it would be very hard to distinguish a user based on type of data copied to clipboard and there is a limited subset of types(that are accessible via async clipboard read API) which will be present in the payload.
 
 
 ## 6 Appendix
@@ -231,7 +231,7 @@ The clipboard data types available in the clipboard (that are accessible via asy
 
 ### 7.1 Future permission prompting mechanisms
 
-In future, we may have additional ways of prompting the user for permissions - 1) By explicitly requesting for "clipboard-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158). 2) The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted. This is still open for discussion as it is not a common pattern to prompt user for permissions when attaching event listeners. 3) The user can be prompted for permissions just before the browser dispatches the "clipboardchange" event. This way, the permissions prompt would appear only when required by the browser however web authors won't have control over when the prompt would be triggered which might not be desirable.  
+In future, we may have additional ways of prompting the user for permissions - 1) By explicitly requesting for "clipboard-read"/"clipboard-monitor" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158). 2) The user can be prompted for permissions just before the browser dispatches the "clipboardchange" event. This way, the permissions prompt would appear only when required by the browser however web authors won't have control over when the prompt would be triggered which might not be desirable.  
 
 ### 7.2 Fencedframe
 
