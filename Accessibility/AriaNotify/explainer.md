@@ -162,7 +162,7 @@ as the concept of [earcons](https://en.wikipedia.org/wiki/Earcon)). Without addi
 options can be offered: options that apply to all `ariaNotify` notifications universally or customization on a
 per-notification-string basis. 
 
-To aid in customization, `ariaNotify` provides a method to give context of the notification (`notificationId`). This
+To aid in customization, `ariaNotify` provides a method to give context of the notification (`type`). This
 explainer provides a set of potential suggestions but allows for arbitrary non-localized strings to be used by the
 content author. All strings will be processed by the user agent according to a fixed algorithm ([ASCII
 encode](https://infra.spec.whatwg.org/#ascii-encode), then [ASCII
@@ -170,11 +170,11 @@ lowercase](https://infra.spec.whatwg.org/#ascii-lowercase), and finally, [strip 
 whitespace](https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace)) before the notification is sent
 to the platform API (invalid strings will throw an exception). 
 
-When no `notificationId` is explicitly provided by the content author, the `notificationId` is set to `notify` by
+When no `type` is explicitly provided by the content author, the `type` is set to `notify` by
 default.
 
-To specify a `notificationId`, pass the string as the second parameter.  Alternatively, the `notificationId` may be
-expressed in an object form with property `notificationId`. For example: 
+To specify a `type`, pass the string as the second parameter.  Alternatively, the `type` may be
+expressed in an object form with property `type`. For example: 
 
 #### Example 2
 ```
@@ -185,11 +185,11 @@ document.ariaNotify(
 // ... 
 myfile.asyncFileUpload().then( () => { 
     document.ariaNotify( "File untitled-1 uploaded.", { 
-         notificationId: "task-progress-finished" } ); 
+         type: "task-progress-finished" } ); 
 }); 
 ```
 
-Screen readers may allow their users to filter out these task-progress `notificationId`, may make these notifications
+Screen readers may allow their users to filter out these task-progress `type`, may make these notifications
 only available at particular verbosity levels, or may replace the output strings with audio cues. 
 
 ### Managing pending notifications 
@@ -219,12 +219,12 @@ notifications:
 // Dispatch a notification updating background task status -- normal/low priority
 document.ariaNotify( "Background task completed",
     { "priority":"normal",
-      "notificationId":"StatusUpdate" }); 
+      "type":"StatusUpdate" }); 
 
 // Dispatch a high priority notification that data may be lost
 document.ariaNotify("Unable to save changes, lost connection to server",
     { "priority":"high",
-      "notificationId":"ServerError" }); 
+      "type":"ServerError" }); 
 ```
 
 Assuming the initial normal priority string hasn't already started to be acted upon (spoken/brailled), the high priority
@@ -239,19 +239,19 @@ the user first.
 // sent to the user 
 document.querySelector("#dataStatus")
         .ariaNotify( "generating content",
-            { "notificationId":"statusUpdate" }); 
+            { "type":"statusUpdate" }); 
 
 document.querySelector("#dataStatus")
         .ariaNotify( "processing data ", 
-            { "notificationId":"statusUpdate" }); 
+            { "type":"statusUpdate" }); 
 
 document.querySelector("#dataStatus")
         .ariaNotify( "counting items ",
-            { "notificationId":"statusUpdate" } ); 
+            { "type":"statusUpdate" } ); 
 
 document.ariaNotify( " server connection lost ",
             { "priority":"high",  
-              "notificationId":"serverStatus" } ); 
+              "type":"serverStatus" } ); 
 ```
 
 As content is being generated, the user is informed of that status. When something more serious occurs, such as losing
@@ -295,7 +295,7 @@ function simulateProgress() {
   // update to be fully spoken 
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}", 
-            { "notificationId": "progressBar", 
+            { "type": "progressBar", 
               "priority":"normal",
               "interrupt":"none" });
 }
@@ -323,7 +323,7 @@ function simulateProgress() {
   // pending percentages, and add the latest 
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}",
-            { "notificationId":"progressBar",
+            { "type":"progressBar",
               "priority":"normal",
               "interrupt":"all" });
  }
@@ -354,7 +354,7 @@ function simulateProgress() {
   // latest 
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}",
-              { "notificationId":"progressBar", 
+              { "type":"progressBar", 
                 "priority":"normal",
                 "interrupt":"pending" }); 
 }
@@ -387,7 +387,7 @@ directly to ARIA live regions.
 In the case of browsers that do not yet support `ariaNotify`, we propose the following fallback mechanism using the same
 backend as the existing ARIA live regions: 
  - The message payload for `ariaNotify` is equivalent to the contents of an ARIA live region. 
- - The `notificationId` is dropped entirely. 
+ - The `type` is dropped entirely. 
  - `"priority: high"` and `"priority: normal"` correspond to `aria-live="assertive"` and `aria-live="polite"` ARIA
  live attributes, respectively. 
  - ARIA live regions do not support interruptibility, so all behavior of `interrupt` defaults to `none`.  
@@ -420,13 +420,13 @@ if ("ariaNotify" in element) {
 ```
 
 ## Open Issues 
-### Predefined notificationIds 
-The use of `notificationId` give the screen reader contextual information regarding the notification which allows for
+### Predefined types 
+The use of `type` give the screen reader contextual information regarding the notification which allows for
 creative approaches to dispatching the information to their users. The question then arises of whether the API should
-create a predetermined set of `notificationId` names for common/expected scenarios or whether having predefined names is
+create a predetermined set of `type` names for common/expected scenarios or whether having predefined names is
 pointless given no matter the list, it will always fall short. 
 
-Possible examples of predefined `notificationId` could be something like: 
+Possible examples of predefined `type` could be something like: 
  - Recent action completion status: `action-completion-success`, `action-completion-warning`,
  `action-completion-failure` 
  - Async/indeterminate task progress: `task-progress-started`, `task-progress-ongoing`, `task-progress-blocked`,
@@ -504,8 +504,8 @@ Adding `ariaNotify` to Elements was driven by several goals:
 
 Screen reader users can customize the verbosity of the information (and context) that is read to them via settings.
 Screen reader vendors can also adapt the screen reader on a per site or per app basis for the best experience of their
-users. `ariaNotify` offers `notificationId` as a mechanism to allow screen reader vendors or users to customize not only the
-general use of `ariaNotify` on websites, but also individual notifications by `notificationId` (or specific notification
+users. `ariaNotify` offers `type` as a mechanism to allow screen reader vendors or users to customize not only the
+general use of `ariaNotify` on websites, but also individual notifications by `type` (or specific notification
 string instances in the limit). 
 
 **Tooling help**
