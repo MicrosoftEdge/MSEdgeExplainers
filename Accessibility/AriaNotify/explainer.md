@@ -208,26 +208,26 @@ notifications.
 
 `priority` indicates where the screen reader should add the notification in relationship to any existing pending
 notifications: 
- - `important` 
-   - Screen reader should add this string to the end of any other pending important notifications but before all
-   non-important pending notifications  
- - `none` - (default) 
+ - `high` 
+   - Screen reader should add this string to the end of any other pending high priority notifications but before all
+   normal priority pending notifications  
+ - `normal` - (default) 
    - Screen reader should add this string to the end of all pending notifications. 
 
 #### Example 3
 ```
-// Dispatch a notification updating background task status -- low priority
+// Dispatch a notification updating background task status -- normal/low priority
 document.ariaNotify( "Background task completed",
-    { "priority":"none",
+    { "priority":"normal",
       "notificationId":"StatusUpdate" }); 
 
 // Dispatch a high priority notification that data may be lost
 document.ariaNotify("Unable to save changes, lost connection to server",
-    { "priority":"important",
+    { "priority":"high",
       "notificationId":"ServerError" }); 
 ```
 
-Assuming the initial low priority string hasn't already started to be acted upon (spoken/brailled), the high priority
+Assuming the initial normal priority string hasn't already started to be acted upon (spoken/brailled), the high priority
 item is guaranteed to be placed ahead of the lower priority and will be processed first, followed by the lower priority
 notification. This ensures that important messages that the user should be aware of are processed and are supplied to
 the user first. 
@@ -250,7 +250,7 @@ document.querySelector("#dataStatus")
             { "notificationId":"statusUpdate" } ); 
 
 document.ariaNotify( " server connection lost ",
-            { "priority":"important",  
+            { "priority":"high",  
               "notificationId":"serverStatus" } ); 
 ```
 
@@ -296,7 +296,7 @@ function simulateProgress() {
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}", 
             { "notificationId": "progressBar", 
-              "priority":"none",
+              "priority":"normal",
               "interrupt":"none" });
 }
 
@@ -324,7 +324,7 @@ function simulateProgress() {
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}",
             { "notificationId":"progressBar",
-              "priority":"none",
+              "priority":"normal",
               "interrupt":"all" });
  }
 
@@ -355,7 +355,7 @@ function simulateProgress() {
   document.querySelector("#progressBar")
           .ariaNotify( "Progress is ${currentValue}",
               { "notificationId":"progressBar", 
-                "priority":"none",
+                "priority":"normal",
                 "interrupt":"pending" }); 
 }
 
@@ -377,8 +377,8 @@ notifications to propagate to the top-level browsing context, we will require a 
 ## Relationship to ARIA Live Regions
 There are some similarities between `ariaNotify` and the existing ARIA live regions. This section maps the existing ARIA
 live region configuration attributes to the options available with `ariaNotify`: 
- - `aria-live="assertive"` is the equivalent of `"priority: important"` and `"interrupt: none"`
- - `aria-live="polite"` is the equivalent of `"priority: none"` and `"interrupt: none"`
+ - `aria-live="assertive"` is the equivalent of `"priority: high"` and `"interrupt: none"`
+ - `aria-live="polite"` is the equivalent of `"priority: normal"` and `"interrupt: none"`
 
 Beyond the above, the additional functionality provided by `ariaNotify` is not supported and cannot be mapped back
 directly to ARIA live regions. 
@@ -388,7 +388,7 @@ In the case of browsers that do not yet support `ariaNotify`, we propose the fol
 backend as the existing ARIA live regions: 
  - The message payload for `ariaNotify` is equivalent to the contents of an ARIA live region. 
  - The `notificationId` is dropped entirely. 
- - `"priority: important"` and `"priority: none"` correspond to `aria-live="assertive"` and `aria-live="polite"` ARIA
+ - `"priority: high"` and `"priority: normal"` correspond to `aria-live="assertive"` and `aria-live="polite"` ARIA
  live attributes, respectively. 
  - ARIA live regions do not support interruptibility, so all behavior of `interrupt` defaults to `none`.  
 
@@ -399,15 +399,15 @@ regions:
 #### Example 6 
 ```
 element.ariaNotify("This message is normal.",
-    { "priority": "none",
+    { "priority": "normal",
       "interrupt": "none"}); 
 
 element.ariaNotify("This message should interrupt",
-    { "priority": "none", "interrupt": "all" }); 
+    { "priority": "normal", "interrupt": "all" }); 
 ```
 
 In the above case, when `ariaNotify` is supported, the expected behavior would be for the second notification to silence
-the current one and flush all other queued notifications from element with priority: `"none"`. However, the fallback is
+the current one and flush all other queued notifications from element with priority: `"normal"`. However, the fallback is
 not able to silence or flush existing notifications, as that behavior is not supported in ARIA live regions.  In the
 case that the web browser does not yet support `ariaNotify`, it is the responsibility of the web author to detect and
 fallback to ARIA live regions.  The above conversion may serve as a guide on how to do so. One can detect whether or not
