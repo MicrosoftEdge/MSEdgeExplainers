@@ -1,6 +1,6 @@
 # ARIA Notify
 
-Authors: [Doug Geoffray](), [Alison Maher](), [Sara Tang](https://github.com/sartang), [Travis Leithead](https://github.com/travisleithead), [Daniel Libby](https://github.com/dlibby-)
+Authors: [Doug Geoffray](), [Alison Maher](), [Sara Tang](https://github.com/sartang), [Travis Leithead](https://github.com/travisleithead), [Daniel Libby](https://github.com/dlibby-), [Andy Luhrs](https://github.com/aluhrs13)
 
 ## Introduction
 
@@ -215,7 +215,7 @@ A previous version of this explainer included an `interrupt` property (now descr
 ## Future considerations 
 `ariaNotify` can be extended in the future to handle more functionality as needs arise. We've discussed a few of these in-depth and have included them below.
 
-### Braille and pronunciations
+### Braille and speech markup
 There may be a need for a web author to supply a Braille specific string separate from the speech string. For example, an author could supply "3 stars" as the speech string to indicate a retail item's rating. However, to better map within a Braille display, the author could supply `***` as a Braille alternative string. The API could easily be extended by adding another optional property for Braille strings. For example: 
 
 ```js
@@ -232,6 +232,10 @@ For example, maybe you would like "911" pronounce as "9 1 1" in some cases. Or i
 document.ariaNotify( "911", {"SSML":"<say-as
 interpret-as=\x22\"""digits\x22""">911" });
 ``` 
+
+Related issues:
+- [w3c/aria #2334](https://github.com/w3c/aria/issues/2334)
+- [w3c/aria #2335](https://github.com/w3c/aria/issues/2335)
 
 ### Interruption
 #### Use Case
@@ -264,10 +268,10 @@ on the source, priority, and interrupt settings of the current and pending notif
    remove/flush all of them. 
    - Step 3: Add the notification to pending notifications as per its priority. 
 
-#### Example 3 - `interrupt`
+Related issue - [w3c/aria #2331](https://github.com/w3c/aria/issues/2331)
 
-`ariaNotify` can allow more scenarios than Live Regions. Here is a simple example showing three outcomes for the same
-scenario (a progress bar which reports its status at every percent increment): 
+#### Example 3 - `interrupt`
+Here is a simple example showing three outcomes for the same scenario (a progress bar which reports its status at every percent increment): 
 
 ##### Example 3.1
 `interrupt:none` - Every progress bar percentage from 1% to 100% will be spoken. 
@@ -472,6 +476,8 @@ Possible examples of predefined `type` could be something like:
   - `ui-enabled / ui-disabled`
   - `ui-editable / ui-readonly`
   - `ui-selected / ui-unselected`
+
+  Related issue - [w3c/aria #2330](https://github.com/w3c/aria/issues/2330)
 
 ## FAQ 
 **Is this API going to lead to privacy concerns for AT users?**
