@@ -26,7 +26,7 @@ Browsers have a list of search providers and each browser brand implementation h
 The goals of the API are:
 
 - Provide an API to detect whether current search provider is brand's recommended search provier.
-- Privide an API to reset current search provider to brand's recommended search provier.
+- Provide an API to reset current search provider to brand's recommended search provier.
 
 ## Non-Goals
 
