@@ -105,7 +105,6 @@ beyond the immediate effect of the primary action.
    - solves the consistency and predictability problems of live regions 
  - Provide a design framework for improvements to live regions as a "declarative version" of the notification API. 
    - removes guesswork on what to speak from a DOM node by providing an exact string 
-   - provides context of what the string represents 
 
 ## Proposed Solution 
 A new API, `ariaNotify`, enables content authors to directly tell a screen reader what to read. The behavior would be
@@ -184,7 +183,7 @@ notifications to propagate to the top-level browsing context, we will require a 
 ## Relationship to ARIA Live Regions
 There are some similarities between `ariaNotify` and the existing ARIA live regions. Some functionality provided by `ariaNotify` is not supported and cannot be mapped back directly to ARIA live regions. 
 
-In the case of browsers that do not yet support `ariaNotify`, we propose the following fallback mechanism using the same
+In the case of operating systems that do not yet support `ariaNotify`, we propose the following fallback mechanism using the same
 backend as the existing ARIA live regions: 
  - The message payload for `ariaNotify` is equivalent to the contents of an ARIA live region. 
  - `"priority: high"` corresponds to ARIA live's `aria-live="assertive"` 
@@ -354,7 +353,7 @@ The only difference between the three snippets is the `interrupt` setting. Each 
 experience difference for the user. 
 
 ##### Fallback
-In the case of browsers that do not yet support `ariaNotify`, ARIA live regions do not support interruptibility, so all behavior of `interrupt` defaults to `none`. 
+In the case of operating systems that do not yet support `ariaNotify`, ARIA live regions do not support interruptibility, so all behavior of `interrupt` defaults to `none`. 
 
 The addition of `interrupt` would mean that there is no exact mapping of `ariaNotify` back to ARIA live regions, and our proposal reflects a best effort
 to achieve similar behavior. There are cases where we will not be able to get the intended behavior using ARIA live
@@ -456,7 +455,7 @@ document.ariaNotify( " server connection lost ",
 As content is being generated, the user is informed of that status. When something more serious occurs, such as losing server access, the server error is prioritized above any pending status updates. Screen readers can choose to offer settings for users to manage specific types, like supressing minor `statusUpdate` notifications entirely.
 
 #### Fallback 
-In the case of browsers that do not yet support `ariaNotify`, `type` is dropped entirely when falling back to ARIA live regions. 
+In the case of operating systems that do not yet support `ariaNotify`, `type` is dropped entirely when falling back to ARIA live regions. 
 
 #### Open Issue - Predefined types 
 The use of `type` give the screen reader contextual information regarding the notification which allows for
