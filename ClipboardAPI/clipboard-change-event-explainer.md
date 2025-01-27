@@ -28,9 +28,9 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
     - [4.1 Paste options detection](#41-paste-options-detection)
   - [5. Event spec details and open questions](#5-event-spec-details-and-open-questions)
     - [5.1 User permission requirement](#51-user-permission-requirement)
-      - [5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-monitor permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-readclipboard-monitor-permission-required-to-listen-to-clipboardchange-event)
+      - [5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-types-read permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-readclipboard-types-read-permission-required-to-listen-to-clipboardchange-event)
         - [5.1.1.1 Support for browsers which don't have permission model for clipboard APIs](#5111-support-for-browsers-which-dont-have-permission-model-for-clipboard-apis)
-        - [5.1.1.2 Acquiring the clipboard-read / clipboard-monitor permission](#5112-acquiring-the-clipboard-read--clipboard-monitor-permission)
+        - [5.1.1.2 Acquiring the clipboard-read / clipboard-types-read permission](#5112-acquiring-the-clipboard-read--clipboard-types-read-permission)
         - [Pros](#pros)
         - [Cons](#cons)
         - [5.1.1.1 Permissions policy integration in cross-origin iframes](#5111-permissions-policy-integration-in-cross-origin-iframes)
@@ -106,7 +106,7 @@ Additionally we must ensure that we monitor the clipboard only when absolutely r
     document.getElementById("png_paste_button").disabled = !(e.clipboardData.types.indexOf('img/png') > -1);
   }
 
-  // This will trigger a permission popup for "clipboard-monitor" / "clipboard-read" (if choice not already provided)
+  // This will trigger a permission popup for "clipboard-types-read" / "clipboard-read" (if choice not already provided)
   navigator.clipboard.addEventListener("clipboardchange", onClipboardChanged);
 ```
 
@@ -116,13 +116,15 @@ A sample web application which demonstrates the usage of "clipboardchange" event
 
 ### 5.1 User permission requirement
 
-#### 5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-monitor permission required to listen to clipboardchange event
-Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read or clipboard-monitor depending on the user agent. For browsers like Chromium which already protect clipboard access using "clipboard-read", the clipboardchange API can be gated with the same "clipboard-read" permission.
+#### 5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-types-read permission required to listen to clipboardchange event
+Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read or clipboard-types-read depending on the user agent. For browsers like Chromium which already protect clipboard access using "clipboard-read", the clipboardchange API can be gated with the same "clipboard-read" permission.
 
 ##### 5.1.1.1 Support for browsers which don't have permission model for clipboard APIs
-For browsers like Firefox which don't have explicit clipboard-read like permission but rely of user gesture to grant access to async clipboard APIs, a new permission named **"clipboard-monitor"** can be used to gate clipboardchange event API. This means that user agents like Firefox can still enable scenario [2.2](#22-scenario-show-available-paste-formats-in-web-based-editors), where a web page would be able to update available clipboard data types on the UI without any user intervention.
+For browsers like Firefox which don't have explicit clipboard-read like permission but rely of user gesture to grant access to async clipboard APIs, a new permission named **"clipboard-types-read"** can be used to gate the clipboardchange event API. This means that user agents like Firefox can still enable scenario [2.2](#22-scenario-show-available-paste-formats-in-web-based-editors), where a web page would be able to update available clipboard data types on the UI without any user intervention.
 
-##### 5.1.1.2 Acquiring the clipboard-read / clipboard-monitor permission
+Considered alternative: The clipboardchange event itself does not require any user permission, however reading clipboard data types do require some user consent. The clipboardchange event callback payload could contain a promise which resolves to available clipboard data types. Upon every clipboardchange event, the browser can show a popup asking user to provide consent to reading clipboard data types. (similar to paste tablet shown in Firefox) If the user provides consent, the promise to clipboard data types within the event handler would be resolved otherwise it will be rejected. We favor the previous approach of having a one time consent through user permission instead of requiring a user gesture on every clipboardchange as the latter won't provide an optimal user experience.
+
+##### 5.1.1.2 Acquiring the clipboard-read / clipboard-types-read permission
 The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted.
 
 In browsers like Chromium, web apps can request for the clipboard-read permissions in advance by performing a read operation using one of [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api). In case the permission is granted after calling any of these methods, no further permission prompt would appear upon calling "addEventListener" method with "clipboardchange" as input.
@@ -231,7 +233,7 @@ The data types available in the clipboard (that are accessible via async clipboa
 
 ### 7.1 Future permission prompting mechanisms
 
-In future, we may have additional ways of prompting the user for permissions - 1) By explicitly requesting for "clipboard-read"/"clipboard-monitor" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158). 2) The user can be prompted for permissions just before the browser dispatches the "clipboardchange" event. This way, the permissions prompt would appear only when required by the browser however web authors won't have control over when the prompt would be triggered which might not be desirable.  
+In future, we may have additional ways of prompting the user for permissions - 1) By explicitly requesting for "clipboard-read"/"clipboard-types-read" permission, the API for this is still under discussion (https://github.com/w3c/permissions/issues/158). 2) The user can be prompted for permissions just before the browser dispatches the "clipboardchange" event. This way, the permissions prompt would appear only when required by the browser however web authors won't have control over when the prompt would be triggered which might not be desirable.  
 
 ### 7.2 Fencedframe
 
