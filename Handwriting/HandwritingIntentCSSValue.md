@@ -95,9 +95,9 @@ The `handwriting` keyword indicates whether an element and the element's descend
 
 #### Keyword interactions
 
-Distinction between gesture intentions is left to the User Agent, and determining whether a user intends to pan, zoom or write is beyond the scope of this keyword which only determines if the feature is available. In scenarios where both `handwriting` and `pan-*` are enabled (such as `auto` or `manipulation`, etc.) the User Agent will be responsible for determining which action takes place.
+Distinction between gesture intentions is left to the User Agent, and determining whether a user intends to pan, zoom or write is beyond the scope of this keyword which only determines if the gesture is available. In scenarios where both `handwriting` and `pan-*` are enabled (such as `auto` or `manipulation`, etc.) the User Agent will be responsible for determining which action takes place.
 
-User Agents may implement certain capabilities to be exclusive to certain devices, like handwriting only being available for styluses. At the moment, the `touch-action` property does not allow for a granular enablement of feature by discriminating between pointer devices. It will be the responsibility of User Agents to handle these complexities when implementing the `handwriting` keyword.
+User Agents may implement certain capabilities to be exclusive to certain devices, like handwriting only being available for styluses. At the moment, the `touch-action` property does not allow for a granular enablement of gesture by discriminating between pointer devices. It will be the responsibility of User Agents to handle these complexities when implementing the `handwriting` keyword.
 
 ### Determining enablement
 
