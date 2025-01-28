@@ -20,7 +20,7 @@ Additionally, embedders can opt into default behavior the platform makes to addr
 
 With global web usage continuing to rise and more companies relying on the web as a primary platform to deliver their applications, performance has become a critical factor for success. As more users access websites through mobile devices and lower-powered hardware, the need for fast responsive web experiences is non-negotiable[^1],[^2].
 
-When it comes to optimizing performance, websites and apps are limited by the performance of the external content they embed; these can be 3rd party sites, 3rd party apps, and even content from other organizations within a company. As a result, being able to control the performance of embedded content is crucial to improving the overall performance of a site or app.
+When it comes to optimizing performance, websites and apps are limited by the performance of the external content they embed; these can be 3rd party sites, 3rd party apps, and even content from other organizations within a company. Additionally, in cases where heavyweight apps transition to embedded scenarios, they may be optimized for standalone use but cause issues in an embedded context, impacting the overall performance of the app. As a result, being able to control the performance of embedded content is crucial to improving the overall performance of a site or app.
 
 This proposal has two primary goals:
 1.	Improve users’ satisfaction with their OS, browser, and applications via formalizing methods of constraining the resources available to web content, while removing the burden of determining individual constraints from web developers.
