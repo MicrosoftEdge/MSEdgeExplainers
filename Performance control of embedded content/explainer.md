@@ -10,7 +10,7 @@
 
 This document proposes platform functionality to give embedders (browsers, websites, hosting applications) the ability to put constraints on resources allocated to embedees (tabs, iframes, WebViews) to minimize the performance impact that embedded web content can have on an user’s device. Additionally, violations of the constraints will be reported to the embedder to inform and improve the ecosystem.
 
-Embedder developers can do this by enabling various categories of criteria that constrain performance impacting features on the embedee. If those constraints are violated, they are reported to the embedder and embedee to:
+Embedder developers can do this by setting policies that constrain the performance impacting features of the embedee. If those constraints are violated, they are reported to the embedder and embedee to:
 1.  Inform the embedder so it can make decisions accordingly, to make the right tradeoffs for their app and give their users an optimal experience.
 2.  Inform the embedee so they can be aware of issues and learn about improvement opportunities.
 
@@ -28,7 +28,7 @@ This proposal has two primary goals:
 
 ## Non-goals
 
-1. Granular control of limits or individual criteria within a category. **The developer will not have control over granular values of each limit or individual criteria within a category. This is determined by the platform.** The key factor of this solution is there are predefined categories of focused, perf impacting features that embedder developers can choose to enforce restrictions on the embedded content in their app/site. This is to simplify the process and remove the burden from the embedder developer to determine individual constraints.
+1. Granular control of limits for each policy. **The developer will not have control over granular values of limits or criteria for each policy. Policies and limits are determined by the platform.** The key factor of this solution is there are predefined policies constraining focused, perf impacting features that embedder developers can set to enforce restrictions on the embedded content in their app/site. This is to simplify the process and remove the burden from the embedder developer to determine individual constraints.
 
 ## Use cases and scenarios
 
@@ -43,7 +43,7 @@ Embedded content can unintentionally or deliberately consume disproportionate re
 
 ## Proposed Solution
 
-> **Note:** This proposal is grounded in experience working with embedded web content and evaluation of numerous websites. We've identified recurring issues that can lead well-intentioned web content to unintentionally deliver suboptimal user experiences. The categories and criteria are open to modification and the limits will be determined based on data, from sources like the [Web Almanac](https://almanac.httparchive.org/en/2024/), and feedback from experts. Additionally, the threshold/limits and specific criteria within a category may evolve over time and is determined by the platform.
+> **Note:** This proposal is grounded in experience working with embedded web content and evaluation of numerous websites. We've identified recurring issues that can lead well-intentioned web content to unintentionally deliver suboptimal user experiences. We have formalized patterns of recurring issues into **categories** (policies) comprised of various **criteria** items. The categories and criteria are open to modification and the limits will be determined based on data, from sources like the [Web Almanac](https://almanac.httparchive.org/en/2024/), and feedback from experts. Additionally, the threshold/limits and specific criteria within a category may evolve over time and is determined by the platform.
 
 Introduce [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points, one for each of the following performance-impacting categories:
 
