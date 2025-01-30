@@ -5,6 +5,8 @@
 - Kurt Catti-Schmidt
 - Daniel Clark
 - Tien Mai
+- Alison Maher
+- Andy Luhrs
 
 ## Participate
 - [Discussion forum](https://github.com/WICG/webcomponents/issues/939)
@@ -43,6 +45,8 @@ content location of future work and discussions.
 
 ## Background
 With the use of web components in web development, web authors often encounter challenges in managing styles, such as distributing global styles into shadow roots and sharing styles across different shadow roots. Markup-based shadow DOM, or [Declarative shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom), is a new concept that makes it easier and more efficient to create a shadow DOM definition directly in HTML, without needing JavaScript for setup. [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) provides isolation for CSS, JavaScript, and HTML. Each shadow root has its own separate scope, which means styles defined inside one shadow root do not affect another or the main document.
+
+We're currently investigating this and [@sheet](/AtSheet/explainer.md) in parallel, and anticipate that we'll be prioritizing only one of these two in the immediate future.
 
 ## Problem
 Sites that make use of Declarative Shadow DOM (DSD) have reported that the lack of a way to reference repeated stylesheets creates large payloads that add large amounts of latency. Authors have repeatedly asked for a way to reference stylesheets from other DSD instances in the same way that frameworks leverage internal data structures to share constructable style sheets via `adoptedStyleSheets`. This Explainer explores several potential solutions.
@@ -243,6 +247,37 @@ Another advantage of this proposal is that it can allow multiple module specifie
 </my-element>
 ```
 
+### Scoping
+
+The module map exists today as a global registry per document, not scoped to a particular shadow root. Many developers have expressed interest in such a global map for sharing stylesheets, as it allows for nested shadow roots to access a base set of shared styles without needing to redefine them at each level of shadow root nesting.
+
+A global map does come with some tradeoffs, particularly when names collide. With a global map, nested shadow roots could override entries from parent shadow roots, which could be undesirable.
+
+### `<script>` vs `<style>` For CSS Modules
+
+This document uses the `<script>` tag for defining CSS Modules. Developer feedback has shown a preference for using the `<style>` tag when defining a CSS Module. This makes sense for CSS Modules in isolation, but does not align with other types of modules. The table in the [next section](#other-declarative-modules) details other module types and demonstrates the degree of consistency achieved with `<script>`.  Developer feedback is important and should be considered, even at the potential expense of consistency.
+
+This is an example of a CSS Module defined with the `<style>` tag:
+```html
+<style type="css-module" specifier="/foo.css">
+  #content {
+    color: red;
+  }
+</style>
+
+<my-element>
+  <template shadowrootmode="open" adoptedstylesheets="/foo.css">
+    <!-- ... -->
+  </template>
+</my-element>
+```
+
+A compromise could be to support both `<script>` tags and `<style>` tags.
+
+### Behavior with script disabled
+
+User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not been verified yet.
+
 ## Other declarative modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
 ```html
@@ -282,12 +317,12 @@ CSS Modules are not the only type of module - there are also JavasScript, JSON, 
 
 | Module type    | Script Module                                            | Declarative Module                                                        |
 | -------------- | -------------------------------------------------------- | --------------------------------------------------------------------------|
-| JavaScript     | `import { foo } from "./bar.js";`                        | TODO                                                                      |
-| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<template shadowrootmode="open" adoptedstylesheets="/foo.css">`          |
-| JSON           | `import foo from "./bar.json" with { type: "json" };`    | TODO                                                                      |
-| HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<template shadowrootmode="open" shadowroothtml="/foo.html"></template> ` |
-| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<template shadowrootmode="open" shadowrootsvg="/foo.svg"></template> `   |
-| WASM           | TODO                                                     | TODO                                                                      |
+| JavaScript     | `import { foo } from "./bar.js";`                        | `<script type="script-module" specifier="/bar.js"></script>`              |
+| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<script type="css-module" specifier="/bar.css"></script>`                |
+| JSON           | `import foo from "./bar.json" with { type: "json" };`    | `<script type="json-module" specifier="/bar.json"></script>`              |
+| HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<script type="html-module" specifier="/bar.html"></script>`              |
+| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<script type="svg-module" specifier="/bar.svg"></script>`                |
+| WASM           | `import {foo} from "bar.wasm" with {type: "wasm"};`      | `<script type="wasm-module" specifier="/bar.wasm"></script>`              |
 
 ## Alternate proposals
 ### [Layer and adoptStyles](https://github.com/w3c/csswg-drafts/issues/10176#proposal)
@@ -489,8 +524,15 @@ This suggestion looks like the following:
 ```
 
 ## Summary
-The following table compares pros and cons of the various proposals:
-<image src="images/summary.png">
+The following table compares pros and cons of the various proposals: 
+
+| | Proposal | Currently supported in DSD? | Can hit network? | FOUC | Can apply styles only to shadow? | Can export styles to parent document ?|
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Inline, declarative CSS Module Scripts | ❌ No | ✅ No | ✅ No (unless module is imported from a separate file) | Yes, on a **per-sheet** basis | ✅ Yes |
+| 2 | `<link rel>` | ✅ Yes | ❌ Yes | ❌ Yes | Yes, on a **per-sheet** basis | ❌ No |
+| 3 | `@layer` + `importStyles` | ❌ No | ✅ No | ✅ No (unless `@imports` is used) | Yes, on a **per-sheet** basis | ❌ Not currently, but could be specified. |
+| 4 | `@Sheet` | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ Not currently, but could be specified. |
+| 5 | `adoptedstylesheets` attribute | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ No |
 
 ## Open issues
 * What happens if a `<template shadowrootadoptedstylesheets="">` references a specifier that was imported as a non-inline CSS module whose fetch hasn’t completed yet?

@@ -10,6 +10,7 @@
 - [Issue tracker](https://issues.chromium.org/issues/40268201)
 
 ## Status of this Document
+
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 * This document status: **Active**
 * Expected venue: [W3C Web Performance WG](https://www.w3.org/webperf/)
@@ -65,10 +66,12 @@ That's fine. The browser should make a reasonable effort to collect call stack d
 An infinite loop in a worker doesn't cause the page or iframe to become unresponsive. This API reports only script on the main thread.
 
 ## When there are frames from multiple origins in a renderer, how do we ensure that stacks are attributed to the correct frame?
+
 To ensure that stacks are attributed to the correct frame, we need to send back the serialized frame token from the renderer to the browser along with the call stack. This way, the browser can verify that the call stack belongs to the same frame which the crash report is being generated for before attaching it to the report.
 
 ## If there is an extension executing scripts in the main world, how will you prevent the endpoint from knowing about the agent’s execution environment such as what extensions they have installed?
-Extension code injected into the main world may be visible.
+
+To address this, call stacks are automatically omitted whenever an extension’s content script is on the stack. By omitting the stack in these cases, we avoid exposing information about installed extensions in crash reports.
 
 ## How do wasm call stacks work with this proposal?
 Wasm stack frames will be supported. Typically the format is `${url}:wasm-function[${funcIndex}]:${pcOffset}` as found [here](https://webassembly.github.io/spec/web-api/index.html#conventions).
@@ -79,11 +82,15 @@ Wasm stack frames will be supported. Typically the format is `${url}:wasm-functi
 
 #### Why require opt-in?
 
-Some sites may be sending their reports to a third-party service and not wish to expose information about their site code to that third party. This feature would also increase the size of reports, add a property that existing servers might not handle correctly, and include data that users might not have consented to send.
+Some sites may be sending their reports to a third-party service and not wish to expose information about their site code to that third party. This feature would also increase the size of reports, add a property that existing servers might not handle correctly, and include data that users might not have consented to send. Although developers can capture stacks manually (e.g., yielding code or throwing exceptions), we provide an explicit opt-in to align with privacy concerns. This ensures site owners control when potentially sensitive data is collected and sent. Given that developers can already obtain data sufficiently similar to what is reported by this API using existing tools, we do not enforce a separate user opt-in.
 
 #### Does this affect user privacy?
 
 This adds a mechanism that could allow website owners to learn about an extension that a user is running if the page reports a crash while code from the extension's content script is on the stack.
+
+We have received feedback suggesting two potential paths to mitigate privacy concerns around exposed extensions:
+1. Automatically omitting JavaScript call stacks if an extension’s content script is on the stack.
+2. Prompting users with a user-comprehensible explanation of what sensitive information's likely to be sent: for example the list of extensions that injected script.
 
 ### Security
 
