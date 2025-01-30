@@ -128,17 +128,17 @@ Firefox and Safari have User activation + User gesture approach and don't use cl
 
 Conclusion, for Firefox and Safari the "clipboard-read" permission requirement need not be applicable for only firing the clipboardchange event (without any payload). 
 
-Now, for the use cases outlined in the explainer especially the dynamic contextual menus and buttons appearing with different MIME types available on clipboard. Just firing the clipboard change event is not sufficient. Developers will need to know the available MIME types on clipboard. This can be achieved by: 
+Now, lets talk about the use cases outlined in the explainer especially the dynamic contextual menus and buttons appearing with different MIME types available on clipboard([Scenario 2.2](#22-scenario-show-available-paste-formats-in-web-based-editors)). Just firing the clipboard change event is not sufficient. Developers will need to know the available MIME types on clipboard. This can be achieved by: 
 
-1.) Use Asnyc clipboard APIs to read clipboard for types every time ClipboardChange event is fired. 
+1.) Use Async clipboard APIs to read clipboard for types every time ClipboardChange event is fired. 
 
 Or 
 
 2.) Make clipboard data types available as a payload on the ClipboardChange event. 
 
-Challenge with 1.) would be that, in case of Firefox and Safari user will see Paste button (user gesture requirement) to allow reading clipboard and this does not server the use case of dynamically updating context menus. 
+Challenge with approach 1.) would be that in case of Firefox and Safari, user will see a paste button (user gesture requirement) to allow reading clipboard every time the clipboard changes and this does not serve the use case of dynamically updating context menus without any user intervention. 
 
-Hence we can use Approach 2.) to provide clipboard data types as part of event payload. And since the information about clipboard data types is still privacy sensitive, it needs to be gated by a user permission. Browsers like Chromium which already protect clipboard data with "clipboard-read" permission can use the same permission to gate the clipboardchange event (which inturn gates the clipboard types data which is payload of the event). Browsers which don't have this permission, like Firefox and Safari, can introduce a new permission, example "clipboard-types-read" (similar to how Firefox has [this permission model](https://support.mozilla.org/en-US/kb/does-firefox-share-my-location-websites?redirectslug=does-firefox-share-my-location-web-sites&redirectlocale=en-US) for accessing location services)
+Hence we need to use approach 2.) to provide clipboard data types as part of event payload. And since the information about clipboard data types is still privacy sensitive, it needs to be gated by a user permission. Browsers like Chromium which already protect clipboard data with "clipboard-read" permission can use the same permission to gate the clipboardchange event (which inturn gates the clipboard types data which is payload of the event). Browsers which don't have this permission, like Firefox and Safari, can introduce a new permission, example "clipboard-types-read" (similar to how Firefox has [this permission model](https://support.mozilla.org/en-US/kb/does-firefox-share-my-location-websites?redirectslug=does-firefox-share-my-location-web-sites&redirectlocale=en-US) for accessing location services)
 
 ##### 5.1.1.2 Acquiring the clipboard-read / clipboard-types-read permission
 The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted.
@@ -221,7 +221,7 @@ Considered alternative - DataTransfer object: The [getData](https://html.spec.wh
 
 #### 5.3.2 Clipboard data types
 
-The data types available in the clipboard (that are accessible via async clipboard read API) after the clipboardchange event can be accessed in the event payload via "event.clipboardData.types" property. The clipboard types are part of the event payload since the types are limited which won't cause any data bloating. Further, this should not introduce privacy concerns since it would be very hard to distinguish a user based on type of data copied to clipboard and there is a limited subset of types(that are accessible via async clipboard read API) which will be present in the payload.
+The data types available in the clipboard (that are accessible via async clipboard read API) after the clipboardchange event can be accessed in the event payload via "event.clipboardData.types" property. The clipboard types are part of the event payload since the types are limited which won't cause any data bloating. Further, this should not introduce any serious privacy concerns since it would be very hard to distinguish a user based on type of data copied to clipboard and there is a limited subset of types(that are accessible via async clipboard read API) which will be present in the payload.
 
 
 ## 6 Appendix
