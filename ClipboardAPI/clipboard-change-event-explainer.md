@@ -27,27 +27,23 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
   - [4. Example javascript code for detecting clipboard changes:](#4-example-javascript-code-for-detecting-clipboard-changes)
     - [4.1 Paste options detection](#41-paste-options-detection)
   - [5. Event spec details and open questions](#5-event-spec-details-and-open-questions)
-    - [5.1 User permission requirement](#51-user-permission-requirement)
-      - [5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-types-read permission required to listen to clipboardchange event](#511-approach-1-preferred---clipboard-readclipboard-types-read-permission-required-to-listen-to-clipboardchange-event)
-        - [5.1.1.1 Support for browsers which don't have permission model for clipboard APIs](#5111-support-for-browsers-which-dont-have-permission-model-for-clipboard-apis)
+    - [5.1 Permissions and Interop](#51-permissions-and-interop)
         - [5.1.1.2 Acquiring the clipboard-read / clipboard-types-read permission](#5112-acquiring-the-clipboard-read--clipboard-types-read-permission)
-        - [Pros](#pros)
-        - [Cons](#cons)
         - [5.1.1.1 Permissions policy integration in cross-origin iframes](#5111-permissions-policy-integration-in-cross-origin-iframes)
       - [5.1.2 Approach 2 - No permission required](#512-approach-2---no-permission-required)
-        - [Pros](#pros-1)
-        - [Cons](#cons-1)
+        - [Pros](#pros)
+        - [Cons](#cons)
       - [5.1.3 Conclusion](#513-conclusion)
     - [5.2 Page focus requirement](#52-page-focus-requirement)
       - [5.2.1 Approach 1 (Preferred) - Page required to be in focus to receive event](#521-approach-1-preferred---page-required-to-be-in-focus-to-receive-event)
-        - [Pros](#pros-2)
-        - [Cons](#cons-2)
+        - [Pros](#pros-1)
+        - [Cons](#cons-1)
       - [5.2.2 Approach 2 - No focus requirement](#522-approach-2---no-focus-requirement)
+        - [Pros:](#pros-2)
+        - [Cons:](#cons-2)
+      - [5.2.3 Approach 3 - Transient user activation](#523-approach-3---transient-user-activation)
         - [Pros:](#pros-3)
         - [Cons:](#cons-3)
-      - [5.2.3 Approach 3 - Transient user activation](#523-approach-3---transient-user-activation)
-        - [Pros:](#pros-4)
-        - [Cons:](#cons-4)
       - [5.2.4 Conclusion](#524-conclusion)
     - [5.3 Event details](#53-event-details)
       - [5.3.1 Clipboard contents](#531-clipboard-contents)
@@ -114,27 +110,40 @@ A sample web application which demonstrates the usage of "clipboardchange" event
 
 ## 5. Event spec details and open questions
 
-### 5.1 User permission requirement
+### 5.1 Permissions and Interop
 
-#### 5.1.1 Approach 1 (Preferred) - clipboard-read/clipboard-types-read permission required to listen to clipboardchange event
-Since the clipboard contains privacy-sensitive data, we should protect access to the clipboard change event using a user permission - clipboard-read or clipboard-types-read depending on the user agent. For browsers like Chromium which already protect clipboard access using "clipboard-read", the clipboardchange API can be gated with the same "clipboard-read" permission.
+Today browser engines have different approaches to clipboard API permissions. 
 
-##### 5.1.1.1 Support for browsers which don't have permission model for clipboard APIs
-For browsers like Firefox which don't have explicit clipboard-read like permission but rely of user gesture to grant access to async clipboard APIs, a new permission named **"clipboard-types-read"** can be used to gate the clipboardchange event API. This means that user agents like Firefox can still enable scenario [2.2](#22-scenario-show-available-paste-formats-in-web-based-editors), where a web page would be able to update available clipboard data types on the UI without any user intervention.
+While Chromium has [this permissions model](https://github.com/w3c/clipboard-apis/blob/main/explainer.adoc#clipboard-permissions) for clipboard. [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) and [Safari](https://webkit.org/blog/10855/async-clipboard-api/) rely on combination of user activation and user gesture. 
 
-Considered alternative: The clipboardchange event itself does not require any user permission, however reading clipboard data types do require some user consent. The clipboardchange event callback payload could contain a promise which resolves to available clipboard data types. Upon every clipboardchange event, the browser can show a popup asking user to provide consent to reading clipboard data types. (similar to paste tablet shown in Firefox) If the user provides consent, the promise to clipboard data types within the event handler would be resolved otherwise it will be rejected. We favor the previous approach of having a one time consent through user permission instead of requiring a user gesture on every clipboardchange as the latter won't provide an optimal user experience.
+**Paste button in Firefox**
+![](img/firefox-paste-button.png)
+
+**Permission prompt in Chromium**
+![](img/chrome-permission-prompt.png)
+
+For browsers that use clipboard permissions, as outlined in the privacy section, it becomes important that "clipboard-read" permission is a pre-requisite for ClipboardChange event. 
+
+Firefox and Safari have User activation + User gesture approach and don't use clipboard permissions. In this case firing ClipboardChange event itself is not a privacy concern as clipboard reads are guarded by user gesture requirement. 
+
+Conclusion, for Firefox and Safari the "clipboard-read" permission requirement need not be applicable for only firing the clipboardchange event (without any payload). 
+
+Now, for the use cases outlined in the explainer especially the dynamic contextual menus and buttons appearing with different MIME types available on clipboard. Just firing the clipboard change event is not sufficient. Developers will need to know the available MIME types on clipboard. This can be achieved by: 
+
+1.) Use Asnyc clipboard APIs to read clipboard for types every time ClipboardChange event is fired. 
+
+Or 
+
+2.) Make clipboard data types available as a payload on the ClipboardChange event. 
+
+Challenge with 1.) would be that, in case of Firefox and Safari user will see Paste button (user gesture requirement) to allow reading clipboard and this does not server the use case of dynamically updating context menus. 
+
+Hence we can use Approach 2.) to provide clipboard data types as part of event payload. And since the information about clipboard data types is still privacy sensitive, it needs to be gated by a user permission. Browsers like Chromium which already protect clipboard data with "clipboard-read" permission can use the same permission to gate the clipboardchange event (which inturn gates the clipboard types data which is payload of the event). Browsers which don't have this permission, like Firefox and Safari, can introduce a new permission, example "clipboard-types-read" (similar to how Firefox has [this permission model](https://support.mozilla.org/en-US/kb/does-firefox-share-my-location-websites?redirectslug=does-firefox-share-my-location-web-sites&redirectlocale=en-US) for accessing location services)
 
 ##### 5.1.1.2 Acquiring the clipboard-read / clipboard-types-read permission
 The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted.
 
 In browsers like Chromium, web apps can request for the clipboard-read permissions in advance by performing a read operation using one of [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api). In case the permission is granted after calling any of these methods, no further permission prompt would appear upon calling "addEventListener" method with "clipboardchange" as input.
-
-##### Pros
-1. Since clipboard can be changed by a user action, the information regarding when the clipboard has changed can be considered a user private data. Having the permissions check ensures that this privacy sensitive information is protected by user consent.
-2. This approach aligns with the security model for other clipboard APIs.
-
-##### Cons
-1. This approach imposes a small restriction on web authors as they have to call a clipboard read API method before starting to listen for the clipboardchange event.
 
 ##### 5.1.1.1 Permissions policy integration in cross-origin iframes
 
@@ -149,16 +158,14 @@ Listening to "clipboardchange" event within a cross-origin iframe can be enabled
 ```
 
 #### 5.1.2 Approach 2 - No permission required
-Since no data is being sent as part of the clipboardchange event, it can be argued that we don't need any permission to simply know when clipboard contents change. This will simplify the user flow as they don't need to explicitly ask for permissions before listening to the event. It can also be noted that there is no identified incremental security risk in providing the "clipboardchange" event to web authors since this event doesn't allow the site to modify the system in any way - it simply tells when the clipboard contents have changed.
-
 ##### Pros
 1. Simpler implementation and user experience
 
 ##### Cons
-1. This can cause user privacy violation - a site will be able to monitor the clipboard - a privileged OS component - without the user explicitly allowing it. (Though the author would only know that the clipboard changed, but wouldn't have any details about the payload)
+1. This can cause user privacy violation - a site will be able to monitor the clipboard - a privileged OS component - without the user explicitly allowing it.
 
 #### 5.1.3 Conclusion
-We favour Approach 1 i.e. having clipboard-read permission required to listen to clipboardchange event, because it has more provisions which safeguards user privacy.
+We favour Approach 1 i.e. having clipboard-read/clipboard-data-types permission required to listen to clipboardchange event, because it has more provisions which safeguards user privacy.
 
 ### 5.2 Page focus requirement
 As per the [current spec](https://www.w3.org/TR/clipboard-apis/#clipboard-event-clipboardchange), we should not fire "clipboardchange" event when a page is not is focus. This is in-line with the current behavior where async clipboard API is not accessible unless the given page is in focus. We do fire "clipboardchange" event when the page regains focus, incase the clipboard contents had changed when the page was out of focus. Note that even if the clipboard had changed multiple times while the page was out of focus, we will only fire a single "clipboardchange" event when the page regains focus. This is because the event is designed to indicate that the clipboard contents are different from what they were when the page lost focus, rather than tracking every individual change that occurred while the page was out of focus.
