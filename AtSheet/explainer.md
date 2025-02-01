@@ -47,7 +47,6 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
 ## Proposal - `@sheet`
 Create a new `@sheet` CSS block, for separating style sheets with named identifiers.
 
-
 ```css
 @sheet foo {
   div {
@@ -70,7 +69,7 @@ This stylesheet will create three CSS sheets - The default sheet, `foo`, and `ba
 ### Importing a specific sheet via `@import`
 ```html
 <style>
-  @import sheet("sheet.css#foo");
+  @import foo from "sheet.css";
 </style>
 ```
 
@@ -78,7 +77,7 @@ This will import only the rules for `foo` - in this case, the `div { color: red;
 
 ### Importing a specific sheet via the `<link>` tag
 ```html
-<link rel="stylesheet" href="sheet.css#foo" />
+<link rel="stylesheet" href="sheet.css" sheet="foo" />
 ```
 
 This will also import only this rules for "foo" - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
@@ -87,7 +86,7 @@ This will also import only this rules for "foo" - in this case, the `div { color
 Shadow DOM isolates styles, but fragment identifiers from the light DOM are global and referenceable from shadow DOM (but not vice versa). This enables Declarative Shadow DOM to import `@sheet` references from the light DOM:
 
 ```html
-<style>
+<style id="sheet">
 @sheet foo {
   div {
     color: red;
@@ -95,7 +94,7 @@ Shadow DOM isolates styles, but fragment identifiers from the light DOM are glob
 }
 </style>
 <template shadowrootmode="open">
-  <link rel="stylesheet" href="#foo" />
+  <link rel="stylesheet" href="#sheet" sheet="foo" />
   <span>I'm in the shadow DOM</span>
 </template>
 ```
@@ -109,6 +108,16 @@ or imported from JavaScript:
 ```
 
 ## Detailed design discussion
+
+#### Specific Changes to HTML and CSS
+
+This proposal augments the HTML `<link>` tag in two ways:
+1. Fragment identifiers to same-document `<style>` tags are supported in the `href` attribute to allow for `@sheet` to work with same-document `<style>` tags.
+2. The `sheet` attribute, which scopes the specified style reference to rules within an `@sheet` identifier (should this be a list of identifiers so multiple sheets can be imported?)
+
+This proposal augments the CSS `@import` syntax by adding an optional named sheet identifier ( `@import foo from "sheet.css";`).
+
+The `@sheet` fragment syntax (`<link rel="stylesheet" href="sheet.css#foo" />`) that was agreed upon in https://lists.w3.org/Archives/Public/www-style/2023Apr/0004.html should be revisited with these new applications in mind, as it is not compatible with same-document `<style>` references.
 
 #### Named Imports with Imperative Shadow DOM
 
@@ -161,15 +170,15 @@ import { bar } from 'sheet.css' with { type: 'css' }
 ```html
 <style>
   /* The following two imports should only make a single network request. */
-  @import "sheet.css#foo";
-  @import "sheet.css#bar";
+  @import foo from "sheet.css";
+  @import bar from "sheet.css";
 </style>
 ```
 
 ```html
 <!-- The following two link tags should only make a single network request. -->
-<link rel="stylesheet" href="sheet.css#foo" />
-<link rel="stylesheet" href="sheet.css#bar" />
+<link rel="stylesheet" href="sheet.css" sheet="foo" />
+<link rel="stylesheet" href="sheet.css" sheet="bar" />
 ```
 
 #### Interaction with CSSOM
@@ -207,18 +216,18 @@ interface CSSStyleSheet : StyleSheet {
 5. [#938](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/938) - Do we want to be able to access sheets declared in shadow DOM from light DOM? For example:
 ```html
 <template shadowrootmode="open">
-  <style>
+  <style id="sheet">
     @sheet foo {
       div {
         color: red;
       }
     }
   </style>
-  <link rel="stylesheet" href="#foo" />
+  <link rel="stylesheet" href="#foo" sheet="foo" />
   <span>I'm in the shadow DOM</span>
 </template>
 
-<link rel="stylesheet" href="#foo" />
+<link rel="stylesheet" href="#sheet" sheet="foo" />
 <span>I'm in the light DOM</span>
 ```
 6. [#939](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/939) - The name `nestedStyleSheets` is up for discussion.
