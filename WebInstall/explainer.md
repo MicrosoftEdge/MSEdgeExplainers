@@ -188,11 +188,11 @@ To install an application with the Web Install API, the process is as follows:
 ### Sample code
 
 ```javascript
-/* tries to install the current domain */
+/* tries to install the current document */
 const installApp = async () => {
     if (!navigator.install) return; // api not supported
     try {
-        await navigator.install('content_id_123');
+        await navigator.install();
     } catch(err) {
         switch(err.name){
             case 'AbortError':
@@ -204,18 +204,20 @@ const installApp = async () => {
 ```
 
 ```javascript
-/* tries to install a cross-origin web app */
+/* tries to install a background document (app) */
 
-const installApp = async (manifest_id, install_url) => {
-    if ('install' in navigator === false) return; // api not supported
+const installApp = async (install_url, manifest_id) => {
+    if (!navigator.install) return; // api not supported
     try {
-        await navigator.install(manifest_id, install_url);
+        await navigator.install(install_url, manifest_id);
     } catch(err) {
         switch(err.name){
             case 'AbortError':
                 /* Operation was aborted*/
                 break;
-
+            case 'DataError':
+                /*issue with manifest file or id*/
+                break;
         }
     }
 };
@@ -226,7 +228,7 @@ To install content using the Web Install API, the document (current or backgroun
 
 The importance of `id`s for installed content is to avoid cases where multiple *same* apps are installed with no way to update them. More details can be found in [this document](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
 
->**Note:** There is no other requirement regarding what can be installed with the API and this requirement does not interfere with other affordances that some UAs have to add any content to the system/OS.
+>**Note:** There is no other requirement regarding what can be installed with the API and this requirement does not interfere with other affordances that some UAs have to add any content to the system/OS. This is, the UA can still allow the end user to install any type of content from a menu or prompt that follows different requirements than this API.
 
 ## Privacy and Security Considerations
 
@@ -260,19 +262,33 @@ const { state } = await navigator.permissions.query({
 });
 switch (state) {
   case "granted":
-    navigator.install('https://elk.zone');
+    navigator.install('https://productivitysuite.com');
     break;
   case "prompt":
     //shows the install button in the web UI
     showInstallButton();
     break;
   case "denied":
-    redirectToAppStore();
+    redirectToApp();
     break;
 }
 ```
 
 > **Note:** A permission prompt will appear for origins that do not have the capability to install apps if the invoking document is not the current one. Even if the installation is of a "[background document](#background-document-1-param)" in the same origin, for consistency the origin must have the permission to install apps. The only cases that will not prompt for the permission are the installation of the "[current document](#current-document)" or a "[background document](#background-document-1-param)" in an origin that already has installation permissions.
+
+**Example:**
+
+The app located in `https://productivitysuite.com` displays in its homepage 3 buttons that aim to install 3 different apps (notice all apps are in the same origin):
+* the text processor located at `https://productivitysuite.com/text`
+* the presentation app located at `https://productivitysuite.com/slides`
+* the spreadsheet locacated at `https://productivitysuite.com/spreadsheet`
+
+The end user goes to the homepage in the `https://productivitysuite.com`'s origin and clicks on the button to install the presentation application. As this is a *background document* (not the current document the user is interacting with) and the origin does not have permission to install apps, a permission prompt will appear. If this permission is granted for the origin, it can now install apps. After this permissin prompt the second prompt where the user confirms the isntallation appears.  
+
+The end user then tries to install the text processor, and since the origin has been granted the permission, then it will prompt to confirm that "productivity suite wants to install text procesor". The installation permission is bound to an origin.
+
+If the user where to deny the permission to install for the origin, they could browse to the app itself and once there, they can install the application. In this case there isn't any permission prompt required as this is now a *current document* installation. 
+
 
 ### Rejecting promise with `AbortError` and `DataError`
 
@@ -282,7 +298,7 @@ To protect the users privacy, the API does not create any new error names for th
 ### **Gating capability behind installation**
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
 
-**For cross-origin installs, the user gesture, the new origin permission, and the final installation confirmation (current default behaviour in the browser before installing an app) and the optional gated capability work together to minimize the risk of origins spamming the user for unrequested installations**, give developers complete flexibility about where their apps will be installed from and provide the user with an implicit (double: one for the user gesture, the other one from the prompt before installing) confirmation before the app gets installed on their device.
+**The user gesture, the new origin permission, the final installation confirmation (current default behaviour in the browser before installing an app) and the optional gated capability work together to minimize the risk of origins spamming the user for unrequested installations**, give developers flexibility to control the distribution of their apps and end users the facility to discover and acquire content in a frictionless way.
 
 ## Considered Alternative Solutions
 
