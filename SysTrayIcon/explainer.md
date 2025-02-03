@@ -133,7 +133,7 @@ Similar to other UX features enabled through the manifest like shortcuts, protoc
 No, this is a UX affordance for supporting platforms, same as the capability of an app having shortcuts or supporting Window Controls Overlay.
 
 * **Can we use the `icons` array to specify the icon for this OS area?**
-Initilly the separate field of `status_icon` was defined. We've defaulted to using existing manifest constructs for icons to specify this new one. The existing `icons` field in the manifest file will be used to add the system status icon. Each icon object has a [`purpose`](https://developer.mozilla.org/en-US/docs/Web/Manifest/Reference/icons#purpose) optional field that could be used to specify that this is meant to be used as the "status" icon. 
+Initially the separate field of `status_icon` was defined. We've defaulted to using existing manifest constructs for icons to specify this new one. The existing `icons` field in the manifest file will be used to add the system status icon. Each icon object has a [`purpose`](https://developer.mozilla.org/en-US/docs/Web/Manifest/Reference/icons#purpose) optional field that could be used to specify that this is meant to be used as the "status" icon. 
 
 * **Can the Badging API interact with this feature?** Ideally yes, the [Badging API](https://w3c.github.io/badging/) would be able to set badges on the system status icon. This could be the default `setAppBadge` method that sets the badge on both app launcher icon and system status icon, or a new signature in for the method that specifies the status icon as the recipient.
 
