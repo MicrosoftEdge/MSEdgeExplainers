@@ -126,6 +126,8 @@ Giving the developer the option to have different menu options in the shortcuts 
 
 There are no new privacy or security considerations. The feature only enables a UX affordance on supporting platforms.
 
+Similar to other UX features enabled through the manifest like shortcuts, protocol_handling and Window Controls Overlay, this feature is relevant for installed web applications only. 
+
 ## Open Questions
 * **Do we need a permission for this feature?**
 No, this is a UX affordance for supporting platforms, same as the capability of an app having shortcuts or supporting Window Controls Overlay.
