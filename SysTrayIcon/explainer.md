@@ -15,7 +15,7 @@ This specific area varies in names depending on the platform, but the functional
 
 As stated previously on macOS and Windows, an application can have a system status icon that can show a badge and have a menu that allows for entering, deep-linking into, or quitting the app. A notable characteristic of icons on the system status area on all platforms is that the app's system status icon ONLY shows if the application is open, as opposed to the icons on the taskbar or dock, that are always present.
 
-Web applications currently do not have a way of participating in the system status area. This leads to a worse user experience for end users on desktop environments. If a user closes the installed web application's window, this causes the web app to quit, and users may, for example, stop receiving status updates or miss that the application is running.
+Web applications currently do not have a way of participating in the system status area. This leads to a worse user experience for end users on desktop environments for certain classes of applications. If a user closes the installed web application's window, this causes the web app to quit, and users may, for example, stop receiving status updates or miss that the application is running.
 
 ### System *Status* area
 
@@ -47,9 +47,13 @@ Having icons on the system status area for apps is giving the user an entry poin
     * The minimum common UX that major platforms offer is a menu. It is not the scope of this API to enable elaborate menus that different platforms may offer.
 * Allow the app to run on the background.
     * This API is to allow an installed web app to have an icon on the system status area when the app is open/running.
+* Create dynamic menus that change options.
 * Enable this feature on platforms that are not desktop or that do not support this natively, like Linux.
 
 ## Use Cases
+
+Different applications will use the status icon differently. There are cases where the options in the menus are the same, other apps vary content. This feature aims to give this flexibility to the developer. Independently of this, there is a user expectation that certain apps can be accessed from the status area. Also, in different platforms this icon will show in the status area even if the corresponding task/dock entry doesn't show as open, for example, if the user is in a secondary (virtual) desktop. The following are illustrative cases of how system status icons for apps are used today.
+
 ### Instant Messaging apps
 
 ![The Teams app on Windows system status icon menu](teamsMenu.png)
@@ -73,7 +77,7 @@ On macOS the VLC media player adds an icon to the system status area to put play
 
 The scope of this feature is to allow an installed Web app to have an icon on the system's status area if the application is open and running.
 
-There feature consists of several parts, namely, a way for the app to indicate that it wants to have a icon on the status area and a way to specify menu options for when the user right-clicks on the icon. 
+The feature consists of several parts, namely, a way for the app to indicate that it wants to have a icon on the status area and a way to specify menu options for when the user right-clicks on the icon. 
 
 ### Opting into the System Status icon
 
@@ -94,10 +98,10 @@ For an app to opt into having an icon on the platform's system status area, it c
 }
 ```
 
-This icon will be present ONLY if the application is open and running. This icon can also be different from the one used in the platforms app launcher. Clicking on the icon will open/focus the app's window. Right-clicking on the icon will bring up the app's system status menu.
+This icon will be present ONLY if the application is open and running. This icon can also be different from the one used in the platforms app launcher. Interacting with the icon will open/focus the app's window. Secondary interaction (usually right-clicking) on the icon will bring up the app's system status menu.
 
 ### System Status Menu
-As stated before, the icon on the system status for an installed web app will open/focus the app's window when clicked and will have a menu when the user double clicks. This menu can be specified in the manifest file, and uses the same format as the one for shortcuts. To define it, you add the `secondary_shortcuts` field in the manifest file. 
+As stated before, the icon on the system status for an installed web app will open/focus the app's window when clicked and will have a menu when the user uses the secondary click action. This menu can be specified in the manifest file, and uses the same format as the one for shortcuts. To define it, you add the `secondary_shortcuts` field in the manifest file. 
 
 ```json
 "secondary_shortcuts": [
@@ -116,7 +120,7 @@ As stated before, the icon on the system status for an installed web app will op
 ]
 ```
 
-Giving the developer the option to have different menu options in the shortcuts and system status menu allows them to provide a better UX for users that doesn't repeat unnecessary options. By default, the system status menu should have options to open and to quit the app.
+Giving the developer the option to have different menu options in the shortcuts and system status menu allows them to provide a better UX for users that doesn't repeat unnecessary options. The system status menu could have options to open and to quit the app.
 
 ## Privacy and Security Considerations
 
