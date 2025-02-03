@@ -209,8 +209,8 @@ interface CSSStyleSheet : StyleSheet {
 
 ## Open Issues
 
-1. [#934](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/934) - Whether rules are applied automatically for `@sheet` definitions, or whether they need to be imported to apply. The CSS Working Group did not have a consensus.
-2. [#935](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/935) - Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).
+1. ~~[#934](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/934) - Whether rules are applied automatically for `@sheet` definitions, or whether they need to be imported to apply. The CSS Working Group did not have a consensus.~~ Rules are not applied by default - they must be deliberately included by sheet identifier.
+2. ~~[#935](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/935) - Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).~~ Same-document local sheet references are supported.
 3. [#936](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/936) - Behavior of `@import` - should `@import` be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached. This was briefly discussed in this CSSWG conversation: https://lists.w3.org/Archives/Public/www-style/2023Apr/0004.html
 4. [#937](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/937) - What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved (https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1498299448). Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition from an external CSS file may override it.
 5. [#938](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/938) - Do we want to be able to access sheets declared in shadow DOM from light DOM? For example:
@@ -232,7 +232,7 @@ interface CSSStyleSheet : StyleSheet {
 ```
 6. [#939](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/939) - The name `nestedStyleSheets` is up for discussion.
 7. [#939](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/939) - Should we add `name` to the `StyleSheet` interface or overload the existing `title` attribute instead?
-8. [#940](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/940) - If a stylesheet contains named `@sheet` references *and* rules outside of the `@sheet` references, what happens in all cases when a fragment identifier is *not* specified? For example:
+8. ~~[#940](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/940) - If a stylesheet contains named `@sheet` references *and* rules outside of the `@sheet` references, what happens in all cases when a fragment identifier is *not* specified? For example:~~
 
 sheet.css:
 
@@ -254,12 +254,15 @@ div {
 <link rel="stylesheet" href="sheet.css"> <!-- Does the @sheet "foo" get dropped? -->
 ```
 
+Sheet "foo" gets dropped, as it was not explicitly imported.
+
 ## References & acknowledgements
 Many thanks for valuable feedback and advice from:
 
 - Alison Maher
 - Daniel Clark
 - Justin Fagnani
+- Noam Rosenthal
 - Tab Atkins Jr.
 - Tien Mai
 - Westbrook Johnson
