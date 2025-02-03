@@ -1,6 +1,6 @@
 # ARIA Notify
 
-Authors: [Doug Geoffray](), [Alison Maher](), [Sara Tang](https://github.com/sartang), [Travis Leithead](https://github.com/travisleithead), [Daniel Libby](https://github.com/dlibby-)
+Authors: [Doug Geoffray](), [Alison Maher](), [Sara Tang](https://github.com/sartang), [Travis Leithead](https://github.com/travisleithead), [Daniel Libby](https://github.com/dlibby-), [Andy Luhrs](https://github.com/aluhrs13)
 
 ## Introduction
 
@@ -70,27 +70,13 @@ way.
 ### Keyboard action confirmation 
 Keyboard commands (especially those without a corresponding UI affordance) when activated may need to confirm the
 associated state change with the user. The following cases are variations on this theme: 
- - **Glow text command**: User is editing text, highlights a word and presses Shift+Alt+Y which makes it glow blue. No
+ 1. **Glow text command**: User is editing text, highlights a word and presses Shift+Alt+Y which makes it glow blue. No
  UI elements were triggered or changed state, but the user should hear some confirmation that the action was successful,
  such as "selected text glowing blue". 
- - **Set Presence**: In a chat application, the user presses Shift+Alt+4 to toggle their presence state to "do not
- disturb". The application responds with "presence set to do not disturb". 
-   - Most recent notification priority: The user presses Shift+Alt+3 by mistake, and then quickly presses Shift+Alt+4.
-   The application began to respond with "presence..." [set to busy] but interrupts itself with the latest response
-   "presence set to do not disturb". 
-   - Overall priority: The user presses Shift+Alt+4, then immediately issues a command to the screen reader to jump to
-   the next header. The response "presence set to do not disturb" may be skipped, deferred, interrupted, or pre-empted
+ 2. **Set Presence**: In a chat application, the user presses Shift+Alt+4 to toggle their presence state to "do not
+ disturb". The application responds with "presence set to do not disturb". Overall priority: The user presses Shift+Alt+4, then immediately issues a command to the screen reader to jump to
+   the next header. The response "presence set to do not disturb" may be deferred or pre-empted
    by the announcement of the focus change event depending on the content author's design.
- - **Filter editing confirmations**: User is editing text using bold, italic, underline, etc.. By default, the
- application responds with confirmations such as "bold on" / "bold off" as they toggle each state. As the application
- sends the confirmation for the user's actions, it also attached a unique identifier indicating the string is a
- confirmation for a basic editing command. Based on this identifier, the screen reader gives their users the following
- choices: 
-   - Speak and Braille the confirmation notice, as normal 
-   - Speak but do not flash the confirmation in Braille 
-   - Filter/suppress the entire confirmation from speech and Braille 
-   - Replace speech with a quick confirmation tone 
-   - Any other option the screen reader believes would be beneficial to their users 
 
 ### Failed or delayed actions 
 According to common screen reader etiquette, user actions where the context is clear are assumed to be successful by
@@ -119,7 +105,6 @@ beyond the immediate effect of the primary action.
    - solves the consistency and predictability problems of live regions 
  - Provide a design framework for improvements to live regions as a "declarative version" of the notification API. 
    - removes guesswork on what to speak from a DOM node by providing an exact string 
-   - provides context of what the string represents 
 
 ## Proposed Solution 
 A new API, `ariaNotify`, enables content authors to directly tell a screen reader what to read. The behavior would be
@@ -133,7 +118,7 @@ is there a way to know that a screen reader is available at all! Well-designed w
 provide appropriate notifications for accessibility whether or not their users require a screen reader or not. 
 
 #### Example 1
-```
+```js
 // Dispatch a message associated with the document: 
 document.ariaNotify( "John Doe is connected" ); 
 
@@ -155,216 +140,37 @@ other sources, such as the OS, other applications, input keystrokes from the use
 updates, etc. This explainer does not specify nor constrain the screen reader regarding the ordering of `ariaNotify`
 notifications with respect to these other messages that exist in some total order of the screen reader's message queue. 
 
-### Screen reader customizations for user preference 
-Screen readers offer the flexibility to customize the notification experience for their users.  Customization options
-for user preferences include disabling, prioritizing, filtering, and providing alternate output for notifications (such
-as the concept of [earcons](https://en.wikipedia.org/wiki/Earcon)). Without additional context, only two customization
-options can be offered: options that apply to all `ariaNotify` notifications universally or customization on a
-per-notification-string basis. 
-
-To aid in customization, `ariaNotify` provides a method to give context of the notification (`notificationId`). This
-explainer provides a set of potential suggestions but allows for arbitrary non-localized strings to be used by the
-content author. All strings will be processed by the user agent according to a fixed algorithm ([ASCII
-encode](https://infra.spec.whatwg.org/#ascii-encode), then [ASCII
-lowercase](https://infra.spec.whatwg.org/#ascii-lowercase), and finally, [strip leading and trailing ASCII
-whitespace](https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace)) before the notification is sent
-to the platform API (invalid strings will throw an exception). 
-
-When no `notificationId` is explicitly provided by the content author, the `notificationId` is set to `notify` by
-default.
-
-To specify a `notificationId`, pass the string as the second parameter.  Alternatively, the `notificationId` may be
-expressed in an object form with property `notificationId`. For example: 
-
-#### Example 2
-```
-// Notify of a long-running async task starting and ending 
-document.ariaNotify(
-    "Uploading file untitled-1 to the cloud.",
-    "task-progress-started" ); 
-// ... 
-myfile.asyncFileUpload().then( () => { 
-    document.ariaNotify( "File untitled-1 uploaded.", { 
-         notificationId: "task-progress-finished" } ); 
-}); 
-```
-
-Screen readers may allow their users to filter out these task-progress `notificationId`, may make these notifications
-only available at particular verbosity levels, or may replace the output strings with audio cues. 
-
 ### Managing pending notifications 
 Given that each call to `ariaNotify` will immediately dispatch the message to the platform notification API, and the
 platform notification API will immediately dispatch to all registered listeners (i.e.  screen readers), the screen
 reader will effectively prioritize and queue up the notifications, as it may not be able to fully dispatch (i.e.
 speak/Braille) the current notification before a new notification arrives. Each screen reader is responsible for
-managing the prioritization and queuing of the notifications, along with all other system notifications, etc.
-
-`ariaNotify` will also support priority information (i.e. place the notification ahead or behind pending notifications)
-along with interruptibility implications (i.e. silence the currently speaking notification and/or flush pending
-notifications). This is determined using the `priority` and `interrupt` properties. 
-
-More specifically, the `priority` property can be used to ensure the notification is placed ahead of lesser priority
+managing the prioritization and queuing of the notifications, along with all other system notifications, etc. `ariaNotify` will also support communicating priority information (i.e. place the notification ahead or behind pending notifications) using the `priority` property to ensure the notification is placed ahead of lesser priority
 notifications. 
 
 `priority` indicates where the screen reader should add the notification in relationship to any existing pending
 notifications: 
- - `important` 
-   - Screen reader should add this string to the end of any other pending important notifications but before all
-   non-important pending notifications  
- - `none` - (default) 
+ - `high` 
+   - Screen reader should add this string to the end of any other pending high priority notifications but before all
+   normal priority pending notifications  
+ - `normal` - (default) 
    - Screen reader should add this string to the end of all pending notifications. 
 
-#### Example 3
-```
-// Dispatch a notification updating background task status -- low priority
+#### Example 2
+```js
+// Dispatch a notification updating background task status -- normal/low priority
 document.ariaNotify( "Background task completed",
-    { "priority":"none",
-      "notificationId":"StatusUpdate" }); 
+    { "priority":"normal" }); 
 
 // Dispatch a high priority notification that data may be lost
 document.ariaNotify("Unable to save changes, lost connection to server",
-    { "priority":"important",
-      "notificationId":"ServerError" }); 
+    { "priority":"high" }); 
 ```
 
-Assuming the initial low priority string hasn't already started to be acted upon (spoken/brailled), the high priority
+Assuming the initial normal priority string hasn't already started to be acted upon (spoken/brailled), the high priority
 item is guaranteed to be placed ahead of the lower priority and will be processed first, followed by the lower priority
 notification. This ensures that important messages that the user should be aware of are processed and are supplied to
-the user first. 
-
-#### Example 4
-```
-// User has initiated an action which starts a generation process of data.
-// During the status of the generation, a more critical status needs to be
-// sent to the user 
-document.querySelector("#dataStatus")
-        .ariaNotify( "generating content",
-            { "notificationId":"statusUpdate" }); 
-
-document.querySelector("#dataStatus")
-        .ariaNotify( "processing data ", 
-            { "notificationId":"statusUpdate" }); 
-
-document.querySelector("#dataStatus")
-        .ariaNotify( "counting items ",
-            { "notificationId":"statusUpdate" } ); 
-
-document.ariaNotify( " server connection lost ",
-            { "priority":"important",  
-              "notificationId":"serverStatus" } ); 
-```
-
-As content is being generated, the user is informed of that status. When something more serious occurs, such as losing
-server access, the server error is prioritized above any pending status updates. 
-
-Along with the `priority`, the web author also has control over whether or not the screen reader should silence an
-existing notification that is being spoken and/or flush pending notifications waiting to be processed. This is handled
-through the `interrupt` property. 
-
-`Interrupt` indicates whether or not the screen reader should interrupt an existing notification from speaking and
-whether or not it should remove any other pending notifications. Note that the functionality of `interrupt` is dependent
-on the source, priority, and interrupt settings of the current and pending notifications. 
- - `none` - (default) 
-   - Do not interrupt anything and do not flush any pending notifications.  Simply add the notification to pending
-   notifications as per its priority. 
- - `all`
-   - Step 1: If a notification with the same source, priority, and interrupt (`all`) is speaking, immediately silence
-   that string.  
-   - Step 2: If any pending notifications with the same source, priority, and interrupt (`all`) are being held,
-   remove/flush all of them. 
-   - Step 3: Add the notification to pending notifications as per its priority.  
- - `pending`
-   - Step 1: If a notification with the same source, priority, and interrupt (`pending`) is speaking, allow the current
-   notification being spoken to fully complete. 
-   - Step 2: If any pending notification with the same source, priority, and interrupt (`pending`) is being held,
-   remove/flush all of them. 
-   - Step 3: Add the notification to pending notifications as per its priority. 
-
-`ariaNotify` can allow more scenarios than Live Regions. Here is a simple example showing three outcomes for the same
-scenario (a progress bar which reports its status at every percent increment): 
-
-#### Example 5.1
-`interrupt:none` - Every progress bar percentage from 1% to 100% will be spoken. 
-
-```
-let percent = 0; 
-function simulateProgress() { 
-  percent += 1; 
-  updateProgressBarVisual(percent); 
-  // Report progress to ariaNotify. interrupt:none will cause each percent
-  // update to be fully spoken 
-  document.querySelector("#progressBar")
-          .ariaNotify( "Progress is ${currentValue}", 
-            { "notificationId": "progressBar", 
-              "priority":"none",
-              "interrupt":"none" });
-}
-
-if (percent < 100) { 
-  setTimeout(simulateProgress, 100);
-}
-```
-
-#### Example 5.2
-`interrupt:all` - Each new progress bar percentage will interrupt/silence the currently speaking percentage, flush any
-pending percentages, and add the latest.
-
-Because the percentage is likely updating before each percentage fully speaks, the user will either hear nothing or the
-first part of each/some percentage until the last is processed where the user will hear the full string "Progress is
-100". 
-
-```
-let percent = 0; 
-function simulateProgress() { 
-  percent += 1; 
-  updateProgressBarVisual(percent);
-  // Report progress to ariaNotify. interrupt all will cause each percentage
-  // update to interrupt any existing percentage that may be speaking, flush any
-  // pending percentages, and add the latest 
-  document.querySelector("#progressBar")
-          .ariaNotify( "Progress is ${currentValue}",
-            { "notificationId":"progressBar",
-              "priority":"none",
-              "interrupt":"all" });
- }
-
-if (percent < 100) { 
-  setTimeout(simulateProgress, 100); 
-} 
-```
-
-#### Example 5.3
-`interrupt:pending` -- Assuming the first percentage "Progress is 1" is processed and sent to the synthesizer before the
-next percentage is sent, it will be completely spoken. Regardless, while any percentage is being spoken, that percentage
-will be allowed to finish speaking, other pending percentages sent to `ariaNotify` will be thrown out, and the latest
-percentage will be added.  
-
-How long it takes to speak the current percentage will determine the number of subsequent percentages that will be
-skipped. A slower speech rate will cause more percentages to be ignored. A faster speech rate will allow more
-percentages to be spoken. When the current percentage fully speaks, the next percentage that was allowed to be held will
-speak, and the process will repeat. Finally, the last percentage "Progress is 100" will be spoken.  
-
-```
-let percent = 0; 
-function simulateProgress() { 
-  percent += 1; 
-  updateProgressBarVisual(percent); 
-  // Report progress to ariaNotify. interrupt pending will allow the current
-  // percentage to finish speaking, flush any pending percentages, and add the
-  // latest 
-  document.querySelector("#progressBar")
-          .ariaNotify( "Progress is ${currentValue}",
-              { "notificationId":"progressBar", 
-                "priority":"none",
-                "interrupt":"pending" }); 
-}
-
-if (percent < 100) { 
-  setTimeout(simulateProgress, 100); 
-} 
-```
-The only difference between the three snippets is the `interrupt` setting. Each of the three settings produces a big
-experience difference for the user. 
+the user first.  
 
 ## iframes and use in subresources 
 As iframes and other embedded content comes from external sources, web authors of the top-level context will not be
@@ -372,72 +178,18 @@ permitted to add notifications within the embedded content.
 
 On the other hand, the web authors of the iframe will be able to add notifications to their content. In order for these
 notifications to propagate to the top-level browsing context, we will require a new value to the `sandbox` attribute for
-`<iframe>`, such as `allow-notifications`.
+`<iframe>` called `allow-aria-notify`.
 
 ## Relationship to ARIA Live Regions
-There are some similarities between `ariaNotify` and the existing ARIA live regions. This section maps the existing ARIA
-live region configuration attributes to the options available with `ariaNotify`: 
- - `aria-live="assertive"` is the equivalent of `"priority: important"` and `"interrupt: none"`
- - `aria-live="polite"` is the equivalent of `"priority: none"` and `"interrupt: none"`
+There are some similarities between `ariaNotify` and the existing ARIA live regions. Some functionality provided by `ariaNotify` is not supported and cannot be mapped back directly to ARIA live regions. 
 
-Beyond the above, the additional functionality provided by `ariaNotify` is not supported and cannot be mapped back
-directly to ARIA live regions. 
-
-## Fallback 
-In the case of browsers that do not yet support `ariaNotify`, we propose the following fallback mechanism using the same
+In the case of operating systems that do not yet support `ariaNotify`, we propose the following fallback mechanism using the same
 backend as the existing ARIA live regions: 
  - The message payload for `ariaNotify` is equivalent to the contents of an ARIA live region. 
- - The `notificationId` is dropped entirely. 
- - `"priority: important"` and `"priority: none"` correspond to `aria-live="assertive"` and `aria-live="polite"` ARIA
- live attributes, respectively. 
- - ARIA live regions do not support interruptibility, so all behavior of `interrupt` defaults to `none`.  
-
-Note that there is no exact mapping of `ariaNotify` back to ARIA live regions, and our proposal reflects a best effort
-to achieve similar behavior. There are cases where we will not be able to get the intended behavior using ARIA live
-regions:
-
-#### Example 6 
-```
-element.ariaNotify("This message is normal.",
-    { "priority": "none",
-      "interrupt": "none"}); 
-
-element.ariaNotify("This message should interrupt",
-    { "priority": "none", "interrupt": "all" }); 
-```
-
-In the above case, when `ariaNotify` is supported, the expected behavior would be for the second notification to silence
-the current one and flush all other queued notifications from element with priority: `"none"`. However, the fallback is
-not able to silence or flush existing notifications, as that behavior is not supported in ARIA live regions.  In the
-case that the web browser does not yet support `ariaNotify`, it is the responsibility of the web author to detect and
-fallback to ARIA live regions.  The above conversion may serve as a guide on how to do so. One can detect whether or not
-`ariaNotify` is supported by checking if the method exists on the document or element in question: 
-
-```
-if ("ariaNotify" in element) { 
-  element.ariaNotify(...); 
-} 
-```
+ - `"priority: high"` corresponds to ARIA live's `aria-live="assertive"` 
+ - `"priority: normal"` corresponds to ARIA live's `aria-live="polite"`
 
 ## Open Issues 
-### Predefined notificationIds 
-The use of `notificationId` give the screen reader contextual information regarding the notification which allows for
-creative approaches to dispatching the information to their users. The question then arises of whether the API should
-create a predetermined set of `notificationId` names for common/expected scenarios or whether having predefined names is
-pointless given no matter the list, it will always fall short. 
-
-Possible examples of predefined `notificationId` could be something like: 
- - Recent action completion status: `action-completion-success`, `action-completion-warning`,
- `action-completion-failure` 
- - Async/indeterminate task progress: `task-progress-started`, `task-progress-ongoing`, `task-progress-blocked`,
- `task-progress-canceled`, `task-progress-finished`
- - Navigational boundary endpoints: `boundary-beginning`, `boundary-middle`, `boundary-end`
- - Value-relative state changes: `value-increase`, `value-decrease`
- - User interface state: 
-  - `ui-clickable / ui-clicked`
-  - `ui-enabled / ui-disabled`
-  - `ui-editable / ui-readonly`
-  - `ui-selected / ui-unselected`
 
 ### Spamming mitigations 
 The general nature of a notification API means that authors could use it for scenarios that are already handled by
@@ -456,31 +208,275 @@ Opportunities exist to mitigate against these possibilities:
  - Make use of [User Activation](https://html.spec.whatwg.org/multipage/interaction.html#tracking-user-activation)
  primitives to limit usage of this API to only actions taken by the user. 
 
+### `interrupt`
+A previous version of this explainer included an `interrupt` property (now described below). It seems unlikely that any implementers will include this property in their initial implementation, but including it in the initial spec would allow app developers to plan ahead when they initially start using `ariaNotify` and the behavior will be progressively enhanced when `interrupt` is implemented.
+
 ## Future considerations 
-1. `ariaNotify` can be extended in the future to handle more functionality as needs arise. Two possible examples are
-provided below.There may be a need for a web author to supply a Braille specific string separate from the speech string.
+`ariaNotify` can be extended in the future to handle more functionality as needs arise. We've discussed a few of these in-depth and have included them below.
 
-    For example, an author could supply "3 stars" as the speech string to indicate a retail item's rating. However, to better map within a Braille display, the author could supply `***` as a Braille alternative string. 
+### Braille and speech markup
+There may be a need for a web author to supply a Braille specific string separate from the speech string. For example, an author could supply "3 stars" as the speech string to indicate a retail item's rating. However, to better map within a Braille display, the author could supply `***` as a Braille alternative string. The API could easily be extended by adding another optional property for Braille strings. For example: 
 
-    The API could easily be extended by adding another optional property for Braille strings. For example: 
-
-```
+```js
 document.ariaNotify( "3 stars", {"braille":"***"} );
 ```
 
-2. There may also be a use case where an author would want to allow the speech string to be marked up to guarantee a
+There may also be a use case where an author would want to allow the speech string to be marked up to guarantee a
 specific pronunciation. This can be useful in cases where the speech engine may not produce the best experience for the
 user.
 
-    For example, maybe you would like "911" pronounce as "9 1 1" in some cases. Or in a spreadsheet, you may want to hear "a
-1" spoken with a long "a" sound instead of a short "a" sound (i.e. "ay 1" as opposed to  "uh 1").  
+For example, maybe you would like "911" pronounce as "9 1 1" in some cases. Or in a spreadsheet, you may want to hear "a 1" spoken with a long "a" sound instead of a short "a" sound (i.e. "ay 1" as opposed to  "uh 1"). The API could easily be extended by adding another property for strings marked up with, say, SSML: 
 
-    The API could easily be extended by adding another property for strings marked up with, say, SSML: 
-
-```
+```js
 document.ariaNotify( "911", {"SSML":"<say-as
 interpret-as=\x22\"""digits\x22""">911" });
 ``` 
+
+Related issues:
+- [w3c/aria #2334](https://github.com/w3c/aria/issues/2334)
+- [w3c/aria #2335](https://github.com/w3c/aria/issues/2335)
+
+### Interruption
+#### Use Case
+Looking at our set presence example above where the user pressed Shift+Alt+4 to toggle their presence state to "do not
+ disturb". The application responds with "presence set to do not disturb". With configurable interruption, the application could handle more complex scenarios: 
+   - Most recent notification priority: The user presses Shift+Alt+3 by mistake, and then quickly presses Shift+Alt+4.
+   The application began to respond with "presence..." [set to busy] but interrupts itself with the latest response
+   "presence set to do not disturb". 
+   - Overall priority: The user presses Shift+Alt+4, then immediately issues a command to the screen reader to jump to
+   the next header. The response "presence set to do not disturb" may interrupted (in addition to deferred or pre-empted)
+   by the announcement of the focus change event depending on the content author's design.
+
+#### Proposal - `interrupt`
+`ariaNotify` could also handle interruptibility implications (i.e. silence the currently speaking notification and/or flush pending notifications) via the `interrupt` property. `interrupt` indicates whether or not the screen reader should interrupt an existing notification from speaking and
+whether or not it should remove any other pending notifications. Note that the functionality of `interrupt` is dependent
+on the source, priority, and interrupt settings of the current and pending notifications. 
+ - `none` - (default) 
+   - Do not interrupt anything and do not flush any pending notifications.  Simply add the notification to pending
+   notifications as per its priority. 
+ - `all`
+   - Step 1: If a notification with the same source, priority, and interrupt (`all`) is speaking, immediately silence
+   that string.  
+   - Step 2: If any pending notifications with the same source, priority, and interrupt (`all`) are being held,
+   remove/flush all of them. 
+   - Step 3: Add the notification to pending notifications as per its priority.  
+ - `pending`
+   - Step 1: If a notification with the same source, priority, and interrupt (`pending`) is speaking, allow the current
+   notification being spoken to fully complete. 
+   - Step 2: If any pending notification with the same source, priority, and interrupt (`pending`) is being held,
+   remove/flush all of them. 
+   - Step 3: Add the notification to pending notifications as per its priority. 
+
+Related issue - [w3c/aria #2331](https://github.com/w3c/aria/issues/2331)
+
+#### Example 3 - `interrupt`
+Here is a simple example showing three outcomes for the same scenario (a progress bar which reports its status at every percent increment): 
+
+##### Example 3.1
+`interrupt:none` - Every progress bar percentage from 1% to 100% will be spoken. 
+
+```js
+let percent = 0; 
+function simulateProgress() { 
+  percent += 1; 
+  updateProgressBarVisual(percent); 
+  // Report progress to ariaNotify. interrupt:none will cause each percent
+  // update to be fully spoken 
+  document.querySelector("#progressBar")
+          .ariaNotify( "Progress is ${currentValue}", 
+            { "priority":"normal",
+              "interrupt":"none" });
+}
+
+if (percent < 100) { 
+  setTimeout(simulateProgress, 100);
+}
+```
+
+##### Example 3.2
+`interrupt:all` - Each new progress bar percentage will interrupt/silence the currently speaking percentage, flush any
+pending percentages, and add the latest.
+
+Because the percentage is likely updating before each percentage fully speaks, the user will either hear nothing or the
+first part of each/some percentage until the last is processed where the user will hear the full string "Progress is
+100". 
+
+```js
+let percent = 0; 
+function simulateProgress() { 
+  percent += 1; 
+  updateProgressBarVisual(percent);
+  // Report progress to ariaNotify. interrupt all will cause each percentage
+  // update to interrupt any existing percentage that may be speaking, flush any
+  // pending percentages, and add the latest 
+  document.querySelector("#progressBar")
+          .ariaNotify( "Progress is ${currentValue}",
+            { "priority":"normal",
+              "interrupt":"all" });
+ }
+
+if (percent < 100) { 
+  setTimeout(simulateProgress, 100); 
+} 
+```
+
+##### Example 3.3
+`interrupt:pending` -- Assuming the first percentage "Progress is 1" is processed and sent to the synthesizer before the
+next percentage is sent, it will be completely spoken. Regardless, while any percentage is being spoken, that percentage
+will be allowed to finish speaking, other pending percentages sent to `ariaNotify` will be thrown out, and the latest
+percentage will be added.  
+
+How long it takes to speak the current percentage will determine the number of subsequent percentages that will be
+skipped. A slower speech rate will cause more percentages to be ignored. A faster speech rate will allow more
+percentages to be spoken. When the current percentage fully speaks, the next percentage that was allowed to be held will
+speak, and the process will repeat. Finally, the last percentage "Progress is 100" will be spoken.  
+
+```js
+let percent = 0; 
+function simulateProgress() { 
+  percent += 1; 
+  updateProgressBarVisual(percent); 
+  // Report progress to ariaNotify. interrupt pending will allow the current
+  // percentage to finish speaking, flush any pending percentages, and add the
+  // latest 
+  document.querySelector("#progressBar")
+          .ariaNotify( "Progress is ${currentValue}",
+              { "priority":"normal",
+                "interrupt":"pending" }); 
+}
+
+if (percent < 100) { 
+  setTimeout(simulateProgress, 100); 
+} 
+```
+The only difference between the three snippets is the `interrupt` setting. Each of the three settings produces a big
+experience difference for the user. 
+
+##### Fallback
+In the case of operating systems that do not yet support `ariaNotify`, ARIA live regions do not support interruptibility, so all behavior of `interrupt` defaults to `none`. 
+
+The addition of `interrupt` would mean that there is no exact mapping of `ariaNotify` back to ARIA live regions, and our proposal reflects a best effort
+to achieve similar behavior. There are cases where we will not be able to get the intended behavior using ARIA live
+regions:
+
+```js
+element.ariaNotify("This message is normal.",
+    { "priority": "normal",
+      "interrupt": "none"}); 
+
+element.ariaNotify("This message should interrupt",
+    { "priority": "normal", "interrupt": "all" }); 
+```
+
+In the above case, when `ariaNotify` is supported, the expected behavior would be for the second notification to silence
+the current one and flush all other queued notifications from element with priority: `"normal"`. However, the fallback is
+not able to silence or flush existing notifications, as that behavior is not supported in ARIA live regions.  In the
+case that the web browser does not yet support `ariaNotify`, it is the responsibility of the web author to detect and
+fallback to ARIA live regions.  The above conversion may serve as a guide on how to do so. One can detect whether or not
+`ariaNotify` is supported by checking if the method exists on the document or element in question: 
+
+```js
+if ("ariaNotify" in element) { 
+  element.ariaNotify(...); 
+} 
+```
+
+### Screen reader customizations for user preference 
+#### Use Case
+User is editing text using bold, italic, underline, etc.. By default, the
+ application responds with confirmations such as "bold on" / "bold off" as they toggle each state. As the application
+ sends the confirmation for the user's actions, it also attached a unique identifier indicating the string is a
+ confirmation for a basic editing command. Based on this identifier, the screen reader gives their users the following
+ choices: 
+   - Speak and Braille the confirmation notice, as normal 
+   - Speak but do not flash the confirmation in Braille 
+   - Filter/suppress the entire confirmation from speech and Braille 
+   - Replace speech with a quick confirmation tone 
+   - Any other option the screen reader believes would be beneficial to their users 
+
+#### Proposal - `type`
+Screen readers offer the flexibility to customize the notification experience for their users.  Customization options
+for user preferences include disabling, prioritizing, filtering, and providing alternate output for notifications (such
+as the concept of [earcons](https://en.wikipedia.org/wiki/Earcon)). Without additional context, only two customization
+options can be offered: options that apply to all `ariaNotify` notifications universally or customization on a
+per-notification-string basis. 
+
+To aid in customization, `ariaNotify` provides a method to give context of the notification (`type`). This
+explainer provides a set of potential suggestions but allows for arbitrary non-localized strings to be used by the
+content author. All strings will be processed by the user agent according to a fixed algorithm ([ASCII
+encode](https://infra.spec.whatwg.org/#ascii-encode), then [ASCII
+lowercase](https://infra.spec.whatwg.org/#ascii-lowercase), and finally, [strip leading and trailing ASCII
+whitespace](https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace)) before the notification is sent
+to the platform API (invalid strings will throw an exception). 
+
+When no `type` is explicitly provided by the content author, the `type` is set to `notify` by
+default.
+
+To specify a `type`, pass the string as the second parameter.  Alternatively, the `type` may be
+expressed in an object form with property `type`. For example: 
+
+```js
+// Notify of a long-running async task starting and ending 
+document.ariaNotify(
+    "Uploading file untitled-1 to the cloud.",
+    "task-progress-started" ); 
+// ... 
+myfile.asyncFileUpload().then( () => { 
+    document.ariaNotify( "File untitled-1 uploaded.", { 
+         type: "task-progress-finished" } ); 
+}); 
+```
+
+Screen readers may allow their users to filter out these task-progress `type`, may make these notifications
+only available at particular verbosity levels, or may replace the output strings with audio cues. 
+
+#### Example 5 - `type`
+```js
+// User has initiated an action which starts a generation process of data.
+// During the status of the generation, a more critical status needs to be
+// sent to the user 
+document.querySelector("#dataStatus")
+        .ariaNotify( "generating content",
+            { "type":"statusUpdate" }); 
+
+document.querySelector("#dataStatus")
+        .ariaNotify( "processing data ", 
+            { "type":"statusUpdate" }); 
+
+document.querySelector("#dataStatus")
+        .ariaNotify( "counting items ",
+            { "type":"statusUpdate" } ); 
+
+document.ariaNotify( " server connection lost ",
+            { "priority":"high",  
+              "type":"serverStatus" } ); 
+```
+
+As content is being generated, the user is informed of that status. When something more serious occurs, such as losing server access, the server error is prioritized above any pending status updates. Screen readers can choose to offer settings for users to manage specific types, like supressing minor `statusUpdate` notifications entirely.
+
+#### Fallback 
+In the case of operating systems that do not yet support `ariaNotify`, `type` is dropped entirely when falling back to ARIA live regions. 
+
+#### Open Issue - Predefined types 
+The use of `type` give the screen reader contextual information regarding the notification which allows for
+creative approaches to dispatching the information to their users. The question then arises of whether the API should
+create a predetermined set of `type` names for common/expected scenarios or whether having predefined names is
+pointless given no matter the list, it will always fall short. 
+
+Possible examples of predefined `type` could be something like: 
+ - Recent action completion status: `action-completion-success`, `action-completion-warning`,
+ `action-completion-failure` 
+ - Async/indeterminate task progress: `task-progress-started`, `task-progress-ongoing`, `task-progress-blocked`,
+ `task-progress-canceled`, `task-progress-finished`
+ - Navigational boundary endpoints: `boundary-beginning`, `boundary-middle`, `boundary-end`
+ - Value-relative state changes: `value-increase`, `value-decrease`
+ - User interface state: 
+  - `ui-clickable / ui-clicked`
+  - `ui-enabled / ui-disabled`
+  - `ui-editable / ui-readonly`
+  - `ui-selected / ui-unselected`
+
+  Related issue - [w3c/aria #2330](https://github.com/w3c/aria/issues/2330)
 
 ## FAQ 
 **Is this API going to lead to privacy concerns for AT users?**
@@ -504,8 +500,8 @@ Adding `ariaNotify` to Elements was driven by several goals:
 
 Screen reader users can customize the verbosity of the information (and context) that is read to them via settings.
 Screen reader vendors can also adapt the screen reader on a per site or per app basis for the best experience of their
-users. `ariaNotify` offers `notificationId` as a mechanism to allow screen reader vendors or users to customize not only the
-general use of `ariaNotify` on websites, but also individual notifications by `notificationId` (or specific notification
+users. `ariaNotify` offers `type` as a mechanism to allow screen reader vendors or users to customize not only the
+general use of `ariaNotify` on websites, but also individual notifications by `type` (or specific notification
 string instances in the limit). 
 
 **Tooling help**
