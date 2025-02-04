@@ -1,4 +1,4 @@
-# An API for a more Precise Measurement of Browser Frame Rate
+# A More Precise Way to Measure Frames per Second (fps)
 
 [comment]: < ** (*Same-Origin*) >
 
