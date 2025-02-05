@@ -32,7 +32,21 @@ Our goal is to create an API for a more precise measure of browser frame rate. P
 *	We are not trying to increase fps, or improve animation, rather measure fps so we can solve other performance issues in the future
 
 ## Use Cases
-### Keep it general
+
+###	1. Gaming
+* Higher frames per second (fps) lead to smoother animations and a more enjoyable gaming experience. However, since (rAF) calls can be affected by how busy the main thread is, this method may overlook animation tasks performed by a compositor thread. Specific metrics can significantly impact gameplay elements, like how quickly characters can move or decisions can be made, which affects the overall user experience. Game developers are constantly striving to make their visuals more consistent and immersive. To guarantee smooth gameplay, developers need to test animations repeatedly.
+	
+###	2. Continuously scrolling or selecting
+* FPS can be difficult to measure when relating to user interaction. An average metric isn't always effective because in certain apps, animation begins on a user click. There doesn't need to be a continuous measurement since without a user click, there is no animation. Some examples of this include scrolling a long grid or document, selecting or highlighting large areas of the screen, resizing images, or dragging objects across the screen.
+  
+### 3. Measuring animation and graphics performance of browsers
+* The public benchmark, MotionMark, measures how well different browsers render animation. Its score tells users the most complex animation that the browser can render at a certain frame rate. The benchmark is most accurate when it gets the most precise measure of frame rate. Currently, the method using rAF to measure frame rate doesn't reflect the user's actual experience.
+
+### 4. Testing animation performance on different hardware
+* Testing the performance of animation on different hardware/browser combinations may expose performance issues that could not be seem with imprecise metrics.
+	
+
+
 
 
 
