@@ -47,7 +47,6 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
 ## Proposal - `@sheet`
 Create a new `@sheet` CSS block, for separating style sheets with named identifiers.
 
-
 ```css
 @sheet foo {
   div {
@@ -70,7 +69,7 @@ This stylesheet will create three CSS sheets - The default sheet, `foo`, and `ba
 ### Importing a specific sheet via `@import`
 ```html
 <style>
-  @import sheet("sheet.css#foo");
+  @import foo from "sheet.css";
 </style>
 ```
 
@@ -78,7 +77,7 @@ This will import only the rules for `foo` - in this case, the `div { color: red;
 
 ### Importing a specific sheet via the `<link>` tag
 ```html
-<link rel="stylesheet" href="sheet.css#foo" />
+<link rel="stylesheet" href="sheet.css" sheet="foo" />
 ```
 
 This will also import only this rules for "foo" - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
@@ -87,7 +86,7 @@ This will also import only this rules for "foo" - in this case, the `div { color
 Shadow DOM isolates styles, but fragment identifiers from the light DOM are global and referenceable from shadow DOM (but not vice versa). This enables Declarative Shadow DOM to import `@sheet` references from the light DOM:
 
 ```html
-<style>
+<style id="sheet">
 @sheet foo {
   div {
     color: red;
@@ -95,7 +94,7 @@ Shadow DOM isolates styles, but fragment identifiers from the light DOM are glob
 }
 </style>
 <template shadowrootmode="open">
-  <link rel="stylesheet" href="#foo" />
+  <link rel="stylesheet" href="#sheet" sheet="foo" />
   <span>I'm in the shadow DOM</span>
 </template>
 ```
@@ -109,6 +108,16 @@ or imported from JavaScript:
 ```
 
 ## Detailed design discussion
+
+#### Specific Changes to HTML and CSS
+
+This proposal augments the HTML `<link>` tag in two ways:
+1. Fragment identifiers to same-document `<style>` tags are supported in the `href` attribute to allow for `@sheet` to work with same-document `<style>` tags.
+2. The `sheet` attribute, which scopes the specified style reference to rules within an `@sheet` identifier (should this be a list of identifiers so multiple sheets can be imported?)
+
+This proposal augments the CSS `@import` syntax by adding an optional named sheet identifier ( `@import foo from "sheet.css";`).
+
+The `@sheet` fragment syntax (`<link rel="stylesheet" href="sheet.css#foo" />`) that was agreed upon in https://lists.w3.org/Archives/Public/www-style/2023Apr/0004.html should be revisited with these new applications in mind, as it is not compatible with same-document `<style>` references.
 
 #### Named Imports with Imperative Shadow DOM
 
@@ -161,15 +170,15 @@ import { bar } from 'sheet.css' with { type: 'css' }
 ```html
 <style>
   /* The following two imports should only make a single network request. */
-  @import "sheet.css#foo";
-  @import "sheet.css#bar";
+  @import foo from "sheet.css";
+  @import bar from "sheet.css";
 </style>
 ```
 
 ```html
 <!-- The following two link tags should only make a single network request. -->
-<link rel="stylesheet" href="sheet.css#foo" />
-<link rel="stylesheet" href="sheet.css#bar" />
+<link rel="stylesheet" href="sheet.css" sheet="foo" />
+<link rel="stylesheet" href="sheet.css" sheet="bar" />
 ```
 
 #### Interaction with CSSOM
@@ -200,30 +209,30 @@ interface CSSStyleSheet : StyleSheet {
 
 ## Open Issues
 
-1. [#934](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/934) - Whether rules are applied automatically for `@sheet` definitions, or whether they need to be imported to apply. The CSS Working Group did not have a consensus.
-2. [#935](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/935) - Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).
+1. ~~[#934](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/934) - Whether rules are applied automatically for `@sheet` definitions, or whether they need to be imported to apply. The CSS Working Group did not have a consensus.~~ Rules are not applied by default - they must be deliberately included by sheet identifier.
+2. ~~[#935](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/935) - Fragment-only identifiers (without a URL) should allow inline `@sheet` references on the same document to be included globally (even within shadow roots). This wasn't brought up in the CSSWG discussions at all, but is important for DSD without requiring an external file (to avoid FOUC).~~ Same-document local sheet references are supported.
 3. [#936](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/936) - Behavior of `@import` - should `@import` be possible within `@sheet` at all, should it be allowed if it's the first/only statement, or should it be blocked? There was discussion of this in the CSSWG, but no conclusion was reached. This was briefly discussed in this CSSWG conversation: https://lists.w3.org/Archives/Public/www-style/2023Apr/0004.html
 4. [#937](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/937) - What happens with multiple `@sheet` definitions with the same identifier? First-definition wins, or do they get merged like `@layer`? Again, this was brought up in the CSSWG but not resolved (https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1498299448). Note that it's possible to have a "Flash of other-styled content" if it's last-defintion-wins, as the first definition may apply, then a later definition from an external CSS file may override it.
 5. [#938](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/938) - Do we want to be able to access sheets declared in shadow DOM from light DOM? For example:
 ```html
 <template shadowrootmode="open">
-  <style>
+  <style id="sheet">
     @sheet foo {
       div {
         color: red;
       }
     }
   </style>
-  <link rel="stylesheet" href="#foo" />
+  <link rel="stylesheet" href="#foo" sheet="foo" />
   <span>I'm in the shadow DOM</span>
 </template>
 
-<link rel="stylesheet" href="#foo" />
+<link rel="stylesheet" href="#sheet" sheet="foo" />
 <span>I'm in the light DOM</span>
 ```
 6. [#939](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/939) - The name `nestedStyleSheets` is up for discussion.
 7. [#939](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/939) - Should we add `name` to the `StyleSheet` interface or overload the existing `title` attribute instead?
-8. [#940](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/940) - If a stylesheet contains named `@sheet` references *and* rules outside of the `@sheet` references, what happens in all cases when a fragment identifier is *not* specified? For example:
+8. ~~[#940](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/940) - If a stylesheet contains named `@sheet` references *and* rules outside of the `@sheet` references, what happens in all cases when a fragment identifier is *not* specified? For example:~~
 
 sheet.css:
 
@@ -245,12 +254,15 @@ div {
 <link rel="stylesheet" href="sheet.css"> <!-- Does the @sheet "foo" get dropped? -->
 ```
 
+Sheet "foo" gets dropped, as it was not explicitly imported.
+
 ## References & acknowledgements
 Many thanks for valuable feedback and advice from:
 
 - Alison Maher
 - Daniel Clark
 - Justin Fagnani
+- Noam Rosenthal
 - Tab Atkins Jr.
 - Tien Mai
 - Westbrook Johnson
