@@ -74,10 +74,11 @@ Authors are used to the [recommended practice of adding touch-action: none](http
 <textarea style="touch-action:pan-x handwriting;"></textarea> <!-- the computed handwriting value is true -->
 <textarea style="touch-action:manipulation;"></textarea>      <!-- the computed handwriting value is true -->
 
-<!-- Having a parent that disables handwriting causes all its children to lose handwriting capabilities -->
-<div style="touch-action:pan-x;">                             <!-- the computed handwriting value is false -->
-  <textarea></textarea>                                       <!-- the computed handwriting value is false -->
-  <textarea style="touch-action:handwriting;"></textarea>     <!-- the computed handwriting value is false -->
+<!-- Intermediate scroller parent that allows direct manipulation behaviors for handwriting -->
+<div style="touch-action: none;">
+  <div style="overflow: auto; touch-action: manipulation">
+    <div contenteditable="true"></div>                        <!-- the computed handwriting value is true -->
+  </div>
 </div>
 
 <div class="handwritable">
@@ -101,18 +102,31 @@ User Agents may implement certain capabilities to be exclusive to certain device
 
 ### Determining enablement
 
-All CSS properties have computed values for all elements. The enablement of handwriting in a given `element` can be determined by running the following steps:
+The enablement of handwriting in a given `element` will follow the same rules as the enablement of panning does, according to the [spec](https://www.w3.org/TR/pointerevents/#determining-supported-direct-manipulation-behavior):
+> - A direct manipulation interaction for panning is supported if it [conforms](https://www.w3.org/TR/pointerevents/#dfn-conforming-touch-behavior) to the `touch-action` property of each element between the hit tested element and its nearest inclusive ancestor that is a [scroll container](https://www.w3.org/TR/css-overflow-3/#scroll-container) (as defined in [[CSS-OVERFLOW-3](https://www.w3.org/TR/pointerevents/#bib-css-overflow-3 "CSS Overflow Module Level 3")]).
 
-1. If the computed value for `touch-action` on `element` and all of its ancestors include either keyword `auto`, `handwriting`, or `manipulation`, **enable handwriting**.
-2. If the computed value for `touch-action` on `element` or any of its ancestors does not include either keyword `auto`, `handwriting`, or `manipulation`, **disable handwriting**.
 
-### Caveats / Cons
+### Addressing concerns
 
-A few pain points have been brought up that are worth discussion:
-* Web pages that currently have the `touch-action` property set for different elements will lose the handwriting capabilities on this element even if they don't want to disable it. When the new keyword ships, the absence of the value will be interpreted as the author of the webpage intentionally disabling handwriting.
-* Authors that specify `touch-action: manipulation` will be enabling `handwriting`, even when they might not want the behavior enabled in their webpage. These authors would then need to update their webpages to explicitly mention which behaviors they want, i.e. : `touch-action: pan-x pan-y pinch-zoom`.
-*   Using `touch-action` restricts handwriting implementations to touch input devices (such as stylus and touch), even though a platform could support handwriting capabilities for other devices, like mouse pointer events.
-	* `touch-action` determines which behaviors are allowed for touch input devices regardless of which device is being used, either touch or stylus. In the future, these input devices might be separated into two different CSS attributes to allow things like, say, enable panning with finger touch events and only enable handwriting with a stylus.  
+A few pain points have been brought up that are worth highlighting:
+#### Losing handwriting capabilities
+Web pages that currently have the `touch-action` property set for different elements will lose the handwriting capabilities on this element even if they don't want to disable it. When the new keyword ships, the absence of the value will be interpreted as the author of the webpage intentionally disabling handwriting.
+
+Input fields and text areas are scrolling containers, and by making `handwriting` follow the `pan-*` rules for enablement, we expect that the amount of elements that will be affected by the new keyword to be minimized, as only input fields with explicitly stated `touch-action` fields will lose their handwriting capabilities.
+
+#### Unintentionally enabling handwriting
+ The  `manipulation` keyword is [defined as](https://www.w3.org/TR/pointerevents/#details-of-touch-action-values):
+> **manipulation**
+The user agent _MAY_ consider direct manipulation interactions that begin on the element only for the purposes of panning and **continuous** zooming (such as pinch-zoom), but _MUST NOT_ trigger other related behaviors that rely on multiple activations that must happen within a set period of time (such as double-tap to zoom, or double-tap and hold for single-finger zoom).
+
+Authors that specify `touch-action: manipulation` will be enabling `handwriting`, even when they might not want the behavior enabled in their webpage.
+
+The implementation of the `handwriting` keyword will necessitate updating `manipulation`'s definition, and the web page authors will need to update their webpages to explicitly mention which behaviors they want, i.e. : `touch-action: pan-x pan-y pinch-zoom`.
+#### "touch-action" is restricting handwriting to touch events
+Using `touch-action` restricts handwriting implementations to touch input devices (such as stylus and touch), even though a platform could support handwriting capabilities for other devices, like mouse pointer events.
+
+`touch-action` determines which behaviors are allowed for touch input devices regardless of which device is being used, either touch or stylus. In the future, these input devices might be separated into two different CSS attributes to allow things like, say, enable panning with finger touch events and only enable handwriting with a stylus. This is a topic with open discussions ([pointerevents/#203](https://github.com/w3c/pointerevents/issues/203), [pointerevents/#512](https://github.com/w3c/pointerevents/issues/512)) that will likely follow up and absorb the `handwriting` keyword.
+ 
 ## Privacy and Security Considerations
 
 ### Privacy
