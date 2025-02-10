@@ -34,7 +34,7 @@ To fix this situation, we require a bucket to store this contextual information.
 ## Use Cases
 This will allow developers 2 cases for the standard title bar.
 1.	Installed web apps that only have the app’s name as define in the manifest file.
-    * Useful to replicate some native experiences that only have the app’s name in the title bar (This is the default behaviour for web apps that do not specify the app-title meta tag or define it through the JS API).
+    * Useful to replicate some native experiences that only have the app’s name in the title bar (This is the default behaviour for web apps that do not specify the app-title meta tag or set the content to a blank or empty string).
 2.	Installed Web Apps that have the app’s name and a app-title or detail as defined in the document’s meta tag.
     * Useful for apps that can have multiple instances running with several documents open, such as word processors.
 
@@ -44,7 +44,6 @@ As defined in the [HTML specification](https://html.spec.whatwg.org/multipage/se
 
 `<meta name="app-title" content="additional/secondary text to go in the title bar">`
 
-
 The following image is a mockup of a PWA using the `app-title` meta-tag.
 
 ![image of twitter installed web app with a long text in the title bar](webAppTitleBar2.png)
@@ -52,6 +51,8 @@ The following image is a mockup of a PWA using the `app-title` meta-tag.
 This is achieved by adding the following meta tag in the head of the page:
 
 `<meta name="app-title" content="Direct Messages">`
+
+
 
 ## Privacy and Security Considerations
 

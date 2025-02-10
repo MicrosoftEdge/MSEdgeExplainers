@@ -79,6 +79,7 @@ we move them into the [Alumni section](#alumni-) below.
 | [Split Tab Navigation](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/SplitTab/NavigationInSplitTab/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Split%20Tab">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Split%20Tab?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=xuzhengyi1995&labels=Split+Tab&template=split-tab.md&title=%Split+Tab%5D+Issue) | Web Applications |
 | [Set Default Audio Output Device](SetDefaultSinkId/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SetDefaultSinkId"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/SetDefaultSinkId?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=kyerebo&labels=SetDefaultSinkId&template=setDefaultSinkId.md&title=%5BSetDefaultSinkId%5D+Issue) | WebRTC |
 | [Handwriting attribute](Handwriting/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Handwriting"> ![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Handwriting?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=adettenb&labels=Handwriting&template=Handwriting.md&title=%5BHandwriting%5D+Issue) | HTML |
+| [AudioContext Interrupted State](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AudioContextInterruptedState/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/AudioContext%20Interrupted%20State">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/AudioContext%20Interrupted%20State?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=gabrielbrito&labels=AudioContext+Interrupted+State&title=%5BAudioContext+Interrupted+State%5D+%3CTITLE+HERE%3E) | WebAudio |
 
 
 # Alumni 🎓
@@ -131,7 +132,8 @@ standards communities. Thanks for your continued interest!
 |[Primitives for Enlightened Experiences on Foldable Devices (CSS parts)](https://github.com/WICG/visual-viewport/blob/gh-pages/segments-explainer/SEGMENTS-EXPLAINER.md)|[Web Incubator Community Group](https://wicg.io/)|[2023-07-17](Foldables/explainer.md)|
 | [Exporting IDs from shadow roots for cross-root ARIA](https://github.com/WICG/aom/blob/gh-pages/exportid-explainer.md) | [Web Incubator Community Group](https://wicg.io/) | 2023-09-22 |
 | [writingsuggestions attribute](https://html.spec.whatwg.org/#writing-suggestions) | [WHATWG](https://whatwg.org/) | [2024-03-12](WritingSuggestions/explainer.md)
-| [PointerEvent DeviceId](https://github.com/WICG/pointer-event-extensions/blob/main/pointer-event-device-id-explainer.md) | [W3C Web Incubator Community Group](https://wicg.io/) | [2024-01-11](PointerEventDeviceId/explainer.md)
+| [PointerEvent DeviceId](https://github.com/WICG/pointer-event-extensions/blob/main/pointer-event-device-id-explainer.md) | [W3C Web Incubator Community Group](https://wicg.io/) | [2024-01-11](PointerEventDeviceId/explainer.md) |
+| [Gamepad Trigger Rumble](https://w3c.github.io/gamepad/#dom-gamepadhapticactuator) | [W3C Web Applications Working Group](https://www.w3.org/groups/wg/webapps/) | [2024-04-10](GamepadHapticsActuatorTriggerRumble/explainer.md) |
 
 
 # DevTools 🧰
@@ -229,7 +231,6 @@ We'd love to hear your feedback!
 | [Time-limited Permissions](TimeLimitedPermissions/Explainer.md) | | 2023-07-17 |
 | [Cache API Response Metadata](CacheAPIResponseMetadata/explainer.md) | | 2023-07-17 |
 | [First Run Permissions Prompt](InstallTimePermissionsPrompt/Explainer.md) | | 2023-07-17 |
-| [Gamepad Trigger Rumble](GamepadHapticsActuatorTriggerRumble) | This specification has since been superceded by the Web Haptics or HapticsDevice API | 2023-07-17 |
 | [Version History](VersionHistory/explainer.md) | | 2023-07-17 |
 | [Confirmation of Action](Accessibility/ConfimrationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)| 2023-11-13 |
 | [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTimingProtocolLaunchExtensions/explainer.md) | | 2024-04-22 |
