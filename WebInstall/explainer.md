@@ -77,7 +77,7 @@ Building on the previous use case, the website can also provide a way to directl
 Developers of Search Engines could use the API to include a way to directly install an origin that is an application. A new feature could be offered by search engines that could see them facilitating a frictionless way to acquire an app that a user is searching for. This could also aid discovery as a user might not be aware that a specific origin has an associated web application they could acquire. 
 
 > **Note:**
->This is enabled by the installation of a *background document*.
+> This is enabled by the installation of a *background document*.
 
 ### **Creation of online catalogs**
 
