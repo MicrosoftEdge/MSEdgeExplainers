@@ -162,7 +162,7 @@ To install an application with the Web Install API, the process is as follows:
 1. User gesture activates code that calls the `install()` method. 
 2. If current document has a manifest file, continue. Else reject with `DataError`.
 3. If manifest file has an `id` field defined, continue. Else reject with `DataError`.
-4. UA shows the acquisition confirmation UX (prompt/dialog). If the user accepts, continue. Else reject with `AbortError`. 
+4. UA shows the acquisition/installation confirmation UX (prompt/dialog). If the user accepts, continue. Else reject with `AbortError`. 
 7. Promise resolves with processed `id` of installed app and application follows the platform's post-install UX (adds to Dock/opens app/adds to mobile app drawer).
 
 #### Background Document (1 param)
