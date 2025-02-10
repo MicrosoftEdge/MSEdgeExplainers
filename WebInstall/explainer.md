@@ -285,7 +285,7 @@ The app located in `https://productivitysuite.com` displays in its homepage 3 bu
 
 The end user goes to the homepage in the `https://productivitysuite.com`'s origin and clicks on the button to install the presentation application. As this is a *background document* (not the current document the user is interacting with) and the origin does not have permission to install apps, a permission prompt will appear. If this permission is granted for the origin, it can now install apps. After this permissin prompt the second prompt where the user confirms the isntallation appears.  
 
-The end user then tries to install the text processor, and since the origin has been granted the permission, then it will prompt to confirm that "productivity suite wants to install text procesor". The installation permission is bound to an origin.
+The end user then tries to install the text processor, and since the origin has been granted the permission, then the UA will skip the permission prompt and skip directly to confirm installation with a prompt indicating that "productivity suite wants to install text processor". The installation permission is bound to an origin.
 
 If the user were to deny the permission to install for the origin, they could browse to the app itself and once there, they could install the application. In this case, there wouldn't be any permission prompt required as this would now be a *current document* installation. 
 
