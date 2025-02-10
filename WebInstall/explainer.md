@@ -17,7 +17,7 @@ The Web Install API **aims to standardize the way installations are invoked by *
 
 Inherently, these alternative user flows to "install" an app rely on multi-step processes that at best require a couple of clicks to navigate to an origin and install it, and at worst involve the user searching on browser menus for a way to add the app to their device. The web platform is not currently capable of providing a seamless, consistent experience that allows users to discover and acquire applications in a frictionless manner. Every additional step in the acquisition funnel for web apps comes with an additional drop off rate as well. 
 
-Moreover, the **Web Install API feature is beneficial for app discovery**: it allows developers to create their own acquisition mechanism and tailor it to **benefit users that:**
+Moreover, the **Web Install API feature is beneficial for app discovery**: it allows developers to provide a consistent funnel to all their users, regardless of their UA or platform. Developers can tailor their app acquisition to **benefit users that:**
 * might not know that a web app exists for the current origin.
 * don't understand what the icon/prompt in the omnibox does.
 * don't know how to deep search several layers of browser UX to add the app to their devices.
@@ -106,7 +106,7 @@ To install a web app, a web site would use the promise-based method `navigator.i
 The Web Install API consists of the extension to the navigator interface with an `install` method. This method has 3 different signatures that can be used in different scenarios. The possible parameters it may receive are:
 
 * `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. For an optimal user experience, it is recommended that developers use an `install_url` that does not redirect and only contains content that is relevant for installation purposes (essentially just a reference to the web manifest).
-* `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. This value must match the id specified in the manifest file to form the processed id once an application is installed.
+* `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. As a parameter, this value must match the `id` value specified in the manifest file or the processed `id` string once an application is installed.
 * optional [parameters](#parameters).
 
 The `manifest_id` is the *what* to install, the `install_url` is the *where* to find it.
@@ -146,9 +146,9 @@ This signature is intended to install background documents that don't necessaril
 > **Note:** according to the manifest spec, if there is no `id` member present, the processed string resolves to that of the `start_url`.
 
 
-##### **Optional Parameters**
+##### **Optional Parameter Object**
 
-The `navigator.install` call can receive an object with a set of parameters that specify different installation behaviours for the app. It is also a way to future-proof the API if additional data were required with the call.
+Independent of the signature used to install an application, the `navigator.install` call can receive an optional object with a set of parameters that specify different installation behaviours for the app. It is also a way to future-proof the API if additional data were required with the call.
 * **referral-info**: this parameter takes the form of an object that can have arbitrary information required by the calling installation domain. This information can later be retrieved inside the installed application via the [Acquisition Info API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md).
 
 > **Note:** Three signatures exist to accommodate all possibilities of existing apps. We acknowledge that only around 4% (as of 2024) of web apps have defined `id`s in their manifest. We also know that `id`s are a crucial part to support to avoid situations of multiple *same* applications with no path to being updated. For apps that have an `id` defined in their manifest, the 1 param signature is useful. For apps that do not define the `id` field, they can be installed with the 2 parameter signature. 
@@ -223,6 +223,12 @@ const installApp = async (install_url, manifest_id) => {
 };
 ```
 
+### Installing an *already* installed application
+
+In the case that the `navigator.install` method is invoked to install an application that is already installed in the device, it is up to the UA to decide the relevant default behaviour. For example, the UA can choose to open (or ask to open) the app.  
+* The promise will resolve if the application opens.
+* The promise rejects otherwise, with an `AbortError` or `DataError` depending on the UA's implementation.
+
 ## Installability criteria & Web app manifest `id`
 To install content using the Web Install API, the _document being installed_ must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. 
 
@@ -274,7 +280,7 @@ switch (state) {
 }
 ```
 
-> **Note:** A permission prompt will appear for origins that do not have the capability to install apps if the invoking document is not the current one. Even if the installation is of a "[background document](#background-document-1-param)" in the same origin, for consistency the origin must have the permission to install apps. The only cases that will not prompt for the permission are the installation of the "[current document](#current-document)" or a "[background document](#background-document-1-param)" in an origin that already has installation permissions.
+> **Note:** For background documents, a permission prompt will appear for origins that do not have the capability to install apps. Even if the installation is of a "[background document](#background-document-1-param)" in the same origin, for consistency the origin must have the permission to install apps. The only cases that will not prompt for the permission are the installation of the "[current document](#current-document)" or a "[background document](#background-document-1-param)" in an origin that already has installation permissions.
 
 **Example:**
 
@@ -283,7 +289,7 @@ The app located in `https://productivitysuite.com` displays in its homepage 3 bu
 * the presentation app located at `https://productivitysuite.com/slides`
 * the spreadsheet located at `https://productivitysuite.com/spreadsheet`
 
-The end user goes to the homepage in the `https://productivitysuite.com`'s origin and clicks on the button to install the presentation application. As this is a *background document* (not the current document the user is interacting with) and the origin does not have permission to install apps, a permission prompt will appear. If this permission is granted for the origin, it can now install apps. After this permissin prompt the second prompt where the user confirms the isntallation appears.  
+The end user goes to the homepage in the `https://productivitysuite.com`'s origin and clicks on the button to install the presentation application. As this is a _background document_ (not the current document the user is interacting with) and the origin does not have permission to install apps, a permission prompt will appear. If this permission is granted for the origin, it can now install apps. After this permission prompt, the second prompt where the user confirms the installation appears.
 
 The end user then tries to install the text processor, and since the origin has been granted the permission, then the UA will skip the permission prompt and skip directly to confirm installation with a prompt indicating that "productivity suite wants to install text processor". The installation permission is bound to an origin.
 
@@ -294,9 +300,11 @@ If the user were to deny the permission to install for the origin, they could br
 
 To protect the users privacy, the API does not create any new error names for the `DOMException`, instead it uses 2 common existing names: `AbortError` and `DataError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
 
-
 ### **Gating capability behind installation**
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
+
+### **Feature does not work on Incognito or private mode**
+The install capability should not work on *incognito*, and the promise should always reject if called in a private browsing context. 
 
 **The user gesture, the new origin permission, the final installation confirmation (current default behaviour in the browser before installing an app) and the optional gated capability work together to minimize the risk of origins spamming the user for unrequested installations**, give developers flexibility to control the distribution of their apps and end users the facility to discover and acquire content in a frictionless way.
 
@@ -326,15 +334,18 @@ The `install_sources` was a new manifest field that specified which domains coul
 
 ## Open Questions
 
+* Should we have custom error types like `IDMismatchError`?
+
+No, we are grouping all error cases into 2 different errors (`DataError` and `AbortError`). This will reduce the possibility for a bad actor to determine if a user was logged-in to a site that has a manifest behind a login. It also complicates knowing the reason why an application's installation fails. 
+
 * Is it correct for the permission when calling the `install` method to be required for all background document installations, and not just cross-origin installations?
+
+Yes, we are now requiring any installation apart from _current document_ ones to come from an origin that has the permission to install.  
 
 * Should we allow an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to enable cancelling the installation if the process takes too long?
 
 * Can we remove power from the developer to query if the app is installed by offloading to the UA the knowledge of which apps are installed?
     * Is there any form of attribute that can be added to a DOM element to signal this distinction/difference?
-
-* Should `getInstalledApps` and `getInstalledRelatedApps` be merged together?
-    See [this issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/804).
 
 ## Future Work
 
