@@ -227,7 +227,7 @@ const installApp = async (install_url, manifest_id) => {
 
 In the case that the `navigator.install` method is invoked to install an application that is already installed in the device, it is up to the UA to decide the relevant default behaviour. For example, the UA can choose to open (or ask to open) the app.  
 * The promise will resolve if the application opens.
-* The promise rejects otherwise, with an `AbortError` or `DataError` depending on the UA's implementation.
+* The promise rejects otherwise, with an `AbortError`.
 
 ## Installability criteria & Web app manifest `id`
 To install content using the Web Install API, the _document being installed_ must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. 
