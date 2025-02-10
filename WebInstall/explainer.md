@@ -60,7 +60,7 @@ These two scenarios enable the following use cases (among others):
 Picture a user browsing on their favorite video streaming web app. The user might browse to this web app daily, yet not be aware that there is a way that they can install the app directly from the app's UI (or that that specific web site has an app altogether). This could be through a button that the webapp would be able to implement, that would trigger the installation. 
 
 > **Note:**
->This is enabled by the installation of the *current document*.
+> This is enabled by the installation of the *current document*.
 
 ![Same domain install flow](./samedomaininstall.png) 
 
