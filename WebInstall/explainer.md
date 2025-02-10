@@ -243,7 +243,7 @@ The importance of `id`s for installed content is to avoid cases where multiple *
 
 * The biggest risk for the API is installation spamming. To minimize this behaviour, installing a PWA using the Web Install API requires a [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event).
 
-* A new permission type will be introduced for an origin, that would allow it to install web apps. The first time a website requests to install (use the API) an app that is in another domain the UA will prompt the user to confirm that the website can install apps into the device. This prompt is similar to that of other permissions like geolocation or camera/microphone. The UA can decide how to implement this prompt.
+* A new permission type will be introduced for an origin, that would allow it to install web apps. The first time a website requests to install (use the API) any document other than itself, the UA will prompt the user to confirm that the website can install apps into the device. This prompt is similar to that of other permissions like geolocation or camera/microphone. The UA can decide how to implement this prompt.
 
 A website that wants to install apps will require this new permission and will only be able to prompt the user for this in a period of time defined by the implementer. This will avoid spam from websites constantly asking for a permission to install apps, and will force websites to only prompt when there is a meaningful user intent to install apps.
 
