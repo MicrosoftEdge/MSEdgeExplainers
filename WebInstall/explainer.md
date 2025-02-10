@@ -53,7 +53,7 @@ Installation of the current document is when the install API is invoked to insta
 
 Installation of the background document is when the install API is invoked to install a web application different from the navigation context the API is called from. The app that will be installed can be in the same or a different origin.
 
-These two scenarios enable use cases like the following ones:
+These two scenarios enable the following use cases (among others):
 
 ### **Websites installing their web apps**
 
