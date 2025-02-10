@@ -84,7 +84,7 @@ Developers of Search Engines could use the API to include a way to directly inst
  Another potential use case for the API is related to the creation of online catalogs. A web site/app can list and install web apps. A unique aspect of this approach is that since the applications that are installed are web apps, this could enable a new set of true cross-device, cross-platform app repositories. 
  
  > **Note:**
->This is enabled by the installation of a *background document*.
+> This is enabled by the installation of a *background document*.
 
   ![Install flow from an app repository](./apprepositoryinstallation.png)
 
