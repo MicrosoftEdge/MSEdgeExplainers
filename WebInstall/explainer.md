@@ -70,7 +70,7 @@ Building on the previous use case, the website can also provide a way to directl
 
 
 > **Note:**
->This is enabled by the installation of a *background document*.
+> This is enabled by the installation of a *background document*.
 
 ### **SERP app install**
 
