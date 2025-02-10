@@ -281,7 +281,7 @@ switch (state) {
 The app located in `https://productivitysuite.com` displays in its homepage 3 buttons that aim to install 3 different apps (notice all apps are in the same origin):
 * the text processor located at `https://productivitysuite.com/text`
 * the presentation app located at `https://productivitysuite.com/slides`
-* the spreadsheet locacated at `https://productivitysuite.com/spreadsheet`
+* the spreadsheet located at `https://productivitysuite.com/spreadsheet`
 
 The end user goes to the homepage in the `https://productivitysuite.com`'s origin and clicks on the button to install the presentation application. As this is a *background document* (not the current document the user is interacting with) and the origin does not have permission to install apps, a permission prompt will appear. If this permission is granted for the origin, it can now install apps. After this permissin prompt the second prompt where the user confirms the isntallation appears.  
 
