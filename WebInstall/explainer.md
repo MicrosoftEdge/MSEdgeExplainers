@@ -105,7 +105,7 @@ To install a web app, a web site would use the promise-based method `navigator.i
 #### **Signatures of the `install` method**
 The Web Install API consists of the extension to the navigator interface with an `install` method. This method has 3 different signatures that can be used in different scenarios. The possible parameters it may receive are:
 
-* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. In an ideal scenario, an `install_url` must not redirect nor contain extra content that is not relevant for installation purposes.
+* `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. For an optimal user experience, it is recommended that developers use an `install_url` that does not redirect and only contains content that is relevant for installation purposes (essentially just a reference to the web manifest).
 * `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. This value must match the id specified in the manifest file to form the processed id once an application is installed.
 * optional [parameters](#parameters).
 
