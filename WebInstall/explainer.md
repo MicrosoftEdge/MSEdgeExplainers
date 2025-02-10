@@ -224,7 +224,7 @@ const installApp = async (install_url, manifest_id) => {
 ```
 
 ## Installability criteria & Web app manifest `id`
-To install content using the Web Install API, the document (current or background) must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. 
+To install content using the Web Install API, the _document being installed_ must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. 
 
 The importance of `id`s for installed content is to avoid cases where multiple *same* apps are installed with no way to update them. More details can be found in [this document](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
 
