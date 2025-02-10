@@ -314,7 +314,7 @@ Pros:
 
 Cons: 
 * Takes the user out of the current context.
-* Limits the amount of information a developer can act upon that the promise provide, such as if the prompt was shown or if the origin has permissions to install apps.
+* Limits the amount of information a developer can act upon that the promise provides, such as if the prompt was shown or if the origin has permissions to install apps.
 * Can become cumbersome when specifying the parameters in the tag.
 * Can't easily pass additional information like the referral-info. 
 
