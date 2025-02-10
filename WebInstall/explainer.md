@@ -172,7 +172,7 @@ To install an application with the Web Install API, the process is as follows:
 3. UA tries to fetch the background document present at the `<install_url>` and its manifest file.
 4. If fetched document has a manifest file, continue. Else reject with `DataError`.
 5. If manifest file linked to the fetched document has an `id` field defined, continue. Else reject with `DataError`.
-6. UA shows the acquisition confirmation UX (prompt/dialog). If the user accepts, continue. Else reject with `AbortError`. 
+6. UA shows the acquisition/installation confirmation UX (prompt/dialog). If the user accepts, continue. Else reject with `AbortError`. 
 7. Promise resolves with processed `id` of installed app and application follows the platform's post-install UX (adds to Dock/opens app/adds to mobile app drawer).
 
 #### Background Document (2 param)
