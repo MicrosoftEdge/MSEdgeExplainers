@@ -168,7 +168,7 @@ To install an application with the Web Install API, the process is as follows:
 #### Background Document (1 param)
 
 1. User gesture activates code that calls the `install(<install_url>)` method.
-2. If the `<install_url>` is not the current document, the UA asks for permission to perform installations. Else reject with `AbortError`. 
+2. If the `<install_url>` is not the current document, the UA asks for permission to perform installations (it not previously granted). Else reject with `AbortError`. 
 3. UA tires to fetch the background document present at the `<install_url>` and its manifest file.
 4. If fetched document has a manifest file, continue. Else reject with `DataError`.
 5. If manifest file linked to the fetched document has an `id` field defined, continue. Else reject with `DataError`.
