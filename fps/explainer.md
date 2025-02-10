@@ -24,12 +24,17 @@ Our goal is to create an API for a more precise measure of browser frame rate. P
 
 
 ## Goals
-* Create an API that measures frame rate more accurately
+* Needs to be queryable from JavaScript
+* Capture the user-perceived frame rate accurately
 * Ensure that our solution does not slow down performance
+* Should be able to query the frame rate at any specific point in time, rather than relying on events to indicate changes in frame rate
+* Cross-browser compatibility
+* Take into account both the main and the compositor thread
+
 
 ## Non-goals
-*	Former solutions to calculate fps have used rAF polling. We do not want to rely on rAF polling.
-*	We are not trying to increase fps, or improve animation, rather measure fps so we can solve other performance issues in the future
+* Former solutions to calculate fps have used rAF polling. We do not want to rely on rAF polling.
+* We are not trying to increase fps, or improve animation, rather measure fps so we can solve other performance issues in the future
 
 ## Use Cases
 
