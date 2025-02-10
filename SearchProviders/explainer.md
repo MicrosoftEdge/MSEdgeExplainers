@@ -1,4 +1,4 @@
-# Search Providers --- Reset Search Provier to brand's recommended.
+# Search Providers --- Reset Search Provider to brand's recommended.
 
 ## Authors:
 
@@ -25,8 +25,8 @@ Browsers have a list of search providers and each browser brand implementation h
 
 The goals of the API are:
 
-- Provide an API to detect whether current search provider is brand's recommended search provier.
-- Provide an API to reset current search provider to brand's recommended search provier.
+- Provide an API to detect whether current search provider is brand's recommended search provider.
+- Provide an API to reset current search provider to brand's recommended search provider.
 
 ## Non-Goals
 
@@ -38,11 +38,11 @@ The API is not intended to be used for:
 
 ## Use Cases
 
-The feature is intended to be used by any web page that wants to restore the current default search provider to brand's recommended search provider. Here is scenario in which this can be useful to users: **Microsoft Edge** as example
+The feature is intended to be used by any web page that wants to restore the current default search provider to brand's recommended search provider. Here is scenario in which this can be useful to users:
 
-- User opens a web page (Bing SERP).
-- JaveScript calls the API to detect whether current default search provider is **Microsoft** recommended search provider.
-- Page popups UI for user to reset the current default search provider to **Microsoft** recommended search provider.
+- User opens a web page.
+- JaveScript calls the API to detect whether current default search provider is brand's recommended search provider.
+- Page popups UI for user to reset the current default search provider to brand's recommended search provider.
 >>![scenario](scenario.gif)
 
 ## Proposed Solution

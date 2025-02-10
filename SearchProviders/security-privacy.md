@@ -4,9 +4,7 @@
 
 1. **What information might this feature expose to Web sites or other parties, and for what purposes is that exposure necessary?**
 
-    This feature exposes information to the origins if the web site from a search provider.
-
-    Note: the default implementation will only expose to Bing.com origin.
+    This feature exposes information to the origins allowed.
 
 2. **Do features in your specification expose the minimum amount of information necessary to enable their intended uses?**
 
@@ -26,9 +24,7 @@
 
 6. **Do the features in your specification expose information about the underlying platform to origins?**
 
-    This feature exposes information to the origins if the web site from a search provider.
-
-    Note: the default implementation will only expose to Bing.com origin.
+    This feature exposes information to the origins allowed.
 
 7. **Does this specification allow an origin to send data to the underlying platform?**
 
