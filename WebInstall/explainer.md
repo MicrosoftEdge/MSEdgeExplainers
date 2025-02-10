@@ -66,7 +66,7 @@ Picture a user browsing on their favorite video streaming web app. The user migh
 
 ### **Suite of Web Apps**
 
-Building on the previous use case, the website can also provide a way to directly acquire other applications it might offer, like a dedicated "kids" version of the app, or a "sports" version of the app. Another example would be a family of software applications, like a productivity or photography suite. The developer is in control and can effectively advertise and control their applications, without having to redirect users to platform-specific propriatery repositories, which is what happens now.
+Building on the previous use case, the website can also provide a way to directly acquire other applications it might offer, like a dedicated "kids" version of the app, or a "sports" version of the app. Another example would be a family of software applications, like a productivity or photography suite, where each application is accessed from a different web page. The developer is in control and can effectively advertise and control their applications, without having to redirect users to platform-specific proprietary repositories, which is what happens now.
 
 
 > **Note:**
