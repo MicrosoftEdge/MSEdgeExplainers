@@ -287,7 +287,7 @@ The end user goes to the homepage in the `https://productivitysuite.com`'s origi
 
 The end user then tries to install the text processor, and since the origin has been granted the permission, then it will prompt to confirm that "productivity suite wants to install text procesor". The installation permission is bound to an origin.
 
-If the user where to deny the permission to install for the origin, they could browse to the app itself and once there, they can install the application. In this case there isn't any permission prompt required as this is now a *current document* installation. 
+If the user were to deny the permission to install for the origin, they could browse to the app itself and once there, they could install the application. In this case, there wouldn't be any permission prompt required as this would now be a *current document* installation. 
 
 
 ### Rejecting promise with `AbortError` and `DataError`
