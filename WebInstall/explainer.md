@@ -326,7 +326,7 @@ The `install_sources` was a new manifest field that specified which domains coul
 
 ## Open Questions
 
-* Is it correct to limit the permission when calling the `install` method if the background document is a cross-origin document?
+* Is it correct for the permission when calling the `install` method to be required for all background document installations, and not just cross-origin installations?
 
 * Should we allow an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to enable cancelling the installation if the process takes too long?
 
