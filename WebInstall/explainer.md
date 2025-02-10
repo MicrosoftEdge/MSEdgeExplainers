@@ -47,7 +47,7 @@ The Web Install API enables installation of web applications. An abstraction of 
 
 **Current Document**
 
-Installation of the current document is when the install API is invoked to install the same document.
+Installation of the current document is when the install API is invoked to install the web application located at the web page in the UA's current navigation context.
 
 **Background Document**
 
