@@ -116,6 +116,7 @@ standards communities. Thanks for your continued interest!
 | [@media queries for HDR video in Media Queries Level 4](https://drafts.csswg.org/mediaqueries-4/#video-prefixed-features) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | 2020-01-17 |
 | [Improved Client-side Video Editing](https://github.com/WICG/video-editing/blob/master/readme.md) | [Web Incubator Community Group](https://wicg.io/) | [2020-01-08](MediaBlob/explainer.md) |
 | [CSS Custom Highlight API Module Level 1](https://drafts.csswg.org/css-highlight-api-1/) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2019-12-10](highlight/explainer.md) |
+| [highlightsFromPoint API](https://drafts.csswg.org/css-highlight-api-1/#interactions) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2025-01-24](highlight/HighlightsFromPointsExplainer.md)
 | [Import Assertions](https://github.com/tc39/proposal-import-assertions/blob/master/README.md) | [ECMA TC39 Task Group](https://www.ecma-international.org/memento/tc39-rf-tg.htm) | 2019-11-08 |
 | ['shortcuts' member of Web App Manifest](https://w3c.github.io/manifest/#shortcuts-member) | [W3C Web Applications Working Group](https://www.w3.org/2019/webapps/) | [2019-11-04](Shortcuts/explainer.md) |
 | ['spatialRendering' for spatial audio query in Media Capabilities](https://w3c.github.io/media-capabilities/#audioconfiguration) | [W3C Media Working Group](https://www.w3.org/media-wg/) | 2019-10-02 |
