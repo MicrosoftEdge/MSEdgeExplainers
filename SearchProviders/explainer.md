@@ -41,7 +41,7 @@ The API is not intended to be used for:
 The feature is intended to be used by any web page that wants to restore the current default search provider to brand's recommended search provider. Here is scenario in which this can be useful to users:
 
 - User opens a web page.
-- JaveScript calls the API to detect whether current default search provider is brand's recommended search provider.
+- JavaScript calls the API to detect whether current default search provider is brand's recommended search provider.
 - Page popups UI for user to reset the current default search provider to brand's recommended search provider.
 >>![scenario](scenario.gif)
 
