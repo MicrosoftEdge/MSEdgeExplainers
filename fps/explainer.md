@@ -49,10 +49,27 @@ Our goal is to create an API for a more precise measure of browser frame rate. P
 	
 
 
+## Proposed Solutions
+#### Option 1: Direct Query
+This solution would involve querying the frame rate directly. JavaScript would call an API that measures the fps at a specific point in time. To measure the overall frame rate, the API would be called multiple times, using the values to calculate an average frame rate.
+* window.framerate()
+  
+#### Option 2: Start and End Markers
+JavaScript Performance markers are used to track points in time. In this solution, developers could mark a start and end point on the performance timeline and measure the duration between the two markers, with FPS as a property.
+* window.framerate("perfMarker") <- Framerate since that marker
+* performance.mark("myMarker")
+* performance.measure("myMarker", "endMarker")
+* FPS could be a property on performance measure
 
+#### Option 3: Event Listener
+Adding an event listener for frame rate changes would alert developers about large drops in frame rate. Since it would not be necessary to know if the rate drops by a frame or two. Instead, the developer could set the event listener to alert when the frame rate drops by n. Or, similarly to the long task API's duration threshold, the developer could set a min and max fps. The event listener would fire only if the FPS is above the max or below the min.
 
+## Alternatives Considered
+For the event listener scenario, it was determined that using granularity would not give a useful measure of FPS due to lack of detail. The granularity was modeled after the compute pressure API.
+* window.addEventListener("frameratechange", (event) =>{doSomething();})
 
-## Proposed Solution
+## Concerns/Open Questions
+1. The user-perceived frame rate is influenced by both the main thread and the compositor thread. Accurate measurement of frame rates must account for both. Since the compositor thread operates independently of the main thread, it can be difficult to get its frame rate data. However, an accurate frame rate measurements needs to take into account both measurements.
 
 
 ## Glossary
