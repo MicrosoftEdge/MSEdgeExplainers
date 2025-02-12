@@ -308,7 +308,7 @@ To protect the user's privacy, the API does not create any new error names for t
 **The promise will reject with a `DataError` if:**
 * No manifest file present or invalid install URL.
 * No `id` field defined in the manifest file.
-* There is a mismatch between the `id` passed as parameter and the processed `id`.
+* There is a mismatch between the `id` passed as parameter and the processed `id` from the manifest.
 
 #### Example: combining errors to mitigate private data leaking
 
