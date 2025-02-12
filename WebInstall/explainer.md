@@ -298,7 +298,7 @@ If the user were to deny the permission to install for the origin, they could br
 
 ### Rejecting promise with `AbortError` and `DataError`
 
-To protect the users privacy, the API does not create any new error names for the `DOMException`, instead it uses 2 common existing names: `AbortError` and `DataError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
+To protect the user's privacy, the API does not create any new error names for the `DOMException`, instead it uses 2 common existing names: `AbortError` and `DataError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
 
 **The promise will reject with an `AbortError` if:**
 * Installation was closed/cancelled.
