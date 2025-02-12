@@ -304,6 +304,7 @@ To protect the user's privacy, the API does not create any new error names for t
 * Installation was closed/cancelled.
 * User is outside of the main frame.
 * Invocation happens without a user activation.
+* The install permission is required but hasn't been granted.
 
 **The promise will reject with a `DataError` if:**
 * No manifest file present or invalid install URL.
