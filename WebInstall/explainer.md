@@ -300,6 +300,24 @@ If the user were to deny the permission to install for the origin, they could br
 
 To protect the users privacy, the API does not create any new error names for the `DOMException`, instead it uses 2 common existing names: `AbortError` and `DataError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
 
+**The promise will reject with an `AbortError` if:**
+* Installation was closed/cancelled.
+* User is outside of the main frame.
+* Invocation happens without a user activation.
+
+**The promise will reject with a `DataError` if:**
+* No manifest file present or invalid install URL.
+* No `id` field defined in the manifest file.
+* There is a mismatch between the `id` passed as parameter and the processed `id`.
+
+#### Example: combining errors to mitigate private data leaking
+
+A bad actor could try to determine if a user is logged into a dating website. This dating web site could provide install UX _after_ a user is logged in (the dating website will likely have a page that serves a manifest, but it requires authentication). If a request is sent from a third party origin, with a 'wrong' manifest id, this would result in the promise rejecting with an `DataError`.
+
+The invoking call doesn't know if the `DataError` is because i) manifest file was not accessible (user not logged in), or ii) there was a mismatch between the `id` field and the provided 'wrong' parameter (user _is_ logged). 
+
+> **Note:** Using less verbose errors by grouping them into existing ones reduces leakage of information. This is the reason why we avoid using multiple errors or creating new ones, like a previously proposed `ManifestIdMismatch` and `NoIdInManifest`.
+
 ### **Gating capability behind installation**
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
 
