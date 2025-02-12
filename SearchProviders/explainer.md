@@ -1,4 +1,4 @@
-# Search Providers --- Reset Search Provider to brand's recommended.
+# Search Providers --- Reset default search provider to brand's recommended default search provider.
 
 ## Authors:
 
@@ -19,14 +19,14 @@ of future work and discussions.
 
 ## Introduction
 
-Browsers have a list of search providers and each browser brand implementation has a recommended search provider. This proposal aims to standardize the API that could be leveraged by webpages to detect whether current default search provider is the brand recommended search provider and reset the current default search provider to brand's recommended one.
+Browsers have a list of search providers and each browser brand implementation has a recommended default search provider. This proposal aims to standardize the API that could be leveraged by webpages to detect whether current default search provider is the brand recommended default search provider and reset the current default search provider to brand's recommended one.
 
 ## Goals
 
 The goals of the API are:
 
-- Provide an API to detect whether current search provider is brand's recommended search provider.
-- Provide an API to reset current search provider to brand's recommended search provider.
+- Provide an API to detect whether current default search provider is brand's recommended default search provider.
+- Provide an API to reset current default search provider to brand's recommended default search provider.
 
 ## Non-Goals
 
@@ -38,30 +38,32 @@ The API is not intended to be used for:
 
 ## Use Cases
 
-The feature is intended to be used by any web page that wants to restore the current default search provider to brand's recommended search provider. Here is scenario in which this can be useful to users:
+The feature is intended to be used by any web page that wants to restore the current default search provider to brand's recommended default search provider. Here is scenario in which this can be useful to users:
 
 - User opens a web page.
-- JavaScript calls the API to detect whether current default search provider is brand's recommended search provider.
-- Page popups UI for user to reset the current default search provider to brand's recommended search provider.
+- JavaScript calls the API to detect whether current default search provider is brand's recommended default search provider.
+- Page popups UI for user to reset the current default search provider to brand's recommended default search provider.
 >>![scenario](scenario.gif)
 
 ## Proposed Solution
 
-### Detect whether current search provider is brand's recommended.
+### Detect whether current default search provider is brand's recommended.
 
 ```js
 chrome.searchProviders.isRecommendedDSE((success: boolean) => void);
 ```
 > #### NOTE
-> This API will return **true** if a search provider is already the brand's recommended one, otherwise **false**.
+> This API will return **true** if the current default search provider is already the brand's recommended one **or** the current default search provider is managed policy, otherwise return **false**.\
+> See example of how current default search provider is managed by policy: [Default search provider policies](https://learn.microsoft.com/en-us/DeployEdge/microsoft-edge-policies#default-search-provider-policies). 
 
-### Reset current search provider to brand's recommended.
+### Reset current default search provider to brand's recommended.
 
 ```js
 chrome.searchProviders.resetToRecommendedDSE((success: boolean) => void)
 ```
 > #### NOTE
-> This API will return **true** if a search provider is set to the recommended one, otherwise **false**.
+> This API will reset current default search provider to the brand's recommended one only if the current default search provider is not managed by policy, otherwise do nothing.\
+> See example of how current default search provider is managed by policy: [Default search provider policies](https://learn.microsoft.com/en-us/DeployEdge/microsoft-edge-policies#default-search-provider-policies). 
 
 ## Security and Privacy Considerations
 
