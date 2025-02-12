@@ -314,7 +314,9 @@ To protect the user's privacy, the API does not create any new error names for t
 
 A bad actor could try to determine if a user is logged into a dating website. This dating web site could provide install UX _after_ a user is logged in (the dating website will likely have a page that serves a manifest, but it requires authentication). If a request is sent from a third party origin, with a 'wrong' manifest id, this would result in the promise rejecting with an `DataError`.
 
-The invoking call doesn't know if the `DataError` is because i) manifest file was not accessible (user not logged in), or ii) there was a mismatch between the `id` field and the provided 'wrong' parameter (user _is_ logged). 
+The benefit of the defined error handling for this feature is that the invoking call doesn't know if the `DataError` is because:
+   i. manifest file was not accessible (user not logged-in) or 
+   ii. there was a mismatch between the `id` field and the provided 'wrong' parameter (user _is_ logged-in). 
 
 > **Note:** Using less verbose errors by grouping them into existing ones reduces leakage of information. This is the reason why we avoid using multiple errors or creating new ones, like a previously proposed `ManifestIdMismatch` and `NoIdInManifest`.
 
