@@ -14,29 +14,88 @@ Web component authors often seek to create custom elements that inherit the beha
 
 - Custom buttons can provide unique styles and additional functionality, such as split or toggle button semantics, while still maintaining [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button) behavior such as being a [popover invoker](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement).
 - Custom buttons can extend native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit) when activated. Similarly, custom buttons that extend native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset) when activated.
-- Custom labels can provide additional functionality, such as tooltips and icons, while still supporting associations with [labelable elements](https://html.spec.whatwg.org/multipage/forms.html#category-label) via the `for` attribute.
+- Custom labels can provide additional functionality, such as tooltips and icons, while still supporting associations with [labelable elements](https://html.spec.whatwg.org/multipage/forms.html#category-label) via the `for` attribute or nesting a labelable element inside the custom label.
 
 ### Goals
 
-- [A bulleted list of goals can help with comparing proposed solutions.]
+- A solution for customizable built-in elements that provides an improvement over `extends`/`is`, in terms of interoperability and functionality.
+- Supporting as many as customizable built-in use cases as possible, though not necessarily all at once. Support for more `type` values can be added over time.
 
 ### Non-goals
 
-[If there are "adjacent" goals which may appear to be in scope but aren't,
-enumerate them here. This section may be fleshed out as your design progresses and you encounter necessary technical and other trade-offs.]
+- Deprecation of `extends`/`is`. This is something that should be considered independently, once `elementInternals.type` addresses developer needs sufficiently.
 
-## Proposed Approach
+## Proposed Approach: add `type` property to `ElementInternals`
 
-[Explain the proposed solution or approach to addressing the identified problem.
-Do not include WebIDL in this section.
-Show example code using your approach.]
+The `ElementInternals` interface currently give web developers a way to participate in HTML forms and integrate with the accessibility OM. These capabilities can be extended to also support customizable built-ins by adding a `type` property, which can be set to string values that represent native element types. The initial set of `type` values being proposed are listed below, though more may be added in the future.
+  - `button` (for [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button))
+  - `submit` (for [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit))
+  - `reset` (for [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset))
+  - `label` (for [label](https://html.spec.whatwg.org/multipage/forms.html#the-label-element))
 
-[Where necessary, provide links to longer explanations of the relevant pre-existing concepts and API.
-If there is no suitable external documentation, you might like to provide supplementary information as an appendix in this document, and provide an internal link where appropriate.]
+### Example #1: Custom button
 
-[If this is already specced, link to the relevant section of the spec.]
+Below is an example showcasing a custom button definition and how the custom button can then be declaratively created and used as a popup invoker. When the custom button is activated, ex. via a click, `div id="my-popover` will be shown as a popover.
 
-[If spec work is in progress, link to the PR or draft of the spec.]
+```js
+    class CustomButton extends HTMLElement {
+        static formAssociated = true;
+
+        constructor() {
+            super();
+            this.internals_ = this.attachInternals();
+            this.internals_.type = 'button';
+        }
+    }
+    customElements.define('custom-button', CustomButton);
+```
+```html
+    <custom-button popovertarget="my-popover">Open popover</custom-button>
+    <div id="my-popover" popover>This is popover content.</div>
+```
+
+### Example #2: Custom submit button
+
+Below is an example showcasing a custom submit button definition and how the custom submit button can then be declaratively created and used to submit a form. When the custom button is activated, ex. via a click, the form will be submitted and the page will navigate.
+
+```js
+    class CustomSubmitButton extends HTMLElement {
+        static formAssociated = true;
+
+        constructor() {
+            super();
+            this.internals_ = this.attachInternals();
+            this.internals_.type = 'submit';
+        }
+    }
+    customElements.define('custom-submit-button', CustomSubmitButton);
+```
+```html
+    <form action="http://www.bing.com">
+        <custom-submit-button>Submit</custom-submit-button>
+    </form>
+```
+
+### Example #3: Custom label
+
+Below is an example showcasing how to create a custom label definition and how the custom label can then be declaratively created and used to label a checkbox. When the custom label is activated, ex. via a click, the checkbox is also activated, resulting in its state changing to checked.
+
+```js
+    class CustomLabel extends HTMLElement {
+        static formAssociated = true;
+
+        constructor() {
+            super();
+            this.internals_ = this.attachInternals();
+            this.internals_.type = 'label';
+        }
+    }
+    customElements.define('custom-label', CustomLabel);
+```
+```html
+   <custom-label for='my-checkbox'>Toggle checkbox</custom-label>
+   <input type='checkbox' id='my-checkbox' />
+```
 
 ### Dependencies on non-stable features
 
@@ -89,3 +148,4 @@ during the design process.]
 Many thanks for valuable feedback and advice from:
 
 - [Chris Holt](https://github.com/chrisdholt)
+- [Mason Freed](https://github.com/mfreed7)
