@@ -28,14 +28,21 @@ Web component authors often seek to create custom elements that inherit the beha
 ## Proposed Approach: add `type` property to `ElementInternals`
 
 The `ElementInternals` interface currently give web developers a way to participate in HTML forms and integrate with the accessibility OM. These capabilities can be extended to also support customizable built-ins by adding a `type` property, which can be set to string values that represent native element types. The initial set of `type` values being proposed are listed below, though more may be added in the future.
-  - `button` (for [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button))
-  - `submit` (for [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit))
-  - `reset` (for [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset))
-  - `label` (for [label](https://html.spec.whatwg.org/multipage/forms.html#the-label-element))
+- `button` (for [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button))
+- `submit` (for [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit))
+- `reset` (for [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset))
+- `label` (for [label](https://html.spec.whatwg.org/multipage/forms.html#the-label-element))
 
-### Example #1: Custom button
+### `elementInternals.type = 'button'`
 
-Below is an example showcasing a custom button definition and how the custom button can then be declaratively created and used as a popup invoker. When the custom button is activated, ex. via a click, `div id="my-popover` will be shown as a popover.
+`elementInternals.type = 'button'` can be set in a custom element constructor to give the custom element native button like behavior. Specifically, the custom element will support the attributes listed below.
+- [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
+- [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
+- [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
+- [`popovertarget`](https://html.spec.whatwg.org/multipage/popover.html#attr-popovertarget)
+- [`popovertargetaction`](https://html.spec.whatwg.org/multipage/popover.html#attr-popovertargetaction)
+
+Below is an example showcasing a custom button being used as a popup invoker. When the custom button is activated, ex. via a click, `div id="my-popover` will be shown as a popover.
 
 ```js
     class CustomButton extends HTMLElement {
@@ -54,9 +61,29 @@ Below is an example showcasing a custom button definition and how the custom but
     <div id="my-popover" popover>This is popover content.</div>
 ```
 
-### Example #2: Custom submit button
+Just like with native buttons, if the `disabled` attribute is set, a custom button cannot be activated and thus cannot invoke popovers.
 
-Below is an example showcasing a custom submit button definition and how the custom submit button can then be declaratively created and used to submit a form. When the custom button is activated, ex. via a click, the form will be submitted and the page will navigate.
+### `elementInternals.type = 'submit'`
+
+Custom elements with `elementInternals.type = 'submit'` set will support the following attributes.
+- [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
+- [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
+- [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
+- [`formAction`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formaction)
+- [`formEnctype`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formenctype)
+- [`formMethod`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formmethod)
+- [`formNoValidate`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formnovalidate)
+- [`formTarget`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fs-formtarget)
+- [`name`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-name)
+- [`value`](https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-value)
+- [`willValidate`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-willvalidate)
+- [`validity`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-validity)
+- [`validationMessage`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-validationmessage)
+- [`checkValidity`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-checkvalidity)
+- [`reportValidity`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-reportvalidity)
+- [`setCustomValidity`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-setcustomvalidity)
+
+Below is an example showcasing a custom submit button being used to submit a form. When the custom button is activated, ex. via a click, the form will be submitted and the page will navigate.
 
 ```js
     class CustomSubmitButton extends HTMLElement {
@@ -76,9 +103,23 @@ Below is an example showcasing a custom submit button definition and how the cus
     </form>
 ```
 
-### Example #3: Custom label
+If the `disabled` attribute is set, a custom button cannot be activated and thus cannot submit the form.
 
-Below is an example showcasing how to create a custom label definition and how the custom label can then be declaratively created and used to label a checkbox. When the custom label is activated, ex. via a click, the checkbox is also activated, resulting in its state changing to checked.
+### `elementInternals.type = 'reset'`
+
+Custom elements with `elementInternals.type = 'submit'` set will support the following attributes.
+- [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
+- [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
+- [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
+
+### `elementInternals.type = 'label'`
+
+Custom elements with `elementInternals.type = 'label'` set will support the following attributes.
+- [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
+- [`for`](https://html.spec.whatwg.org/multipage/forms.html#dom-label-htmlfor)
+- [`control`](https://html.spec.whatwg.org/multipage/forms.html#dom-label-control)
+
+Below is an example showcasing a custom label being used to label a checkbox. When the custom label is activated, ex. via a click, the checkbox is also activated, resulting in its state changing to checked.
 
 ```js
     class CustomLabel extends HTMLElement {
@@ -97,29 +138,9 @@ Below is an example showcasing how to create a custom label definition and how t
    <input type='checkbox' id='my-checkbox' />
 ```
 
-### Dependencies on non-stable features
+### Resolving ARIA roles
 
-[If your proposed solution depends on any other features that haven't been either implemented by
-multiple browser engines or adopted by a standards working group (that is, not just a W3C community
-group), list them here.]
 
-### Solving [goal 1] with this approach
-
-```js
-// Provide example code - not IDL - demonstrating the design of the feature.
-
-// If this API can be used on its own to address a user need,
-// link it back to one of the scenarios in the goals section.
-
-// If you need to show how to get the feature set up
-// (initialized, or using permissions, etc.), include that too.
-```
-
-### Solving [goal 2] with this approach
-
-[If some goals require a suite of interacting APIs, show how they work together to achieve the goals.]
-
-[etc.]
 
 ## Alternatives considered
 
