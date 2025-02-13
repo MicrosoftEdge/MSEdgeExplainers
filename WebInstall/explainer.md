@@ -296,20 +296,24 @@ The end user then tries to install the text processor, and since the origin has 
 If the user were to deny the permission to install for the origin, they could browse to the app itself and once there, they could install the application. In this case, there wouldn't be any permission prompt required as this would now be a *current document* installation. 
 
 
-### Rejecting promise with `AbortError` and `DataError`
+### Rejecting promise with limited existing `DOMException` names
 
-To protect the user's privacy, the API does not create any new error names for the `DOMException`, instead it uses 2 common existing names: `AbortError` and `DataError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
+To protect the user's privacy, the API does not create any new error names for the `DOMException`, instead it uses common existing names: `AbortError`, `DataError`, `NotAllowError` and `InvalidStateError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
 
 **The promise will reject with an `AbortError` if:**
 * Installation was closed/cancelled.
-* User is outside of the main frame.
-* Invocation happens without a user activation.
-* The install permission is required but hasn't been granted.
 
 **The promise will reject with a `DataError` if:**
 * No manifest file present or invalid install URL.
 * No `id` field defined in the manifest file.
 * There is a mismatch between the `id` passed as parameter and the processed `id` from the manifest.
+
+**The promise will reject with an `NotAllowedError` if:**
+* The install permission is required but hasn't been granted.
+
+**The promise will reject with an `InvalidStateError` if:**
+* User is outside of the main frame.
+* Invocation happens without a user activation.
 
 #### Example: combining errors to mitigate private data leaking
 
