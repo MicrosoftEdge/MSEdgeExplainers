@@ -53,7 +53,7 @@ The feature is intended to be used by any web page that wants to restore the cur
 chrome.searchProviders.isRecommendedDSE((success: boolean) => void);
 ```
 > #### NOTE
-> This API will return **true** if the current default search provider is already the brand's recommended one **or** the current default search provider is managed policy, otherwise return **false**.\
+> This API will run callback with **true** if the current default search provider is already the brand's recommended one **or** the current default search provider is managed policy, otherwise run callback with **false**.\
 > See example of how current default search provider is managed by policy: [Default search provider policies](https://learn.microsoft.com/en-us/DeployEdge/microsoft-edge-policies#default-search-provider-policies). 
 
 ### Reset current default search provider to brand's recommended.
@@ -62,7 +62,7 @@ chrome.searchProviders.isRecommendedDSE((success: boolean) => void);
 chrome.searchProviders.resetToRecommendedDSE((success: boolean) => void)
 ```
 > #### NOTE
-> This API will reset current default search provider to the brand's recommended one only if the current default search provider is not managed by policy, otherwise do nothing.\
+> This API will run callback with **true** if it could successfully reset current default search provider to the brand's recommended one, otherwise run callback with **false**. This API will not reset  current default search provider if the current default search provider is managed by policy or current default search provider is brand's recommended one.\
 > See example of how current default search provider is managed by policy: [Default search provider policies](https://learn.microsoft.com/en-us/DeployEdge/microsoft-edge-policies#default-search-provider-policies). 
 
 ## Security and Privacy Considerations
