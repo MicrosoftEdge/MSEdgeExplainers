@@ -37,7 +37,7 @@ This explainer proposes a solution to this situation by allowing another option 
 * Define a mechanism that will allow for more selective style sharing via CSS `@sheet`.
 
 ## Non-goals
-* Anything specific to `@sheet` should be discussed in its dedicated proposal.
+* Anything specific to `@sheet` should be discussed in its dedicated <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">proposal</a>.
 
 ## Proposal - Local References for Link Rel Tags
 
