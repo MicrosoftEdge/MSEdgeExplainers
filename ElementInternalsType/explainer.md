@@ -4,13 +4,14 @@
 
 - [Sanket Joshi](https://github.com/sanketj)
 - [Alex Keng](https://github.com/alexkeng)
+- [Chris Holt](https://github.com/chrisdholt)
 
 ## Participate
   - [OpenUI issue tracking initial discussions and WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088)
 
 ## Introduction
 
-Web component authors often seek to create custom elements that inherit the behaviors and properties of native HTML elements (ie. customized built-in elements). This allows them to leverage the built-in functionality of standard elements while extending their capabilities to meet specific needs. Some of the use cases enabled by customized built-ins are listed below.
+Web component authors often want to create custom elements that inherit the behaviors and properties of native HTML elements (ie. "customized built-in elements" or just "customized built-ins"). This allows them to leverage the built-in functionality of standard elements while extending their capabilities to meet specific needs. Some of the use cases enabled by customized built-ins are listed below.
 
 - Custom buttons can provide unique styles and additional functionality, such as split or toggle button semantics, while still maintaining [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button) behavior such as being a [popover invoker](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement).
 - Custom buttons can extend native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit). Similarly, custom buttons that extend native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset).
@@ -18,20 +19,24 @@ Web component authors often seek to create custom elements that inherit the beha
 
 ### Goals
 
-- A solution for customizable built-in elements that provides an improvement over `extends`/`is`, in terms of interoperability and functionality.
-- Supporting as many as customizable built-in use cases as possible, though not necessarily all at once. Support for more `type` values can be added over time.
+- A solution for customized built-in elements that provides an improvement over `extends`/`is`, in terms of interoperability and functionality.
+- Supporting as many as customized built-in use cases as possible, though not necessarily all at once. Support for more `type` values can be added over time.
 
 ### Non-goals
 
-- Deprecation of `extends`/`is`. This is something that should be considered independently, once `elementInternals.type` addresses developer needs sufficiently.
+- Deprecation of `extends`/`is`. This is something that can be considered independently, once `elementInternals.type` addresses developer needs sufficiently.
+- A declarative version of `elementInternals.type`. This requires finding a general solution for declarative custom elements with declarative `elementInternals`. This is a broader problem that should be explored separately.
 
 ## Proposal: add `type` property to `ElementInternals`
 
-The `ElementInternals` interface gives web developers a way to participate in HTML forms and integrate with the accessibility OM. This will be extended to support the creation of customizable built-ins by adding a `type` property, which can be set to string values that represent native element types. The initial set of `type` values being proposed are listed below. More values may be supported in the future.
-- `button` (for [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button))
-- `submit` (for [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit))
-- `reset` (for [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset))
-- `label` (for [label](https://html.spec.whatwg.org/multipage/forms.html#the-label-element))
+The `ElementInternals` interface gives web developers a way to participate in HTML forms and integrate with the accessibility OM. This will be extended to support the creation of customized built-ins by adding a `type` property, which can be set to string values that represent native element types. The initial set of `type` values being proposed are listed below. Support for additional values may be added in the future.
+- `'' (empty string)` - this is the default value, indicating the custom element is not a customized built-in
+- `button` - for [button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button) like behavior
+- `submit` - for [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) like behavior
+- `reset` - for [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) like behavior
+- `label` - for [label](https://html.spec.whatwg.org/multipage/forms.html#the-label-element) like behavior
+
+If `elementInternals.type` is assigned any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
 ### `elementInternals.type = 'button'`
 
@@ -106,7 +111,7 @@ Below is an example showcasing a custom submit button being used to submit a for
     </form>
 ```
 
-If the `disabled` attribute is set, a custom button cannot be activated and thus cannot submit the form.
+If the `disabled` attribute is set on a custom submit button, it cannot be activated and thus cannot submit forms.
 
 ### `elementInternals.type = 'reset'`
 
@@ -145,14 +150,16 @@ Below is an example showcasing a custom label being used to label a checkbox. Wh
 
 When `elementInternals.type` is set, the custom element will be assigned the same defaults as the corresponding native element. For example, if `elementInternals.type = 'button'` is set, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternal.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
 
+### `elementInternals.type` does not conflict with `extends`
+Per spec, [`attachInternals`](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals) cannot be called on custom elements that are defined with `extends`. Therefore, it is not possible to create a custom element that is defined with `extends` and also sets `elementInternals.type`.
+
 ## Alternatives considered
 
-A partial solution for this problem already exists today. Authors can specify the `extends` option when [defining a custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define). Authors can then use the `is` attribute to give a built-in element a custom name, thereby turning it into a customizable built-in element.
+A partial solution for this problem already exists today. Authors can specify the `extends` option when [defining a custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define). Authors can then use the `is` attribute to give a built-in element a custom name, thereby turning it into a customized built-in element.
 
-Both `extends` and `is` are supported in Firefox and Chromium-based browsers today. However, this solution has limitations, such as not being able to attach shadow trees to (most) customizable built-in elements. Citing these limitations, Safari doesn't plan to support customizable built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
+Both `extends` and `is` are supported in Firefox and Chromium-based browsers today. However, this solution has limitations, such as not being able to attach shadow trees to (most) customized built-in elements. Citing these limitations, Safari doesn't plan to support customized built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
 
 The `elementInternals.type` proposal addresses many of the limitations with `extends`/`is`, including allowing customized built-ins to support shadow DOM. The proposal also has support from the WHATWG and multiple browser vendors (including Safari) as noted by a WG resolution here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455.
-
 
 ## Stakeholder Feedback / Opposition
 
@@ -166,5 +173,5 @@ The `elementInternals.type` proposal addresses many of the limitations with `ext
 
 Many thanks for valuable feedback and advice from:
 
-- [Chris Holt](https://github.com/chrisdholt)
 - [Mason Freed](https://github.com/mfreed7)
+- [Open UI Community Group](https://www.w3.org/community/open-ui/)
