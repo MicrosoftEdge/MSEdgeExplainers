@@ -41,6 +41,7 @@ The `ElementInternals` interface currently give web developers a way to particip
 - [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
 - [`popovertarget`](https://html.spec.whatwg.org/multipage/popover.html#attr-popovertarget)
 - [`popovertargetaction`](https://html.spec.whatwg.org/multipage/popover.html#attr-popovertargetaction)
+- [`interesttarget`](https://github.com/whatwg/html/pull/11006/files#:~:text=span%3E%20the%20%3Ccode%20data%2Dx%3D%22attr%2Dinteresttarget%22%3E-,interesttarget,-%3C/code%3E%20attribute.%3C/p%3E) - [currently experimental in Chromium](https://groups.google.com/a/chromium.org/g/blink-dev/c/LLgsMjTzmAY/m/5GUjSYC2AQAJ)
 
 Below is an example showcasing a custom button being used as a popup invoker. When the custom button is activated, ex. via a click, `div id="my-popover` will be shown as a popover.
 
@@ -82,6 +83,8 @@ Custom elements with `elementInternals.type = 'submit'` set will support the fol
 - [`checkValidity`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-checkvalidity)
 - [`reportValidity`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-reportvalidity)
 - [`setCustomValidity`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-cva-setcustomvalidity)
+- [`name`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-name)
+- [`value`](https://html.spec.whatwg.org/multipage/form-elements.html#dom-button-value)
 
 Below is an example showcasing a custom submit button being used to submit a form. When the custom button is activated, ex. via a click, the form will be submitted and the page will navigate.
 
@@ -138,9 +141,9 @@ Below is an example showcasing a custom label being used to label a checkbox. Wh
    <input type='checkbox' id='my-checkbox' />
 ```
 
-### Resolving ARIA roles
+### Order of precedence for used values: Element properties > `ElementInternals` properties > default properties via `elementInternals.type`
 
-
+When `elementInternals.type` is set, the custom element will be assigned the same defaults as the corresponding native element. For example, if `elementInternals.type = 'button'` is set, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternal.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
 
 ## Alternatives considered
 
@@ -150,11 +153,6 @@ Both `extends` and `is` are supported in Firefox and Chromium-based browsers tod
 
 The `elementInternals.type` proposal addresses many of the limitations with `extends`/`is`, including allowing customized built-ins to support shadow DOM. The proposal also has support from the WHATWG and members from multiple browser (including Safari) as noted by a WG resolution here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455.
 
-
-## Accessibility, Privacy, and Security Considerations
-
-[Highlight any accessibility, security, and privacy implications that have been taken into account
-during the design process.]
 
 ## Stakeholder Feedback / Opposition
 
