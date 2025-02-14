@@ -1,16 +1,14 @@
 # ElementInternals.type
 
 ## Authors:
-
 - [Sanket Joshi](https://github.com/sanketj)
 - [Alex Keng](https://github.com/alexkeng)
 - [Chris Holt](https://github.com/chrisdholt)
 
 ## Participate
-  - [OpenUI issue tracking initial discussions and WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088)
+- [OpenUI issue tracking initial discussions and WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088)
 
 ## Introduction
-
 Web component authors often want to create custom elements that inherit the behaviors and properties of native HTML elements. These types of custom elements are referred to as "customized built-in elements" or just "customized built-ins". By customizing built-in elements, custom elements can leverage the built-in functionality of standard elements while extending their capabilities to meet specific needs. Some of the use cases enabled by customized built-ins are listed below.
 
 - Custom buttons can provide unique styles and additional functionality, such as split or toggle button semantics, while still maintaining [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button) behavior such as being a [popover invoker](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement).
@@ -18,17 +16,14 @@ Web component authors often want to create custom elements that inherit the beha
 - Custom labels can provide additional functionality, such as tooltips and icons, while still supporting associations with [labelable elements](https://html.spec.whatwg.org/multipage/forms.html#category-label) via the `for` attribute or nesting a labelable element inside the custom label.
 
 ### Goals
-
 - A solution for customized built-in elements that provides an improvement over `extends`/`is`, in terms of interoperability and functionality.
 - Supporting as many as customized built-in use cases as possible, though not necessarily all at once. Support for more `type` values can be added over time.
 
 ### Non-goals
-
 - Deprecation of `extends`/`is`. This is something that can be considered independently, once `elementInternals.type` addresses developer needs sufficiently.
 - A declarative version of `elementInternals.type`. This requires finding a general solution for declarative custom elements with declarative `elementInternals`. This is a broader problem that should be explored separately.
 
 ## Proposal: add `type` property to `ElementInternals`
-
 The `ElementInternals` interface gives web developers a way to participate in HTML forms and integrate with the accessibility OM. This will be extended to support the creation of customized built-ins by adding a `type` property, which can be set to string values that represent native element types. The initial set of `type` values being proposed are listed below. Support for additional values may be added in the future.
 - `'' (empty string)` - this is the default value, indicating the custom element is not a customized built-in
 - `button` - for [button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button) like behavior
@@ -38,8 +33,9 @@ The `ElementInternals` interface gives web developers a way to participate in HT
 
 If `elementInternals.type` is assigned any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
-### `elementInternals.type = 'button'`
+`elementInternals.type` should only be set once. If `elementInternals.type` has a non-empty string value and is attempted to be set again, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown. This works similar to how [`attachInternals` throws an error if called on an element more than once](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals:~:text=If%20this%27s%20attached%20internals%20is%20non%2Dnull%2C%20then%20throw%20an%20%22NotSupportedError%22%20DOMException).
 
+### `elementInternals.type = 'button'`
 When `elementInternals.type = 'button'` is set in a custom element's constructor, the custom element will gain support for the attributes listed below.
 - [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
 - [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
@@ -70,7 +66,6 @@ Below is an example showcasing a custom button being used as a popup invoker. Wh
 Like with native buttons, if the `disabled` attribute is set, a custom button cannot be activated and thus cannot invoke popovers.
 
 ### `elementInternals.type = 'submit'`
-
 Custom elements with `elementInternals.type = 'submit'` set will support the following attributes.
 - [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
 - [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
@@ -114,14 +109,12 @@ Below is an example showcasing a custom submit button being used to submit a for
 If the `disabled` attribute is set on a custom submit button, it cannot be activated and thus cannot submit forms.
 
 ### `elementInternals.type = 'reset'`
-
 Custom elements with `elementInternals.type = 'reset'` set will support the following attributes.
 - [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
 - [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
 - [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
 
 ### `elementInternals.type = 'label'`
-
 Custom elements with `elementInternals.type = 'label'` set will support the following attributes.
 - [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
 - [`for`](https://html.spec.whatwg.org/multipage/forms.html#dom-label-htmlfor)
@@ -147,7 +140,6 @@ Below is an example showcasing a custom label being used to label a checkbox. Wh
 ```
 
 ### Order of precedence for used values: Element properties > `ElementInternals` properties > default properties via `elementInternals.type`
-
 When `elementInternals.type` is set, the custom element will be assigned the same defaults as the corresponding native element. For example, if `elementInternals.type = 'button'` is set, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternal.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
 
 ### `elementInternals.type` does not conflict with `extends`
