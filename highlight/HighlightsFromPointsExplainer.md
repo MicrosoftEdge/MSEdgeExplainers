@@ -51,7 +51,7 @@ It was initially discussed in the CSSWG whether an event-based API to handle int
 2. Dispatch a single event for the top-priority Highlight, with the event path including other Highlights and then bubbling to the DOM tree. However, pointer events can currently only target elements, so this approach might break other specification assumptions.
 3. A combination of approaches 1 and 2, dispatching two events per user action: one for Highlights and one for the DOM tree. The Highlight event propagates through overlapping Highlights, and if `preventDefault()` wasn't called in that sequence, a new event is fired on the DOM tree.
 
-In the end, due to these options becoming increasingly complex, `highlightsFromPoint()` was decided to be implemented as a first step, allowing handling pointer events with regular DOM events, and still satisfying most of the use cases that were brought up in the discussions.
+Each of these event-based options carries significant complexity. The `highlightsFromPoint()` API was selected since it is much simpler to implement and still satisfies the use cases adequately.
 
 ### Making `highlightsFromPoint` part of `DocumentOrShadowRoot`
 While exploring the implementation of the `highlightsFromPoint()` API, we considered adding it to the `DocumentOrShadowRoot` interface. However, we decided against this approach due to the complexities involved in managing shadow DOM encapsulation and to ensure consistency with existing APIs like `caretPositionFromPoint()` and `getHTML()`, which face similar encapsulation challenges.
