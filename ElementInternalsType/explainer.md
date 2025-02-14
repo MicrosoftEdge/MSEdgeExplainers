@@ -115,7 +115,7 @@ If the `disabled` attribute is set on a custom submit button, it cannot be activ
 
 ### `elementInternals.type = 'reset'`
 
-Custom elements with `elementInternals.type = 'submit'` set will support the following attributes.
+Custom elements with `elementInternals.type = 'reset'` set will support the following attributes.
 - [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
 - [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
 - [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
