@@ -14,11 +14,11 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 
 - [1. Introduction](#1-introduction)
 - [2. User scenarios](#2-user-scenarios)
-  - [2.1 Scenario: Sync clipboard with a remote desktop](#21-scenario-sync-clipboard-with-a-remote-desktop)
-  - [2.2 Scenario: Show available paste formats in web based editors](#22-scenario-show-available-paste-formats-in-web-based-editors)
+  - [2.1 Scenario: Show available paste formats in web based editors](#21-scenario-show-available-paste-formats-in-web-based-editors)
     - [2.2.1 Copy multiple cells should show multiple paste options in Excel online](#221-copy-multiple-cells-should-show-multiple-paste-options-in-excel-online)
     - [2.2.2 Copy plain text should show only single paste option in Excel online](#222-copy-plain-text-should-show-only-single-paste-option-in-excel-online)
     - [2.2.3 Multiple paste options in Google sheets](#223-multiple-paste-options-in-google-sheets)
+  - [2.2 Scenario: Sync clipboard with a remote desktop](#22-scenario-sync-clipboard-with-a-remote-desktop)
 - [3. Motivation - Alternative to inefficient polling of clipboard](#3-motivation---alternative-to-inefficient-polling-of-clipboard)
 - [4. Proposed Approach](#4-proposed-approach)
   - [4.1 Example javascript code for detecting clipboard changes:](#41-example-javascript-code-for-detecting-clipboard-changes)
@@ -30,19 +30,12 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
       - [Cons](#cons-1)
   - [4.4 Event bubble up and cancellation](#44-event-bubble-up-and-cancellation)
   - [4.5 Clipboard contents - Not available](#45-clipboard-contents---not-available)
-    - [4.6 Clipboard data types](#46-clipboard-data-types)
+  - [4.6 Clipboard data types](#46-clipboard-data-types)
 - [5 Alternatives considered](#5-alternatives-considered)
-    - [5.1 New permission approach: Requires ‘clipboard-read-type’](#51-new-permission-approach-requires-clipboard-read-type)
-      - [Pros](#pros-2)
-      - [Cons](#cons-2)
-      - [Acquiring the clipboard-read / clipboard-types-read permission:](#acquiring-the-clipboard-read--clipboard-types-read-permission)
-    - [5.2 No page focus requirement](#52-no-page-focus-requirement)
+  - [5.1 Transient user activation requirement](#51-transient-user-activation-requirement)
       - [Pros:](#pros)
       - [Cons:](#cons)
-    - [5.3 Transient user activation requirement](#53-transient-user-activation-requirement)
-      - [Pros:](#pros-1)
-      - [Cons:](#cons-1)
-      - [5.4 API Signature alternate: Use DataTransfer object of ClipboardEvent class](#54-api-signature-alternate-use-datatransfer-object-of-clipboardevent-class)
+  - [5.2 API Signature alternate: Use DataTransfer object of ClipboardEvent class](#52-api-signature-alternate-use-datatransfer-object-of-clipboardevent-class)
 - [6 Appendix](#6-appendix)
   - [6.1 APIs provided by all OS to listen to clipboardchange event:](#61-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
 - [7 Open issues](#7-open-issues)
@@ -54,17 +47,15 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 
 ## 1. Introduction
 
-The clipboardchange event fires whenever the system clipboard contents are changed. This allows web-apps like remote desktop clients to be notified and respond to changes to the system clipboard. It provides an efficient alternative to polling the clipboard for changes.
+The `clipboardchange` event aims to provide an efficient and secure way of notifying web applications about changes to the system clipboard. This allows web applications to provide rich user experiences like dynamic contextual menu options based on available clipboard MIME types and ability to efficiently sync clipboard in web based virtual desktop clients.
+
+Today, this can be achieved by web developers in Chromium based browsers by calling async clipboard read API in a polling approach (assuming clipboard-read permissions are granted). This is inefficient as clipboard read API calls are expensive and it is resource-intensive to read entire clipboard data just to infer if the clipboard has changed. Also, polling is not feasible on [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) and [Safari](https://webkit.org/blog/10855/async-clipboard-api/) as these browser engines rely on combination of user activation and user gesture for web pages to access user clipboard contents which means there will be a 'Paste' button presented requiring user interaction on every clipboard change and making polling infeasible.
+
+Hence `clipboardchange` event is being proposed. This event will be fired, in a secure manner by firing only when document is in focus and requiring that clipboard contents are not part of this event.
 
 ## 2. User scenarios
 
-### 2.1 Scenario: Sync clipboard with a remote desktop
-When a user copies text or an image on their local machine, a web-based remote desktop application can detect that clipboard contents have changed by listening for the `clipboardchange` event. Upon detecting the change (which happens when 'clipboardchange' event is triggered on the web app when the page regains focus), the application can re-read the clipboard and send the updated clipboard content to the remote desktop environment.
-
-![](img/sync-clipboard-scenario.png)
-
-
-### 2.2 Scenario: Show available paste formats in web based editors
+### 2.1 Scenario: Show available paste formats in web based editors
 Web-based editors like Word Online, Excel Online, Google Sheets, and similar applications support paste operations in multiple formats, such as CSV, images, HTML, and plain text. These editors may have separate paste functionality depending on the data type which is pasted, hence the web UI might have different paste buttons for each data type. The clipboard change event can be used to detect the change in available formats in clipboard and reflect the same on the UI as soon as it is changed.
 
 **Example scenario with clipboardchange event**: Imagine a user working on a report in Word Online. They copy a table from Excel, which is available in multiple formats: plain text, HTML, and CSV. As soon as the user copies the table, the `clipboardchange` event fires, and Word Online's UI updates to show buttons for "Paste as Text," "Paste as HTML," and "Paste as CSV." The user can then choose the most suitable format for their report with a single click, streamlining their workflow. 
@@ -79,6 +70,12 @@ Web-based editors like Word Online, Excel Online, Google Sheets, and similar app
 
 #### 2.2.3 Multiple paste options in Google sheets
 ![](img/google-sheets.png)
+
+### 2.2 Scenario: Sync clipboard with a remote desktop
+When a user copies text or an image on their local machine, a web-based remote desktop application can detect that clipboard contents have changed by listening for the `clipboardchange` event. Upon detecting the change (which happens when 'clipboardchange' event is triggered on the web app when the page regains focus), the application can re-read the clipboard and send the updated clipboard content to the remote desktop environment.
+
+![](img/sync-clipboard-scenario.png)
+
 
 ## 3. Motivation - Alternative to inefficient polling of clipboard
 Today, a web-app can monitor the system clipboard by polling and reading the clipboard through async clipboard API at regular intervals.
@@ -101,27 +98,28 @@ Additionally we must ensure that we monitor the clipboard only when absolutely r
   navigator.clipboard.addEventListener("clipboardchange", onClipboardChanged);
 ```
 
-A sample web application which demonstrates the usage of "clipboardchange" event for showing available paste formats for rich web editors [Scenario 2.2](#22-scenario-show-available-paste-formats-in-web-based-editors) can be found [here](./clipboard-change-event-example-app.html).
+A sample web application which demonstrates the usage of "clipboardchange" event for showing available paste formats for rich web editors [Scenario 2.2](#21-scenario-show-available-paste-formats-in-web-based-editors) can be found [here](./clipboard-change-event-example-app.html).
 
 ### 4.2 Permissions and Interop - No user permission required 
  
-We favour having no permission requirement for listening to clipboardchange events for it’s simplicity in providing interoperability and user experience.
-
 Today browser engines have different approaches to clipboard API permissions. While Chromium has [this permissions model](https://github.com/w3c/clipboard-apis/blob/main/explainer.adoc#clipboard-permissions) for clipboard, [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) and [Safari](https://webkit.org/blog/10855/async-clipboard-api/) rely on combination of user activation and user gesture for web pages to access user clipboard contents. This strict requirement is present because a user's clipboard contents are highly sensitive and can contain private data like passwords, security tokens. However, we will see that core scenarios involving clipboardchange event does not require complete user clipboard contents and hence we propose a more lenient permissions approach, that works in all browsers, for this new API. 
  
 **Permission prompt in Chromium**
 ![](img/chrome-permission-prompt.png)
- 
-With ClipboardChange event API, event would be fired to indicate there was a change to clipboard. Without any additional data or information provided with this event, there shouldn't be any privacy concern as there is no data exposed. As no data is exposed, no permissions are needed. Now let’s consider the use cases outlined in the explainer, especially the dynamic contextual menus and buttons appearing or not appearing with different MIME types available on clipboard([Scenario 2.2](#22-scenario-show-available-paste-formats-in-web-based-editors)). For this just firing the clipboard change event is not sufficient. Developers will need to know the available MIME types on clipboard to provide such capabilities on Web Platform. And a developer can know the available types if the browser provides Clipboard MIME types as part of payload on the ClipboardChange event.
 
-Letting the developers be informed about the presence of common data types (but not the actual data) like TEXT, PNG or HTML should not result in or add to security or privacy concern. However, same cannot be said for custom MIME types because if custom MIME types are exposed (without user consent) a web page can know which applications a user is working on and this information can be used to identify users by a malicious webpage. Hence if custom MIME types are provided in the clipboardchange event payload, the event needs to be gated by a user permission. Hence custom MIME types would not be available in the event payload. And with custom MIME types missing in the clipboardchange event payload, applications won't be able to show paste buttons related to custom MIME types for [this scenario](#22-scenario-show-available-paste-formats-in-web-based-editors).
+**Permission prompt in Firefox**
+![](img/firefox-paste-button.png)
+ 
+With ClipboardChange event API, event would be fired to indicate there was a change to clipboard. Without any additional data or information provided with this event, there shouldn't be any privacy concern as there is no data exposed. As no data is exposed, no permissions are needed. Now let’s consider the use cases outlined in the explainer, especially the dynamic contextual menus and buttons appearing or not appearing with different MIME types available on clipboard([Scenario 2.2](#21-scenario-show-available-paste-formats-in-web-based-editors)). For this just firing the clipboard change event is not sufficient. Developers will need to know the available MIME types on clipboard to provide such capabilities on Web Platform. And a developer can know the available types if the browser provides Clipboard MIME types as part of payload on the ClipboardChange event.
+
+Letting the developers be informed about the presence of common data types (but not the actual data) like TEXT, PNG or HTML should not result in or add to security or privacy concern. However, same cannot be said for custom MIME types because if custom MIME types are exposed (without user consent) a web page can know which applications a user is working on and this information can be used to identify users by a malicious webpage. Hence if custom MIME types are provided in the clipboardchange event payload, the event needs to be gated by a user permission. Hence custom MIME types would not be available in the event payload. And with custom MIME types missing in the clipboardchange event payload, applications won't be able to show paste buttons related to custom MIME types for [this scenario](#21-scenario-show-available-paste-formats-in-web-based-editors).
 
 ##### Pros
 1.) Simpler implementation and user experience with no permission prompts.
 2.) Provides feature interop out of box without need to implement new permissions.
 
 ##### Cons
-1.) No support for custom clipboard data types in the event payload which might limit user scenarios for web apps.
+1.) No support for custom clipboard data types in the event payload which anyways is not supported on all browsers.
  
 ### 4.3 Page focus requirement
 We favour page required to be in focus to receive event, since this approach is inline with the current Async clipboard APIs and also reduces the possibility of misusing the clipboard change event in privacy related attacks. Also the approach has relatively lower resource usage.
@@ -143,7 +141,7 @@ Clipboard contents are not present as part of this event's payload as per the se
 
 To get the changed clipboard data within the event handler, the [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) can be used, given the web page has sufficient permissions. Note that in browsers which don't have permission based access to clipboard (like Firefox), a call to async clipboard read might require user gesture like clicking paste tablet. In those browsers, web authors can instead show a "Sync" button on the UI, which can be enabled upon receiving clipboardchange event and disabled again once user clicks the "Sync" button. 
 
-#### 4.6 Clipboard data types
+### 4.6 Clipboard data types
 
 The interface of the ClipboardChange event handler argument looks like following:
 
@@ -168,32 +166,7 @@ The data types available in the clipboard (that are accessible via async clipboa
 
 ## 5 Alternatives considered
 
-#### 5.1 New permission approach: Requires ‘clipboard-read-type’
-Browsers can introduce a new permission, called "clipboard-types-read" (there is also some precedence for this with how Firefox has [this permission model](https://support.mozilla.org/en-US/kb/does-firefox-share-my-location-websites?redirectslug=does-firefox-share-my-location-web-sites&redirectlocale=en-US) for accessing location services)
-Note: Browsers that already have permissions model for clipboard (e.g., Chromium) could also use the existing “clipboard-read” permission to gate the clipboardchange event, however, for interoperability we prefer even these browsers to introduce a new permission if this approach to clipboardchange API permission is taken.
-
-##### Pros
-1.) Facilitates interop.
-2.) Supports providing custom clipboard data types(along with standard MIME types) with event payload.
-
-##### Cons
-1.) Complex user experience involving permission prompt.
-2.) New permission implementation.
-
-##### Acquiring the clipboard-read / clipboard-types-read permission:
-The user can be prompted for permissions as soon as the "addEventListener" method is called with "clipboardchange" in case the permissions are not already granted.
- 
-#### 5.2 No page focus requirement
-
-##### Pros:
-1. Opens possibility for more user scenarios - e.g. For example, a web app can make network calls in the background when a specific clipboard item is updated - before pasting an image, a web app might want to check the image for embedded malicious content using a remote service. If the app can be notified about a clipboard change in background, it can trigger the necessary network operations while the user is in another page or application. When the user returns, the web app is ready with the results, reducing the wait time.
-
-##### Cons:
-1. Might be open to misuse - a web app will be able to monitor the clipboard even when the user is interacting with other applications / pages.
-2. May not be useful unless the page focus requirement is also removed from the async read/write clipboard API.
-3. Could lead to higher resource consumption due to continuous monitoring. E.g. if a large number of pages are listening to the clipboardchange event, when the clipboard is changed, then all the pages will receive the event at once, which might put load on the system.
-
-#### 5.3 Transient user activation requirement
+### 5.1 Transient user activation requirement
 This approach allows the clipboardchange event to be fired for a short duration after the user loses page focus, such as up to 5 seconds. This ensures that clipboard changes occurring immediately after focus loss are still captured, enhancing user experience without compromising security.
 
 ##### Pros:
@@ -206,7 +179,7 @@ Example: A web app can pre-process clipboard data while the user is in another a
 2. Still requires monitoring for a brief period after focus loss, which could lead to resource usage if many pages implement this.
 Example: Multiple tabs monitoring clipboard changes for 5 seconds could still cause a temporary spike in resource usage.
 
-##### 5.4 API Signature alternate: Use DataTransfer object of ClipboardEvent class
+### 5.2 API Signature alternate: Use DataTransfer object of ClipboardEvent class
 
 The clipboardchange event can be considered a [ClipboardEvent](https://www.w3.org/TR/clipboard-apis/#clipboard-event-interfaces) which includes a [DataTransfer](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) object as "clipboardData" property. This is similar to other clipboard related events like [cut](https://w3c.github.io/clipboard-apis/#clipboard-event-cut), [copy](https://w3c.github.io/clipboard-apis/#clipboard-event-copy) or [paste](https://w3c.github.io/clipboard-apis/#clipboard-event-paste) events. The clipboard types can be read using "clipboardData.types" property. However, methods to access actual clipboard data like "getData" won't be accessible. Calling these inaccessible methods would return an "undefined" or equivalent null value.  
 
