@@ -1,6 +1,6 @@
 # Local References In `<link>` Tags
 
-## Authors:
+## Authors
 
 - Kurt Catti-Schmidt
 - Noam Rosenthal
@@ -113,6 +113,7 @@ This proposal augments the HTML `<link>` tag in two ways:
 2. The name `inline-stylesheet` can be refined (or revisited if  it's not necessary to define a new `rel` value).
 
 ## References & acknowledgements
+
 Many thanks for valuable feedback and advice from:
 
 - Alison Maher
