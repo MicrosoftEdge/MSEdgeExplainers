@@ -11,7 +11,7 @@
 
 ## Introduction
 
-Web component authors often want to create custom elements that inherit the behaviors and properties of native HTML elements (ie. "customized built-in elements" or just "customized built-ins"). This allows them to leverage the built-in functionality of standard elements while extending their capabilities to meet specific needs. Some of the use cases enabled by customized built-ins are listed below.
+Web component authors often want to create custom elements that inherit the behaviors and properties of native HTML elements. These types of custom elements are referred to as "customized built-in elements" or just "customized built-ins". By customizing built-in elements, custom elements can leverage the built-in functionality of standard elements while extending their capabilities to meet specific needs. Some of the use cases enabled by customized built-ins are listed below.
 
 - Custom buttons can provide unique styles and additional functionality, such as split or toggle button semantics, while still maintaining [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button) behavior such as being a [popover invoker](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement).
 - Custom buttons can extend native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit). Similarly, custom buttons that extend native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset).
@@ -40,7 +40,7 @@ If `elementInternals.type` is assigned any other value, a ["NotSupportedError"](
 
 ### `elementInternals.type = 'button'`
 
-`elementInternals.type = 'button'` can be set in a custom element constructor to give the custom element native button like behavior. Specifically, the custom element will support the attributes listed below.
+When `elementInternals.type = 'button'` is set in a custom element's constructor, the custom element will gain support for the attributes listed below.
 - [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
 - [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
 - [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
@@ -67,7 +67,7 @@ Below is an example showcasing a custom button being used as a popup invoker. Wh
     <div id="my-popover" popover>This is popover content.</div>
 ```
 
-Just like with native buttons, if the `disabled` attribute is set, a custom button cannot be activated and thus cannot invoke popovers.
+Like with native buttons, if the `disabled` attribute is set, a custom button cannot be activated and thus cannot invoke popovers.
 
 ### `elementInternals.type = 'submit'`
 
