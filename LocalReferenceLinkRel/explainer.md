@@ -26,7 +26,7 @@ content location of future work and discussions.
 Modern web development practices have converged towards building reusable components instead of building monolithic documents. Frameworks such as React and Angular have popularized this approach, which has made its way natively to the web platform via Web Components. 
 
 Web Components allow for defining custom elements, and these custom elements often rely on Shadow DOM for ID encapsulation. But Shadow DOM doesn't just encapsulate ID's - it encapsulates style as well. The current preferred approach
-for styling elements under a Shadow DOM is through `<link>` tags, but these tags have several downsides, namely that they must be an external file or a dataURI. The performance and developer ergonomics of this
+for styling elements under a Shadow DOM is through `<link>` tags, but these tags have several downsides, namely that they must be an external file or a dataURI. The performance of an external file and developer ergonomics of generating a dataURI make them difficult to use. Because of that, developers using Custom Elements have expressed strong interest in addressing these issues.
 situation are not ideal, and developers using Custom Elements have expressed strong interest in addressing these issues.
 
 This explainer proposes a solution to this situation by allowing another option for sharing styles via the `<link>` tag - local references to `<style>` objects.
