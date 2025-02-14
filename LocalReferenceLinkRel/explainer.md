@@ -38,7 +38,7 @@ This explainer proposes a solution to this situation by allowing another option 
 
 ## Non-goals
 * Anything specific to `@sheet` should be discussed in its dedicated <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">proposal</a>.
-* Modifications to Shadow DOM scoping behaviors. This proposal depends on existing Shadow DOM behavior as currently defined. Styles defined in Shadow DOM will remain inaccessible to the Light DOM.
+* Modifications to Shadow DOM scoping behaviors. This proposal depends on existing Shadow DOM behavior as currently defined. Styles defined in a Shadow DOM will remain inaccessible to the Light DOM.
 
 ## Proposal - Local References for Link Rel Tags
 
@@ -74,7 +74,6 @@ Developers may want to link to styles pulled into another `<link>` tag. These `<
 ### Scoping
 
 ```html
-<p>Outside Shadow DOM</p>
 <template shadowrootmode="open">
   <style id="inline_styles_from_shadow">
     p { color: blue; }
@@ -91,20 +90,20 @@ Due to existing Shadow DOM scoping behaviors, `<style>` tags defined inside the 
 
 ### Deep Clone vs Reference
 
-`<link>` tags referencing external files are always treated as separate instances, even when they refer to the same file. This also occurs through CSS `@import` https://www.w3.org/TR/css-cascade-3/#import-processing.
+`<link>` tags referencing external files are always treated as separate instances, even when they refer to the same file. This also occurs with CSS `@import` statements as defined in https://www.w3.org/TR/css-cascade-3/#import-processing.
 
 However, in this situation, it might make more sense to behave like SVG `<use>` (and other reference-based SVG elements) by behaving as if it's a reference to the original stylesheet instead of a deep copy. This will allow for styles to stay in sync when the stylesheet changes.
-This behavior could improve developer ergonomics and provide memory savings.
+This behavior could improve developer ergonomics by keeping stylesheets in sync. This approach could also provide memory savings due to the fact that there would only be one stylesheet in memory instead of many copies.
 
 #### Specific Changes to HTML and CSS
 
 This proposal augments the HTML `<link>` tag in two ways:
-1. A new value for the `<link>` tag's `rel` attribute for `inline-stylesheet`.
+1. A new value for the `<link>` tag's `rel` attribute to indicate a local fragment. We are currently using the value `inline-stylesheet`, but this name is open to suggestions.
 2. Fragment identifiers to same-document `<style>` tags are supported in the `href` attribute when the `rel` attribute is `inline-stylesheet`.
 
 ## Considered alternatives
 
-1. [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) are another mechanism for sharing styles between Declarative Shadow DOM and light DOM without the use of JavaScript.
+1. [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) are another mechanism for sharing styles between Declarative Shadow DOM and Light DOM without the use of JavaScript.
 2. External CSS files in `<link>` tags - these are always asychronous (which may not be desired), and may have negative performance implications due to the need to fetch another resource.
 3. CSS-encoded DataURI references in `<link>` tags - this approach avoids some of the issues with 2), but has poor developer ergonomics due to dataURI encoding. Furthermore, there is no ability to automatically synchronize dataURI values.
 
@@ -120,4 +119,3 @@ Many thanks for valuable feedback and advice from:
 - Andy Luhrs
 - Daniel Clark
 - Kevin Babbitt
-- Noam Rosenthal
