@@ -2,8 +2,8 @@
 
 ## Authors:
 
-- Andy Luhrs
 - Kurt Catti-Schmidt
+- Noam Rosenthal
 
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/LRLR)
@@ -29,15 +29,17 @@ Web Components allow for defining custom elements, and these custom elements oft
 for styling elements under a Shadow DOM is through `<link>` tags, but these tags have several downsides, namely that they must be an external file or a dataURI. The performance of an external file and developer ergonomics of generating a dataURI make them difficult to use. Because of that, developers using Custom Elements have expressed strong interest in addressing these issues.
 situation are not ideal, and developers using Custom Elements have expressed strong interest in addressing these issues.
 
-This explainer proposes a solution to this situation by allowing another option for sharing styles via the `<link>` tag - local references to `<style>` objects.
+This explainer proposes a solution to this situation by allowing another option for sharing styles via the `<link>` tag - local references to `<style>` elements.
 
 ## Goals
-* Allow for developers to share styles defined in the Light DOM document into Shadow DOM trees.
-* Allow developers to define their CSS upfront in the same document as their HTML when using Shadow DOM.
+* Allow developers to share styles defined in the Light DOM document into Shadow DOM trees.
+* Allow developers to define their CSS up-front in the same document as their HTML when using Shadow DOM.
 * Define a mechanism that will allow for more selective style sharing via CSS `@sheet`.
+* Allow for inline styles to be defined but not applied <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">via `@sheet`</a>.
 
 ## Non-goals
 * Anything specific to `@sheet` should be discussed in its dedicated <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">proposal</a>.
+* Modifications to Shadow DOM scoping behaviors. This proposal depends on existing Shadow DOM behavior as currently defined. Styles defined in Shadow DOM will remain inaccessible to the Light DOM.
 
 ## Proposal - Local References for Link Rel Tags
 
@@ -55,7 +57,7 @@ We propose supporting fragment identifiers that reference the `id` attribute of 
 ```
 With this functionality, the text "Inside Shadow DOM" will by styled blue, due to the `<link rel="inline-stylesheet" href="#inline_styles">` node's stylesheet applying (along with the `color: blue` rule applying via the `p` selector in that stylesheet).
 
-A new value for the `rel` attribute is used here to prevent legacy engines from performing an unnecessary fetch with this markup. The namne `inline-stylesheet` is preliminary and open to discussion.
+A new value for the `rel` attribute is used here to prevent legacy engines from performing an unnecessary fetch with this markup. The name `inline-stylesheet` is preliminary and open to discussion.
 
 ### Linking to another `<link>` tag
 
@@ -68,7 +70,23 @@ A new value for the `rel` attribute is used here to prevent legacy engines from 
 </template>
 ```
 
-Developers may want to link to other `<link>` tags. These `<link>` references may be internal files (via `inline-stylesheet`), or external files. Loop detection may be necessary for references to another `inline-stylesheet`. 
+Developers may want to link to styles pulled into another `<link>` tag. These `<link>` references may be internal files (via `inline-stylesheet`), or external files. Loop detection may be necessary for references to another `inline-stylesheet`. 
+
+### Scoping
+
+```html
+<p>Outside Shadow DOM</p>
+<template shadowrootmode="open">
+  <style id="inline_styles_from_shadow">
+    p { color: blue; }
+  </style>
+  <p>Inside Shadow DOM</p>
+</template>
+<link rel="stylesheet" href="foo.css" id="#inline_styles_from_shadow">
+<p>Outside Shadow DOM. Styles defined inside the Shadow Root are not applied, so this text is not blue.</p>
+```
+
+Due to existing Shadow DOM scoping behaviors, `<style>` tags defined inside the Shadow DOM cannot be accessed from the Light DOM.
 
 ## Detailed design discussion
 
@@ -88,8 +106,8 @@ This proposal augments the HTML `<link>` tag in two ways:
 ## Considered alternatives
 
 1. [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) are another mechanism for sharing styles between Declarative Shadow DOM and light DOM without the use of JavaScript.
-2. External CSS files in `<link>` tags - these are always asychronous (which may not be desired), and may have negative performance implications due to the need to fetch another resource
-3. CSS-encoded DataURI references in `<link>` tags - this approach avoids some of the issues with 2), but has poor developer ergonomics due to dataURI encoding. Furthermore, there is no ability to automatically synchronizing dataURI values.
+2. External CSS files in `<link>` tags - these are always asychronous (which may not be desired), and may have negative performance implications due to the need to fetch another resource.
+3. CSS-encoded DataURI references in `<link>` tags - this approach avoids some of the issues with 2), but has poor developer ergonomics due to dataURI encoding. Furthermore, there is no ability to automatically synchronize dataURI values.
 
 ## Open Issues
 
@@ -100,6 +118,7 @@ This proposal augments the HTML `<link>` tag in two ways:
 Many thanks for valuable feedback and advice from:
 
 - Alison Maher
+- Andy Luhrs
 - Daniel Clark
 - Kevin Babbitt
 - Noam Rosenthal
