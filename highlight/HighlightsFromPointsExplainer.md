@@ -1,6 +1,6 @@
 # HighlightsFromPoint API Explainer
 
-Authors: [Stephanie Zhang](https://github.com/stephanieyzhang), [Sanket Joshi](https://github.com/sanketj)
+Authors: [Stephanie Zhang](https://github.com/stephanieyzhang), [Sanket Joshi](https://github.com/sanketj), [Fernando Fiori](https://github.com/ffiori)
 
 Previous authors: [Dan Clark](https://github.com/dandclark), [Luis Sánchez Padilla](https://github.com/luisjuansp)
 
@@ -44,6 +44,16 @@ dictionary HighlightsFromPointOptions {
 ```
 
 ## Alternative Solutions
+### Event-based API
+It was initially discussed in the CSSWG whether an event-based API to handle interactions with custom Highlights was the most suitable option (see [this issue](https://github.com/w3c/csswg-drafts/issues/7513) for details). The main idea was dispatching events to the Highlights present under the cursor upon user actions. Different approaches were taken into account:
+
+1. A separate event is dispatched for each Highlight under the cursor in descending priority order. The default action is to advance to the next Highlight and `preventDefault()` can be used to stop this. This might result in firing an arbitrary number of events for a single user action.
+2. Dispatch a single event for the top-priority Highlight, with the event path including other Highlights and then bubbling to the DOM tree. However, pointer events can currently only target elements, so this approach might break other specification assumptions.
+3. A combination of approaches 1 and 2, dispatching two events per user action: one for Highlights and one for the DOM tree. The Highlight event propagates through overlapping Highlights, and if `preventDefault()` wasn't called in that sequence, a new event is fired on the DOM tree.
+
+Each of these event-based options carries significant complexity. The `highlightsFromPoint()` API was selected since it is much simpler to implement and still satisfies the use cases adequately.
+
+### Making `highlightsFromPoint` part of `DocumentOrShadowRoot`
 While exploring the implementation of the `highlightsFromPoint()` API, we considered adding it to the `DocumentOrShadowRoot` interface. However, we decided against this approach due to the complexities involved in managing shadow DOM encapsulation and to ensure consistency with existing APIs like `caretPositionFromPoint()` and `getHTML()`, which face similar encapsulation challenges.
 
 ## Privacy and Security Considerations
