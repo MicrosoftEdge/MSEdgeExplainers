@@ -1,6 +1,6 @@
 # Local References In `<link>` Tags
 
-## Authors:
+## Authors
 
 - Andy Luhrs
 - Kurt Catti-Schmidt
