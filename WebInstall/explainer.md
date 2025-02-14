@@ -317,7 +317,7 @@ To protect the user's privacy, the API does not create any new error names for t
 
 #### Example: combining errors to mitigate private data leaking
 
-A bad actor could try to determine if a user is logged into a dating website. This dating web site could provide install UX _after_ a user is logged in (the dating website will likely have a page that serves a manifest, but it requires authentication). If a request is sent from a third party origin, with a 'wrong' manifest id, this would result in the promise rejecting with an `DataError`.
+A bad actor could try to determine if a user is logged into a dating website. This dating web site could provide install UX _after_ a user is logged in (the dating website will likely have a page that serves a manifest, but it requires authentication). The bad actor could deceive the user to provide a user gesture allowing them to silently call `navigator.install` _intentionally+ with the wrong manifest id.  Their hope would be to get an error indicating a manifest id mismatch, meaning that the user had access to retrieve the manifest (and was thus logged-in), or an error indicating that the manifest could not be retrieved (meaning that they weren't logged-in). 
 
 The benefit of the defined error handling for this feature is that the invoking call doesn't know if the `DataError` is because:
    i. manifest file was not accessible (user not logged-in) or 
