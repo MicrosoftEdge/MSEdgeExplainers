@@ -1,4 +1,4 @@
-# Local References In <link> Tags
+# Local References In `<link>` Tags
 
 ## Authors:
 
