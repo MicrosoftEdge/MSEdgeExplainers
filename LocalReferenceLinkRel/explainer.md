@@ -51,7 +51,7 @@ elements.
   HTML when using Shadow DOM.
 - Define a mechanism that will allow for more selective style sharing via CSS
   `@sheet`.
-- Allow for inline styles to be defined but not applied
+- Provide a foundation for allowing inline styles to be defined but not applied
   <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">via
   `@sheet`</a>.
 
@@ -181,3 +181,4 @@ Many thanks for valuable feedback and advice from:
 - Andy Luhrs
 - Daniel Clark
 - Kevin Babbitt
+- Rob Glidden
