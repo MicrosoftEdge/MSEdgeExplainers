@@ -12,44 +12,37 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [clipboardchange event API explainer](#clipboardchange-event-api-explainer)
-  - [Authors:](#authors)
-  - [Participate](#participate)
-  - [Table of Contents](#table-of-contents)
-  - [1. Introduction](#1-introduction)
-  - [2. User scenarios](#2-user-scenarios)
-    - [2.1 Scenario: Show available paste formats in web based editors](#21-scenario-show-available-paste-formats-in-web-based-editors)
-      - [2.2.1 Copy multiple cells should show multiple paste options in Excel online](#221-copy-multiple-cells-should-show-multiple-paste-options-in-excel-online)
-      - [2.2.2 Copy plain text should show only single paste option in Excel online](#222-copy-plain-text-should-show-only-single-paste-option-in-excel-online)
-      - [2.2.3 Multiple paste options in Google sheets](#223-multiple-paste-options-in-google-sheets)
-    - [2.2 Scenario: Sync clipboard with a remote desktop](#22-scenario-sync-clipboard-with-a-remote-desktop)
-  - [3. Motivation - Alternative to inefficient polling of clipboard](#3-motivation---alternative-to-inefficient-polling-of-clipboard)
-  - [4. Proposed Approach](#4-proposed-approach)
-    - [4.1 Proposed IDL and example javascript code:](#41-proposed-idl-and-example-javascript-code)
-      - [4.1.1 IDL changes](#411-idl-changes)
-      - [4.1.2 Sample JS code](#412-sample-js-code)
-    - [4.2 Clipboard data types - Available in event payload](#42-clipboard-data-types---available-in-event-payload)
-    - [4.3 Clipboard contents - Not available in event payload](#43-clipboard-contents---not-available-in-event-payload)
-    - [4.4 Permissions and Interop - No user permission required](#44-permissions-and-interop---no-user-permission-required)
-        - [Pros](#pros)
-        - [Cons](#cons)
-    - [4.5 Page focus requirement](#45-page-focus-requirement)
-        - [Pros](#pros-1)
-        - [Cons](#cons-1)
-    - [4.6 Event bubble up and cancellation](#46-event-bubble-up-and-cancellation)
-  - [5 Alternatives considered](#5-alternatives-considered)
-    - [5.1 Transient user activation requirement](#51-transient-user-activation-requirement)
-        - [Pros:](#pros-2)
-        - [Cons:](#cons-2)
-    - [5.2 API Signature alternate: Use DataTransfer object of ClipboardEvent class](#52-api-signature-alternate-use-datatransfer-object-of-clipboardevent-class)
-  - [6 Appendix](#6-appendix)
-    - [6.1 APIs provided by all OS to listen to clipboardchange event:](#61-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
-    - [6.2 Permission prompt mechanism in various browsers](#62-permission-prompt-mechanism-in-various-browsers)
-    - [6.3 Reading clipboard contents within the clipboardchange event handler](#63-reading-clipboard-contents-within-the-clipboardchange-event-handler)
-    - [6.4 Custom clipboard data types and clipboardchange event](#64-custom-clipboard-data-types-and-clipboardchange-event)
-  - [7 Open issues](#7-open-issues)
-    - [7.1 Fencedframe](#71-fencedframe)
-  - [8 References \& acknowledgements](#8-references--acknowledgements)
+- [1. Introduction](#1-introduction)
+- [2. User scenarios](#2-user-scenarios)
+  - [2.1 Scenario: Show available paste formats in web based editors](#21-scenario-show-available-paste-formats-in-web-based-editors)
+    - [2.2.1 Copy multiple cells should show multiple paste options in Excel online](#221-copy-multiple-cells-should-show-multiple-paste-options-in-excel-online)
+    - [2.2.2 Copy plain text should show only single paste option in Excel online](#222-copy-plain-text-should-show-only-single-paste-option-in-excel-online)
+    - [2.2.3 Multiple paste options in Google sheets](#223-multiple-paste-options-in-google-sheets)
+  - [2.2 Scenario: Sync clipboard with a remote desktop](#22-scenario-sync-clipboard-with-a-remote-desktop)
+- [3. Motivation - Alternative to inefficient polling of clipboard](#3-motivation---alternative-to-inefficient-polling-of-clipboard)
+- [4. Proposed Approach](#4-proposed-approach)
+  - [4.1 Proposed IDL and example javascript code:](#41-proposed-idl-and-example-javascript-code)
+    - [4.1.1 IDL changes](#411-idl-changes)
+    - [4.1.2 Sample JS code](#412-sample-js-code)
+  - [4.2 Clipboard data types - Available in event payload](#42-clipboard-data-types---available-in-event-payload)
+  - [4.3 Clipboard contents - Not available in event payload](#43-clipboard-contents---not-available-in-event-payload)
+  - [4.4 Permissions and Interop - No user permission required](#44-permissions-and-interop---no-user-permission-required)
+      - [Pros](#pros)
+  - [4.5 Page focus requirement](#45-page-focus-requirement)
+  - [4.6 Event bubble up and cancellation](#46-event-bubble-up-and-cancellation)
+- [5 Alternatives considered](#5-alternatives-considered)
+  - [5.1 Transient user activation requirement](#51-transient-user-activation-requirement)
+      - [Pros:](#pros)
+      - [Cons:](#cons)
+  - [5.2 API Signature alternate: Use DataTransfer object of ClipboardEvent class](#52-api-signature-alternate-use-datatransfer-object-of-clipboardevent-class)
+- [6 Appendix](#6-appendix)
+  - [6.1 APIs provided by all OS to listen to clipboardchange event:](#61-apis-provided-by-all-os-to-listen-to-clipboardchange-event)
+  - [6.2 Permission prompt mechanism in various browsers](#62-permission-prompt-mechanism-in-various-browsers)
+  - [6.3 Reading clipboard contents within the clipboardchange event handler](#63-reading-clipboard-contents-within-the-clipboardchange-event-handler)
+  - [6.4 Custom clipboard data types and clipboardchange event](#64-custom-clipboard-data-types-and-clipboardchange-event)
+- [7 Open issues](#7-open-issues)
+  - [7.1 Fencedframe](#71-fencedframe)
+- [8 References & acknowledgements](#8-references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -116,7 +109,7 @@ A sample web application which demonstrates the usage of "clipboardchange" event
 
 ### 4.2 Clipboard data types - Available in event payload
 
-The ClipboardChange event object will have a types member that lists all the available native formats available on the clipboard. [Custom formats](#64-custom-clipboard-data-types-and-clipboardchange-event) will not be included in this list to minimize fingerprinting risk.
+The ClipboardChange event object will have a types member that lists all the available native formats available on the clipboard. [Custom formats](#64-custom-clipboard-data-types-and-clipboardchange-event) will not be included in this list.
 
 ```typescript
 interface ClipboardChangeEvent{
@@ -126,31 +119,23 @@ interface ClipboardChangeEvent{
 The types member can be used to detect available data types present on the clipboard and then reflect the same on the UI as per [this scenario](#21-scenario-show-available-paste-formats-in-web-based-editors).
 
 ### 4.3 Clipboard contents - Not available in event payload
-[Clipboard contents](#63-reading-clipboard-contents-within-the-clipboardchange-event-handler) are not present as part of this event's payload as it can contain user sensitive data like passwords/security tokens.
+
+This API doesn't intend to provide any user clipboard contents as part of the event payload.
 
 ### 4.4 Permissions and Interop - No user permission required 
 
-Listening to the 'clipboardchange' event should not require any user permissions. Just knowing when the clipboard has changed, that too only when the page is in focus, should not pose any privacy concern. Letting the developers be informed about the presence of only the native data types (but not the actual data) also should not add to any security or privacy concern.
- 
-##### Pros
-1.) Simpler implementation and user experience with no permission prompts / user gesture requirements.
-2.) Provides feature interop out of box without need to implement new permissions.
+When fired, this API intends to indicate that the clipboard has changed and provides the current MIME types present on the clipboard. Since no data exposed, there is no need for user permissions.
 
-##### Cons
-1.) No support for custom clipboard data types in the event payload which anyways is not supported on all browsers.
- 
+##### Pros
+1.) Simpler user experience with no permission prompts / user gesture requirements.
+2.) Provides interop out of box without need to implement new permissions.
+
 ### 4.5 Page focus requirement
 
 The clipboardchange event will not fire if the target document is not focused. If clipboard changes occur while the document is not in focus, a single clipboardchange event will be fired when the document comes back into focus. Historical clipboard change information will not be available, only the available types when the page gained focus will be included in the types member.
 
-##### Pros
-1. This is in-line with current async clipboard focus APIs which require focus to access.
-
-##### Cons
-1. Might restrict web app scenarios which need to listen to clipboardchange events in the background.
-2. Could result in a less responsive user experience if clipboard changes are detected with a delay - if clipboard got changed when the browser was in background, the event is fired only when the browser regains focus. The delay here is the duration between actual copy of contents to clipboard and firing of the clipboardchange event in browser.
-
 ### 4.6 Event bubble up and cancellation 
+
 Since the clipboardchange event is not triggered by a user action and the event is not associated to any DOM element, hence this event doesn't bubble up and is not cancellable.
 
 ## 5 Alternatives considered
@@ -211,7 +196,7 @@ To get the changed clipboard data within the event handler, the [read](https://w
 
 ### 6.4 Custom clipboard data types and clipboardchange event
 
-Custom clipboard data types are not part of this event because if custom MIME types are exposed (without user consent) a web page can know which applications a user is working on providing fingerprinting surface for malicious sites. With custom MIME types missing in the clipboardchange event payload, applications won't be able to show paste buttons related to custom MIME types for [this scenario](#20-scenario-show-available-paste-formats-in-web-based-editors). This should be acceptable since not all browsers support custom clipboard data types.
+Custom clipboard data types are not part of this event because if custom MIME types are exposed (without user consent) a web page can know which applications a user is working on providing fingerprinting surface for malicious sites. Moreover, not all browsers support custom clipboard data types.
 
 ## 7 Open issues
 
