@@ -70,6 +70,8 @@ For the event listener scenario, it was determined that using granularity would 
 
 ## Concerns/Open Questions
 1. The user-perceived frame rate is influenced by both the main thread and the compositor thread. Accurate measurement of frame rates must account for both. Since the compositor thread operates independently of the main thread, it can be difficult to get its frame rate data. However, an accurate frame rate measurements needs to take into account both measurements.
+2. Similar to the abandoned [Frame Timing interface](https://wicg.github.io/frame-timing/#introduction). We are currently gathering historical context on how this relates and why it is no longer being pursued.
+
 
 
 ## Glossary
