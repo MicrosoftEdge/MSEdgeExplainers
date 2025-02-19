@@ -124,7 +124,7 @@ This API doesn't intend to provide any user clipboard contents as part of the ev
 
 ### 4.4 Permissions and Interop - No user permission required 
 
-When fired, this API intends to indicate that the clipboard has changed and provides the current MIME types present on the clipboard. Since no data exposed, there is no need for user permissions.
+When fired, this API indicates that the clipboard has changed and provides the current MIME types present on the clipboard. Since the actual contents of the clipboard are not exposed, there is no need for user permissions.
 
 ##### Pros
 1.) Simpler user experience with no permission prompts / user gesture requirements.
