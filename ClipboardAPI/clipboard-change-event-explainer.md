@@ -109,7 +109,7 @@ A sample web application which demonstrates the usage of "clipboardchange" event
 
 ### 4.2 Clipboard data types - Available in event payload
 
-The ClipboardChange event object will have a types member that lists all the available native formats available on the clipboard. [Custom formats](#64-custom-clipboard-data-types-and-clipboardchange-event) will not be included in this list.
+The ClipboardChange event object will have a `types` member that lists all the available native formats available on the clipboard. [Custom formats](#64-custom-clipboard-data-types-and-clipboardchange-event) will not be included in this list.
 
 ```typescript
 interface ClipboardChangeEvent{
