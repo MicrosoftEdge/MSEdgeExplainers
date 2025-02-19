@@ -128,7 +128,7 @@ When fired, this API indicates that the clipboard has changed and provides the c
 
 ##### Pros
 1.) Simpler user experience with no permission prompts / user gesture requirements.
-2.) Provides interop out of box without need to implement new permissions.
+2.) Provides interop out of the box without need to implement new permissions.
 
 ### 4.5 Page focus requirement
 
