@@ -116,7 +116,7 @@ interface ClipboardChangeEvent{
   types: Array<string>; // MIME types available in the clipboard when the event was fired
 }
 ```
-The types member can be used to detect available data types present on the clipboard and then reflect the same on the UI as per [this scenario](#21-scenario-show-available-paste-formats-in-web-based-editors).
+The `types` member can be used to detect available data types present on the clipboard and then reflect the same on the UI as per [this scenario](#21-scenario-show-available-paste-formats-in-web-based-editors).
 
 ### 4.3 Clipboard contents - Not available in event payload
 
