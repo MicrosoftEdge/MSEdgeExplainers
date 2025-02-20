@@ -6,6 +6,7 @@
 - [Chris Holt](https://github.com/chrisdholt)
 
 ## Participate
+- [WHATWG tracking issue](https://github.com/whatwg/html/issues/11061)
 - [OpenUI issue tracking initial discussions and WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088)
 
 ## Introduction
