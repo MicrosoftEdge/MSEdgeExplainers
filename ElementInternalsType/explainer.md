@@ -35,7 +35,7 @@ If `elementInternals.type` is assigned any other value, a ["NotSupportedError"](
 
 `elementInternals.type` should only be set once. If `elementInternals.type` has a non-empty string value and is attempted to be set again, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown. This works similar to how [`attachInternals` throws an error if called on an element more than once](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals:~:text=If%20this%27s%20attached%20internals%20is%20non%2Dnull%2C%20then%20throw%20an%20%22NotSupportedError%22%20DOMException).
 
-Setting `elementInternal.type` allows the custom element to support additional attributes, the full list for each type is provided in the sub-sections below. If any of the properties have been set prior to setting `elementInternals.type`, the attribute will be "reset" to the default state for that type. Below is an example showcasing this with the `disabled` attribute.
+Setting `elementInternal.type` allows the custom element to support additional attributes. The full list for each type is provided in the sub-sections below. If any of the properties have been set prior to setting `elementInternals.type`, the attribute will be "reset" to the default state for that type. Below is an example showcasing this with the `disabled` attribute.
 
 ```js
     class CustomButton extends HTMLElement {
@@ -46,7 +46,7 @@ Setting `elementInternal.type` allows the custom element to support additional a
             this.disabled = true;
             this.internals_ = this.attachInternals();
             this.internals_.type = 'button';
-            console.log(this.disabled)  // logs `false`
+            console.log(this.disabled);  // logs `false`
         }
     }
     customElements.define('custom-button', CustomButton);
