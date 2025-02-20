@@ -125,11 +125,15 @@ Below is an example showcasing a custom submit button being used to submit a for
 
 If the `disabled` attribute is set on a custom submit button, it cannot be activated and thus cannot submit forms.
 
+Note that a custom submit button needs to be defined as a [form-associated custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-form-associated) in order to be able to submit forms. This is done by including `static formAssociated = true;` in its definition.
+
 ### `elementInternals.type = 'reset'`
 Custom elements with `elementInternals.type = 'reset'` set will support the following attributes.
 - [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
 - [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
 - [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
+
+Similar to custom submit buttons, custom reset buttons also need to defined as [form-associated](https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-form-associated) in order to be able to reset forms.
 
 ### `elementInternals.type = 'label'`
 Custom elements with `elementInternals.type = 'label'` set will support the following attributes.
