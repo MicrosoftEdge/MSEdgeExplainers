@@ -123,8 +123,6 @@ Below is an example showcasing a custom submit button being used to submit a for
     </form>
 ```
 
-Note that a custom submit button needs to be defined as a [form-associated custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-form-associated) in order to be able to submit forms. This is done by including `static formAssociated = true;` in its definition.
-
 If the `disabled` attribute is set on a custom submit button, it cannot be activated and thus cannot submit forms.
 
 ### `elementInternals.type = 'reset'`
@@ -132,8 +130,6 @@ Custom elements with `elementInternals.type = 'reset'` set will support the foll
 - [`disabled`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fe-disabled)
 - [`labels`](https://html.spec.whatwg.org/multipage/forms.html#dom-lfe-labels)
 - [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
-
-Similar to custom submit buttons, custom reset buttons also need to defined as [form-associated](https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-form-associated) in order to be able to reset forms.
 
 ### `elementInternals.type = 'label'`
 Custom elements with `elementInternals.type = 'label'` set will support the following attributes.
@@ -161,13 +157,16 @@ Below is an example showcasing a custom label being used to label a checkbox. Wh
 ```
 
 ### Order of precedence for used values: Element properties > `ElementInternals` properties > default properties via `elementInternals.type`
-When `elementInternals.type` is set, the custom element will be assigned the same defaults as the corresponding native element. For example, if `elementInternals.type = 'button'` is set, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternal.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
+When `elementInternals.type` is set, the custom element will be assigned the same defaults as the corresponding native element. For example, if `elementInternals.type = 'button'` is set, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternals.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
 
 ### `elementInternals.type` does not conflict with `extends`
 Per spec, [`attachInternals`](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals) cannot be called on custom elements that are defined with `extends`. Therefore, it is not possible to create a custom element that is defined with `extends` and also sets `elementInternals.type`.
 
 ### `elementInternals.type` does not change element appearance
 Setting `elementInternals.type` gives a custom element native element like behavior, but the custom element's appearance does not change. In other words, the custom element does not take on default, author-specified or user-specified styles from the native element.
+
+### Customized built-ins must be [form-associated](https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-form-associated) to participate in forms
+Today, custom elements need to be defined as [form-associated](https://html.spec.whatwg.org/multipage/custom-elements.html#concept-custom-element-definition-form-associated) to participate in forms. This is done by including `static formAssociated = true;` in its definition. Customized built-ins created by setting `elementInternals.type` will also need to be defined with `static formAssociated = true;` to participate in forms.
 
 ## Alternatives considered
 
