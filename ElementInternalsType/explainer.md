@@ -60,6 +60,8 @@ When `elementInternals.type = 'button'` is set in a custom element's constructor
 - [`form`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#dom-fae-form)
 - [`popovertarget`](https://html.spec.whatwg.org/multipage/popover.html#attr-popovertarget)
 - [`popovertargetaction`](https://html.spec.whatwg.org/multipage/popover.html#attr-popovertargetaction)
+- [`command`](https://html.spec.whatwg.org/#attr-button-command)
+- [`commandfor`](https://html.spec.whatwg.org/#attr-button-commandfor)
 - [`interesttarget`](https://github.com/whatwg/html/pull/11006/files#:~:text=span%3E%20the%20%3Ccode%20data%2Dx%3D%22attr%2Dinteresttarget%22%3E-,interesttarget,-%3C/code%3E%20attribute.%3C/p%3E) - [currently experimental in Chromium](https://groups.google.com/a/chromium.org/g/blink-dev/c/LLgsMjTzmAY/m/5GUjSYC2AQAJ)
 
 Below is an example showcasing a custom button being used as a popup invoker. When the custom button is activated, ex. via a click, `div id="my-popover"` will be shown as a popover.
