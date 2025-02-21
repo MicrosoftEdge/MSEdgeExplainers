@@ -62,7 +62,7 @@ When `elementInternals.type = 'button'` is set in a custom element's constructor
 - [`popovertargetaction`](https://html.spec.whatwg.org/multipage/popover.html#attr-popovertargetaction)
 - [`interesttarget`](https://github.com/whatwg/html/pull/11006/files#:~:text=span%3E%20the%20%3Ccode%20data%2Dx%3D%22attr%2Dinteresttarget%22%3E-,interesttarget,-%3C/code%3E%20attribute.%3C/p%3E) - [currently experimental in Chromium](https://groups.google.com/a/chromium.org/g/blink-dev/c/LLgsMjTzmAY/m/5GUjSYC2AQAJ)
 
-Below is an example showcasing a custom button being used as a popup invoker. When the custom button is activated, ex. via a click, `div id="my-popover` will be shown as a popover.
+Below is an example showcasing a custom button being used as a popup invoker. When the custom button is activated, ex. via a click, `div id="my-popover"` will be shown as a popover.
 
 ```js
     class CustomButton extends HTMLElement {
@@ -173,7 +173,7 @@ Today, custom elements need to be defined as [form-associated](https://html.spec
 
 A partial solution for this problem already exists today. Authors can specify the `extends` option when [defining a custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define). Authors can then use the `is` attribute to give a built-in element a custom name, thereby turning it into a customized built-in element.
 
-Both `extends` and `is` are supported in Firefox and Chromium-based browsers today. However, this solution has limitations, such as not being able to attach shadow trees to (most) customized built-in elements. Citing these limitations, Safari doesn't plan to support customized built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
+Both `extends` and `is` are supported in Firefox and Chromium-based browsers. However, this solution has limitations, such as not being able to attach shadow trees to (most) customized built-in elements. Citing these limitations, Safari doesn't plan to support customized built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
 
 The `elementInternals.type` proposal addresses many of the limitations with `extends`/`is`, including allowing customized built-ins to support shadow DOM. The proposal also has support from the WHATWG and multiple browser vendors (including Safari) as noted by a WG resolution here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455.
 
