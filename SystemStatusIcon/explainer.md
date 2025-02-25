@@ -22,11 +22,11 @@ Web applications currently do not have a way of participating in the system stat
 Instead of menu bar extra or system tray area, we use the term "*System Status area*" to refer to the OS surface where the platform displays information like network, time, battery, etc. Most major platforms have a similar surface, and they can also have mechanisms that allow apps to participate in this surface. The goal is to allow web apps to have a presence in the "system status" area, and present certain functionality to end users. 
 
 For example, on Windows, this is the area in the bottom-right corner of the desktop. The screenshot below shows a file backup app, a videoplayer, an email client and an instant messaging program running and having presence in the *system tray* area.
-![Image of Windows System Status](SystrayWindows.png)
+![Image of Windows System Status](systrayWindows.png)
 
 In macOS, this is the area in the top-right corner of the desktop. In the screenshot below we can see a messaging app, an email client, a VPN client, a videoplayer and a file backup program running and having an icon in their menu bar area. This is called "[menu bar extras](https://developer.apple.com/design/human-interface-guidelines/the-menu-bar#Menu-bar-extras)".
 
-![Image of macOS Menu Bar](MacMenuBar1.png)
+![Image of macOS Menu Bar](macMenuBar1.png)
 
 Other platforms like Ubuntu, that use the GNOME GUI can be tweaked to display apps on the "GNOME shell top bar", although this requires the use of [GNOME extensions](https://extensions.gnome.org/extension/1160/dash-to-panel/). Ubuntu does not support this functionality out of the box, so it is out of the scope of this feature to cover this platform.
 
