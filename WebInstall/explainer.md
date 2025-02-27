@@ -329,7 +329,7 @@ The benefit of the defined error handling for this feature is that the invoking 
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
 
 ### **Showing try-before-you-buy UX**
-The install UX can should a try-before-you-buy prompt. The UA may decide to show a prompt, some sort of rich-install dialog with additional information found in the manifest file, or load a preview of the app with the install confirmation. This is an implementation detail completely up to the UA.
+The install UX can show a try-before-you-buy prompt. The UA may decide to show a prompt, some sort of rich-install dialog with additional information found in the manifest file, or load a preview of the app with the install confirmation. This is an implementation detail completely up to the UA.
 
 ### **Feature does not work on Incognito or private mode**
 The install capability should not work on *incognito*, and the promise should always reject if called in a private browsing context. 
