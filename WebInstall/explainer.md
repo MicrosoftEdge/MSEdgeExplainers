@@ -340,40 +340,31 @@ The install capability should not work on *incognito*, and the promise should al
 
 ### Declarative install
 
-**An alternate solution to allow installation of web apps is by allowing a new target type of `_install` to the HTML anchor tag.**
+An alternate solution is to have a declarative way to install web apps. This can be achieved by allowing a new `target` type of `_install` to the HTML anchor tag. It can also use the [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel) attribute to hint to the UA that the url in the link should be installed
 
 `<a href="https://airhorner.com" target="_install">honk</a>`
 
-Pros:
+`<a href="https://airhorner.com" rel="install">honk</a>`
+
+*Pros:*
 * Platform fallback to navigate to the content automatically.
 * Does not need JavaScript.
 
-Cons:
+*Cons:*
 * Takes the user out of the current context, providing no alternative if the use case benefits from them staying in context.
 * Limits the amount of information a developer can act upon that the promise provides, such as if the installation was successful.
 * Developers can't easily detect UA declarative support in order to be able to tailor their UX to different situations.
 * No support for the concept of an `install_url` (requires additional work to the HTML specification).  Using an `install_url` as the `href` could confusingly land the user on a seemingly blank page for UA's that don't support declarative install.
 * No clear way to pass additional information intended for the UA (like the referral-info).
-
-**Another alternate solution based in a declarative approach could see the use of the [rel](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel) attribute to hint to the UA that the url in the link should be installed.**
-
-`<a href="https://airhorner.com" rel="install">honk</a>`
-
-Pros (same as above):
-* Basic platform default fallback (navigation).
-* Does not need JavaScript.
-
-Cons (same as above plus): 
-* Unintended navigation to `install_url`: If a UA doesn't implement the web install feature, and the `install_url` is used in the `href` value, it may fallback to navigate to that `install_url`, potentially leaving the end user in a blank document. (this could be resolved by creating more attributes to the `a` tag to define the additional parameters that the feature requires).
 * Longer `a` tags: if we address the missing `install_url` and `manifest_id` parameters and decided to keep the `href` as a link then we could be potentially introducing lengthier and less readable tags similar to: `<a href="https://airhorner.com" rel="install" target="_blank" installUrl="https://airhorner.com/install.html" manifestId="https://airhorner.com/airhornApp">honk</a>`.
 * More complex combinations for the UA to take into account: additional attributes that act on a link HTML tag (`a`) like the target mean there is an increased set of scenarios that might have unintended consequences for end users. For example, how does a target of `_ top` differ from `_blank`? While we could look at ignoring the `target` attribute if a `rel` attribute is present, the idea is to use acquisition mecanisms that are already present in UAs. 
 
 Having stated this, we believe that a declarative implementation is a simple and effective solution, and a future entry point for the API. It should be [considered for a v2](#future-work) of the capability. For the current solution, **we've decided to go with an imperative implementation since it allows more control over the overall installation UX**:
 * Allows the source to detect if an installation occurred with ease. (resolves/rejects a promise).
 * Supports `install_url`. This url can be an optimized url or the normal homepage that an application already has. The advantage is that unlike a declarative version, there is no scenario where an end user can be left stranded accidentally in a blank page that is meant to be a lightweight entry point to the app.
-* Code can be used to detect if an origin has permission to install apps, and UX can be tailored to change accordingly (for example, remove a button or display a link instead).
+* Code can be used to detect if an origin has [permission](#new-installation-permission-for-origin) to install apps, and UX can be tailored to change accordingly (for example, remove a button or display a link instead).
 * The developer ergonomics of handling a promise are better than responding to an `a` tag navigation.
-* Keeps the user in the context, which *can* be beneficial in certain scenarios (if the developer *wants* to take the user out of the current context, they *can* do so with a `a` tag). 
+* Keeps the user in the context, which *can* be beneficial in certain scenarios (if the developer *wants* to take the user out of the current context, they *can* do so with a `a` tag).
 
 ### `install_sources` manifest field
 
