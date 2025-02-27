@@ -352,7 +352,7 @@ Cons:
 * Takes the user out of the current context, providing no alternative if the use case benefits from them staying in context.
 * Limits the amount of information a developer can act upon that the promise provides, such as if the installation was successful.
 * Developers can't easily detect UA declarative support in order to be able to tailor their UX to different situations.
-* No support for the concept of an `install_url` (requires additional work to the HTML specification).
+* No support for the concept of an `install_url` (requires additional work to the HTML specification).  Using an `install_url` as the `href` could confusingly land the user on a seemingly blank page for UA's that don't support declarative install.
 * No clear way to pass additional information intended for the UA (like the referral-info).
 
 **Another alternate solution based in a declarative approach could see the use of the [rel](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel) attribute to hint to the UA that the url in the link should be installed.**
