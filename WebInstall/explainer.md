@@ -350,7 +350,7 @@ Pros:
 
 Cons:
 * Takes the user out of the current context, providing no alternative if the use case benefits from them staying in context.
-* Limits the amount of information a developer can act upon that the promise provides, such as if the prompt was shown.
+* Limits the amount of information a developer can act upon that the promise provides, such as if the installation was successful.
 * Developers can't modify their UX to tailor to situations where the origin permission isn't granted.
 * No support for the concept of an `install_url` (requires additional work to the HTML specification).
 * Can't easily pass additional information like the referral-info.
