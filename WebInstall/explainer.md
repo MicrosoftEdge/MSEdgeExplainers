@@ -370,7 +370,7 @@ Cons (same as above plus):
 
 Having stated this, we believe that a declarative implementation is a simple and effective solution, and a future entry point for the API. It should be [considered for a v2](#future-work) of the capability. For the current solution, **we've decided to go with an imperative implementation since it allows more control over the overall installation UX**:
 * Allows the source to detect if an installation occurred with ease. (resolves/rejects a promise).
-* Supports `install_url`. This url can be an optimized url or the normal homepage that an application already has. The advantage is that unlike a declarative version, there is no scenario where an end user can be left stranded accidentally in a blank page that is meant to be a  lightweight entry point to the app.
+* Supports `install_url`. This url can be an optimized url or the normal homepage that an application already has. The advantage is that unlike a declarative version, there is no scenario where an end user can be left stranded accidentally in a blank page that is meant to be a lightweight entry point to the app.
 * Code can be used to detect if an origin has permission to install apps, and UX can be tailored to change accordingly (for example, remove a button or display a link instead).
 * The developer ergonomics of handling a promise are better than responding to an `a` tag navigation.
 * Keeps the user in the context, which *can* be beneficial in certain scenarios (if the developer *wants* to take the user out of the current context, they *can* do so with a `a` tag). 
