@@ -352,6 +352,7 @@ An alternate solution is to have a declarative way to install web apps. This can
 
 *Cons:*
 * Takes the user out of the current context, providing no alternative if the use case benefits from them staying in context.
+  * For example, in an online app repository, if the user is installing applications, they do not expect to navigate away from said repository. This is a scenario where keeping context is important as it can provide the end user with a level of trust.
 * Limits the amount of information a developer can act upon that the promise provides, such as if the installation was successful.
 * Developers can't easily detect UA declarative support in order to be able to tailor their UX to different situations.
 * No support for the concept of an `install_url` (requires additional work to the HTML specification).  Using an `install_url` as the `href` could confusingly land the user on a seemingly blank page for UA's that don't support declarative install.
@@ -363,9 +364,8 @@ Having stated this, we believe that a declarative implementation is a simple and
 * Allows the source to detect if an installation occurred with ease. (resolves/rejects a promise).
 * Supports `install_url`. This url can be an optimized url or the normal homepage that an application already has. The advantage is that unlike a declarative version, there is no scenario where an end user can be left stranded accidentally in a blank page that is meant to be a lightweight entry point to the app.
 * Code can be used to detect if an origin has [permission](#new-installation-permission-for-origin) to install apps, as well as if the UA supports the API, and UX can be tailored to change accordingly (for example, remove a button or display a link instead).
-* ```
 * The developer ergonomics of handling a promise are better than responding to an `a` tag navigation.
-* Keeps the user in the context, which *can* be beneficial in certain scenarios (if the developer *wants* to take the user out of the current context, they *can* do so with a `a` tag).
+* Keeps the user in the context, which *can* be beneficial in certain scenarios (importantly, if the developer *wants* to take the user out of the current context, they *can* do so by navigating).
 
 ### `install_sources` manifest field
 
