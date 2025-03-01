@@ -296,9 +296,34 @@ The end user then tries to install the text processor, and since the origin has 
 If the user were to deny the permission to install for the origin, they could browse to the app itself and once there, they could install the application. In this case, there wouldn't be any permission prompt required as this would now be a *current document* installation. 
 
 
-### Rejecting promise with `AbortError` and `DataError`
+### Rejecting promise with limited existing `DOMException` names
 
-To protect the users privacy, the API does not create any new error names for the `DOMException`, instead it uses 2 common existing names: `AbortError` and `DataError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
+To protect the user's privacy, the API does not create any new error names for the `DOMException`, instead it uses common existing names: `AbortError`, `DataError`, `NotAllowError` and `InvalidStateError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
+
+**The promise will reject with an `AbortError` if:**
+* Installation was closed/cancelled.
+
+**The promise will reject with a `DataError` if:**
+* No manifest file present or invalid install URL.
+* No `id` field defined in the manifest file.
+* There is a mismatch between the `id` passed as parameter and the processed `id` from the manifest.
+
+**The promise will reject with an `NotAllowedError` if:**
+* The install permission is required but hasn't been granted.
+
+**The promise will reject with an `InvalidStateError` if:**
+* User is outside of the main frame.
+* Invocation happens without a user activation.
+
+#### Example: combining errors to mitigate private data leaking
+
+A bad actor could try to determine if a user is logged into a dating website. This dating web site could provide install UX _after_ a user is logged in (the dating website will likely have a page that serves a manifest, but it requires authentication). The bad actor could deceive the user to provide a user gesture allowing them to silently call `navigator.install` _intentionally+ with the wrong manifest id.  Their hope would be to get an error indicating a manifest id mismatch, meaning that the user had access to retrieve the manifest (and was thus logged-in), or an error indicating that the manifest could not be retrieved (meaning that they weren't logged-in). 
+
+The benefit of the defined error handling for this feature is that the invoking call doesn't know if the `DataError` is because:
+   i. manifest file was not accessible (user not logged-in) or 
+   ii. there was a mismatch between the `id` field and the provided 'wrong' parameter (user _is_ logged-in). 
+
+> **Note:** Using less verbose errors by grouping them into existing ones reduces leakage of information. This is the reason why we avoid using multiple errors or creating new ones, like a previously proposed `ManifestIdMismatch` and `NoIdInManifest`.
 
 ### **Gating capability behind installation**
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
