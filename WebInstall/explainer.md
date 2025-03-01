@@ -328,6 +328,9 @@ The benefit of the defined error handling for this feature is that the invoking 
 ### **Gating capability behind installation**
 A UA may choose to gate the `navigator.install` capability behind a requirement that the installation origin itself is installed. This would serve as an additional trust signal from the user towards enabling the functionality.
 
+### **Showing try-before-you-buy UX**
+The install UX can show a try-before-you-buy prompt. The UA may decide to show a prompt, some sort of rich-install dialog with additional information found in the manifest file, or load a preview of the app with the install confirmation. This is an implementation detail completely up to the UA.
+
 ### **Feature does not work on Incognito or private mode**
 The install capability should not work on *incognito*, and the promise should always reject if called in a private browsing context. 
 
@@ -337,21 +340,32 @@ The install capability should not work on *incognito*, and the promise should al
 
 ### Declarative install
 
-An alternate solution to allow installation of web apps is by allowing a new target type of `_install` to the HTML anchor tag.
+An alternate solution is to have a declarative way to install web apps. This can be achieved by allowing a new `target` type of `_install` to the HTML anchor tag. It can also use the [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel) attribute to hint to the UA that the url in the link should be installed.
 
 `<a href="https://airhorner.com" target="_install">honk</a>`
 
-Pros:
+`<a href="https://airhorner.com" rel="install">honk</a>`
+
+*Pros:*
 * Platform fallback to navigate to the content automatically.
 * Does not need JavaScript.
 
-Cons: 
-* Takes the user out of the current context.
-* Limits the amount of information a developer can act upon that the promise provides, such as if the prompt was shown or if the origin has permissions to install apps.
-* Can become cumbersome when specifying the parameters in the tag.
-* Can't easily pass additional information like the referral-info. 
+*Cons:*
+* Takes the user out of the current context, providing no alternative if the use case benefits from them staying in context.
+  * For example, in an online app repository, if the user is installing applications, they do not expect to navigate away from said repository. This is a scenario where keeping context is important as it can provide the end user with a level of trust.
+* Limits the amount of information a developer can act upon that the promise provides, such as if the installation was successful.
+* Developers can't easily detect UA declarative support in order to be able to tailor their UX to different situations.
+* No support for the concept of an `install_url` (requires additional work to the HTML specification).  Using an `install_url` as the `href` could confusingly land the user on a seemingly blank page for UA's that don't support declarative install.
+* No clear way to pass additional information intended for the UA (like the referral-info).
+* Longer `a` tags: if we address the missing `install_url` and `manifest_id` parameters and decided to keep the `href` as a link then we could be potentially introducing lengthier and less readable tags similar to: `<a href="https://airhorner.com" rel="install" target="_blank" installUrl="https://airhorner.com/install.html" manifestId="https://airhorner.com/airhornApp">honk</a>`.
+* More complex combinations for the UA to take into account: additional attributes that act on a link HTML tag (`a`) like the target mean there is an increased set of scenarios that might have unintended consequences for end users. For example, how does a target of `_ top` differ from `_blank`? While we could look at ignoring the `target` attribute if a `rel` attribute is present, the idea is to use acquisition mechanisms that are already present in UAs. 
 
-The declarative solution is a simple and effective solution and future entry point for the API. It should be considered for a v2 of the capability. For the current solution, we've decided to go with an imperative implementation since it allows more control over the overall installation UX.
+Having stated this, we believe that a declarative implementation is a simple and effective solution, and a future entry point for the API. It should be [considered for a v2](#future-work) of the capability. For the current solution, **we've decided to go with an imperative implementation since it allows more control over the overall installation UX**:
+* Allows the source to detect if an installation occurred with ease. (resolves/rejects a promise).
+* Supports `install_url`. This url can be an optimized url or the normal homepage that an application already has. The advantage is that unlike a declarative version, there is no scenario where an end user can be left stranded accidentally in a blank page that is meant to be a lightweight entry point to the app.
+* Code can be used to detect if an origin has [permission](#new-installation-permission-for-origin) to install apps, as well as if the UA supports the API, and UX can be tailored to change accordingly (for example, remove a button or display a link instead).
+* The developer ergonomics of handling a promise are better than responding to an `a` tag navigation.
+* Keeps the user in the context, which *can* be beneficial in certain scenarios (importantly, if the developer *wants* to take the user out of the current context, they *can* do so by navigating).
 
 ### `install_sources` manifest field
 
@@ -361,16 +375,16 @@ The `install_sources` was a new manifest field that specified which domains coul
 
 * Should we have custom error types like `IDMismatchError`?
 
-No, we are grouping all error cases into 2 different errors (`DataError` and `AbortError`). This will reduce the possibility for a bad actor to determine if a user was logged-in to a site that has a manifest behind a login. It also complicates knowing the reason why an application's installation fails. 
+  No, we are grouping all error cases into 2 different errors (`DataError` and `AbortError`). This will reduce the possibility for a bad actor to determine if a user was logged-in to a site that has a manifest behind a login. It also complicates knowing the reason why an application's installation fails. 
 
 * Is it correct for the permission when calling the `install` method to be required for all background document installations, and not just cross-origin installations?
 
-Yes, we are now requiring any installation apart from _current document_ ones to come from an origin that has the permission to install.  
+  Yes, we are now requiring any installation apart from _current document_ ones to come from an origin that has the permission to install.  
 
 * Should we allow an [`AbortController`](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to enable cancelling the installation if the process takes too long?
 
 * Can we remove power from the developer to query if the app is installed by offloading to the UA the knowledge of which apps are installed?
-    * Is there any form of attribute that can be added to a DOM element to signal this distinction/difference?
+  * Is there any form of attribute that can be added to a DOM element to signal this distinction/difference?
 
 ## Future Work
 
