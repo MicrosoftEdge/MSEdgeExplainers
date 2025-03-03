@@ -72,6 +72,14 @@ For the event listener scenario, it was determined that using granularity would 
 ## Concerns/Open Questions
 1. The user-perceived frame rate is influenced by both the main thread and the compositor thread. Accurate measurement of frame rates must account for both. Since the compositor thread operates independently of the main thread, it can be difficult to get its frame rate data. However, an accurate frame rate measurements needs to take into account both measurements.
 2. Similar to the abandoned [Frame Timing interface](https://wicg.github.io/frame-timing/#introduction). We are currently gathering historical context on how this relates and why it is no longer being pursued.
+3. Questions to Consider:
+	* Should content missing from the compositor frame due to delayed tile rasterization be tracked? 
+	* Should the fps be something that a web page can query anytime? Or only reported out when the browser misses some target?
+	* How will this API work with variable rate monitors or on screens with higher refresh rates?
+	* How will this API take into account situations where the compositor thread produces frames that are missing content from the main thread?
+	* How will this API measure both the compositor and the main thread when they may have differing frame rates. The compositor thread can usually run at a higher frame rate than the main thread due to its simpler tasks.
+	* Should a developer be able to target a subset of time based on an interaction triggering an animation?
+
 
 
 
