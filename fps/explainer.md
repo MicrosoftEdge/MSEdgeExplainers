@@ -47,7 +47,9 @@ To get an accurate score, it is crucial  that MotionMark can measure frame rate 
 
 ### 4. Testing animation performance on different hardware
 * Testing the performance of animation on different hardware/browser combinations may expose performance issues that could not be seem with imprecise metrics.
-	
+
+### 5. Improving animation libraries
+* Animation libraries measure frame rate in different ways. For example, GSAP and PixiJS use tickers to measure FPS, but the developer have to add custom logic to run each tick to measure frame rate. Three.js uses a second library, stats.js, to measure frame rate, and anime.js and Motion libraries use rAF calling. It would be beneficial for libraries to have a built-in way to measure FPS. A built-in method would be more convenient and allow for a more seamless integration with each library's animation loop, leading to more accurate results. Immediate feedback would make debugging and resolving issues easier. Ideally, this would also standardize a way to measure FPS leading to consistency across libraries.
 
 
 ## Proposed Solutions
