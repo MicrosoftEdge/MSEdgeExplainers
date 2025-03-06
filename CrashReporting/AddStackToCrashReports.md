@@ -71,7 +71,7 @@ To ensure that stacks are attributed to the correct frame, we need to send back 
 
 ## If there is an extension executing scripts in the main world, how will you prevent the endpoint from knowing about the agent’s execution environment such as what extensions they have installed?
 
-To address this, call stacks are automatically omitted whenever an extension’s content script is on the stack. By omitting the stack in these cases, we avoid exposing information about installed extensions in crash reports.
+Individual stack frames from extension scripts will be replaced with `<redacted>`, preserving the rest of the call stack. This per-frame redaction provides useful debugging context without revealing specific extension details.
 
 ## How do wasm call stacks work with this proposal?
 Wasm stack frames will be supported. Typically the format is `${url}:wasm-function[${funcIndex}]:${pcOffset}` as found [here](https://webassembly.github.io/spec/web-api/index.html#conventions).
