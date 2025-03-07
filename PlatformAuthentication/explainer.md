@@ -1,4 +1,4 @@
-# Allow JS App to directly interact with platform broker 
+# Enterprise Platform Authentication Broker API
  
 Authors: [Linping Zhang](https://github.com/coder-linping), Petar Dimov
  
@@ -57,7 +57,7 @@ navigator.platformAuthentication.getSupportedContracts(
 ```
 `brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to "MicrosoftEntra". Browsers can define additional per-platform requirements for how new brokers can be registered and verified by the browser.
 
-The response for this API will be a sequence of contracts – initially those will be `get-token-and-sign-out` (which contains both `GetToken` and `SignOut` APIs) and apply-cookies. 
+The response for this API will be a sequence of contracts – initially those will be `get-token-and-sign-out` (which contains both `GetToken` and `SignOut` APIs) and `apply-cookies`.
 ```
 enum NativeAuthContracts { 
     apply-cookies, 
