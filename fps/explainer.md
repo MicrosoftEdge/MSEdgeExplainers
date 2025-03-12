@@ -1,4 +1,4 @@
-# A More Precise Way to Measure Frames per Second (fps)
+# A More Precise Way to Measure Animation Smoothness
 
 [comment]: < ** (*Same-Origin*) >
 
