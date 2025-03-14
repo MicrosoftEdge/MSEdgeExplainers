@@ -16,10 +16,10 @@ Smooth animation of the web is critical to a positive user experience. In order 
 * Frame rate: the number of frames displayed per second of animation
 * Frame Latency: the time it takes to render a single frame in an animation. Essentially, it's the delay between starting to create a frame and finishing it.
 * Other smoothness metrics: 
-* Time between an interaction (Ex: clicking to start the animation) and the update on the screen
-* Consistency of the animation: One average fps value may not represent the animation smoothness if there are long periods of jank
-* High frame rate variations: This could be a positive or negative experience depending on the range of variations. For example an animation running between 120 and 240 fps may not be noticeable to the user or impact perceived smoothness
-* Completeness of content (Checkerboarding): Even if an animation has a high frame rate, the animation may be poor if the content isn't fully rendered due to checkerboarding. While fps ensures a smooth motion, if the quality of image is low, the overall user experience will not be satisfactory.
+	* Time between an interaction (Ex: clicking to start the animation) and the update on the screen
+	* Consistency of the animation: One average fps value may not represent the animation smoothness if there are long periods of jank
+	* High frame rate variations: This could be a positive or negative experience depending on the range of variations. For example an animation running between 120 and 240 fps may not be noticeable to the user or impact perceived smoothness
+	* Completeness of content (Checkerboarding): Even if an animation has a high frame rate, the animation may be poor if the content isn't fully rendered due to checkerboarding. While fps ensures a smooth motion, if the quality of image is low, the overall user experience will not be satisfactory.
 
 Our goal is to use one or more of these metrics to create an API to more precisely measure animation smoothness as perceived by the user.
 	
