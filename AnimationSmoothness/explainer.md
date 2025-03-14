@@ -10,16 +10,27 @@ This document is a starting point for engaging the community and standards bodie
 * Expected venue: [W3C Web Performance Working Group](https://www.w3.org/groups/wg/webperf/)
 * **Current version: this document**
 
-##  Introduction
-Animation frames are rendered on the screen when there is a change that needs to be updated. Ideally, these frames are completed in a certain amount of time. If they are not updated in time,  the browser drops a frame,. For the user, this looks like remaining on the same frame for longer, but it some instances, it may not even be noticeable.
+##Introduction
+Smooth animation of the web is critical to a positive user experience. In order to improve the smoothness of animation, we need to first be able to measure the frames produced by the GPU and their completeness. There are multiple metrics that may play a role in measuring this:
 
-requestAnimationFrame() polling can help decipher whether or not a frame has been dropped. The method works by  having the browser call a function (rAF) to update the animation before the screen refreshes (paint stage). Keeping track of the number of times rAF is called provides a count for the number of frames being shown per second, which helps understand the smoothness of the browser's animation. If the browser does not call the function, that is an indicator that a frame was dropped.
+* Frame rate: the number of frames displayed per second of animation
+* Frame Latency: the time it takes to render a single frame in an animation. Essentially, it's the delay between starting to create a frame and finishing it.
+* Other smoothness metrics: 
+* Time between an interaction (Ex: clicking to start the animation) and the update on the screen
+* Consistency of the animation: One average fps value may not represent the animation smoothness if there are long periods of jank
+* High frame rate variations: This could be a positive or negative experience depending on the range of variations. For example an animation running between 120 and 240 fps may not be noticeable to the user or impact perceived smoothness
+* Completeness of content (Checkerboarding): Even if an animation has a high frame rate, the animation may be poor if the content isn't fully rendered due to checkerboarding. While fps ensures a smooth motion, if the quality of image is low, the overall user experience will not be satisfactory.
+
+Our goal is to use one or more of these metrics to create an API to more precisely measure animation smoothness as perceived by the user.
+	
+One of the current ways to measure frame rate (frames per second or fps) is by using requestAnimationFrame() polling. Animation frames are rendered on the screen when there is a change that needs to be updated. Ideally, these frames are completed in a certain amount of time. If they are not updated in time, the browser drops a frame,. For the user, this looks like remaining on the same frame for longer, but it some instances, it may not even be noticeable.
+requestAnimationFrame() polling can help decipher whether or not a frame has been dropped. The method works by having the browser call a function (rAF) to update the animation before the screen refreshes (paint stage). Keeping track of the number of times rAF is called provides a count for the number of frames being shown per second, which helps understand the smoothness of the browser's animation. If the browser does not call the function, that is an indicator that a frame was dropped.
 
 In the past, Edge had a library for this purpose called fps-emitter. While that is a helpful way to measure events that slow down performance, it is not the most precise way to measure the actual smoothness of the animation. This is because there are other processes executing independently to render the animation, which can impact the user perceived frame rate and can't be detected just by looking at rAF calls.
 
 Using the rAF method can actually slow down performance because it creates more tasks for the browser on the main thread. The extra work can cause the frame to drop by not executing before the deadline. An increase in dropped frames causes a less smooth animation.
 
-Our goal is to create an API for a more precise measure of animation smoothness, specifically one that captures user-perceived frame rate. Prototyping an API that measures animation smoothness more accurately would help developers gain insights about performance issues they can improve without slowing down their performance using rAF.
+Our goal is to create an API for a more precise measure of animation smoothness. Specifically, we want to create one that captures user-perceived frame rate, which could measure more than just frames per second. Prototyping an API that measures animation smoothness more accurately would help developers gain insights about performance issues they can improve without slowing down their performance using rAF.![image](https://github.com/user-attachments/assets/e83115e0-a4ee-44c1-a569-ca14e1401b93)
 
 ## Goals
 * Needs to be queryable from JavaScript
