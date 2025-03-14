@@ -10,7 +10,7 @@ This document is a starting point for engaging the community and standards bodie
 * Expected venue: [W3C Web Performance Working Group](https://www.w3.org/groups/wg/webperf/)
 * **Current version: this document**
 
-##Introduction
+## Introduction
 Smooth animation of the web is critical to a positive user experience. In order to improve the smoothness of animation, we need to first be able to measure the frames produced by the GPU and their completeness. There are multiple metrics that may play a role in measuring this:
 
 * Frame rate: the number of frames displayed per second of animation
@@ -30,7 +30,7 @@ In the past, Edge had a library for this purpose called fps-emitter. While that 
 
 Using the rAF method can actually slow down performance because it creates more tasks for the browser on the main thread. The extra work can cause the frame to drop by not executing before the deadline. An increase in dropped frames causes a less smooth animation.
 
-Our goal is to create an API for a more precise measure of animation smoothness. Specifically, we want to create one that captures user-perceived frame rate, which could measure more than just frames per second. Prototyping an API that measures animation smoothness more accurately would help developers gain insights about performance issues they can improve without slowing down their performance using rAF.![image](https://github.com/user-attachments/assets/e83115e0-a4ee-44c1-a569-ca14e1401b93)
+Our goal is to create an API for a more precise measure of animation smoothness. Specifically, we want to create one that captures user-perceived frame rate, which could measure more than just frames per second. Prototyping an API that measures animation smoothness more accurately would help developers gain insights about performance issues they can improve without slowing down their performance using rAF.
 
 ## Goals
 * Needs to be queryable from JavaScript
