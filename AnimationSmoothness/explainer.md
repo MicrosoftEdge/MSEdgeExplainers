@@ -23,8 +23,8 @@ Smooth animation of the web is critical to a positive user experience. In order 
 
 Our goal is to use one or more of these metrics to create an API to more precisely measure animation smoothness as perceived by the user.
 	
-One of the current ways to measure smoothness is by measuring frames per second (fps) using requestAnimationFrame() polling. Animation frames are rendered on the screen when there is a change that needs to be updated. Ideally, these frames are completed in a certain amount of time. If they are not updated in time, the browser drops a frame,. For the user, this looks like remaining on the same frame for longer, but it some instances, it may not even be noticeable.
-requestAnimationFrame() polling can help decipher whether or not a frame has been dropped. The method works by having the browser call a function (rAF) to update the animation before the screen refreshes (paint stage). Keeping track of the number of times rAF is called provides a count for the number of frames being shown per second, which helps understand the smoothness of the browser's animation. If the browser does not call the function, that is an indicator that a frame was dropped.
+One of the current ways to measure smoothness is by measuring frames per second (fps) using `requestAnimationFrame()` polling. Animation frames are rendered on the screen when there is a change that needs to be updated. Ideally, these frames are completed in a certain amount of time. If they are not updated in time, the browser drops a frame,. For the user, this looks like remaining on the same frame for longer, but it some instances, it may not even be noticeable.
+`requestAnimationFrame()` polling can help decipher whether or not a frame has been dropped. The method works by having the browser call a function (rAF) to update the animation before the screen refreshes (paint stage). Keeping track of the number of times rAF is called provides a count for the number of frames being shown per second, which helps understand the smoothness of the browser's animation. If the browser does not call the function, that is an indicator that a frame was dropped.
 
 In the past, Edge had a library for this purpose called fps-emitter. While that is a helpful way to measure events that slow down performance, it is not the most precise way to measure the actual smoothness of the animation. This is because there are other processes executing independently to render the animation, which can impact the user perceived frame rate and can't be detected just by looking at rAF calls.
 
@@ -64,16 +64,20 @@ Animation libraries measure frame rate in different ways. For example, GSAP and 
 ## Proposed Solutions
 #### Option 1: Direct Query
 This solution would involve querying the frame rate directly. JavaScript would call an API that measures the fps at a specific point in time. To measure the overall frame rate, the API would be called multiple times, using the values to calculate an average frame rate.
-* window.framerate()
+
+`window.framerate()`
   
 #### Option 2: Start and End Markers
 JavaScript Performance markers are used to track points in time. In this solution, developers could mark a start and end point on the performance timeline and measure the duration between the two markers, with FPS as a property.
-* window.framerate("perfMarker") <- Framerate since that marker
-* performance.mark("myMarker")
-* performance.measure("myMarker", "endMarker")
+
+`window.framerate("perfMarker")` <- Framerate since that marker
+
+`performance.mark("myMarker")`
+
+`performance.measure("myMarker", "endMarker")`
 * FPS could be a property on performance measure
 
-This option works similarly to the [Frame Timing API](https://wicg.github.io/frame-timing/#dom-performanceframetiming) by using start and end markers. Frame startTime and frame endTime are returned by the Performance object's now() method; the distance between the two points is frame duration. When the duration of a frame is too long, it is clear that there was a rendering issue. A PerformanceFrameTiming object is created and added to the performance entry buffer of each active web page, which developers can then access for information.
+This option works similarly to the [Frame Timing API](https://wicg.github.io/frame-timing/#dom-performanceframetiming) by using start and end markers. Frame startTime and frame endTime are returned by the Performance object's `now()` method; the distance between the two points is frame duration. When the duration of a frame is too long, it is clear that there was a rendering issue. A PerformanceFrameTiming object is created and added to the performance entry buffer of each active web page, which developers can then access for information.
 
 #### Option 3: Event Listener
 Adding an event listener for frame rate changes would alert developers about large drops in frame rate. Since it would not be necessary to know if the rate drops by a frame or two. Instead, the developer could set the event listener to alert when the frame rate drops by n. Or, similarly to the long task API's duration threshold, the developer could set a min and max fps. The event listener would fire only if the FPS is above the max or below the min.
@@ -82,7 +86,8 @@ This options works similarly to both [LoAF API](https://github.com/w3c/long-anim
 
 ## Alternatives Considered
 For the event listener scenario, it was determined that using granularity would not give a useful measure of FPS due to lack of detail. The granularity was modeled after the compute pressure API.
-* window.addEventListener("frameratechange", (event) =>{doSomething();})
+
+`window.addEventListener("frameratechange", (event) =>{doSomething();})`
 
 ## Concerns/Open Questions
 1. The user-perceived frame rate is influenced by both the main thread and the compositor thread. Accurate measurement of frame rates must account for both. Since the compositor thread operates independently of the main thread, it can be difficult to get its frame rate data. However, an accurate frame rate measurements needs to take into account both measurements.
