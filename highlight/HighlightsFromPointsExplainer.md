@@ -179,8 +179,6 @@ for (highlight of highlightToUsername.keys()) {
 }
 ```
 
-<!-- Notice how in `createActivHighlights` now we don't have to loop over the highlights affected. However, we lose the ability to easily create many active highlights at the same time, for example if two users have selected content that overlaps. This is an issue of this possible approach because the events are agnostic to other highlight's event listeners. -->
-
 In contrast to the solutions presented before, in `createActiveHighlights` now we don't have to loop over the highlights affected, but we have to do it beforehand to set all the necessary event listeners.
 Also notice how now we have to be careful and keep track of the active highlights since we're not rebuilding them in the same step, introducing some extra code on that front that wasn't required before.
 
@@ -194,38 +192,6 @@ A workaround is needed here where `event.target` should stay as the element `e1`
 Furthermore, when `currentTarget == target`, it should be target phase, this would imply the event phases work in a new way and it could break current site implementations or introduce inconsistencies with current specifications.
 
 In conclusion, the `highlightsFromPoint()` API is much simpler to implement and specify, it doesn't need these kind of workarounds nor creates these open questions, and still satisfies the use cases adequately.
-
-<!-- 1. Highlights cannot be event targets because they're only defined to be elements, so it could break assumptions
-
-2. If a page has two or more highlighting libraries that don't coordinate with each other, both libraries could independently set this event listener in order to ensure that events get routed to their highlights:
-
-```html
-document.addEventListener("click", function(e) {
-  if (e.defaultPrevented)
-    return;
-  for (let { highlight, ranges } of CSS.highlights.highlightsFromPoint(e.clientX, e.clientY)) {
-    e.ranges = ranges;
-    highlight.dispatchEvent(e);
-    if (e.defaultPrevented)
-      break;
-  }
-  delete e.ranges;
-});
-```
-
-If the Highlight event handlers for both libraries call preventDefault, then the defaultPrevented checking means we won't repeat the events. But if neither highlighting library wants to preventDefault, then each Highlight will get the event twice for each user interactions: once from each Document "click" handler set by each respective highlighting library.
-
-It seems hard to get this right when there are multiple non-coordinating highlight libraries. I'd like to reconsider whether an approach that provides platform support closer to a traditional event path makes sense here:
-
-[when the user performs a pointer interaction over a highlight range], dispatch an event against the top-priority intersected highlight such that the event path includes any overlapping highlights in descending priority order. Secondly, the "normal" pointer event is dispatched against the originating element. In this case we could consider defining preventDefault on the highlight-dispatched event to prevent the subsequent dispatch of the "normal" pointer event. -->
-
-<!-- #### Customer Problem Example Using Event-based API
-
-(TODO: write a solution to the same problem using event. See the discussions and issues there was some more explanation)
-sth like highlight.addEventListener()
-See https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/ca3656ae0678862d1020106e5f16cda6ab5c83df/highlight/events-explainer.md
-
-check https://github.com/w3c/csswg-drafts/issues/7513#issuecomment-1201588806 -->
 
 ### Promise-based API
 
@@ -249,9 +215,6 @@ function createActiveHighlights(x, y) {
     });
 }
 ```
-
-<!-- This could become a little chaotic as in what could happen if the Promise resolves after other things happen, like for example if the mouse gets out of the div first. It would incorrectly create active highlights and they would stay there until the user enters the div again with the mouse. This could be fixed by adding more code, which would introduce potential delays and make the implementation more complex and harder to maintain, for example:
-Also, this is just one case that could be problematic, it could also happen that the active highlights are set in an incorrect order -->
 
 This could become a little chaotic as in what could happen if one Promise resolves after other things take plae. Let's say for example in this case if the user moves the mouse out of any highlighted ranges and keeps it static in that position. If an old Promise where the mouse was over some Highlight resolves after that, it could incorrectly create active highlights and they would stay there until the user moves the mouse again. This would be problematic for the developer to fix.
 
