@@ -390,10 +390,16 @@ Hovering over those highlighted pieces of text shows which user selected them an
                     let range = new Range();
                     range.setStart(highlightAbstractRange.startContainer, highlightAbstractRange.startOffset);
                     range.setEnd(highlightAbstractRange.endContainer, highlightAbstractRange.endOffset);
+                    let rangeIsHit = false;
                     for (rect of range.getClientRects()) {
                         if (isPointInsideDOMRect(x, y, rect)) {
                             setActiveHighlight(highlight, username, x, y);
+                            rangeIsHit = true;
+                            break;
                         }
+                    }
+                    if (rangeIsHit) {
+                        break;
                     }
                 }
             }
@@ -402,10 +408,6 @@ Hovering over those highlighted pieces of text shows which user selected them an
 
     div.addEventListener('mouseover', (event) => {
         listenForMouseMove = true;
-        console.log(event)
-        console.log(event.eventPhase)
-        console.log(event.target)
-        console.log(event.currentTarget)
     });
 
     div.addEventListener('mousemove', (event) => {
