@@ -11,26 +11,270 @@ This document is intended as a starting point for engaging the community and sta
 * Current version: this document
 
 ## Introduction
-[Highlights](https://drafts.csswg.org/css-highlight-api-1/) give ranges an appearance, such as rendering background colors to denote comments or annotations in a document, find-on-page for virtualized content, and squiggles for spelling and grammar checking.
+[Highlights](https://drafts.csswg.org/css-highlight-api-1/) give ranges an appearance, such as rendering background colors to denote comments or annotations in a document, online collaboration for text or code edition, find-on-page for virtualized content, and squiggles for spelling and grammar checking.
 
 These use cases require that the users not only be able to see the highlighted portion of the document, but have the ability to interact with it.
 
 Here are some inspirational examples of how users may interact with highlighted ranges:
+ - When a user hovers over content that a different user has selected or is editing, display some information about the user currently working on that content.
  - When a user clicks a highlighted result from find-on-page, the selection may be moved to cover the result so that it can be copied or edited easily.
  - When a user hovers over a misspelled word, the web app may display UI with suggested replacement text.
  - When a user clicks an annotation in a document, the web app may emphasize and scroll into view the corresponding annotation in a pane which lists all the annotations in the document.
 
+Nowadays, web developers who want to implement some sort of interaction with custom highlights need to use workarounds that make it cumbersome to code and maintain, and potentially incur in performance penalties.
+
+## Customer Problem Example
+
+For example, let's have a deeper look at the case of online collaboration mentioned above where it's needed to show the name of the user who is selecting some piece of text upon hovering over it.
+This could look as follows, where the chunks of text each user selected are highlighted with a different color:
+
+![online-collaboration-example](example-text-editor-online-collaboration.gif)
+
+In the [Appendix](#example-code-without-highlightsfrompoint) there is a full example of code showing how this could be achieved with custom highlights, but let's focus on the section where an event listener for mouse move is added:
+
+```html
+div.addEventListener('mousemove', (event) => {
+    if (listenForMouseMove) {
+        createActiveHighlights(event.pageX, event.pageY);
+    }
+});
+```
+
+One possible implementation for `createActiveHighlights` could be written as follows:
+
+```html
+function isPointInsideDOMRect(x, y, rect) {
+    return (
+        x >= rect.left && x <= rect.right &&
+        y >= rect.top && y <= rect.bottom
+    );
+}
+
+function createActiveHighlights(x, y) {
+    resetActiveHighlights();
+    for (highlight of CSS.highlights.values()) {
+        let username = highlightToUsername.get(highlight);
+        if (username != undefined) {
+            for (highlightAbstractRange of highlight.values()) {
+                let range = new Range();
+                range.setStart(highlightAbstractRange.startContainer, highlightAbstractRange.startOffset);
+                range.setEnd(highlightAbstractRange.endContainer, highlightAbstractRange.endOffset);
+                for (rect of range.getClientRects()) {
+                    if (isPointInsideDOMRect(x, y, rect)) {
+                        setActiveHighlight(highlight, username, x, y);
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+Some things to notice:
+
+- There's a loop over all of the registered custom highlights in `CSS.highlights`.
+- There's another loop over all of the highlight's ranges to see if the point `(x,y)` is inside one of them.
+- A `Range` has to be created for each range of the highlight because they can be `StaticRanges`, which don't support `getClientRects()`.
+- There's a loop over all of the `DOMRects` returned by `getClientRects()` for each range.
+- Determining if a point is inside a `DOMRect` needs some extra computation which was added in a helper `isPointInsideDOMRect`.
+
 
 ## Proposal
-The highlightsFromPoint() API is designed to enhance user interaction with highlighted content on web pages. Highlights are used to visually distinguish specific ranges within a document, such as comments, search results, or spelling errors. This API aims to provide a robust mechanism for identifying and interacting with these highlights, addressing challenges related to multiple overlapping highlights, shadow DOM handling, and performance optimization.
+The `highlightsFromPoint()` API aims to provide a robust mechanism for identifying and interacting with custom highlights, making it easier for web developers to implement features like the ones described in the [Introduction](#introduction) of this document.
 
-### Key Considerations 
+Some considerations about it:
+
 - **Multiple Overlapping Highlights**: When multiple highlights overlap from different features (e.g., a spell-checker and a find-on-page feature), it's crucial to identify all highlights at a specific point. This ensures that all relevant highlights are accurately identified, enabling web developers to handle overlapping highlights more effectively.
-- **Shadow DOM Handling**: Highlights within shadow DOMs require special handling to maintain encapsulation. The method can be designed to respect shadow DOM boundaries, ensuring highlights inside shadows are managed correctly. This helps maintain the integrity of the shadow DOM while still allowing highlights to be identified and interacted with.
 - **Performance Optimization**: By providing a dedicated API for hit-testing highlights, the method can optimize performance. Instead of relying on more complex and potentially slower methods to determine which highlights are under a specific point, this method offers a streamlined and efficient way to perform this task, improving overall performance.
+- **Shadow DOM Handling**: Highlights within shadow DOMs require special handling to maintain encapsulation. The method can be designed to respect shadow DOM boundaries, ensuring highlights inside shadows are managed correctly. This helps maintain the integrity of the shadow DOM while still allowing highlights to be identified and interacted with.
 
-### API Design
-The `highlightsFromPoint()` method will be part of the `CSS.highlights` interface. It will return a sequence of highlights at a specified point, ordered by [priority](https://drafts.csswg.org/css-highlight-api-1/#priorities). The developer has the option to pass in `options`, which is an optional dictionary where the key maps to an array of `ShadowRoot` objects. The API can search for and return highlights within the provided shadow DOM. The approach of passing an `options` parameter of `ShadowRoot` object is similar to [caretPositionFromPoint()](https://drafts.csswg.org/cssom-view/#dom-document-caretpositionfrompoint) and [getHTML()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml) methods. 
+The `highlightsFromPoint()` method proposed would be part of the `CSS.highlights` interface. It would return a sequence of highlights at a specified point, ordered by [priority](https://drafts.csswg.org/css-highlight-api-1/#priorities). The developer has the option to pass in `options`, which is an optional dictionary where the key maps to an array of `ShadowRoot` objects. The API can search for and return highlights within the provided shadow DOM. The approach of passing an `options` parameter of `ShadowRoot` object is similar to [caretPositionFromPoint()](https://drafts.csswg.org/cssom-view/#dom-document-caretpositionfrompoint) and [getHTML()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml) methods. 
+
+### Customer Problem Example Using highlightsFromPoint
+
+Now going back to the text editor online collaboration example discussed in [Customer Problem Example](#customer-problem-example) section, let's see how `createActiveHighlights` could be implemented using the proposed API:
+
+```html
+function createActiveHighlights(x, y) {
+    resetActiveHighlights();
+    let highlights = CSS.highlights.highlightsFromPoint(event.clientX, event.clientY);
+    for (highlight of highlights) {
+        let username = highlightToUsername.get(highlight);
+        if (username != undefined) {
+            setActiveHighlight(highlight, username, x, y);
+        }
+    }
+}
+```
+
+This piece of code is significantly smaller and simpler than the solution that was shown in the previous section without highlightsFromPoint. More specifically:
+- There's no need to iterate over all the ranges of the highlights registered anymore, now highlightsFromPoint gives us only the highlights that are under the point `(x,y)`.
+- There's no need to deal with ranges and rectangles anymore because that's handled by the API.
+
+You can refer to a full implementation in the [Appendix](#example-code-using-highlightsfrompoint).
+
+## Alternative Solutions
+### Event-based API
+A [previous explainer](events-explainer.md) proposed an [event](https://dom.spec.whatwg.org/#event)-based API to handle interactions with custom Highlights.
+This has been discussed in the CSSWG too, see [this issue](https://github.com/w3c/csswg-drafts/issues/7513) for details. The main idea was dispatching events to the Highlights present under the cursor upon user actions. Different approaches were taken into account:
+
+1. A separate event is dispatched for each Highlight under the cursor in descending priority order. The default action is to advance to the next Highlight and `preventDefault()` can be used to stop this. This might result in firing an arbitrary number of events for a single user action.
+2. Dispatch a single event for the top-priority Highlight, with the event path including other Highlights and then bubbling to the DOM tree. However, pointer events can currently only target elements, so this approach might break other specification assumptions.
+3. A combination of approaches 1 and 2, dispatching two events per user action: one for Highlights and one for the DOM tree. The Highlight event propagates through overlapping Highlights, and if `preventDefault()` wasn't called in that sequence, a new event is fired on the DOM tree.
+
+If we wanted to apply option 3 above to the example of online collaboration described before, instead of adding the event listener to the `div` element, we should add it to the highlights themselves. This could be achieved as follows:
+
+```html
+let currentActiveHighlightUsernames = new Set([]);
+
+function buildActiveUsernamesLabel() {
+    let label = '';
+    for (username of currentActiveHighlightUsernames.values()) {
+        label += username + ', ';
+    }
+    label = label.substring(0, label.length-2);
+    return label;
+}
+
+function setActiveHighlight(highlight, username, x, y) {
+    let activeHighlightName = 'active-selection-highlight-' + username;
+    CSS.highlights.set(activeHighlightName, highlight);
+    currentActiveHighlightUsernames.add(username);
+    cursorBox.textContent = buildActiveUsernamesLabel();
+    cursorBox.style.display = 'block';
+    cursorBox.style.left = (x + 2) + 'px';
+    cursorBox.style.top = (y - cursorBox.getBoundingClientRect().height - 6) + 'px';
+}
+
+function createActiveHighlight(highlight, x, y) {
+    let username = highlightToUsername.get(highlight);
+    if (username != undefined) {
+        setActiveHighlight(highlight, username, x, y);
+    }
+}
+
+function removeActiveHighlight(highlight) {
+    let username = highlightToUsername.get(highlight);
+    if (username != undefined) {
+        let activeHighlightName = 'active-selection-highlight-' + username;
+        CSS.highlights.delete(activeHighlightName);
+        currentActiveHighlightUsernames.delete(username);
+        if (currentActiveHighlightUsernames.size == 0) {
+            cursorBox.style.display = 'none';
+        }
+        else {
+            cursorBox.textContent = buildActiveUsernamesLabel();
+        }
+    }
+}
+
+for (highlight of highlightToUsername.keys()) {
+    highlight.addEventListener('mouseover', (event) => {
+        createActiveHighlight(event.currentTarget, event.pageX, event.pageY);
+    });
+
+    highlight.addEventListener('mouseout', (event) => {
+        removeActiveHighlight(event.currentTarget);        
+    });
+}
+```
+
+<!-- Notice how in `createActivHighlights` now we don't have to loop over the highlights affected. However, we lose the ability to easily create many active highlights at the same time, for example if two users have selected content that overlaps. This is an issue of this possible approach because the events are agnostic to other highlight's event listeners. -->
+
+In contrast to the solutions presented before, in `createActiveHighlights` now we don't have to loop over the highlights affected, but we have to do it beforehand to set all the necessary event listeners.
+Also notice how now we have to be careful and keep track of the active highlights since we're not rebuilding them in the same step, introducing some extra code on that front that wasn't required before.
+
+However, each of these event-based options carry significant complexity from a specification point of view. Option 3 mentioned above would be the most suitable one, but the event phases are hard to define. Let's suppose that the user moves the mouse over the Highlight `h1` set on element `e1`, and an event listener was set on `h1`. The phases should look as follows:
+
+    Capture phase e1 pointermove - target:e1 currentTarget:e1
+    Target phase h1 pointermove - target:e1 currentTarget:h1
+    Bubbling phase e1 pointermove - target:e1 currentTarget:e1
+
+A workaround is needed here where `event.target` should stay as the element `e1` because pointer events can only target elements, but actually the target was the highlight, which doesn't really follow the definition for `event.target`.
+Furthermore, when `currentTarget == target`, it should be target phase, this would imply the event phases work in a new way and it could break current site implementations or introduce inconsistencies with current specifications.
+
+In conclusion, the `highlightsFromPoint()` API is much simpler to implement and specify, it doesn't need these kind of workarounds nor creates these open questions, and still satisfies the use cases adequately.
+
+<!-- 1. Highlights cannot be event targets because they're only defined to be elements, so it could break assumptions
+
+2. If a page has two or more highlighting libraries that don't coordinate with each other, both libraries could independently set this event listener in order to ensure that events get routed to their highlights:
+
+```html
+document.addEventListener("click", function(e) {
+  if (e.defaultPrevented)
+    return;
+  for (let { highlight, ranges } of CSS.highlights.highlightsFromPoint(e.clientX, e.clientY)) {
+    e.ranges = ranges;
+    highlight.dispatchEvent(e);
+    if (e.defaultPrevented)
+      break;
+  }
+  delete e.ranges;
+});
+```
+
+If the Highlight event handlers for both libraries call preventDefault, then the defaultPrevented checking means we won't repeat the events. But if neither highlighting library wants to preventDefault, then each Highlight will get the event twice for each user interactions: once from each Document "click" handler set by each respective highlighting library.
+
+It seems hard to get this right when there are multiple non-coordinating highlight libraries. I'd like to reconsider whether an approach that provides platform support closer to a traditional event path makes sense here:
+
+[when the user performs a pointer interaction over a highlight range], dispatch an event against the top-priority intersected highlight such that the event path includes any overlapping highlights in descending priority order. Secondly, the "normal" pointer event is dispatched against the originating element. In this case we could consider defining preventDefault on the highlight-dispatched event to prevent the subsequent dispatch of the "normal" pointer event. -->
+
+<!-- #### Customer Problem Example Using Event-based API
+
+(TODO: write a solution to the same problem using event. See the discussions and issues there was some more explanation)
+sth like highlight.addEventListener()
+See https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/ca3656ae0678862d1020106e5f16cda6ab5c83df/highlight/events-explainer.md
+
+check https://github.com/w3c/csswg-drafts/issues/7513#issuecomment-1201588806 -->
+
+### Promise-based API
+
+Another asynchronous variation for `highlightsFromPoint` could be returning a [Promise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-objects), which returns the highlights present at the given point upon resolving.
+This is some example code for how to implement the online collaboration website with it:
+
+```html
+function createActiveHighlights(x, y) {
+    let highlightsPromise = CSS.highlights.highlightsFromPoint(event.clientX, event.clientY);
+    highlightsPromise.then((highlights) => {
+        if (listenForMouseMove) {
+            resetActiveHighlights();
+            
+            for (highlight of highlights) {
+                let username = highlightToUsername.get(highlight);
+                if (username != undefined) {
+                    setActiveHighlight(highlight, username, x, y);
+                }
+            }
+        }
+    });
+}
+```
+
+<!-- This could become a little chaotic as in what could happen if the Promise resolves after other things happen, like for example if the mouse gets out of the div first. It would incorrectly create active highlights and they would stay there until the user enters the div again with the mouse. This could be fixed by adding more code, which would introduce potential delays and make the implementation more complex and harder to maintain, for example:
+Also, this is just one case that could be problematic, it could also happen that the active highlights are set in an incorrect order -->
+
+This could become a little chaotic as in what could happen if one Promise resolves after other things take plae. Let's say for example in this case if the user moves the mouse out of any highlighted ranges and keeps it static in that position. If an old Promise where the mouse was over some Highlight resolves after that, it could incorrectly create active highlights and they would stay there until the user moves the mouse again. This would be problematic for the developer to fix.
+
+### Making `highlightsFromPoint` part of `DocumentOrShadowRoot`
+While exploring the implementation of the `highlightsFromPoint()` API, we considered adding it to the `DocumentOrShadowRoot` interface. However, we decided against this approach due to the complexities involved in managing shadow DOM encapsulation and to ensure consistency with existing APIs like `caretPositionFromPoint()` and `getHTML()`, which face similar encapsulation challenges.
+
+## Privacy and Security Considerations
+### Privacy Considerations
+The API is designed to minimize the exposure of user information by only revealing highlights at a specific point. It does not handle personal or sensitive information directly, but developers must ensure that highlights do not contain private data. The API respects shadow DOM boundaries to maintain encapsulation and operates independently of user state, so to not reveal any personal information.
+
+### Security Considerations
+The API introduces no new security risks. 
+
+## Relevant Discussions
+  1. [[css-highlight-api] Approaches for dispatching highlight pointer events · Issue #7513 · w3c/csswg-drafts (github.com)](https://github.com/w3c/csswg-drafts/issues/7513)
+  2. [[css-highlight-api] Exposing shadow DOM highlights in highlightsFromPoint() · Issue #7766 · w3c/csswg-drafts (github.com)](https://github.com/w3c/csswg-drafts/issues/7766)
+
+  ---
+  [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/highlightsFromPoint) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BhighlightsFromPoint%5D)
+
+## Appendix
+
+### highlightsFromPoint IDL Proposed
 
 ```html
 interface HighlightRegistry {
@@ -43,29 +287,253 @@ dictionary HighlightsFromPointOptions {
 };
 ```
 
-## Alternative Solutions
-### Event-based API
-It was initially discussed in the CSSWG whether an event-based API to handle interactions with custom Highlights was the most suitable option (see [this issue](https://github.com/w3c/csswg-drafts/issues/7513) for details). The main idea was dispatching events to the Highlights present under the cursor upon user actions. Different approaches were taken into account:
+### Example Code Without highlightsFromPoint
 
-1. A separate event is dispatched for each Highlight under the cursor in descending priority order. The default action is to advance to the next Highlight and `preventDefault()` can be used to stop this. This might result in firing an arbitrary number of events for a single user action.
-2. Dispatch a single event for the top-priority Highlight, with the event path including other Highlights and then bubbling to the DOM tree. However, pointer events can currently only target elements, so this approach might break other specification assumptions.
-3. A combination of approaches 1 and 2, dispatching two events per user action: one for Highlights and one for the DOM tree. The Highlight event propagates through overlapping Highlights, and if `preventDefault()` wasn't called in that sequence, a new event is fired on the DOM tree.
+This is the full implementation for the text editor online collaboration example mentioned in [Customer Problem Example](#customer-problem-example) section. This is one way the code for it could be written nowadays without highlightsFromPoint API.
 
-Each of these event-based options carries significant complexity. The `highlightsFromPoint()` API was selected since it is much simpler to implement and still satisfies the use cases adequately.
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    div {
+        padding: 20px;
+        font-size: 22px;
+    }
+    div::highlight(selection-highlight-Alice) {
+        background-color: rgba(0, 255, 0, 0.3);
+    }
+    div::highlight(selection-highlight-Bob) {
+        background-color: rgba(0, 255, 255, 0.3);
+    }
+    div::highlight(active-selection-highlight-Alice) {
+        background-color: rgba(0, 255, 0, 1);
+    }
+    div::highlight(active-selection-highlight-Bob) {
+        background-color: rgba(0, 255, 255, 1);
+    }
+    #cursorBox {
+        position: absolute;
+        background-color: white;
+        padding: 2px;
+        border: 1px solid black;
+        display: none;
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+<div contenteditable="true" spellcheck="false">
+This is an example for using custom highlights in online collaboration.</br>
+This simulates a text document that Alice and Bob are editing, besides you, the user seeing this.</br>
+This is some text that Alice selected on her text editor session.</br>
+This whole sentence is what Bob has selected on his.</br>
+</br>
+Hovering over those highlighted pieces of text shows which user selected them and intensifies the background color.</br> 
+</div>
+<div id="cursorBox"></div>
+<script>
+    let listenForMouseMove = false;
+    let cursorBox = document.getElementById('cursorBox');
+    let div = document.querySelector('div');
+    let aliceTextNode = div.childNodes[4];
+    let aliceRange = new StaticRange({startContainer: aliceTextNode, startOffset: 0, endContainer: aliceTextNode, endOffset: 18});
+    let bobTextNode = div.childNodes[6];
+    let bobRange = new StaticRange({startContainer: bobTextNode, startOffset: 0, endContainer: bobTextNode, endOffset: bobTextNode.textContent.length});
 
-### Making `highlightsFromPoint` part of `DocumentOrShadowRoot`
-While exploring the implementation of the `highlightsFromPoint()` API, we considered adding it to the `DocumentOrShadowRoot` interface. However, we decided against this approach due to the complexities involved in managing shadow DOM encapsulation and to ensure consistency with existing APIs like `caretPositionFromPoint()` and `getHTML()`, which face similar encapsulation challenges.
+    let aliceHighlightName = 'selection-highlight-Alice';
+    let aliceHighlight = new Highlight(aliceRange);
+    let aliceActiveHighlight = new Highlight(aliceRange);
+    CSS.highlights.set(aliceHighlightName, aliceHighlight);
+    let bobHighlightName = 'selection-highlight-Bob';
+    let bobHighlight = new Highlight(bobRange);
+    let bobActiveHighlight = new Highlight(bobRange);
+    CSS.highlights.set(bobHighlightName, bobHighlight);
 
-## Privacy and Security Considerations
-### Privacy Considerations:
-The API is designed to minimize the exposure of user information by only revealing highlights at a specific point. It does not handle personal or sensitive information directly, but developers must ensure that highlights do not contain private data. The API respects shadow DOM boundaries to maintain encapsulation and operates independently of user state, so to not reveal any personal information.
+    let highlightToUsername = new Map([
+        [aliceHighlight, "Alice"],
+        [bobHighlight, "Bob"]
+    ]);
 
-### Security Considerations:
-The API introduces no new security risks. 
+    function resetActiveHighlights() {
+        for(username of highlightToUsername.values()){
+            let activeHighlightName = 'active-selection-highlight-' + username;
+            CSS.highlights.delete(activeHighlightName);
+        }
+        cursorBox.style.display = 'none';
+        cursorBox.textContent = '';
+    }
 
-## Relevant Discussions
-  1. [[css-highlight-api] Approaches for dispatching highlight pointer events · Issue #7513 · w3c/csswg-drafts (github.com)](https://github.com/w3c/csswg-drafts/issues/7513)
-  2. [[css-highlight-api] Exposing shadow DOM highlights in highlightsFromPoint() · Issue #7766 · w3c/csswg-drafts (github.com)](https://github.com/w3c/csswg-drafts/issues/7766)
+    function setActiveHighlight(highlight, username, x, y) {
+        let activeHighlightName = 'active-selection-highlight-' + username;
+        CSS.highlights.set(activeHighlightName, highlight);
+        cursorBox.textContent += (cursorBox.textContent.length ? ', ' : '') + username;
+        cursorBox.style.display = 'block';
+        cursorBox.style.left = (x + 2) + 'px';
+        cursorBox.style.top = (y - cursorBox.getBoundingClientRect().height - 6) + 'px';
+    }
 
-  ---
-  [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/HighlightEvents) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BHighlightEvents%5D)
+    function isPointInsideDOMRect(x, y, rect) {
+        return (
+            x >= rect.left && x <= rect.right &&
+            y >= rect.top && y <= rect.bottom
+        );
+    }
+
+    function createActiveHighlights(x, y) {
+        resetActiveHighlights();
+        for (highlight of CSS.highlights.values()) {
+            let username = highlightToUsername.get(highlight);
+            if (username != undefined) {
+                for (highlightAbstractRange of highlight.values()) {
+                    // Need to create a Range for getClientRects() because it can be a StaticRange.
+                    let range = new Range();
+                    range.setStart(highlightAbstractRange.startContainer, highlightAbstractRange.startOffset);
+                    range.setEnd(highlightAbstractRange.endContainer, highlightAbstractRange.endOffset);
+                    for (rect of range.getClientRects()) {
+                        if (isPointInsideDOMRect(x, y, rect)) {
+                            setActiveHighlight(highlight, username, x, y);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    div.addEventListener('mouseover', (event) => {
+        listenForMouseMove = true;
+        console.log(event)
+        console.log(event.eventPhase)
+        console.log(event.target)
+        console.log(event.currentTarget)
+    });
+
+    div.addEventListener('mousemove', (event) => {
+        if (listenForMouseMove) {
+            createActiveHighlights(event.pageX, event.pageY);
+        }
+    });
+
+    div.addEventListener('mouseout', (event) => {
+        listenForMouseMove = false;
+    });
+</script>
+</body>
+</html>
+```
+
+### Example Code Using highlightsFromPoint
+
+This is the full implementation for the text editor online collaboration example mentioned in [Customer Problem Example](#customer-problem-example-using-highlightsfrompoint) section, using the new highlightsFromPoint API proposed.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    div {
+        padding: 20px;
+        font-size: 22px;
+    }
+    div::highlight(selection-highlight-Alice) {
+        background-color: rgba(0, 255, 0, 0.3);
+
+    }
+    div::highlight(selection-highlight-Bob) {
+        background-color: rgba(0, 255, 255, 0.3);
+    }
+    div::highlight(active-selection-highlight-Alice) {
+        background-color: rgba(0, 255, 0, 1);
+    }
+    div::highlight(active-selection-highlight-Bob) {
+        background-color: rgba(0, 255, 255, 1);
+    }
+    #cursorBox {
+        position: absolute;
+        background-color: white;
+        padding: 2px;
+        border: 1px solid black;
+        display: none;
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+<div contenteditable="true" spellcheck="false">
+This is an example for using custom highlights in online collaboration.</br>
+This simulates a text document that Alice and Bob are editing, besides you, the user seeing this.</br>
+This is some text that Alice selected on her text editor session.</br>
+This whole sentence is what Bob has selected on his.</br>
+</br>
+Hovering over those highlighted pieces of text shows which user selected them and intensifies the background color.</br> 
+</div>
+<div id="cursorBox"></div>
+<script>
+    let listenForMouseMove = false;
+    let cursorBox = document.getElementById('cursorBox');
+    let div = document.querySelector('div');
+    let aliceTextNode = div.childNodes[4];
+    let aliceRange = new StaticRange({startContainer: aliceTextNode, startOffset: 0, endContainer: aliceTextNode, endOffset: 18});
+    let bobTextNode = div.childNodes[6];
+    let bobRange = new StaticRange({startContainer: bobTextNode, startOffset: 0, endContainer: bobTextNode, endOffset: bobTextNode.textContent.length});
+
+    let aliceHighlightName = 'selection-highlight-Alice';
+    let aliceHighlight = new Highlight(aliceRange);
+    let aliceActiveHighlight = new Highlight(aliceRange);
+    CSS.highlights.set(aliceHighlightName, aliceHighlight);
+    let bobHighlightName = 'selection-highlight-Bob';
+    let bobHighlight = new Highlight(bobRange);
+    let bobActiveHighlight = new Highlight(bobRange);
+    CSS.highlights.set(bobHighlightName, bobHighlight);
+
+    let highlightToUsername = new Map([
+        [aliceHighlight, "Alice"],
+        [bobHighlight, "Bob"]
+    ]);
+
+    function resetActiveHighlights() {
+        for(username of highlightToUsername.values()){
+            let activeHighlightName = 'active-selection-highlight-' + username;
+            CSS.highlights.delete(activeHighlightName);
+        }
+        cursorBox.style.display = 'none';
+        cursorBox.textContent = '';
+    }
+
+    function setActiveHighlight(highlight, username, x, y) {
+        let activeHighlightName = 'active-selection-highlight-' + username;
+        CSS.highlights.set(activeHighlightName, highlight);
+        cursorBox.textContent += (cursorBox.textContent.length ? ', ' : '') + username;
+        cursorBox.style.display = 'block';
+        cursorBox.style.left = (x + 2) + 'px';
+        cursorBox.style.top = (y - cursorBox.getBoundingClientRect().height - 6) + 'px';
+    }
+
+    function createActiveHighlights(x, y) {
+        resetActiveHighlights();
+        let highlights = CSS.highlights.highlightsFromPoint(x, y);
+        for (highlight of highlights) {
+            let username = highlightToUsername.get(highlight);
+            if (username != undefined) {
+                setActiveHighlight(highlight, username, x, y);
+            }
+        }
+    }
+
+    div.addEventListener('mouseover', (event) => {
+        listenForMouseMove = true;
+    });
+
+    div.addEventListener('mousemove', (event) => {
+        if (listenForMouseMove) {
+            createActiveHighlights(event.pageX, event.pageY);
+        }
+    });
+
+    div.addEventListener('mouseout', (event) => {
+        listenForMouseMove = false;
+    });
+</script>
+</body>
+</html>
+```
