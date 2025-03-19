@@ -11,7 +11,7 @@ This document is intended as a starting point for engaging the community and sta
 * Current version: this document
 
 ## Introduction
-[Highlights](https://drafts.csswg.org/css-highlight-api-1/) give ranges an appearance, such as rendering background colors to denote comments or annotations in a document, online collaboration for text or code edition, find-on-page for virtualized content, and squiggles for spelling and grammar checking.
+[Highlights](https://drafts.csswg.org/css-highlight-api-1/) allow developers to give an appearance to a range of text. Use cases for this include rendering background colors to denote comments or annotations in a document, highlighting selections of other users in online collaboration for text or code editing, highlighting find-on-page results for virtualized content, and squiggles for spelling and grammar checking.
 
 These use cases require that the users not only be able to see the highlighted portion of the document, but have the ability to interact with it.
 
@@ -21,7 +21,7 @@ Here are some inspirational examples of how users may interact with highlighted 
  - When a user hovers over a misspelled word, the web app may display UI with suggested replacement text.
  - When a user clicks an annotation in a document, the web app may emphasize and scroll into view the corresponding annotation in a pane which lists all the annotations in the document.
 
-Nowadays, web developers who want to implement some sort of interaction with custom highlights need to use workarounds that make it cumbersome to code and maintain, and potentially incur in performance penalties.
+Currently, web developers who want to implement some sort of interaction with custom highlights need to use workarounds that are cumbersome to code and maintain and that potentially incur performance penalties.
 
 ## Customer Problem Example
 
@@ -30,17 +30,7 @@ This could look as follows, where the chunks of text each user selected are high
 
 ![online-collaboration-example](example-text-editor-online-collaboration.gif)
 
-In the [Appendix](#example-code-without-highlightsfrompoint) there is a full example of code showing how this could be achieved with custom highlights, but let's focus on the section where an event listener for mouse move is added:
-
-```html
-div.addEventListener('mousemove', (event) => {
-    if (listenForMouseMove) {
-        createActiveHighlights(event.pageX, event.pageY);
-    }
-});
-```
-
-One possible implementation for `createActiveHighlights` could be written as follows:
+In the [Appendix](#example-code-without-highlightsfrompoint) there is a full example of code showing how this could be achieved with custom highlights, but let's focus on the section where the event listeners are added:
 
 ```html
 function isPointInsideDOMRect(x, y, rect) {
@@ -68,6 +58,10 @@ function createActiveHighlights(x, y) {
         }
     }
 }
+
+div.addEventListener('mousemove', (event) => {
+    createActiveHighlights(event.pageX, event.pageY);
+});
 ```
 
 Some things to notice:
@@ -127,25 +121,6 @@ If we wanted to apply option 3 above to the example of online collaboration desc
 ```html
 let currentActiveHighlightUsernames = new Set([]);
 
-function buildActiveUsernamesLabel() {
-    let label = '';
-    for (username of currentActiveHighlightUsernames.values()) {
-        label += username + ', ';
-    }
-    label = label.substring(0, label.length-2);
-    return label;
-}
-
-function setActiveHighlight(highlight, username, x, y) {
-    let activeHighlightName = 'active-selection-highlight-' + username;
-    CSS.highlights.set(activeHighlightName, highlight);
-    currentActiveHighlightUsernames.add(username);
-    cursorBox.textContent = buildActiveUsernamesLabel();
-    cursorBox.style.display = 'block';
-    cursorBox.style.left = (x + 2) + 'px';
-    cursorBox.style.top = (y - cursorBox.getBoundingClientRect().height - 6) + 'px';
-}
-
 function createActiveHighlight(highlight, x, y) {
     let username = highlightToUsername.get(highlight);
     if (username != undefined) {
@@ -202,24 +177,24 @@ This is some example code for how to implement the online collaboration website 
 function createActiveHighlights(x, y) {
     let highlightsPromise = CSS.highlights.highlightsFromPoint(event.clientX, event.clientY);
     highlightsPromise.then((highlights) => {
-        if (listenForMouseMove) {
-            resetActiveHighlights();
-            
-            for (highlight of highlights) {
-                let username = highlightToUsername.get(highlight);
-                if (username != undefined) {
-                    setActiveHighlight(highlight, username, x, y);
-                }
+        resetActiveHighlights();
+        for (highlight of highlights) {
+            let username = highlightToUsername.get(highlight);
+            if (username != undefined) {
+                setActiveHighlight(highlight, username, x, y);
             }
         }
     });
+    return highlightsPromise;
 }
 ```
 
-This could become a little chaotic as in what could happen if one Promise resolves after other things take plae. Let's say for example in this case if the user moves the mouse out of any highlighted ranges and keeps it static in that position. If an old Promise where the mouse was over some Highlight resolves after that, it could incorrectly create active highlights and they would stay there until the user moves the mouse again. This would be problematic for the developer to fix.
+This could become a little chaotic as in what could happen if one Promise resolves after other things take place. Let's say for example in this case if the user moves the mouse out of any highlighted ranges and keeps it static in that position. If an old Promise where the mouse was over some Highlight resolves after that, it could incorrectly create active highlights and they would stay there until the user moves the mouse again. This would be problematic for the developer to fix.
+
+Another disadvantage of this option is that being promise-based would be inconsistent with other similar APIs like [`elementFromPoint`](https://drafts.csswg.org/cssom-view/#dom-document-elementfrompoint) and [`caretPositionFromPoint`](https://drafts.csswg.org/cssom-view/#dom-document-caretpositionfrompoint), which are synchronous, potentially introducing some developer confusion regards how to handle these functions and how they work.
 
 ### Making `highlightsFromPoint` part of `DocumentOrShadowRoot`
-While exploring the implementation of the `highlightsFromPoint()` API, we considered adding it to the `DocumentOrShadowRoot` interface. However, we decided against this approach due to the complexities involved in managing shadow DOM encapsulation and to ensure consistency with existing APIs like `caretPositionFromPoint()` and `getHTML()`, which face similar encapsulation challenges.
+While exploring the implementation of the `highlightsFromPoint()` API, we considered adding it to the [`DocumentOrShadowRoot`](https://dom.spec.whatwg.org/#documentorshadowroot) interface. However, we decided against this approach due to the complexities involved in managing shadow DOM encapsulation and to ensure consistency with existing APIs like [`caretPositionFromPoint()`](https://drafts.csswg.org/cssom-view/#dom-document-caretpositionfrompoint) and [`getHTML()`](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml), which face similar encapsulation challenges.
 
 ## Privacy and Security Considerations
 ### Privacy Considerations
