@@ -82,9 +82,8 @@ non-ergonomic workarounds such as these examples:
 
 * Extend CSS [column rule
   properties](https://drafts.csswg.org/css-multicol-1/#column-gaps-and-rules) to
-  apply to grid, flex, and masonry in addition to multi-column containers.
-* Introduce row-direction gap decorations on CSS grid, flex, and masonry
-  containers.
+  apply to other container layouts such as grid, flex, and masonry.
+* Introduce row-direction gap decorations on CSS container layouts.
 * Allow gap decorations to vary over a given container to handle cases such as
   alternating row separators.
 
@@ -95,17 +94,6 @@ non-ergonomic workarounds such as these examples:
   for Implementation, and there are interoperability differences among engines.
   Additionally, authors can achieve many of the scenarios covered by this
   explainer in a table already using cell borders.
-* Row-direction gap decorations on multi-column containers. This is
-  theoretically feasible for cases where an element [spans across multiple
-  columns](https://drafts.csswg.org/css-multicol-1/#spanning-columns), but
-  currently [row gaps do not apply to multi-column
-  containers](https://drafts.csswg.org/css-align-3/#gap-multicol), so there is
-  nowhere to put such a decoration. Support for row-gap on multi-column
-  containers was proposed in issue
-  [6746](https://github.com/w3c/csswg-drafts/issues/6746); discussion in that
-  issue also notes the potential for multi-column to gain block-direction
-  overflow with a corresponding gap. This non-goal could become a goal if either
-  of these ideas are adopted.
 * Images in gap decorations. Compared to, say, border-image, gap decoration
   images need to cover significantly more cases such as T intersections. See
   [this
