@@ -79,7 +79,7 @@ The `highlightsFromPoint()` API aims to provide a robust mechanism for identifyi
 Some considerations about it:
 
 - **Multiple Overlapping Highlights**: When multiple highlights overlap from different features (e.g., a spell-checker and a find-on-page feature), it's crucial to identify all highlights at a specific point. This ensures that all relevant highlights are accurately identified, enabling web developers to handle overlapping highlights more effectively.
-- **Performance Optimization**: By providing a dedicated API for hit-testing highlights, the method can optimize performance. Instead of relying on more complex and potentially slower methods to determine which highlights are under a specific point, this method offers a streamlined and efficient way to perform this task, improving overall performance.
+- **Performance Optimization**: By providing a dedicated API for hit-testing highlights, the method can optimize performance. Instead of relying on more complex and potentially slower methods to determine which highlights are under a specific point, this method offers a streamlined and efficient way to perform this task, improving overall performance (refer to the [Performance Analysis](#performance-analysis) in the Appendix for more details on an example).
 - **Shadow DOM Handling**: Highlights within shadow DOMs require special handling to maintain encapsulation. The method can be designed to respect shadow DOM boundaries, ensuring highlights inside shadows are managed correctly. This helps maintain the integrity of the shadow DOM while still allowing highlights to be identified and interacted with.
 
 The `highlightsFromPoint()` method proposed would be part of the `CSS.highlights` interface. It would return a sequence of highlights at a specified point, ordered by [priority](https://drafts.csswg.org/css-highlight-api-1/#priorities). The developer has the option to pass in `options`, which is an optional dictionary where the key maps to an array of `ShadowRoot` objects. The API can search for and return highlights within the provided shadow DOM. The approach of passing an `options` parameter of `ShadowRoot` object is similar to [caretPositionFromPoint()](https://drafts.csswg.org/cssom-view/#dom-document-caretpositionfrompoint) and [getHTML()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml) methods. 
@@ -477,3 +477,83 @@ Hovering over those highlighted pieces of text shows which user selected them an
 </body>
 </html>
 ```
+
+### Performance Analysis
+
+We compared the performance of the two approaches presented for the online collaboration example analyzed throughout this explainer: with and without the proposed `highlightsFromPoint` API.
+We compared how long it takes for the event listener added for 'mousemove' events to complete in both cases when the mouse moves over a highlighted portion and when it moves over unaffected text. For this, we slightly modified the listener as shown below and also implemented a `testPerformance` function as follows, adding a hundred extra highlights to stress the test:
+
+```html
+let accumulatedTime = 0;
+let eventsFired = 0;
+div.addEventListener('mousemove', (event) => {
+    let start = performance.now();
+    if (listenForMouseMove) {
+        createActiveHighlights(event.pageX, event.pageY);
+    }
+    accumulatedTime += performance.now() - start;
+    eventsFired++;
+});
+
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function testPerformance() {
+    let mousemoveEvent = new Event('mousemove');
+    let highlightRange = new Range();
+    highlightRange.setStart(bobRange.startContainer, bobRange.startOffset);
+    highlightRange.setEnd(bobRange.endContainer, bobRange.endOffset);
+    let rangeRect = highlightRange.getClientRects()[0];
+
+    mousemoveEvent.pageX = rangeRect.left + rangeRect.width/2;
+    mousemoveEvent.pageY = rangeRect.top + rangeRect.height/2;
+
+    // Add more highlights to stress the test.
+    for(let i=0; i<100; i++){
+        let h = new Highlight(bobRange);
+        let name = "highlight-" + i;
+        CSS.highlights.set(name, h);
+        highlightToUsername.set(h, name)
+    }
+    
+    // First dispatches can be outliers.
+    for(let i=0; i<100; i++){
+        div.dispatchEvent(mousemoveEvent);
+    }
+    await wait(100); 
+    
+    // Measure the time it takes to process a mousemove event over highlights.
+    accumulatedTime = 0;
+    eventsFired = 0;
+    for(let i=0; i<1000; i++){
+        div.dispatchEvent(mousemoveEvent);
+    }
+    await wait(1000); 
+    console.log("Average time it took to process a mousemove event over highlights: " + (accumulatedTime/eventsFired));
+
+    // Now measure the time it takes to process a mousemove event outside of the highlights.
+    mousemoveEvent.pageY = rangeRect.top - 1;
+    accumulatedTime = 0;
+    eventsFired = 0;
+    for(let i=0; i<1000; i++){
+        div.dispatchEvent(mousemoveEvent);
+    }
+    await wait(1000);
+    console.log("Average time it took to process a mousemove event outside of the highlights: " + (accumulatedTime/eventsFired));
+}
+
+testPerformance();
+```
+
+After executing both examples, we got the following results showing a ~1.9x improvement on hovering over highlights and a ~17x improvement on hovering outside of any highlights when using `highlightsFromPoint`:
+
+- Using `highlightsFromPoint`:
+    - Average time it took to process a mousemove event over highlights: 6.60029999999702
+    - Average time it took to process a mousemove event outside of highlights: 0.015899999991059302
+
+- Not using `highlightsFromPoint`:
+    - Average time it took to process a mousemove event over highlights: 12.525500000044703
+    - Average time it took to process a mousemove event outside of highlights: 0.2749000000208616
+
+When the mouse move event happens outside of the higlights, the performance profiler from developer tools shows that `createActiveHighlights` takes more time dealing with the ranges and getting the rectangles compared to the version that uses `highlightsFromPoint`. And when the event happens on a highlight, the call to `highlightsFromPoint` takes less time than all the necessary calls to `getClientRects` that are fired in the version that doesn't use the new API. Both measurements indicate that using the new API gives a performance advantage compared to implementing this use case with the current APIs available.
