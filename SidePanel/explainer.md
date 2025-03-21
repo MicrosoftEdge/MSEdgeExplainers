@@ -17,7 +17,7 @@ will retain this document as an archive and use this section to keep the
 community up-to-date with the most current standards venue and content location
 of future work and discussions.
 
-- This document status: _Active_
+- This document status: _Archived_
 - Expected venue: [W3C Web Applications Working
   Group](https://www.w3.org/2019/webapps/) |
   [w3c/manifest](https://github.com/w3c/manifest/) 
