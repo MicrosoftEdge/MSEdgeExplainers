@@ -2,14 +2,14 @@
 
 ## Contacts
 
-<guohuideng@microsoft.com>
+<guohuideng@microsoft.com> or [guohuideng2024](https://github.com/guohuideng2024)
 
 ## References & acknowledgements
 
-yashjoshimail@gmail.com put up [4 CLs](https://chromium-review.googlesource.com/q/owner:yashjoshimail@gmail.com)(wpt tests, and implementation for the cases where the initiators are html and javascript) and a [design doc](https://docs.google.com/document/d/1ODMUQP9ua-0plxe0XhDds6aPCe_paZS6Cz1h1wdYiKU/edit?tab=t.0) . More discussion can be found [here](https://github.com/w3c/resource-timing/issues/263) and [here](https://github.com/w3c/resource-timing/issues/380).
+yashjoshimail@gmail.com put up [4 CLs](https://chromium-review.googlesource.com/q/owner:yashjoshimail@gmail.com) (wpt tests, and implementation for the cases where the initiators are html and javascript) and a [design doc](https://docs.google.com/document/d/1ODMUQP9ua-0plxe0XhDds6aPCe_paZS6Cz1h1wdYiKU/edit?tab=t.0) . More discussion can be found [here](https://github.com/w3c/resource-timing/issues/263) and [here](https://github.com/w3c/resource-timing/issues/380).
 
 ## Goal
-To expose the dependency of the resources from RUM(real user monitoring) data.
+To expose the dependency of the resources from RUM (real user monitoring) data.
 As `nicjansma@` points out [here](https://github.com/w3c/resource-timing/issues/263), the data exposed by this proposal is a RUM version of [RequestMap tool](http://requestmap.webperf.tools/). The RequestMap tool can be a good demonstration of the data to be exposed.
 Chrome devtool exposes an attribute [`initiator`](https://developer.chrome.com/docs/devtools/network) for a similar purpose.
 
@@ -21,7 +21,7 @@ The idea was brought up in year [2021](https://github.com/w3c/resource-timing/is
 -	Security products to backtrace rogue requests
 
 ## API Changes and Example Code
-A new field `initiatorUrl` will be added to the `PerformanceEntry` returned by `PerformanceResourceTiming`. `initiatorUrl` is the url of the resource that triggered the fetch of current resource.
+A new field `initiatorUrl` will be added to the `PerformanceEntry` returned by `PerformanceResourceTiming`. `initiatorUrl` is the url of the resource that triggered the fetch of the current resource.
 
 ```javascript
 const observer = new PerformanceObserver((list) => {
@@ -40,8 +40,20 @@ Then we conclude that resource "apple" triggered the fetch of the resource "oran
 */
 ```
 
-An empty `initiatorUlr` indicates the `initiator info` is missing. This happens to a page that's loaded
-according to the user's navigation, for which the "initiator resource" doesn't exist. When the UA cannot find out the inititor, for any reason (including partial implementation), an empty `initiatorUrl` can be returned.
+## Missing `initiator info` values
+An empty `initiatorUrl` indicates the `initiator info` is missing. There are a number of possibilities discussed below.
+
+### `initiator` may not exist.
+A main page can be loaded according to the user navigation. For the main page, `initiator` doesn't exist.
+
+### Resources may be cached.
+Cached resources appear in `PerformanceResourceTiming` too. Such resources are not part of the resource dependency tree, and they are not relevant to the content delivery optimization.
+
+It's easier if the `inititorUrl` is empty for cached resources: when constructing the dependency tree, only the `PerformanceResourceTiming` entries with valid `initiator info` are considered; and there is no need to filter out cached resources.
+
+### UA only partially implements the `initiator Info`.
+When the `initiator info` is missing for some resources, the partial resource dependency information is still useful. Therefore, a UA can release a particial `initiator info` implementation and make improvements later.
+
 
 ## Alternatives considered
 
@@ -55,21 +67,21 @@ This approach makes it more complicated to consume the information.
 It would be effortless to find the initator resource. However, the initiator `PerformanceResourceTiming` entry may be garbage collected already when it's reported as an initiator resource. So it alone is not a reliable presentation.
 
 ## Other considerations
-The "initiator" concept has been implemented in a number of places. Most noticablly, it's reported in Chrome Devtool "network" tab. However, there is a lack of a clear specification on how the initiator should be determined.
+The "initiator" concept has been implemented in a number of places. Most noticeably, it's reported in Chrome Devtool "network" tab. However, there is a lack of a clear specification on how the initiator should be determined.
 
-For interoperability, it's very desiable to specify how the initiator resource is determined.
+For interoperability, it's very desirable to specify how the initiator resource is determined.
 
 ## Stakeholder Feedback/Opposition
 TBD.
 
 ## Security/Privacy Considerations
-All the attributes proposed to be exposed are behind `CORS` check. `Time-Allow-Origin` doesn’t expose these values.
+All the attributes proposed to be exposed are behind `CORS` check. `Timing-Allow-Origin` doesn’t expose these values.
 
 ### [Self-Review Questionnaire: Security and Privacy](https://w3ctag.github.io/security-questionnaire/)
 
 >1.	What information does this feature expose, and for what purposes?
 
-The new fields from `PerformanceResourceTiming` expose what resource triggered the fetch of what resource. Collected from RUM(real user monitoring), they can help the web sites and CDN optimize content delivery, and help security products track down rogue content.
+The new fields from `PerformanceResourceTiming` expose what resource triggered the fetch of what resource. Collected from RUM (real user monitoring), they can help the web sites and CDN optimize content delivery, and help security products track down rogue content.
 
 >2.	Do features in your specification expose the minimum amount of information necessary to implement the intended functionality?
 
@@ -106,8 +118,7 @@ No.
 No.
 >13.	What temporary identifiers do the features in this specification create or expose to the web?
 
-`resouceId` that identifies the resources, which are already been exposed by PerformanceResoruceTiming.
-
+No.
 >14.	How does this specification distinguish between behavior in first-party and third-party contexts?
 
 No distinction.
@@ -122,7 +133,7 @@ Yes.
 No.
 >18.	What happens when a document that uses your feature is kept alive in BFCache (instead of getting destroyed) after navigation, and potentially gets reused on future navigations back to the document?
 
-The `resourceId` would be larger if the page has been in BFCache.
+When navigating back to a document that has been alive in BFCache, some resources would be loaded from cache instead of network. The `initiatorUrl` field would be empty in the corresponding `PerformanceResourceTiming` entries. However, whether a resource is loaded from cache or network is already implicated by a collection of `content sizes` in `PerformanceResourceTiming`. Therefore, no new information is exposed because of this behavior.
 
 >19.	What happens when a document that uses your feature gets disconnected?
 
