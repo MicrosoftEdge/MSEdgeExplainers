@@ -31,6 +31,7 @@ This explainer addresses allowing web applications to use materials that might b
 ## Goals
 
 - Enable the frame of an installed web application to use OS materials.
+- Design a solution that will scale to future design systems.
 
 ## Non-goals
 
@@ -38,15 +39,19 @@ This explainer addresses allowing web applications to use materials that might b
 
 ## Proposed Solutions
 
-### Manifest enabled material
+### Manifest enabled Materials
 
-An application manifest is a JSON document that contains startup parameters and application defaults for when a web application is launched. We propose adding a new `base_material` member to the manifest file, which hints to the UA that the frame should be of a certain type if supported. The `base_material` key can have a value of:
+An application manifest is a JSON document that contains startup parameters and application defaults for when a web application is launched. Both options presented below can scale by adding new values for the manifest key.
+
+#### Option 1: Material Abstraction
+
+We propose adding a new `base_material` member to the manifest file, which hints to the UA that the frame should be of a certain type if supported. The `base_material` key can have a value of:
 -  `opaque`: the frame of the installed web app does not have any material applied to it. This is the default value.
 - `translucent`: the frame of the installed web app is of a translucent material. This is a softened effect that prevents full visibility.
 - `transparent`: the frame of the app has a transparent-like effect. This material allows the background to pass through with less significant scattering, providing a clearer, less distorted view than `translucent`.
 
 > **NOTE**:
-> The way a UA maps the values to the available platform materials is completely up to the implementation. Different platforms have different number of materials and this explainer aims to provide a limited set of materials available for web apps.
+> The way a UA maps the values to the available platform materials is completely up to the implementation. Different platforms have different number of materials and this explainer aims to provide an abstraction via an offering of a limited set of materials available for web apps.
 
 ```JSON
 {
@@ -67,12 +72,41 @@ An application manifest is a JSON document that contains startup parameters and 
 
 The web developer needs to specify the background of the document as transparent (`background-color: transparent`) to remove the color from the viewport and let the web content appear as on top of the translucent frame. Any additional in-app effects, such as materials and tinting can be achieved with CSS like `backdrop-filter`.
 
+#### Option 2: Explicit Material Platform Values
+
+We propose adding a property to a PWA manifest that allows an app to declare a prioritized list of materials that it would like to use as its background if possible, conceptually similar to `font-family` matching the the phrasing the OS uses for the material:
+
+`background_material = ["windows-mica", "macos-ultrathick", "windows-acrylic", "#87ceeb"]`
+
+The browser would attempt to use the given materials if possible, with the (optional) final color being a fallback.
+
+### Material Detection
+
+To allow the developer to gracefully degrade the experience if a platform does not support materials an additional media query is required. This query would allow the site to conditionally make the content on top of it transparent or give it a specific color:
+
+```CSS
+/*option 1*/
+
+@media (base-material: 'opaque'){
+  body{
+    background-color: aliceblue);
+  }
+}
+
+/*option 2*/
+
+@media (background-material: 'windows-mica'){
+  body{
+    background-color: rgba(0, 0, 0, 0));
+  }
+}
+```
+
 ## Considered Alternatives
 
 ### CSS "Color"
 
 We thought about having a special CSS "color" that would represent the material so it would be easily applied to different surfaces in the viewport. The problem is that this more a frame property than a DOM object property. Having the frame be of a certain material allows the developer to create the UX they want. Specifying a CSS background color and assigning this to different areas in the viewport conflicts with the overall UA's default background and the color of the frame provided by the underlying platform.
-
 
 ## Concerns/Open Questions
 
