@@ -57,13 +57,8 @@ We propose adding a new `base_material` member to the manifest file, which hints
 {
   "name": "Awesome Web App",
   "short_name": "Awesome App",
-  "icons": [{
-    "src": "icon/icon.webp",
-    "sizes": "64x64",
-    "type": "image/webp"
-  }],
-  "scope": "/",
   "id": "aweapp",
+  ...
   "start_url": "/index.html",
   "display": "standalone",
   "base_material": "translucent"
@@ -76,7 +71,17 @@ The web developer needs to specify the background of the document as transparent
 
 We propose adding a property to a PWA manifest that allows an app to declare a prioritized list of materials that it would like to use as its background if possible, conceptually similar to `font-family` matching the the phrasing the OS uses for the material:
 
-`background_material = ["windows-mica", "macos-ultrathick", "windows-acrylic", "#87ceeb"]`
+```JSON
+{
+  "name": "Awesome Web App",
+  "short_name": "Awesome App",
+  "id": "aweapp",
+  ...
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_material": ["windows-mica", "macos-ultrathick", "windows-acrylic", "#87ceeb"]
+}
+```
 
 The browser would attempt to use the given materials if possible, with the (optional) final color being a fallback.
 
