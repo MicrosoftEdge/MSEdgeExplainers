@@ -1,0 +1,83 @@
+# Materials in Web Applications
+
+Authors: [Diego Gonzalez](https://github.com/diekus), [Andy Luhrs](https://github.com/aluhrs13)
+
+## Status of this Document
+
+This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+
+- This document status: **Brainstorming**
+- Expected venue: TBD
+- **Current version: this document**
+
+## Introduction
+
+*Materials* are visual effects applied to UX surfaces that resemble real life artifacts. Modern applications can use *materials* to create a unified and integrated appearance with the underlying OS. Materials are a powerful way to:
+- create stronger contextual relationship between the content the user is interacting an related UX (like context menus or side bars).
+- indicate window (active/inactive) focus state.
+- establish visual hierarchy.
+- communicate separation between layers to help a user retain a sense of space.
+
+[MacOS](https://developer.apple.com/design/human-interface-guidelines/materials) has several materials, ranging from `ultraThin` to `ultraThick`.
+
+![Stock app on macOS displaying a left panel with a translucent material background](macMaterial.png)
+
+[Windows](https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/materials) also has a similar concept, with `Mica`, `Mica Alt` and `Acrylic`.
+
+![Copilot app on Windows 11 displaying a left panel with a translucent material background](winMaterial.png)
+
+This explainer addresses allowing web applications to use materials that might be available in the underlying platform. When enabled, and if the platform supports it, the frame of the installed web application will use the specified visual effect, and if the background of the page is transparent the material would be visible.
+
+## Goals
+
+- Enable the frame of an installed web application to use OS materials.
+
+## Non-goals
+
+- Define or override material usage for the application's UX elements like context menus and tooltips (This is handled by the platform).
+
+## Proposed Solutions
+
+### Manifest enabled material
+
+An application manifest is a JSON document that contains startup parameters and application defaults for when a web application is launched. We propose adding a new `base_material` member to the manifest file, which hints to the UA that the frame should be of a certain type if supported. The `base_material` key can have a value of:
+-  `opaque`: the frame of the installed web app does not have any material applied to it. This is the default value.
+- `translucent`: the frame of the installed web app is of a translucent material. This is a softened effect that prevents full visibility.
+- `transparent`: the frame of the app has a transparent-like effect. This material allows the background to pass through with less significant scattering, providing a clearer, less distorted view than `translucent`.
+
+> **NOTE**:
+> The way a UA maps the values to the available platform materials is completely up to the implementation. Different platforms have different number of materials and this explainer aims to provide a limited set of materials available for web apps.
+
+```JSON
+{
+  "name": "Awesome Web App",
+  "short_name": "Awesome App",
+  "icons": [{
+    "src": "icon/icon.webp",
+    "sizes": "64x64",
+    "type": "image/webp"
+  }],
+  "scope": "/",
+  "id": "aweapp",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "base_material": "translucent"
+}
+```
+
+The web developer needs to specify the background of the document as transparent (`background-color: transparent`) to remove the color from the viewport and let the web content appear as on top of the translucent frame. Any additional in-app effects, such as materials and tinting can be achieved with CSS like `backdrop-filter`.
+
+## Considered Alternatives
+
+### CSS "Color"
+
+We thought about having a special CSS "color" that would represent the material so it would be easily applied to different surfaces in the viewport. The problem is that this more a frame property than a DOM object property. Having the frame be of a certain material allows the developer to create the UX they want. Specifying a CSS background color and assigning this to different areas in the viewport conflicts with the overall UA's default background and the color of the frame provided by the underlying platform.
+
+
+## Concerns/Open Questions
+
+1. How will performance be affected for web content on a transparent background that bleeds into the visual material effect?
+
+## Glossary
+
+## Acknowledgements
