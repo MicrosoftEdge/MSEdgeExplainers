@@ -28,6 +28,8 @@ This document is a starting point for engaging the community and standards bodie
 
 This explainer addresses allowing web applications to use materials that might be available in the underlying platform. When enabled, and if the platform supports it, the frame of the installed web application will use the specified visual effect, and if the background of the page is transparent the material would be visible.
 
+> **Note:** A developer can already create and mimic experiences based on opaque surfaces. By using images and paterns there is a high chance that a desired platform aesthetic can be achieved (like _brushed-metal_). With newer and more powerful hardware, platforms are starting to add transparency effects to their UX surfaces. The intention of this API is to allow a web application's frame to use materials with transparency effects like the ones in the screenshots below.
+
 ## Goals
 
 - Enable the frame of an installed web application to use OS materials.
@@ -36,6 +38,7 @@ This explainer addresses allowing web applications to use materials that might b
 ## Non-goals
 
 - Define or override material usage for the application's UX elements like context menus and tooltips (This is handled by the platform).
+- Support devices that do not have content behind a frame/window that 'bleeds' through. As an example, (non-desktop) mobile devices generally don't have regions of the UX where the user would be able to see content behind the application's frame.
 
 ## Proposed Solutions
 
@@ -115,7 +118,10 @@ We thought about having a special CSS "color" that would represent the material 
 
 ## Concerns/Open Questions
 
-1. How will performance be affected for web content on a transparent background that bleeds into the visual material effect?
+1. **How will performance be affected for web content on a transparent background that bleeds into the visual material effect?**
+2. **How can the materials API be futureproofed?**
+      
+      With option 1, by having abstract values for the material (i.e. `translucent`, `transparent`) of the frame of the installed web application, if a future version of an OS comes with new naming for materials, the new platform can just render the content that would map to those values. For exmaple, if a future version of macOS or Windows decides to change the naming for their materials, the developer wouldn't have to update a list of proprietary names. 
 
 ## Glossary
 
