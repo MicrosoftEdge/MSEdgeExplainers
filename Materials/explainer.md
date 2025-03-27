@@ -18,11 +18,11 @@ This document is a starting point for engaging the community and standards bodie
 - establish visual hierarchy.
 - communicate separation between layers to help a user retain a sense of space.
 
-[MacOS](https://developer.apple.com/design/human-interface-guidelines/materials) has several materials, ranging from `ultraThin` to `ultraThick`.
+[Apple OSs](https://developer.apple.com/design/human-interface-guidelines/materials) have several materials, ranging from `ultraThin` to `ultraThick`.
 
 ![Stock app on macOS displaying a left panel with a translucent material background](macMaterial.png)
 
-[Windows](https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/materials) also has a similar concept, with `Mica`, `Mica Alt` and `Acrylic`.
+[Windows 11](https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/materials) also has a similar concept, with `Mica`, `Mica Alt` and `Acrylic`.
 
 ![Copilot app on Windows 11 displaying a left panel with a translucent material background](winMaterial.png)
 
@@ -121,7 +121,7 @@ We thought about having a special CSS "color" that would represent the material 
 1. **How will performance be affected for web content on a transparent background that bleeds into the visual material effect?**
 2. **How can the materials API be futureproofed?**
       
-      With option 1, by having abstract values for the material (i.e. `translucent`, `transparent`) of the frame of the installed web application, if a future version of an OS comes with new naming for materials, the new platform can just render the content that would map to those values. For exmaple, if a future version of macOS or Windows decides to change the naming for their materials, the developer wouldn't have to update a list of proprietary names. 
+      With option 1, by having abstract values for the material (i.e. `translucent`, `transparent`) of the frame of the installed web application, if a future version of an OS comes with new naming for materials, the new platform can just render the content that would map to those values. For exmaple, if a future version of macOS or Windows decides to change the naming for their materials, the developer wouldn't have to update a list of proprietary names.
 
 ## Glossary
 
