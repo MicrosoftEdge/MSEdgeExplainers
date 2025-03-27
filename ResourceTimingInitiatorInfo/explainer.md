@@ -55,9 +55,9 @@ There are a number of advantages to this approach.
 
 - It's easier to consume the output to construct the resource dependency tree: Only the `PerformanceResourceTiming` entries with valid `initiator info` are considered. No extra filter is needed.
 
-- It avoids overhead from the UA when the resources are loaded fast.
+- It avoids overhead when the resources are loaded fast.
 
-- It simplifies implmenetation in the UA.
+- It simplifies implmenetation.
 
 ### 3. UA only partially implements the `initiator Info`.
 When the `initiator info` is missing for some resources, the partial resource dependency information is still useful. Therefore, a UA can release a particial `initiator info` implementation and make improvements later.
