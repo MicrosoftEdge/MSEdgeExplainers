@@ -33,7 +33,7 @@ This explainer addresses allowing web applications to use materials that might b
 ## Goals
 
 - Enable the frame of an installed web application to use OS materials.
-- Design a solution that will scale to future design systems.
+- Design a solution that will scale to future OS materials.
 
 ## Non-goals
 
