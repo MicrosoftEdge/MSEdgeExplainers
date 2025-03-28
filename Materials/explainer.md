@@ -121,7 +121,7 @@ We thought about having a special CSS "color" that would represent the material 
 1. **How will performance be affected for web content on a transparent background that bleeds into the visual material effect?**
 2. **How can the materials API be futureproofed?**
       
-      With option 1, by having abstract values for the material (i.e. `translucent`, `transparent`) of the frame of the installed web application, if a future version of an OS comes with new naming for materials, the new platform can just render the content that would map to those values. For exmaple, if a future version of macOS or Windows decides to change the naming for their materials, the developer wouldn't have to update a list of proprietary names.
+      With option 1, by having abstract values for the material (i.e. `translucent`, `transparent`) of the frame of the installed web application, if a future version of an OS comes with new naming for materials, the new platform can just render the content that would map to those values. For example, if a future version of macOS or Windows decides to change the naming for their materials, the developer wouldn't have to update a list of proprietary names.
 
 ## Glossary
 
