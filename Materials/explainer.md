@@ -103,7 +103,7 @@ To allow the developer to gracefully degrade the experience if a platform does n
 
 /*option 2*/
 
-@media (background-material: 'windows-mica'){
+@media (background-material: 'windows-mica'), (background-material: 'macos-ultrathick') {
   body{
     background-color: rgba(0, 0, 0, 0));
   }
