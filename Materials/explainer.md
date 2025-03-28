@@ -114,7 +114,9 @@ To allow the developer to gracefully degrade the experience if a platform does n
 
 ### Using a new <color> CSS data type
 
-We thought about having a special CSS "color" that would represent the material so it would be easily applied to different surfaces in the viewport. The problem is that this more a frame property than a DOM object property. Having the frame be of a certain material allows the developer to create the UX they want. Specifying a CSS background color and assigning this to different areas in the viewport conflicts with the overall UA's default background and the color of the frame provided by the underlying platform.
+We considered introducing a new value to the `<color>` CSS data type, which would represent the material. This value could then be easily applied by developers to the background of the app, or to different surfaces within the app.
+
+The limitation is that the CSS styles defined by developers apply to elements that are within the viewport, and not to the app frame itself. Using a CSS background color for different areas in the viewport would conflict with the UA's default background of the app frame provided by the underlying platform.
 
 ## Concerns/Open Questions
 
