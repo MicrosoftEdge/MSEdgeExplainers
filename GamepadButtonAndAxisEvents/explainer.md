@@ -1,4 +1,4 @@
-# Gamepad button and Axis Events
+# Gamepad Button and Axis Events
 
 ## Authors:
 
