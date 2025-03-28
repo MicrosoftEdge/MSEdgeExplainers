@@ -97,7 +97,7 @@ To allow the developer to gracefully degrade the experience if a platform does n
 
 @media (base-material: 'opaque'){
   body{
-    background-color: aliceblue);
+    background-color: aliceblue;
   }
 }
 @media (base-material: 'translucent'){
