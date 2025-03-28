@@ -18,7 +18,7 @@ This document is a starting point for engaging the community and standards bodie
 - establish visual hierarchy.
 - communicate separation between layers to help a user retain a sense of space.
 
-[Apple OSs](https://developer.apple.com/design/human-interface-guidelines/materials) have several materials, ranging from `ultraThin` to `ultraThick`.
+[Apple operating systems](https://developer.apple.com/design/human-interface-guidelines/materials) have several materials, ranging from `ultraThin` to `ultraThick`.
 
 ![Stock app on macOS displaying a left panel with a translucent material background](macMaterial.png)
 
