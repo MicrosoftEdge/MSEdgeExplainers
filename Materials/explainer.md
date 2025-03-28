@@ -100,7 +100,14 @@ To allow the developer to gracefully degrade the experience if a platform does n
     background-color: aliceblue);
   }
 }
-
+@media (base-material: 'translucent'){
+  body{
+    background-color: transparent;
+  }
+  .sidebar{
+    background-color: transparent;
+  }
+}
 /*option 2*/
 
 @media (background-material: 'windows-mica'), (background-material: 'macos-ultrathick') {
