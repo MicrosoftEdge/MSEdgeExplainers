@@ -13,10 +13,11 @@ This document is a starting point for engaging the community and standards bodie
 ## Introduction
 
 *Materials* are visual effects applied to UX surfaces that resemble real life artifacts. Modern applications can use *materials* to create a unified and integrated appearance with the underlying OS. Materials are a powerful way to:
-- create stronger contextual relationship between the content the user is interacting an related UX (like context menus or side bars).
-- indicate window (active/inactive) focus state.
-- establish visual hierarchy.
-- communicate separation between layers to help a user retain a sense of space.
+
+- Create a stronger contextual relationship between the content the user is interacting with and the UI it appears in, such as when using context menus or side bars.
+- Indicate an app window's focused, or active/inactive, state.
+- Establish a visual hierarchy.
+- Visually communicate the separation between various UI layers of an app, to help users retain a sense of space.
 
 [Apple operating systems](https://developer.apple.com/design/human-interface-guidelines/materials) have several materials, ranging from `ultraThin` to `ultraThick`.
 
