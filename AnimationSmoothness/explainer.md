@@ -69,19 +69,19 @@ Animation libraries measure frame rate in different ways. For example, GSAP and 
 
 ## Proposed Solutions
 #### Option 1: Direct Query
-This solution would involve querying the frame rate directly. JavaScript would call an API that measures the fps at a specific point in time. To measure the overall frame rate, the API would be called multiple times, using the values to calculate an average frame rate.
+This solution would involve querying the frame rate directly. JavaScript would call an API that measures some frame information at a specific point in time. To measure the overall frame rate, the API would be called multiple times, using the values to calculate an average frame rate.
 
-`window.framerate()`
+`window.frameinfo()`
   
 #### Option 2: Start and End Markers
-JavaScript Performance markers are used to track points in time. In this solution, developers could mark a start and end point on the performance timeline and measure the duration between the two markers, with FPS as a property.
+JavaScript Performance markers are used to track points in time. In this solution, developers could mark a start and end point on the performance timeline and measure the duration between the two markers, with frame information as a property.
 
-`window.framerate("perfMarker")` <- Framerate since that marker
+`window.frameinfo("perfMarker")` <- Framerate since that marker
 
 `performance.mark("myMarker")`
 
 `performance.measure("myMarker", "endMarker")`
-* FPS could be a property on performance measure
+* Frame info could be a property on performance measure
 
 This option works similarly to the [Frame Timing API](https://wicg.github.io/frame-timing/#dom-performanceframetiming) by using start and end markers. Frame startTime and frame endTime are returned by the Performance object's `now()` method; the distance between the two points is frame duration. When the duration of a frame is too long, it is clear that there was a rendering issue. A PerformanceFrameTiming object is created and added to the performance entry buffer of each active web page, which developers can then access for information.
 
@@ -91,12 +91,12 @@ Adding an event listener for frame rate changes would alert developers about lar
 This options works similarly to both [LoAF API](https://github.com/w3c/long-animation-frames) and the [Paint Timing API](https://www.w3.org/TR/paint-timing/), which both use the performance observer and follow a pattern that developers expect to use when improving performance. When observing long animation frames, developers can specify the entry types they want to the performance observer to processes. Like the performance observer reports which animation frames are too long, the event listener would send an alert when the frame rate drops by a certain amount. The two APIs differ in the amount of information given. The LoAF API can give more specific metrics for long animations, while event listeners provide a more general way of monitoring frame rate.
 
 ## Alternatives Considered
-For the event listener scenario, it was determined that using granularity would not give a useful measure of FPS due to lack of detail. The granularity was modeled after the compute pressure API.
+For the event listener scenario, it was determined that using granularity would not give a useful measure of frame info due to lack of detail. The granularity was modeled after the compute pressure API.
 
 `window.addEventListener("frameratechange", (event) =>{doSomething();})`
 
 ## Concerns/Open Questions
-1. The user-perceived frame rate is influenced by both the main thread and the compositor thread. Accurate measurement of frame rates must account for both. Since the compositor thread operates independently of the main thread, it can be difficult to get its frame rate data. However, an accurate frame rate measurements needs to take into account both measurements.
+1. The user-perceived smoothness is influenced by both the main thread and the compositor thread. Accurate measurement of frame rates must account for both. Since the compositor thread operates independently of the main thread, it can be difficult to get its frame rate data. However, an accurate frame rate measurements needs to take into account both measurements.
 2. Similar to the abandoned [Frame Timing interface](https://wicg.github.io/frame-timing/#introduction). We are currently gathering historical context on how this relates and why it is no longer being pursued.
 3. Questions to Consider:
 	* Should content missing from the compositor frame due to delayed tile rasterization be tracked? 
