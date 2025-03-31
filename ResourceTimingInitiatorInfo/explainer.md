@@ -47,7 +47,7 @@ An empty `initiatorUrl` indicates the `initiator info` is missing. There are a n
 A main page can be loaded according to the user navigation. For the main page, `initiator` doesn't exist.
 
 ### 2. Resources may not be downloaded from network.
-Resources can be cached, or handled by services workers, instead of being downloaded from network.They still appear in `PerformanceResourceTiming`. Such resources are not part of the resource dependency tree, and they are not relevant to the content delivery optimization.
+Resources can be cached, or handled by service workers, instead of being downloaded from network. They still appear in `PerformanceResourceTiming`. Such resources are not part of the resource dependency tree, and they are not relevant to the content delivery optimization.
 
 **`initiatorUrl` is empty unless the resource is actually downloaded from network.**
 
@@ -57,7 +57,7 @@ There are a number of advantages to this approach.
 
 - It avoids overhead when the resources are loaded fast.
 
-- It simplifies implmenetation.
+- It simplifies implementation.
 
 ### 3. UA only partially implements the `initiator Info`.
 When the `initiator info` is missing for some resources, the partial resource dependency information is still useful. Therefore, a UA can release a particial `initiator info` implementation and make improvements later.
