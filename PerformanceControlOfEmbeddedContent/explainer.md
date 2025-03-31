@@ -65,7 +65,7 @@ This enables each document to:
 | -------------  | -------- | ------------------- |
 | **A: Basic**<br>**Description**: Basic web development best practices that are scenario-agnostic. | **- Text resources must be compressed** (HTML, CSS, JS, JSON).<br> - **Unzipped assets are flagged.**<br> - **Oversized assets are flagged:**<br>* Assets larger than ?KB embedded via `data:...` URLs.<br>* Image files larger than ?KB served in last generation formats.<br> * Web fonts that are larger than ?KB. | - Reporting violations via Reporting API.<br> - Assets not rendered.<br> UI indicator to block out images that are too large. |
 | **B: Early-script**<br>**Description**: JavaScript constraints during load to enhance performance and minimize impact on user experience before interaction begins. | **- JS limits:**<br>* Total limits on JS served prior to user interaction: ?MB<br>* Scripts must contain `content-length` headers<br>* No non-compositor thread animations (e.g. animated SVGs, loading spinners, etc.). | - Report violations via Reporting API.<br> - Loading of scripts that violate the limit are paused/blocked.<br> - Pause/disconnect animations that are not visible, interacted with. |
-| **C: Globals**<br>**Description:** Overall media and system resource usage constraints. | **- Cumulative resource consumption limits per interaction:**<br>* Caps on total media usage. No more than a total of ?.<br>* Limits on iframe count. No more than a total of ?.<br>* Limits of iframe depth. No more than a depth of ?.<br>* CPU usage before first interaction: ?MB. | - Report violations via Reporting API.<br>- Do not load media at all. <br>- Do not load iframes that surpass the depth. |
+| **C: Globals**<br>**Description:** Overall media and system resource usage constraints. | **- Cumulative resource consumption limits per interaction:**<br>* Caps on total media usage. No more than a total of ?.<br>* Limits on iframe count. No more than a total of ?.<br>* Limits of iframe depth. No more than a depth of ?.<br>* CPU usage before first interaction: ?%. | - Report violations via Reporting API.<br>- Do not load media at all. <br>- Do not load iframes that surpass the depth. |
 | **D: Script**<br>**Description:** Strict JavaScript restrictions while running/post-load. | **-Additional JS limits:**<br>* Long tasks in the main thread.<br>* High CPU usage.<br>* Workers with long tasks that exceed ?ms.<br> | - Report violations via Reporting API.<br>- Stopping JavaScript if [no user interaction/running in the background]. |
 
 ### Discussion of different categories
@@ -201,27 +201,19 @@ The result is a set of criteria mapped to a smaller set of policies/categories. 
 We expect these criteria and their specific limits to evolve with the web, which poses the question of how to best evolve the API. We are considering the following options:
 
 1. **Define once, no changes**
-    **Pros**
-    * Web developers can anticipate and address violations.
-    * Consistent behavior after site opts into the policy.
-
-    **Cons**
-    * Criteria fixed to today's recommendations.
+    | **Pros** | **Cons** |
+    |---|---|
+    | - Web developers can anticipate and address violations.<br>- Consistent behavior after site opts into the policy. | - Criteria fixed to today's recommendations. |
 
 2. **Updating criteria under the same category tags**
-    **Pros**
-    * Sites opting in are kept to the latest criteria under each category.
-
-    **Cons**
-    * Sites subject to changing platform behavior.
-    * Actual criteria and limits are fragmented with the web.
+    | **Pros** | **Cons** |
+    |---|---|
+    | - Sites opting in are kept to the latest criteria under each category. | - Sites subject to changing platform behavior.<br>- Actual criteria and limits are fragmented with the web. |
 
 3. **Updated criteria under new category tags**
-    **Pros**
-    * Web developers can anticipate and address violations.
-
-    **Cons**
-    * Requires changes from sites each time there's a change in a category.
+    | **Pros** | **Cons** |
+    |---|---|
+    |- Web developers can anticipate and address violations. | - Requires changes from sites each time there's a change in a category. | 
 
 An ideal mechanism would allow for this evolution go happen in a controlled, predictable manner. An open point for discussion is whether it's a reasonable trade off for developers opting in to be expected to keep up with the platform as criteria evolves.
 
