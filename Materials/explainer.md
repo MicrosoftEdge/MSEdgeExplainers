@@ -49,7 +49,7 @@ A web application manifest is a JSON file that contains startup parameters and a
 
 #### Option 1: Material Abstraction
 
-We propose adding a new `base_material` member to the manifest file, which hints to the UA that the frame should be of a certain type if supported. The `base_material` key can have a value of:
+We propose adding a new `base_material` member to the manifest file, which hints to the UA that the frame should be of a certain type, if the operating sustem supports it. The `base_material` member can be set to the following values:
 -  `opaque`: the frame of the installed web app does not have any material applied to it. This is the default value.
 - `translucent`: the frame of the installed web app is of a translucent material. This is a softened effect that prevents full visibility.
 - `transparent`: the frame of the app has a transparent-like effect. This material allows the background to pass through with less significant scattering, providing a clearer, less distorted view than `translucent`.
