@@ -27,7 +27,7 @@ This document is a starting point for engaging the community and standards bodie
 
 ![Copilot app on Windows 11 displaying a left panel with a translucent material background](winMaterial.png)
 
-This explainer addresses allowing web applications to use materials that might be available in the underlying platform. When enabled, and if the platform supports it, the frame of the installed web application will use the specified visual effect, and if the background of the page is transparent the material would be visible.
+This explainer proposes a way to allow installed web applications to use materials from the underlying platform, to use as the app's window frame background effect. When enabled, and if the platform supports it, the frame of the installed web application will use the specified visual effect, and if the background of the page is transparent the material will be visible.
 
 > **Note:** Web developers can already mimic some OS-specific experiences. By using images, gradients, or filters in CSS, developers can match a platform's aesthetic, such as a brushed metal background, in their app. However, with newer and more powerful hardware, platforms are starting to add transparency effects to their UI surfaces. The intention of this proposal is to allow a web application's frame to use materials with transparency effects like the ones shown in the previous screenshots.
 
