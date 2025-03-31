@@ -73,7 +73,9 @@ The web developer needs to specify the background of the document as transparent
 
 #### Option 2: Explicit Material Platform Values
 
-We propose adding a property to a PWA manifest that allows an app to declare a prioritized list of materials that it would like to use as its background if possible, conceptually similar to `font-family` matching the the phrasing the OS uses for the material:
+We propose introducing the `background_material` member to the web app manifest. This member allows apps to declare a prioritized list of materials that they wish to use as frame background if possible. This is conceptually similar to the `font-family` CSS property, which also goes through a list of prioritized fonts to find one that can be used.
+
+The values of the `background_material` member match how specific materials are named in various operating systems:
 
 ```JSON
 {
