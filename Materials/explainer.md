@@ -38,7 +38,7 @@ This explainer proposes a way to allow installed web applications to use materia
 
 ## Non-goals
 
-- Define or override material usage for the application's UX elements like context menus and tooltips (This is handled by the platform).
+- Define a solution to apply material to UI elements like context menus and tooltips (this is already handled by the platform).
 - Support devices that do not have content behind a frame/window that 'bleeds' through. As an example, (non-desktop) mobile devices generally don't have regions of the UX where the user would be able to see content behind the application's frame.
 
 ## Proposed Solutions
