@@ -91,7 +91,7 @@ The browser would attempt to use the given materials if possible, with the (opti
 
 ### Material Detection
 
-To allow the developer to gracefully degrade the experience if a platform does not support materials an additional media query is required. This query would allow the site to conditionally make the content on top of it transparent or give it a specific color:
+To allow developers to set their app's background to transparent only when the platform supports materials, and use a different background color if not, we propose adding a media query:
 
 ```CSS
 /*option 1*/
