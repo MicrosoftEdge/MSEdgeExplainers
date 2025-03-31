@@ -69,7 +69,7 @@ We propose adding a new `base_material` member to the manifest file, which hints
 }
 ```
 
-The web developer needs to specify the background of the document as transparent (`background-color: transparent`) to remove the color from the viewport and let the web content appear as on top of the translucent frame. Any additional in-app effects, such as materials and tinting can be achieved with CSS like `backdrop-filter`.
+To let the base material be visible in their app, web developers must set the background of the document to be transparent (`background-color: transparent`). This removes the color from the viewport and lets the web content appear on top of the translucent frame. Any additional in-app effects, such as materials and tinting can be achieved with CSS, for example by using `backdrop-filter`.
 
 #### Option 2: Explicit Material Platform Values
 
