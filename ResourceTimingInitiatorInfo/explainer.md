@@ -60,7 +60,7 @@ There are a number of advantages to this approach.
 - It simplifies implementation.
 
 ### 3. UA only partially implements the `initiator Info`.
-When the `initiator info` is missing for some resources, the partial resource dependency information is still useful. Therefore, a UA can release a particial `initiator info` implementation and make improvements later.
+When the `initiator info` is missing for some resources, the partial resource dependency information is still useful. Therefore, a UA can release a partial `initiator info` implementation and make improvements later.
 
 
 ## Alternatives considered
