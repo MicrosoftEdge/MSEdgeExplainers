@@ -45,7 +45,7 @@ This explainer proposes a way to allow installed web applications to use materia
 
 ### Manifest enabled Materials
 
-An application manifest is a JSON document that contains startup parameters and application defaults for when a web application is launched. Both options presented below can scale by adding new values for the manifest key.
+A web application manifest is a JSON file that contains startup parameters and application defaults for when a web application is launched and installed. We are presenting two different options, both based on adding a new manifest member.
 
 #### Option 1: Material Abstraction
 
