@@ -17,12 +17,6 @@ This document is a starting point for engaging the community and standards bodie
 - Expected venue:**[W3C Web Applications Working Group](https://www.w3.org/groups/wg/webapps/)**
 - Current version: **This document**
 
-### Definitions
-*Fine-Grained Events* - These events only fire when a button is pressed, released.
-*Button up/down events* - fires only once per actual press/release (not every frame).
-*Frame-based Consolidated Event* - Instead of firing individual events for every small change, a frame-based gamepadchange event collects multiple updates into one.
-- Fires once per animation frame (e.g., 60Hz) and includes all changes.
-
 ## Introduction
 
 The current Gamepad API relies on continuous polling to detect input changes, which can lead to input latency and increased CPU usage. This proposal introduces a more efficient approach that combines event-driven input handling for button presses and releases with frame-based state consolidation, where a single event encapsulates all gamepad state changes that occur within an input frame.
@@ -140,6 +134,7 @@ rawgamepadchange {
 // Web IDL for the gamepadchange event
 
 interface GamepadChangeEvent : Event {
+  const DOMString type = "gamepadchange";
   readonly attribute Gamepad gamepadSnapshot;
   readonly attribute FrozenArray<long> axesChanged;
   readonly attribute FrozenArray<long> buttonsChanged;
@@ -149,13 +144,15 @@ interface GamepadChangeEvent : Event {
   sequence<GamepadChangeEvent> getCoalescedEvents();
 };
 
-interface GamepadChangeEvent : Event {
+nterface RawGamepadChangeEvent : Event {
+  const DOMString type = "rawgamepadchange";
   readonly attribute Gamepad gamepadSnapshot;
   readonly attribute FrozenArray<long> axesChanged;
   readonly attribute FrozenArray<long> buttonsChanged;
   readonly attribute FrozenArray<long> buttonsPressed;
   readonly attribute FrozenArray<long> buttonsReleased;
 };
+
 ```
 
 ### Dependencies on non-stable features
