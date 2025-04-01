@@ -176,9 +176,10 @@ the user first.
 As iframes and other embedded content comes from external sources, web authors of the top-level context will not be
 permitted to add notifications within the embedded content. 
 
-On the other hand, the web authors of the iframe will be able to add notifications to their content. In order for these
-notifications to propagate to the top-level browsing context, we will require a new value to the `sandbox` attribute for
-`<iframe>` called `allow-aria-notify`.
+On the other hand, the web authors of the iframe will be able to add notifications to their content. We will create a new `Permissions-Policy` called `aria-notify`. 
+By default, `aria-notify` is allowed in iframes.  Authors can opt iframes out of aria-notify by:
+ - `<iframe allow="aria-notify 'none'">`
+ - `Permissions-Policy: aria-notify=(self)`
 
 ## Relationship to ARIA Live Regions
 There are some similarities between `ariaNotify` and the existing ARIA live regions. Some functionality provided by `ariaNotify` is not supported and cannot be mapped back directly to ARIA live regions. 
