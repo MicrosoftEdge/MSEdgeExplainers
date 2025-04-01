@@ -82,10 +82,9 @@ buttonup {
 }
 
 ```
-
-### Proposed IDL for GamepadButtonEvent
-
 ```
+// Proposed IDL for GamepadButtonEvent
+
 interface GamepadButtonEvent : Event {
     readonly attribute long gamepadIndex;
     readonly attribute long buttonIndex;
@@ -129,9 +128,8 @@ rawgamepadchange {
   buttonsReleased: [],
 }
 ```
-
 ```
-// Web IDL for the gamepadchange event
+// Web IDL for the gamepadchange and rawgamepadchange event.
 
 interface GamepadChangeEvent : Event {
   const DOMString type = "gamepadchange";
@@ -144,7 +142,7 @@ interface GamepadChangeEvent : Event {
   sequence<GamepadChangeEvent> getCoalescedEvents();
 };
 
-nterface RawGamepadChangeEvent : Event {
+interface RawGamepadChangeEvent : Event {
   const DOMString type = "rawgamepadchange";
   readonly attribute Gamepad gamepadSnapshot;
   readonly attribute FrozenArray<long> axesChanged;
