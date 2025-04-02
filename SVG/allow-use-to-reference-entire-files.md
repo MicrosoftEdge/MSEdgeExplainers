@@ -34,13 +34,14 @@ Spec: [https://svgwg.org/svg2-draft/struct.html#UseElement](https://svgwg.org/sv
 The `use` element in SVG allows for the reuse of existing SVG elements by referencing them. This helps reduce the amount of code and makes it easier to manage and update SVG graphics. 
 
 ## 2. Problem Statement 
-The `use` element does not support referencing entire SVG files directly. It only allows referencing specific elements within an SVG file using an id attribute/fragment identifier. This limitation increases workload and maintenance overhead, as it requires manual editing, which is error-prone and can lead to inconsistencies when files are frequently updated. Additionally, it makes it cumbersome to reuse entire SVG files, especially when dealing with complex graphics or icons. ( Refer Section [Customer/Developer Feedback: Pain Points](#7-customerdeveloper-feedback-pain-points))  
+The `use` element does not support referencing entire SVG files directly. It only allows referencing specific elements within an SVG file using an id attribute/fragment identifier. This limitation increases workload and maintenance overhead, as it requires manual editing, which is error-prone and can lead to inconsistencies when files are frequently updated. Additionally, it makes it cumbersome to reuse external SVG files, 
+as one had to hand edit them by adding id just so that they can refer them in their applications. ( Refer Section [Customer/Developer Feedback: Pain Points](#7-customerdeveloper-feedback-pain-points))  
 
 ## 3. Current Limitation
 
 To use the whole SVG with a `use` tag, you typically need to reference a specific element within the SVG file using a fragment identifier (an id with a hash #): 
 
-```cpp
+```html
 <svg> 
 
   <use xlink:href="myshape.svg#icon"></use> 
@@ -48,11 +49,21 @@ To use the whole SVG with a `use` tag, you typically need to reference a spe
 </svg> 
 ```
 
-In this example, `#icon` is the fragment identifier pointing to an element with id="icon" within myshape.svg. 
+In this example, `#icon` is the fragment identifier pointing to an element with id="icon" within myshape.svg, which might look like: 
 
-## 4. Motivation
+_myshape.svg_
 
-The above [limitions](#3-current-limitation) introduces the below issues while using #id:
+```html
+<svg id="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0,0,512,512"> 
+
+ <circle cx="256" cy="256" r="200" fill="red" /> 
+
+</svg> 
+```
+
+## 4. Motivation and User Use Case
+
+The above [limitation](#3-current-limitation) introduces the below issues while using #id:
 
 ### 4.1 Manual Editing: 
 
@@ -62,7 +73,7 @@ The above [limitions](#3-current-limitation) introduces the below issues while u
 
 **Example:** Consider an SVG file without an id: 
 
-```cpp
+```html
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0,0,512,512"> 
 
  <circle cx="256" cy="256" r="200" fill="red" /> 
@@ -72,7 +83,7 @@ The above [limitions](#3-current-limitation) introduces the below issues while u
 
 To use this SVG with a <use> tag, you need to add an id: 
 
-```cpp
+```html
 <svg id="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0,0,512,512"> 
 
   <circle cx="256" cy="256" r="200" fill="red" /> 
@@ -82,7 +93,7 @@ To use this SVG with a <use> tag, you need to add an id:
 
 Then reference it: 
 
-```cpp
+```html
 <svg> 
 
   <use xlink:href="myshape.svg#icon"></use> 
@@ -103,7 +114,7 @@ Then reference it:
 ## 5. Proposed Approach
 Allow the `use` element to reference entire SVG files without needing an id. This means we can reuse the whole SVG file like this: 
 
-```cpp
+```html
 <svg width="100" height="100"> 
 
   <use href="icon.svg" /> 
