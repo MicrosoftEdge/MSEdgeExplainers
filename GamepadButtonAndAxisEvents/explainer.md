@@ -54,9 +54,9 @@ Research and experimental implementations in Firefox suggest that event-driven i
 ## Proposed Approach
 To address the challenges of handling gamepad input efficiently while ensuring real-time responsiveness, an approach is proposed to event-driven input handling along with frame-based state consolidation.This proposal would add four new events that fire on the Gamepad object:
 
-1) buttonup: These events fire only when a button is pressed (pressed attribute changes to false).
+1) buttonup: These events fire only when a button is released (pressed attribute changes to false).
 
-2) buttondown: These events fire only when a button is released (pressed attribute changes to true).
+2) buttondown: These events fire only when a button is pressed (pressed attribute changes to true).
 
 If multiple input frames have been received since the last time the event listener was invoked, then the event listener is invoked only once with the most recent data received from the device. The getIntermediateEvents method returns the list of event objects representing the intermediate events that were not dispatched. An application only needs to subscribe to the types of events it is interested in handling.
 
