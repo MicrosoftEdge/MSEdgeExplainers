@@ -4,6 +4,7 @@
 
 - Sneha Agarwal (https://github.com/snehagarwal_microsoft)
 - Steve Becker (https://github.com/SteveBeckerMSFT)
+- Gabriel Brito (https://github.com/gabrielsanbrito)
 
 ## Participate
 - [Issue tracker]
@@ -19,17 +20,18 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-The current Gamepad API relies on continuous polling to detect input changes, which can lead to input latency and increased CPU usage. This proposal introduces a more efficient approach that combines event-driven input handling for button presses and releases with frame-based state consolidation, where a single event encapsulates all gamepad state changes that occur within an input frame.
+The current Gamepad API relies on continuous polling to detect input changes, which can lead to input latency and increased CPU usage. This proposal suggests using a single event API that is fired as soon as an input change (button and axis) is detected. If multiple chnages happen in a rapid succession, each change triggers a separate event instead of merging these changes in to a single event.
 
-- Event-Driven Input Handling: Immediate events (buttondown, buttonup) fire when discrete inputs like button presses or releases occur.
+This proposal builds upon earlier work by Chromium developers while refining the hybrid model for improved performance, [Original Proposal](https://docs.google.com/document/d/1rnQ1gU0iwPXbO7OvKS6KO9gyfpSdSQvKhK9_OkzUuKE/edit?pli=1&tab=t.0)
 
-- Frame-Based Consolidation: gamepadchange event encapsulates all the gamepad state changes that occurred within an input frame, preventing event spam.
-
-This proposal builds upon earlier work by Chromium developers while refining the hybrid model for improved performance.
 
 ## User-Facing Problem
 
-The Gamepad API does not natively support event-driven input handling, and applications must rely only on continuous polling for updates. This polling-based approach introduces input latency because scripts cannot sync their polling with the arrival of new input, leading to a delay between input detection and handling. If an application polls at a regular interval, the average added latency is half the polling interval. For example, polling at 60Hz results in a latency of about 8.33 milliseconds. While decreasing the polling interval can reduce this latency, it comes at the cost of increased CPU usage.
+The Gamepad API lacks event-driven input handling, forcing applications to rely on continuous polling. This introduces input latency, as scripts cannot synchronize with new input, and reducing the polling interval to mitigate latency increases CPU usage, impacting efficiency and battery life.
+
+This issue is particularly problematic for Xbox cloud gaming (xCloud), which streams Xbox games to a browser and depends on real-time gamepad input. To minimize latency,they currently poll every 4ms, but this high-frequency polling increases CPU usage and battery drain, especially on laptops and mobile devices. Additionally, since the Gamepad API operates only on the main UI thread, it can cause thread contention, particularly on low-end devices. In some cases, these constraints force them to reduce polling frequency, increasing input latency as a trade-off.
+
+A more efficient solution would be an event-driven Gamepad API, similar to mouse and keyboard events, enabling real-time responsiveness without the overhead of constant polling. 
 
 ### Goals
 
@@ -39,116 +41,116 @@ Reduce input latency by moving away from constant polling and introducing event-
 
 The existing polling mechanism will not be deprecated at all. We are just proposing an alternative way of handling input events and applications are free to select whichever they prefer.
 
-## User research
-
-Research and experimental implementations in Firefox suggest that event-driven input handling can significantly improve responsiveness and efficiency. Based on this research, the following challenges with prior implementations have been identified and addressed:
-
-- Inadequate handling of analog button states: Previous implementations only triggered events when the button's pressed state changed, without accounting for changes in the button's numeric value or "touched" state. The new proposal ensures that all relevant state changes, including value adjustments and touch states, are captured, providing more comprehensive input data.
-
-- Potential loss of gamepad state before event listeners execute: The gamepad state at the time the event was created may be lost, as the event includes a reference to the live Gamepad object, which may have updated its state before the event listener is invoked. For instance, if a button is quickly pressed and released, the Gamepad's button state may already indicate that the button is unpressed when the event listener is called. By combining polling with event-driven updates, the new approach mitigates this issue by ensuring the most recent state is captured, and events are triggered only when significant changes occur, reducing the risk of missing relevant input data.
-
-- Unintuitive event targets: Previous event systems fired on the global window object, which was counterintuitive. The windows object is not directly tied to a specific gamepad instance and since multiple gamepads can be connected, handleing events at the gamepad level will be more logical. Most input APIs like KeyboardEvent and MouseEvent dispatch events on the relevant input device not the global window. Gamepad events on window break this consistency. With the new proposal, events will be triggered directly on the Gamepad object that generated the event, providing a clearer and more developer-friendly experience.
-
-- Event spam from per-frame axis updates:When a separate event for each changed axis on each frame of input is fired, if events are received too rapidly then they will queue, introducing input latency. 
-
 ## Proposed Approach
-To address the challenges of handling gamepad input efficiently while ensuring real-time responsiveness, an approach is proposed to event-driven input handling along with frame-based state consolidation.This proposal would add four new events that fire on the Gamepad object:
+To address the challenges of input latency an approach is proposed to event-driven input handling. This proposal would add one new event that fires on the Gamepad object:
 
-1) buttonup: These events fire only when a button is pressed (pressed attribute changes to false).
+rawgamepadinputchange event fires on the Gamepad object and delivers a snapshot of all gamepad input changes (axes and buttons) that occurred since the last event.
 
-2) buttondown: These events fire only when a button is released (pressed attribute changes to true).
+- axesChanged and buttonsChanged contain the indices of all axes and buttons whose value changed since last input.
 
-If multiple input frames have been received since the last time the event listener was invoked then the event listener is invoked only once with the most recent data received from the device. The getIntermediateEvents method returns the list of event objects representing the intermediate events that were not dispatched. An application only needs to subscribe to the types of events it is interested in handling.
+- buttonsPressed and buttonsReleased include indices of buttons whose pressed state changed (i.e., transitioned to or from a pressed state) since last input.
 
-```js
-// Example Event Code
+- The gamepadSnapshot provides the full current state of the gamepad, including button states, axis values, and metadata like ID, index, and timestamp.
 
-// When a button is pressed.
-buttondown {
-  "type": "buttondown",
-  "gamepadIndex": 0,
-  "buttonIndex": 2,
-  "buttonSnapshot": { "pressed": true, "touched": true, "value": 1 },
-  "gamepadTimestamp": 1234.567
-}
+- A new rawgamepadinputchange event is dispatched for every individual input state change, enabling latency-sensitive applications (such as game streaming) to respond immediately to input events, without relying on polling. These events are not delayed or coalesced, and reflect each change as it happens, offering precise, real-time responsiveness.
 
-// When a button is released.
-buttonup {
-  "type": "buttonup",
-  "gamepadIndex": 0,
-  "buttonIndex": 2,
-  "buttonSnapshot": { "pressed": false, "touched": false, "value": 0 },
-  "gamepadTimestamp": 1234.567
-}
-
-```
-```
-// Proposed IDL for GamepadButtonEvent
-
-interface GamepadButtonEvent : Event {
-    readonly attribute long gamepadIndex;
-    readonly attribute long buttonIndex;
-    readonly attribute GamepadButton buttonSnapshot;
-    readonly attribute DOMHighResTimeStamp gamepadTimestamp;
-
-    sequence<GamepadButtonEvent> getIntermediateEvents();
-};
-
-```
-3) gamepadchange event: Will also fire on the Gamepad object, and will include the snapshot of all the changes (buttons and axes) that happened within that input frame. The axesChange and buttonsChanged arrays contain indices of the axes and buttons for which the value attribute changed in the input frame, and the buttonsPressed and buttonsReleased arrays contain indices of buttons for which the pressed attribute changed in the input frame.
-
-The getCoalescedEvents() method is used to return a sequence of events that have been coalesced (combined) together. 
-
-How it woriks: 
-To avoid firing too many events in quick succession for performance issues, the browser may choose to delay firing the gamepadchange event. When this happens, the browser adds the event to an internal queue.
-
-Before firing a buttondown or buttonup event (indicating a button has been pressed or released) or before running animation callbacks (e.g., requestAnimationFrame), the event queue is flushed. This means that all the events that have been delayed will be combined into one single event, representing the union of all changes up to that point.
-
-The final, combined gamepadchange event represents the combined state of the gamepad from all the events that were delayed and coalesced. When this event is dispatched, it contains all the changes that occurred during the delayed period.
-
-4) rawgamepadchange event: This event is proposed for applications that need to consume each gamepad change as soon as it occurs. The rawgamepadchange event carries the same information as gamepadchange but is never delayed or coalesced.
+- This design is especially beneficial for scenarios like cloud gaming, rhythm games (guitar hero), or real-time multiplayer controls where timely input processing is critical.
 
 ```js
-// Example gamepadchange Event:
-gamepadchange {
-  type: "gamepadchange",
-  gamepadSnapshot: Gamepad {id: "Example gamepad", index: 0, …},
-  axesChanged: [0, 1, 2, 3],
+// Example rawgamepadinputchange Event:
+rawgamepadinputchange {
+  type: "rawgamepadchange",
+  gamepadSnapshot: Gmepad {
+    id: "Xbox Wireless Controller (STANDARD GAMEPAD Vendor: 045e Product: 02fd)",
+    index: 0,
+    connected: true,
+    mapping: "standard",
+    buttons: [
+      // index 0 - button A
+      { pressed: true, touched: true, value: 1 },
+      // index 1 - button B
+      { pressed: false, touched: false, value: 0 },
+      ...
+    ],
+    // [left stick X, left stick Y, right stick X, right stick Y]
+    axes: [0.25, -0.5, 0.0, 0.0],
+    timestamp: 9123456.789
+  },
+  // Left stick X and Y moved
+  axesChanged: [0, 1],
+  // button index 0 (A) state changed
   buttonsChanged: [0],
+  // button index 0 (A) pressed
   buttonsPressed: [0],
+  // No button was released
   buttonsReleased: [],
-}
-
-rawgamepadchange {
-    type: "rawgamepadchange",
-  gamepadSnapshot: Gamepad {id: "Example gamepad", index: 0, …},
-  axesChanged: [0, 1, 2, 3],
-  buttonsChanged: [0],
-  buttonsPressed: [0],
-  buttonsReleased: [],
+  // High-res timestamp when change was detected
+  gamepadTimestamp: 9123456.789 
 }
 ```
+## Proposed IDL
 ```
-// Web IDL for the gamepadchange and rawgamepadchange event.
+[Exposed=Window, SecureContext]
+interface Gamepad {
+  // New attributes
+  attribute EventHandler onrawgamepadinputchange;
 
-interface GamepadChangeEvent : Event {
-  const DOMString type = "gamepadchange";
-  readonly attribute Gamepad gamepadSnapshot;
-  readonly attribute FrozenArray<long> axesChanged;
-  readonly attribute FrozenArray<long> buttonsChanged;
-  readonly attribute FrozenArray<long> buttonsPressed;
-  readonly attribute FrozenArray<long> buttonsReleased;
-
-  sequence<GamepadChangeEvent> getCoalescedEvents();
+  // Existing attributes
+  readonly attribute DOMString id;
+  readonly attribute long index;
+  readonly attribute boolean connected;
+  readonly attribute DOMHighResTimeStamp timestamp;
+  readonly attribute GamepadMappingType mapping;
+  readonly attribute FrozenArray<double> axes;
+  readonly attribute FrozenArray<GamepadButton> buttons;
 };
+```
+### RawGamepadInputChangeEvent interface IDL, used for rawgamepadinputchange.
+```
+[Exposed=Window, SecureContent]
+interface RawGamepadInputChangeEvent : Event {
+  constructor(DOMString type, optional RawGamepadInputChangeEventInit eventInitDict = {});
 
-interface RawGamepadChangeEvent : Event {
-  const DOMString type = "rawgamepadchange";
   readonly attribute Gamepad gamepadSnapshot;
-  readonly attribute FrozenArray<long> axesChanged;
-  readonly attribute FrozenArray<long> buttonsChanged;
-  readonly attribute FrozenArray<long> buttonsPressed;
-  readonly attribute FrozenArray<long> buttonsReleased;
+  readonly attribute FrozenArray<unsigned long> axesChanged;
+  readonly attribute FrozenArray<unsigned long> buttonsChanged;
+  readonly attribute FrozenArray<unsigned long> buttonsPressed;
+  readonly attribute FrozenArray<unsigned long> buttonsReleased;
+};
+```
+##  Developer code sample
+
+```JS
+// Listen for when a gamepad is connected
+window.ongamepadconnected = (connectEvent) => {
+  const gamepad = connectEvent.gamepad;
+
+  console.log(`Gamepad connected: ${gamepad.id} (index: ${gamepad.index})`);
+
+  // Listen for input changes on this gamepad.
+  gamepad.onrawgamepadinputchange = (changeEvent) => {
+    const snapshot = changeEvent.gamepadSnapshot;
+
+    for (const axisIndex of changeEvent.axesChanged) {
+      const axisValue = snapshot.axes[axisIndex];
+      console.log(`Axis ${axisIndex} on gamepad ${snapshot.index} changed to ${axisValue}`);
+    }
+
+    for (const buttonIndex of changeEvent.buttonsChanged) {
+      const buttonValue = snapshot.buttons[buttonIndex]?.value ?? 'unknown';
+      console.log(`Button ${buttonIndex} on gamepad ${snapshot.index} changed to ${buttonValue}`);
+    }
+  };
+
+  // Listen for button press.
+  gamepad.onbuttondown = (buttonEvent) => {
+    console.log(`Button ${buttonEvent.buttonIndex} on gamepad ${buttonEvent.gamepadIndex} pressed`);
+  };
+
+  // Listen for button release.
+  gamepad.onbuttonup = (buttonEvent) => {
+    console.log(`Button ${buttonEvent.buttonIndex} on gamepad ${buttonEvent.gamepadIndex} released`);
+  };
 };
 
 ```
@@ -158,14 +160,13 @@ interface RawGamepadChangeEvent : Event {
 None identified at this stage. The proposal builds upon the existing Gamepad API.
 
 ## Alternatives considered
+gamepadchange event: Similar to rawgamepadinputchange event but instead the getCoalescedEvents() method is used to return a sequence of events that have been coalesced (combined) together.
 
-### Alternative 1: axischange and buttonchange events
+How it works: To avoid firing too many events in quick succession for performance issues, the browser may choose to delay firing the gamepadchange event. When this happens, the browser adds the event to an internal queue.
 
-axischange event: that fires when a member of the Gamepad's axes array changes.
-buttonchange event: that fires when a GamepadButton's value attribute changes.
+Before firing a buttondown or buttonup event (indicating a button has been pressed or released) or before running animation callbacks (e.g., requestAnimationFrame), the event queue is flushed. This means that all the events that have been delayed will be combined into one single event, representing the union of all changes up to that point.
 
-- Event Overload: A gamepad with multiple axes and analog buttons may trigger many events within a single input frame, especially if several axis or button values are modified at the same time.
-- Sequential Input Processing: Applications may prefer to process related inputs simultaneously rather than one after the other. For example, both the X and Y axes of a thumbstick are usually handled together.
+The final, combined gamepadchange event represents the combined state of the gamepad from all the events that were delayed and coalesced. When this event is dispatched, it contains all the changes that occurred during the delayed period.
 
 ## Accessibility, Privacy, and Security Considerations
 To prevent abuse and fingerprinting:
@@ -176,9 +177,9 @@ Limit Persistent Tracking (fingerprinting): gamepadchange event will not expose 
 ## Stakeholder Feedback / Opposition
 Firefox: [#554 Gamepad API button and axis event](https://github.com/mozilla/standards-positions/issues/554)
 
-WebKit JS: Positive
-
 Safari: No Signal
+
+xCloud: Positive
 
 Web Developers: Positive
 
@@ -186,7 +187,7 @@ Web Developers: Positive
 
 Thanks to the following contributors and prior work that influenced this proposal:
 
-Firefox’s experimental implementation
+Firefox’s experimental implementation.
 
 Chromium Prior discussions on improving gamepad input handling.
 
