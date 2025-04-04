@@ -7,7 +7,7 @@
 
 ## Participate
 
-- For feedback about this explainer, open [an issue on the MicrosoftEdge/DevTools repo](https://github.com/MicrosoftEdge/DevTools/issues).
+- For feedback about this explainer, open [an issue on the MSEdgeExplainers repo](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=console-context.md).
 - The expected venue for this is the [Console spec](https://console.spec.whatwg.org/). For feedback about the spec changes, see [console.context()](https://github.com/whatwg/console/issues/193) on the spec's repo.
 
 ## Table of Contents
