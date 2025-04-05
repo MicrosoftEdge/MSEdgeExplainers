@@ -20,16 +20,16 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-The current Gamepad API relies on continuous polling to detect input changes, which can lead to input latency and increased CPU usage. This proposal suggests using a single event API that is fired as soon as an input change (button and axis) is detected. If multiple chnages happen in a rapid succession, each change triggers a separate event instead of merging these changes in to a single event.
+The current Gamepad API relies on continuous polling to detect input changes, which can lead to input latency and increased CPU usage. This proposal suggests using a single event API that is fired as soon as an input change (button and axis) is detected. If multiple changes happen in a rapid succession, each change triggers a separate event instead of merging these changes in to a single event.
 
-This proposal builds upon earlier work by Chromium developers while refining the hybrid model for improved performance, [Original Proposal](https://docs.google.com/document/d/1rnQ1gU0iwPXbO7OvKS6KO9gyfpSdSQvKhK9_OkzUuKE/edit?pli=1&tab=t.0)
+This proposal builds upon earlier work by Chromium developers for improved performance, [Original Proposal](https://docs.google.com/document/d/1rnQ1gU0iwPXbO7OvKS6KO9gyfpSdSQvKhK9_OkzUuKE/edit?pli=1&tab=t.0)
 
 
 ## User-Facing Problem
 
-The Gamepad API lacks event-driven input handling, forcing applications to rely on continuous polling. This introduces input latency, as scripts cannot synchronize with new input, and reducing the polling interval to mitigate latency increases CPU usage, impacting efficiency and battery life.
+The Gamepad API lacks event-driven input handling, forcing applications to rely on continuous polling to query for changes in gamepad input. The continuous polling introduces input latency, as scripts cannot synchronize with new input fast enough. If the script reduces the polling interval to mitigate input latency, it increases CPU usage, impacting efficiency and battery life of the device.
 
-This issue is particularly problematic for Xbox cloud gaming (xCloud), which streams Xbox games to a browser and depends on real-time gamepad input. To minimize latency,they currently poll every 4ms, but this high-frequency polling increases CPU usage and battery drain, especially on laptops and mobile devices. Additionally, since the Gamepad API operates only on the main UI thread, it can cause thread contention, particularly on low-end devices. In some cases, these constraints force them to reduce polling frequency, increasing input latency as a trade-off.
+This issue is particularly problematic for Xbox cloud gaming (xCloud), which streams Xbox games to a browser and depends on real-time gamepad input. To minimize latency, they currently poll every 4ms, but this high-frequency polling increases CPU usage and battery drain, especially on laptops and mobile devices. Additionally, since the Gamepad API is only supported on the main UI thread, it causes thread contention, particularly on low-end devices. In some cases, these constraints force them to reduce polling frequency, increasing input latency as a trade-off.
 
 A more efficient solution would be an event-driven Gamepad API, similar to mouse and keyboard events, enabling real-time responsiveness without the overhead of constant polling. 
 
@@ -39,7 +39,7 @@ Reduce input latency by moving away from constant polling and introducing event-
 
 ### Non-goals
 
-The existing polling mechanism will not be deprecated at all. We are just proposing an alternative way of handling input events and applications are free to select whichever they prefer.
+The existing polling mechanism will not be deprecated. We are just proposing an alternative way of handling input events and applications are free to select whichever they prefer.
 
 ## Proposed Approach
 To address the challenges of input latency an approach is proposed to event-driven input handling. This proposal would add one new event that fires on the Gamepad object:
@@ -76,7 +76,7 @@ rawgamepadinputchange {
     axes: [0.25, -0.5, 0.0, 0.0],
     timestamp: 9123456.789
   },
-  // Left stick X and Y moved
+  // Left stick X and Y moved since last event.
   axesChanged: [0, 1],
   // button index 0 (A) state changed
   buttonsChanged: [0],
@@ -113,9 +113,9 @@ interface RawGamepadInputChangeEvent : Event {
 
   readonly attribute Gamepad gamepadSnapshot;
   readonly attribute FrozenArray<unsigned long> axesChanged;
-  readonly attribute FrozenArray<unsigned long> buttonsChanged;
+  readonly attribute FrozenArray<unsigned long> buttonsValueChanged;
   readonly attribute FrozenArray<unsigned long> buttonsPressed;
-  readonly attribute FrozenArray<unsigned long> buttonsReleased;
+  readonly attribute FrozenArray<unsigned long> buttonsTouched;
 };
 ```
 ##  Developer code sample
@@ -123,7 +123,10 @@ interface RawGamepadInputChangeEvent : Event {
 ```JS
 // Listen for when a gamepad is connected
 window.ongamepadconnected = (connectEvent) => {
-  const gamepad = connectEvent.gamepad;
+
+  const connectedGamepads = navigator.getGamepads();
+
+  const gamepad = connectedGamepads[connectEvent.gamepad.index];
 
   console.log(`Gamepad connected: ${gamepad.id} (index: ${gamepad.index})`);
 
@@ -136,20 +139,29 @@ window.ongamepadconnected = (connectEvent) => {
       console.log(`Axis ${axisIndex} on gamepad ${snapshot.index} changed to ${axisValue}`);
     }
 
-    for (const buttonIndex of changeEvent.buttonsChanged) {
-      const buttonValue = snapshot.buttons[buttonIndex]?.value ?? 'unknown';
-      console.log(`Button ${buttonIndex} on gamepad ${snapshot.index} changed to ${buttonValue}`);
+    // Analog buttons (ex: triggers)
+    for (let buttonIndex of changeEvent.buttonsValueChanged) {
+      const buttonValue = changeEvent.gamepadSnapshot.buttons[buttonIndex].value;
+      console.log('button ' + buttonIndex +
+                  ' on gamepad ' + changeEvent.gamepadSnapshot.index +
+                  ' changed to value ' + buttonValue);
     }
-  };
 
-  // Listen for button press.
-  gamepad.onbuttondown = (buttonEvent) => {
-    console.log(`Button ${buttonEvent.buttonIndex} on gamepad ${buttonEvent.gamepadIndex} pressed`);
-  };
+    // Binary buttons pressed
+    for (let buttonIndex of changeEvent.buttonsPressed) {
+      const buttonPressed = changeEvent.gamepadSnapshot.buttons[buttonIndex].pressed;
+      console.log('button ' + buttonIndex +
+                  ' on gamepad ' + changeEvent.gamepadSnapshot.index +
+                  ' changed pressed to ' + buttonPressed);
+    }
 
-  // Listen for button release.
-  gamepad.onbuttonup = (buttonEvent) => {
-    console.log(`Button ${buttonEvent.buttonIndex} on gamepad ${buttonEvent.gamepadIndex} released`);
+    // Buttons touched
+    for (let buttonIndex of changeEvent.buttonsTouched) {
+      const buttonTouched = changeEvent.gamepadSnapshot.buttons[buttonIndex].touched;
+      console.log('button ' + buttonIndex +
+                  ' on gamepad ' + changeEvent.gamepadSnapshot.index +
+                  ' changed touched to ' + buttonTouched);
+    }
   };
 };
 
@@ -164,7 +176,7 @@ gamepadchange event: Similar to rawgamepadinputchange event but instead the getC
 
 How it works: To avoid firing too many events in quick succession for performance issues, the browser may choose to delay firing the gamepadchange event. When this happens, the browser adds the event to an internal queue.
 
-Before firing a buttondown or buttonup event (indicating a button has been pressed or released) or before running animation callbacks (e.g., requestAnimationFrame), the event queue is flushed. This means that all the events that have been delayed will be combined into one single event, representing the union of all changes up to that point.
+Before running animation callbacks (e.g., requestAnimationFrame), the event queue is flushed. This means that all the events that have been delayed will be combined into one single event, representing the union of all changes up to that point.
 
 The final, combined gamepadchange event represents the combined state of the gamepad from all the events that were delayed and coalesced. When this event is dispatched, it contains all the changes that occurred during the delayed period.
 
