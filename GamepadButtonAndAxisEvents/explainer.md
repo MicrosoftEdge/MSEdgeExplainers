@@ -67,9 +67,11 @@ rawgamepadinputchange {
     mapping: "standard",
     buttons: [
       // index 0 - button A
-      { pressed: true, touched: true, value: 1 },
+      { pressed: true, touched: false, value: 1.0 },
       // index 1 - button B
-      { pressed: false, touched: false, value: 0 },
+      { pressed: false, touched: true, value: 0.0 },
+      // index 2 - analog button
+      { pressed: false, touched: false, value: 0.5 },
       ...
     ],
     // [left stick X, left stick Y, right stick X, right stick Y]
@@ -78,12 +80,12 @@ rawgamepadinputchange {
   },
   // Left stick X and Y moved since last event.
   axesChanged: [0, 1],
-  // button index 0 (A) state changed
-  buttonsChanged: [0],
-  // button index 0 (A) pressed
+  // button index 0 was pressed, button index 2 value changed
+  buttonsValueChanged: [0, 2],
+  // button index 0 pressed
   buttonsPressed: [0],
-  // No button was released
-  buttonsReleased: [],
+  // button index 1 was touched
+  buttonsTouched: [1],
   // High-res timestamp when change was detected
   gamepadTimestamp: 9123456.789 
 }
