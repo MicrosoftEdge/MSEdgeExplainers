@@ -60,7 +60,7 @@ rawgamepadinputchange event fires on the Gamepad object and delivers a snapshot 
 // Example rawgamepadinputchange Event:
 rawgamepadinputchange {
   type: "rawgamepadchange",
-  gamepadSnapshot: Gmepad {
+  gamepadSnapshot: Gamepad {
     id: "Xbox Wireless Controller (STANDARD GAMEPAD Vendor: 045e Product: 02fd)",
     index: 0,
     connected: true,
