@@ -4,6 +4,10 @@
 
 <guohuideng@microsoft.com> or [guohuideng2024](https://github.com/guohuideng2024)
 
+## Participate
+
+Please join the discussion at: https://github.com/w3c/resource-timing/issues/263
+
 ## References & acknowledgements
 
 yashjoshimail@gmail.com put up [4 CLs](https://chromium-review.googlesource.com/q/owner:yashjoshimail@gmail.com) (wpt tests, and implementation for the cases where the initiators are html and javascript) and a [design doc](https://docs.google.com/document/d/1ODMUQP9ua-0plxe0XhDds6aPCe_paZS6Cz1h1wdYiKU/edit?tab=t.0) . More discussion can be found [here](https://github.com/w3c/resource-timing/issues/263) and [here](https://github.com/w3c/resource-timing/issues/380).
@@ -43,16 +47,24 @@ Then we conclude that resource "apple" triggered the fetch of the resource "oran
 ## Missing `initiator info` values
 An empty `initiatorUrl` indicates the `initiator info` is missing. There are a number of possibilities discussed below.
 
-### `initiator` may not exist.
+### 1. `initiator` may not exist.
 A main page can be loaded according to the user navigation. For the main page, `initiator` doesn't exist.
 
-### Resources may be cached.
-Cached resources appear in `PerformanceResourceTiming` too. Such resources are not part of the resource dependency tree, and they are not relevant to the content delivery optimization.
+### 2. Resources may not be downloaded from network.
+Resources can be cached, or handled by service workers, instead of being downloaded from network. They still appear in `PerformanceResourceTiming`. Such resources are not part of the resource dependency tree, and they are not relevant to the content delivery optimization.
 
-It's easier if the `inititorUrl` is empty for cached resources: when constructing the dependency tree, only the `PerformanceResourceTiming` entries with valid `initiator info` are considered; and there is no need to filter out cached resources.
+**`initiatorUrl` is empty unless the resource is actually downloaded from network.**
 
-### UA only partially implements the `initiator Info`.
-When the `initiator info` is missing for some resources, the partial resource dependency information is still useful. Therefore, a UA can release a particial `initiator info` implementation and make improvements later.
+There are a number of advantages to this approach.
+
+- It's easier to consume the output to construct the resource dependency tree: Only the `PerformanceResourceTiming` entries with valid `initiator info` are considered. No extra filter is needed.
+
+- It avoids overhead when the resources are loaded fast.
+
+- It simplifies implementation.
+
+### 3. UA only partially implements the `initiator Info`.
+When the `initiator info` is missing for some resources, the partial resource dependency information is still useful. Therefore, a UA can release a partial `initiator info` implementation and make improvements later.
 
 
 ## Alternatives considered

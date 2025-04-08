@@ -54,6 +54,7 @@ We propose adding a new `base_material` member to the manifest file, which hints
 - `translucent-low`: the frame of the installed web app is of a translucent material. This is a softened effect that prevents full visibility.
 - `transparent-high`: This material allows the background to pass through with less significant scattering, providing a clearer, less distorted view than `translucent-low`.
 
+
 > **NOTE**:
 > The way a UA maps the values to the available platform materials is completely up to the implementation. Different platforms have different number of materials and this explainer aims to provide an abstraction via an offering of a limited set of materials available for web apps.
 
