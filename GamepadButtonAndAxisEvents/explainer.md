@@ -183,8 +183,7 @@ Before running animation callbacks (e.g., requestAnimationFrame), the event queu
 The final, combined gamepadchange event represents the combined state of the gamepad from all the events that were delayed and coalesced. When this event is dispatched, it contains all the changes that occurred during the delayed period.
 
 ## Accessibility, Privacy, and Security Considerations
-To prevent abuse and fingerprinting:
-User Gesture Required:  Gamepad events won’t start firing until a user interacts with the gamepad (e.g., pressing a button). [Gamepad user gesture](https://www.w3.org/TR/gamepad/#dfn-gamepad-user-gesture)
+To prevent abuse and fingerprinting, a ["gamepad user gesture"](https://www.w3.org/TR/gamepad/#dfn-gamepad-user-gesture) will be required before `RawGamepadInputChange` events start firing (e.g., pressing a button).
 
 Limit Persistent Tracking (fingerprinting): gamepadchange event will not expose device-specific identifiers. By default, no gamepad state is exposed to the tab even when gamepads are connected. [Fingerprinting in Web](https://www.w3.org/TR/fingerprinting-guidance/)
 
