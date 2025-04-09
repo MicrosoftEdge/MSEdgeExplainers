@@ -42,7 +42,7 @@ Reduce input latency by moving away from constant polling and introducing event-
 The existing polling mechanism will not be deprecated. We are just proposing an alternative way of handling input events and applications are free to select whichever they prefer.
 
 ## Proposed Approach
-To address the challenges of input latency an approach is proposed to event-driven input handling. This proposal would add one new event that fires on the Gamepad object:
+To address the challenges of input latency an approach is proposed to event-driven input handling. This proposal would add one new event that fires on the [Gamepad](https://w3c.github.io/gamepad/#dom-gamepad) object:
 
 rawgamepadinputchange event fires on the Gamepad object and delivers a snapshot of all gamepad input changes (axes and buttons) that occurred since the last event.
 
