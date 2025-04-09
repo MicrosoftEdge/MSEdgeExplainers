@@ -27,7 +27,7 @@ This proposal builds upon earlier work by Chromium developers for improved perfo
 
 ## User-Facing Problem
 
-The Gamepad API lacks event-driven input handling, forcing applications to rely on continuous polling to query for changes in gamepad input. The continuous polling introduces input latency, as scripts cannot synchronize with new input fast enough. If the script reduces the polling interval to mitigate input latency, it increases CPU usage, impacting efficiency and battery life of the device.
+The Gamepad API lacks event-driven input handling, forcing applications to rely on continuous polling to query for changes in gamepad input. The continuous polling introduces input latency, as scripts cannot synchronize with new input fast enough. If the script increases the polling frequency to mitigate input latency, it increases CPU usage, impacting efficiency and battery life of the device.
 
 This issue is particularly problematic for cloud gaming platforms that stream games to a browser and rely on real-time gamepad input. For instance, to minimize latency, they often poll as frequently as every 4ms, but this high-frequency polling increases CPU usage and battery drain, especially on laptops and mobile devices. Additionally, because the Gamepad API is only supported on the main UI thread, it can cause thread contention—particularly on low-end devices. In some cases, these constraints force developers to reduce polling frequency, increasing input latency as a trade-off.
 
@@ -42,7 +42,7 @@ Reduce input latency by moving away from constant polling and introducing event-
 The existing polling mechanism will not be deprecated. We are just proposing an alternative way of handling input events and applications are free to select whichever they prefer.
 
 ## Proposed Approach
-To address the challenges of input latency, this proposal introduces a new event-driven mechanism: The `rawgamepadinputchange` event. This event fires directly on the Gamepad object and delivers real-time updates for each input change, eliminating the need for high-frequency polling. The `rawgamepadinputchange` event includes detailed information about the state of the gamepad at the moment of change:
+To address the challenges of input latency, this proposal introduces a new event-driven mechanism: The `rawgamepadinputchange` event. This event fires directly on the [Gamepad](https://w3c.github.io/gamepad/#dom-gamepad) object and delivers real-time updates for each input change, eliminating the need for high-frequency polling. The `rawgamepadinputchange` event includes detailed information about the state of the gamepad at the moment of change:
 
 - `axesChanged` and `buttonsChanged`: Arrays of indices indicating which axes or button values changed since the last event.
 
@@ -179,8 +179,7 @@ Before running animation callbacks (e.g., requestAnimationFrame), the event queu
 The final, combined gamepadchange event represents the combined state of the gamepad from all the events that were delayed and coalesced. When this event is dispatched, it contains all the changes that occurred during the delayed period.
 
 ## Accessibility, Privacy, and Security Considerations
-To prevent abuse and fingerprinting:
-User Gesture Required:  Gamepad events won’t start firing until a user interacts with the gamepad (e.g., pressing a button). [Gamepad user gesture](https://www.w3.org/TR/gamepad/#dfn-gamepad-user-gesture)
+To prevent abuse and fingerprinting, a ["gamepad user gesture"](https://www.w3.org/TR/gamepad/#dfn-gamepad-user-gesture) will be required before `RawGamepadInputChange` events start firing (e.g., pressing a button).
 
 Limit Persistent Tracking (fingerprinting): `rawgamepadinputchange` event will not expose device-specific identifiers. By default, no gamepad state is exposed to the tab even when gamepads are connected. [Fingerprinting in Web](https://www.w3.org/TR/fingerprinting-guidance/)
 
