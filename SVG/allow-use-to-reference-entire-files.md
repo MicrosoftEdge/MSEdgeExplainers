@@ -34,8 +34,9 @@ Spec: [https://svgwg.org/svg2-draft/struct.html#UseElement](https://svgwg.org/sv
 The `use` element in SVG allows for the reuse of existing SVG elements by referencing them. This helps reduce the amount of code and makes it easier to manage and update SVG graphics. 
 
 ## 2. Problem Statement 
-The `use` element does not support referencing entire SVG files directly. It only allows referencing specific elements within an SVG file using an id attribute/fragment identifier. This limitation increases workload and maintenance overhead, as it requires manual editing, which is error-prone and can lead to inconsistencies when files are frequently updated. Additionally, it makes it cumbersome to reuse external SVG files, 
-as one had to hand edit them by adding id just so that they can refer them in their applications. ( Refer Section [Customer/Developer Feedback: Pain Points](#7-customerdeveloper-feedback-pain-points))  
+The `use` element does not support referencing entire SVG files directly. It only allows referencing specific elements within an SVG file using an id attribute/fragment identifier. This limitation creates significant friction for developers, as it requires manual modification of the source SVG files — adding id attributes or defining fragment identifiers — in order to use it. This manual process not only increases development and maintenance overhead but is also error-prone and can lead to inconsistencies, particularly in scenarios where SVG assets are frequently updated or sourced externally. This limitation breaks the common developer expectation of being able to reuse SVG assets out-of-the-box — especially when sourcing icons or illustrations from design systems, marketplaces, or third-party libraries. 
+
+Ultimately, the lack of support for referencing entire external SVG files using `use` reduces developer productivity, increases the risk of inconsistencies, and makes scalable asset management more challenging — particularly for complex graphics and large icon sets. ( Refer Section [Customer/Developer Feedback: Pain Points](#7-customerdeveloper-feedback-pain-points))  
 
 ## 3. Current Limitation
 
