@@ -27,7 +27,7 @@ This proposal builds upon earlier work by Chromium developers for improved perfo
 
 ## User-Facing Problem
 
-The Gamepad API lacks event-driven input handling, forcing applications to rely on continuous polling to query for changes in gamepad input. The continuous polling introduces input latency, as scripts cannot synchronize with new input fast enough. If the script reduces the polling interval to mitigate input latency, it increases CPU usage, impacting efficiency and battery life of the device.
+The Gamepad API lacks event-driven input handling, forcing applications to rely on continuous polling to query for changes in gamepad input. The continuous polling introduces input latency, as scripts cannot synchronize with new input fast enough. If the script increases the polling frequency to mitigate input latency, it increases CPU usage, impacting efficiency and battery life of the device.
 
 This issue is particularly problematic for Xbox cloud gaming (xCloud), which streams Xbox games to a browser and depends on real-time gamepad input. To minimize latency, they currently poll every 4ms, but this high-frequency polling increases CPU usage and battery drain, especially on laptops and mobile devices. Additionally, since the Gamepad API is only supported on the main UI thread, it causes thread contention, particularly on low-end devices. In some cases, these constraints force them to reduce polling frequency, increasing input latency as a trade-off.
 
