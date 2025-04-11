@@ -24,7 +24,7 @@ Spec: [https://svgwg.org/svg2-draft/struct.html#UseElement](https://svgwg.org/sv
 - [7. References & acknowledgements](#7-references--acknowledgements)
 
 ## 1. Introduction
-The `use` element in SVG allows for the reuse of existing SVG elements by referencing them, but currently browsers only support these being `id` references. We propose that browsers also support the [SVG2](https://svgwg.org/svg2-draft/struct.html#UseElement) capability of allowing a `use` reference to refer to an entire file, without `id`. This helps reduce the amount of code and makes it easier to manage and update SVG graphics.
+The `use` element in SVG allows for the reuse of existing SVG elements by referencing them, but currently browsers only support these being `id` references. We propose that browsers also support the [SVG2](https://svgwg.org/svg2-draft/struct.html#UseElement) capability of allowing a `use` reference to refer to an entire file, without `id`.
 
 ## 2. Problem Statement 
 The `use` element does not support referencing entire SVG files directly. It only allows referencing specific elements within an SVG file using an id attribute/fragment identifier. This limitation creates significant friction for developers, as it requires manual modification of the source SVG files — adding id attributes or defining fragment identifiers — in order to use it. This manual process not only increases development and maintenance overhead, but is also error-prone and can lead to inconsistencies, particularly in scenarios where SVG assets are frequently updated or sourced externally. This limitation breaks the common developer expectation of being able to reuse SVG assets out-of-the-box — especially when sourcing icons or illustrations from design systems, marketplaces, or third-party libraries. 
@@ -33,13 +33,11 @@ Ultimately, the lack of support for referencing entire external SVG files using 
 
 ## 3. Current Limitation
 
-To clone an SVG element with a `use` tag, you currently need to reference a specific element within the SVG file using a fragment identifier (an id with a hash #): : 
+To clone an SVG element with a `use` tag, you currently need to reference a specific element within the SVG file using a fragment identifier (an id with a hash #): 
 
 ```html
 <svg> 
-
   <use xlink:href="myshape.svg#icon"/>
-
 </svg> 
 ```
 
@@ -79,7 +77,7 @@ Then reference it:
 
 ```html
 <svg> 
-  <use xlink:href="myshape.svg#icon"></use> 
+  <use xlink:href="myshape.svg#icon"/>
 </svg> 
 ```
 
