@@ -4,6 +4,10 @@
 
 <guohuideng@microsoft.com> or [guohuideng2024](https://github.com/guohuideng2024)
 
+## Participate
+
+Please join the discussion at: https://github.com/w3c/resource-timing/issues/263
+
 ## References & acknowledgements
 
 yashjoshimail@gmail.com put up [4 CLs](https://chromium-review.googlesource.com/q/owner:yashjoshimail@gmail.com) (wpt tests, and implementation for the cases where the initiators are html and javascript) and a [design doc](https://docs.google.com/document/d/1ODMUQP9ua-0plxe0XhDds6aPCe_paZS6Cz1h1wdYiKU/edit?tab=t.0) . More discussion can be found [here](https://github.com/w3c/resource-timing/issues/263) and [here](https://github.com/w3c/resource-timing/issues/380).
