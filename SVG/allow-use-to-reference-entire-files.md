@@ -24,21 +24,21 @@ Spec: [https://svgwg.org/svg2-draft/struct.html#UseElement](https://svgwg.org/sv
 - [7. References & acknowledgements](#7-references--acknowledgements)
 
 ## 1. Introduction
-The `use` element in SVG allows for the reuse of existing SVG elements by referencing them. This helps reduce the amount of code and makes it easier to manage and update SVG graphics. 
+The `use` element in SVG allows for the reuse of existing SVG elements by referencing them, but currently browsers only support these being `id` references. We propose that browsers also support the [SVG2](https://svgwg.org/svg2-draft/struct.html#UseElement) capability of allowing a `use` reference to refer to an entire file, without `id`. This helps reduce the amount of code and makes it easier to manage and update SVG graphics.
 
 ## 2. Problem Statement 
-The `use` element does not support referencing entire SVG files directly. It only allows referencing specific elements within an SVG file using an id attribute/fragment identifier. This limitation creates significant friction for developers, as it requires manual modification of the source SVG files — adding id attributes or defining fragment identifiers — in order to use it. This manual process not only increases development and maintenance overhead but is also error-prone and can lead to inconsistencies, particularly in scenarios where SVG assets are frequently updated or sourced externally. This limitation breaks the common developer expectation of being able to reuse SVG assets out-of-the-box — especially when sourcing icons or illustrations from design systems, marketplaces, or third-party libraries. 
+The `use` element does not support referencing entire SVG files directly. It only allows referencing specific elements within an SVG file using an id attribute/fragment identifier. This limitation creates significant friction for developers, as it requires manual modification of the source SVG files — adding id attributes or defining fragment identifiers — in order to use it. This manual process not only increases development and maintenance overhead, but is also error-prone and can lead to inconsistencies, particularly in scenarios where SVG assets are frequently updated or sourced externally. This limitation breaks the common developer expectation of being able to reuse SVG assets out-of-the-box — especially when sourcing icons or illustrations from design systems, marketplaces, or third-party libraries. 
 
 Ultimately, the lack of support for referencing entire external SVG files using `use` reduces developer productivity, increases the risk of inconsistencies, and makes scalable asset management more challenging — particularly for complex graphics and large icon sets. ( Refer Section [Customer/Developer Feedback: Pain Points](#6-customerdeveloper-feedback-pain-points))  
 
 ## 3. Current Limitation
 
-To use the whole SVG with a `use` tag, you typically need to reference a specific element within the SVG file using a fragment identifier (an id with a hash #): 
+To clone an SVG element with a `use` tag, you currently need to reference a specific element within the SVG file using a fragment identifier (an id with a hash #): : 
 
 ```html
 <svg> 
 
-  <use xlink:href="myshape.svg#icon"></use> 
+  <use xlink:href="myshape.svg#icon"/>
 
 </svg> 
 ```
@@ -49,15 +49,13 @@ _myshape.svg_
 
 ```html
 <svg id="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0,0,512,512"> 
-
- <circle cx="256" cy="256" r="200" fill="red" /> 
-
+  <circle cx="256" cy="256" r="200"/> 
 </svg> 
 ```
 
 ## 4. Motivation and User Use Case
 
-The above [limitation](#3-current-limitation) introduces the below issues while using #id:
+The above [limitation](#3-current-limitation) introduces the below issues while using fragment identifier":
 
 ### 4.1 Manual Editing: 
 
@@ -65,9 +63,7 @@ The above [limitation](#3-current-limitation) introduces the below issues while 
 
 ```html
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0,0,512,512"> 
-
- <circle cx="256" cy="256" r="200" fill="red" /> 
-
+  <circle cx="256" cy="256" r="200"/> 
 </svg> 
 ```
 
@@ -75,9 +71,7 @@ To use this SVG with a <use> tag, you need to add an id:
 
 ```html
 <svg id="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0,0,512,512"> 
-
-  <circle cx="256" cy="256" r="200" fill="red" /> 
-
+  <circle cx="256" cy="256" r="200"/> 
 </svg> 
 ```
 
@@ -85,9 +79,7 @@ Then reference it:
 
 ```html
 <svg> 
-
   <use xlink:href="myshape.svg#icon"></use> 
-
 </svg> 
 ```
 
@@ -101,20 +93,20 @@ Then reference it:
 
 - **Maintenance Overhead:** Keeping track of id attributes and ensuring they are correctly referenced adds to the maintenance overhead. 
 
+Note: SVG `image` element currently supports referencing entire SVG files, much like this proposal for `use`.
+
 ## 5. Proposed Approach
 Allow the `use` element to reference entire SVG files without needing an id. This means we can reuse the whole SVG file like this: 
 
 ```html
 <svg width="100" height="100"> 
-
   <use href="icon.svg" /> 
-
 </svg>
 ``` 
 
-In above svg we now return the root svg element of `icon.svg` when the `use` element try to resolve its href target. That way the entire svg pointed by icon.svg will be rendered.
+In above SVG we now return the root SVG element of `icon.svg` when the `use` element try to resolve its `href` target. That way the entire SVG referenced by icon.svg will be rendered.
 
-Note that in the current code base if we use the above svg as is nothing will be rendered. As the `use` element is unable to resolve the target to render without the fragment identifier. 
+Note that in the current code base if we use the above SVG as-is nothing will be rendered. As the `use` element is unable to resolve the target to render without the fragment identifier. 
  
 
 ## 6. Customer/Developer Feedback: Pain Points  
@@ -150,3 +142,4 @@ Many thanks for valuable feedback and advice from:
 - Abhishek Singh
 - Daniel Clark
 - Ragvesh Sharma
+- Kurt Catti-Schmidt
