@@ -116,7 +116,7 @@ rawgamepadinputchange {
 ## Proposed IDL
 ```
 [Exposed=Window]
-interface Gamepad {
+interface Gamepad : EventTarget {
   // New attributes
   attribute EventHandler onrawgamepadinputchange;
 
