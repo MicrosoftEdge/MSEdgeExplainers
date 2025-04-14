@@ -91,7 +91,7 @@ Then reference it:
 
 - **Maintenance Overhead:** Keeping track of id attributes and ensuring they are correctly referenced adds to the maintenance overhead. 
 
-Note: SVG `image` element currently supports referencing entire SVG files, much like this proposal for `use`.
+Note: SVG `image` element currently supports referencing entire SVG files, much like this proposal for `use`. The API surface and behaviors between `image` and `use` are significantly different, leaving room for both versions.
 
 ## 5. Proposed Approach
 Allow the `use` element to reference entire SVG files without needing an id. This means we can reuse the whole SVG file like this: 
