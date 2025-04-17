@@ -23,7 +23,9 @@ It is not a goal of this proposal to allow embedders to arbitrarily control when
 
 ## Use Cases
 There are scenarios where a website might want to just not render an iframe. For example:
-- A website, in response to an user action, might decide to temporarily not show an iframe that is playing media. However, since it is not possible to mute it, the only option is for the website to remove the iframe completely from the DOM and recreate it from scratch when it should be visible again. Since the embedded iframe can also load many resources, the iframe recreation operation might make the web page slow and spend resources unnecessarily.
+-  Websites that toggle the visibility of 3rd-party content which, for user experience reasons, should not be allowed to play back audio while not visible. 
+   - Without this capability, these sites must completely unload the iframe to guarantee that audio stops and will not play again at some future point. This in turn results in an undesirable user experience when the iframe is made visible again: it must perform a fresh navigation which the user would need to wait for. Additionally, the unload-and-load action may result in the user losing unsaved data, e.g. form field entries.
+- A website which loads video advertisements and wants to guarantee the user doesn’t hear the ad when not visible.
 
 ## Proposed solution: media-playback-while-not-visible Permission Policy
 
@@ -258,6 +260,16 @@ Similarly to the [HTMLMediaElement.muted](https://html.spec.whatwg.org/multipage
 
 This alternative was not selected as the preferred one, because we think that pausing media playback is preferable to just muting it.
 
+The [Web Speech API](https://wicg.github.io/speech-api/) proposes a [SpeechSynthesis interface](https://wicg.github.io/speech-api/#tts-section). The latter interface allows websites to create text-to-speech output by calling [`window.speechSynthesis.speak`](https://wicg.github.io/speech-api/#dom-speechsynthesis-speak) with a [`SpeechSynthesisUtterance`](https://wicg.github.io/speech-api/#speechsynthesisutterance), which represents the text-to-be-said.
+
+For both scenarios, the iframe should listen for utterance errors when calling `window.speechSynthesis.speak()`. For scenario 1 it should fail with a [`"not-allowed" SpeechSynthesisErrorCode`](https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-not-allowed) SpeechSyntesis error; and, for scenario 2, it should fail with an [`"interrupted" SpeechSynthesisErrorCode`](https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-interrupted) error.
+
+## Accessibility, Privacy, and Security Considerations
+
+There is a possibility that the embedded could infer that the permission policy is in effect and it is being hidden. For example, a webpage could have both an HTMLVideoElement and an AudioContext playing audio simultaneously. If at some point they both get, respectively, paused and interrupted within a short time frame; then, the website could infer that an ancestor frame is applying the permission policy on it and that it has been hidden by one of the ancestors.
+
+Nevertheless, we believe that this would be very low impact, because a web page could make a similar observation by monitoring when it’s unloaded as well as via the [IntersectionObserver API].
+
 [AudioContext constructor]: https://webaudio.github.io/web-audio-api/#dom-audiocontext-audiocontext
 [allowed to play]: https://html.spec.whatwg.org/multipage/media.html#allowed-to-play
 [allowed to start]: https://webaudio.github.io/web-audio-api/#allowed-to-start
@@ -268,6 +280,7 @@ This alternative was not selected as the preferred one, because we think that pa
 [`"execution-while-out-of-viewport"`]: https://wicg.github.io/page-lifecycle/#execution-while-out-of-viewport
 [`"interrupted"`]: https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AudioContextInterruptedState/explainer.md
 [`"interrupted"` SpeechSynthesisErrorCode]: ttps://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-interrupted
+[IntersectionObserver API]: https://w3c.github.io/IntersectionObserver/#intersection-observer-interface
 [`"not-allowed"` SpeechSynthesisErrorCode]: https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-not-allowed
 [Page Lifecycle API]: https://wicg.github.io/page-lifecycle/#feature-policies
 [permission policy]: https://www.w3.org/TR/permissions-policy/
@@ -282,8 +295,3 @@ This alternative was not selected as the preferred one, because we think that pa
 [viewport]: https://www.w3.org/TR/CSS2/visuren.html#viewport
 [Web Speech API]: https://wicg.github.io/speech-api/
 [`window.speechSynthesis.speak`]: https://wicg.github.io/speech-api/#dom-speechsynthesis-speak
-
-
-The [Web Speech API](https://wicg.github.io/speech-api/) proposes a [SpeechSynthesis interface](https://wicg.github.io/speech-api/#tts-section). The latter interface allows websites to create text-to-speech output by calling [`window.speechSynthesis.speak`](https://wicg.github.io/speech-api/#dom-speechsynthesis-speak) with a [`SpeechSynthesisUtterance`](https://wicg.github.io/speech-api/#speechsynthesisutterance), which represents the text-to-be-said.
-
-For both scenarios, the iframe should listen for utterance errors when calling `window.speechSynthesis.speak()`. For scenario 1 it should fail with a [`"not-allowed" SpeechSynthesisErrorCode`](https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-not-allowed) SpeechSyntesis error; and, for scenario 2, it should fail with an [`"interrupted" SpeechSynthesisErrorCode`](https://wicg.github.io/speech-api/#dom-speechsynthesiserrorcode-interrupted) error.
