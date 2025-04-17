@@ -22,7 +22,6 @@ Propose a mechanism to allow embedder documents to limitedly control embedded if
 It is not a goal of this proposal to allow embedders to arbitrarily control when to play, pause, stop, resume, etc, the media playback of a rendered iframe.
 
 ## Use Cases
-There are scenarios where a website might want to just not render an iframe. For example:
 -  Websites that toggle the visibility of 3rd-party content which, for user experience reasons, should not be allowed to play back audio while not visible. 
    - Without this capability, these sites must completely unload the iframe to guarantee that audio stops and will not play again at some future point. This in turn results in an undesirable user experience when the iframe is made visible again: it must perform a fresh navigation which the user would need to wait for. Additionally, the unload-and-load action may result in the user losing unsaved data, e.g. form field entries.
 - A website which loads video advertisements and wants to guarantee the user doesn’t hear the ad when not visible.
