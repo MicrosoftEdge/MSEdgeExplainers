@@ -86,7 +86,7 @@ This will also import only this rules for "foo" - in this case, the `div { color
 
 Shadow DOM isolates styles, but fragment identifiers from the light DOM are global and referenceable from shadow DOM (but not vice versa).
 
-Combined with [Local References In <link> Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md), developers may define a set of styles for their compenents upfront,
+Combined with [Local References In <link> Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md), developers may define a set of styles for their components upfront,
 and then reference these styles declaratively from their component. By using inline styles instead of an external .css file, a Flash of Unstyled Content (FOUC) can be avoided in many cases.
 
 This example demonstates importing `@sheet` references from the light DOM into a Declarative Shadow DOM:
@@ -117,7 +117,7 @@ or imported from JavaScript:
 
 #### Specific Changes to HTML and CSS
 
-This proposal augments the HTML `<link>` tag by introducing he `sheet` attribute, which scopes the specified style reference to rules within an `@sheet` identifier.
+This proposal augments the HTML `<link>` tag by introducing the `sheet` attribute, which scopes the specified style reference to rules within an `@sheet` identifier.
 
 A separate proposal to support fragment identifiers to same-document `<style>` in the `href` attribute for `<link>` tags is described in [Local References In <link> Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md).
 
