@@ -167,8 +167,8 @@ instead of many copies.
 #### Specific Changes to HTML and CSS
 
 This proposal augments the HTML `<link>` tag by supporting fragment identifiers to
-same-document `<style>` tags are supported in the `href` attribute when the `rel`
-attribute is `stylesheet`.
+same-document `<style>` tags in the `href` attribute when the `rel` attribute is
+`stylesheet`.
 
 ## Considered alternatives
 
