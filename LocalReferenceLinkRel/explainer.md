@@ -86,26 +86,6 @@ to the `<link rel="inline-stylesheet" href="#inline_styles">` node's stylesheet
 applying (along with the `color: blue` rule applying via the `p` selector in
 that stylesheet).
 
-A new value for the `rel` attribute is used here to prevent legacy engines from
-performing an unnecessary fetch with this markup. The name `inline-stylesheet`
-is preliminary and open to discussion.
-
-### Linking to another `<link>` tag
-
-```html
-<link rel="stylesheet" href="foo.css" id="inline_styles" />
-<p>Outside Shadow DOM</p>
-<template shadowrootmode="open">
-  <link rel="inline-stylesheet" href="#inline_styles" />
-  <p>Inside Shadow DOM</p>
-</template>
-```
-
-Developers may want to link to styles pulled into another `<link>` tag. These
-`<link>` references may be internal files (via `inline-stylesheet`), or external
-files. Loop detection may be necessary for references to another
-`inline-stylesheet`.
-
 ### Scoping
 
 ```html
@@ -117,7 +97,7 @@ files. Loop detection may be necessary for references to another
   </style>
   <p>Inside Shadow DOM</p>
 </template>
-<link rel="stylesheet" href="foo.css" id="#inline_styles_from_shadow" />
+<link rel="stylesheet" href="#inline_styles_from_shadow" />
 <p>
   Outside Shadow DOM. Styles defined inside the Shadow Root are not applied, so
   this text is not blue.
@@ -126,6 +106,46 @@ files. Loop detection may be necessary for references to another
 
 Due to existing Shadow DOM scoping behaviors, `<style>` tags defined inside the
 Shadow DOM cannot be accessed from the Light DOM.
+
+This means that `<style>` tags defined within a Shadow DOM are only accessible from
+the shadow root where they are defined, as illustrated by the following examples:
+
+```html
+<template shadowrootmode="open">
+  <style id="inline_styles_from_shadow">
+    p {
+      color: blue;
+    }
+  </style>
+  <p>Inside Shadow DOM</p>
+    <template shadowrootmode="open">
+      <link rel="stylesheet" href="#inline_styles_from_shadow" />
+      <p>Inside Nested Shadow DOM</p>
+    </template>
+</template>
+<p>
+  Styles defined inside the parent Shadow Root are not applied, so "Inside Nested Shadow DOM" is not blue.
+</p>
+```
+
+```html
+<template shadowrootmode="open">
+  <style id="inline_styles_from_shadow">
+    p {
+      color: blue;
+    }
+  </style>
+  <p>Inside Shadow DOM</p>
+</template>
+<template shadowrootmode="open">
+  <link rel="stylesheet" href="#inline_styles_from_shadow" />
+  <p>Inside Sibling Shadow DOM</p>
+</template>
+
+<p>
+  Styles defined inside the sibling Shadow Root are not applied, so "Inside Sibling Shadow DOM" is not blue.
+</p>
+```
 
 ## Detailed design discussion
 
@@ -146,13 +166,9 @@ instead of many copies.
 
 #### Specific Changes to HTML and CSS
 
-This proposal augments the HTML `<link>` tag in two ways:
-
-1. A new value for the `<link>` tag's `rel` attribute to indicate a local
-   fragment. We are currently using the value `inline-stylesheet`, but this name
-   is open to suggestions.
-2. Fragment identifiers to same-document `<style>` tags are supported in the
-   `href` attribute when the `rel` attribute is `inline-stylesheet`.
+This proposal augments the HTML `<link>` tag by supporting fragment identifiers to
+same-document `<style>` tags are supported in the `href` attribute when the `rel`
+attribute is `stylesheet`.
 
 ## Considered alternatives
 
@@ -170,8 +186,6 @@ This proposal augments the HTML `<link>` tag in two ways:
 ## Open Issues
 
 1. "Deep Clone vs Reference" listed above is the biggest outstanding issue.
-2. The name `inline-stylesheet` can be refined (or revisited if it's not
-   necessary to define a new `rel` value).
 
 ## References & acknowledgements
 
