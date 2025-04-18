@@ -76,13 +76,13 @@ a `<style>` or `<link>` tag:
 </style>
 <p>Outside Shadow DOM</p>
 <template shadowrootmode="open">
-  <link rel="inline-stylesheet" href="#inline_styles" />
+  <link rel="stylesheet" href="#inline_styles" />
   <p>Inside Shadow DOM</p>
 </template>
 ```
 
 With this functionality, the text "Inside Shadow DOM" will by styled blue, due
-to the `<link rel="inline-stylesheet" href="#inline_styles">` node's stylesheet
+to the `<link rel="stylesheet" href="#inline_styles">` node's stylesheet
 applying (along with the `color: blue` rule applying via the `p` selector in
 that stylesheet).
 
