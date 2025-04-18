@@ -61,7 +61,7 @@ elements.
   <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">proposal</a>.
 - Modifications to Shadow DOM scoping behaviors. This proposal depends on
   existing Shadow DOM behavior as currently defined. Styles defined in a Shadow
-  DOM will remain inaccessible to the Light DOM.
+  DOM will remain inaccessible to the Light DOM and other Shadow DOMs.
 
 ## Proposal - Local References for Link Rel Tags
 
@@ -123,10 +123,11 @@ the shadow root where they are defined, as illustrated by the following examples
       <p>Inside Nested Shadow DOM</p>
     </template>
 </template>
+```
+
 <p>
   Styles defined inside the parent Shadow Root are not applied, so "Inside Nested Shadow DOM" is not blue.
 </p>
-```
 
 ```html
 <template shadowrootmode="open">
@@ -141,11 +142,11 @@ the shadow root where they are defined, as illustrated by the following examples
   <link rel="stylesheet" href="#inline_styles_from_shadow" />
   <p>Inside Sibling Shadow DOM</p>
 </template>
+```
 
 <p>
   Styles defined inside the sibling Shadow Root are not applied, so "Inside Sibling Shadow DOM" is not blue.
 </p>
-```
 
 ## Detailed design discussion
 
@@ -186,6 +187,8 @@ same-document `<style>` tags in the `href` attribute when the `rel` attribute is
 ## Open Issues
 
 1. "Deep Clone vs Reference" listed above is the biggest outstanding issue.
+
+2. Should there be a way for Shadow DOM roots to export style ID's for sharing?
 
 ## References & acknowledgements
 
