@@ -80,7 +80,7 @@ This will import only the rules for `foo` - in this case, the `div { color: red;
 <link rel="stylesheet" href="sheet.css" sheet="foo" />
 ```
 
-This will also import only this rules for "foo" - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
+This will also import only the rules for "foo" - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
 
 ### Importing a base set of inline styles into a Declarative Shadow DOM
 
@@ -121,7 +121,7 @@ This proposal augments the HTML `<link>` tag by introducing the `sheet` attribut
 
 A separate proposal to support fragment identifiers to same-document `<style>` in the `href` attribute for `<link>` tags is described in [Local References In <link> Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md).
 
-This proposal augments the CSS `@import` syntax by adding the `from` keyword, with comma-separated list of `@sheet` identifiers ( `@import foo from "sheet.css";`).
+This proposal augments the CSS `@import` syntax by adding the `from` keyword, with comma-separated list of `@sheet` identifiers ( `@import foo, bar from "sheet.css";`).
 
 The `@sheet` fragment syntax (`<link rel="stylesheet" href="sheet.css#foo" />`) that was agreed upon in https://lists.w3.org/Archives/Public/www-style/2023Apr/0004.html should be revisited with these new applications in mind, as it is not compatible with same-document `<style>` references.
 
@@ -190,7 +190,7 @@ import { bar } from 'sheet.css' with { type: 'css' }
 #### Interaction with CSSOM
 
 
-Named `@sheet` references augment the [existing](https://drafts.csswg.org/cssom/#stylesheet) `StyleSheet` interface with an optional `name` attribute reflecting the `@sheet` identifier:
+Named `@sheet` rules are a new type of `CSSGroupingRule` with a required `name` attribute reflecting the `@sheet` identifier:
 
 ```
 [Exposed=Window]
