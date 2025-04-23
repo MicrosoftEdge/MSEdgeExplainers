@@ -113,26 +113,15 @@ rawgamepadinputchange {
   buttonsPressed: [0],
   // button index 1 was touched.
   buttonsTouched: [1],
-  // High-res timestamp when change was detected.
-  gamepadTimestamp: 9123456.789 
 }
 ```
 ## Proposed IDL
 ```
 [Exposed=Window]
-interface Gamepad : EventTarget {
-  // New attributes
+partial interface Gamepad : EventTarget {
   attribute EventHandler onrawgamepadinputchange;
-
-  // Existing attributes
-  readonly attribute DOMString id;
-  readonly attribute long index;
-  readonly attribute boolean connected;
-  readonly attribute DOMHighResTimeStamp timestamp;
-  readonly attribute GamepadMappingType mapping;
-  readonly attribute FrozenArray<double> axes;
-  readonly attribute FrozenArray<GamepadButton> buttons;
 };
+
 ```
 ### `RawGamepadInputChangeEvent` interface IDL, used for `rawgamepadinputchange`.
 ```
