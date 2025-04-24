@@ -180,7 +180,7 @@ Both `extends` and `is` are supported in Firefox and Chromium-based browsers. Ho
 The `elementInternals.type` proposal addresses many of the limitations with `extends`/`is`, including allowing customized built-ins to support shadow DOM. The proposal also has support from the WHATWG and multiple browser vendors (including Safari) as noted by a WG resolution here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455.
 
 ## Questions of Interest
-If a declarative implementation is considered, how should it be done so it would align with the future creation of a declartive implementation for custom elements?
+If a declarative implementation is considered, how should it be done so it would [align with the future creation of a declarative implementation](https://github.com/openui/open-ui/issues/1088#issuecomment-2375184147) for custom elements?
 
 ## Stakeholder Feedback / Opposition
 
