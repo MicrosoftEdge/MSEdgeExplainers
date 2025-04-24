@@ -21,7 +21,7 @@ Here are some inspirational examples of how users may interact with highlighted 
  - When a user hovers over a misspelled word, the web app may display UI with suggested replacement text.
  - When a user clicks an annotation in a document, the web app may emphasize and scroll into view the corresponding annotation in a pane which lists all the annotations in the document.
 
-Currently, web developers who want to implement some sort of interaction with custom highlights need to use workarounds that are cumbersome to code and maintain and that potentially incur performance penalties.
+Currently, web developers who want to implement some sort of interaction with custom highlights need to use workarounds that are cumbersome to code, maintain, often involve directly editing the DOM with static ranges, and incurring performance penalties.
 
 ## Customer Problem Example
 
@@ -204,6 +204,10 @@ The API introduces no new security risks.
 
   ---
   [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/highlightsFromPoint) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=highlightsfrompoint.md)
+
+## Questions of Interest
+Is there a demand for the API to return the Range object in addition to the Highlight pseudo object?
+Are there performance issues regarding the "FromPoint" APIs synchronous implementations?
 
 ## Appendix
 
