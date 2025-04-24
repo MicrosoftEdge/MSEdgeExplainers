@@ -206,8 +206,8 @@ The API introduces no new security risks.
   [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/highlightsFromPoint) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=highlightsfrompoint.md)
 
 ## Questions of Interest
-Is there a demand for the API to return the Range object in addition to the Highlight pseudo object?
-Are there performance issues regarding the "FromPoint" APIs synchronous implementations?
+Is there a demand for the API to return the Range object in addition to the Highlight object?
+Are there performance issues regarding the "FromPoint" APIs (e.g. [caretPositionFromPoint](https://developer.mozilla.org/en-US/docs/Web/API/Document/caretPositionFromPoint))synchronous implementations?
 
 ## Appendix
 
