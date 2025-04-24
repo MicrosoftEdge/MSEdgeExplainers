@@ -12,6 +12,8 @@ Authors:
 
 This document proposes enhancements to Resource Timing API to enable developers to accurately map resource timings to specific fetch events. This addresses challenges in mapping resource timings in navigation scenarios involving service workers, multiple tabs, and navigation preloads.
 
+This proposal is adjacent to the [Resource Timing Initiator Info explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ResourceTimingInitiatorInfo/explainer.md), but it solves different problems. While the Initiator Info explainer focuses on providing additional context about what initiated a resource request, this proposal aims to establish a precise mapping between resource timings and fetch events.
+
 ## Goals
 The proposed changes in this document aim to provide web developers with the ability to map resource timings to fetch events easily and accurately. 
 
@@ -34,94 +36,8 @@ Tracking resource timing across multiple requests, whether from different browsi
 
 ## Proposed Solution
 
-### Add new `clientId` and `resultingClientId` field to the PerformanceResourceTiming (Option 1)
-
-To allow developers to identify the resource timings for a fetch event, we propose adding a new read-only `clientId` and `resultingClientId` fields to PerformanceResourceTiming interface. [FetchEvent](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/clientId) on the SW global scope gives info on the request along with [clientId](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/clientId) and [resultingClientId](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/resultingClientId) already which we want to associate it to PerformanceResourceTiming entry to help with mapping a resource timing back to the fetch. 
-
-```webidl
-interface PerformanceResourceTiming  {
-    readonly attribute DOMString clientId; 
-    readonly attribute DOMString resultingClientId; 
-};
-```
-
-`clientId`: The identifier of the client that initiated the request. This corresponds to the clientId property of the FetchEvent that handled the request. This will be empty for a navigation request.
-
-`resultingClientId`: The identifier of the resulting client. This corresponds to the resulting ClientId property of the FetchEvent, which may differ if the request results in a new client (e.g., navigation to a new document). This will be empty for a resource request.
-
-When querying the Performance API for a navigation entry, the payload of a performance.getEntriesByType("navigation") call would look like:
-```
-clientId: ""
-resultingClientId: "2dfa511d-2f0d-46b8-b173-2610dafbdc3f"
-```
-
-When querying the Performance API for a resource entry, the payload of a performance.getEntriesByType("resource") call would look like:
-```
-clientId: "2dfa511d-2f0d-46b8-b173-2610dafbdc3f"
-resultingClientId: ""
-```
-
-This proposal provides a consistent way to associate PerformanceResourceTiming entries with their initiating client or navigation by exposing existing clientId and resultingClientId fields from the Service Worker FetchEvent. While it does not offer a direct correlation to individual fetch requests or resolve cases where the same resource is requested multiple times from the same URL by one or multiple clients, it improves traceability of resource loads, enabling developers to measure Service Worker processing time, analyze navigation preload behavior, and optimize resource loading in multi-tab or multi-client scenarios. The scope of changes is limited to the PerformanceResourceTiming specification, leveraging existing identifiers without introducing new user tracking vectors or increasing fingerprinting risks.
-
-#### Example: Using `resultingClientId` for Navigation preload requests for multi-tab scenario
-The following example demonstrates how a web application can correlate navigation timing observed in the main window with the timing of the response as seen by the Service Worker. It captures when the first byte (TTFB) of the response was received in both contexts and aligns their timelines using performance.timeOrigin, leveraging the resultingClientId property for precise matching. 
-
-By aligning performance.timeOrigin between the Service Worker and the main window, we can accurately determine: 
-* When the Service Worker received the first byte of the response 
-* How long it took for that byte to be delivered to the main thread 
-```js
-// Service Worker(sw.js)
-self.addEventListener("fetch", (event) => { 
-  if (event.request.mode === "navigate") { 
-    event.respondWith((async () => { 
-      let response = await event.preloadResponse; 
-      if (!response) { 
-        response = await fetch(event.request); 
-      } 
-
-      // Find timing info for the preloaded navigation using resultingClientId 
-      const entries = self.performance.getEntriesByType("navigation"); 
-      const timing = entries.find(e => e.resultingClientId === event.resultingClientId); 
-      const responseStart = timing?.responseStart ?? self.performance.now(); 
-      const client = await self.clients.get(event. resultingClientId); 
-
-      client?.postMessage({ 
-        type: "SW_TIMING", 
-        responseStart, 
-        timeOrigin: self.performance.timeOrigin 
-      });
-
-      return response; 
-    })()); 
-  } 
-}); 
-```
-
-```js
-// Main Window(main.js)
-navigator.serviceWorker.onmessage = (event) => { 
-  if (event.data?.type === "SW_TIMING") { 
-    const navEntry = performance.getEntriesByType("navigation")[0]; 
-    const adjustedSWResponseStart = event.data.responseStart - (event.data.timeOrigin - performance.timeOrigin); 
-
-    console.log("Client responseStart:", navEntry.responseStart); 
-    console.log("SW responseStart (aligned):", adjustedSWResponseStart); 
-    console.log("TTFB delta (client - SW):", navEntry.responseStart - adjustedSWResponseStart); 
-  } 
-}; 
-```
-
-Example output:
-```
-Client responseStart: 230.88 
-SW responseStart (aligned): 215.50 
-TTFB delta (client - SW): 15.38 ms 
-```
-
-## Alternative Considered Solutions
-
-### Add new `responseId` field to the PerformanceResourceTiming (Option 2)
-Another considered proposal is to add a new read-only responseId field to the Response interface of the Fetch API, as well to the PerformanceResourceTiming interface. The user agent would be responsible for generating a unique identifier for each response it creates. This responseId could then be used to link a fetch Response to its corresponding resource timing data.
+### Add new `responseId` field to the PerformanceResourceTiming (Option 1)
+Add a new read-only responseId field to the Response interface of the Fetch API, as well to the PerformanceResourceTiming interface. The user agent would be responsible for generating a unique identifier for each response it creates. This responseId could then be used to link a fetch Response to its corresponding resource timing data.
 
 ```webidl
 interface Response  { 
@@ -237,7 +153,9 @@ fetchAndIdentify("/data.json");
 Even though all three fetches use the same URL, responseId ensures that each one maps to its own unique resource timing entry, eliminating ambiguity. 
 This is essential for tracking retries, performance audits, or analytics when multiple requests to the same resource occur within a session or across tabs.
 
-### Add `requestId` to the Fetch API (Option 3)
+## Alternative Considered Solutions
+
+### Add `requestId` to the Fetch API (Option 2)
 One considered proposal is to add optional requestId to the [RequestInit](https://fetch.spec.whatwg.org/#requestinit) dictionary of [Fetch method](https://fetch.spec.whatwg.org/#fetch-method) allowing developers to specify a unique identifier for a given fetch request to tag a specific request for tracing, debugging, or correlation across systems.
 
 ```webidl
@@ -439,21 +357,105 @@ fetchAndTrack("/data.json");
 
 When the same resource is fetched multiple times, all entries share the same name (URL), making them hard to distinguish. Using requestId ensures each fetch has a unique link to its performance entry, enabling precise tracking and analysis. 
 
+### Add new `clientId` and `resultingClientId` field to the PerformanceResourceTiming (Option 3)
+
+Another considered proposal is to add a new read-only `clientId` and `resultingClientId` fields to PerformanceResourceTiming interface. [FetchEvent](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/clientId) on the SW global scope gives info on the request along with [clientId](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/clientId) and [resultingClientId](https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent/resultingClientId) already which we want to associate it to PerformanceResourceTiming entry to help with mapping a resource timing back to the fetch. 
+
+```webidl
+interface PerformanceResourceTiming  {
+    readonly attribute DOMString clientId; 
+    readonly attribute DOMString resultingClientId; 
+};
+```
+
+`clientId`: The identifier of the client that initiated the request. This corresponds to the clientId property of the FetchEvent that handled the request. This will be empty for a navigation request.
+
+`resultingClientId`: The identifier of the resulting client. This corresponds to the resulting ClientId property of the FetchEvent, which may differ if the request results in a new client (e.g., navigation to a new document). This will be empty for a resource request.
+
+When querying the Performance API for a navigation entry, the payload of a performance.getEntriesByType("navigation") call would look like:
+```
+clientId: ""
+resultingClientId: "2dfa511d-2f0d-46b8-b173-2610dafbdc3f"
+```
+
+When querying the Performance API for a resource entry, the payload of a performance.getEntriesByType("resource") call would look like:
+```
+clientId: "2dfa511d-2f0d-46b8-b173-2610dafbdc3f"
+resultingClientId: ""
+```
+
+This proposal provides a consistent way to associate PerformanceResourceTiming entries with their initiating client or navigation by exposing existing clientId and resultingClientId fields from the Service Worker FetchEvent. While it does not offer a direct correlation to individual fetch requests or resolve cases where the same resource is requested multiple times from the same URL by one or multiple clients, it improves traceability of resource loads, enabling developers to measure Service Worker processing time, analyze navigation preload behavior, and optimize resource loading in multi-tab or multi-client scenarios. The scope of changes is limited to the PerformanceResourceTiming specification, leveraging existing identifiers without introducing new user tracking vectors or increasing fingerprinting risks.
+
+#### Example: Using `resultingClientId` for Navigation preload requests for multi-tab scenario
+The following example demonstrates how a web application can correlate navigation timing observed in the main window with the timing of the response as seen by the Service Worker. It captures when the first byte (TTFB) of the response was received in both contexts and aligns their timelines using performance.timeOrigin, leveraging the resultingClientId property for precise matching. 
+
+By aligning performance.timeOrigin between the Service Worker and the main window, we can accurately determine: 
+* When the Service Worker received the first byte of the response 
+* How long it took for that byte to be delivered to the main thread 
+```js
+// Service Worker(sw.js)
+self.addEventListener("fetch", (event) => { 
+  if (event.request.mode === "navigate") { 
+    event.respondWith((async () => { 
+      let response = await event.preloadResponse; 
+      if (!response) { 
+        response = await fetch(event.request); 
+      } 
+
+      // Find timing info for the preloaded navigation using resultingClientId 
+      const entries = self.performance.getEntriesByType("navigation"); 
+      const timing = entries.find(e => e.resultingClientId === event.resultingClientId); 
+      const responseStart = timing?.responseStart ?? self.performance.now(); 
+      const client = await self.clients.get(event. resultingClientId); 
+
+      client?.postMessage({ 
+        type: "SW_TIMING", 
+        responseStart, 
+        timeOrigin: self.performance.timeOrigin 
+      });
+
+      return response; 
+    })()); 
+  } 
+}); 
+```
+
+```js
+// Main Window(main.js)
+navigator.serviceWorker.onmessage = (event) => { 
+  if (event.data?.type === "SW_TIMING") { 
+    const navEntry = performance.getEntriesByType("navigation")[0]; 
+    const adjustedSWResponseStart = event.data.responseStart - (event.data.timeOrigin - performance.timeOrigin); 
+
+    console.log("Client responseStart:", navEntry.responseStart); 
+    console.log("SW responseStart (aligned):", adjustedSWResponseStart); 
+    console.log("TTFB delta (client - SW):", navEntry.responseStart - adjustedSWResponseStart); 
+  } 
+}; 
+```
+
+Example output:
+```
+Client responseStart: 230.88 
+SW responseStart (aligned): 215.50 
+TTFB delta (client - SW): 15.38 ms 
+```
+
 ### Options Evaluation
 
 | **Criteria** | **Option1** | **Option2** | **Option3** |
 | ------------ | ----------- | ----------- | ----------- |
-|Direct client/tab mapping to resource timings | ✅ | ✅ In SW context, client mapping information can be indirectly obtained by filtering the resource timing entries using the responseId and then associating it with the FetchEvent's clientId. | ✅  In SW context, client mapping information can be indirectly obtained by filtering the resource timing entries using the requestId and then associating it with the FetchEvent's clientId. |
-|Distinguish between multiple identical requests from the same client. |❌  | ✅ |✅ |
-|Distinguish between identical requests from different clients. |✅ |✅ |✅ |
-|Enables end-to-end correlation between requests, responses, and resource timings.|❌ |❌ |✅|
-|Leverages existing identifiers (FetchEvent).|✅ |❌|❌|
-|Developers do not need to generate and manage RequestIds |✅ |✅ |❌|
-|User agents do not need to generate and manage Ids.|✅ |❌ |❌|
-|Spec Changes Required|Minimal. Only updates to resource timing. |Moderate. Changes to Fetch spec for Response and resource timing spec.  |Broad. Changes to Fetch spec for Fetch, Request, Response APIs, and resource timing spec.
-|Privacy considerations|Low risk. Uses existing identifiers already exposed in SW context (FetchEvent). |Medium risk. Can be mitigated if UA generates the random/non-guessable ids. |Medium risk. UA generated ones can be mitigated. Developers must also generate random, ephemeral Ids|
-|BestFor|Scenarios where developers need to know which client (tab/iframe) initiated or resulted from a request, especially for navigation preload requests|Scenarios where developers need to correlate a response object with its performance data.|Scenarios requiring granular fetch request tracking, even for duplicate URLs. | 
-|Use in Service Worker Context?|✅ Enables mapping resource timing entries for navigation preloads or multi-client cases back to the right tab/client. |✅ Allows tracing the response in SW to its performance timing but lacks client context for preload requests but can be obtained with custom logic by the developer. |✅ requestId can be carried across the SW lifecycle and responses. |
+|Direct client/tab mapping to resource timings | ✅ In SW context, client mapping information can be indirectly obtained by filtering the resource timing entries using the responseId and then associating it with the FetchEvent's clientId. | ✅  In SW context, client mapping information can be indirectly obtained by filtering the resource timing entries using the requestId and then associating it with the FetchEvent's clientId. | ✅ |
+|Distinguish between multiple identical requests from the same client. | ✅ | ✅ | ❌ |
+|Distinguish between identical requests from different clients. | ✅ |✅ | ✅ |
+|Enables end-to-end correlation between requests, responses, and resource timings.| ❌ |✅| ❌ |
+|Leverages existing identifiers (FetchEvent).| ❌ | ❌ | ✅ |
+|Developers do not need to generate and manage RequestIds | ✅ |❌| ✅ |
+|User agents do not need to generate and manage Ids.|❌ |❌| ✅ |
+|Spec Changes Required| Moderate. Changes to Fetch spec for Response and resource timing spec. | Broad. Changes to Fetch spec for Fetch, Request, Response APIs, and resource timing spec. | Minimal. Only updates to resource timing. |
+|Privacy considerations| Medium risk. Can be mitigated if UA generates the random/non-guessable ids. |Medium risk. UA generated ones can be mitigated. Developers must also generate random, ephemeral Ids| Low risk. Uses existing identifiers already exposed in SW context (FetchEvent). |
+|BestFor| Scenarios where developers need to correlate a response object with its performance data.|Scenarios requiring granular fetch request tracking, even for duplicate URLs. | Scenarios where developers need to know which client (tab/iframe) initiated or resulted from a request, especially for navigation preload requests |
+|Use in Service Worker Context?|✅ Allows tracing the response in SW to its performance timing but lacks client context for preload requests but can be obtained with custom logic by the developer. |✅ requestId can be carried across the SW lifecycle and responses. | ✅ Enables mapping resource timing entries for navigation preloads or multi-client cases back to the right tab/client. |
 ## Privacy and Security Considerations
 
 ### Privacy
@@ -473,3 +475,8 @@ These two fields also follow security considerations of PerformanceResourceTimin
 [Resource timing spec issue](https://github.com/w3c/resource-timing/issues/259)
 
 [Resource timing API](https://www.w3.org/TR/resource-timing/#dom-performanceresourcetiming)
+
+Many thanks for valuable feedback and advice from:
+- [Todd Reifsteck](https://github.com/toddreifsteck)
+- [Liang Zhao](https://github.com/LiangTheDev)
+- [Andy Luhrs](https://github.com/aluhrs13)
