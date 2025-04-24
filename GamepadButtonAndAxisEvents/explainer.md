@@ -30,11 +30,9 @@ Each input frame refers to a single timestamped update of a gamepad’s state, t
 
 ## User-Facing Problem
 
-The Gamepad API lacks event-driven input handling, forcing applications to rely on continuous polling to query for changes in gamepad input. The continuous polling introduces input latency, as scripts cannot synchronize with new input fast enough. If the script increases the polling frequency to mitigate input latency, it increases CPU usage, impacting efficiency and battery life of the device.
+The Gamepad API lacks event-driven input handling, requiring applications to poll for input state changes. This polling model makes it difficult to achieve low-latency responsiveness, as input changes can be missed between polling intervals. Developers working on latency-sensitive applications, such as cloud gaming platforms, have reported needing to poll at very high frequencies to detect input as quickly as possible. However, even with aggressive polling, scripts may still struggle to react in real time, especially under heavy UI thread load or on resource-constrained devices.
 
-This issue is particularly problematic for cloud gaming platforms that stream games to a browser and rely on real-time gamepad input. For instance, to minimize latency, they often poll as frequently as every 4ms, but this high-frequency polling increases CPU usage and battery drain, especially on laptops and mobile devices. Additionally, because the Gamepad API is only supported on the main UI thread, it can cause thread contention—particularly on low-end devices. In some cases, these constraints force developers to reduce polling frequency, increasing input latency as a trade-off.
-
-A more efficient solution would be an event-driven Gamepad API, similar to mouse and keyboard events, enabling real-time responsiveness without the overhead of constant polling.
+These limitations make it challenging to deliver consistent, low-latency input experiences in the browser. An event-driven Gamepad API (similar to existing keyboard and mouse event models) would allow applications to respond immediately to input changes as they occur, reducing the reliance on polling and enabling real-time responsiveness for latency-critical use cases.
 
 ### Developer code sample of existing poll based API
 ```JS
