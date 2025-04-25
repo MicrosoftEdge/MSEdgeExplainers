@@ -28,6 +28,9 @@ This proposal builds on earlier work by Chromium engineers, which explored event
 ### Input Frame: 
 Each input frame refers to a single timestamped update of a gamepad’s state, typically derived from a HID (Human Interface Device) report, including all button and axis values at that moment in time.
 
+### RawGamepadInputChangeEvent: 
+An event that represents a snapshot of a gamepad’s state at the moment a new input frame is received from the gamepad device. Each event corresponds to a full input report (e.g., a HID report) and contains the complete state of all buttons, axes. This event enables applications to react to input in a timely, event-driven manner, as an alternative to polling via navigator.getGamepads().
+
 ## User-Facing Problem
 
 The Gamepad API lacks event-driven input handling, requiring applications to poll for input state changes. This polling model makes it difficult to achieve low-latency responsiveness, as input changes can be missed between polling intervals. Developers working on latency-sensitive applications, such as cloud gaming platforms, have reported needing to poll at very high frequencies to detect input as quickly as possible. However, even with aggressive polling, scripts may still struggle to react in real time, especially under heavy UI thread load or on resource-constrained devices.
@@ -105,10 +108,12 @@ rawgamepadinputchange {
   },
   // Left stick X and Y moved since last event.
   axesChanged: [0, 1],
-  // button index 0 was pressed, button index 2 value changed.
+  // button index 0 was pressed and released, button index 2 value changed.
   buttonsValueChanged: [0, 2],
   // button index 0 pressed.
   buttonsPressed: [0],
+  // button index 0 released.
+  buttonsReleased: [0],
   // button index 1 was touched.
   buttonsTouched: [1],
 }
@@ -131,6 +136,7 @@ interface RawGamepadInputChangeEvent : Event {
   readonly attribute FrozenArray<unsigned long> axesChanged;
   readonly attribute FrozenArray<unsigned long> buttonsValueChanged;
   readonly attribute FrozenArray<unsigned long> buttonsPressed;
+  readonly attribute FrozenArray<unsigned long> buttonsReleased;
   readonly attribute FrozenArray<unsigned long> buttonsTouched;
 };
 ```
@@ -165,6 +171,12 @@ window.ongamepadconnected = (connectEvent) => {
     for (let buttonIndex of changeEvent.buttonsPressed) {
       const buttonPressed = changeEvent.gamepadSnapshot.buttons[buttonIndex].pressed;
       console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonPressed}`);
+    }
+
+    // Binary buttons released.
+    for (let buttonIndex of changeEvent.buttonsReleased) {
+      const buttonReleased = changeEvent.gamepadSnapshot.buttons[buttonIndex].released;
+      console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonReleased}`);
     }
 
     // Buttons touched.
