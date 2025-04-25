@@ -60,7 +60,7 @@ window.addEventListener('gamepadconnected', () => {
 ```
 #### Key Points:
 - navigator.getGamepads() returns a snapshot of all connected gamepads.
-- The polling loop is driven by `requestAnimationFrame`, typically around 60Hz (matching display refresh rate), which is much lower than the internal OS poll rate (eg., 250Hz). This     mismatch can result in missed input updates, making the 60Hz rate insufficient for latency-critical applications like cloud gaming.
+- The polling loop is driven by `requestAnimationFrame`, typically around 60Hz (matching display refresh rate), which is much lower than the internal OS poll rate (eg., 250Hz). This mismatch can result in missed input updates, making the 60Hz rate insufficient for latency-critical applications like cloud gaming.
 
 ### Goals
 
