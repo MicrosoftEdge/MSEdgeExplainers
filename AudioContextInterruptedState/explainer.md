@@ -8,6 +8,13 @@
 ## Participate
 - https://github.com/WebAudio/web-audio-api/issues/2392
 
+## Status of this Document
+This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+
+* This document status: **Archived**
+* Expected venue: [Audio WG](https://www.w3.org/groups/wg/audio/)
+* Current version: this document
+
 ## Introduction
 
 The [Web Audio API] is widely used to add advanced audio capabilities to web applications, like web-based games and music applications. One of the API's features is the [AudioContext ] interface, which represents an audio graph. An `AudioContext` can find itself in one of three states: [`"suspended"`], [`"running"`], or [`"closed"`]. Once an `AudioContext` is in the `"running"` state, it can only pause media playback by transitioning to the `"suspended"` state when, and only when, user code calls [`AudioContext.suspend()`] on this `AudioContext`. However, there are situations where we might want to let the User Agent (UA) decide when to interrupt playback - e.g., the proposed [`"media-playback-while-not-visible"` permission policy], the proposed [Audio Session API], or during a phone call where the calling application will need exclusive access to the audio hardware. To support these scenarios, we propose adding a new `"interrupted"` state to the [`AudioContextState`] enum.
