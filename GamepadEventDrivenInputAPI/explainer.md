@@ -65,11 +65,11 @@ window.addEventListener('gamepadconnected', () => {
 - navigator.getGamepads() returns a snapshot of all connected gamepads.
 - The polling loop is driven by `requestAnimationFrame`, typically around 60Hz (matching display refresh rate), which is much lower than the internal OS poll rate (eg., 250Hz). This mismatch can result in missed input updates, making the 60Hz rate insufficient for latency-critical applications like cloud gaming.
 
-### Goals
+## Goals
 
 Reduce input latency by moving away from constant polling and introducing event-driven input handling. 
 
-### Non-goals
+## Non-goals
 
 The existing polling mechanism will not be deprecated. We are just proposing an alternative way of handling input events and applications are free to select whichever they prefer.
 
@@ -139,6 +139,15 @@ interface RawGamepadInputChangeEvent : Event {
   readonly attribute FrozenArray<unsigned long> buttonsReleased;
   readonly attribute FrozenArray<unsigned long> buttonsTouched;
 };
+
+dictionary RawGamepadInputChangeEventInit : EventInit {
+  required Gamepad gamepadSnapshot;
+  FrozenArray<unsigned long> axesChanged = [];
+  FrozenArray<unsigned long> buttonsValueChanged = [];
+  FrozenArray<unsigned long> buttonsPressed = [];
+  FrozenArray<unsigned long> buttonsReleased = [];
+  FrozenArray<unsigned long> buttonsTouched = [];
+};
 ```
 ##  Developer code sample
 
@@ -162,25 +171,25 @@ window.ongamepadconnected = (connectEvent) => {
     }
 
     // Analog buttons (ex: triggers).
-    for (let buttonIndex of changeEvent.buttonsValueChanged) {
+    for (const buttonIndex of changeEvent.buttonsValueChanged) {
       const buttonValue = changeEvent.gamepadSnapshot.buttons[buttonIndex].value;
       console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonValue}`);
     }
 
     // Binary buttons pressed.
-    for (let buttonIndex of changeEvent.buttonsPressed) {
+    for (const buttonIndex of changeEvent.buttonsPressed) {
       const buttonPressed = changeEvent.gamepadSnapshot.buttons[buttonIndex].pressed;
       console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonPressed}`);
     }
 
     // Binary buttons released.
-    for (let buttonIndex of changeEvent.buttonsReleased) {
+    for (const buttonIndex of changeEvent.buttonsReleased) {
       const buttonReleased = changeEvent.gamepadSnapshot.buttons[buttonIndex].released;
       console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonReleased}`);
     }
 
     // Buttons touched.
-    for (let buttonIndex of changeEvent.buttonsTouched) {
+    for (const buttonIndex of changeEvent.buttonsTouched) {
       const buttonTouched = changeEvent.gamepadSnapshot.buttons[buttonIndex].touched;
       console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonTouched}`);
     }
