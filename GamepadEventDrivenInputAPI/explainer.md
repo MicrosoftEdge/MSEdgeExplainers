@@ -172,26 +172,26 @@ window.ongamepadconnected = (connectEvent) => {
 
     // Analog buttons (ex: triggers).
     for (const buttonIndex of changeEvent.buttonsValueChanged) {
-      const buttonValue = changeEvent.gamepadSnapshot.buttons[buttonIndex].value;
-      console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonValue}`);
+      const buttonValue = snapshot.buttons[buttonIndex].value;
+      console.log(`button ${buttonIndex} on gamepad ${snapshot.index} changed to value ${buttonValue}`);
     }
 
     // Binary buttons pressed.
     for (const buttonIndex of changeEvent.buttonsPressed) {
-      const buttonPressed = changeEvent.gamepadSnapshot.buttons[buttonIndex].pressed;
-      console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonPressed}`);
+      const buttonPressed = snapshot.buttons[buttonIndex].pressed;
+      console.log(`button ${buttonIndex} on gamepad ${snapshot.index} changed to value ${buttonPressed}`);
     }
 
     // Binary buttons released.
     for (const buttonIndex of changeEvent.buttonsReleased) {
-      const buttonReleased = changeEvent.gamepadSnapshot.buttons[buttonIndex].released;
-      console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonReleased}`);
+      const buttonReleased = snapshot.buttons[buttonIndex].released;
+      console.log(`button ${buttonIndex} on gamepad ${snapshot.index} changed to value ${buttonReleased}`);
     }
 
     // Buttons touched.
     for (const buttonIndex of changeEvent.buttonsTouched) {
-      const buttonTouched = changeEvent.gamepadSnapshot.buttons[buttonIndex].touched;
-      console.log(`button ${buttonIndex} on gamepad ${changeEvent.gamepadSnapshot.index} changed to value ${buttonTouched}`);
+      const buttonTouched = snapshot.buttons[buttonIndex].touched;
+      console.log(`button ${buttonIndex} on gamepad ${snapshot.index} changed to value ${buttonTouched}`);
     }
   };
 };
