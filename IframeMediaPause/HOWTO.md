@@ -20,7 +20,7 @@ The "media-playback-while-not-visible" permission policy is available in Chromiu
 
 ## Setting your page up for origin trials
 
-Follow the instructions in the [official documentation](https://developer.chrome.com/docs/web-platform/origin-trials).
+Register for the feature's origin trial [here](https://developer.chrome.com/origintrials/#/view_trial/4596486369685012481) and follow the instructions in the [official documentation](https://developer.chrome.com/docs/web-platform/origin-trials) to have it setup for your website.
 
 ## Use case example
 
