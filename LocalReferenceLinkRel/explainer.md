@@ -165,8 +165,8 @@ named "foo.html" is as follows:
 <link rel="stylesheet" href="foo.css" id="#inline_styles_from_shadow" />
 ```
 
-1. A fetch is intiated for `foo.html#inline_styles_from_shadow` (a `<base>` tag
-may modify the base URL).
+1. A fetch is initiated for `foo.html#inline_styles_from_shadow` (a `<base>`
+tag may modify the base URL).
 2. Upon resolving the fetch (this will usually be a cache hit for the current
 page), the `<link>` tag's `onerror` event is fired due to a MIME type mismatch
 (the `<link>` tag expects a CSS MIME type when `rel="stylesheet"`, while
