@@ -110,12 +110,20 @@ There is no proposed approach yet identified by this explainer. Instead, there a
 ### Option 1: Direct Query 
 This solution would involve querying the animation smoothness data directly. JavaScript would call an API that measures some frame information at a specific point in time. To measure the frame information, the API would be called multiple times, using the values to calculate an average frame rate. 
 
-`window.frameinfo() `
+`window.frameinfo() ` or `performance.frameinfo()`
 
 ### Option 2: Start and End Markers 
 JavaScript Performance markers are used to track points in time. In this solution, developers could mark a start and end point on the performance timeline and measure the duration between the two markers, with frame information as a property.
 
-`window.frameinfo("perfMarker")` <- Framerate since that marker 
+
+2a
+
+`performance.mark("myMarker") `
+
+`window.frameinfo("myMarker")` <- Framerate since that marker 
+
+
+2b
 
 `performance.mark("myMarker") `
 
@@ -127,11 +135,27 @@ This option works similarly to the [Frame Timing API](https://wicg.github.io/fra
 
 Adding an event listener for frame rate changes would alert developers about large drops in frame rate. Since it would not be necessary to know if the rate drops by a frame or two. Instead, the developer could set the event listener to alert when the frame rate drops by n. Or, similarly to the long task API's duration threshold, the developer could set a min and max fps. The event listener would fire only if the FPS is above the max or below the min. 
 
+`window.addEventListener("frameratechange", (event) =>{doSomething();}) `
+
+### Option 4: Performance Observer
+
 This option works similarly to both [LoAF API](https://github.com/w3c/long-animation-frames) and the [Paint Timing API](https://www.w3.org/TR/paint-timing/), which both use the performance observer and follow a pattern that developers expect to use when improving performance. When observing long animation frames, developers can specify the entry types they want to the performance observer to processes. Like the performance observer reports which animation frames are too long, the event listener would send an alert when the frame rate drops by a certain amount. The two APIs differ in the amount of information given. The LoAF API can give more specific metrics for long animations, while event listeners provide a more general way of monitoring frame rate. 
+
+```javascript
+function perfObserver(list, observer) { 
+ list.getEntries().forEach((entry) => { 
+    if (entry.entryType === "frameSmoothness") { 
+      console.log(${entry.name}'s startTime: ${entry.startTime}); 
+      }
+     }); 
+} 
+const observer = new PerformanceObserver(perfObserver); 
+observer.observe({ entryTypes: ["frameSmoothness"] });
+
+```
 
 ## Alternatives Considered
 For the event listener scenario, it was determined that using granularity would not give a useful measure of frame info due to lack of detail. The granularity was modeled after the compute pressure API.
-
 `window.addEventListener("frameratechange", (event) =>{doSomething();})`
 
 ## Concerns/Open Questions
