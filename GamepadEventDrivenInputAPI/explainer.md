@@ -8,7 +8,7 @@
 
 ## Participate
 - [Should fire events instead of using passive model #4](https://github.com/w3c/gamepad/issues/4)
-- [Need to spec liveness of Gamepad objects](https://github.com/w3c/gamepad/issues/8)
+- [Need to spec liveness of Gamepad objects #8](https://github.com/w3c/gamepad/issues/8)
 
 ## Status of this Document
 
@@ -87,7 +87,7 @@ To address the challenges of input latency, this proposal introduces a new event
 
 - `gamepadSnapshot`: A frozen (read-only) snapshot of the gamepad’s state at the moment the input was received. It includes all axes, buttons, ID, index, and timestamp, and does not update after the event is dispatched.
 
-A new `rawgamepadinputchange` event is dispatched for every gamepad input state change, without delay or coalescing, enabling latency-sensitive applications—such as rhythm games, cloud gaming, or real-time multiplayer scenarios—to respond immediately and accurately to input.
+A new `rawgamepadinputchange` event is dispatched for every gamepad input state change, without delay or coalescing, enabling latency-sensitive applications such as: rhythm games, cloud gaming, or real-time multiplayer scenarios, to respond immediately and accurately to input.
 
 ## Example `rawgamepadinputchange` Event
 ```js
@@ -101,11 +101,11 @@ rawgamepadinputchange {
     connected: true,
     mapping: "standard",
     buttons: [
-      // index 0 - button A pressed.
+      // Index 0 - button A pressed.
       { pressed: true, value: 1.0 },
-      // index 1 - button B released.
+      // Index 1 - button B released.
       { pressed: false, value: 0.0 },
-      // index 2 - analog button (e.g., triggers)
+      // Index 2 - analog button (e.g., triggers).
       { pressed: false, value: 0.5 },
       ...
     ],
@@ -116,11 +116,11 @@ rawgamepadinputchange {
 
   // Left stick X and Y moved since last event.
   axesChanged: [0, 1],
-  // button index 0 was pressed and button index 1 released, button index 2 value changed.
+  // Button index 0 was pressed and button index 1 released, button index 2 value changed.
   buttonsValueChanged: [0, 1, 2],
-  // button index 0 pressed.
+  // Button index 0 pressed.
   buttonsPressed: [0],
-  // button index 0 released.
+  // Button index 0 released.
   buttonsReleased: [1]
 }
 ```
@@ -183,9 +183,9 @@ window.ongamepadconnected = (connectEvent) => {
 
     // Analog button changes (ex: triggers).
     for (const buttonIndex of changeEvent.buttonsValueChanged) {
-      const snapshotButtonValue = snapshot.buttons[buttonIndex].value;
-      const liveButtonValue = liveGamepad.buttons[buttonIndex].value;
-      console.log(`button ${buttonIndex} on gamepad ${snapshot.index} changed to value ${snapshotButtonValue} (live: ${liveButtonValue})`);
+      const snapshotButtonValueChanged = snapshot.buttons[buttonIndex].value;
+      const liveButtonsValueChanged = liveGamepad.buttons[buttonIndex].value;
+      console.log(`button ${buttonIndex} on gamepad ${snapshot.index} changed to value ${snapshotButtonValueChanged} (live: ${liveButtonValueChanged})`);
     }
 
     // Binary buttons that were pressed.
@@ -219,7 +219,8 @@ Firefox: No Signal
 Safari: No Signal
 
 Web Developers: Positive
-[Should fire events instead of using passive model](https://github.com/w3c/gamepad/issues/4)
+[Should fire events instead of using passive model](https://github.com/w3c/gamepad/issues/4),
+
 [Gamepad Other Events](https://w3c.github.io/gamepad/#other-events)
 
 ## References & acknowledgements
