@@ -154,23 +154,23 @@ The current behavior for the `<link>` tag with following markup in a file
 named "foo.html" is as follows:
 
 ```html
+<style id="style_tag">
+  p {
+    color: blue;
+  }
+</style>
 <template shadowrootmode="open">
-  <style id="inline_styles_from_shadow">
-    p {
-      color: blue;
-    }
-  </style>
+  <link rel="stylesheet" href="#style_tag" />
   <p>Inside Shadow DOM</p>
 </template>
-<link rel="stylesheet" href="foo.css" id="#inline_styles_from_shadow" />
 ```
 
-1. A fetch is initiated for `foo.html#inline_styles_from_shadow` (a `<base>`
-tag may modify the base URL).
+1. A fetch is initiated for `foo.html#style_tag` (a `<base>` tag may modify
+the base URL).
 2. Upon resolving the fetch (this will usually be a cache hit for the current
 page), the `<link>` tag's `onerror` event is fired due to a MIME type mismatch
 (the `<link>` tag expects a CSS MIME type when `rel="stylesheet"`, while
-`foo.html#inline_styles_from_shadow` is an HTML MIME type). Note that some
+`foo.html#style_tag` is an HTML MIME type). Note that some
 User Agent's don't follow this behavior this and instead fire `onload`.
 
 There are several options to avoid this fetch:
