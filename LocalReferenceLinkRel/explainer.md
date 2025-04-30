@@ -148,6 +148,78 @@ the shadow root where they are defined, as illustrated by the following examples
   Styles defined inside the sibling Shadow Root are not applied, so "Inside Sibling Shadow DOM" is not blue.
 </p>
 
+### Fetch Behavior
+
+The current behavior for the `<link>` tag with following markup in a file
+named "foo.html" is as follows:
+
+```html
+<template shadowrootmode="open">
+  <style id="inline_styles_from_shadow">
+    p {
+      color: blue;
+    }
+  </style>
+  <p>Inside Shadow DOM</p>
+</template>
+<link rel="stylesheet" href="foo.css" id="#inline_styles_from_shadow" />
+```
+
+1. A fetch is intiated for `foo.html#inline_styles_from_shadow` (a `<base>` tag
+may modify the base URL).
+2. Upon resolving the fetch (this will usually be a cache hit for the current
+page), the `<link>` tag's `onerror` event is fired due to a MIME type mismatch
+(the `<link>` tag expects a CSS MIME type, while
+`foo.html#inline_styles_from_shadow` is an HTML MIME type).
+
+This fetch can be avoided with several methods:
+1. Using a different value for `rel` than `stylesheet` (`inline-stylesheet`
+is one option).
+2. Using a different attribute than `href` for in-document stylesheets.
+3. Using a special URL scheme, e.g. inline:id rather than relying on fragment
+identifiers.
+
+However, this may not be necessary. An easy method of polyfilling this behavior
+is to simply add an `onerror` and `onload` handlers that look up the stylesheet
+and copy its contents into a dataURI, as follows:
+
+```html
+<style id="style_tag">
+    span {color: blue;}
+</style>
+<span>Light DOM text</span>
+<script>
+function polyfill(elem) {
+  if(!elem.sheet || !elem.sheet.cssRules || elem.sheet.cssRules.length === 0) {
+    // Extract the fragment from the link tag's href attribute.
+    const url = new URL(elem.href);
+    const fragment = url.hash.substring(1);
+    if(fragment.length > 0) {
+      // Look up the corresponding <style> with said href.
+      let style_tag = document.getElementById(fragment);
+      if(style_tag && style_tag.sheet) {
+        let css_rule_string = "";
+        for(let i = 0; i < style_tag.sheet.rules.length; ++i) {
+          css_rule_string += style_tag.sheet.rules[i].cssText + ";";
+        }
+        // Update the link tag with a dataURI with the referenced style rules.
+        elem.setAttribute("href", "data:text/css;base64," + btoa(css_rule_string));
+      }
+    }
+  }
+}
+</script>
+<div>
+  <template shadowrootmode="open">
+  <link rel="stylesheet" href="#style_tag" onerror="polyfill(this);" onload="polyfill(this);" />
+    <span>Shadow DOM</span>
+  </template>
+</div>
+```
+
+Note that this polyfill is not a live reference to the referenced stylesheet,
+so changes to `style_tag` will not be reflected in the shadow DOM.
+
 ## Detailed design discussion
 
 ### Deep Clone vs Reference
