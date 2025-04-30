@@ -181,7 +181,7 @@ is one option).
 identifiers.
 
 However, this may not be necessary. An easy method of polyfilling this behavior
-is to simply add an `onerror` and `onload` handlers that look up the `<style>`
+is to simply add `onerror` and `onload` handlers that look up the `<style>`
 element referenced and copy its contents into a dataURI, as follows:
 
 ```html
