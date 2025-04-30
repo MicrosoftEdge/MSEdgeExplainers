@@ -169,10 +169,11 @@ named "foo.html" is as follows:
 may modify the base URL).
 2. Upon resolving the fetch (this will usually be a cache hit for the current
 page), the `<link>` tag's `onerror` event is fired due to a MIME type mismatch
-(the `<link>` tag expects a CSS MIME type, while
-`foo.html#inline_styles_from_shadow` is an HTML MIME type).
+(the `<link>` tag expects a CSS MIME type when `rel="stylesheet"`, while
+`foo.html#inline_styles_from_shadow` is an HTML MIME type). Note that some
+User Agent's don't follow this behavior this and instead fire `onload`.
 
-This fetch can be avoided with several methods:
+There are several options to avoid this fetch:
 1. Using a different value for `rel` than `stylesheet` (`inline-stylesheet`
 is one option).
 2. Using a different attribute than `href` for in-document stylesheets.
@@ -180,8 +181,8 @@ is one option).
 identifiers.
 
 However, this may not be necessary. An easy method of polyfilling this behavior
-is to simply add an `onerror` and `onload` handlers that look up the stylesheet
-and copy its contents into a dataURI, as follows:
+is to simply add an `onerror` and `onload` handlers that look up the `<style>`
+element referenced and copy its contents into a dataURI, as follows:
 
 ```html
 <style id="style_tag">
@@ -191,11 +192,11 @@ and copy its contents into a dataURI, as follows:
 <script>
 function polyfill(elem) {
   if(!elem.sheet || !elem.sheet.cssRules || elem.sheet.cssRules.length === 0) {
-    // Extract the fragment from the link tag's href attribute.
+    // Extract the fragment from the link tag's `href` attribute.
     const url = new URL(elem.href);
     const fragment = url.hash.substring(1);
     if(fragment.length > 0) {
-      // Look up the corresponding <style> with said href.
+      // Look up the corresponding <style> tag with specified `href`.
       let style_tag = document.getElementById(fragment);
       if(style_tag && style_tag.sheet) {
         let css_rule_string = "";
