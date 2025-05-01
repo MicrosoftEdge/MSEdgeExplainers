@@ -206,7 +206,7 @@ Many thanks for valuable feedback and advice from:
 - [Matt Reynolds](https://github.com/nondebug)
 
 ## Appendix: Proposed WebIDL
-```
+```JS
 [Exposed=Window]
 partial interface Gamepad : EventTarget {
   attribute EventHandler onrawgamepadinputchange;
@@ -214,7 +214,7 @@ partial interface Gamepad : EventTarget {
 
 ```
 ### `RawGamepadInputChangeEvent` interface IDL, used for `rawgamepadinputchange`.
-```
+```JS
 // Inherits `target` from Event, which refers to the live Gamepad.
 [Exposed=Window]
 interface RawGamepadInputChangeEvent : Event {
