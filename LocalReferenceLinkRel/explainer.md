@@ -150,8 +150,9 @@ the shadow root where they are defined, as illustrated by the following examples
 
 ### Fetch Behavior
 
-The current behavior for the `<link>` tag with following markup in a file
-named "foo.html" is as follows:
+In user agents where "Local References In `<link>` Tags" is not supported,
+the behavior for the `<link>` tag with the following markup in a file named
+"foo.html" will be as follows:
 
 ```html
 <style id="style_tag">
@@ -186,9 +187,10 @@ element referenced and copy its contents into a dataURI, as follows:
 
 ```html
 <style id="style_tag">
-    span {color: blue;}
+  p {
+    color: blue;
+  }
 </style>
-<span>Light DOM text</span>
 <script>
 function polyfill(elem) {
   if(!elem.sheet || !elem.sheet.cssRules || elem.sheet.cssRules.length === 0) {
@@ -213,7 +215,7 @@ function polyfill(elem) {
 <div>
   <template shadowrootmode="open">
   <link rel="stylesheet" href="#style_tag" onerror="polyfill(this);" onload="polyfill(this);" />
-    <span>Shadow DOM</span>
+    <p>Inside Shadow DOM</p>
   </template>
 </div>
 ```
