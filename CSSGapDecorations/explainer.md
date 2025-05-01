@@ -481,17 +481,16 @@ to introduce pseudo-elements representing gaps, for example:
 In some ways, this would be more powerful, as it would allow for more
 flexibility for what can be placed in the gaps.
 
-However, this approach also comes with drawbacks.
-Varying gap decorations over a container becomes much harder. One might
-imagine a `::row-gaps::nth(even)` pseudo selector to style every other row
-gap. However, certain container types such as grid can automatically generate
-rows and columns depending on their contents. That means we don't know until
-layout time how many such pseudo styles we need to produce, which creates a
-wrong-way dependency between layout and style. It would also mean that, for
-large containers, we would incur the costs of calculating and storing styles
-for every single gap. That would be a large overhead to absorb, especially
-considering that the more common case is to have at most a single decoration
-style for a given container.
+However, this approach also comes with drawbacks. Varying gap decorations over a
+container becomes much harder. One might imagine a `::row-gaps::nth(even)`
+pseudo selector to style every other row gap. However, certain container types
+such as grid can automatically generate rows and columns depending on their
+contents. That means we don't know until layout time how many such pseudo styles
+we need to produce, which creates a wrong-way dependency between layout and
+style. It would also mean that, for large containers, we would incur the costs
+of calculating and storing styles for every single gap. That would be a large
+overhead to absorb, especially considering that the more common case is to have
+at most a single decoration style for a given container.
 
 ## References & acknowledgements
 
