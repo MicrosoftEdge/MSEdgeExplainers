@@ -18,6 +18,22 @@ This document is a starting point for engaging the community and standards bodie
 - Expected venue: **[W3C Web Applications Working Group](https://www.w3.org/groups/wg/webapps/)**
 - Current version: **This document**
 
+## Table of Contents
+
+1. [Introduction](#introduction) 
+2. [Definitions](#definitions)
+2. [User-Facing Problem](#user-facing-problem)  
+3. [Proposed Approach](#proposed-approach)
+4. [Example `rawgamepadinputchange` Event](#example-rawgamepadinputchange-event)
+5. [Goals](#goals)
+6. [Non-goals](#non-goals)  
+7. [Developer code sample](#developer-code-sample)
+8. [Alternatives considered](#alternatives-considered)
+9. [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
+10. [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+11. [References & acknowledgements](#references--acknowledgements)
+12. [Appendix: Proposed WebIDL](#appendix--Proposed-webidl)   
+
 ## Introduction
 
 This explainer proposes an event-driven Gamepad Input API for the web, designed to complement the existing polling-based model. By enabling input events to be dispatched in response to changes in gamepad state, this API aims to support low-latency scenarios such as cloud gaming, where timely and reactive input delivery is critical.
@@ -90,6 +106,7 @@ To address the challenges of input latency, this proposal introduces a new event
 A new `rawgamepadinputchange` event is dispatched for every gamepad input state change, without delay or coalescing, enabling latency-sensitive applications such as: rhythm games, cloud gaming, or real-time multiplayer scenarios, to respond immediately and accurately to input.
 
 ## Example `rawgamepadinputchange` Event
+
 ```js
 rawgamepadinputchange {
   type: "rawgamepadchange",
