@@ -124,38 +124,6 @@ rawgamepadinputchange {
   buttonsReleased: [1]
 }
 ```
-## Proposed IDL
-```
-[Exposed=Window]
-partial interface Gamepad : EventTarget {
-  attribute EventHandler onrawgamepadinputchange;
-};
-
-```
-### `RawGamepadInputChangeEvent` interface IDL, used for `rawgamepadinputchange`.
-```
-// Inherits `target` from Event, which refers to the live Gamepad.
-[Exposed=Window]
-interface RawGamepadInputChangeEvent : Event {
-  constructor(DOMString type, optional RawGamepadInputChangeEventInit eventInitDict = {});
-
-  // Immutable snapshot of gamepad state at time of event dispatch.
-  readonly attribute Gamepad gamepadSnapshot;
-
-  readonly attribute FrozenArray<unsigned long> axesChanged;
-  readonly attribute FrozenArray<unsigned long> buttonsValueChanged;
-  readonly attribute FrozenArray<unsigned long> buttonsPressed;
-  readonly attribute FrozenArray<unsigned long> buttonsReleased;
-};
-
-dictionary RawGamepadInputChangeEventInit : EventInit {
-  required Gamepad gamepadSnapshot;
-  FrozenArray<unsigned long> axesChanged = [];
-  FrozenArray<unsigned long> buttonsValueChanged = [];
-  FrozenArray<unsigned long> buttonsPressed = [];
-  FrozenArray<unsigned long> buttonsReleased = [];
-};
-```
 ##  Developer code sample
 
 ```JS
@@ -219,9 +187,10 @@ Firefox: No Signal
 Safari: No Signal
 
 Web Developers: Positive
-[Should fire events instead of using passive model](https://github.com/w3c/gamepad/issues/4),
-
-[Gamepad Other Events](https://w3c.github.io/gamepad/#other-events)
+- [Should fire events instead of using passive model](https://github.com/w3c/gamepad/issues/4),
+- [Using gamepad-api via events, rather than polling](https://stackoverflow.com/questions/72294832/using-gamepad-api-via-events-rather-than-polling)
+- [How to create a generic "joystick/gamepad event" in Javascript?](https://stackoverflow.com/questions/70788613/how-to-create-a-generic-joystick-gamepad-event-in-javascript)
+- Libraries created by game developers like [gamecontroller.js](https://github.com/alvaromontoro/gamecontroller.js) and [Gamepad-Controller](https://github.com/blovato/Gamepad-Controller)
 
 ## References & acknowledgements
 
@@ -235,3 +204,36 @@ Many thanks for valuable feedback and advice from:
 - [Steve Becker](https://github.com/SteveBeckerMSFT)
 - [Gabriel Brito](https://github.com/gabrielsanbrito)
 - [Matt Reynolds](https://github.com/nondebug)
+
+## Appendix: Proposed WebIDL
+```
+[Exposed=Window]
+partial interface Gamepad : EventTarget {
+  attribute EventHandler onrawgamepadinputchange;
+};
+
+```
+### `RawGamepadInputChangeEvent` interface IDL, used for `rawgamepadinputchange`.
+```
+// Inherits `target` from Event, which refers to the live Gamepad.
+[Exposed=Window]
+interface RawGamepadInputChangeEvent : Event {
+  constructor(DOMString type, optional RawGamepadInputChangeEventInit eventInitDict = {});
+
+  // Immutable snapshot of gamepad state at time of event dispatch.
+  readonly attribute Gamepad gamepadSnapshot;
+
+  readonly attribute FrozenArray<unsigned long> axesChanged;
+  readonly attribute FrozenArray<unsigned long> buttonsValueChanged;
+  readonly attribute FrozenArray<unsigned long> buttonsPressed;
+  readonly attribute FrozenArray<unsigned long> buttonsReleased;
+};
+
+dictionary RawGamepadInputChangeEventInit : EventInit {
+  required Gamepad gamepadSnapshot;
+  FrozenArray<unsigned long> axesChanged = [];
+  FrozenArray<unsigned long> buttonsValueChanged = [];
+  FrozenArray<unsigned long> buttonsPressed = [];
+  FrozenArray<unsigned long> buttonsReleased = [];
+};
+```
