@@ -150,9 +150,9 @@ the shadow root where they are defined, as illustrated by the following examples
 
 ### Fetch Behavior
 
-In user agents where "Local References In `<link>` Tags" is not supported,
-the behavior for the `<link>` tag with the following markup in a file named
-"foo.html" will be as follows:
+In user agents where the Local References In `<link>` Tags feature is not
+supported, the behavior for the `<link>` tag with the following markup in a
+file named "foo.html" will be as follows:
 
 ```html
 <style id="style_tag">
@@ -172,7 +172,7 @@ the base URL).
 page), the `<link>` tag's `onerror` event is fired due to a MIME type mismatch
 (the `<link>` tag expects a CSS MIME type when `rel="stylesheet"`, while
 `foo.html#style_tag` is an HTML MIME type). Note that some
-User Agent's don't follow this behavior this and instead fire `onload`.
+User Agent's don't follow this behavior and instead fire `onload`.
 
 There are several options to avoid this fetch:
 1. Using a different value for `rel` than `stylesheet` (`inline-stylesheet`
