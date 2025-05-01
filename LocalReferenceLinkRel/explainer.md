@@ -172,7 +172,7 @@ the base URL).
 page), the `<link>` tag's `onerror` event is fired due to a MIME type mismatch
 (the `<link>` tag expects a CSS MIME type when `rel="stylesheet"`, while
 `foo.html#style_tag` is an HTML MIME type). Note that some
-User Agent's don't follow this behavior and instead fire `onload`.
+User Agents don't follow this behavior and instead fire `onload`.
 
 There are several options to avoid this fetch:
 1. Using a different value for `rel` than `stylesheet` (`inline-stylesheet`
