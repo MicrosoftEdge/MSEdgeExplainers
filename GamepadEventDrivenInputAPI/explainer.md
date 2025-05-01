@@ -32,7 +32,7 @@ This document is a starting point for engaging the community and standards bodie
 9. [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
 10. [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 11. [References & acknowledgements](#references--acknowledgements)
-12. [Appendix: Proposed WebIDL](#appendix--Proposed-webidl)   
+12. [Appendix: Proposed WebIDL](#appendix-proposed-webidl)   
 
 ## Introduction
 
