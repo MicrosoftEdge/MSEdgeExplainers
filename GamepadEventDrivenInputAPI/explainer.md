@@ -97,7 +97,7 @@ To address the challenges of input latency, this proposal introduces a new event
 
 - The rawgamepadinputchange event is dispatched on the Gamepad object that experienced the input change. This Gamepad instance is accessible via the event's [`event.target`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) property and represents a live object that reflects the current state of the device. The event also provides an `event.gamepadSnapshot` property which captures the input state at the exact time the event was generated, so that applications can safely reason about what triggered the event, even if the live object (`event.target`) has since changed.
 
-- `axesChanged` and `buttonsChanged`: Arrays of indices indicating which axes or button values changed since the last event.
+- `axesChanged` and `buttonsValueChanged`: Arrays of indices indicating which axes or button values changed since the last event.
 
 - `buttonsPressed` and `buttonsReleased`: Indices of buttons whose pressed state transitioned (from pressed to released or vice versa).
 
