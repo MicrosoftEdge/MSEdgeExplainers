@@ -1,4 +1,4 @@
-# Event-Driven Gamepad Input API
+# Gamepad Event-Driven Input API
 
 ## Authors:
 
