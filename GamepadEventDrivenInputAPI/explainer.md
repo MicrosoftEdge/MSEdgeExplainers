@@ -103,7 +103,6 @@ Should fire events instead of using passive model] (https://github.com/w3c/gamep
 To address the challenges of input latency, this proposal introduces a new event-driven mechanism: The `rawgamepadinputchange` event. This event fires directly on the [Gamepad](https://w3c.github.io/gamepad/#dom-gamepad) object and delivers real-time updates for each input frame, eliminating the need for high-frequency polling. The `rawgamepadinputchange` event includes detailed information about the state of the gamepad at the moment of change.
 
 ### Event Details
-
 Dispatched on the Gamepad Object: The rawgamepadinputchange event is dispatched on the Gamepad object that experienced the input change. This Gamepad instance is accessible via the event's [`event.target`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) property and represents a live object that reflects the current state of the device.
 
 Real-Time Updates: A new rawgamepadinputchange event is dispatched for every gamepad input state change, without delay or coalescing. This enables latency-sensitive applications, such as rhythm games, cloud gaming, or real-time multiplayer scenarios, to respond immediately and accurately to input.
