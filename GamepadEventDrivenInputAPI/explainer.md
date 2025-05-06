@@ -22,17 +22,17 @@ This document is a starting point for engaging the community and standards bodie
 
 1. [Introduction](#introduction) 
 2. [Definitions](#definitions)
-2. [User-Facing Problem](#user-facing-problem)  
-3. [Proposed Approach](#proposed-approach)
-4. [Example `rawgamepadinputchange` Event](#example-rawgamepadinputchange-event)
+2. [User-facing problem](#user-facing-problem)  
+3. [Proposed approach](#proposed-approach)
+4. [Example `rawgamepadinputchange` event](#example-rawgamepadinputchange-event)
 5. [Goals](#goals)
 6. [Non-goals](#non-goals)  
 7. [Developer code sample](#developer-code-sample)
 8. [Alternatives considered](#alternatives-considered)
-9. [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
-10. [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+9. [Accessibility, privacy, and security considerations](#accessibility-privacy-and-security-considerations)
+10. [Stakeholder feedback / opposition](#stakeholder-feedback--opposition)
 11. [References & acknowledgements](#references--acknowledgements)
-12. [Appendix: Proposed WebIDL](#appendix-proposed-webidl)   
+12. [Appendix: proposed WebIDL](#appendix-proposed-webidl)   
 
 ## Introduction
 
