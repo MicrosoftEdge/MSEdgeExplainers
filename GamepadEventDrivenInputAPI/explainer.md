@@ -96,20 +96,20 @@ Reduce input latency by moving away from constant polling and introducing event-
 
 In contrast, this proposal for `rawgamepadinputchange` intentionally omits alignment and coalescing in its initial design. At this stage, we've intentionally scoped this proposal to deliver immediate, per-HID-report events without adding alignment or coalescing mechanisms. This is both to reduce complexity up front and to validate the value of the raw event model for latency-sensitive use cases.
 
-That said, we recognize that high-frequency gamepad inputs could eventually require similar treatment to pointer events. This proposal is intended as a foundational step, and we explicitly leave room for future evolution. For further background, we recommend reviewing prior discussions on event-driven gamepad APIs [Open Should fire events instead of using passive model] (https://github.com/w3c/gamepad/issues/4#issuecomment-894460031).
+That said, we recognize that high-frequency gamepad inputs could eventually require similar treatment to pointer events. This proposal is intended as a foundational step, and we explicitly leave room for future evolution. For further background, we recommend reviewing [prior discussions on event-driven gamepad APIs](https://github.com/w3c/gamepad/issues/4#issuecomment-894460031).
 
 ## Proposed Approach
 ### `rawgamepadinputchange` Event
 To address the challenges of input latency, this proposal introduces a new event-driven mechanism: the `rawgamepadinputchange` event. This event fires directly on the [Gamepad](https://w3c.github.io/gamepad/#dom-gamepad) object and delivers real-time updates for each input frame, eliminating the need for high-frequency polling. The `rawgamepadinputchange` event includes detailed information about the state of the gamepad at the moment of change.
 
-#### Event Properties
+### Event Properties
 - `axesChanged` and `buttonsValueChanged`: Arrays of indices indicating which axes or button values changed since the last event.
 
 - `buttonsPressed` and `buttonsReleased`: Indices of buttons whose pressed state transitioned (from pressed to released or vice versa).
 
 - `gamepadSnapshot`: A frozen (read-only) snapshot of the gamepad’s state at the moment the input was received. It includes all axes, buttons, ID, index, and timestamp, and does not update after the event is dispatched.
 
-These properties, `axesChanged`, `buttonsPressed`, `buttonsReleased`, and `buttonsValueChanged` properties are arrays of indices follow the same indentification model as the [Gamepad.axes](https://w3c.github.io/gamepad/#dom-gamepad-axes) and [Gamepad.buttons](https://w3c.github.io/gamepad/#dom-gamepad-buttons) arrays.
+These properties, `axesChanged`, `buttonsPressed`, `buttonsReleased`, and `buttonsValueChanged` properties are arrays of indices and follow the same indentification model as the [Gamepad.axes](https://w3c.github.io/gamepad/#dom-gamepad-axes) and [Gamepad.buttons](https://w3c.github.io/gamepad/#dom-gamepad-buttons) arrays.
 
 #### Event Behavior
 Dispatched on the Gamepad Object: The rawgamepadinputchange event is dispatched on the Gamepad object that experienced the input change. This Gamepad instance is accessible via the event's [`target`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) property and represents a live object that reflects the current state of the device.
