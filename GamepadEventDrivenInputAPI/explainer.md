@@ -94,21 +94,15 @@ Reduce input latency by moving away from constant polling and introducing event-
 
 - Additionally, this proposal does not currently address input alignment or event coalescing. Prior work on high-frequency input APIs, particularly the Pointer Events API has demonstrated the importance of these mechanisms for latency-sensitive use cases. For instance, the [`pointerrawupdate`](https://developer.mozilla.org/en-US/docs/Web/API/Element/pointerrawupdate_event) event was introduced to provide low-latency input delivery, and it is complemented by the [`getCoalescedEvents()`](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/getCoalescedEvents) method, which exposes intermediate pointer updates that occur between animation frames. Together, these features help align input processing with rendering, improving visual smoothness and reducing jitter.
 
-In contrast, this proposal for `rawgamepadinputevent` intentionally omits alignment and coalescing in its initial design. At this stage, we've intentionally scoped this proposal to deliver immediate, per-HID-report events without adding alignment or coalescing mechanisms. This is both to reduce complexity up front and to validate the value of the raw event model for latency-sensitive use cases.
+In contrast, this proposal for `rawgamepadinputchange` intentionally omits alignment and coalescing in its initial design. At this stage, we've intentionally scoped this proposal to deliver immediate, per-HID-report events without adding alignment or coalescing mechanisms. This is both to reduce complexity up front and to validate the value of the raw event model for latency-sensitive use cases.
 
 That said, we recognize that high-frequency gamepad inputs could eventually require similar treatment to pointer events. This proposal is intended as a foundational step, and we explicitly leave room for future evolution. For further background, we recommend reviewing prior discussions on event-driven gamepad APIs [Open Should fire events instead of using passive model] (https://github.com/w3c/gamepad/issues/4#issuecomment-894460031).
 
 ## Proposed Approach
-To address the challenges of input latency, this proposal introduces a new event-driven mechanism: The `rawgamepadinputchange` event. This event fires directly on the [Gamepad](https://w3c.github.io/gamepad/#dom-gamepad) object and delivers real-time updates for each input frame, eliminating the need for high-frequency polling. The `rawgamepadinputchange` event includes detailed information about the state of the gamepad at the moment of change.
+### `rawgamepadinputchange` Event
+To address the challenges of input latency, this proposal introduces a new event-driven mechanism: the `rawgamepadinputchange` event. This event fires directly on the [Gamepad](https://w3c.github.io/gamepad/#dom-gamepad) object and delivers real-time updates for each input frame, eliminating the need for high-frequency polling. The `rawgamepadinputchange` event includes detailed information about the state of the gamepad at the moment of change.
 
-### Event Details
-Dispatched on the Gamepad Object: The rawgamepadinputchange event is dispatched on the Gamepad object that experienced the input change. This Gamepad instance is accessible via the event's [`event.target`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) property and represents a live object that reflects the current state of the device.
-
-Real-Time Updates: A new rawgamepadinputchange event is dispatched for every gamepad input state change, without delay or coalescing. This enables latency-sensitive applications, such as rhythm games, cloud gaming, or real-time multiplayer scenarios, to respond immediately and accurately to input.
-
-Gamepad Snapshot: The event also provides an `event.gamepadSnapshot` property which captures the input state at the exact time the event was generated - corresponding to the moment indicated by the HID input report's timestamp. This ensures that applications can reliably determine the exact state that triggered the event, even if the live object (`event.target`) has changed by the time the event handler runs.
-
-### Event Properties
+#### Event Properties
 - `axesChanged` and `buttonsValueChanged`: Arrays of indices indicating which axes or button values changed since the last event.
 
 - `buttonsPressed` and `buttonsReleased`: Indices of buttons whose pressed state transitioned (from pressed to released or vice versa).
@@ -116,6 +110,13 @@ Gamepad Snapshot: The event also provides an `event.gamepadSnapshot` property wh
 - `gamepadSnapshot`: A frozen (read-only) snapshot of the gamepad’s state at the moment the input was received. It includes all axes, buttons, ID, index, and timestamp, and does not update after the event is dispatched.
 
 These properties, `axesChanged`, `buttonsPressed`, `buttonsReleased`, and `buttonsValueChanged` properties are arrays of indices follow the same indentification model as the [Gamepad.axes](https://w3c.github.io/gamepad/#dom-gamepad-axes) and [Gamepad.buttons](https://w3c.github.io/gamepad/#dom-gamepad-buttons) arrays.
+
+#### Event Behavior
+Dispatched on the Gamepad Object: The rawgamepadinputchange event is dispatched on the Gamepad object that experienced the input change. This Gamepad instance is accessible via the event's [`target`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) property and represents a live object that reflects the current state of the device.
+
+Real-Time Updates: A new rawgamepadinputchange event is dispatched for every gamepad input state change, without delay or coalescing. This enables latency-sensitive applications, such as rhythm games, cloud gaming, or real-time multiplayer scenarios, to respond immediately and accurately to input.
+
+Gamepad Snapshot: The event also provides a `gamepadSnapshot` property which captures the input state at the exact time the event was generated - corresponding to the moment indicated by the HID input report's timestamp. This ensures that applications can reliably determine the exact state that triggered the event, even if the live object (`event.target`) has changed by the time the event handler runs.
 
 ## Example `rawgamepadinputchange` Event
 
