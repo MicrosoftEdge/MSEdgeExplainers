@@ -99,7 +99,7 @@ In contrast, this proposal for `rawgamepadinputevent` intentionally omits alignm
 That said, we recognize that high-frequency gamepad inputs could eventually require similar treatment to pointer events. This proposal is intended as a foundational step, and we explicitly leave room for future evolution. For further background, we recommend reviewing [prior discussions on event-driven gamepad APIs](https://github.com/w3c/gamepad/issues/4#issuecomment-894460031).
 
 ## Proposed Approach
-To address the challenges of input latency, this proposal introduces a new event-driven mechanism: The `rawgamepadinputchange` event. This event fires directly on the [Gamepad](https://w3c.github.io/gamepad/#dom-gamepad) object and delivers real-time updates for each input frame, eliminating the need for high-frequency polling. The `rawgamepadinputchange` event includes detailed information about the state of the gamepad at the moment of change.
+To address the challenges of input latency, this proposal introduces a new event-driven mechanism: the `rawgamepadinputchange` event. This event fires directly on the [Gamepad](https://w3c.github.io/gamepad/#dom-gamepad) object and delivers real-time updates for each input frame, eliminating the need for high-frequency polling. The `rawgamepadinputchange` event includes detailed information about the state of the gamepad at the moment of change.
 
 ### Event Details
 Dispatched on the Gamepad Object: The rawgamepadinputchange event is dispatched on the Gamepad object that experienced the input change. This Gamepad instance is accessible via the event's [`event.target`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) property and represents a live object that reflects the current state of the device.
