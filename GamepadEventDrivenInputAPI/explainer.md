@@ -106,7 +106,7 @@ Dispatched on the Gamepad Object: The rawgamepadinputchange event is dispatched 
 
 Real-Time Updates: A new rawgamepadinputchange event is dispatched for every gamepad input state change, without delay or coalescing. This enables latency-sensitive applications, such as rhythm games, cloud gaming, or real-time multiplayer scenarios, to respond immediately and accurately to input.
 
-Gamepad Snapshot: The event also provides an `event.gamepadSnapshot` property which captures the input state at the exact time the event was generated - corresponding to the moment indicated by the HID input report's timestamp. This ensures that applications can reliably determine the exact state that triggered the event, even if the live object (`event.target`) has changed by the time the event handler runs.
+Gamepad Snapshot: The event also provides an `gamepadSnapshot` property which captures the input state at the exact time the event was generated - corresponding to the moment indicated by the HID input report's timestamp. This ensures that applications can reliably determine the exact state changes that triggered the event, even if the live object (`event.target`) has changed by the time the event handler runs.
 
 ### Event Properties
 - `axesChanged` and `buttonsValueChanged`: Arrays of indices indicating which axes or button values changed since the last event.
