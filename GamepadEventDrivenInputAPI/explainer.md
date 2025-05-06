@@ -115,7 +115,7 @@ Gamepad Snapshot: The event also provides an `gamepadSnapshot` property which ca
 
 - `gamepadSnapshot`: A frozen (read-only) snapshot of the gamepad’s state at the moment the input was received. It includes all axes, buttons, ID, index, and timestamp, and does not update after the event is dispatched.
 
-These properties, `axesChanged`, `buttonsPressed`, `buttonsReleased`, and `buttonsValueChanged` properties are arrays of indices follow the same indentification model as the [Gamepad.axes](https://w3c.github.io/gamepad/#dom-gamepad-axes) and [Gamepad.buttons](https://w3c.github.io/gamepad/#dom-gamepad-buttons) arrays.
+These properties, `axesChanged`, `buttonsPressed`, `buttonsReleased`, and `buttonsValueChanged` properties are arrays of indices and follow the same indentification model as the [Gamepad.axes](https://w3c.github.io/gamepad/#dom-gamepad-axes) and [Gamepad.buttons](https://w3c.github.io/gamepad/#dom-gamepad-buttons) arrays.
 
 ## Example `rawgamepadinputchange` Event
 
