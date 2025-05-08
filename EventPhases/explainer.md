@@ -88,7 +88,7 @@ The spooky-action-at-a-distance design of CSS also makes it impossible for brows
 
 Fast web tools and sites go to extreme lengths to batch writes, only reading sizes from the DOM at the _very_ beginning of a [JavaScript execution task.](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide/In_depth) In moderately complex pages, enforcing this sort of discipline is extremely challenging. 
 
-Style readback creates global effects, since DOM manipulation can't be assured to only impact a specific subtree.
+Style readback can create global effects, since DOM manipulation can't be assured to only impact a specific subtree.
 
 > [!NOTE]
 > Recent additions to the web platform can provide better isolation for each of the frame generation phases. In order:
@@ -470,7 +470,7 @@ await window.write(() => {
 
 Cancellation could be handled with an [`AbortController`.](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
 
-Alternatives to `read()` and `write()` promise-vending callbacks could, instead, be element-based, although this creates challenges for coordination across wider sections of a document and so we do not explore them here.
+Alternatives to `read()` and `write()` promise-vending callbacks could, instead, be element-based, although this can create challenges for coordination across wider sections of a document and so we do not explore them here.
 
 ## Open Questions
 
