@@ -405,7 +405,7 @@ Another way around the problems of synchronous layouts and computed style inform
   // the lines following until the next turn (after a 
   // layout has occurred naturally):
   let dimensions = await foo.dimensions();
-  let bw = dimensoins.borderWidth;
+  let bw = dimensions.borderWidth;
 
   foo.attributeStyleMap.set("width", CSS.px(bw + 10));
 </script>
