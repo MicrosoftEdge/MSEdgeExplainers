@@ -22,14 +22,15 @@ In the worst cases, layout thrashing is a key contributor to slow interactions (
 
 [Joe Liccini's excellent blog post](https://webperf.tips/tip/layout-thrashing/) covers the underlying mechanics in detail, but to recap, the phases of generating a frame from changes to CSS and DOM (per [Paul Lewis' classic article](https://web.dev/articles/rendering-performance)) are:
 
-![The Pixel Pipeline](https://web.dev/static/articles/rendering-performance/image/the-full-pixel-pipeline-45b24543207ea_1440.jpg)
+![The Pixel Pipeline](./the-full-pixel-pipeline-45b24543207ea_1440.jpg "Phases of the pixel pipeline, JavaScript -> Style -> Layout -> Paint -> Composite. From Paul Lewis's article on web.dev")
 
-We can substitute any DOM manipulation &mdash; from the parser, from script, or from UI state changes (e.g., hovering with a mouse) &mdash; for "JavaScript" in this diagram; the phases are the same for generating an updated set of pixels for the user.
+We can substitute most DOM manipulations &mdash; from the parser, from script, or from UI state changes (e.g., hovering with a mouse) &mdash; for "JavaScript" in this diagram; the phases are the same for generating an updated set of pixels for the user.
 
 Now, browsers _could_ simply run this full set of phases after every single DOM or state manipulation. This would require blocking JavaScript execution to generate a visible frame after every manipulation operation (adding or removing elements, changing styles, etc.), which would be relatively slow. To avoid this, browsers batch work, attempting to avoid running the style and layout phases until JavaScript's single-threaded execution relinquishes control of the event loop (see [Jake's masterful talk](https://www.youtube.com/watch?v=cCOL7MC4Pl0), or [a recent transcription](https://www.andreaverlicchi.eu/blog/jake-archibald-in-the-loop-jsconf-asia-talk-transposed/)).
 
 But certain operations _force_ the browser to run at least the style and layout phases before JavaScript has [yielded to the main thread.](https://developer.mozilla.org/en-US/docs/Web/API/Scheduler/yield) These APIs [are numerous](https://gist.github.com/paulirish/5d52fb081b3570c81e3a) and generate an unpredictable amount of main-thread work, as work to generate updated metrics for style-readback operations [can potentially require style and layout invalidation _for every element in the document_.](https://web.dev/articles/reduce-the-scope-and-complexity-of-style-calculations)
 
+> [!NOTE]
 > Incidentally, this is why CSS-in-JS is such a terrible antipattern. Manipulating style rules at runtime is dramatically more costly than poorly timed style readback because it also blows away the caches that make style recalculation and layout faster.
 
 Most code that manipulates the DOM, then calls any API that returns sizing information _before_ yielding to the main thread causes style recalculation and layout to run, which can be extremely slow.
@@ -39,9 +40,9 @@ Most code that manipulates the DOM, then calls any API that returns sizing infor
   // Assuming no script before this code modifies the DOM or styles,
   // this code will execute quickly:
   let foo = document.querySelector("#foo");
-  // Synchronously reads back dimensions computed at last layout
+  // Synchronously reads back dimensions computed at last layout.
   let width = foo.innerWidth; 
-  // Set a style that will impact the element's computed width the
+  // Set styles that will impact the element's computed width the
   // next time a layout occurs.
   foo.style.width = `${parseInt(width) + 10}px`;
   // ...
@@ -54,7 +55,7 @@ Most code that manipulates the DOM, then calls any API that returns sizing infor
 </script>
 ```
 
-It's straightforward to apply the "read, then write" discipline in small programs, but imagine an only slightly more complicated program that uses code from a different vendor; a common occurrence in the modern web:
+It's straightforward to apply the "read, then write" discipline in small programs, but imagine an only slightly more complicated program that uses code from a different vendor, a common occurrence in the modern web:
 
 ```js
 // analytics.example.com/analytics.js
@@ -81,14 +82,15 @@ export function log(element) {
 </script>
 ```
 
-In this (only slightly) stylized example, `log()` performs a synchronous readback of style information that, implies that *at least* the style recalculation and layout phases of the frame generation pipeline must be re-run in order to compute the element's `innerHeight`. This happens at when the `innerHeight` accessor is called because browsers attempt to batch writes in the hopes that they will not need to perform the expensive style, layout, paint, and composite phases until a full frame needs to be generated for the user. 
+In this (only slightly) stylized example, `log()` performs a synchronous readback of style information that implies that *at least* the style recalculation and layout phases of the frame generation pipeline must be re-run in order to compute the element's `innerHeight`. This happens when the `innerHeight` accessor is called because browsers attempt to batch writes in the hopes that they will not need to perform the expensive style, layout, paint, and composite phases until a full frame needs to be generated for the user. 
 
-The spooky-action-at-a-distance design of CSS also makes it impossible for browsers to calculate height without first computing width, meaning that potentially every element in the document may change dimension as a result. Automatic height from width is a tremendous time saving for web developers in general, but creates large side effects from any manipulation. This gives rise to the meme that "DOM is slow" (it isn't); in reality, _style and layout may take an unbounded and hard-to-reason-about amount of time_ and care is required to avoid interleaving DOM manipulation and layout readback operations in script.
+The spooky-action-at-a-distance design of CSS also makes it impossible for browsers to calculate height without first computing width, meaning that potentially every element in the document may change dimension as a result. Automatic height from width is a tremendous time saving for web developers in general, but can create large global side effects whenever the DOM is manipulated. This gives rise to the meme that "DOM is slow" (it isn't); in reality, _style and layout may take an unbounded and hard-to-reason-about amount of time_ and care is required to avoid interleaving DOM manipulation and layout readback operations in script.
 
 Fast web tools and sites go to extreme lengths to batch writes, only reading sizes from the DOM at the _very_ beginning of a [JavaScript execution task.](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide/In_depth) In moderately complex pages, enforcing this sort of discipline is extremely challenging. 
 
 Style readback creates global effects, since DOM manipulation can't be assured to only impact a specific subtree.
 
+> [!NOTE]
 > Recent additions to the web platform can provide better isolation for each of the frame generation phases. In order:
 >
 > - **Style recalc**: [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) provides subtree-level isolation for style recalculation operations for _most_ styles (exceptions include [inherited properties such as `color`, `font-size`, and CSS Custom Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascade/Inheritance#inherited_properties)). <br><br>Other approaches like [selector prefixing (a.k.a. "style scoping")](https://nolanlawson.com/2023/01/17/my-talk-on-css-runtime-performance/) can approximate this benefit by shortcutting lookups when applied to a majority of elements and style rules. Disappointingly, `contain: style;` does _not_ provide this benefit (and its [use-cases](https://css-tricks.com/almanac/properties/c/contain/#aa-style) are dubious).<br><br>
@@ -116,33 +118,33 @@ The scale and persistence of these issues suggests missing platform controls to 
 
 ## Proposal
 
-We propose to introduce separate read and write phases when interacting with the DOM. When this mode is enabled, interleaving reads and writes will no longer incidentally trigger global style recalculation and layout, but will either result in "stale" reads or exceptions.
+We propose a mode with separate read and write phases for interacting with the DOM. When this mode is enabled, interleaving reads and writes will no longer incidentally trigger global style recalculation and layout, but will either result in "stale" reads or exceptions.
 
 Today's phasing can be described as:
 
  1. Browser processing (style, layout, etc.)
- 1. JavaScript event dispatch
+ 1. JavaScript event dispatch (style reads + DOM writes)
     1. Task execution
     1. Microtask queues drained
  1. GOTO: 1
 
-At any point in JavaScript processing, the DOM can be mutated and the results of those modifications on styling for any element can be synchronously requested, forcing _at least_ the `style` and `layout` phases of the frame production process to execute.
+At any point in JavaScript processing, the DOM can be mutated and the results of those modifications on styling for any element can be synchronously read back. If they would impact element dimensions, these changes will force _at least_ the `style` and `layout` phases of the frame production process to execute.
 
 This is, conceptually, a `read/write` phase, in which both operations are allowed in the same task or microtask.
 
-To be minimally invasive to this model, we propose additions to event handling that define phases on either side of `read/write`, such that either `read` or `write` callbacks execute before or after the existing event delivery tasks. We pair it with APIs for scheduling in future phases. 
+To be minimally invasive to this model, we propose additions to event handling that define opt-in phases on either side of `read/write`, such that either `read` or `write` callbacks execute before or after the existing event delivery tasks. We pair it with APIs for scheduling in future phases. 
 
 The new phasing, conceptually, is:
 
  1. Browser processing (style, layout, etc.)
  1. JavaScript event dispatch
-    1. Read phase
+    1. Opt-in `read` phase
        1. Task execution
        1. Microtask queues drained
-    1. Read/Write
+    1. Existing `read/write` phase
        1. Task execution
        1. Microtask queues drained
-    1. Write
+    1. Opt-in `write` phase 
        1. Task execution
        1. Microtask queues drained
  1. GOTO: 1
@@ -180,13 +182,6 @@ foo.addEventListener(
   // Options
   { phase: "read" }
 );
-
-// And using the new `when()` observable style:
-foo.when(
-  "click", 
-  (evt) => { /* ... */}, 
-  { phase: "read" }
-);
 ```
 
 Syntax of the scheduling integration is TBD (e.g., should there be explicit `scheduler.postForRead()` and `scheduler.postForWrite()` API instead?). We could also imagine the event carrying scheduling methods for brevity:
@@ -214,7 +209,7 @@ Extensions will also be required for the platform's existing scheduling APIs to 
 
 ### Opt-in Mechanism
 
-Acheiving widespread adoption of these mechanisms is a daunting but important task, as any stray third party library can effectively destroy the performance of web applications today. As a result, we place a premium on alternatives that allow for incremental rewrites of existing code, as well as the ability to polyfill with minimal intrusion.
+Achieving widespread adoption of these mechanisms is a daunting but important task, as any stray third party library can effectively destroy the performance of web applications today. As a result, we place a premium on alternatives that allow for incremental rewrites of existing code, as well as the ability to polyfill with minimal intrusion.
 
 The meat of our proposal (above) does not require any explicit page-level opt-in, but we can imagine enforcement modes that can set a global policy to strictly require use of them; e.g. via [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md):
 
@@ -240,7 +235,7 @@ This policy will, in effect, prevent the entire class of layout-thrashing bugs. 
 
 ### Facilitating The Transition With Report-Only Mode
 
-Very few libraries and tools will initially be compatible with this model, and experience with the TLS adoption effort has taught us that integration with the [Reporting API](https://developer.mozilla.org/en-US/docs/Web/API/Reporting_API) and a [Report-Only Mode](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) are important enablers for organisations looking to make large-scale change in their applications.
+Very few libraries and tools will initially be compatible with this model, and experience with the [TLS adoption effort](https://www.usenix.org/conference/enigma2017/conference-program/presentation/schechter) has taught us that integration with the [Reporting API](https://developer.mozilla.org/en-US/docs/Web/API/Reporting_API) and a [Report-Only Mode](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy-Report-Only) are important enablers for organisations looking to make large-scale change in their applications.
 
 Programmatic use might look like:
 
@@ -416,7 +411,7 @@ Another way around the problems of synchronous layouts and computed style inform
 </script>
 ```
 
-This style of API opt-in is unusual on the web platform, and our experience designing [the updated DOM for Dart (`dart:html`)](https://dart.dev/libraries/dart-html) has convinced us that the required of transition is exceedingly difficult to pull off in practice, [no matter how nice the new APIs are by comparison.](https://api.dart.dev/stable/latest/dart-html/Element/on.html)
+This style of API opt-in is unusual on the web platform, and our experience designing [the updated DOM for Dart (`dart:html`)](https://dart.dev/libraries/dart-html) convinced us that forced transitions to new APIs are exceedingly difficult to pull off in practice, [no matter how nice the new APIs are by comparison.](https://api.dart.dev/stable/latest/dart-html/Element/on.html)
 
 The powerful force of legacy code will be an impediment to adoption regardless of which style of API we choose, however, and the jury is out on which path will lead to the fastest adoption.
 
@@ -443,7 +438,7 @@ Triggering notice or enforcement this way might use the same values but with an 
 Or perhaps via CSS:
 
 ```css
-#root {
+:root {
   phased-layout-events: strict;
 }
 ```
@@ -477,6 +472,20 @@ Cancellation could be handled with an [`AbortController`.](https://developer.moz
 
 Alternatives to `read()` and `write()` promise-vending callbacks could, instead, be element-based, although this creates challenges for coordination across wider sections of a document and so we do not explore them here.
 
+## Open Questions
+
+The author has no strong preference for any particular API style considered in this document, so the largest open question relates to which design we should pick (if any).
+
+Beyond that, cross-cutting open questions include:
+
+ - Should reads after writes throw or return stale data?
+ - What API style should we adopt for scheduler integration?
+ - Which sort of pattern we should adopt for integrating with existing scheduling APIs (e.g. `rAF()`)?
+ - Use of Document Policy for enforcement vs, e.g., [Feature Policy which reamains more widely supported](https://caniuse.com/feature-policy) but presents a semantic mismatch.
+ - How will these proposals interact with extensions? Should users be able to force such a behaviour onto all extensions? Should we adopt it there by policy?
+
+ Feedback on these issues is appreciated.
+
 ## Accessibility, Privacy, and Security Considerations
 
 This API surface is not believed to present access to new timing information or other data that is not already available via scripting to the web platform and exposes no new security-sensitive capability.
@@ -493,6 +502,9 @@ The author would like to thank many folks for their patience and input in develo
 
 - [Kurt Catti-Schmidt](https://github.com/KurtCattiSchmidt)
 - [Daniel Clark](https://www.linkedin.com/in/daniel-clark-a4a0b658/)
+- [Alison Maher](https://www.linkedin.com/in/alison-maher-6255b2121/)
+- [Andy Luhrs](https://aluhrs.com/)
+- [Kevin Babbitt](https://github.com/kbabbitt)
 
 Many projects have influenced the thinking in this proposal, including:
 
