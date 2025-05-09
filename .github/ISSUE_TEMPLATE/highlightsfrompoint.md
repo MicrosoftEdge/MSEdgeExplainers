@@ -2,7 +2,7 @@
 name: highlightsFromPoint API
 about: new issue
 title: "[highlightsFromPoint] <TITLE HERE>"
-labels: highlightsFromPoint, HighlightEvents
+labels: HighlightEvents
 assignees: ffiori
 
 ---
