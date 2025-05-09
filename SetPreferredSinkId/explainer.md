@@ -71,7 +71,7 @@ Return:
 
 Exceptions:
   NotAllowedError DOMException
-    Returned if a cross-origin sub frame tries to call the API.
+    Returned if a sub frame tries to call the API.
 
   NotFoundError DOMException
     Returned if the deviceId does not match any audio output device.
