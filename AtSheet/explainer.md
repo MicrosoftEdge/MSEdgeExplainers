@@ -31,7 +31,7 @@ Additionally, bundling of stylesheets is difficult for developers who are distri
 
 We propose an enhancement to allow the declaration of new stylesheets via an `@sheet` CSS block and using existing mechanisims such as `@import`, `<link>`, and CSS module script `import` to apply those shared styles to DSDs without the use of JavaScript.
 
-We're currently investigating this and [Declarative CSS modules](/ShadowDOM/explainer.md) in parallel, and anticipate that we'll be prioritizing only one of these two in the immediate future.
+We're currently investigating this and [Declarative CSS modules](/ShadowDOM/explainer.md) in parallel.
 
 ## Goals
 * Allow the reuse of styles in markup-based shadow DOM without requiring JavaScript.
@@ -80,10 +80,16 @@ This will import only the rules for `foo` - in this case, the `div { color: red;
 <link rel="stylesheet" href="sheet.css" sheet="foo" />
 ```
 
-This will also import only this rules for "foo" - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
+This will also import only the rules for "foo" - in this case, the `div { color: red; }` rule. This will *not* import any rules from `sheet.css` outside of "foo".
 
 ### Importing a base set of inline styles into a Declarative Shadow DOM
-Shadow DOM isolates styles, but fragment identifiers from the light DOM are global and referenceable from shadow DOM (but not vice versa). This enables Declarative Shadow DOM to import `@sheet` references from the light DOM:
+
+Shadow DOM isolates styles, but fragment identifiers from the light DOM are global and referenceable from shadow DOM (but not vice versa).
+
+Combined with [Local References In <link> Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md), developers may define a set of styles for their components upfront,
+and then reference these styles declaratively from their component. By using inline styles instead of an external .css file, a Flash of Unstyled Content (FOUC) can be avoided in many cases.
+
+This example demonstates importing `@sheet` references from the light DOM into a Declarative Shadow DOM:
 
 ```html
 <style id="sheet">
@@ -111,11 +117,11 @@ or imported from JavaScript:
 
 #### Specific Changes to HTML and CSS
 
-This proposal augments the HTML `<link>` tag in two ways:
-1. Fragment identifiers to same-document `<style>` tags are supported in the `href` attribute to allow for `@sheet` to work with same-document `<style>` tags.
-2. The `sheet` attribute, which scopes the specified style reference to rules within an `@sheet` identifier (should this be a list of identifiers so multiple sheets can be imported?)
+This proposal augments the HTML `<link>` tag by introducing the `sheet` attribute, which scopes the specified style reference to rules within an `@sheet` identifier.
 
-This proposal augments the CSS `@import` syntax by adding an optional named sheet identifier ( `@import foo from "sheet.css";`).
+A separate proposal to support fragment identifiers to same-document `<style>` in the `href` attribute for `<link>` tags is described in [Local References In <link> Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md).
+
+This proposal augments the CSS `@import` syntax by adding the `from` keyword, with comma-separated list of `@sheet` identifiers ( `@import foo, bar from "sheet.css";`).
 
 The `@sheet` fragment syntax (`<link rel="stylesheet" href="sheet.css#foo" />`) that was agreed upon in https://lists.w3.org/Archives/Public/www-style/2023Apr/0004.html should be revisited with these new applications in mind, as it is not compatible with same-document `<style>` references.
 
@@ -184,12 +190,12 @@ import { bar } from 'sheet.css' with { type: 'css' }
 #### Interaction with CSSOM
 
 
-Named `@sheet` references augment the [existing](https://drafts.csswg.org/cssom/#stylesheet) `StyleSheet` interface with an optional `name` attribute reflecting the `@sheet` identifier:
+Named `@sheet` rules are a new type of `CSSGroupingRule` with a required `name` attribute reflecting the `@sheet` identifier:
 
 ```
 [Exposed=Window]
-interface StyleSheet {
-  readonly attribute DOMString? name;
+interface CSSSheetRule : CSSGroupingRule {
+  readonly attribute CSSOMString name;
 };
 ```
 
@@ -199,6 +205,25 @@ This also expands the [existing](https://drafts.csswg.org/cssom/#cssstylesheet) 
 [Exposed=Window]
 interface CSSStyleSheet : StyleSheet {
   [SameObject] readonly attribute StyleSheetList nestedStyleSheets;
+};
+```
+
+The [existing](https://drafts.csswg.org/cssom-1/#cssimportrule) `CSSImportRule` is extended with `sheetNames` and `namedStyleSheets`.
+
+```
+partial interface CSSImportRule {
+  [SameObject] readonly attribute SheetNameList sheetNames;
+  [SameObject] readonly attribute StyleSheetList namedStyleSheets;
+};
+```
+
+The new `SheetNameList` interface exposes a list of sheet names for a `CSSImportRule`.
+
+```
+[Exposed=Window]
+interface SheetNameList {
+  readonly attribute unsigned long length;
+  getter CSSOMString? item(unsigned long index);
 };
 ```
 

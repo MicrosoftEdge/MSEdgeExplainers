@@ -61,7 +61,7 @@ elements.
   <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">proposal</a>.
 - Modifications to Shadow DOM scoping behaviors. This proposal depends on
   existing Shadow DOM behavior as currently defined. Styles defined in a Shadow
-  DOM will remain inaccessible to the Light DOM.
+  DOM will remain inaccessible to the Light DOM and other Shadow DOMs.
 
 ## Proposal - Local References for Link Rel Tags
 
@@ -76,35 +76,15 @@ a `<style>` or `<link>` tag:
 </style>
 <p>Outside Shadow DOM</p>
 <template shadowrootmode="open">
-  <link rel="inline-stylesheet" href="#inline_styles" />
+  <link rel="stylesheet" href="#inline_styles" />
   <p>Inside Shadow DOM</p>
 </template>
 ```
 
 With this functionality, the text "Inside Shadow DOM" will by styled blue, due
-to the `<link rel="inline-stylesheet" href="#inline_styles">` node's stylesheet
+to the `<link rel="stylesheet" href="#inline_styles">` node's stylesheet
 applying (along with the `color: blue` rule applying via the `p` selector in
 that stylesheet).
-
-A new value for the `rel` attribute is used here to prevent legacy engines from
-performing an unnecessary fetch with this markup. The name `inline-stylesheet`
-is preliminary and open to discussion.
-
-### Linking to another `<link>` tag
-
-```html
-<link rel="stylesheet" href="foo.css" id="inline_styles" />
-<p>Outside Shadow DOM</p>
-<template shadowrootmode="open">
-  <link rel="inline-stylesheet" href="#inline_styles" />
-  <p>Inside Shadow DOM</p>
-</template>
-```
-
-Developers may want to link to styles pulled into another `<link>` tag. These
-`<link>` references may be internal files (via `inline-stylesheet`), or external
-files. Loop detection may be necessary for references to another
-`inline-stylesheet`.
 
 ### Scoping
 
@@ -117,7 +97,7 @@ files. Loop detection may be necessary for references to another
   </style>
   <p>Inside Shadow DOM</p>
 </template>
-<link rel="stylesheet" href="foo.css" id="#inline_styles_from_shadow" />
+<link rel="stylesheet" href="#inline_styles_from_shadow" />
 <p>
   Outside Shadow DOM. Styles defined inside the Shadow Root are not applied, so
   this text is not blue.
@@ -126,6 +106,122 @@ files. Loop detection may be necessary for references to another
 
 Due to existing Shadow DOM scoping behaviors, `<style>` tags defined inside the
 Shadow DOM cannot be accessed from the Light DOM.
+
+This means that `<style>` tags defined within a Shadow DOM are only accessible from
+the shadow root where they are defined, as illustrated by the following examples:
+
+```html
+<template shadowrootmode="open">
+  <style id="inline_styles_from_shadow">
+    p {
+      color: blue;
+    }
+  </style>
+  <p>Inside Shadow DOM</p>
+    <template shadowrootmode="open">
+      <link rel="stylesheet" href="#inline_styles_from_shadow" />
+      <p>Inside Nested Shadow DOM</p>
+    </template>
+</template>
+```
+
+<p>
+  Styles defined inside the parent Shadow Root are not applied, so "Inside Nested Shadow DOM" is not blue.
+</p>
+
+```html
+<template shadowrootmode="open">
+  <style id="inline_styles_from_shadow">
+    p {
+      color: blue;
+    }
+  </style>
+  <p>Inside Shadow DOM</p>
+</template>
+<template shadowrootmode="open">
+  <link rel="stylesheet" href="#inline_styles_from_shadow" />
+  <p>Inside Sibling Shadow DOM</p>
+</template>
+```
+
+<p>
+  Styles defined inside the sibling Shadow Root are not applied, so "Inside Sibling Shadow DOM" is not blue.
+</p>
+
+### Fetch Behavior
+
+In user agents where the Local References In `<link>` Tags feature is not
+supported, the behavior for the `<link>` tag with the following markup in a
+file named "foo.html" will be as follows:
+
+```html
+<style id="style_tag">
+  p {
+    color: blue;
+  }
+</style>
+<template shadowrootmode="open">
+  <link rel="stylesheet" href="#style_tag" />
+  <p>Inside Shadow DOM</p>
+</template>
+```
+
+1. A fetch is initiated for `foo.html#style_tag` (a `<base>` tag may modify
+the base URL).
+2. Upon resolving the fetch (this will usually be a cache hit for the current
+page), the `<link>` tag's `onerror` event is fired due to a MIME type mismatch
+(the `<link>` tag expects a CSS MIME type when `rel="stylesheet"`, while
+`foo.html#style_tag` is an HTML MIME type). Note that some
+User Agents don't follow this behavior and instead fire `onload`.
+
+There are several options to avoid this fetch:
+1. Using a different value for `rel` than `stylesheet` (`inline-stylesheet`
+is one option).
+2. Using a different attribute than `href` for in-document stylesheets.
+3. Using a special URL scheme, e.g. inline:id rather than relying on fragment
+identifiers.
+
+However, this may not be necessary. An easy method of polyfilling this behavior
+is to simply add `onerror` and `onload` handlers that look up the `<style>`
+element referenced and copy its contents into a dataURI, as follows:
+
+```html
+<style id="style_tag">
+  p {
+    color: blue;
+  }
+</style>
+<script>
+function polyfill(elem) {
+  if(!elem.sheet || !elem.sheet.cssRules || elem.sheet.cssRules.length === 0) {
+    // Extract the fragment from the link tag's `href` attribute.
+    const url = new URL(elem.href);
+    const fragment = url.hash.substring(1);
+    if(fragment.length > 0) {
+      // Look up the corresponding <style> tag with specified `href`.
+      let style_tag = document.getElementById(fragment);
+      if(style_tag && style_tag.sheet) {
+        let css_rule_string = "";
+        for(let i = 0; i < style_tag.sheet.rules.length; ++i) {
+          css_rule_string += style_tag.sheet.rules[i].cssText + ";";
+        }
+        // Update the link tag with a dataURI with the referenced style rules.
+        elem.setAttribute("href", "data:text/css;base64," + btoa(css_rule_string));
+      }
+    }
+  }
+}
+</script>
+<div>
+  <template shadowrootmode="open">
+  <link rel="stylesheet" href="#style_tag" onerror="polyfill(this);" onload="polyfill(this);" />
+    <p>Inside Shadow DOM</p>
+  </template>
+</div>
+```
+
+Note that this polyfill is not a live reference to the referenced stylesheet,
+so changes to `style_tag` will not be reflected in the shadow DOM.
 
 ## Detailed design discussion
 
@@ -146,13 +242,9 @@ instead of many copies.
 
 #### Specific Changes to HTML and CSS
 
-This proposal augments the HTML `<link>` tag in two ways:
-
-1. A new value for the `<link>` tag's `rel` attribute to indicate a local
-   fragment. We are currently using the value `inline-stylesheet`, but this name
-   is open to suggestions.
-2. Fragment identifiers to same-document `<style>` tags are supported in the
-   `href` attribute when the `rel` attribute is `inline-stylesheet`.
+This proposal augments the HTML `<link>` tag by supporting fragment identifiers to
+same-document `<style>` tags in the `href` attribute when the `rel` attribute is
+`stylesheet`.
 
 ## Considered alternatives
 
@@ -170,8 +262,8 @@ This proposal augments the HTML `<link>` tag in two ways:
 ## Open Issues
 
 1. "Deep Clone vs Reference" listed above is the biggest outstanding issue.
-2. The name `inline-stylesheet` can be refined (or revisited if it's not
-   necessary to define a new `rel` value).
+
+2. Should there be a way for Shadow DOM roots to export style ID's for sharing?
 
 ## References & acknowledgements
 

@@ -48,6 +48,8 @@ content location of future work and discussions.
     - [Scenario 3: Segmented gap decorations](#scenario-3-segmented-gap-decorations)
   - [Open questions](#open-questions)
   - [Future ideas](#future-ideas)
+    - [Images](#images)
+    - [Corner joins](#corner-joins)
     - [Placement of gap decorations](#placement-of-gap-decorations)
       - [Grid](#grid)
       - [Flex, multi-column, and masonry](#flex-multi-column-and-masonry)
@@ -56,6 +58,7 @@ content location of future work and discussions.
     - [Logical properties for flex and masonry containers](#logical-properties-for-flex-and-masonry-containers)
   - [Considered alternatives](#considered-alternatives)
     - [Alternative 1: 2021 draft specification](#alternative-1-2021-draft-specification)
+    - [Alternative 2: Using pseudo-elements](#alternative-2-using-pseudo-elements)
   - [References \& acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -94,12 +97,8 @@ non-ergonomic workarounds such as these examples:
   for Implementation, and there are interoperability differences among engines.
   Additionally, authors can achieve many of the scenarios covered by this
   explainer in a table already using cell borders.
-* Images in gap decorations. Compared to, say, border-image, gap decoration
-  images need to cover significantly more cases such as T intersections. See
-  [this
-  comment](https://github.com/w3c/csswg-drafts/issues/5080#issuecomment-1526585163)
-  for more detail. Further exploration is needed into the best way to handle
-  these, so this scenario is left to a future level of the feature.
+* Images in gap decorations. Further exploration is needed into the best way to
+  handle these, so this scenario is left as a [future idea](#images).
 
 ## User research
 
@@ -353,6 +352,36 @@ src="images/csswg-drafts-issues-2748-issuecomment-446781218-last-example.png">
 
 ## Future ideas
 
+### Images
+
+Much like `border-image`, support for images in gap decorations would allow for
+more decorative separators to be used. These could be purely design choices, or
+they could be used to achieve practical effects such as coupon borders.
+Examples:
+
+* https://github.com/w3c/csswg-drafts/issues/2748#issuecomment-446781218 - third example
+
+  <image src="images/csswg-drafts-issues-2748-issuecomment-446781218-third-example.png">
+
+* https://github.com/w3c/csswg-drafts/issues/2748#issuecomment-621983931
+
+  <image src="images/csswg-drafts-issues-2748-issuecomment-621983931-first-example.png">
+
+However, unlike `border-image`, gap decoration images need to cover
+significantly more cases, such as T intersections and cross intersections. More
+detail and examination of this issue:
+
+* https://github.com/w3c/csswg-drafts/issues/5080#issuecomment-1526585163
+* https://github.com/w3c/csswg-drafts/issues/2748#issuecomment-623039817
+
+### Corner joins
+
+In [Issue 985](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/985), it
+was suggested that we apply a `border-radius` like property to gap decorations
+to allow for more flexible styling near intersections. We could also potentially
+reuse concepts from `corner-shape` for even more flexibility. This idea is tracked
+in [CSSWG Issue 12150](https://github.com/w3c/csswg-drafts/issues/12150).
+
 ### Placement of gap decorations
 
 Allow authors to specify where gap decorations start and end within a container.
@@ -456,10 +485,46 @@ grid lines, and (b) simplifying the model for fine-tuning segment placement. We
 also believe the proposal in this explainer offers developers more flexibility
 even absent support for gap decoration images; see Scenario 3 for one example.
 
+### Alternative 2: Using pseudo-elements
+
+An alternative approach to `column-rule-*` and `row-rule-*` properties would be
+to introduce pseudo-elements representing gaps, for example:
+
+```css
+.container {
+  display: grid;
+  grid-template: auto / auto;
+  gap: 5px;
+}
+.container::column-gaps {
+  background: red;
+  width: 1px;
+}
+.container::row-gaps {
+  background: blue;
+  width: 1px;
+}
+```
+
+In some ways, this would be more powerful, as it would allow for more
+flexibility for what can be placed in the gaps.
+
+However, this approach also comes with drawbacks. Varying gap decorations over a
+container becomes much harder. One might imagine a `::row-gaps::nth(even)`
+pseudo selector to style every other row gap. However, certain container types
+such as grid can automatically generate rows and columns depending on their
+contents. That means we don't know until layout time how many such pseudo styles
+we need to produce, which creates a wrong-way dependency between layout and
+style. It would also mean that, for large containers, we would incur the costs
+of calculating and storing styles for every single gap. That would be a large
+overhead to absorb, especially considering that the more common case is to have
+at most a single decoration style for a given container.
+
 ## References & acknowledgements
 
 Many thanks for valuable feedback and advice from:
 
+- <a href="https://github.com/alico-cra">@alico-cra</a>
 - Alison Maher
 - Benoît Rouleau
 - Ian Kilpatrick
