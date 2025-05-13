@@ -1,19 +1,19 @@
 ---
-name: Prompt API
-description: Report an issue about the Prompt API in Microsoft Edge
+name: Writing assistance APIs
+description: Report an issue about the writing assistance APIs in Microsoft Edge
 about: new issue
-title: "[Prompt API] <TITLE HERE>"
-labels: Prompt API
+title: "[Writing assistance APIs] <TITLE HERE>"
+labels: Writing assistance APIs
 assignees: sohchatt
 body:
 - type: markdown
   attributes:
     value: |
-      Thank you for reporting an issue with the Prompt API in Microsoft Edge!
+      Thank you for reporting an issue with the writing assistance APIs in Microsoft Edge!
 
-      If you want to send feedback, questions, or discuss about your scenario for built-in AI instead, please add a comment to issue #1012.
+      If you want to send feedback, questions, or discuss about your scenario for built-in AI instead, please add a comment to issue #1031.
 
-      Before reporting an issue, please check the [Prompt API documentation](https://aka.ms/edge-prompt-api-docs), which includes instructions about how to enable the API in Microsoft Edge.
+      Before reporting an issue, please check the [Writing assistance APIs documentation](https://aka.ms/edge-writing-assistance-api-docs), which includes instructions about how to enable the APIs in Microsoft Edge.
 - type: textarea
   attributes:
     label: System
