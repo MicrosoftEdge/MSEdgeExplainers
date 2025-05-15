@@ -106,7 +106,7 @@ tooltips (for example, color properties, font properties, etc.)
 the author by default.
 * Allow authors to override the default positioning behavior of the built-in
 tooltips.
-* Allow authors to change the animation and timing of built-in tooltips.
+* Allow authors to change the timing of built-in tooltips.
 * Improve accessibility of the `title` attribute, particularly for keyboard users.
 * Guarentee security best practices, given that tooltips today can extend past
 the bounds of the browser Window.
@@ -169,8 +169,8 @@ requires their own input management, proper accessibility support and proper
 handling of the tooltip positioning, which can be complex.
 
 This does allow authors to acheive their goal of full cusomizability, but it often
-requires heavy use of JS, or use of `:before` or `:after` pseudos, which can be easy
-to get accessibility correct.
+requires heavy use of JS, or use of `:before` or `:after` pseudos, which can make
+getting accessibility correct quite difficult.
 
 As such, this solution requires a lot of work to get right, especially if all they
 want to do is adjust a few simple styles on the built-in tooltip.
@@ -354,7 +354,7 @@ https://github.com/w3c/csswg-drafts/issues/8930#issuecomment-1581848840)
 from Lea Verou in 2023. 
 
 The proposal in this document takes close inspiration from these, by
-introducing a new pseudo element, called `::tooltip` that can be
+introducing a new pseudo element, called `::tooltip`, that can be
 used by authors to style the browser tooltip that is displayed when
 the `title` attribute is set on an HTML element.
 
@@ -380,14 +380,14 @@ should be able to style tooltips in their own chosen way, unless
 
 Authors may also want to trigger this path without triggering any
 styles beyond those that are default. As such, there requires
-some mechanism for authors to trigger the new default `::tooltip`
-based default to start applying.
+some mechanism for authors to trigger the new `::tooltip`-based
+default.
 
 An initial suggestion would be to add a new value to [`appearance`](
 https://drafts.csswg.org/css-ui/#propdef-appearance), similar to
 what was done for [customizable select elements](
 https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select),
-called `base-tooltip` that an author can use within the `::tooltip`
+called `base-tooltip`, that an author can use within the `::tooltip`
 pseudo element to trigger the new base default styles and
 customizability.
 
@@ -431,8 +431,8 @@ set this via the default stylesheet in the following manner:
 
 There were some concerns that this wouldn't work well for SVGs,
 since SVGs use `<title>` instead of the `title` attribute for
-built-in tooltips. [@bleper](https://github.com/bleper)'s put
-togerher a [potential proposal](
+built-in tooltips. [@bleper](https://github.com/bleper) put
+together a [potential proposal](
 https://github.com/w3c/csswg-drafts/issues/8930#issuecomment-1581848840)
 for how to address this issue.
 
@@ -470,8 +470,8 @@ anchor for the rendered tooltip.
 ### Default styles for `::tooltip`
 
 When the new default `::tooltip` styles are tiggered via the
-`appearance` property, or some other mechanism, a set of default
-styles would be applied by the UA.
+`appearance` property, a set of default styles would be applied
+by the UA.
 
 These styles were mostly pulled directly from Lea Verou's initial
 [proposal](
@@ -527,8 +527,8 @@ https://github.com/w3c/csswg-drafts/issues/9447) to discuss what
 properties should be styleable within a `::tooltip` pseudo element.
 As such, the complete list of properties is up for discussion, but
 as the proposal notes, the core set of properties should include:
-- `content` for setting the text displayed in the tooltip (although
-whether authors should be allowed to change this is up for debate)
+- `content` for setting the text displayed in the tooltip (whether
+authors should be allowed to change this is up for debate)
 - `appearance` as a means to trigger new default tooltip styles
 - All font properties, `text-transform`, `letter-spacing`,
 `word-spacing`, and the i18n text properties
@@ -547,7 +547,7 @@ with the rest of their page.)
 default styling of the position of `::tooltip`, we should also
 include [CSS Anchor Positioning](
 https://drafts.csswg.org/css-anchor-position-1/) properties
-for author customization.
+for author customization
 
 The list above should handle the majority of styling use cases
 for authors, however the [current proposal](
@@ -573,16 +573,16 @@ To allow `::tooltip` to inherit styles from the rest of the page,
 it should be grouped witin the list of [Tree-Abiding
 Pseudo-elements](https://drafts.csswg.org/css-pseudo/#treelike).
 
-This would allow `::tooltip` to inherit properties like `font-family`
+This would allow `::tooltip` to inherit properties, like `font-family`,
 from the rest of the page, making it easier for authors to create
 a consistent look and feel across all their UI.
 
 ### What user interaction triggers the built-in tooltip?
 
-Currently, browsers show `title`-based tooltips when a user hovers
+Currently, browsers shows `title`-based tooltips when a user hovers
 over the element associated with the tooltip.
 
-No major browser engine appears to currently support touch interactions
+No major browser engines appears to currently support touch interactions
 for these built-in tooltips, but this should be something for browser
 vendors to consider along with support for `::tooltip`, similar to
 what is [proposed with `interesttarget`](
@@ -654,7 +654,7 @@ styles as follows:
 ### Scenario 3: Adjusting tooltip timing
 
 An author may not like the timing of the built-in tooltip popup. An author
-can adjust this by adjusting the tooltip `transition`, as demonstrated in
+can change this by adjusting the tooltip `transition`, as demonstrated in
 the example below:
 
 ```html
@@ -673,9 +673,10 @@ the example below:
 
 ### Scenario 4: Setting the name using `title` without rendering a tooltip
 
-There is no existing way for most elements to set an [accessible
-description](https://developer.mozilla.org/en-US/docs/Glossary/Accessible_description#accessible_description_computation) without
-using ARIA or without a tooltip being shown (via the `title` attribute).
+There is no existing way to set an [accessible description](
+https://developer.mozilla.org/en-US/docs/Glossary/Accessible_description#accessible_description_computation) for most
+elements without using ARIA or without a tooltip being shown (via
+the `title` attribute).
 
 We can consider making this possible through the `::tootlip` proposal
 utilizing `content: none` as follows:
@@ -708,12 +709,12 @@ below:
 
 ## Accessibility Considerations
 
-### What is the current accessibility experience of tooltips across browsers?
-
 According to the WCAG, “Content which can be triggered via pointer hover
 should also be able to be triggered by keyboard focus.” (Resource). As
 such, tooltips should also be keyboard accessible, and per guidance should
 also be dismissible.
+
+### What is the current accessibility experience of tooltips across browsers?
 
 Unlike [`interesttarget`](
 https://open-ui.org/components/interest-invokers.explainer/#why-is-interesttarget-not-unlimited-like-title-is),
@@ -724,8 +725,8 @@ keyboard accessible.
 
 On top of this, no browser, outside of Microsoft Edge, exposes to
 built-in tooltip on focus, even if the associated element is focusable.
-This means that browser built-in tooltips are not accessible out of
-the box, which is one of the goals of this proposal.
+This means that browser built-in tooltips are not accessible
+out-of-the-box, which is one of the goals of this proposal.
 
 ### Proposed improvements
 
@@ -752,7 +753,7 @@ user more control over the resulting behavior as they see fit.
 Creating a more accessible tooltip experience for users is one of
 the key goals of this proposal, so additional ideas from the
 community that should be considered to help in further improving
-the current situation is very much welcome and appreciated.
+the current situation is very much welcome.
 
 ### Zoom
 
@@ -793,8 +794,6 @@ this proposal.
 element?](https://github.com/w3c/csswg-drafts/issues/9447)
 - Should `::tooltip` be based on `interesttarget` or should that
 detail be left up to the UA?
-- What is the best way to set the text content on `::tooltip` from
-the `title` attribute?
 - Should we consider another method for triggering `::tooltip` and its
 base styles than the `appearance` property?
 - Is `content` the best mechanism for setting the tooltip text from
@@ -805,7 +804,7 @@ should this be magic left up to the UA?
 - What are the right default UA styles for `::tooltip`?
 - Does it make sense for `::tooltip` to be a [Tree-Abiding
 Pseudo-element](https://drafts.csswg.org/css-pseudo/#treelike)?
-- How should `tootltip` interact with `interesttarget` and any other
+- How should `::tootltip` interact with `interesttarget` and any other
 `popover` on the same element?
 - Are there other ways we improve the current accessibility landscape
 of the `title` attribute?
@@ -815,10 +814,7 @@ of the `title` attribute?
 or [`position-visibility`](
 https://drafts.csswg.org/css-anchor-position-1/#position-visibility)?
 If `position-visibility`, we may want to consider adding a new value
-for always hidden.
-- Should we add new keywords to specify the default CSS Anchor Positioning
-for `::tooltip` to allow authors to easily reuse the same default behavior
-for custom tooltips via `interesttarget` or other mechanisms?
+for "always hidden".
 
 ## Future ideas
 
@@ -844,12 +840,12 @@ Positioning.
 
 ### Customizing `::tooltip` user interactions
 
-For now, the UA will contraol the user interactions that trigger a built-in
+For now, the UA will control the user interactions that trigger a built-in
 tooltip, but authors may wish to change the interaction behavior. Exploring
 options to allow more author control of these interactions will be considered
 in future versions of the feature.
 
-### CSS Anchor Positioning Tooltip Defaults
+### CSS Anchor Positioning tooltip defaults
 
 If an author would like to produce consistent positioning that is acheived
 with `::tooltip` when creating fully custom tooltips via `interesttarget` or other
@@ -857,7 +853,7 @@ methods, we may want to consider adding new keywords to CSS Anchor Positioning
 properties for the default behavior defined for `::tooltip` in the UA stylesheet.
 
 This would allow authors to more easily create a consistent postitioning behavior
-as the proposal for built-in tooltips.
+as built-in tooltips.
 
 ## Considered alternatives
 
@@ -866,7 +862,7 @@ as the proposal for built-in tooltips.
 `interesttarget` is a great solution for authors when creating custom tooltips.
 However, if an author is only adjusting a few simple styles, `interesttarget` may
 be a bit more cumbersome than utilizing the browser built-in tooltips and adjusting
-their style in CSS.
+such styles in CSS.
 
 `interesttarget` is also limited to links and buttons, although this restriction
 could be expanded in the future.
