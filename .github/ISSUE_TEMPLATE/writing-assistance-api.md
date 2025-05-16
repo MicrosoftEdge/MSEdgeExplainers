@@ -1,6 +1,6 @@
 ---
 name: Writing assistance APIs
-description: Report an issue about the writing assistance APIs in Microsoft Edge
+description: Report an issue about the Writing Assistance APIs in Microsoft Edge
 about: new issue
 title: "[Writing assistance APIs] <TITLE HERE>"
 labels: Writing assistance APIs
@@ -14,18 +14,6 @@ body:
       If you want to send feedback, questions, or discuss about your scenario for built-in AI instead, please add a comment to issue #1031.
 
       Before reporting an issue, please check the [Writing assistance APIs documentation](https://aka.ms/edge-writing-assistance-api-docs), which includes instructions about how to enable the APIs in Microsoft Edge.
-- type: textarea
-  attributes:
-    label: System
-    description: Which operating system / processor are you testing on? For Windows, you can find this information at Windows: Settings > About > Device specifications > System info. For Mac, see Apple > About this mac.
-  validations:
-    required: true
-- type: textarea
-  attributes:
-    label: GL renderer
-    description: What is your device's GL_RENDERER info? In Edge Canary, go to edge://gpu and copy the value for "GL_RENDERER".
-  validations:
-    required: true
 - type: dropdown
   attributes:
     label: Device performance class
