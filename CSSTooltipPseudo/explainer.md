@@ -36,7 +36,7 @@ content location of future work and discussions.
   - [Use an existing library or component](#use-an-existing-library-or-component)
   - [Create a fully custom tooltip](#create-a-fully-custom-tooltip)
     - [Utilize `popover`, CSS anchor positioning, and/or `interesttarget`](#utilize-popover-css-anchor-positioning-andor-interesttarget)
-- [Current landscape of built-in tootlips](#current-landscape-of-built-in-tootlips)
+- [Current landscape of built-in tooltips](#current-landscape-of-built-in-tooltips)
   - [Simple tooltips across browsers](#simple-tooltips-across-browsers)
     - [Chromium](#chromium)
     - [Gecko](#gecko)
@@ -68,7 +68,7 @@ content location of future work and discussions.
 - [Privacy Considerations](#privacy-considerations)
 - [Open questions](#open-questions)
 - [Future ideas](#future-ideas)
-  - [Tootlip pointer/arrow](#tootlip-pointerarrow)
+  - [Tooltip pointer/arrow](#tooltip-pointerarrow)
   - [Customizing `::tooltip` user interactions](#customizing-tooltip-user-interactions)
   - [CSS Anchor Positioning Tooltip Defaults](#css-anchor-positioning-tooltip-defaults)
 - [Considered alternatives](#considered-alternatives)
@@ -120,8 +120,9 @@ on the same OS, ensuring an interoperable experience for authors.
 * This proposal is not meant to support tooltips with arbitrary HTML content, which
 can be covered by existing solutions, like `popover`, CSS Anchor positioning, and
 the not-yet-available `interesttarget` attribute.
-* Provide a means to set a pointer on the `title` based tooltip. The solution should
-be specified to allow for this functionality in the future, though.
+* Provide a means to set a [pointer](#tooltip-pointerarrow) on the `title` based
+tooltip. The solution should be specified to allow for this functionality in
+the future, though.
 
 ## User research
 
@@ -131,7 +132,7 @@ was drawn from discussions in issues
 [9447](https://github.com/w3c/csswg-drafts/issues/9447), and OpenUI issue
 [730](https://github.com/openui/open-ui/issues/730).
 
-There are also many articules on the web that walk authors through various
+There are also many articles on the web that walk authors through various
 options for creating custom tooltips using tools available to them today.
 One such [article](https://blog.replaybird.com/css-tooltip-examples/)
 walks through different options, along with various examples and use cases
@@ -184,8 +185,11 @@ Although creating a custom tooltip can be cumbersome for an author who is lookin
 to just adjust a few simple styles, they do have some new (and upcoming) web
 APIs, that can help them in accomplishing a fully customizable tooltip more
 easily:
-  - The [`popover`](https://html.spec.whatwg.org/multipage/popover.html#dom-popover) 
-    attribute, which is baseline across browsers as of April 2024.
+  - The [`popover`](
+    https://html.spec.whatwg.org/multipage/popover.html#dom-popover) attribute,
+    which is [baseline](
+    https://developer.mozilla.org/en-US/docs/Glossary/Baseline/Compatibility)
+    across browsers as of April 2024.
   - [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position-1/),
     which is not yet baseline, but is part of the [Interop 2025 effort](
     https://github.com/web-platform-tests/interop/blob/main/2025/README.md#css-anchor-positioning).
@@ -210,7 +214,7 @@ than what is currently available through the browser's built-in option using the
 `title` attribute, but these options often require more work than should be
 necessary for a simple style adjustment.
 
-## Current landscape of built-in tootlips
+## Current landscape of built-in tooltips
 
 The rendering of tooltips via the `title` attribute is up to each UA. Below
 is a brief survey of how some of the top browser engines render built-in
@@ -296,7 +300,7 @@ On mobile, tooltips are not activatable in Webkit.
 
 ### Longer tooltips across browsers
 
-Below is an overview of how each major browser engine handles longer tootlip text,
+Below is an overview of how each major browser engine handles longer tooltip text,
 in no particular order.
 
 #### Chromium
@@ -410,7 +414,7 @@ for `::tooltip` for how best to set the content of the `::tooltip`
 pseudo element.
 
 The content itself will be pulled from the `title` attribute, or in
-the case of SVG, the `<title>` element. The initial proposal is the
+the case of SVG, the `<title>` element. The initial proposal is to
 utilize the `content` property for applying the content to the
 `::tooltip` pseudo element itself.
 
@@ -444,7 +448,7 @@ the wider community.
 There has been discussion in the CSSWG around whether the positioning
 of `::tooltip` should be UA magic, or if the author should be able to
 customize this. The main concern being around security, given that
-tootlips can escape the bounds of the browser window today (see
+tooltips can escape the bounds of the browser window today (see
 [Security Considerations](#security-considerations) for more details).
 
 Given the proposal to not allow tooltips styled through the
@@ -506,7 +510,8 @@ to the styles above (notably, this doesn't include the defined
 `transition` and sets `margin` to `0` to account for the default
 `popover` styles). Since this is based on `interesttarget`, at the
 time of writing, this demo is required to be tested in a Chromium-based
-browser with Web Platform Experimental Flags Enabled.
+browser with [Web Platform Experimental features flag](
+chrome://flags/#enable-experimental-web-platform-features) enabled.
 
 ### What styles can be applied to `::tooltip`?
 
@@ -673,7 +678,7 @@ https://developer.mozilla.org/en-US/docs/Glossary/Accessible_description#accessi
 elements without using ARIA or without a tooltip being shown (via
 the `title` attribute).
 
-We can consider making this possible through the `::tootlip` proposal
+We can consider making this possible through the `::tooltip` proposal
 utilizing `content: none` as follows:
 
 ```css
@@ -713,10 +718,10 @@ accessible, and per guidance should also be dismissible.
 
 Unlike [`interesttarget`](
 https://open-ui.org/components/interest-invokers.explainer/#why-is-interesttarget-not-unlimited-like-title-is),
-the `title` attribute is allowed on any element, even if it isn't
-interactable. This can pose problems for accessiblity, because if the
-element isn't focusable, it means that the associated tooltip is not
-keyboard accessible.
+the `title` attribute is allowed on any element, even if that element
+isn't interactable. This can pose problems for accessiblity, because
+if the element isn't focusable, it means that the associated tooltip
+is not keyboard accessible.
 
 On top of this, no browser, outside of Microsoft Edge, exposes the
 built-in tooltip on focus, even if the associated element is focusable.
@@ -725,7 +730,7 @@ out-of-the-box, which is one of the goals of this proposal.
 
 ### Proposed improvements
 
-To improve the current situation, the `::tootlip` element cannot be
+To improve the current situation, the `::tooltip` element cannot be
 triggered or styled if the element associated with the tooltip is
 not focusable.
 
@@ -735,11 +740,11 @@ tooltip is focusable, and utilize the escape key to trigger tooltip
 dismissal.
 
 One consideration for improving this further is to force existing
-`title`-based tooltips to have a `tabindex` of `0` if it is not
-already focusable. However, this is not ideal, as it could lead
-a container to become focusable that was not before, leading to
-undesirable focus changes if a user incorrectly applies focus just
-outside of a target element within that container.
+elements with an associated `title`-based tooltips to have a
+`tabindex` of `0` if it is not already focusable. However, this is
+not ideal, as it could lead a container to become focusable that was
+not before, leading to undesirable focus changes if a user incorrectly
+applies focus just outside of a target element within that container.
 
 An alternative for browser vendors to consider is including a user
 setting that forces a `tabindex` of `0` in such cases, allowing the
@@ -748,7 +753,7 @@ user more control over the resulting behavior as they see fit.
 Creating a more accessible tooltip experience for users is one of
 the key goals of this proposal, so additional ideas from the
 community that should be considered to help in further improving
-the current situation is very much welcome.
+the current situation are very much welcome.
 
 ### Zoom
 
@@ -762,7 +767,7 @@ scenarios.
 ## Security Considerations
 
 As noted in the section on the [current landscape of built-in
-tootlips](#current-landscape-of-built-in-tootlips), browser built-in
+tooltips](#current-landscape-of-built-in-tooltips), browser built-in
 tooltips are currently allowed to escpape the bounds of the browser
 window.
 
@@ -814,7 +819,7 @@ for "always hidden".
 
 ## Future ideas
 
-### Tootlip pointer/arrow
+### Tooltip pointer/arrow
 
 Many authors like to add a pointer, nub or arrow with their tooltip, to
 create a clearer tie between the tooltip and its associated content, as
