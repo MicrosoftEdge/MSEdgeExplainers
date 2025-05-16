@@ -87,8 +87,10 @@ tooltip is associated with.
 
 Authors can utilize the browser's built-in tooltips by setting the
 [`title`](https://html.spec.whatwg.org/multipage/dom.html#attr-title)
-attribute on an element of interest. However, the tooltip that appears as a
-result is not customizable in any way by the author.
+attribute on an element of interest, or via the [`<title>`](
+https://html.spec.whatwg.org/multipage/semantics.html#the-title-element)
+element in SVG. However, the tooltip that appears as a result is not
+customizable in any way by the author.
 
 This lack of customizability has been a source of common frustration for authors
 who want to keep a consistent look and feel across all of their UI.
@@ -108,14 +110,14 @@ the author by default.
 tooltips.
 * Allow authors to change the timing of built-in tooltips.
 * Improve accessibility of the `title` attribute, particularly for keyboard users.
-* Guarentee security best practices, given that tooltips today can extend past
-the bounds of the browser Window.
-* Styled tooltips should produce consistent results across all platforms, ensuring
-an interoperable experience for authors.
+* Guarantee security best practices, given that tooltips today can extend past
+the bounds of the browser window.
+* Styling built-in tooltips should produce consistent results across all browsers 
+on the same OS, ensuring an interoperable experience for authors.
 
 ## Non-goals
 
-* This proposal is not meant to solve for tooltips with arbitrary HTML content, which
+* This proposal is not meant to support tooltips with arbitrary HTML content, which
 can be covered by existing solutions, like `popover`, CSS Anchor positioning, and
 the not-yet-available `interesttarget` attribute.
 * Provide a means to set a pointer on the `title` based tooltip. The solution should
@@ -138,7 +140,7 @@ for tooltips on the web.
 ## Existing and upcoming tools available for custom tooltips
 
 If an author would like to adjust the style of their tooltip today, they must resort
-to the one of the following alternative approaches to the built-in tooltip that they
+to one of the following alternative approaches to the built-in tooltip that they
 get with the `title` attribute.
 
 ### Use an existing library or component
@@ -154,13 +156,14 @@ Some example libraries include:
 It is clear that there are many libraries and components for creating custom tooltips
 that authors can use to solve their need for more customization.
 
-If the library chosen if well architected to properly handle accessibility, this can
+If the library chosen is well architected to properly handle accessibility, this can
 also be a convenient way to get such functionality "for free". However, relying on
 external library to get accessibility right can be risky, which may limit the usability
 if not done correctly.
 
-The other downside of this approach is that it requires heavy use of JS, which can be
-slower, and shouldn't be necessary if all you want to do is adjust some basic styles.
+The other downside of this approach is that it requires heavy use of scripting,
+which can be slower, and shouldn't be necessary if all you want to do is
+adjust some basic styles.
 
 ### Create a fully custom tooltip
 
@@ -169,8 +172,8 @@ requires their own input management, proper accessibility support and proper
 handling of the tooltip positioning, which can be complex.
 
 This does allow authors to acheive their goal of full cusomizability, but it often
-requires heavy use of JS, or use of `:before` or `:after` pseudos, which can make
-getting accessibility correct quite difficult.
+requires heavy use of scripting, or use of `:before` or `:after` pseudos, which
+can make getting accessibility correct quite difficult.
 
 As such, this solution requires a lot of work to get right, especially if all they
 want to do is adjust a few simple styles on the built-in tooltip.
@@ -178,9 +181,9 @@ want to do is adjust a few simple styles on the built-in tooltip.
 #### Utilize `popover`, CSS anchor positioning, and/or `interesttarget`
 
 Although creating a custom tooltip can be cumbersome for an author who is looking
-to just adjust a few simple styles, they do have some new web APIs, and APIs that
-are in the works, that can help them in accomplishing a fully customizable tooltip
-more easily:
+to just adjust a few simple styles, they do have some new (and upcoming) web
+APIs, that can help them in accomplishing a fully customizable tooltip more
+easily:
   - The [`popover`](https://html.spec.whatwg.org/multipage/popover.html#dom-popover) 
     attribute, which is baseline across browsers as of April 2024.
   - [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position-1/),
@@ -233,22 +236,19 @@ background with black or white text and a matching border.
 
 On Windows the simple test case above renders as follows:
 
-<p align="center">
-  <image src="images/simple-button-chromium-windows.png">
-</p>
+![Screenshot of tooltip in Chromium on Windows](
+images/simple-button-chromium-windows.png)
 
 On Linux, the style of the tooltip defaults to a darker color scheme:
 
-<p align="center">
-  <image src="images/simple-button-chromium-linux.png">
-</p>
+![Screenshot of tooltip in Chromium on Linux](
+images/simple-button-chromium-linux.png)
 
 On MacOS, Chromium leaves the rendering up to the OS itself, producing the
 following result:
 
-<p align="center">
-  <image src="images/simple-button-chromium-mac.png">
-</p>
+![Screenshot of tooltip in Chromium on Mac](
+images/simple-button-chromium-mac.png)
 
 On mobile, tooltips are not activatable in Chromium.
 
@@ -263,23 +263,20 @@ style than Chromium and has more of an offset from the anchored element.
 
 On Windows the simple test case above renders as follows:
 
-<p align="center">
-  <image src="images/simple-button-firefox-windows.png">
-</p>
+![Screenshot of tooltip in Gecko on Windows](
+images/simple-button-firefox-windows.png)
 
 On Linux, the style of the tooltip defaults to a darker color scheme,
 with no border, and slightly more padding:
 
-<p align="center">
-  <image src="images/simple-button-firefox-linux.png">
-</p>
+![Screenshot of tooltip in Gecko on Linux](
+images/simple-button-firefox-linux.png)
 
 On MacOS, Gecko matches the OS tooltip styles, producing the following
 result:
 
-<p align="center">
-  <image src="images/simple-button-firefox-mac.png">
-</p>
+![Screenshot of tooltip in Gecko on Mac](
+images/simple-button-firefox-mac.png)
 
 On mobile, tooltips are not activatable in Gecko.
 
@@ -292,9 +289,8 @@ element it is anchored to.
 The style of the tooltip that is rendered is in accordance with the platform,
 similarly to Chromium and Firefox on MacOS.
 
-<p align="center">
-  <image src="images/simple-button-webkit-mac.png">
-</p>
+![Screenshot of tooltip in Webkit on Mac](
+images/simple-button-webkit-mac.png)
 
 On mobile, tooltips are not activatable in Webkit.
 
@@ -309,9 +305,8 @@ In Chromium, built-in tooltips add elipses to the tooltip text if the text
 is greater than or equal to 1025 characters. The tooltip is also allowed to
 escape the bounds of the window. For example:
 
-<p align="center">
-  <image src="images/out-of-bounds-chromium-windows.png">
-</p>
+![Screenshot of a long tooltip with an elipses in Chromium on Windows](
+images/out-of-bounds-chromium-windows.png)
 
 #### Gecko
 
@@ -320,9 +315,9 @@ which an elipses was added, like it does in Chromium. However, tooltips
 are also able to escape the bounds of the window in Gecko, but the tooltip
 width stays more constrained than in Chromium. For example:
 
-<p align="center">
-  <image src="images/out-of-bounds-firefox-windows.png">
-</p>
+![Screenshot of a long tooltip in Gecko on Windows](
+images/out-of-bounds-firefox-windows.png)
+
 
 #### Webkit
 
@@ -331,9 +326,8 @@ which an elipses was added, like it does in Chromium. However, tooltips
 are also able to escape the bounds of the window in Webkit. In this case,
 the tooltip appears to have uneven padding. For example:
 
-<p align="center">
-  <image src="images/out-of-bounds-webkit-mac.png">
-</p>
+![Screenshot of a long tooltip in Webkit on Mac](
+images/out-of-bounds-webkit-mac.png)
 
 _________________________
 
@@ -371,10 +365,11 @@ positioning, input handling, and accessibility up to the browser.
 ### How to trigger `::tooltip` default styles?
 
 Currently, browser default tooltips are triggered by the `title`
-attribute being set, or `<title>` being set within an SVG element.
+attribute being set, or by the presence of the `<title>` element for
+SVG elements.
 
 We could have the default `::tooltip` apply in all cases by default,
-but this could be a breaking change for browsers. Instead, the UA
+but this may be a breaking change for some browsers. Instead, the UA
 should be able to style tooltips in their own chosen way, unless
 `::tooltip` is triggered in some way.
 
@@ -463,7 +458,7 @@ https://drafts.csswg.org/css-anchor-position-1/) to define the default
 position of the `::tooltip` pseudo element, which will allow authors
 to override this in the way that they see fit.
 
-As a result, this mean that the element associated with the `title`
+As a result, this means that the element associated with the `title`
 attribute (or `<title>` element in the case of SVG) will be an implied
 anchor for the rendered tooltip.
 
@@ -518,9 +513,9 @@ browser with Web Platform Experimental Flags Enabled.
 Not all styles should or need to be applied within the context
 of a simple text-based tooltip. For example, we likely don't
 want tooltips with images, lists, scrollbars, or non-default
-`display` types or `z-index`. As such, there should be a limited list of styles
-that are valid within a `::tooltip` pseudo element; that list of
-which can be expanded on in the future.
+`display` types or `z-index`. As such, there should be a limited list
+of styles that are valid within a `::tooltip` pseudo element; that
+list can be expanded on in the future.
 
 There is an open [CSSWG issue](
 https://github.com/w3c/csswg-drafts/issues/9447) to discuss what
@@ -538,7 +533,7 @@ longhands)
 - `color-scheme` and `forced-color-adjust` (these two were not
 included in the initial [CSSWG proposal](
 https://github.com/w3c/csswg-drafts/issues/9447), but would likely
-be helpful for authors to guarentee consistent theming capabilites
+be helpful for authors to guarantee consistent theming capabilites
 with the rest of their page.)
 - Transitions
 - `tranform`, `transform-origin`, `rotate`, `scale`, `translate`
@@ -709,10 +704,10 @@ below:
 
 ## Accessibility Considerations
 
-According to the WCAG, “Content which can be triggered via pointer hover
-should also be able to be triggered by keyboard focus.” (Resource). As
-such, tooltips should also be keyboard accessible, and per guidance should
-also be dismissible.
+According to the [WCAG](
+https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus.html),
+“Content which can be triggered via pointer hover should also be able to be triggered by keyboard focus.” As such, tooltips should also be keyboard
+accessible, and per guidance should also be dismissible.
 
 ### What is the current accessibility experience of tooltips across browsers?
 
@@ -723,7 +718,7 @@ interactable. This can pose problems for accessiblity, because if the
 element isn't focusable, it means that the associated tooltip is not
 keyboard accessible.
 
-On top of this, no browser, outside of Microsoft Edge, exposes to
+On top of this, no browser, outside of Microsoft Edge, exposes the
 built-in tooltip on focus, even if the associated element is focusable.
 This means that browser built-in tooltips are not accessible
 out-of-the-box, which is one of the goals of this proposal.
@@ -778,10 +773,11 @@ outside the bounds of the browser window, which becomes exacerbated when
 styleability is involved, because this can more easily trick users into
 clicking on a spot on the screen that could lead to a security vulnerability.
 
-This behavior would be limiting for Iframes in particular but would be
-consistent with the behavior authors get with custom JS tooltips already,
-so applying the same restriction here likely wouldn’t be a major downgrade
-for authors.
+This behavior would be limiting for Iframes in particular, as this would mean
+that tooltips in such scenarios would also not be allowed to escape the bounds
+of the Iframe window. This, however, would be consistent with the behavior
+authors get with custom JS tooltips already, so applying the same restriction
+here likely wouldn’t be a major downgrade for authors.
 
 ## Privacy Considerations
 
@@ -825,9 +821,9 @@ create a clearer tie between the tooltip and its associated content, as
 illustrated by the below screenshot from [Wikipedia](
 https://en.wikipedia.org/wiki/Tooltip):
 
-<p align="center">
-  <image src="images/tooltip-with-arrow.png">
-</p>
+![Screenshot from Wikipedia showcasing a tooltip with a light blue background
+and an arrow pointing to the link it is associate with](
+images/tooltip-with-arrow.png)
 
 A future consideration for `::tooltip` is to add a way for authors to include
 a pointer/arrow with their tooltip that is associated with their `::tooltip`
