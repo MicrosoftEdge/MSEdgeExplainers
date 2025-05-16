@@ -579,7 +579,7 @@ a consistent look and feel across all their UI.
 
 ### What user interaction triggers the built-in tooltip?
 
-Currently, browsers shows `title`-based tooltips when a user hovers
+Currently, browsers show `title`-based tooltips when a user hovers
 over the element associated with the tooltip.
 
 No major browser engines appears to currently support touch interactions
