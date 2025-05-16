@@ -102,8 +102,8 @@ accessibility for their tooltips up to the browser.
 
 ## Goals
 
-* Provide low effort way for authors to style core properties on browser built-in
-tooltips (for example, color properties, font properties, etc.)
+* Provide a low effort way for authors to style core properties on browser
+built-in tooltips (for example, color properties, font properties, etc.)
 * This mechanism should handle accessibility, positioning, and input handling for
 the author by default.
 * Allow authors to override the default positioning behavior of the built-in
@@ -162,7 +162,7 @@ external library to get accessibility right can be risky, which may limit the us
 if not done correctly.
 
 The other downside of this approach is that it requires heavy use of scripting,
-which can be slower, and shouldn't be necessary if all you want to do is
+which can be slower, and shouldn't be necessary if the author simply wants to
 adjust some basic styles.
 
 ### Create a fully custom tooltip
