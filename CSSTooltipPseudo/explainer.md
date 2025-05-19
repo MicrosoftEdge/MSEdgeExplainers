@@ -172,9 +172,9 @@ Authors can also choose to create their own custom tooltip or component, which
 requires their own input management, proper accessibility support and proper
 handling of the tooltip positioning, which can be complex.
 
-This does allow authors to acheive their goal of full cusomizability, but it often
-requires heavy use of scripting, or use of `:before` or `:after` pseudos, which
-can make getting accessibility correct quite difficult.
+This does allow authors to achieve their goal of full customizability, but it
+often requires heavy use of scripting, or use of `::before` or `::after`
+pseudos, which can make getting accessibility correct quite difficult.
 
 As such, this solution requires a lot of work to get right, especially if all they
 want to do is adjust a few simple styles on the built-in tooltip.
@@ -300,22 +300,22 @@ On mobile, tooltips are not activatable in Webkit.
 
 ### Longer tooltips across browsers
 
-Below is an overview of how each major browser engine handles longer tooltip text,
-in no particular order.
+Below is an overview of how each major browser engine handles longer
+tooltip text, in no particular order.
 
 #### Chromium
 
-In Chromium, built-in tooltips add elipses to the tooltip text if the text
-is greater than or equal to 1025 characters. The tooltip is also allowed to
-escape the bounds of the window. For example:
+In Chromium, built-in tooltips add ellipses to the tooltip text if the
+text is greater than or equal to 1025 characters. The tooltip is also
+allowed to escape the bounds of the window. For example:
 
-![Screenshot of a long tooltip with an elipses in Chromium on Windows](
+![Screenshot of a long tooltip with an ellipses in Chromium on Windows](
 images/out-of-bounds-chromium-windows.png)
 
 #### Gecko
 
 In Gecko, I was *not* able to find a limit for built-in tooltip length for
-which an elipses was added, like it does in Chromium. However, tooltips
+which an ellipses was added, like it does in Chromium. However, tooltips
 are also able to escape the bounds of the window in Gecko, but the tooltip
 width stays more constrained than in Chromium. For example:
 
@@ -326,7 +326,7 @@ images/out-of-bounds-firefox-windows.png)
 #### Webkit
 
 In Webkit, I was *not* able to find a limit for built-in tooltip length for
-which an elipses was added, like it does in Chromium. However, tooltips
+which an ellipses was added, like it does in Chromium. However, tooltips
 are also able to escape the bounds of the window in Webkit. In this case,
 the tooltip appears to have uneven padding. For example:
 
@@ -382,11 +382,10 @@ styles beyond those that are default. As such, there requires
 some mechanism for authors to trigger the new `::tooltip`-based
 default.
 
-An initial suggestion would be to add a new value to [`appearance`](
-https://drafts.csswg.org/css-ui/#propdef-appearance), similar to
-what was done for [customizable select elements](
-https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select),
-called `base-tooltip`, that an author can use within the `::tooltip`
+An initial suggestion would be to utilize [`appearance: base`](
+https://www.w3.org/TR/css-forms-1/#valdef-appearance-base), similar
+to what was done for [customizable select elements](
+https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select), that an author can use within the `::tooltip`
 pseudo element to trigger the new base default styles and
 customizability.
 
@@ -395,7 +394,7 @@ one could apply the following styles:
 
 ```css
 ::tooltip {
-  appearance: base-tooltip;
+  appearance: base;
   color: red;
 }
 ```
@@ -468,7 +467,7 @@ anchor for the rendered tooltip.
 
 ### Default styles for `::tooltip`
 
-When the new default `::tooltip` styles are tiggered via the
+When the new default `::tooltip` styles are triggered via the
 `appearance` property, a set of default styles would be applied
 by the UA.
 
@@ -570,7 +569,7 @@ https://github.com/w3c/csswg-drafts/issues/9447).
 ### `::tooltip` style inheritance
 
 To allow `::tooltip` to inherit styles from the rest of the page,
-it should be grouped witin the list of [Tree-Abiding
+it should be grouped within the list of [Tree-Abiding
 Pseudo-elements](https://drafts.csswg.org/css-pseudo/#treelike).
 
 This would allow `::tooltip` to inherit properties, like `font-family`,
@@ -582,7 +581,7 @@ a consistent look and feel across all their UI.
 Currently, browsers show `title`-based tooltips when a user hovers
 over the element associated with the tooltip.
 
-No major browser engines appears to currently support touch interactions
+No major browser engine appears to currently support touch interactions
 for these built-in tooltips, but this should be something for browser
 vendors to consider along with support for `::tooltip`, similar to
 what is [proposed with `interesttarget`](
@@ -617,13 +616,13 @@ the base set of styles and specified interactions are met.
 
 In its most base form, an author could opt-into the new `::tooltip` base
 styles without adjusting any of its styles in order to get a consistent basic
-styling for tooltips across browsres. An author could accomplish this with
+styling for tooltips across browsers. An author could accomplish this with
 the following HTML and CSS.
 
 ```html
 <style>
   ::tooltip {
-    appearance: base-tooltip;
+    appearance: base;
   }
 </style>
 
@@ -640,7 +639,7 @@ styles as follows:
 ```html
 <style>
   ::tooltip {
-    appearance: base-tooltip;
+    appearance: base;
     background: orange;
     color: blue;
   }
@@ -660,7 +659,7 @@ the example below:
 ```html
 <style>
   ::tooltip {
-    appearance: base-tooltip;
+    appearance: base;
     transition: 0s 1s visibility;
   }
 </style>
@@ -683,7 +682,7 @@ utilizing `content: none` as follows:
 
 ```css
 ::tooltip {
-  appearance: base-tooltip;
+  appearance: base;
   content: none;
 }
 ```
@@ -702,7 +701,7 @@ below:
 
 ```css
 ::tooltip {
-  appearance: base-tooltip;
+  appearance: base;
   position-area: start span-all;
 }
 ```
@@ -805,7 +804,7 @@ should this be magic left up to the UA?
 - What are the right default UA styles for `::tooltip`?
 - Does it make sense for `::tooltip` to be a [Tree-Abiding
 Pseudo-element](https://drafts.csswg.org/css-pseudo/#treelike)?
-- How should `::tootltip` interact with `interesttarget` and any other
+- How should `::tooltip` interact with `interesttarget` and any other
 `popover` on the same element?
 - Are there other ways we improve the current accessibility landscape
 of the `title` attribute?
