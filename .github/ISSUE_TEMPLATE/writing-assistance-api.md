@@ -1,6 +1,6 @@
 ---
 name: "Writing assistance APIs"
-description: "Report an issue about the Writing Assistance APIs in Microsoft Edge"
+about: "Report an issue about the Writing Assistance APIs in Microsoft Edge"
 title: "[Writing Assistance APIs] <TITLE HERE>"
 labels: "Writing Assistance APIs"
 assignees: sohchatt
