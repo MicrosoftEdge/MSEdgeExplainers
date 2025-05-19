@@ -23,22 +23,16 @@ body:
     value: "A bug happened!"
   validations:
     required: true
-- type: dropdown
+- type: input
   attributes:
     label: Device performance class
-    description: In Edge Canary, go to edge://on-device-internals/ and find the Device performance value under Tools.
-    options:
-      - Very high
-      - High
-      - Medium
-      - Low
-      - Very low
+    description: In Edge, go to edge://on-device-internals/ and find the Device performance class value under Tools.
   validations:
     required: true
 - type: dropdown
   attributes:
     label: Is device capable
-    description: In Edge Canary, go to edge://on-device-internals/ and find the Device capable value under Model Status.
+    description: In Edge, go to edge://on-device-internals/ and find the Device capable value under Model Status.
     options:
       - True
       - False
@@ -47,7 +41,7 @@ body:
 - type: dropdown
   attributes:
     label: Microsoft Edge channel
-    description: The Microsoft Edge channel you are using. See edge://version.
+    description: The Microsoft Edge channel you are using. Go to edge://version for details.
     options:
       - Dev
       - Canary
@@ -56,8 +50,8 @@ body:
 - type: input
   attributes:
     label: Microsoft Edge version
-    description: The version of Microsoft Edge you are using. See edge://version.
-    placeholder: ex. Windows 11, version 22H2, x64
+    description: The version of Microsoft Edge you are using. Go to edge://version for details.
+    placeholder: ex. Edge Dev 138.0.3309.2.
   validations:
     required: false
 - type: input
@@ -70,7 +64,7 @@ body:
 - type: input
   attributes:
     label: GPU information
-    description: Tell us the GPU information of your device.
+    description: Tell us the GPU information of your device. Go to edge://gpu and search for GL_RENDERER.
   validations:
     required: false
 ---
