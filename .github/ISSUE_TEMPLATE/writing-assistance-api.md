@@ -11,9 +11,18 @@ body:
     value: |
       Thank you for reporting an issue with the writing assistance APIs in Microsoft Edge!
 
-      If you want to send feedback, questions, or discuss about your scenario for built-in AI instead, please add a comment to issue #1031.
+      If you want to send feedback, questions, or discuss about your scenario for built-in AI instead, please [add a comment in issue #1031](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1031).
 
       Before reporting an issue, please check the [Writing assistance APIs documentation](https://aka.ms/edge-writing-assistance-api-docs), which includes instructions about how to enable the APIs in Microsoft Edge.
+- type: textarea
+  id: what-happened
+  attributes:
+    label: What happened?
+    description: Also tell us, what did you expect to happen?
+    placeholder: Tell us what you see!
+    value: "A bug happened!"
+  validations:
+    required: true
 - type: dropdown
   attributes:
     label: Device performance class
