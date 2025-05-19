@@ -44,4 +44,33 @@ body:
       - False
   validations:
     required: true
+- type: dropdown
+  attributes:
+    label: Microsoft Edge channel
+    description: The Microsoft Edge channel you are using. See edge://version.
+    options:
+      - Dev
+      - Canary
+  validations:
+    required: false
+- type: input
+  attributes:
+    label: Microsoft Edge version
+    description: The version of Microsoft Edge you are using. See edge://version.
+    placeholder: ex. Windows 11, version 22H2, x64
+  validations:
+    required: false
+- type: input
+  attributes:
+    label: Operating system, version, and architecture
+    description: Tell us the operating system, version, and architecture of your device.
+    placeholder: ex. Windows 11, version 24H2, x64
+  validations:
+    required: false
+- type: input
+  attributes:
+    label: GPU information
+    description: Tell us the GPU information of your device.
+  validations:
+    required: false
 ---
