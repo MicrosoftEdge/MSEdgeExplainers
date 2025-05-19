@@ -1,6 +1,6 @@
 ---
 name: "Prompt API"
-description: "Report an issue about the Prompt API in Microsoft Edge"
+about: "Report an issue about the Prompt API in Microsoft Edge"
 title: "[Prompt API] <TITLE HERE>"
 labels: "Prompt API"
 assignees: sohchatt
