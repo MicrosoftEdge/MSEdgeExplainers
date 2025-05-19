@@ -3,7 +3,7 @@ name: Writing assistance APIs
 description: Report an issue about the Writing Assistance APIs in Microsoft Edge
 about: new issue
 title: "[Writing assistance APIs] <TITLE HERE>"
-labels: Writing assistance APIs
+labels: Writing Assistance APIs
 assignees: sohchatt
 body:
 - type: markdown
