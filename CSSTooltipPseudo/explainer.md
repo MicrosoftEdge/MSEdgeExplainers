@@ -687,6 +687,13 @@ the example below:
   provided styles.
 </button>
 ```
+One may find it is strange that an author could adjust the `transition`
+of the `visibility` property, without being able to update the `visibility`
+property itself. This is because the UA owns the user interaction, and as such,
+the UA owns the resulting visibility of the tooltip. However, an author may
+still want to adjust the tooltip show/hide timing, which can be accomplished
+through an adjustment of the `transition` defined in the UA default styles
+for `::tooltip`.
 
 ### Scenario 4: Setting the name using `title` without rendering a tooltip
 
