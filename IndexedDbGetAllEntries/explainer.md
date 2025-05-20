@@ -317,3 +317,4 @@ Many thanks for valuable feedback and advice from:
 
 - [Rahul Singh](https://github.com/rahulsingh-msft)
 - [Foromo Daniel Soromou](https://github.com/fosoromo_microsoft)
+- [Evan Stade](https://github.com/evanstade)
