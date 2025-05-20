@@ -49,6 +49,7 @@ content location of future work and discussions.
   - [How to trigger `::tooltip` default styles?](#how-to-trigger-tooltip-default-styles)
   - [How to set the `::tooltip` content?](#how-to-set-the-tooltip-content)
   - [Positioning for `::tooltip`](#positioning-for-tooltip)
+  - [`::tooltip` sizing](#tooltip-sizing)
   - [Default styles for `::tooltip`](#default-styles-for-tooltip)
   - [What styles can be applied to `::tooltip`?](#what-styles-can-be-applied-to-tooltip)
   - [`::tooltip` style inheritance](#tooltip-style-inheritance)
@@ -70,7 +71,7 @@ content location of future work and discussions.
 - [Future ideas](#future-ideas)
   - [Tooltip pointer/arrow](#tooltip-pointerarrow)
   - [Customizing `::tooltip` user interactions](#customizing-tooltip-user-interactions)
-  - [CSS Anchor Positioning Tooltip Defaults](#css-anchor-positioning-tooltip-defaults)
+  - [CSS Anchor Positioning tooltip defaults](#css-anchor-positioning-tooltip-defaults)
 - [Considered alternatives](#considered-alternatives)
   - [Alternative 1: The `interesttarget` attribute](#alternative-1-the-interesttarget-attribute)
 - [References & acknowledgements](#references--acknowledgements)
@@ -465,6 +466,23 @@ As a result, this means that the element associated with the `title`
 attribute (or `<title>` element in the case of SVG) will be an implied
 anchor for the rendered tooltip.
 
+### `::tooltip` sizing
+
+This proposal sizes the default `::tooltip`-based tooltip according to
+default sizing definitions (where the size of the tooltip is based on
+the size of its content.) This also means that the tooltip will be
+constrained by the viewport in the inline direction, but may overflow
+the viewport in the block direction, if too large.
+
+We could instead consider whether the default tooltip in this case should
+have a non-default sizing definition. For example, the width of the
+tooltip could be constrained by to be no larger than some percentage of
+the viewport width using the `max-width` property.
+
+This, and whether authors should be allowed to adjust the sizing
+properties within a `::tooltip` pseudo element, remain open
+questions for further discussion.
+
 ### Default styles for `::tooltip`
 
 When the new default `::tooltip` styles are triggered via the
@@ -540,7 +558,7 @@ https://github.com/w3c/csswg-drafts/issues/9447), but would likely
 be helpful for authors to guarantee consistent theming capabilites
 with the rest of their page.)
 - Transitions
-- `tranform`, `transform-origin`, `rotate`, `scale`, `translate`
+- `transform`, `transform-origin`, `rotate`, `scale`, `translate`
 - Custom properties
 - Given that the proposal suggests using anchor positioning for
 default styling of the position of `::tooltip`, we should also
@@ -801,6 +819,8 @@ base styles than the `appearance` property?
 - Should authors be allowed to change the `content` of the `::tooltip`?
 - Should authors be able to change the positioning of a `::tooltip` or
 should this be magic left up to the UA?
+- Should authors be able to customize the size of the `::tooltip` through
+sizing properties?
 - What are the right default UA styles for `::tooltip`?
 - Does it make sense for `::tooltip` to be a [Tree-Abiding
 Pseudo-element](https://drafts.csswg.org/css-pseudo/#treelike)?
