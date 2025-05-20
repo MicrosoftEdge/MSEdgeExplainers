@@ -31,7 +31,7 @@ This explainer proposes adding `getAllRecords()` to both [`IDBObjectStore`](http
 
 ## Adding direction to `getAll()` and `getAllKeys()`
 
-This explainer proposes using `getAllRecords()` as feature detection for direction support in `getAllKeys()` and `getAll()`.  `getAllRecords()` introduces the `IDBGetAllOptions` dictionary, which developers may also use with `getAll()` and `getAllKeys()`.  Before using `IDBGetAllOptions`, developers must check for the existence of `getAllRecords()` in `IDBObjectStore` or `IDBIndex`.
+This explainer proposes using `getAllRecords()` as feature detection for direction support in `getAllKeys()` and `getAll()`.  `getAllRecords()` introduces the `IDBGetAllOptions` dictionary, which developers may also use with `getAll()` and `getAllKeys()`.  Before using `IDBGetAllOptions`, developers must check for the existence of `getAllRecords()` in `IDBObjectStore` or `IDBIndex`.  If developers provide both the `IDBGetAllOptions` argument and the `count` argument, the extra `count` argument is ignored like any other extra argument.  The `count` property in `IDBGetAllOptions` is used instead.
 
 ## Compatibility risk
 
@@ -58,7 +58,7 @@ async function get_all_records_with_promise(
     // Create a read-only transaction.
     const read_transaction = database.transaction(
       object_store_name,
-      "readonly"
+      'readonly'
     );
 
     // Get the object store or index to query.
@@ -93,7 +93,7 @@ const records = await get_all_records_with_promise(
   /*query_options=*/ { count: 5 }
 );
 console.log(
-  "The second record in the database contains: " +
+  'The second record in the database contains: ' +
     `primaryKey: ${records[1].primaryKey}, key: ${records[1].key}, value: ${records[1].value}`
 );
 ```
@@ -165,7 +165,7 @@ async function* idb_batch_record_iterator(
 
     // Store the lower or upper bound for the next iteration.
     const last_record = records[records.length - 1];
-    if (direction === "next" || direction === "nextunique") {
+    if (direction === 'next' || direction === 'nextunique') {
       query = IDBKeyRange.lowerBound(last_record.key, /*exclusive=*/ true);
     } else { // direction === 'prev' || direction === 'prevunique'
       query = IDBKeyRange.upperBound(last_record.key, /*exclusive=*/ true);
@@ -177,17 +177,17 @@ async function* idb_batch_record_iterator(
 // Create a reverse iterator that reads 5 records from an index at a time.
 const reverse_iterator = idb_batch_record_iterator(
   database,
-  "my_object_store",
-  /*direction=*/ "prev",
+  'my_object_store',
+  /*direction=*/ 'prev',
   /*batch_size=*/ 5,
-  "my_index"
+  'my_index'
 );
 
 // Get the last 5 records.
 let results = await reverse_iterator.next();
 let records = results.value;
 console.log(
-  "The first record contains: " +
+  'The first record contains: ' +
     `primaryKey: ${records[0].primaryKey}, key: ${records[0].key}, value: ${records[0].value}`
 );
 
@@ -202,14 +202,14 @@ if (!results.done) {
 `getAllRecords()` introduces the `IDBGetAllOptions` dictionary, which developers may also use with `getAll()` and `getAllKeys()`.  Before using `IDBGetAllOptions`, developers must check for the existence of `getAllRecords()` in `IDBObjectStore` or `IDBIndex`.
 
 ```js
-const read_transaction = database.transaction('my_object_store', "readonly");
+const read_transaction = database.transaction('my_object_store', 'readonly');
 const object_store = read_transaction.objectStore('my_object_store');
 
 // Use feature detection to determine if this browser supports `getAllRecords()`.
 if ('getAllRecords' in object_store) {
   // Request the last 5 primary keys in `object_store`.
   const get_all_options = {
-    direction = 'prev',
+    direction: 'prev',
     count: 5    
   };
   const request = object_store.getAllKeys(get_all_options);
