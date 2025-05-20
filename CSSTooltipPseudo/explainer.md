@@ -476,7 +476,7 @@ the viewport in the block direction, if too large.
 
 We could instead consider whether the default tooltip in this case should
 have a non-default sizing definition. For example, the width of the
-tooltip could be constrained by to be no larger than some percentage of
+tooltip could be constrained to be no larger than some percentage of
 the viewport width using the `max-width` property.
 
 This, and whether authors should be allowed to adjust the sizing
