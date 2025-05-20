@@ -21,7 +21,7 @@ Here are some inspirational examples of how users may interact with highlighted 
  - When a user hovers over a misspelled word, the web app may display UI with suggested replacement text.
  - When a user clicks an annotation in a document, the web app may emphasize and scroll into view the corresponding annotation in a pane which lists all the annotations in the document.
 
-Currently, web developers who want to implement some sort of interaction with custom highlights need to use workarounds that are cumbersome to code, maintain, often involve directly editing the DOM with static ranges, and incurring performance penalties.
+Currently, web developers who want to implement interactions with custom highlights often need to use workarounds that involve directly editing the DOM with static ranges. This approach is cumbersome to code, difficult to maintain, and incurs performance penalties.
 
 ## Customer Problem Example
 
