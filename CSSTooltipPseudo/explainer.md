@@ -690,10 +690,19 @@ the example below:
 One may find it is strange that an author could adjust the `transition`
 of the `visibility` property, without being able to update the `visibility`
 property itself. This is because the UA owns the user interaction, and as such,
-the UA owns the resulting visibility of the tooltip. However, an author may
-still want to adjust the tooltip show/hide timing, which can be accomplished
-through an adjustment of the `transition` defined in the UA default styles
-for `::tooltip`.
+the UA owns the resulting visibility of the tooltip.
+
+Disallowing author control of `visibility` itself allows UAs to lazily calculate
+tooltip styles under the `::tooltip` pseudo element until it is determined by
+the UA to display the tooltip itself. If an author were able to adjust
+`visibility`, we would need to calculate `::tooltip` styles for all elements
+to determine if the tooltip would be shown or not, which would be less
+performant.
+
+Although we don't allow author adjustment of `visibility`, authors may still
+find it useful to adjust the timing the tooltip is shown, which we are proposing
+can be accomplished via adjustment to the `transition` defined in the UA default
+styles for `::tooltip`.
 
 ### Scenario 4: Setting the name using `title` without rendering a tooltip
 
