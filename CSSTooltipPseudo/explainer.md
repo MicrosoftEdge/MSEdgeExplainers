@@ -3,11 +3,13 @@
 ## Authors
 
 - [Alison Maher](https://github.com/alisonmaher)
+- [Lea Verou](https://github.com/LeaVerou) (author of the [original
+proposal](https://github.com/w3c/csswg-drafts/issues/8930)) 
 
 ## Participate
 
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSTooltipPseudo)
-- [CSSWG Github Proposal](https://github.com/w3c/csswg-drafts/issues/8930#issuecomment-1581848840)
+- [CSSWG Github Proposal](https://github.com/w3c/csswg-drafts/issues/8930)
 
 ## Status of this Document
 
@@ -349,7 +351,7 @@ Many have proposed a pseudo for styling browser tooltips over the years,
 with the [first proposal](
 https://lists.w3.org/Archives/Public/www-style/2000Apr/0014.html)
 originating around April 2000, and the most [recent proposal](
-https://github.com/w3c/csswg-drafts/issues/8930#issuecomment-1581848840)
+https://github.com/w3c/csswg-drafts/issues/8930)
 from Lea Verou in 2023. 
 
 The proposal in this document takes close inspiration from these, by
@@ -817,6 +819,13 @@ of the Iframe window. This, however, would be consistent with the behavior
 authors get with custom JS tooltips already, so applying the same restriction
 here likely wouldn’t be a major downgrade for authors.
 
+With styled tooltips being constrained to the browser window bounds, depending
+on the UA choice for rendering technology, UAs will need to ensure that the
+tooltip remains isolated from the rest of the document and the resulting
+layout, as to ensure that styled tooltips do not cause unexpected side
+effects on page content, which is guarenteed of tooltips across browsers
+today.
+
 ## Privacy Considerations
 
 There are no known privacy considerations to take into account as part of
@@ -851,6 +860,7 @@ or [`position-visibility`](
 https://drafts.csswg.org/css-anchor-position-1/#position-visibility)?
 If `position-visibility`, we may want to consider adding a new value
 for "always hidden".
+- Should tooltips generate their own events?
 
 ## Future ideas
 
@@ -922,7 +932,7 @@ Many thanks for valuable feedback and advice from:
 Thanks to the following proposals, projects, libraries, frameworks, and languages for their work on similar problems that influenced this proposal.
 - A special thank you to Lea Verou for her [detailed proposal of
 `::tooltip`](
-https://github.com/w3c/csswg-drafts/issues/8930#issuecomment-1581848840)
+https://github.com/w3c/csswg-drafts/issues/8930)
 and for reviving the idea in the CSSWG, which was a valuable source of
 inspiration for this document.
 - Thank you to Tantek Çelik, whose [original proposal](
