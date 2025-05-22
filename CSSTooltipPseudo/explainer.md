@@ -153,7 +153,7 @@ Authors can use an existing library or component for a fully customizable toolti
 Some example libraries include:
   - https://fluent2.microsoft.design/components/web/react/core/tooltip/usage
   - https://www.opentip.org/
-  - https://floating-ui.com/?utm_source=popper.js.org
+  - https://floating-ui.com/
   - https://www.npmjs.com/search?ranking=popularity&q=tooltip
   - Many more   
 
