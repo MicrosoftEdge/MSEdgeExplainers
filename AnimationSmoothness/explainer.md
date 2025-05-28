@@ -75,7 +75,7 @@ One of the current ways to measure smoothness is by measuring frames per second 
 
 Animation frames are rendered on the screen when there is a change that needs to be updated. If they are not updated in a certain amount of time, the browser drops a frame, which may affect animation smoothness.
 
-The rAF method has the browser call a function (rAF) to update the animation before the screen refreshes. By counting how often rAF is called, you can determine the FPS. If the browser skips calling rAF, it means a frame was dropped. This method helps understand how well the browser handles animations and whether any frames are being dropped.
+The rAF method has the browser call a function (rAF) to update the animation before the screen refreshes. By counting how often rAF is called, you can determine the FPS. If the browser skips calling rAF, a potential frame rendering opportunity was skipped. This method helps understand how well the browser handles animations and whether any frames are being dropped.
 
 #### Limitations
 
@@ -90,7 +90,7 @@ Using rAF to determine the FPS can be energy intensive and inaccurate. This appr
 A long animation frame (LoAF) occurs when a frame takes more than 50ms to render. The Long Animation Frames API allows developers to identify long animation frames by keeping track of the time it takes for frames to complete. If the frame exceeds the threshold, it is flagged.
 
 #### Limitations
-Unlike requestAnimationFrame() (rAF), which measures FPS, LoAF focuses on pinpointing performance issues and responsiveness. The two APIs provide different metrics and are called at different frequencies. While both APIs track animation frames, neither provides the precision needed for measuring animation smoothness.
+requestAnimationFrame() and long animation frames serve different purposes. requestAnimationFrame() schedules a rendering opportunity and includes a callback to observe that rendering, while long animation frames only observe rendering events without participating in their scheduling. LoAF focuses on pinpointing performance issues and responsiveness. Although both APIs track animation frames and provide different metrics at varying frequencies, neither offer the precision required for measuring animation smoothness. 
 
 ####  [Reference](https://github.com/w3c/long-animation-frames)
 
