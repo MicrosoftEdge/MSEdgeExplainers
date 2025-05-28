@@ -1,0 +1,14 @@
+---
+pagination:
+  data: collections.explainers
+  size: 1
+  alias: explainer
+permalink: "{{ explainer.url }}"
+layout: layouts/explainer.njk
+---
+
+<a href="/" class="back-link">← Back to All Explainers</a>
+
+<main>
+  {{ explainer.renderedContent | safe }}
+</main>

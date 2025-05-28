@@ -1,0 +1,49 @@
+---
+title: Microsoft Edge Explainers
+layout: layouts/explainer.njk
+permalink: /
+---
+
+<header>
+  <h1>{{ title }}</h1>
+  <p>The latest web platform proposals and explainers from the Microsoft Edge team. Will add more text if we like this.</p>
+<header>
+
+
+<main>
+<h2>Brainstorming 🧠</h2>
+<p>These are proposals that are still really early in their lifecycle. We might just be thinking about the problems, starting to get rough ideas of what solutions might look like, or just want to throw an idea out to the world to see if there's more people with similar problems. Once we get a handle on the possible solutions and directions we'll move these to the "Active Explainers" section above.</p>
+  <table class="explainer-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Issues</th>
+        <th>Feedback</th>
+        <th>Group</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      {%- for explainer in collections.explainers -%}
+      <tr>
+        <td>
+          <a href="{{ explainer.url }}" class="explainer-title">{{ explainer.data.title }}</a>
+        </td>
+        <td>
+          <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/{{explainer.data.label}}">
+            Issues
+          </a>
+        </td>
+        <td>
+          <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees={{explainer.data.owner}}&labels={{explainer.data.label}}&title=%5B{{explainer.data.label}}%5D+%3CTITLE+HERE%3E">
+            New Issue
+          </a>
+        </td>
+        <td>
+          {{ explainer.data.venue or "TBD" }}
+        </td>
+      </tr>
+      {%- endfor -%}
+    </tbody>
+  </table>
+</main>

@@ -1,3 +1,11 @@
+---
+tags: explainer, brainstorming
+title: Materials in Web Applications
+label: Materials 
+owner: diekus
+venue: Web Apps
+---
+
 # Materials in Web Applications
 
 Authors: [Diego Gonzalez](https://github.com/diekus), [Andy Luhrs](https://github.com/aluhrs13)

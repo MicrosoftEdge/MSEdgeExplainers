@@ -1,3 +1,11 @@
+---
+tags: explainer, brainstorming
+title: Performance Control of Embedded Content
+label: PerformanceControlOfEmbeddedContent 
+owner: nishitha-burman
+venue: Web Perf
+---
+
 # Performance control of embedded content
 
 ## Authors

@@ -1,3 +1,11 @@
+---
+tags: explainer, brainstorming
+title: Animation Smoothness
+label: AnimationSmoothness
+owner: jenna-sasson
+venue: Web Perf
+---
+
 # A More Precise Way to Measure Animation Smoothness
 
 [comment]: < ** (*Same-Origin*) >

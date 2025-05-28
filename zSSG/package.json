@@ -1,0 +1,16 @@
+{
+  "name": "edge-explainers",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "eleventy",
+    "serve": "eleventy --serve",
+    "start": "eleventy --serve --watch"
+  },
+  "dependencies": {
+    "@11ty/eleventy": "^3.1.0",
+    "glob": "^10.3.10",
+    "gray-matter": "^4.0.3",
+    "markdown-it": "^14.1.0"
+  }
+}

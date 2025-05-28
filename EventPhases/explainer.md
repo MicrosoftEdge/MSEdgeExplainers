@@ -1,3 +1,11 @@
+---
+tags: explainer, brainstorming
+title: Opt-In Event Phases For Reliably Fast DOM Operations
+label: EventPhases 
+owner: slightlyoff
+venue: Web Perf
+---
+
 # Opt-In Event Phases For Reliably Fast DOM Operations
 
 ## Authors:
