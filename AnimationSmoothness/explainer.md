@@ -183,8 +183,9 @@ For the event listener scenario, it was determined that using granularity would 
    * Should the fps be something that a web page can query anytime? Or only reported out when the browser misses some target?
    * How will this API work with variable rate monitors or on screens with higher refresh rates?
    * How will this API take into account situations where the compositor thread produces frames that are missing content from the main thread?
-   * How will this API measure both the compositor and the main thread when they may have differing frame rates. The compositor thread can usually run at a higher frame rate than the main thread due to its simpler tasks.
+   * How will this API measure both the compositor and the main thread when they may have differing frame rates. The compositor thread can usually run at a higher frame rate than the main thread due to its simpler tasks and multiple threads and processes contribute to smoothness metrics. 
    * Should a developer be able to target a subset of time based on an interaction triggering an animation?
+   * How will this API be interoperable and return meaningful metrics applicable to all browser engines? 
 
 ## Acknowledgements
 
