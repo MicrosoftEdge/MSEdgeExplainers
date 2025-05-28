@@ -872,7 +872,8 @@ psuedo.
 This addition would require allowing sub-psuedo elements within `::tooltip`.
 There would also need to be a way to know the position of the tooltip itself
 to position the arrow against, which can be accomplished with CSS Anchor
-Positioning.
+Positioning, along with the proposed [`::tether` pseudo element](
+https://github.com/w3c/csswg-drafts/issues/9271).
 
 ### Customizing `::tooltip` user interactions
 
