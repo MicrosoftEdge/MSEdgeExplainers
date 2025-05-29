@@ -189,4 +189,4 @@ For the event listener scenario, it was determined that using granularity would 
 
 ## Acknowledgements
 
-Thank you to Sam Fortiner, Olga Gerchikov, and Andy Luhrs for their valuable feedback.
+Thank you to [Sam Fortiner](https://github.com/sfortiner), Olga Gerchikov, and [Andy Luhrs](https://github.com/aluhrs13) for their valuable feedback.
