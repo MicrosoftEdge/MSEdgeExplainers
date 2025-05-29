@@ -148,7 +148,7 @@ This option works similarly to the [Frame Timing API](https://wicg.github.io/fra
 
 ### Option 3: Event Listener
 
-Adding an event listener for frame rate changes would alert developers about large drops in frame rate. Since it would not be necessary to know if the rate drops by a frame or two. Instead, the developer could set the event listener to alert when the frame rate drops by n. Or, similarly to the long task API's duration threshold, the developer could set a min and max fps. The event listener would fire only if the FPS is above the max or below the min.
+Adding an event listener for frame rate changes would alert developers about large drops in frame rate since it would not be necessary to know if the rate drops by a frame or two. Instead, the developer could set the event listener to alert when the frame rate drops by n. Or, similarly to the long task API's duration threshold, the developer could set a min and max fps. The event listener would fire only if the FPS is above the max or below the min.
 
 `window.addEventListener("frameratechange", (event) =>{doSomething();})`
 
