@@ -75,7 +75,7 @@ One of the current ways to measure smoothness is by measuring frames per second 
 
 Animation frames are rendered on the screen when there is a change that needs to be updated. If they are not updated in a certain amount of time, the browser drops a frame, which may affect animation smoothness.
 
-The rAF method has the browser call a function (rAF) to update the animation before the screen refreshes. By counting how often rAF is called, you can determine the FPS. If the browser skips calling rAF, a potential frame rendering opportunity was skipped. This method helps understand how well the browser handles animations and whether any frames are being dropped.
+The rAF method has the browser call a function (rAF) to update the animation before the screen refreshes. By counting how often rAF is called, you can determine the FPS. If the browser skips calling rAF, a potential frame rendering opportunity was skipped. This method helps understand how well the browser handles animations.
 
 #### Limitations
 
