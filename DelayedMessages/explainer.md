@@ -2,6 +2,79 @@
 
 Author: [Joone Hur](https://github.com/joone)
 
+# Participate
+
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DelayedMessages)
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+# Table of Contents
+
+- [Explainer: Delayed Messages API](#explainer-delayed-messages-api)
+- [Overview](#overview)
+- [Goals](#goals)
+- [Non-goals](#non-goals)
+- [Problems](#problems)
+  - [Case 1: Thread Being Occupied](#case-1-thread-being-occupied)
+    - [index.html](#indexhtml)
+    - [main.js](#mainjs)
+    - [worker.js](#workerjs)
+  - [Case 2: Message Queue Congestion](#case-2-message-queue-congestion)
+    - [index.html](#indexhtml-1)
+    - [main.js](#mainjs-1)
+    - [worker.js](#workerjs-1)
+  - [Case 3: Serialization/Deserialization Time](#case-3-serializationdeserialization-time)
+    - [index.html](#indexhtml-2)
+    - [main.js](#mainjs-2)
+    - [worker.js](#workerjs-2)
+    - [Console logs](#console-logs)
+    - [Summary of Problems](#summary-of-problems)
+- [Proposal: Introducing the Delayed Messages API](#proposal-introducing-the-delayed-messages-api)
+  - [`PerformanceDelayMessageTiming` Interface](#performancedelaymessagetiming-interface)
+    - [`postMessage` Timestamps and Durations:](#postmessage-timestamps-and-durations)
+    - [Instance Properties](#instance-properties)
+      - [`PerformanceEntry.entryType`](#performanceentryentrytype)
+      - [`PerformanceEntry.name`](#performanceentryname)
+      - [`PerformanceEntry.startTime`](#performanceentrystarttime)
+      - [`PerformanceEntry.duration`](#performanceentryduration)
+      - [`PerformanceDelayMessageTiming.sentTime`](#performancedelaymessagetimingsenttime)
+      - [`PerformanceDelayMessageTiming.processingStart`](#performancedelaymessagetimingprocessingstart)
+      - [`PerformanceDelayMessageTiming.processingEnd`](#performancedelaymessagetimingprocessingend)
+      - [`PerformanceDelayMessageTiming.blockedDuration`](#performancedelaymessagetimingblockedduration)
+      - [`PerformanceDelayMessageTiming.serialization`](#performancedelaymessagetimingserialization)
+      - [`PerformanceDelayMessageTiming.deserialization`](#performancedelaymessagetimingdeserialization)
+      - [`PerformanceDelayMessageTiming.messageType`](#performancedelaymessagetimingmessagetype)
+      - [`PerformanceDelayMessageTiming.traceId`](#performancedelaymessagetimingtraceid)
+      - [`PerformanceDelayMessageTiming.invoker`](#performancedelaymessagetiminginvoker)
+      - [`PerformanceDelayMessageTiming.receiver`](#performancedelaymessagetimingreceiver)
+      - [`PerformanceDelayMessageTiming.scripts`](#performancedelaymessagetimingscripts)
+  - [`PerformanceMessageScriptInfo` Interface](#performancemessagescriptinfo-interface)
+    - [Instance Properties](#instance-properties-1)
+      - [`PerformanceMessageScriptInfo.name`](#performancemessagescriptinfoname)
+      - [`PerformanceMessageScriptInfo.sourceFunctionName`](#performancemessagescriptinfosourcefunctionname)
+      - [`PerformanceMessageScriptInfo.sourceURL`](#performancemessagescriptinfosourceurl)
+      - [`PerformanceMessageScriptInfo.executionContext`](#performancemessagescriptinfoexecutioncontext)
+      - [`PerformanceMessageScriptInfo.sourceCharPosition`](#performancemessagescriptinfosourcecharposition)
+      - [`PerformanceMessageScriptInfo.sourceLineNumber`](#performancemessagescriptinfosourcelinenumber)
+      - [`PerformanceMessageScriptInfo.sourceColumnNumber`](#performancemessagescriptinfosourcecolumnnumber)
+  - [`PerformanceExecutionContextInfo` Interface](#performanceexecutioncontextinfo-interface)
+    - [Instance Properties](#instance-properties-2)
+      - [`PerformanceExecutionContextInfo.id`](#performanceexecutioncontextinfoid)
+      - [`PerformanceExecutionContextInfo.name`](#performanceexecutioncontextinfoname)
+      - [`PerformanceExecutionContextInfo.type`](#performanceexecutioncontextinfotype)
+  - [Monitoring Delayed `postMessage` Events](#monitoring-delayed-postmessage-events)
+    - [`durationThreshold`](#durationthreshold)
+  - [Examples of a `delayed-message` Performance Entry](#examples-of-a-delayed-message-performance-entry)
+- [Alternatives Considered](#alternatives-considered)
+  - [DevTools Tracing](#devtools-tracing)
+  - [Manual Instrumentation / Polyfills](#manual-instrumentation--polyfills)
+- [Security and Privacy Considerations](#security-and-privacy-considerations)
+- [Discussion](#discussion)
+  - [Minimum Duration for Delayed Messages (`durationThreshold`)](#minimum-duration-for-delayed-messages-durationthreshold)
+- [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Overview
 
 Web applications frequently use `postMessage` to send messages across different execution contexts, such as between windows, iframes, and web workers. However, message delays happen when messages are queued but not processed promptly, often because the event loop in the receiving context is occupied with long-running tasks or the message queue itself becomes congested due to a high volume of messages.
