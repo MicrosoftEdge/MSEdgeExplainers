@@ -6,8 +6,8 @@ Authors: [Victor Huang](https://github.com/victorhuangwq)
 
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-This document status: Active
-Expected venue: [WHAT WG](https://whatwg.org/)
+This document status: Active  
+Expected venue: [WHAT WG](https://whatwg.org/)  
 Current version: this document
 
 ## Introduction
@@ -36,13 +36,13 @@ Developers can signal their intent via `window.open()` and `<a>` elements. The b
 - For `window.open()`, we propose introducing a new `windowFeatures` parameter called `addOpenerToHistory`. When this feature is specified, the browser will add the opener to the new tab's history.
 
 ```javascript
-window.open("https://www.exampledestination.com", "_blank", "addOpenerToHistory")
+window.open("https://www.destination.com", "_blank", "addOpenerToHistory")
 ```
 
 - For `<a>` elements, we propose introducing a new `rel` attribute value called `addOpenerToHistory`. When this value is specified, the browser will add the opener to the new tab's history.
 
 ```html
-<a href="https://www.exampledestination.com" target="_blank" rel="addOpenerToHistory">Example Destination</a>
+<a href="https://www.destination.com" target="_blank" rel="addOpenerToHistory">Example Destination</a>
 ```
 
 ### Observed Behavior
@@ -62,7 +62,7 @@ Pros:
 - Simplifies implementation for developers, as they wouldn't need to modify individual links or scripts.
 - Ensures consistent behavior across the site without requiring additional attributes.
 
-Cons:
+Cons:  
 Less flexible than the opt-in mechanism, as it applies to all links on the site, potentially leading to unintended behavior for links that shouldn't have this functionality.
 
 ### UA-Defined Behavior
