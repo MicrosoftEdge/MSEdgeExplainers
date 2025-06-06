@@ -1,4 +1,4 @@
-# Back to the Opener: Seamless Navigation with Linked Tab Histories
+# Back to Opener: Seamless Back Navigation in New Tabs
 
 Authors: [Victor Huang](https://github.com/victorhuangwq)
 
