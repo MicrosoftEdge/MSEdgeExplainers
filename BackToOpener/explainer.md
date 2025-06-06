@@ -12,9 +12,9 @@ Current version: this document
 
 ## Introduction
 
-Modern web experiences can lead to excessive tab proliferation when users click links that open in new tabs, particularly in contexts such as search engines and LLM chat interfaces. Notably, a relatively modern paradigm has emerged where chat interfaces (like ChatGPT, Copilot, or Gemini) often open content in new tabs rather than replacing the current tab. This approach supports multitasking and preserves the conversational context.
+Modern web experiences can lead to excessive tab proliferation when users click links that open in new tabs, particularly in contexts such as search engines and LLM chat interfaces. Notably, a relatively modern paradigm has emerged where chat interfaces (like ChatGPT, Copilot, or Gemini) often open content in new tabs rather than replacing the current tab. This makes sense for the chat interfaces, as this approach supports multitasking and preserves the conversational context.
 
-This proposal introduces an opt‑in mechanism that signals the browser to insert the opener as an initial entry in the new tab's history. When the user navigates back in the new tab, the UA will automatically return focus to the originating tab and close the new tab, provided the opener is still active. This feature enhances user experience by maintaining context and reducing tab clutter.
+This proposal introduces an opt‑in mechanism that signals the browser to insert the opener as an initial entry in the new tab's history. When the user navigates back in the new tab, the UA will automatically return focus to the originating tab and close the new tab, provided the opener is still active. This feature enhances user experience by supporting a logical back navigation flow, and reduce tab clutter at the same time.
 
 ## User-Facing Problem
 
