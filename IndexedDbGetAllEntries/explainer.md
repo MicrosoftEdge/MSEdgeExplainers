@@ -7,6 +7,7 @@
 ## Participate
 
 - https://github.com/w3c/IndexedDB/issues/206
+- https://github.com/w3c/IndexedDB/issues/130
 
 ## Introduction
 
@@ -14,15 +15,29 @@
 
 This explainer proposes a new operation, `getAllRecords()`, which combines [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) with [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) to enumerate both primary keys and values at the same time. For an [`IDBIndex`](https://developer.mozilla.org/en-US/docs/Web/API/IDBIndex), `getAllRecords()` also provides the record's index key in addition to the primary key and value. Lastly, `getAllRecords()` offers a new direction option to enumerate records sorted by key in descending order.
 
+To add the direction option to the existing `getAll()` and `getAllKeys()` operations, this explainer proposes new function overloads that accept the same argument as `getAllRecords()`: the `IDBGetAllOptions` dictionary.
+
 ## Goals
 
 Decrease the latency of database read operations. By retrieving the primary key, value and index key for database records through a single operation, `getAllRecords()` reduces the number of JavaScript events required to read records. Each JavaScript event runs as a task on the main JavaScript thread. These tasks can introduce overhead when reading records requires a sequence of tasks that go back and forth between the main JavaScript thread and the IndexedDB I/O thread.
 
 For batched record iteration, for example, retrieving *N* records at a time, the primary and index keys provided by `getAllRecords()` can eliminate the need for an [`IDBCursor`](https://developer.mozilla.org/en-US/docs/Web/API/IDBCursor), which further reduces the number of JavaScript events required. To read the next *N* records, instead of advancing a cursor to determine the range of the next batch, getAllRecords() can use the primary key or the index key retrieved by the results from the previous batch.
 
+Update the existing operations `getAll()` and `getAllKeys()` to support the same query options as `getAllRecords()`, which adds direction.  For some scenarios, `getAll()` and `getAllKeys()` may suffice.  For example, developers may use `getAllKeys()` to defer loading values until needed.  For records with inline keys, `getAll()` already retrieves both key and value.
+
 ## `IDBObject::getAllRecords()` and `IDBIndex::getAllRecords()`
 
 This explainer proposes adding `getAllRecords()` to both [`IDBObjectStore`](https://www.w3.org/TR/IndexedDB/#idbobjectstore) and [`IDBIndex`](https://www.w3.org/TR/IndexedDB/#idbindex). `getAllRecords()` creates a new `IDBRequest` that queries its `IDBObjectStore` or `IDBIndex` owner. The `IDBRequest` completes with an array of `IDBRecord` results. Each `IDBRecord` contains the `key`, `primaryKey` and `value` attributes. For `IDBIndex`, `key` is the record's index key. For `IDBObjectStore`, both `key` and `primaryKey` return the same value. The pre-existing [`IDBCursorWithValue`](https://www.w3.org/TR/IndexedDB/#idbcursorwithvalue) interface contains the same attributes and values for both `IDBObjectStore` and `IDBIndex`. However, unlike `getAllRecords()`, a cursor may only read one record at a time.
+
+## Adding direction to `getAll()` and `getAllKeys()`
+
+This explainer proposes using `getAllRecords()` as feature detection for direction support in `getAllKeys()` and `getAll()`.  `getAllRecords()` introduces the `IDBGetAllOptions` dictionary, which developers may also use with `getAll()` and `getAllKeys()`.  Before using `IDBGetAllOptions`, developers must check for the existence of `getAllRecords()` in `IDBObjectStore` or `IDBIndex`.  If developers provide both the `IDBGetAllOptions` argument and the `count` argument, the extra `count` argument is ignored like any other extra argument.  The `count` property in `IDBGetAllOptions` is used instead.
+
+## Compatibility risk
+
+Overloading `getAll()` and `getAllKeys()` to accept the `IDBGetAllOptions` dictionary introduces compatibility risk.  Prior to this proposal, when passed a dictionary argument, both `getAll()` and `getAllKeys()` throw an exception after [failing to convert the dictionary to a key range](https://w3c.github.io/IndexedDB/#convert-a-value-to-a-key-range).  After the overload, `getAllKeys()` and `getAll()` will no longer throw for dictionary input.  When the `IDBGetAllOptions` dictionary initializes with its default values, it creates a query that retrieves all of the keys or values from the entire database.
+
+Since using a dictionary with `getAll()` and `getAllKeys()` is a programming error, we believe compat risk is low.
 
 ## Key scenarios
 
@@ -43,7 +58,7 @@ async function get_all_records_with_promise(
     // Create a read-only transaction.
     const read_transaction = database.transaction(
       object_store_name,
-      "readonly"
+      'readonly'
     );
 
     // Get the object store or index to query.
@@ -78,7 +93,7 @@ const records = await get_all_records_with_promise(
   /*query_options=*/ { count: 5 }
 );
 console.log(
-  "The second record in the database contains: " +
+  'The second record in the database contains: ' +
     `primaryKey: ${records[1].primaryKey}, key: ${records[1].key}, value: ${records[1].value}`
 );
 ```
@@ -150,7 +165,7 @@ async function* idb_batch_record_iterator(
 
     // Store the lower or upper bound for the next iteration.
     const last_record = records[records.length - 1];
-    if (direction === "next" || direction === "nextunique") {
+    if (direction === 'next' || direction === 'nextunique') {
       query = IDBKeyRange.lowerBound(last_record.key, /*exclusive=*/ true);
     } else { // direction === 'prev' || direction === 'prevunique'
       query = IDBKeyRange.upperBound(last_record.key, /*exclusive=*/ true);
@@ -162,23 +177,44 @@ async function* idb_batch_record_iterator(
 // Create a reverse iterator that reads 5 records from an index at a time.
 const reverse_iterator = idb_batch_record_iterator(
   database,
-  "my_object_store",
-  /*direction=*/ "prev",
+  'my_object_store',
+  /*direction=*/ 'prev',
   /*batch_size=*/ 5,
-  "my_index"
+  'my_index'
 );
 
 // Get the last 5 records.
 let results = await reverse_iterator.next();
 let records = results.value;
 console.log(
-  "The first record contains: " +
+  'The first record contains: ' +
     `primaryKey: ${records[0].primaryKey}, key: ${records[0].key}, value: ${records[0].value}`
 );
 
 // Get the next batch of 5 records.
 if (!results.done) {
   results = await reverse_iterator.next();
+}
+```
+
+### Use direction with `getAllKeys()` after feature detection
+
+`getAllRecords()` introduces the `IDBGetAllOptions` dictionary, which developers may also use with `getAll()` and `getAllKeys()`.  Before using `IDBGetAllOptions`, developers must check for the existence of `getAllRecords()` in `IDBObjectStore` or `IDBIndex`.
+
+```js
+const read_transaction = database.transaction('my_object_store', 'readonly');
+const object_store = read_transaction.objectStore('my_object_store');
+
+// Use feature detection to determine if this browser supports `getAllRecords()`.
+if ('getAllRecords' in object_store) {
+  // Request the last 5 primary keys in `object_store`.
+  const get_all_options = {
+    direction: 'prev',
+    count: 5    
+  };
+  const request = object_store.getAllKeys(get_all_options);
+} else {
+  // Fallback to a cursor with direction: 'prev' for this query.
 }
 ```
 
@@ -194,14 +230,10 @@ Similar to `getAllRecords()` but [provides results as an array of entries](https
 
 Developers may directly use the entry results to construct a `Map` or `Object` since the entry results are inspired by ECMAScript's [Map.prototype.entries()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map/entries).  However, `getAllEntries()` has unusual ergonomics, requiring indices like `0` and `1` to access the record properties like `key` and `value`.  Also, IndexedDB database records do not map cleanly to ECMAScript entries.  For `IDBIndex`, the results contain a third element for index key.  For an alternate form, `[[ indexKey1, [ primaryKey1, value1]], [ indexKey2, [ primaryKey2, value2]], ... ]`, the index key cannot always serve as the entry's key since the index key may not be unique across all records.
 
-### Adding direction to `getAll()` and `getAllKeys()`
-
-This will be pursued separately.  Join the discussion at https://github.com/w3c/IndexedDB/issues/130.  Providing the direction option on `getAllKeys()` might be useful for reverse iteration scenarios that don't need to load every value enumerated.
-
 ## WebIDL
 
 ```js
-dictionary IDBGetAllRecordsOptions {
+dictionary IDBGetAllOptions {
   // A key or an `IDBKeyRange` identifying the records to retrieve.
   any query = null;
 
@@ -228,6 +260,20 @@ partial interface IDBObjectStore {
   // `[[primaryKey1, value1], [primaryKey2, value2], ... ]`
   [NewObject, RaisesException]
   IDBRequest getAllRecords(optional IDBGetAllRecordsOptions options = {});
+
+  // For `getAll()` and `getAllKeys()`, add support for the direction option
+  // through a new overload, which accepts a `IDBGetAllOptions` dictionary as
+  // the first and only argument.
+  // 
+  // IDBRequest getAll(optional IDBGetAllOptions options);
+  // IDBRequest getAllKeys(optional IDBGetAllOptions options);
+  // 
+  [NewObject, RaisesException]
+  IDBRequest getAll(optional any query_or_options = null,
+                    optional [EnforceRange] unsigned long count);  
+  [NewObject, RaisesException]
+  IDBRequest getAllKeys(optional any query_or_options = null,
+                        optional [EnforceRange] unsigned long count);                    
 }
 
 [Exposed=(Window,Worker)]
@@ -237,6 +283,19 @@ partial interface IDBIndex {
   // `[[primaryKey1, value1, indexKey1], [primaryKey2, value2, indexKey2], ... ]`
   [NewObject, RaisesException]
   IDBRequest getAllRecords(optional IDBGetAllRecordsOptions options = {});
+
+  // Like `IDBObjectStore` above, IDBIndex overloads `getAll()` and `getAllKeys()`
+  // to support direction:
+  //
+  // IDBRequest getAll(optional IDBGetAllOptions options);
+  // IDBRequest getAllKeys(optional IDBGetAllOptions options);
+  // 
+  [NewObject, RaisesException]
+  IDBRequest getAll(optional any query_or_options = null,
+                    optional [EnforceRange] unsigned long count);  
+  [NewObject, RaisesException]
+  IDBRequest getAllKeys(optional any query_or_options = null,
+                        optional [EnforceRange] unsigned long count);     
 }
 ```
 
@@ -258,3 +317,4 @@ Many thanks for valuable feedback and advice from:
 
 - [Rahul Singh](https://github.com/rahulsingh-msft)
 - [Foromo Daniel Soromou](https://github.com/fosoromo_microsoft)
+- [Evan Stade](https://github.com/evanstade)
