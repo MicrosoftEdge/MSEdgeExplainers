@@ -10,7 +10,6 @@ Author: [Joone Hur](https://github.com/joone)
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 # Table of Contents
 
-- [Explainer: Delayed Messages API](#explainer-delayed-messages-api)
 - [Overview](#overview)
 - [Goals](#goals)
 - [Non-goals](#non-goals)
@@ -71,6 +70,8 @@ Author: [Joone Hur](https://github.com/joone)
 - [Security and Privacy Considerations](#security-and-privacy-considerations)
 - [Discussion](#discussion)
   - [Minimum Duration for Delayed Messages (`durationThreshold`)](#minimum-duration-for-delayed-messages-durationthreshold)
+- [Related Discussion, Articles, and Browser Issues](#related-discussion-articles-and-browser-issues)
+- [Acknowledgements](#acknowledgements)
 - [References](#references)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -819,6 +820,19 @@ We propose a default `durationThreshold` of 200ms for identifying delayed messag
 To address this, the API makes `durationThreshold` configurable by the developer. This allows developers to adjust the threshold to their specific application's performance requirements and specific use cases. In addition, the `durationThreshold` also helps ensure that data is only collected for messages that are genuinely problematic, reducing unnecessary monitoring overhead.
 
 Further discussion is needed to determine the minimum allowed value for this threshold (e.g., 50ms as suggested) to ensure it remains useful without introducing significant performance costs.
+
+# Related Discussion, Articles, and Browser Issues
+- **Chromium Issue:** [Support Long Tasks API in workers](https://issues.chromium.org/issues/41399667)  
+    Web developers are interested in extending the Long Tasks API to monitor delayed execution in Web Workers. However, unlike the Long Animation Frames (LoAF) API, the current Long Tasks API lacks script attribution, making it harder to trace the source of delays.
+    
+- **Chromium Issue:** [postMessage between Trello and iframes timing out more frequently](https://issues.chromium.org/issues/40723533)  
+    This issue highlights increasing latency in `postMessage` communication between Trello and embedded iframes, suggesting a need for better diagnostics around message delivery delays.
+    
+- **Article:** [Is postMessage slow?](https://surma.dev/things/is-postmessage-slow/)  
+    This article explains how serialization and deserialization are major sources of delay in `postMessage` usage. While `SharedArrayBuffer` can, in theory, eliminate copying overhead by enabling shared memory, its real-world usage is limited due to strict security constraints and the added complexity of manual memory management and thread synchronization.
+
+# Acknowledgements
+Thank you to Abhishek Shanthkumar, Alex Russell, Andy Luhrs, Dave Meyers, Ethan Bernstein, Evan Stade, Jared Mitchell, Luis Pardo, Noam Helfman, Sam Fortiner, Samuele Carpineti, Steve Becker, Yehor Lvivski for their valuable feedback and input.
 
 # References
 - [Event Timing API](https://w3c.github.io/event-timing/)
