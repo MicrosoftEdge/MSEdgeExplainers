@@ -8,7 +8,7 @@ Authors:
 [Would like a precise way to map PerformanceTimings to FetchEvent](https://github.com/w3c/resource-timing/issues/259)
 
 ## Introduction
-[Resource Timing](https://www.w3.org/TR/resource-timing/) API has no information that uniquely identifies each resource timing to each fetch request. As such, in situations where resources are fetched multiple times, such as with multiple tabs or multiple requests to the same URL, it’s not possible to accurately map resource timings. This lack of clear mapping can hinder performance analysis and optimization efforts. 
+The [Resource Timing](https://www.w3.org/TR/resource-timing/) API has no information that uniquely maps each resource timing to each fetch request. As such, in situations where resources are fetched multiple times, such as with multiple tabs or multiple requests to the same URL, it’s not possible to accurately map resource timings. This lack of clear mapping can hinder performance analysis and optimization efforts. 
 
 This document proposes enhancements to Resource Timing API to enable developers to accurately map resource timings to specific fetch events. This addresses challenges in mapping resource timings in navigation scenarios involving service workers, multiple tabs, and navigation preloads.
 
@@ -25,14 +25,14 @@ The proposed changes in this document aim to provide web developers with the abi
 ## Use Cases
 Tracking resource timing across multiple requests, whether from different browsing contexts (e.g. multiple tabs) or service workers, can be challenging. Some examples include:
 1. **Measuring Resource Timing Across Client and Service Worker** <br>
-   When multiple tabs request the same resource through a service worker, associating timing data between the Performance Resource Timing entries observed in the client and those within the service worker can be difficult. The client-side performance.getEntries() provide the total duration of the request, but it lacks insight into processes inside service worker, such as request handling and network retrieval. The service worker itself can collect performance timing for fetch requests, but there is no direct linkage between these entries and those in the client’s performance timeline.  
+   When multiple tabs request the same resource through a service worker, associating timing data between the Performance Resource Timing entries observed in the client and those within the service worker can be difficult. The client-side `performance.getEntries()` provides the total duration of the request, but it lacks insight into processes inside the service worker, such as request handling and network retrieval. The service worker itself can collect performance timing for fetch requests, but there is no direct linkage between these entries and those in the client’s performance timeline.  
 
    This limitation is particularly problematic for navigation preload requests, where fetch stages occur both in the main thread and the service worker without a unified timing reference. While developers can annotate service worker fetch requests, navigation preload fetches cannot be similarly tagged. 
 
 2. **Tracking Fetch Events to Resource Timing Entries** <br>
    When multiple requests target the same URL from a single client or across multiple tabs (e.g. user opening same URL on multiple tabs, POST requests to same endpoint but with different payloads) it becomes challenging to associate PerformanceResourceTiming entries with specific fetch events.  
 
-   Performance entries use the requested URL as their identifier, but identical URLs result in multiple entries with no distinguishing tag linking them to respective clients or fetch operations. Identical URLs are common for POST requests to same endpoints with different body, and a current [workaround](https://github.com/w3c/resource-timing/issues/255#issuecomment-832196522) involves adding incremental ids as query strings to the URL, but custom query strings might be rejected by the host.
+   Performance entries use the requested URL as their identifier, but identical URLs result in multiple entries with no distinguishing tag linking them to respective clients or fetch operations. Identical URLs are common for POST requests to same endpoints with a different body, and a current [workaround](https://github.com/w3c/resource-timing/issues/255#issuecomment-832196522) involves adding incremental ids as query strings to the URL, but custom query strings might be rejected by the host.
 
 ## Proposed Solution
 
@@ -49,10 +49,10 @@ interface PerformanceResourceTiming  {
 }
 ```
 
-The payload of a performance.getEntriesByType("navigation") call would then look like: 
+The payload of a `performance.getEntriesByType("navigation")` call would then look like: 
 
 ```
-responseId: f943344a-2bb2-46ef-832f-2f0cb81c888f 
+responseId: "f943344a-2bb2-46ef-832f-2f0cb81c888f"
 ```
 
 When querying PerformanceResourceTiming in the main thread or in a Service Worker context:
@@ -189,7 +189,7 @@ If developer doesn’t provide a requestId, the user agent will generate a GUID 
    Adding a read-only `requestId` field on the Request interface.
 
     ```webidl
-    [ Exposed=Window, Worker ] 
+    [Exposed=(Window,Worker)] 
     interface Request { 
       readonly attribute DOMString requestId; 
     }
@@ -200,7 +200,7 @@ If developer doesn’t provide a requestId, the user agent will generate a GUID 
     ```js
     self.addEventListener('fetch', event => { 
       const request = event.request; 
-      console.log(request.requestId); '123e4567-e89b-12d3-a456-426614174000' 
+      console.log(request.requestId); // '123e4567-e89b-12d3-a456-426614174000' 
     }); 
     ```
 
@@ -208,7 +208,7 @@ If developer doesn’t provide a requestId, the user agent will generate a GUID 
     Adding a read-only 'requestId' field on the Response interface.
 
     ```webidl
-    [ Exposed=Window, Worker ] 
+    [Exposed=(Window, Worker)]
     interface Response { 
       readonly attribute DOMString requestId;
     }
