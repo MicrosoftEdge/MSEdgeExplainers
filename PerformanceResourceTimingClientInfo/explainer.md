@@ -226,7 +226,7 @@ If developer doesn’t provide a requestId, the user agent will generate a GUID 
     The payload of a performance.getEntriesByType("resource") or performance.getEntriesByType("navigation") call would then look like: 
 
     ```
-    requestId: “123e4567-e89b-12d3-a456-426614174000” 
+    requestId: "123e4567-e89b-12d3-a456-426614174000"
     ```
 
     An example of how an application might use the requestId to get the resource timing info for a fetch. 
