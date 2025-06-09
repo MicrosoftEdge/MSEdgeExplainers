@@ -178,7 +178,7 @@ fetch(request)
 Or
 
 fetch('https://api.example.com/data', { 
-  method: ‘GET’, 
+  method: 'GET', 
   requestId: '123e4567-e89b-12d3-a456-426614174000'
 }); 
 ```
