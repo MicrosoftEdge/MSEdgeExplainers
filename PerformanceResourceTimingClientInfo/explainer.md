@@ -24,12 +24,12 @@ The proposed changes in this document aim to provide web developers with the abi
 
 ## Use Cases
 Tracking resource timing across multiple requests, whether from different browsing contexts (e.g. multiple tabs) or service workers, can be challenging. Some examples include:
-1. **Measuring Resource Timing Across Client and Service Worker** <br>
+1. **Measuring Resource Timing Across Client and Service Worker**  
    When multiple tabs request the same resource through a service worker, associating timing data between the Performance Resource Timing entries observed in the client and those within the service worker can be difficult. The client-side `performance.getEntries()` provides the total duration of the request, but it lacks insight into processes inside the service worker, such as request handling and network retrieval. The service worker itself can collect performance timing for fetch requests, but there is no direct linkage between these entries and those in the client’s performance timeline.  
 
    This limitation is particularly problematic for navigation preload requests, where fetch stages occur both in the main thread and the service worker without a unified timing reference. While developers can annotate service worker fetch requests, navigation preload fetches cannot be similarly tagged. 
 
-2. **Tracking Fetch Events to Resource Timing Entries** <br>
+2. **Tracking Fetch Events to Resource Timing Entries**  
    When multiple requests target the same URL from a single client or across multiple tabs (e.g. user opening same URL on multiple tabs, POST requests to same endpoint but with different payloads) it becomes challenging to associate PerformanceResourceTiming entries with specific fetch events.  
 
    Performance entries use the requested URL as their identifier, but identical URLs result in multiple entries with no distinguishing tag linking them to respective clients or fetch operations. Identical URLs are common for POST requests to same endpoints with a different body, and a current [workaround](https://github.com/w3c/resource-timing/issues/255#issuecomment-832196522) involves adding incremental ids as query strings to the URL, but custom query strings might be rejected by the host.
@@ -450,7 +450,7 @@ TTFB delta (client - SW): 15.38 ms
 |Distinguish between identical requests from different clients. | ✅ |✅ | ✅ |
 |Enables end-to-end correlation between requests, responses, and resource timings.| ❌ |✅| ❌ |
 |Leverages existing identifiers (FetchEvent).| ❌ | ❌ | ✅ |
-|Developers do not need to generate and manage RequestIds | ✅ |❌| ✅ |
+|Flexibility for Developers to use their own Ids | ❌ | ✅ | ❌ |
 |User agents do not need to generate and manage Ids.|❌ |❌| ✅ |
 |Spec Changes Required| Moderate. Changes to Fetch spec for Response and resource timing spec. | Broad. Changes to Fetch spec for Fetch, Request, Response APIs, and resource timing spec. | Minimal. Only updates to resource timing. |
 |Privacy considerations| Medium risk. Can be mitigated if UA generates the random/non-guessable ids. |Medium risk. UA generated ones can be mitigated. Developers must also generate random, ephemeral Ids| Low risk. Uses existing identifiers already exposed in SW context (FetchEvent). |
