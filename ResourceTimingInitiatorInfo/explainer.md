@@ -19,6 +19,10 @@ Chrome devtool exposes an attribute [`initiator`](https://developer.chrome.com/d
 
 ## User Research
 
+Optimizing content delivery speed greatly improves user experience by reducing delays and frustration from slow-loading websites. Websites and CDNs utilize resource dependency data to determine the sequence of resource loading, allowing them to minimize delays caused by dependencies and anticipate resource requests. This proactive approach accelerates content delivery. Additionally, resource dependency information aids in tracing rogue resources, mitigating online threats and strengthening security.
+
+This document proposes that we extend `PerformanceResourceTiming` to enable the collection of resource dependency data from real users.
+
 The idea was brought up in year [2021](https://github.com/w3c/resource-timing/issues/263). To sum up the discussion, quoting from `nicjansma@`, a more accurate dependency tree from RUM can help:
 -	A web site to optimize load speed
 -	The CDN to optimize delivering content
