@@ -12,22 +12,22 @@ Current version: this document
 
 ## Introduction
 
-Modern web experiences can lead to excessive tab proliferation when users click links that open in new tabs, particularly in contexts such as search engines and LLM chat interfaces. Notably, a relatively modern paradigm has emerged where chat interfaces (like ChatGPT, Copilot, or Gemini) often open content in new tabs rather than opening in the current tab. This makes sense for chat interfaces, as this approach helps the user with multitasking and preserves the conversational context.
+A relatively modern paradigm has emerged where chat interfaces (e.g. ChatGPT, Google AI mode, Copilot, Gemini) often open content in new tabs rather than opening in the current tab. This makes sense for chat interfaces, as this approach helps the user with multitasking and preserves the conversational context. This is in addition to various search engines that already opens links in a new tab (e.g. Yahoo, Bing, Perplexity). However, this causes tab proliferation, and also prevents a natural back navigation flow. 
 
-This proposal introduces an opt‑in mechanism that signals the browser to insert the opener as an initial entry in the new tab's history. When the user navigates back in the new tab, the UA will automatically return focus to the originating tab and close the new tab, provided the opener is still active. This feature enhances user experience by supporting a logical back navigation flow, and reduce tab clutter at the same time.
+This proposal introduces an opt‑in mechanism that signals the browser to insert the opener as an initial entry in the new tab's history. Additionally, when the user navigates back in the new tab, the UA will automatically return focus to the originating tab and close the new tab, provided the originating tab is still active. This feature enhances user experience by supporting a logical back navigation flow, and reduce tab clutter at the same time.
 
 ## User-Facing Problem
 
-The new-tab paradigm of chat interfaces and search engines can frustrate users by causing tab proliferation and making it difficult to return to the original conversation or context. Traditional [guidance](https://www.nngroup.com/articles/new-browser-windows-and-tabs/) warns against breaking the user's flow by opening new tabs, yet modern chat interfaces prioritize multitasking and context preservation.
+The new-tab default of chat interfaces and search engines can frustrate users by causing tab proliferation and making it difficult to return to the original conversation or context. Traditional [guidance](https://www.nngroup.com/articles/new-browser-windows-and-tabs/) warns against breaking the user's flow by opening new tabs. At the same time, modern chat interfaces prioritize multitasking and context preservation, which thus prefers opening in new tab.
 
-This proposal bridges the gap by creating a clear, seamless navigation pathway back to the originating tab, ensuring users can effortlessly return without getting lost among numerous extra tabs.
+This proposal bridges the gap by creating a clear navigation pathway back to the originating tab, ensuring users can effortlessly return without navigating through tabs. It additionally helps reduce tab clutter.
 
 ## Goals and Use Cases
 
 The primary goal is to allow web developers to maintain a connected navigation experience, where the source context is always within reach even when content is loaded in new tabs. Key use cases include:
 
-- Search Engines: Users can click on search results and then effortlessly return to their search page.
-- LLM Chat Interfaces: Users can click on links and navigate back to the conversation window seamlessly.
+- Search Engines: Users can click on search results and then return to their search results page.
+- Conversational Chat Interfaces: Users can click on links and navigate back to the conversation window.
 
 ## Proposed Approach
 
