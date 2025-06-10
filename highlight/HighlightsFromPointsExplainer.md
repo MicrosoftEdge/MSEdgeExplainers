@@ -108,7 +108,7 @@ function createActiveHighlights(x, y) {
 
 This piece of code is significantly smaller and simpler than the solution that was shown in the previous section without `highlightsFromPoint`. More specifically:
 - There's no need to iterate over all the ranges of the highlights registered anymore, now `highlightsFromPoint` gives us only the highlights and ranges that are under the point `(x,y)`. Note that in this particular example we know that if a highlight is hit, there's only one range that was hit because there's no overlapping ranges in the spellchecker.
-- There's no need to deal with creating new Ranges and rectangles anymore because that's handled by the API.
+- There's no need to deal with creating new `Ranges` and rectangles anymore because that's handled by the API.
 
 You can refer to a full implementation in the [Appendix](#example-code-using-highlightsfrompoint).
 
@@ -578,4 +578,4 @@ After executing both examples, we got the following results showing a ~4.1x impr
     - Average time it took to process a click event over highlights (ms): 0.868
     - Average time it took to process a click event outside of highlights (ms): 0.497
 
-When the mouse click event happens outside of the higlights, the performance profiler from developer tools shows that `createActiveHighlights` takes more time dealing with the Ranges and getting the rectangles compared to the version that uses `highlightsFromPoint`. And when the event happens on a highlight, the call to `highlightsFromPoint` takes less time than all the necessary calls to `getClientRects` that are fired in the version that doesn't use the new API. Both measurements indicate that using the new API gives a performance advantage by getting rid of all the Javascript overhead that the program requires when implementing this use case with the current APIs available.
+When the mouse click event happens outside of the higlights, the performance profiler from developer tools shows that `createActiveHighlights` takes more time dealing with the `Ranges` and getting the rectangles compared to the version that uses `highlightsFromPoint`. And when the event happens on a highlight, the call to `highlightsFromPoint` takes less time than all the necessary calls to `getClientRects` that are fired in the version that doesn't use the new API. Both measurements indicate that using the new API gives a performance advantage by getting rid of all the Javascript overhead that the program requires when implementing this use case with the current APIs available.
