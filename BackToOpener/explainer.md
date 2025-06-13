@@ -12,44 +12,49 @@ Current version: this document
 
 ## Introduction
 
-A relatively modern paradigm has emerged where chat interfaces (e.g. ChatGPT, Google AI mode, Copilot, Gemini) often open content in new tabs rather than opening in the current tab. This makes sense for chat interfaces, as this approach helps the user with multitasking and preserves the conversational context. This is in addition to various search engines that already opens links in a new tab (e.g. Yahoo, Bing, Perplexity). However, this causes tab proliferation, and also prevents a natural back navigation flow. 
+In scenarios such as chat interfaces (e.g., ChatGPT, Google AI mode, Copilot, Gemini) and search engines (e.g., Yahoo, Bing, Perplexity), users often have significant context associated with the current document and prefer opening links in new browsing contexts (e.g., via `target="_blank"`) to support multitasking and preserve context. However, this practice disables the browser's back button, preventing users from easily returning to the original document, and contributes to tab proliferation by leaving multiple browsing contexts open without a clear navigation path back to the originating document.
 
-This proposal introduces an opt‑in mechanism that signals the browser to insert the opener as an initial entry in the new tab's history. Additionally, when the user navigates back in the new tab, the UA will automatically return focus to the originating tab and close the new tab, provided the originating tab is still active. This feature enhances user experience by supporting a logical back navigation flow, and reduce tab clutter at the same time.
+This proposal introduces an opt‑in mechanism that signals the browser to insert the opener's URL as an initial entry in the new browsing context's session history. When the user navigates back in the new browsing context, the UA will automatically return focus to the originating browsing context and close the newly opened browsing context, provided the originating document is still active. This feature enhances user experience by supporting a logical back navigation flow and reducing the proliferation of browsing contexts (perceived by users as tab clutter).
 
 ## User-Facing Problem
 
-The new-tab default of chat interfaces and search engines can frustrate users by causing tab proliferation and making it difficult to return to the original conversation or context. Traditional [guidance](https://www.nngroup.com/articles/new-browser-windows-and-tabs/) warns against breaking the user's flow by opening new tabs. At the same time, modern chat interfaces prioritize multitasking and context preservation, which thus prefers opening in new tab.
+The default behavior of opening links in new browsing contexts, as commonly used by chat interfaces and search engines, can frustrate users by causing proliferation of browsing contexts and making it difficult to return to the original conversation or context. Traditional [guidance](https://www.nngroup.com/articles/new-browser-windows-and-tabs/) warns against breaking the user's flow by opening new browsing contexts. At the same time, modern chat interfaces prioritize multitasking and context preservation, thus preferring to open links in new browsing contexts.
 
-This proposal bridges the gap by creating a clear navigation pathway back to the originating tab, ensuring users can effortlessly return without navigating through tabs. It additionally helps reduce tab clutter.
+This proposal bridges the gap by creating a clear navigation pathway back to the originating document, ensuring users can effortlessly return without manually navigating through multiple browsing contexts. It additionally helps reduce the proliferation of browsing contexts perceived as tab clutter.
 
 ## Goals and Use Cases
 
-The primary goal is to allow web developers to maintain a connected navigation experience, where the source context is always within reach even when content is loaded in new tabs. Key use cases include:
+The primary goal is to allow web developers to maintain a connected navigation experience, where the source context is always within reach even when content is loaded in new browsing contexts. Key use cases include:
 
-- Search Engines: Users can click on search results and then return to their search results page.
-- Conversational Chat Interfaces: Users can click on links and navigate back to the conversation window.
+- Search Engines: Users can click on search results and then return to their search results document.
+- Conversational Chat Interfaces: Users can click on links and navigate back to the conversation document.
+
+## Non-Goals
+
+- Any PWA (Progressive Web App) specific behavior or functionality.
+- Modifying the behavior of existing links that do not explicitly opt-in to this feature.
 
 ## Proposed Approach
 
-Developers can signal their intent via `window.open()` and `<a>` elements. The browser will then handle the navigation logic, ensuring that when the user navigates back in the new tab, it automatically returns focus to the originating tab and closes the new tab if the opener is still active.
+Developers can signal their intent via `window.open()` and `<a>` elements. The browser will then handle the navigation logic, ensuring that when the user navigates back in the new browsing context, it automatically returns focus to the originating browsing context and closes the new browsing context if the opener is still active.
 
-- For `window.open()`, we propose introducing a new `windowFeatures` parameter called `addOpenerToHistory`. When this feature is specified, the browser will add the opener to the new tab's history.
+- For `window.open()`, we propose introducing a new `windowFeatures` parameter called `addOpenerToHistory`. When this feature is specified, the browser will add the opener's URL to the new browsing context's history.
 
 ```javascript
 window.open("https://www.destination.com", "_blank", "addOpenerToHistory")
 ```
 
-- For `<a>` elements, we propose introducing a new `rel` attribute value called `addOpenerToHistory`. When this value is specified, the browser will add the opener to the new tab's history.
+- For `<a>` elements, we propose introducing a new `rel` attribute value called `addOpenerToHistory`. When this value is specified, the browser will add the opener's URL to the new browsing context's history.
 
 ```html
 <a href="https://www.destination.com" target="_blank" rel="addOpenerToHistory">Example Destination</a>
 ```
 
-### Observed Behavior
+### Expected Behavior
+Upon clicking the back button in the destination browsing context, the UA will, check if the opener browsing context is still active:
 
-- Upon clicking the back button in the destination tab, if the opener tab is still active, the browser will automatically return focus to the opener tab and close the new tab.
-- If the opener tab is unavailable (e.g., closed or navigated away), the new tab will navigate back to the opener's URL in the current tab.
-
+- Active: The UA will automatically return focus to the opener browsing context and close the destination browsing context.
+- Inactive (e.g., closed or navigated away): UA will navigate back to the opener's URL in the current browsing context.
 
 ## Alternatives Considered
 
@@ -62,8 +67,9 @@ Pros:
 - Simplifies implementation for developers, as they wouldn't need to modify individual links or scripts.
 - Ensures consistent behavior across the site without requiring additional attributes.
 
-Cons:  
-Less flexible than the opt-in mechanism, as it applies to all links on the site, potentially leading to unintended behavior for links that shouldn't have this functionality.
+Cons:
+
+- Less flexible than the opt-in mechanism, as it applies to all links on the site, potentially leading to unintended behavior for links that shouldn't have this functionality.  
 
 ### UA-Defined Behavior
 
@@ -81,6 +87,6 @@ Cons:
 
 ## Privacy and Security Considerations
 
-Even though the opener is added to the history, this does not expose any additional information about the opener tab to the new tab. This is because a new tab cannot query the history of another tab and can only use its own history to navigate back and forth.
+Even though the opener's URL is added to the new browsing context's history, this does not expose any additional information about the opener browsing context to the new browsing context. This is because a browsing context cannot query the history of another browsing context and can only use its own history to navigate back and forth.
 
 Interaction with `rel="noopener"` and `rel="noreferrer"` has also been considered. The implementation of this proposal should not rely on the presence of the `Referer` header or the `window.opener` property, as this would not be compatible with `rel="noopener"` or `rel="noreferrer"`.
