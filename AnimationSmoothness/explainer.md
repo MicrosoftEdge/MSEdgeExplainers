@@ -75,7 +75,7 @@ One of the current ways to measure smoothness is by measuring frames per second 
 
 Animation frames are rendered on the screen when there is a change that needs to be updated. If they are not updated in a certain amount of time, the browser drops a frame, which may affect animation smoothness.
 
-The rAF method has the browser call a function (rAF) to update the animation before the screen refreshes. By counting how often rAF is called, you can determine the FPS. If the browser skips calling rAF, it means a frame was dropped. This method helps understand how well the browser handles animations and whether any frames are being dropped.
+The rAF method has the browser call a function (rAF) to update the animation before the screen refreshes. By counting how often rAF is called, you can determine the FPS. If the browser skips calling rAF, a potential frame rendering opportunity was skipped. This method helps understand how well the browser handles animations.
 
 #### Limitations
 
@@ -90,7 +90,7 @@ Using rAF to determine the FPS can be energy intensive and inaccurate. This appr
 A long animation frame (LoAF) occurs when a frame takes more than 50ms to render. The Long Animation Frames API allows developers to identify long animation frames by keeping track of the time it takes for frames to complete. If the frame exceeds the threshold, it is flagged.
 
 #### Limitations
-Unlike requestAnimationFrame() (rAF), which measures FPS, LoAF focuses on pinpointing performance issues and responsiveness. The two APIs provide different metrics and are called at different frequencies. While both APIs track animation frames, neither provides the precision needed for measuring animation smoothness.
+requestAnimationFrame() and long animation frames serve different purposes. requestAnimationFrame() schedules a rendering opportunity and includes a callback to observe that rendering, while long animation frames only observe rendering events without participating in their scheduling. LoAF focuses on pinpointing performance issues and responsiveness. Although both APIs track animation frames and provide different metrics at varying frequencies, neither offer the precision required for measuring animation smoothness. 
 
 ####  [Reference](https://github.com/w3c/long-animation-frames)
 
@@ -148,13 +148,13 @@ This option works similarly to the [Frame Timing API](https://wicg.github.io/fra
 
 ### Option 3: Event Listener
 
-Adding an event listener for frame rate changes would alert developers about large drops in frame rate. Since it would not be necessary to know if the rate drops by a frame or two. Instead, the developer could set the event listener to alert when the frame rate drops by n. Or, similarly to the long task API's duration threshold, the developer could set a min and max fps. The event listener would fire only if the FPS is above the max or below the min.
+Adding an event listener for frame rate changes would alert developers about large drops in frame rate since it would not be necessary to know if the rate drops by a frame or two. Instead, the developer could set the event listener to alert when the frame rate drops by n. Or, similarly to the long task API's duration threshold, the developer could set a min and max fps. The event listener would fire only if the FPS is above the max or below the min.
 
 `window.addEventListener("frameratechange", (event) =>{doSomething();})`
 
 ### Option 4: Performance Observer
 
-This option works similarly to both [LoAF API](https://github.com/w3c/long-animation-frames) and the [Paint Timing API](https://www.w3.org/TR/paint-timing/), which both use the performance observer and follow a pattern that developers expect to use when improving performance. When observing long animation frames, developers can specify the entry types they want to the performance observer to processes. Like the performance observer reports which animation frames are too long, the event listener would send an alert when the frame rate drops by a certain amount. The two APIs differ in the amount of information given. The LoAF API can give more specific metrics for long animations, while event listeners provide a more general way of monitoring frame rate.
+This option works similarly to both [LoAF API](https://github.com/w3c/long-animation-frames) and the [Paint Timing API](https://www.w3.org/TR/paint-timing/), which both use the performance observer and follow a pattern that developers expect to use when improving performance. When observing long animation frames, developers can specify the entry types they want to the performance observer to processes. For example, if performance observer reports which animation frames are too long, the event listener would send an alert when the frame rate drops by a certain amount. The two APIs differ in the amount of information given. The LoAF API can give more specific metrics for long animations, while event listeners provide a more general way of monitoring frame rate. 
 
 ```javascript
 function perfObserver(list, observer) {
@@ -183,9 +183,10 @@ For the event listener scenario, it was determined that using granularity would 
    * Should the fps be something that a web page can query anytime? Or only reported out when the browser misses some target?
    * How will this API work with variable rate monitors or on screens with higher refresh rates?
    * How will this API take into account situations where the compositor thread produces frames that are missing content from the main thread?
-   * How will this API measure both the compositor and the main thread when they may have differing frame rates. The compositor thread can usually run at a higher frame rate than the main thread due to its simpler tasks.
+   * How will this API measure both the compositor and the main thread when they may have differing frame rates. The compositor thread can usually run at a higher frame rate than the main thread due to its simpler tasks and multiple threads and processes contribute to smoothness metrics. 
    * Should a developer be able to target a subset of time based on an interaction triggering an animation?
+   * How will this API be interoperable and return meaningful metrics applicable to all browser engines? 
 
 ## Acknowledgements
 
-Thank you to Sam Fortiner, Olga Gerchikov, and Andy Luhrs for their valuable feedback.
+Thank you to [Sam Fortiner](https://github.com/sfortiner), Olga Gerchikov, and [Andy Luhrs](https://github.com/aluhrs13) for their valuable feedback.
