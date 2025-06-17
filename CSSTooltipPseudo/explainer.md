@@ -259,7 +259,7 @@ images/simple-button-chromium-mac.png)
 
 On mobile, tooltips are not activatable in Chromium, with the
 exception of tooltips on an image, which do appear in the context
-menu upon long press.
+menu upon long press on Android.
 
 #### Gecko
 
@@ -303,7 +303,9 @@ similarly to Chromium and Firefox on MacOS.
 ![Screenshot of tooltip in Webkit on Mac](
 images/simple-button-webkit-mac.png)
 
-On mobile, tooltips are not activatable in Webkit.
+On mobile, tooltips are not activatable in Webkit, with the
+exception of tooltips on an image, which do appear in the context
+menu upon long press.
 
 ### Longer tooltips across browsers
 
