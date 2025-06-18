@@ -257,7 +257,9 @@ following result:
 ![Screenshot of tooltip in Chromium on Mac](
 images/simple-button-chromium-mac.png)
 
-On mobile, tooltips are not activatable in Chromium.
+On mobile, tooltips are not activatable in Chromium, with the
+exception of tooltips on an image, which do appear in the context
+menu upon long press on Android.
 
 #### Gecko
 
@@ -285,7 +287,9 @@ result:
 ![Screenshot of tooltip in Gecko on Mac](
 images/simple-button-firefox-mac.png)
 
-On mobile, tooltips are not activatable in Gecko.
+On mobile, tooltips are not activatable in Gecko, with the
+exception of tooltips on an image, which do appear in the context
+menu upon long press.
 
 #### Webkit
 
@@ -299,7 +303,9 @@ similarly to Chromium and Firefox on MacOS.
 ![Screenshot of tooltip in Webkit on Mac](
 images/simple-button-webkit-mac.png)
 
-On mobile, tooltips are not activatable in Webkit.
+On mobile, tooltips are not activatable in Webkit, with the
+exception of tooltips on an image, which do appear in the context
+menu upon long press.
 
 ### Longer tooltips across browsers
 
@@ -474,7 +480,11 @@ This proposal sizes the default `::tooltip`-based tooltip according to
 default sizing definitions (where the size of the tooltip is based on
 the size of its content.) This also means that the tooltip will be
 constrained by the viewport in the inline direction, but may overflow
-the viewport in the block direction, if too large.
+the viewport in the block direction, if too large, as depicted in
+the image, below.
+
+![Screenshot of a tooltip with base tooltip pseudo styling overflowing
+the viewport in the block direction](images/tooltip-overflow.png)
 
 We could instead consider whether the default tooltip in this case should
 have a non-default sizing definition. For example, the width of the
@@ -547,7 +557,9 @@ properties should be styleable within a `::tooltip` pseudo element.
 As such, the complete list of properties is up for discussion, but
 as the proposal notes, the core set of properties should include:
 - `content` for setting the text displayed in the tooltip (whether
-authors should be allowed to change this is up for debate)
+authors should be allowed to change this is up for debate, as it
+may have some accessibility implications if the tooltip and `title`
+have different text)
 - `appearance` as a means to trigger new default tooltip styles
 - All font properties, `text-transform`, `letter-spacing`,
 `word-spacing`, and the i18n text properties
@@ -602,9 +614,9 @@ Currently, browsers show `title`-based tooltips when a user hovers
 over the element associated with the tooltip.
 
 No major browser engine appears to currently support touch interactions
-for these built-in tooltips, but this should be something for browser
-vendors to consider along with support for `::tooltip`, similar to
-what is [proposed with `interestfor`](
+for these built-in tooltips, except for tooltips on images. However, this should
+be something for browser vendors to consider along with support for
+`::tooltip`, similar to what is [proposed with `interestfor`](
 https://open-ui.org/components/interest-invokers.explainer/#hids-and-interest).
 
 All browsers, except Microsoft Edge, also do not invoke the `title`-based
@@ -724,9 +736,10 @@ utilizing `content: none` as follows:
 ```
 
 Whether authors should be able to change the `content` of these tooltips
-is still an open question. If we decide that is not allowed, this would
-require a different mechanism (like utilizing `visibility`) if we want
-to support this use case for authors.
+is still an open question. There may be accessibility implications with
+allowing the tooltip text to be different than the `title`. If we decide
+that is not allowed, this would require a different mechanism (like
+utilizing `visibility`) if we want to support this use case for authors.
 
 ### Scenario 5: Providing custom positioning to a tooltip
 
