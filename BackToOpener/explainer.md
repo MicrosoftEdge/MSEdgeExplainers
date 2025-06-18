@@ -38,13 +38,13 @@ The primary goal is to allow web developers to maintain a connected navigation e
 
 Developers can signal their intent via `window.open()` and `<a>` elements. The browser will then handle the navigation logic, ensuring that when the user navigates back in the new browsing context, it automatically returns focus to the originating browsing context and closes the new browsing context if the opener is still active.
 
-- For `window.open()`, we propose introducing a new [`windowFeatures`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open#windowfeatures) parameter called `addOpenerToHistory`. When this feature is specified, the browser will add the opener's URL to the new browsing context's history.
+- For `window.open()`, we propose introducing a new [`windowFeatures`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open#windowfeatures) parameter called `addOpenerToHistory`. When this feature is specified, the browser will add the opener's URL to the new browsing context's history. This windowFeature
 
 ```javascript
 window.open("https://www.destination.com", "_blank", "addOpenerToHistory")
 ```
 
-- For `<a>` elements, we propose introducing a new [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel) attribute value called `addOpenerToHistory`. This specifies the relationship between When this value is specified, the browser will add the opener's URL to the new browsing context's history.
+- For `<a>` elements, we propose introducing a new [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel) attribute value called `addOpenerToHistory`. This specifies the relationship between When this value is specified, the browser will add the opener's URL to the new browsing context's history. This windowFeatures would only apply if `target="_blank"`
 
 ```html
 <a href="https://www.destination.com" target="_blank" rel="addOpenerToHistory">Example Destination</a>
