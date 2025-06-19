@@ -8,7 +8,7 @@ proposal](https://github.com/w3c/csswg-drafts/issues/8930))
 
 ## Participate
 
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSTooltipPseudo)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/TooltipPseudo)
 - [CSSWG Github Proposal](https://github.com/w3c/csswg-drafts/issues/8930)
 
 ## Status of this Document
