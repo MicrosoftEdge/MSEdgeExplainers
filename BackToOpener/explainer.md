@@ -90,3 +90,9 @@ Cons:
 Even though the opener's URL is added to the new browsing context's history, this does not expose any additional information about the opener browsing context to the new browsing context. This is because a browsing context cannot query the history of another browsing context and can only use its own history to navigate back and forth.
 
 Interaction with `rel="noopener"` and `rel="noreferrer"` has also been considered. The implementation of this proposal should not rely on the presence of the `Referer` header or the `window.opener` property, as this would not be compatible with `rel="noopener"` or `rel="noreferrer"`.
+
+## References & acknowledgements
+
+Thank you to the following:
+- [Erik Anderson](https://github.com/erik-anderson), for the initial direction
+- [Andy Luhrs](https://github.com/aluhrs13)
