@@ -10,6 +10,12 @@ This document status: Active
 Expected venue: [WHAT WG](https://whatwg.org/)  
 Current version: this document
 
+## Participate
+
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=victorhuangwq&labels=BackToOpener&title=%5BBackToOpener%5D+%3CTITLE+HERE%3E)
+
+<!-- - [Discussion forum] -->
+
 ## Introduction
 
 In scenarios such as chat interfaces (e.g., ChatGPT, Google AI mode, Copilot, Gemini) and search engines (e.g., Yahoo, Bing, Perplexity), users often have significant context associated with the current document and prefer opening links in new browsing contexts (e.g., via `target="_blank"`) to support multitasking and preserve context. However, this practice disables the browser's back button, preventing users from easily returning to the original document, and contributes to tab proliferation by leaving multiple browsing contexts open without a clear navigation path back to the originating document.
@@ -73,7 +79,7 @@ Cons:
 
 ### UA-Defined Behavior
 
-Another alternative we considered was an approach outside the Web Platform, leaving it up to the user agent to determine whether to add the opener to the history based on heuristics or user preferences. 
+Another alternative we considered was an approach outside the Web Platform, leaving it up to the user agent to determine whether to add the opener to the history based on heuristics or user preferences.
 
 Pros:
 
@@ -94,5 +100,6 @@ Interaction with `rel="noopener"` and `rel="noreferrer"` has also been considere
 ## References & acknowledgements
 
 Thank you to the following:
+
 - [Erik Anderson](https://github.com/erik-anderson), for the initial direction
 - [Andy Luhrs](https://github.com/aluhrs13)
