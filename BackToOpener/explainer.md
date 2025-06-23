@@ -97,6 +97,12 @@ Even though the opener's URL is added to the new browsing context's history, thi
 
 Interaction with `rel="noopener"` and `rel="noreferrer"` has also been considered. The implementation of this proposal should not rely on the presence of the `Referer` header or the `window.opener` property, as this would not be compatible with `rel="noopener"` or `rel="noreferrer"`.
 
+## Stakeholder Feedback / Opposition
+
+A primary concern is the potential for an inconsistent user experience, as this is an opt-in feature. Users might be confused by "back-to-opener" behavior that isn't present on all sites opened in a new browsing context. Discoverability is also a challenge, as users may not know which links will have this enhanced navigation.
+
+This feedback raises the question of whether such behavior should be controlled by the user agent rather than the web platform. However, this proposal prioritizes developer opt-in to grant explicit control and avoid altering the behavior of existing web content in unintended ways.
+
 ## References & acknowledgements
 
 Thank you to the following:
