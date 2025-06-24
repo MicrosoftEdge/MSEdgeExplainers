@@ -18,9 +18,9 @@ Current version: this document
 
 ## Introduction
 
-In scenarios such as chat interfaces (e.g., ChatGPT, Google AI mode, Copilot, Gemini) and search engines (e.g., Yahoo, Bing, Perplexity), users often have significant context associated with the current document and prefer opening links in new browsing contexts (e.g., via `target="_blank"`) to support multitasking and preserve context. However, this practice disables the browser's back button, preventing users from easily returning to the original document, and contributes to tab proliferation by leaving multiple browsing contexts open without a clear navigation path back to the originating document.
+In scenarios such as chat interfaces (e.g., ChatGPT, Google AI mode, Copilot, Gemini) and search engines (e.g., Yahoo, Bing, Perplexity), users often have significant context associated with the current document and prefer opening links in new browsing contexts (e.g., via `target="_blank"`) to support multitasking and preserve context. However, this practice disables the browser's back button, preventing users from easily returning to the original document, and contributes to tab proliferation by leaving multiple browsing contexts open without a clear navigation path back to the opener document.
 
-This proposal introduces an opt‑in mechanism that signals the browser to insert the opener's URL as an initial entry in the new browsing context's session history. When the user navigates back in the new browsing context, the UA will automatically return focus to the originating browsing context and close the newly opened browsing context, provided the originating document is still active. This feature enhances user experience by supporting a logical back navigation flow and reducing the proliferation of browsing contexts (perceived by users as tab clutter).
+This proposal introduces an opt‑in mechanism that signals the browser to insert the opener's URL as an initial entry in the destination browsing context's session history. When the user navigates back in the destination browsing context, the UA will automatically return focus to the opener browsing context and close the destination browsing context, provided the originating document is still active. This feature enhances user experience by supporting a logical back navigation flow and reducing the proliferation of browsing contexts (perceived by users as tab clutter).
 
 ## User-Facing Problem
 
@@ -42,25 +42,25 @@ The primary goal is to allow web developers to maintain a connected navigation e
 
 ## Proposed Approach
 
-Developers can signal their intent via `window.open()` and `<a>` elements. The browser will then handle the navigation logic, ensuring that when the user navigates back in the new browsing context, it automatically returns focus to the originating browsing context and closes the new browsing context if the opener is still active.
+Developers can signal their intent via `window.open()` and `<a>` elements. The browser will then handle the navigation logic, ensuring that when the user navigates back in the destination browsing context, it automatically returns focus to the opener browsing context and closes the destination browsing context if the opener is still active.
 
-- For `window.open()`, we propose introducing a new [`windowFeatures`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open#windowfeatures) parameter called `addOpenerToHistory`. When this feature is specified, the browser will add the opener's URL to the new browsing context's history. This windowFeature
+- For `window.open()`, we propose introducing a new [`windowFeatures`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open#windowfeatures) parameter called `addOpenerToHistory`. When this feature is specified, the browser will add the opener's URL to the destination browsing context's history. This windowFeatures would only apply if `target="_blank"`
 
 ```javascript
 window.open("https://www.destination.com", "_blank", "addOpenerToHistory")
 ```
 
-- For `<a>` elements, we propose introducing a new [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel) attribute value called `addOpenerToHistory`. This specifies the relationship between When this value is specified, the browser will add the opener's URL to the new browsing context's history. This windowFeatures would only apply if `target="_blank"`
+- For `<a>` elements, we propose introducing a new [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel) attribute value called `addOpenerToHistory`. Similarly, when this value is specified, the browser will add the opener's URL to the destination browsing context's history.
 
 ```html
 <a href="https://www.destination.com" target="_blank" rel="addOpenerToHistory">Example Destination</a>
 ```
 
 ### Expected Behavior
-Upon clicking the back button in the destination browsing context, the UA will, check if the opener browsing context is still active:
+Upon clicking the back button in the destination browsing context, the UA will check if the opener browsing context is still active:
 
 - Active: The UA will automatically return focus to the opener browsing context and close the destination browsing context.
-- Inactive (e.g., closed or navigated away): UA will navigate back to the opener's URL in the current browsing context.
+- Inactive (e.g., closed or navigated away): UA will navigate back to the opener's URL in the destination browsing context.
 
 ## Alternatives Considered
 
@@ -93,7 +93,7 @@ Cons:
 
 ## Privacy and Security Considerations
 
-Even though the opener's URL is added to the new browsing context's history, this does not expose any additional information about the opener browsing context to the new browsing context. This is because a browsing context cannot query the history of another browsing context and can only use its own history to navigate back and forth.
+Even though the opener's URL is added to the destination browsing context's history, this does not expose any additional information about the opener browsing context to the destination browsing context. This is because a browsing context cannot query the history of another browsing context and can only use its own history to navigate back and forth.
 
 Interaction with `rel="noopener"` and `rel="noreferrer"` has also been considered. The implementation of this proposal should not rely on the presence of the `Referer` header or the `window.opener` property, as this would not be compatible with `rel="noopener"` or `rel="noreferrer"`.
 
