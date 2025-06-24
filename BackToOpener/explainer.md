@@ -28,6 +28,25 @@ The default behavior of opening links in new browsing contexts, as commonly used
 
 This proposal bridges the gap by creating a clear navigation pathway back to the originating document, ensuring users can effortlessly return without manually navigating through multiple browsing contexts. It additionally helps reduce the proliferation of browsing contexts perceived as tab clutter.
 
+### Evidence of User Need
+
+#### User Demand
+
+The practice of opening links in new browsing contexts leads to user frustration due to tab proliferation and the disruption of standard back-button navigation. When a new tab is opened, the back button is not exposed, which breaks the user's mental model of navigation and removes their ability to easily return to the previous page ([dinghy.studio](https://www.dinghy.studio/blog/opening-links-in-new-tabs/)). This issue is particularly prevalent on search engine results pages, where users are unable to use the back button to return to their query result, and forces them to manage an increasing number of open tabs ([How-To Geek](https://www.howtogeek.com/734902/how-to-stop-microsoft-edge-from-opening-links-in-new-tabs/)).
+
+From an accessibility standpoint, this behavior can be disorienting and problematic. It deviates from the expected navigation model. Informing users that a link opens in a new tab helps them understand that the back button will not work as expected, which is particularly important for screen reader users who would otherwise need to manually navigate back to the previous window ([Accessibility Guidelines](https://accessibilityguidelines.com/articles/links-in-new-tabs.html)).
+
+The demand for a solution is also reflected in community feature requests for browsers like [Mozilla](https://connect.mozilla.org/t5/ideas/back-button-closes-newly-created-tabs/idi-p/8428) and [Vivaldi](https://forum.vivaldi.net/topic/56508/preserve-tab-history-when-a-link-is-opened-in-new-tab), where users have explicitly asked for functionality that allows the back button to return to the opener tab.
+
+#### Prior Art
+
+The user need is further underscored by the development of browser extensions designed to provide this functionality. These extensions serve as a form of prior art and demonstrate a clear demand for a native solution. Examples include:
+
+- **Chromium Extensions:** [Tab Origin](https://microsoftedge.microsoft.com/addons/detail/tab-origin/pjokhhddbfamccemjneocheekkoognbo?hl=en-US), [Last Tab Back](https://chromewebstore.google.com/detail/last-tab-back/oijipkokfkhgojikimbbcafnbppebnhe?pli=1)
+- **Legacy Firefox Add-on:** [BackTrack Tab History](https://www.ghacks.net/2017/03/01/backtrack-tab-history-add-on-for-firefox/)
+
+While these add-ons validate the user need, a native implementation within the browser would offer a more integrated, secure, and reliable experience.
+
 ## Goals and Use Cases
 
 The primary goal is to allow web developers to maintain a connected navigation experience, where the source context is always within reach even when content is loaded in new browsing contexts. Key use cases include:
