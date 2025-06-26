@@ -59,9 +59,6 @@ elements.
 
 - Anything specific to `@sheet` should be discussed in its dedicated
   <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">proposal</a>.
-- Modifications to Shadow DOM scoping behaviors. This proposal depends on
-  existing Shadow DOM behavior as currently defined. Styles defined in a Shadow
-  DOM will remain inaccessible to the Light DOM and other Shadow DOMs.
 
 ## Proposal - Local References for Link Rel Tags
 
@@ -147,6 +144,27 @@ the shadow root where they are defined, as illustrated by the following examples
 <p>
   Styles defined inside the sibling Shadow Root are not applied, so "Inside Sibling Shadow DOM" is not blue.
 </p>
+
+These scoping behaviors do not apply to [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md)
+because modules always have global scope. Shadow DOM scoping could be modified though other means, as discussed
+in [this thread](https://github.com/whatwg/html/issues/11364). All of the suggestions in that thread would
+allow for this feature to work with any shadow root, regardless of scope.
+
+### Key Differences Between This Propsoal And Declarative CSS Modules
+
+Both this proposal and [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md)
+allow authors to share inline CSS with Shadow Roots. There are some key differences in both syntax and
+behaviors, as illustrated in the following table:
+
+| | Local Reference Link Rel | Declarative CSS Modules | 
+| :---: | :---: | :---: |
+| Scope | Standard DOM scoping | Global scope |
+| Identifier syntax | Standard HTML IDREF | Module identifier |
+| Integration with @sheet | ✅ Yes | ❌ No |
+| Uses existing HTML concepts | ✅ Yes | ❌ No |
+| Uses existing module concepts | ❌ No | ✅ Yes |
+| Extensibility | Clean @sheet integration, scope expansion could apply to SVG references | More declarative module types (HTML, SVG, etc.) |
+
 
 ### Fetch Behavior
 

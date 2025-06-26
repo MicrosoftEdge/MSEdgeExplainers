@@ -325,6 +325,28 @@ CSS Modules are not the only type of module - there are also JavasScript, JSON, 
 | WASM           | `import {foo} from "bar.wasm" with {type: "wasm"};`      | `<script type="wasm-module" specifier="/bar.wasm"></script>`              |
 
 ## Alternate proposals
+
+### [Local References For Link Rel](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md)
+
+This proposal extends the existing `<link>` tag to support local `<style>` tag references as follows:
+
+```html
+<style id="inline_styles">
+  p {
+    color: blue;
+  }
+</style>
+<p>Outside Shadow DOM</p>
+<template shadowrootmode="open">
+  <link rel="stylesheet" href="#inline_styles" />
+  <p>Inside Shadow DOM</p>
+</template>
+```
+
+This allows for sharing styles defined in the Light DOM across Shadow Roots. Due to scoping behaviors, it will not allow for styles defined in a Shadow DOM
+to be accessed in any other Shadow Root. This limitation could be addressed with extensions on Shadow DOM scoping suggested in 
+[this thread](https://github.com/whatwg/html/issues/11364).
+
 ### [Layer and adoptStyles](https://github.com/w3c/csswg-drafts/issues/10176#proposal)
 This proposal adds the  `adoptStyles` attribute to the template element, enabling its shadow root to adopt styles from outside of the shadow DOM.
 
