@@ -150,6 +150,24 @@ because modules always have global scope. Shadow DOM scoping could be modified t
 in [this thread](https://github.com/whatwg/html/issues/11364). All of the suggestions in that thread would
 allow for this feature to work with any shadow root, regardless of scope.
 
+For example, the "Referencetarget inspired solution on `<template>`" would work with this feature as follows:
+
+```html
+<template exportids="foo"><!-- Exports 'foo' to the light DOM -->
+  <template exportids="foo, bar">
+    <style id="foo">
+     ...
+    </style>
+  </template>
+  <link rel="stylesheet" href="#bar"> <!-- 'bar' is in scope due to `exportids` -->
+</template>
+<link rel="stylesheet" href="#foo"><!-- 'foo' is in the global scope, reference matched -->
+<link rel="stylesheet" href="#bar"><!-- 'bar' is not in scope, reference not matched -->
+```
+
+The other examples in https://github.com/whatwg/html/issues/11364 also use this proposal as an example
+of how scoping can be expanded for Shadow DOM elements.
+
 ### Key Differences Between This Propsoal And Declarative CSS Modules
 
 Both this proposal and [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md)
@@ -158,13 +176,56 @@ behaviors, as illustrated in the following table:
 
 | | Local Reference Link Rel | Declarative CSS Modules | 
 | :---: | :---: | :---: |
-| Scope | Standard DOM scoping | Global scope |
+| Scope | [Standard DOM scoping](#Scoping) | Global scope |
 | Identifier syntax | Standard HTML IDREF | Module identifier |
-| Integration with @sheet | ✅ Yes | ❌ No |
+| Attribute used | Standard HTML `href` | New attribte for `identifier` |
+| Integration with @sheet | ✅ Yes | ❌ No* |
 | Uses existing HTML concepts | ✅ Yes | ❌ No |
 | Uses existing module concepts | ❌ No | ✅ Yes |
 | Extensibility | Clean @sheet integration, scope expansion could apply to SVG references | More declarative module types (HTML, SVG, etc.) |
 
+\* Declarative CSS Modules can be integrated with `@sheet` with some modifications to the syntax. However, it would diverge further from the imperative version of CSS modules. The imperative version of CSS
+modules can import a named `@sheet` "my_sheet" as follows: `import {my_sheet} from './styles.css' with { type: 'css' };`. For Declarative CSS Modules, this syntax could be adapted to look as follows:
+
+```html
+<style type="css-module" specifier="/foo.css">
+@sheet my_sheet {
+  #content {
+    color: red;
+  }
+}
+</style>
+<my-element>
+  <template shadowrootmode="open" adoptedstylesheets="my_sheet from /foo.css">
+    <!-- ... -->
+  </template>
+</my-element>
+```
+
+This would further diverge the `adoptedstylesheets` attribute on `<template>` tags from the imperative version.
+
+### Extensibility
+
+This proposal works nicely with CSS `@sheet`, allowing for the Light DOM to define styles that
+only apply to selected Shadow DOM elements, as demonstrated by the following example:
+
+```html
+<style id="inline_styles">
+@sheet my_sheet {
+  p {
+    color: blue;
+  }
+}
+</style>
+<p>"my_sheet" isn't imported into the light DOM, so this isn't blue</p>
+<template shadowrootmode="open">
+  <link rel="stylesheet" href="#inline_styles" sheet="my_sheet" />
+  <p>Inside Shadow DOM - "my_sheet" was included so this text is blue!</p>
+</template>
+```
+
+All of proposals mentioned in https://github.com/whatwg/html/issues/11364 would not only benefit this
+feature - SVG references, local anchors, and anything that takes an IDREF would benefit.
 
 ### Fetch Behavior
 
