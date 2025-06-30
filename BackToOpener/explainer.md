@@ -18,21 +18,21 @@ Current version: this document
 
 ## Introduction
 
-In scenarios such as chat interfaces (e.g., ChatGPT, Google AI mode, Copilot, Gemini) and search engines (e.g., Yahoo, Bing, Perplexity), users often have significant context associated with the current document and prefer opening links in new browsing contexts (e.g., via `target="_blank"`) to support multitasking and preserve context. However, this practice disables the browser's back button, preventing users from easily returning to the original document, and contributes to tab proliferation by leaving multiple browsing contexts open without a clear navigation path back to the opener document.
+In scenarios such as chat interfaces (e.g., ChatGPT, Google AI mode, Copilot, Gemini) and search engines (e.g., Yahoo, Bing, Perplexity), users often have significant context associated with the current document and prefer opening links in new navigables (e.g., via `target="_blank"`) to support multitasking and preserve context. However, this practice disables the browser's back button, preventing users from easily returning to the original document, and contributes to tab proliferation by leaving multiple navigables open without a clear navigation path back to the opener document.
 
-This proposal introduces an opt‑in mechanism that signals the browser to insert the opener's URL as an initial entry in the destination browsing context's session history. When the user navigates back in the destination browsing context, the UA will automatically return focus to the opener browsing context and close the destination browsing context, provided the originating document is still active. This feature enhances user experience by supporting a logical back navigation flow and reducing the proliferation of browsing contexts (perceived by users as tab clutter).
+This proposal introduces an opt‑in mechanism that signals the browser to insert the opener's URL as an initial entry in the destination navigable's session history. When the user navigates back in the destination navigable, the UA will automatically return focus to the opener navigable and close the destination navigable, provided the originating document is still active. This feature enhances user experience by supporting a logical back navigation flow and reducing the proliferation of navigables (perceived by users as tab clutter).
 
 ## User-Facing Problem
 
-The default behavior of opening links in new browsing contexts, as commonly used by chat interfaces and search engines, can frustrate users by causing proliferation of browsing contexts and making it difficult to return to the original conversation or context. Traditional [guidance](https://www.nngroup.com/articles/new-browser-windows-and-tabs/) warns against breaking the user's flow by opening new browsing contexts. At the same time, modern chat interfaces prioritize multitasking and context preservation, thus preferring to open links in new browsing contexts.
+The default behavior of opening links in new navigables, as commonly used by chat interfaces and search engines, can frustrate users by causing proliferation of navigables and making it difficult to return to the original conversation or context. Traditional [guidance](https://www.nngroup.com/articles/new-browser-windows-and-tabs/) warns against breaking the user's flow by opening new navigables. At the same time, modern chat interfaces prioritize multitasking and context preservation, thus preferring to open links in new navigables.
 
-This proposal bridges the gap by creating a clear navigation pathway back to the originating document, ensuring users can effortlessly return without manually navigating through multiple browsing contexts. It additionally helps reduce the proliferation of browsing contexts perceived as tab clutter.
+This proposal bridges the gap by creating a clear navigation pathway back to the originating document, ensuring users can effortlessly return without manually navigating through multiple navigables. It additionally helps reduce the proliferation of navigables perceived as tab clutter.
 
 ### Evidence of User Need
 
 #### User Demand
 
-The practice of opening links in new browsing contexts leads to user frustration due to tab proliferation and the disruption of standard back-button navigation. When a new tab is opened, the back button is not exposed, which breaks the user's mental model of navigation and removes their ability to easily return to the previous page ([dinghy.studio](https://www.dinghy.studio/blog/opening-links-in-new-tabs/)). This issue is particularly prevalent on search engine results pages, where users are unable to use the back button to return to their query result, and forces them to manage an increasing number of open tabs ([How-To Geek](https://www.howtogeek.com/734902/how-to-stop-microsoft-edge-from-opening-links-in-new-tabs/)).
+The practice of opening links in new navigables leads to user frustration due to tab proliferation and the disruption of standard back-button navigation. When a new tab is opened, the back button is not exposed, which breaks the user's mental model of navigation and removes their ability to easily return to the previous page ([dinghy.studio](https://www.dinghy.studio/blog/opening-links-in-new-tabs/)). This issue is particularly prevalent on search engine results pages, where users are unable to use the back button to return to their query result, and forces them to manage an increasing number of open tabs ([How-To Geek](https://www.howtogeek.com/734902/how-to-stop-microsoft-edge-from-opening-links-in-new-tabs/)).
 
 From an accessibility standpoint, this behavior can be disorienting and problematic. It deviates from the expected navigation model. Informing users that a link opens in a new tab helps them understand that the back button will not work as expected, which is particularly important for screen reader users who would otherwise need to manually navigate back to the previous window ([Accessibility Guidelines](https://accessibilityguidelines.com/articles/links-in-new-tabs.html)).
 
@@ -49,7 +49,7 @@ While these add-ons validate the user need, a native implementation within the b
 
 ## Goals and Use Cases
 
-The primary goal is to allow web developers to maintain a connected navigation experience, where the source context is always within reach even when content is loaded in new browsing contexts. Key use cases include:
+The primary goal is to allow web developers to maintain a connected navigation experience, where the source context is always within reach even when content is loaded in new navigables. Key use cases include:
 
 - Search Engines: Users can click on search results and then return to their search results document.
 - Conversational Chat Interfaces: Users can click on links and navigate back to the conversation document.
@@ -61,25 +61,25 @@ The primary goal is to allow web developers to maintain a connected navigation e
 
 ## Proposed Approach
 
-Developers can signal their intent via `window.open()` and `<a>` elements. The browser will then handle the navigation logic, ensuring that when the user navigates back in the destination browsing context, it automatically returns focus to the opener browsing context and closes the destination browsing context if the opener is still active.
+Developers can signal their intent via `window.open()` and `<a>` elements. The browser will then handle the navigation logic, ensuring that when the user navigates back in the destination navigable, it automatically returns focus to the opener navigable and closes the destination navigable if the opener is still active.
 
-- For `window.open()`, we propose introducing a new [`windowFeatures`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open#windowfeatures) parameter called `add-opener-to-history`. When this feature is specified, the browser will add the opener's URL to the destination browsing context's history. This windowFeatures would only apply if `target="_blank"`
+- For `window.open()`, we propose introducing a new [`windowFeatures`](https://developer.mozilla.org/en-US/docs/Web/API/Window/open#windowfeatures) parameter called `add-opener-to-history`. When this feature is specified, the browser will add the opener's URL to the destination navigable's history. This windowFeatures would only apply if `target="_blank"`
 
 ```javascript
 window.open("https://www.destination.com", "_blank", "add-opener-to-history")
 ```
 
-- For `<a>` elements, we propose introducing a new [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel) attribute value called `add-opener-to-history`. Similarly, when this value is specified, the browser will add the opener's URL to the destination browsing context's history.
+- For `<a>` elements, we propose introducing a new [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/rel) attribute value called `add-opener-to-history`. Similarly, when this value is specified, the browser will add the opener's URL to the destination navigable's history.
 
 ```html
 <a href="https://www.destination.com" target="_blank" rel="add-opener-to-history">Example Destination</a>
 ```
 
 ### Expected Behavior
-Upon clicking the back button in the destination browsing context, the UA will check if the opener browsing context is still active:
+Upon clicking the back button in the destination navigable, the UA will check if the opener navigable is still active:
 
-- Active: The UA will automatically return focus to the opener browsing context and close the destination browsing context.
-- Inactive (e.g., closed or navigated away): UA will navigate back to the opener's URL in the destination browsing context.
+- Active: The UA will automatically return focus to the opener navigable and close the destination navigable.
+- Inactive (e.g., closed or navigated away): UA will navigate back to the opener's URL in the destination navigable.
 
 ## Alternatives Considered
 
@@ -112,13 +112,13 @@ Cons:
 
 ## Privacy and Security Considerations
 
-Even though the opener's URL is added to the destination browsing context's history, this does not expose any additional information about the opener browsing context to the destination browsing context. This is because a browsing context cannot query the history of another browsing context and can only use its own history to navigate back and forth.
+Even though the opener's URL is added to the destination navigable's history, this does not expose any additional information about the opener navigable to the destination navigable. This is because a navigable cannot query the history of another navigable and can only use its own history to navigate back and forth.
 
 Interaction with `rel="noopener"` and `rel="noreferrer"` has also been considered. The implementation of this proposal should not rely on the presence of the `Referer` header or the `window.opener` property, as this would not be compatible with `rel="noopener"` or `rel="noreferrer"`.
 
 ## Stakeholder Feedback / Opposition
 
-A primary concern is the potential for an inconsistent user experience, as this is an opt-in feature. Users might be confused by "back-to-opener" behavior that isn't present on all sites opened in a new browsing context. Discoverability is also a challenge, as users may not know which links will have this enhanced navigation.
+A primary concern is the potential for an inconsistent user experience, as this is an opt-in feature. Users might be confused by "back-to-opener" behavior that isn't present on all sites opened in a new navigable. Discoverability is also a challenge, as users may not know which links will have this enhanced navigation.
 
 This feedback raises the question of whether such behavior should be controlled by the user agent rather than the web platform. However, this proposal prioritizes developer opt-in to grant explicit control and avoid altering the behavior of existing web content in unintended ways.
 
