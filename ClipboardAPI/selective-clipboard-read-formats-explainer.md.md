@@ -3,7 +3,9 @@
 ## Improving Paste Performance through Selective Clipboard Reads
 
  
-**Author:**  Abhishek Singh
+**Author:**  Abhishek Singh( abhisheksing@microsoft.com)
+**Contributors:**  Rohan Raja(roraja@microsoft.com), Rakesh Goulikar(rakesh.goulikar@microsoft.com)
+
 
 ---
 
