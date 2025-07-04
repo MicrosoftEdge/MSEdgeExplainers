@@ -1,9 +1,9 @@
-# Explainer: Selective Clipboard Format Read – C3
+# Explainer: Selective Clipboard Format Read
 
 ## Improving Paste Performance through Selective Clipboard Reads
 
-**Date:**  
-**Author:**  
+ 
+**Author:**  Abhishek Singh
 
 ---
 
@@ -153,6 +153,6 @@ const plainText = await item.getType('text/plain'); // Data is lazily fetched he
 
 We ran experiments simulating real-world clipboard usage to evaluate the performance impact of selectively reading specific clipboard formats. The results showed substantial improvements in the read time when applications read only the required formats instead of the entire clipboard. For example, in a scenario where the clipboard payload was 7.7 MB (comprising 0.7 MB of plain text and 7 MB of HTML), selectively reading just the text reduced the read time by 93%—from 179.5 ms down to 10.8 ms.
 
-As we scaled up the data size, we observed that read times increased proportionally with payload size, reinforcing that the benefits of selective reads become more significant with larger clipboards. Moreover, the type of format had a notable impact on performance. HTML formats consistently exhibited higher read latencies compared to plain text—even when only slightly larger in size—likely due to additional processing like browser-side sanitization for security. Avoiding unnecessary HTML reads can deliver substantial latency improvements, especially in mixed-format clipboards where the application only needs text.
+As we scaled up the data size, we observed that read times increased proportionally with payload size, reinforcing that the benefits of selective reads become more significant with larger clipboard data. Moreover, the type of format had a notable impact on performance. HTML formats consistently exhibited higher read latencies compared to plain text—even when only slightly larger in size—likely due to additional processing like browser-side sanitization for security. Avoiding unnecessary HTML reads can deliver substantial latency improvements, especially in mixed-format clipboards where the application only needs text.
 
 ---
