@@ -1,10 +1,11 @@
 # Performance control of embedded content
 
-## Authors
-- [Nishitha Burman Dey](https://github.com/nishitha-burman)
-- [Luis Flores](https://github.com/lflores-ms)
-- [Andy Luhrs](https://github.com/aluhrs13)
-- [Alex Russell](https://github.com/slightlyoff)
+**Authors:** [Nishitha Burman Dey](https://github.com/nishitha-burman), [Luis Flores](https://github.com/lflores-ms), [Andy Luhrs](https://github.com/aluhrs13), [Alex Russell](https://github.com/slightlyoff)
+
+This proposal introduces four [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points to constrain the performance impact of iframes in the embedding document. Each configuration point enables monitoring for performance-impacting behavior in the iframe, and reports occurrences of such behavior as policy violations through [Reporting API](https://wicg.github.io/document-policy/#reporting). Violations are reported to both the embedding and embedded document. Resources that incur policy violations are blocked from loading.
+
+![Example of resource blocked by policy](
+images/diagram.svg)
 
 ## Participate
 <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Performance%20Control%20of%20Embedded%20Content">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Performance%20Control%20of%20Embedded%20Content?label=issues)</a>
