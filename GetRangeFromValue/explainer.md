@@ -14,50 +14,17 @@
 
 ## Introduction
 
-The current Range interface methods do not support retrieving or creating Range objects that represent the contents of `<textarea>` and `<input>` elements. As a result, if web developers want to use the `getBoundingClientRect()` method in a `<textarea>` or `<input>` element to position a popup beneath the user's current caret to deliver contextual autocomplete suggestions or mark syntax errors as users type using the Highlight API, they have to  find workarounds, such as cloning these elements and their styles into `<div>`s. This is both difficult to maintain and may also impact the web application's performance. This proposal aims to address this issue by introducing `getRangeFromValue()` to directly obtain a Range object for the value of the `<textarea>` and `<input>` elements.
+The current Range interface methods do not support retrieving or creating Range objects that represent the contents of `<textarea>` and `<input>` elements. As a result, if web developers want to use the `getBoundingClientRect()` method in a `<textarea>` or `<input>` element to position a popup beneath the user's current caret to deliver contextual autocomplete suggestions or mark syntax errors as users type using the Highlight API, they have to  find workarounds, such as cloning these elements and their styles into `<div>`s. This is both difficult to maintain and may also impact the web application's performance. This proposal aims to address this issue by introducing `getRangeFromValue()` to directly obtain a Range object for the `value` of the `<textarea>` and `<input>` elements.
 
 ## User-Facing Problem
 
-The Range interface and its methods have several main use cases:
-
-1. Placing a popup near the caret when the user presses a certain key, as shown in the following GIF.
+1. Place a popup near the caret when the user presses a certain key, as shown in the following GIF.
 
 ![popup-inside-div-example](popupmenu-div-example.gif)
 
-2. Marking syntax errors using the Highlight API. 
+2. Mark syntax errors using the Highlight APIm as shown in the following image.
 
 ![highlight-api-example](highlight-api-example.jpg)
-
-The following code shows some basic sample usage of the Highlight API referencing the above image, retrieved from the [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/API/Highlight). Some functionality is omitted for brevity:
-
-```html
-<p class="foo">Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem
-  sapiente non eum facere? Nam rem hic culpa, ipsa rerum ab itaque consectetur
-  molestiae dolores vitae! Quo ex explicabo tempore? Tenetur.</p>
-```
-
-```js
-const parentNode = document.querySelector(".foo");
-const textNode = parentNode.firstChild;
-
-const range1 = new Range();
-range1.setStart(textNode, 6);
-range1.setEnd(textNode, 21);
-
-const range2 = new Range();
-range2.setStart(textNode, 57);
-range2.setEnd(textNode, 71);
-
-const highlight = new Highlight(range1, range2);
-
-CSS.highlights.set("my-custom-highlight", highlight);
-```
-
-```css
-::highlight(my-custom-highlight) {
-  background-color: peachpuff;
-}
-```
 
 Today, web developers have two options to implement these uses cases:
 
@@ -176,7 +143,7 @@ textarea.addEventListener('input', (e) => {
         }
     }
     else {
-        previousWord+=text[selectionStart - 1];
+        previousWord += text[selectionStart - 1];
     }
 });
 
@@ -195,7 +162,7 @@ window.addEventListener('resize',copyStyles);
 
 ### Option 2: Using `contenteditable` `<div>`
 
-Using a `<div contenteditable>` to handle text directly can pose challenges in some applications. Web authors may need to implement additional behaviors to match those of `<textarea>` and `<input>`, such as form integration, consistent behavior across browsers, and accessibility.
+Using a `<div contenteditable>` for direct text handling can be challenging. Web authors may need to implement behaviors for form integration, cross-browser consistency, and accessibility to match `<textarea>` and `<input>` elements.
 
 This is roughly the sample code from the example above, some functionality is omitted for brevity:
 
@@ -244,7 +211,7 @@ nameField.addEventListener('input', (e) => {
         }
     }
     else {
-        previousWord+=text[position - 1];
+        previousWord += text[position - 1];
     }
     // Update hidden input for form validation
     updateHiddenInput();
@@ -254,17 +221,17 @@ nameField.addEventListener('input', (e) => {
 
 ### Goal
 
-Provide a way of obtaining a Range object that represents the contents of `<textarea>` and `<input>` elements.
+Provide a way of obtaining a Range object that represents the `value` of `<textarea>` and `<input>` elements.
 
 ### Non-goals
 
 - Expand the Range API to accommodate the creation of ranges inside `<textarea>` and `<input>` contents.
-- Modifying existing functions in the Range API, Selection API, and Highlight API. 
+- Modifying existing functions in the Range API and Highlight API. 
 - Modify the behavior of `getSelection()` or `getRangeAt()` methods from the Selection API to allow retrieval of `<textarea>` or `<input>` ranges.
 
 ## Proposed Approach
 
-The `getRangeFromValue()` API will be introduced to obtain a Range representing the contents of a `<textarea>` or `<input>` element. It will allow two parameters: `start_offset` and `end_offset`. Using these two values, the function calculates the start and end nodes, as well as the corresponding offsets, of the Range object—taking into account the specific DOM structure of `<textarea>` and `<input>` elements. In an `<input>`, the range will always within a single text node that holds the element’s value. In contrast, a `<textarea>` may contain multiple text nodes if line breaks are present, which may result in the start node being different to the end node. The important thing to note is that the element itself will never be the start/end node.
+The `getRangeFromValue()` API will create a Range representing the `value` of a `<textarea>` or `<input>` element. It accepts two parameters: start_offset and end_offset. These parameters determine the start and end nodes, and their offsets, within the Range object, considering the specific DOM structure of these elements. In an `<input>`, the range is always within a single text node holding the value. In contrast, a `<textarea>` may have multiple text nodes if line breaks are present, potentially resulting in different start and end nodes. Importantly, the element itself will never be the start or end node.
 
 If either one of the `start_offset` and `end_offset` are out of bounds, it will throw a Range type exception. If the field is empty, it will return an empty Range object, with no start or end set.
 
@@ -316,7 +283,7 @@ textarea.addEventListener('input', (e) => {
 });
 ```
 
-This implementation simplifies obtaining the caret's position, using the Highlight API, provides better form integration, and ensures more consistent behavior across browsers. The `getRangeFromValue()` API eliminates the need for cloning elements and copying styles (improving performance) while maintaining the benefits of using native form controls (accessibility, built-in form validation, etc.)
+This implementation simplifies obtaining the caret's position inside `<input>` and `<textarea>` elements. It also allows web developers to use the Highlight API on those elements. The getRangeFromValue() API eliminates the need for cloning elements and copying styles, improving performance while maintaining the benefits of using native form controls, such as accessibility, built-in form validation, and consistent behavior across browsers.
 
 As we want the `getRangeFromValue()` API to be aligned with the current selection APIs for `<textarea>` and `<input>` elements, such as [`select()`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-select), [`selectionStart`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionstart), and [`selectionEnd`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionend), the `<input>` types in which it will be available are listed in the [do not apply](https://html.spec.whatwg.org/multipage/input.html#do-not-apply) section:
 
@@ -326,8 +293,7 @@ As we want the `getRangeFromValue()` API to be aligned with the current selectio
 - URL
 - Password
 
-Following this same alignment to selection APIs, the parameters `start_offset` and `end_offset` of the `getRangeFromValue()` API will be based on caret position, rather than
-character index, just as [`selectionStart`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionstart) and [`selectionEnd`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionend).
+Following this same alignment with selection APIs, the parameters `start_offset` and `end_offset` of the `getRangeFromValue()` API will be based on caret position, rather than character index, just as [`selectionStart`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionstart) and [`selectionEnd`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionend) are.
 
 Sample code for `<input type="text">`:
 
@@ -379,9 +345,9 @@ input.addEventListener('input', (e) => {
 
 Apart from the solutions described in the [User-Facing Problem](#user-facing-problem) section, we have also considered the following alternatives:
 
-### getSelectionBoundingClientRect
+### getSelectionBoundingClientRect()
 
-As one of the main use cases, the original proposal involved obtaining the bounds of a selection within a `<textarea` or `<div>` element through a new API, `getSelectionBoundingClientRect()`. This new API would mimic the behavior of `document.getSelection().getRangeAt(0).getBoundingClientRect();`
+As one of the main use cases, the original proposal involved obtaining the bounds of a selection within a `<textarea>` or `<div>` element through a new API, `getSelectionBoundingClientRect()`. This new API would mimic the behavior of `document.getSelection().getRangeAt(0).getBoundingClientRect();`
 which can be currently used to obtain a DOMRect object representing the selection bounds within a `<div>` element. A sample code for an autocomplete menu positioning using this original approach could look as follows:
 
 ```javascript
@@ -392,7 +358,7 @@ const rect = input.getSelectionBoundingClientRect();
 showAutocomplete(rect.left, rect.bottom);
 ```
 
-After originally considering this proposal, it was eventually discarded and replaced with `getRangeFromValue()` for the following reasons:
+This alternative has the following disadvantages:
 
 1. **Redundancy**
     - `getSelectionBoundingClientRect()` overlaps with `getSelection().getRangeAt(0).getBoundingClientRect()` for every element other than `<textarea>` and `<input>`.
@@ -404,7 +370,7 @@ After originally considering this proposal, it was eventually discarded and repl
     
 ### Extending the Range API
 
-Another alternative approach considered was extending the Range API, allowing `setStart()` and `setEnd()` to work when a Range's boundary points are within a form control.
+Another considered approach was extending the Range API by allowing `setStart()` and `setEnd()` to work when a Range's boundary points are within a form control.
 
 ```javascript
 Range.setStart(formControl: HTMLInputElement | HTMLTextAreaElement, offset: number)
@@ -424,16 +390,7 @@ const rect = range.getBoundingClientRect();
 showAutocomplete(rect.left, rect.bottom);
 ```
 
-While this approach could work, `getRangeFromValue()` was chosen as the better solution for the following reasons:
-
-1. **API Consistency and Integration**:
-    - Follows the same input type restrictions as `selectionStart` and `selectionEnd` (text, search, tel, url, password).
-    - Works with both collapsed and non-collapsed ranges.
-    - Respects the element's disabled state and read-only attributes.
-    - Returns a `Range`, which is a well-understood interface used throughout the web platform.
-
-2. **No backward compatibility issues expected**:
-    - Updating the behavior of `setStart()` and `setEnd()` Range API would cause issues with websites that make use of the current behavior.
+While this approach would help solve the two main use cases stated above, `getRangeFromValue()` was chosen instead because making changes or updating the behavior of `setStart()` and `setEnd()` in the Range API could cause issues for websites that rely on the current specified behavior.
 
 ## Other Considerations
 
@@ -454,12 +411,6 @@ While this approach could work, `getRangeFromValue()` was chosen as the better s
   - Returns an empty Range object (without a start or end) when the field is empty.
 - For password fields:
   - Selection position information is already available through existing APIs.
-
-## Stakeholder Feedback / Opposition
-
-- Chromium: Positive
-- WebKit: Positive based on https://github.com/whatwg/meta/issues/326#issuecomment-2377500295 (API for visible caret position in textarea/input discussion)
-- Gecko: Positive based on https://github.com/whatwg/meta/issues/326#issuecomment-2377500295 (API for visible caret position in textarea/input discussion)
 
 ## References & acknowledgements
 
