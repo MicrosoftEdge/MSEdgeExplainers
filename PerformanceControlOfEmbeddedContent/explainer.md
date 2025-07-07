@@ -6,6 +6,10 @@
 - [Andy Luhrs](https://github.com/aluhrs13)
 - [Alex Russell](https://github.com/slightlyoff)
 
+## Participate
+<a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Performance%20Control%20of%20Embedded%20Content">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Performance%20Control%20of%20Embedded%20Content?label=issues)</a>
+[Open an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=performance-control-of-embedded-content.md)
+
 ## Table of Contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
