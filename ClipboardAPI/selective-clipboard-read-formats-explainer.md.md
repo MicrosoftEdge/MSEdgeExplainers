@@ -3,8 +3,8 @@
 ## Improving Paste Performance through Selective Clipboard Reads
 
  
-**Author:**  Abhishek Singh( abhisheksing@microsoft.com)
-**Contributors:**  Rohan Raja(roraja@microsoft.com), Rakesh Goulikar(rakesh.goulikar@microsoft.com)
+**Author:**  Abhishek Singh(abhisheksing@microsoft.com)
+**Co-authors:**  Rohan Raja(roraja@microsoft.com), Rakesh Goulikar(rakesh.goulikar@microsoft.com)
 
 
 ---
@@ -59,9 +59,7 @@ We propose API signature changes to the [clipboard.read()](https://www.w3.org/TR
 
 ### Proposed API Signature
 
-We propose extending the [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) method to accept a new `types` member in the `ClipboardReadOptions` dictionary.
-
-The browser will query the platform clipboard and return [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) objects containing data only for the requested MIME types.
+We propose to rename the optional argument "ClipboardUnsanitizedFormats" of [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API to `ClipboardReadOptions` and extend this object to include a new `types` property which is a list of mime types to be retrieved.
 
 ```js
 // Example Javascript code and Interface definition Language
@@ -90,34 +88,25 @@ dictionary ClipboardReadOptions {
 - If the clipboard format requested by the application is either invalid or not present in the clipboard, the resolved [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) will have `undefined` for that format.
 - If multiple instances of the same format are provided in the request, the duplicates will be ignored and only one instance will be considered during processing.
 
-**Behaviour of `types` property of ClipboardItems:**
+**Behaviour of [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) property of [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem):**
 
-The `types` property will return only those types out of provided input types which are available in the system clipboard. If a particular type is requested in the input but not present in the platform clipboard, then the `types` value won’t include that format. This way, a web author can verify if a requested type is present in the platform clipboard.
+The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) property will return only those types out of provided input types which are available in the system clipboard. If a particular type is requested in the input but not present in the platform clipboard, then the [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) value won’t include that format. This way, a web author can verify if a requested type is present in the platform clipboard.
 
 ---
 
 ## Pros
 
-1. **Backward Compatible**  
+ **Backward Compatible :**  
    Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) without specifying any MIME types will continue to behave as before, receiving all available clipboard formats.
 
 ---
 
 ## Cons
 
-1. **Potential for Confusion with the unsanitized Option**
+**Potential Confusion Between `[types]` and `[unsanitized]` Options :**
+Adding both `[types]`and `[unsanitized]` to `[ClipboardReadOptions]` may cause confusion about how they interact. For example, what happens if a MIME type is listed in `[unsanitized]` but not in `[types]`? While the spec can clarify that `[types]` filtering applies first, this isn’t immediately obvious from the API shape and could lead to subtle bugs if misunderstood.
 
-    A potential con of the proposed signature is the increased complexity of the ClipboardReadOptions dictionary.
-    By adding the types member alongside the existing unsanitized member, the signature creates a potential for confusion about how these two options interact. A developer might wonder:
-    What happens if I specify a type in unsanitized that I have not included in types?
-    Does the types filter apply before or after the unsanitized request is considered?
-    While the behavior can be clearly defined in the specification (the types filter would logically apply first), the signature itself doesn't make this interaction immediately obvious. This could lead to subtle bugs if developers misunderstand the relationship between the two properties.
-    
-    For more details, see the [Clipboard API specification: ClipboardReadOptions dictionary](https://www.w3.org/TR/clipboard-apis/#clipboardreadoptions-dictionary).
-
----
-
-## Considered Alternate: No API Signature Change but Defer Actual Read Until ClipboardItem.getType()
+## Considered Alternative: No API Signature Change but Defer Actual Read Until ClipboardItem.getType()
 
 
 An alternative approach defers clipboard data retrieval from the OS until the web app explicitly calls [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype). In this model, [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) returns [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) objects listing available MIME types, but without the data. The browser fetches the requested data only when [getType(mimeType)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) is called, caching it to avoid repeated clipboard accesses for the same type. 
