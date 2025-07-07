@@ -141,6 +141,9 @@ There are various layers of configuration that can happen and we need to ensure 
 
 ## Security and Privacy Considerations
 
+### Potential privacy implications of blocking embedded content
+We propose to [report violations across documents](#reporting-3rd-party-violations-to-embedder). These reports may expose information about the embedded document state to the embedder. We consider that because policies defined through Document Policy require opt-in, the embedded document accepts the risks by agreeing to the policy. See discussion in [#1077](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1077) (resource blocking) and [#1085](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1085) (reporting leaks).
+
 ### Global budgets and side-channel attacks
 The proposed criteria include budgets which are shared globally across documents. This could allow for documents to learn things about cross-origin documents, as described in the [Never Slow Mode explainer](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits). We consider the same alternatives introduced for NSM as viable for this proposal:
   * Require CORS
@@ -188,10 +191,19 @@ With this approach, adding a new group of constraints would only be possible by 
 
 ## Open Issues
 
-### Per-document constraints
-Document Policy directives are effective on a per-document basis. This generally makes it harder for constraints to have the desired impact to improve performance, as the overall cap on resources increases with the complexity of the page. We propose capping the overall complexity and resources through frame depth and count restrictions to avoid an unbound upper limit to page resource consumption.
+### Policy enforcement options
+We aim to block loading for resources that violate the `basic` policy. Non-breaking enforcement might help with adoption. See discussion in [#1082](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1082) and [#1079](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1079).
 
-What would be the appropriate frame count and depth limit? See related discussion in [Security and Privacy Considerations](#frame-depth).
+### Limits need to be defined
+We propose to have concrete limits managed by the platform, but defaults can't change without breakage. See discussion in [#1083](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1083) and [#1084](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1084).
+
+**`basic` category limits**
+* HTTP-based compression of text-based resources
+* Opt for compressed formats when available (non text-based resources)
+* Keep size of non-HTTP compressed resources low
+  * data: URLs: 100kB
+  * Images: 1MB
+  * Fonts: 96kB
 
 ### Criteria and category definition, evolution
 This proposal provides an affordance for web developers to gain back control over the performance of their web property. A set of performance-impacting criteria was derived from [Never Slow Mode](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits) and experience in the field (see note in [Proposed Solution](#proposed-solution)). These criteria were then grouped into buckets, taking into account their overall impact, stage in the document lifetime and estimated effort from the developer to fix.
@@ -213,9 +225,19 @@ We expect these criteria and their specific limits to evolve with the web, which
 3. **Updated criteria under new category tags**
     | **Pros** | **Cons** |
     |---|---|
-    |- Web developers can anticipate and address violations. | - Requires changes from sites each time there's a change in a category. | 
+    |- Web developers can anticipate and address violations. | - Requires changes from sites each time there's a change in a category.<br>- New configuration point required for every policy change. |
 
-An ideal mechanism would allow for this evolution go happen in a controlled, predictable manner. An open point for discussion is whether it's a reasonable trade off for developers opting in to be expected to keep up with the platform as criteria evolves.
+4. **Use versioning**
+Bundle criteria updates into versions of the policy and let the document specify which policy version is requested or opted-in to by using a parameterized configuration point instead. Sites need to actively adopt new versions of the policy.
+    | **Pros** | **Cons** |
+    |---|---|
+    |- Web developers can anticipate and address violations.<br>- Changes can happen within the same configuration point. | - Requires changes from sites each time there's a change in a category. |
+Versioning is the preferred mechanim as it allows for policy evolution to happen in a controlled, predictable manner.
+
+### Per-document constraints
+Document Policy directives are effective on a per-document basis. This generally makes it harder for constraints to have the desired impact to improve performance, as the overall cap on resources increases with the complexity of the page. We propose capping the overall complexity and resources through frame depth and count restrictions to avoid an unbound upper limit to page resource consumption.
+
+What would be the appropriate frame count and depth limit? See related discussion in [Security and Privacy Considerations](#frame-depth).
 
 ### Reporting 3rd party violations to embedder
 Embedders are best equipped to influence change in the performance when they are aware of where the issues are. While Document Policy provides a Reporting API integration, this only reports violations to the endpoint of the document where the violation occurs. Embedders do not receive reports that the embedded content has incurred policy violations, which is a limitation. We are currently considering sending a minimal report to the embedder when a violation occurs in the embedded document.
