@@ -6,6 +6,48 @@
 - [Andy Luhrs](https://github.com/aluhrs13)
 - [Alex Russell](https://github.com/slightlyoff)
 
+## Table of Contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Performance control of embedded content](#performance-control-of-embedded-content)
+  - [Authors](#authors)
+  - [Introduction](#introduction)
+  - [Goals](#goals)
+  - [Non-goals](#non-goals)
+  - [Use cases and scenarios](#use-cases-and-scenarios)
+  - [Proposed Solution](#proposed-solution)
+    - [Categories and criteria](#categories-and-criteria)
+    - [Discussion of different categories](#discussion-of-different-categories)
+    - [Example](#example)
+    - [API Design Discussion](#api-design-discussion)
+      - [Using multiple Document Policy configuration points](#using-multiple-document-policy-configuration-points)
+      - [Opt-in and policy negotiation](#opt-in-and-policy-negotiation)
+      - [Negotiation vs enforcement](#negotiation-vs-enforcement)
+      - [Open question: required policy and report-only mode](#open-question-required-policy-and-report-only-mode)
+    - [What should be standardized?](#what-should-be-standardized)
+  - [Security and Privacy Considerations](#security-and-privacy-considerations)
+    - [Potential privacy implications of blocking embedded content](#potential-privacy-implications-of-blocking-embedded-content)
+    - [Global budgets and side-channel attacks](#global-budgets-and-side-channel-attacks)
+    - [Frame depth](#frame-depth)
+  - [Dependencies on non-stable features](#dependencies-on-non-stable-features)
+  - [Alternatives considered](#alternatives-considered)
+    - [Custom attributes and headers](#custom-attributes-and-headers)
+    - [Levels vs. categories](#levels-vs-categories)
+  - [Open Issues](#open-issues)
+    - [Policy enforcement options](#policy-enforcement-options)
+    - [Limits need to be defined](#limits-need-to-be-defined)
+    - [Criteria and category definition, evolution](#criteria-and-category-definition-evolution)
+    - [Per-document constraints](#per-document-constraints)
+    - [Reporting 3rd party violations to embedder](#reporting-3rd-party-violations-to-embedder)
+    - [Interaction with Heavy Ad Interventions](#interaction-with-heavy-ad-interventions)
+    - [Open question: how can we ensure fair restrictions for various types of devices (e.g. low end vs. high end devices)?](#open-question-how-can-we-ensure-fair-restrictions-for-various-types-of-devices-eg-low-end-vs-high-end-devices)
+    - [Open question: how to determine categories/criteria/limits for desktop vs. mobile?](#open-question-how-to-determine-categoriescriterialimits-for-desktop-vs-mobile)
+  - [References & acknowledgements](#references--acknowledgements)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Introduction
 
 This document proposes platform functionality to give embedders (browsers, websites, hosting applications) the ability to put constraints on resources allocated to embedees (tabs, iframes, WebViews) to minimize the performance impact that embedded web content can have on an user’s device. Additionally, violations of the constraints will be reported to the embedder to inform and improve the ecosystem.
