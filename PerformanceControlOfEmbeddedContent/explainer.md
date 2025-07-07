@@ -4,6 +4,11 @@
 
 This proposal introduces four [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points to constrain the performance impact of iframes in the embedding document. Each configuration point enables monitoring for performance-impacting behavior in the iframe, and reports occurrences of such behavior as policy violations through [Reporting API](https://wicg.github.io/document-policy/#reporting). Violations are reported to both the embedding and embedded document. Resources that incur policy violations are blocked from loading.
 
+A working prototype for the first category `basic` is to be implemented in the following stages:
+* **Stage 1.** Configuration point and policy monitoring, reporting.
+* **Stage 2.** Resource blocking.
+* **Stage 3.** Cross-document reporting.
+
 ![Example of resource blocked by policy](
 images/diagram.svg)
 
