@@ -9,6 +9,8 @@ A working prototype for the first category `basic` is to be implemented in the f
 * **Stage 2.** Resource blocking.
 * **Stage 3.** Cross-document reporting.
 
+More details on the behavior for the `basic` category can be found in ["basic" category overview](https://docs.google.com/document/d/1RGxvtkoQbvApLVdipiASoUQjC0Jf-IKD9qV1EfUJHAQ).
+
 ![Example of resource blocked by policy](
 images/diagram.svg)
 
