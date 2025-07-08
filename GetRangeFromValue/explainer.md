@@ -256,7 +256,7 @@ textarea.addEventListener('input', (e) => {
         // Get the range using the proposed API
         const range = textarea.getRangeFromValue(selectionStart, selectionStart);
         // Use the range to obtain the bounding client rect
-        const rect = range.getSelectionBoundingClientRect();
+        const rect = range.getBoundingClientRect();
         // Position and show the user list
         userList.style.left = `${rect.left}px`;
         userList.style.top = `${rect.bottom}px`;
@@ -314,7 +314,7 @@ input.addEventListener('input', (e) => {
         // Get the range using the proposed API
         const range = input.getRangeFromValue(selectionStart, selectionStart);
         // Use the range to obtain the bounding client rect
-        const rect = range.getSelectionBoundingClientRect();
+        const rect = range.getBoundingClientRect();
         // Position the emoji picker under the caret
         emojiPicker.style.position = 'fixed';
         emojiPicker.style.left = `${rect.left}px`;
