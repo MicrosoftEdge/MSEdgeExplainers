@@ -231,7 +231,7 @@ Provide a way of obtaining a Range object that represents part or all of the `va
 
 ## Proposed Approach
 
-The `getRangeFromValue()` API will create a Range representing the `value` of a `<textarea>` or `<input>` element. It accepts two parameters: start_offset and end_offset. These parameters determine the start and end nodes, and their offsets, within the Range object, considering the specific DOM structure of these elements. In an `<input>`, the range is always within a single text node holding the value. In contrast, a `<textarea>` may have multiple text nodes if line breaks are present, potentially resulting in different start and end nodes. Importantly, the element itself will never be the start or end node.
+The `getRangeFromValue()` API will create a Range representing the `value` of a `<textarea>` or `<input>` element. It accepts two parameters: `start_offset` and `end_offset`. These parameters determine the start and end nodes, and their offsets, within the Range object, considering the specific DOM structure of these elements. In an `<input>`, the range is always within a single text node holding the value. In contrast, a `<textarea>` may have multiple text nodes if line breaks are present, potentially resulting in different start and end nodes. Importantly, the element itself will never be the start or end node.
 
 If either one of the `start_offset` and `end_offset` are out of bounds, it will throw a Range type exception. If the field is empty, it will return an empty Range object, with no start or end set.
 
