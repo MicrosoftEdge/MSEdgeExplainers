@@ -22,7 +22,7 @@ The current Range interface methods do not support retrieving or creating Range 
 
 ![popup-inside-div-example](popupmenu-div-example.gif)
 
-2. Mark syntax errors using the Highlight APIm as shown in the following image.
+2. Mark syntax errors using the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API) as shown in the following image.
 
 ![highlight-api-example](highlight-api-example.jpg)
 
