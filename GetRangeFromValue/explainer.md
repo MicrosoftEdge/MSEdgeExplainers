@@ -221,7 +221,7 @@ nameField.addEventListener('input', (e) => {
 
 ### Goal
 
-Provide a way of obtaining a Range object that represents the `value` of `<textarea>` and `<input>` elements.
+Provide a way of obtaining a Range object that represents part or all of the `value` of `<textarea>` and `<input>` elements.
 
 ### Non-goals
 
