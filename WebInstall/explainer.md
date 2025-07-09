@@ -233,7 +233,7 @@ In the case that the `navigator.install` method is invoked to install an applica
 
 If an application is already installed, the `.install()` method can trigger UX in the UA to launch an application. **This is not obvious to the developer, as the UX flow will behave and report identically of installing/opening the app.**
 
-In these cases, `install_url` and `manifest_id` can be the only pieces of information available to determine whether a background document is already installed. A UA can try to match these values to existing installed apps, but these could result in the incorrect application launching in the case of nested apps.
+In these cases, if a `manifest_id` is provided, the UA will use this alone to find an existing installed app. If a `manifest_id` is not provided, the UA will fallback to `install_url` and search for any existing installed app with the url in scope. Note, this may result in the incorrect app being launched in the case of nested scopes. The developer can fix this by passing a `manifest_id`.
 
 ## Installability criteria & Web app manifest `id`
 To install content using the Web Install API, the_document being installed_ must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. Any other requirement to pass 'installability criteria' is up to each implementor. 
