@@ -205,22 +205,22 @@ Global styles can be included in a single stylesheet, which is then importable i
 ## Proposal: Inline, declarative CSS module scripts
 This proposal builds on [CSS module scripts](https://web.dev/articles/css-module-scripts), enabling authors to declare a CSS module inline in an HTML file and link it to a DSD using its [module specifier](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string). A `type=”css-module”` attribute on the `<script>` element would define it as a CSS  module script and the specifier attribute would add it to the module cache as if it had been imported. This allows the page to render with the necessary CSS modules attached to the correct scopes without needing to load them multiple times. Note that module maps are global, meaning that modules defined in a Shadow DOM will be accessible throughout the document context.
 ```js
-<script type="css-module" specifier="/foo.css">
+<style type="css-module" specifier="foo">
   #content {
     color: red;
   }
-</script>
+</style>
 ```
-Given this `<script>` tag, the styles could be applied to a DSD as follows:
+Given this `<style>` tag, the styles could be applied to a DSD as follows:
 ```html
 <my-element>
-  <template shadowrootmode="open" adoptedstylesheets="/foo.css">
+  <template shadowrootmode="open" adoptedstylesheets="foo">
     <!-- ... -->
   </template>
 </my-element>
 ```
 
-The shadow root will be created with its `adoptedStyleSheets` containing the `"/foo.css"` CSS module script’s CSSStyleSheet instance. This single `CSSStyleSheet` instance can be shared by any number of shadow roots.
+The shadow root will be created with its `adoptedStyleSheets` containing the `"foo"` CSS module script’s `CSSStyleSheet` instance. This single `CSSStyleSheet` instance can be shared by any number of shadow roots.
 
 An inline CSS module script could also be imported in a JavaScript module in the usual way:
 ```html
@@ -228,20 +228,20 @@ import styles from '/foo.css' with { type: 'css' };
 ```
 Another advantage of this proposal is that it can allow multiple module specifiers in the `adoptedstylesheets` property:
 ```html
-<script type="css-module" specifier="/foo.css">
+<style type="css-module" specifier="foo">
   #content {
     color: red;
   }
-</script>
+</style>
 
-<script type="css-module" specifier="/bar.css">
+<style type="css-module" specifier="bar">
   #content {
     font-family: sans-serif;
   }
-</script>
+</style>
 
 <my-element>
-  <template shadowrootmode="open" adoptedstylesheets="/foo.css, /bar.css">
+  <template shadowrootmode="open" adoptedstylesheets="foo, bar">
     <!-- ... -->
   </template>
 </my-element>
@@ -255,24 +255,7 @@ A global map does come with some tradeoffs, particularly when names collide. Wit
 
 ### `<script>` vs `<style>` For CSS Modules
 
-This document uses the `<script>` tag for defining CSS Modules. Developer feedback has shown a preference for using the `<style>` tag when defining a CSS Module. This makes sense for CSS Modules in isolation, but does not align with other types of modules. The table in the [next section](#other-declarative-modules) details other module types and demonstrates the degree of consistency achieved with `<script>`.  Developer feedback is important and should be considered, even at the potential expense of consistency.
-
-This is an example of a CSS Module defined with the `<style>` tag:
-```html
-<style type="css-module" specifier="/foo.css">
-  #content {
-    color: red;
-  }
-</style>
-
-<my-element>
-  <template shadowrootmode="open" adoptedstylesheets="/foo.css">
-    <!-- ... -->
-  </template>
-</my-element>
-```
-
-A compromise could be to support both `<script>` tags and `<style>` tags.
+Earlier versions of this document used the `<script>` tag for declaring CSS Modules. Developer feedback has shown a strong preference for using the `<style>` tag when declaring CSS Modules, so this proposal has been updated accordingly. The `<script>` tag remains a more natural wrapper for [other declarative modules](#other-declarative-modules).
 
 ### Behavior with script disabled
 
@@ -318,7 +301,7 @@ CSS Modules are not the only type of module - there are also JavasScript, JSON, 
 | Module type    | Script Module                                            | Declarative Module                                                        |
 | -------------- | -------------------------------------------------------- | --------------------------------------------------------------------------|
 | JavaScript     | `import { foo } from "./bar.js";`                        | `<script type="script-module" specifier="/bar.js"></script>`              |
-| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<script type="css-module" specifier="/bar.css"></script>`                |
+| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<style type="css-module" specifier="bar"></style>`                |
 | JSON           | `import foo from "./bar.json" with { type: "json" };`    | `<script type="json-module" specifier="/bar.json"></script>`              |
 | HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<script type="html-module" specifier="/bar.html"></script>`              |
 | SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<script type="svg-module" specifier="/bar.svg"></script>`                |
@@ -346,6 +329,21 @@ This proposal extends the existing `<link>` tag to support local `<style>` tag r
 This allows for sharing styles defined in the Light DOM across Shadow Roots. Due to scoping behaviors, it will not allow for styles defined in a Shadow DOM
 to be accessed in any other Shadow Root. This limitation could be addressed with extensions on Shadow DOM scoping suggested in 
 [this thread](https://github.com/whatwg/html/issues/11364).
+
+### Key Differences Between This Proposal And Local References For Link Rel
+
+Both this proposal and [Local References For Link Rel](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md)
+allow authors to share inline CSS with Shadow Roots. There are some key differences in both syntax and
+behaviors, as illustrated in the following table:
+
+| | Local Reference Link Rel | Declarative CSS Modules | 
+| :---: | :---: | :---: |
+| Scope | ⚠️ [Standard DOM scoping](#Scoping) | Global scope |
+| Identifier syntax | Standard HTML IDREF | Module identifier |
+| Attribute used | Standard HTML `href` | New attribute for `identifier` |
+| Uses existing HTML concepts | ✅ Yes | ❌ No |
+| Uses existing module concepts | ❌ No | ✅ Yes |
+| Extensibility | Clean @sheet integration, scope expansion could apply to SVG references | More declarative module types (HTML, SVG, etc.) |
 
 ### [Layer and adoptStyles](https://github.com/w3c/csswg-drafts/issues/10176#proposal)
 This proposal adds the  `adoptStyles` attribute to the template element, enabling its shadow root to adopt styles from outside of the shadow DOM.

@@ -168,7 +168,7 @@ For example, the "Referencetarget inspired solution on `<template>`" would work 
 The other examples in https://github.com/whatwg/html/issues/11364 also use this proposal as an example
 of how scoping can be expanded for Shadow DOM elements.
 
-### Key Differences Between This Propsoal And Declarative CSS Modules
+### Key Differences Between This Proposal And Declarative CSS Modules
 
 Both this proposal and [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md)
 allow authors to share inline CSS with Shadow Roots. There are some key differences in both syntax and
@@ -176,33 +176,12 @@ behaviors, as illustrated in the following table:
 
 | | Local Reference Link Rel | Declarative CSS Modules | 
 | :---: | :---: | :---: |
-| Scope | [Standard DOM scoping](#Scoping) | Global scope |
+| Scope | ⚠️ [Standard DOM scoping](#Scoping) | Global scope |
 | Identifier syntax | Standard HTML IDREF | Module identifier |
-| Attribute used | Standard HTML `href` | New attribte for `identifier` |
-| Integration with @sheet | ✅ Yes | ❌ No* |
+| Attribute used | Standard HTML `href` | New attribute for `identifier` |
 | Uses existing HTML concepts | ✅ Yes | ❌ No |
 | Uses existing module concepts | ❌ No | ✅ Yes |
 | Extensibility | Clean @sheet integration, scope expansion could apply to SVG references | More declarative module types (HTML, SVG, etc.) |
-
-\* Declarative CSS Modules can be integrated with `@sheet` with some modifications to the syntax. However, it would diverge further from the imperative version of CSS modules. The imperative version of CSS
-modules can import a named `@sheet` "my_sheet" as follows: `import {my_sheet} from './styles.css' with { type: 'css' };`. For Declarative CSS Modules, this syntax could be adapted to look as follows:
-
-```html
-<style type="css-module" specifier="/foo.css">
-@sheet my_sheet {
-  #content {
-    color: red;
-  }
-}
-</style>
-<my-element>
-  <template shadowrootmode="open" adoptedstylesheets="my_sheet from /foo.css">
-    <!-- ... -->
-  </template>
-</my-element>
-```
-
-This would further diverge the `adoptedstylesheets` attribute on `<template>` tags from the imperative version.
 
 ### Extensibility
 
@@ -225,7 +204,23 @@ only apply to selected Shadow DOM elements, as demonstrated by the following exa
 ```
 
 All of proposals mentioned in https://github.com/whatwg/html/issues/11364 would not only benefit this
-feature - SVG references, local anchors, and anything that takes an IDREF would benefit.
+feature - SVG references, local anchors, and anything that takes an IDREF would benefit. For instance, SVG could benefit with this scoping extension as follows:
+
+```html
+<template exportids="foo"><!-- Exports 'foo' to the light DOM -->
+  <template exportids="foo">
+    <svg height="100" width="100">
+      <circle id="foo" r="45" cx="50" cy="50" fill="red" />
+    </svg>
+  </template>
+  <svg height="100" width="100">
+    <use href="#foo" /><!-- "foo" is in this shadow scope due to the "exportids" attribute above -->
+  </svg>
+</template>
+<svg height="100" width="100">
+  <use href="#foo" /><!-- "foo" is in the Light DOM scope due to the "exportids" attribute above -->
+</svg>
+```
 
 ### Fetch Behavior
 
