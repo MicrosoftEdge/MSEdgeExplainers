@@ -338,7 +338,7 @@ behaviors, as illustrated in the following table:
 
 | | Local Reference Link Rel | Declarative CSS Modules | 
 | :---: | :---: | :---: |
-| Scope | ⚠️ [Standard DOM scoping](#Scoping) | Global scope |
+| Scope | ⚠️ [Standard DOM scoping](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md#Scoping) | Global scope |
 | Identifier syntax | Standard HTML IDREF | Module identifier |
 | Attribute used | Standard HTML `href` | New attribute for `identifier` |
 | Uses existing HTML concepts | ✅ Yes | ❌ No |
