@@ -145,8 +145,7 @@ the shadow root where they are defined, as illustrated by the following examples
   Styles defined inside the sibling Shadow Root are not applied, so "Inside Sibling Shadow DOM" is not blue.
 </p>
 
-These scoping behaviors do not apply to [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md)
-because modules always have global scope. Shadow DOM scoping could be modified though other means, as discussed
+In contrast to this proposal, [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) always have global scope. Shadow DOM scoping could be modified though other means, as discussed
 in [this thread](https://github.com/whatwg/html/issues/11364). All of the suggestions in that thread would
 allow for this feature to work with any shadow root, regardless of scope.
 
@@ -156,6 +155,9 @@ For example, the "Referencetarget inspired solution on `<template>`" would work 
 <template exportids="foo"><!-- Exports 'foo' to the light DOM -->
   <template exportids="foo, bar">
     <style id="foo">
+     ...
+    </style>
+    <style id="bar">
      ...
     </style>
   </template>
