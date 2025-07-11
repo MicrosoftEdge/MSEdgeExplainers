@@ -59,9 +59,6 @@ elements.
 
 - Anything specific to `@sheet` should be discussed in its dedicated
   <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md">proposal</a>.
-- Modifications to Shadow DOM scoping behaviors. This proposal depends on
-  existing Shadow DOM behavior as currently defined. Styles defined in a Shadow
-  DOM will remain inaccessible to the Light DOM and other Shadow DOMs.
 
 ## Proposal - Local References for Link Rel Tags
 
@@ -147,6 +144,85 @@ the shadow root where they are defined, as illustrated by the following examples
 <p>
   Styles defined inside the sibling Shadow Root are not applied, so "Inside Sibling Shadow DOM" is not blue.
 </p>
+
+In contrast to this proposal, [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) always have global scope. Shadow DOM scoping could be modified though other means, as discussed
+in [this thread](https://github.com/whatwg/html/issues/11364). All of the suggestions in that thread would
+allow for this feature to work with any shadow root, regardless of scope.
+
+For example, the "Referencetarget inspired solution on `<template>`" would work with this feature as follows:
+
+```html
+<template exportids="foo"><!-- Exports 'foo' to the light DOM -->
+  <template exportids="foo, bar">
+    <style id="foo">
+     ...
+    </style>
+    <style id="bar">
+     ...
+    </style>
+  </template>
+  <link rel="stylesheet" href="#bar"> <!-- 'bar' is in scope due to `exportids` -->
+</template>
+<link rel="stylesheet" href="#foo"><!-- 'foo' is in the global scope, reference matched -->
+<link rel="stylesheet" href="#bar"><!-- 'bar' is not in scope, reference not matched -->
+```
+
+The other examples in https://github.com/whatwg/html/issues/11364 also use this proposal as an example
+of how scoping can be expanded for Shadow DOM elements.
+
+### Key Differences Between This Proposal And Declarative CSS Modules
+
+Both this proposal and [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md)
+allow authors to share inline CSS with Shadow Roots. There are some key differences in both syntax and
+behaviors, as illustrated in the following table:
+
+| | Local Reference Link Rel | Declarative CSS Modules | 
+| :---: | :---: | :---: |
+| Scope | ⚠️ [Standard DOM scoping](#Scoping) | Global scope |
+| Identifier syntax | Standard HTML IDREF | Module identifier |
+| Attribute used | Standard HTML `href` | New attribute for `identifier` |
+| Uses existing HTML concepts | ✅ Yes | ❌ No |
+| Uses existing module concepts | ❌ No | ✅ Yes |
+| Extensibility | Clean @sheet integration, scope expansion could apply to SVG references | More declarative module types (HTML, SVG, etc.) |
+
+### Extensibility
+
+This proposal works nicely with CSS `@sheet`, allowing for the Light DOM to define styles that
+only apply to selected Shadow DOM elements, as demonstrated by the following example:
+
+```html
+<style id="inline_styles">
+@sheet my_sheet {
+  p {
+    color: blue;
+  }
+}
+</style>
+<p>"my_sheet" isn't imported into the light DOM, so this isn't blue</p>
+<template shadowrootmode="open">
+  <link rel="stylesheet" href="#inline_styles" sheet="my_sheet" />
+  <p>Inside Shadow DOM - "my_sheet" was included so this text is blue!</p>
+</template>
+```
+
+All of proposals mentioned in https://github.com/whatwg/html/issues/11364 would not only benefit this
+feature - SVG references, local anchors, and anything that takes an IDREF would benefit. For instance, SVG could benefit with this scoping extension as follows:
+
+```html
+<template exportids="foo"><!-- Exports 'foo' to the light DOM -->
+  <template exportids="foo">
+    <svg height="100" width="100">
+      <circle id="foo" r="45" cx="50" cy="50" fill="red" />
+    </svg>
+  </template>
+  <svg height="100" width="100">
+    <use href="#foo" /><!-- "foo" is in this shadow scope due to the "exportids" attribute above -->
+  </svg>
+</template>
+<svg height="100" width="100">
+  <use href="#foo" /><!-- "foo" is in the Light DOM scope due to the "exportids" attribute above -->
+</svg>
+```
 
 ### Fetch Behavior
 
