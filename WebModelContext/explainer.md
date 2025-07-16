@@ -187,7 +187,7 @@ This approach was abandoned as supporting multiple agents at a time introduced u
 
 ## Example of Web Model Context API usage
 
-Consider a web application like an example Historical Stamp Database. The complete source is available in the examples/stamps/ folder alongside this explainer.
+Consider a web application like an example Historical Stamp Database. The complete source is available in the [example/](./example/index.html) folder alongside this explainer.
 
 <img src="screenshot.png" alt="Screenshot of Historical Stamp Database" />
 
