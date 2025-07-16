@@ -229,8 +229,14 @@ In the case that the `navigator.install` method is invoked to install an applica
 * The promise will resolve if the application opens.
 * The promise rejects otherwise, with an `AbortError`.
 
+### *Launching* an application
+
+If an application is already installed, the `.install()` method can trigger UX in the UA to launch an application. **This is not obvious to the developer, as the UX flow will behave and report identically of installing/opening the app.**
+
+In these cases, if a `manifest_id` is provided, the UA will use this alone to find an existing installed app. If a `manifest_id` is not provided, the UA will fallback to `install_url` and search for any existing installed app with the url in scope. Note, this may result in the incorrect app being launched in the case of nested scopes. The developer can fix this by passing a `manifest_id`.
+
 ## Installability criteria & Web app manifest `id`
-To install content using the Web Install API, the _document being installed_ must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. Any other requirement to pass 'installability criteria' is up to each implementor. 
+To install content using the Web Install API, the_document being installed_ must have a manifest file. In an ideal scenario the manifest file has an `id` key/value defined, but in either case the processed web app manifest `id` will serve as the installed application's unique identifier. Any other requirement to pass 'installability criteria' is up to each implementor. 
 
 The importance of `id`s for installed content is to avoid cases where multiple *same* apps are installed with no way to update them. More details can be found in [this document](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit#heading=h.koe6r7c5fhdg).
 
