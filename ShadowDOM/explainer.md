@@ -25,9 +25,11 @@ content location of future work and discussions.
 * Expected venue: [Web Components CG](https://w3c.github.io/webcomponents-cg/)
 * Current version: this document
 ## Table of Contents
+- [Declarative shadow DOM style sharing](#declarative-shadow-dom-style-sharing)
   - [Authors](#authors)
   - [Participate](#participate)
   - [Status of this Document](#status-of-this-document)
+  - [Table of Contents](#table-of-contents)
   - [Background](#background)
   - [Problem](#problem)
   - [Goals](#goals)
@@ -36,8 +38,21 @@ content location of future work and discussions.
     - [Media site control widgets](#media-site-control-widgets)
     - [Anywhere web components are used](#anywhere-web-components-are-used)
   - [Alternatives to using style in DSD](#alternatives-to-using-style-in-dsd)
-  - [Proposal: Inline, declarative SS module scripts](#proposal-inline-declarative-css-module-scripts)
+    - [Constructable Stylesheets](#constructable-stylesheets)
+    - [Using `rel="stylesheet"` attribute](#using-relstylesheet-attribute)
+    - [CSS `@import` rules](#css-import-rules)
+  - [Proposal: Inline, declarative CSS module scripts](#proposal-inline-declarative-css-module-scripts)
+    - [Scoping](#scoping)
+    - [`<script>` vs `<style>` For CSS Modules](#script-vs-style-for-css-modules)
+    - [Behavior with script disabled](#behavior-with-script-disabled)
+  - [Other declarative modules](#other-declarative-modules)
   - [Alternate proposals](#alternate-proposals)
+    - [Local References For Link Rel](#local-references-for-link-rel)
+    - [Key Differences Between This Proposal And Local References For Link Rel](#key-differences-between-this-proposal-and-local-references-for-link-rel)
+    - [Layer and adoptStyles](#layer-and-adoptstyles)
+    - [`@Sheet`](#sheet)
+    - [Id-based `adoptedstylesheet` attribute on template](#id-based-adoptedstylesheet-attribute-on-template)
+  - [Polyfills](#polyfills)
   - [Summary](#summary)
   - [Open issues](#open-issues)
   - [References and acknowledgements](#references-and-acknowledgements)
@@ -123,6 +138,29 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
 ```
 Meanwhile, the styles defined within the Shadow DOM are specific to the media control widget. These styles ensure that the widget looks consistent and isn't affected by other styles on the page.
 ```js
+// Shared stylesheet for all <media-control> elements
+const sheet = new CSSStyleSheet();
+sheet.replaceSync(`
+    .media-control-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid #ccc;
+        padding: 16px;
+        background-color: #fff;
+    }
+    .controls {
+        margin-top: 8px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    button, input[type="range"] {
+        cursor: pointer;
+        margin: 5px;
+    }
+`);
+
 class MediaControl extends HTMLElement {
     constructor() {
         super();
@@ -130,30 +168,7 @@ class MediaControl extends HTMLElement {
         // Attach a shadow root to the element.
         const shadow = this.attachShadow({ mode: 'open' });
 
-        // Create elements
-
-        // Style the elements within the shadow DOM
-        const sheet = new CSSStyleSheet();
-        sheet.replaceSync(`
-            .media-control-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                border: 1px solid #ccc;
-                padding: 16px;
-                background-color: #fff;
-            }
-            .controls {
-                margin-top: 8px;
-                display: flex;
-                gap: 8px;
-                align-items: center;
-            }
-            button, input[type="range"] {
-                cursor: pointer;
-                margin: 5px;
-            }
-        `);
+        // Adopt the shared styles
         shadow.adoptedStyleSheets.push(sheet);
 
         // Initialize content from template here
