@@ -450,7 +450,7 @@ showAutocomplete(rect.left, rect.bottom);
 
 While this approach would help solve the two main use cases stated above, `FormControlRange` was chosen instead because making changes or updating the behavior of `setStart()` and `setEnd()` in the Range API could cause issues for websites that rely on the current specified behavior. Additional changes would also be required to certain accessor methods in order to avoid exposing inner implementation details, as mentioned in the [getRangeFromValue()](#getrangefromvalue).
 
-### Extending the Range API (2th Approach)
+### Extending the Range API (2nd Approach)
 
 As previously noted, the first approach regarding the extension of the Range API posed backward compatibility risks due to changes in the behavior of `setStart()` and `setEnd()`. It also raised interoperability concerns regarding breaking the encapsulation of the implementation-defined structures of `<textarea>` and `<input>`. The second approach avoids one of these issues by **not modifying** `setStart()` and `setEnd()`. Instead, it introduces a new method specifically for setting ranges within `<textarea>` and `<input>` elements:
 
