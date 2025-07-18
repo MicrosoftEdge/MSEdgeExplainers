@@ -274,7 +274,7 @@ The `setFormControlRange()` method accepts three parameters:
 - `startOffset`: The start position within the element's value
 - `endOffset`: The end position within the element's value
 
-If either `startOffset` or `endOffset` are out of bounds, it will throw a  `RangeError` exception. If the `value` of the `<textarea>` or `<input>` element is empty, the `FormControlRange` will represent an empty range.
+If either `startOffset` or `endOffset` are out of bounds, it will throw a `RangeError` exception. If the `value` of the `<textarea>` or `<input>` element is empty, the `FormControlRange` will represent an empty range.
 
 The following sample code showcases how the new `FormControlRange` interface would solve the main use cases laid out in the [User-Facing Problem](#user-facing-problem) section.
 
