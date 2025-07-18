@@ -14,9 +14,9 @@
 
 ## Introduction
 
-The current Range interface methods do not support retrieving or creating Range objects that represent the contents of `<textarea>` and `<input>` elements. As a result, if web developers want to use the `getBoundingClientRect()` method in a `<textarea>` or `<input>` element to position a popup beneath the user's current caret to deliver contextual autocomplete suggestions or mark syntax errors as users type using the Highlight API, they have to find workarounds, such as cloning these elements and their styles into `<div>`s. This is both difficult to maintain and may also impact the web application's performance. 
+The current `Range` interface methods do not support retrieving or creating Range objects that represent the `value` (not the element itself) of `<textarea>` and `<input>` elements. As a result, if web developers want to use the `getBoundingClientRect()` method in a `<textarea>` or `<input>` element to position a popup beneath the user's current caret for delivering contextual autocomplete suggestions or marking syntax errors as users type using the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), they must find workarounds. These workarounds often involve cloning these elements and their styles into `<div>`s, which is both difficult to maintain and may impact the web application's performance.
 
-This proposal aims to address these issues by introducing FormControlRange, a new type of Range object that extends AbstractRange and serves as a way to reference spans of text within form control elements.
+This proposal aims to address these issues by introducing `FormControlRange`, a new type of `Range` object that extends `AbstractRange` and serves as a way to reference spans of text within form control elements. 
 
 ## User-Facing Problem
 
@@ -235,13 +235,13 @@ Provide a way of retrieving a `FormControlRange`—a specialized type of `Range`
 
 The `FormControlRange` interface extends `AbstractRange` and provides a controlled way to create limited `Range` objects for the entirety or a part of the `value` of `<textarea>` and `<input>` elements. To protect the inner workings of these elements, `FormControlRange` instances have several limitations on the methods and attributes (from the Range API) that can be accessed through JavaScript.
 
-**Currently available methods and properties:**
+**Initially available methods and properties:**
 - `getBoundingClientRect()`: Returns the bounding rectangle of the range
 - `getClientRects()`: Returns a list of rectangles for the range  
 - `toString()`: Returns the text content of the range
 - `collapsed`: Returns whether the range is collapsed (inherited from AbstractRange)
 
-**Permanently unavailable methods and properties (to prevent exposure and mutation of inner browser implementation details):**
+**Initially unavailable methods and properties (to prevent exposure and mutation of inner browser implementation details):**
 - `setStart()` and `setEnd()`
 - `startContainer`, `startOffset`, `endOffset`, and `endContainer`
 - `surroundContents()`
@@ -251,7 +251,7 @@ The `FormControlRange` interface extends `AbstractRange` and provides a controll
 - `cloneContents()`
 - `cloneRange()`
 
-These limitations are enforced by having each `FormControlRange` instance internally wrap a standard `Range` object. Additional methods can be later introduced progressively based on developer needs.
+Additional methods can be later introduced progressively based on developer needs.
 
 Furthermore, it is important to reiterate that despite being similar to the regular `Range` interface, `FormControlRange` extends `AbstractRange` and thus can be taken as an argument in methods that allow `AbstractRange`, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API).
 
@@ -326,7 +326,7 @@ textarea.addEventListener('input', (e) => {
 });
 ```
 
-This implementation simplifies obtaining the caret's position inside `<input>` and `<textarea>` elements. It also allows web developers to use the Highlight API on those elements. The `FormControlRange` interface eliminates the need for cloning elements and copying styles, improving performance while maintaining the benefits of using native form controls, such as accessibility, built-in form validation, and consistent behavior across browsers.
+This implementation simplifies obtaining the caret's position inside `<input>` and `<textarea>` elements. It also allows web developers to use the Highlight API directly on those elements. The `FormControlRange` interface eliminates the need for cloning elements and copying styles, improving performance while maintaining the benefits of using native form controls, such as accessibility, built-in form validation, and consistent behavior across browsers.
 
 As we want the `FormControlRange` interface to be aligned with the current selection APIs for `<textarea>` and `<input>` elements, such as [`select()`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-select), [`selectionStart`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionstart), and [`selectionEnd`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionend), the `<input>` types in which it will be available are listed in the [do not apply](https://html.spec.whatwg.org/multipage/input.html#do-not-apply) section:
 
@@ -508,7 +508,7 @@ formRange.setFormControlRange(element, startOffset, endOffset);
 
 ### Compatibility
 
-The `FormControlRange` interface is currently compatible with any API that utilizes `AbstractRange` objects, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API). However, despite acting as a wrapper around a standard `Range` object, `FormControlRange` is not compatible with methods and APIs that expect a regular `Range`.
+The `FormControlRange` interface is currently compatible with any API that utilizes `AbstractRange` objects, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API). However, this means that `FormControlRange` is not compatible with methods and APIs that expect a regular `Range`.
 
 To address this limitation, one proposed solution is to introduce a new interface called `DynamicRange`. This interface would serve as the counterpart to `StaticRange` and would also extend `AbstractRange`.
 
