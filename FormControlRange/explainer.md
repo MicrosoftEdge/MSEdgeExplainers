@@ -198,7 +198,7 @@ nameField.addEventListener('input', (e) => {
         userList.style.display = 'none';
     }
     
-    // Check if the last character types was ' ' for Use Case 2
+    // Check if the last character typed was ' ' for Use Case 2
     if (text[position - 1] === ' ' ) {
         if(!dictionary.has(previousWord)){
             // Create Range
