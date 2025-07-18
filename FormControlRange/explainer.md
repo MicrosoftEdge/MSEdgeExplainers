@@ -381,7 +381,7 @@ input.addEventListener('input', (e) => {
         }
     }
     else {
-        previousWord+=text[selectionStart - 1];
+        previousWord += text[selectionStart - 1];
     }
 });
 ```
