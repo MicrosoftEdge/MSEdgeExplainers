@@ -16,9 +16,7 @@
 
 The current Range interface methods do not support retrieving or creating Range objects that represent the contents of `<textarea>` and `<input>` elements. As a result, if web developers want to use the `getBoundingClientRect()` method in a `<textarea>` or `<input>` element to position a popup beneath the user's current caret to deliver contextual autocomplete suggestions or mark syntax errors as users type using the Highlight API, they have to find workarounds, such as cloning these elements and their styles into `<div>`s. This is both difficult to maintain and may also impact the web application's performance. 
 
-An intuitive solution would be to allow Range objects to be created from the contents of `<textarea>` and `<input>` elements. That being said, the object created through such an approach could expose inner implementation details of these elements through attributes like `Range.startContainer` and `Range.endContainer`.
-
-This proposal aims to address these issues by introducing FormControlRange, a new type of Range object that extends AbstractRange and serves as a way to reference spans of text within form control elements without exposing implementation-defined shadow tree structures of those elements.
+This proposal aims to address these issues by introducing FormControlRange, a new type of Range object that extends AbstractRange and serves as a way to reference spans of text within form control elements.
 
 ## User-Facing Problem
 
@@ -41,7 +39,7 @@ If web authors already use a `<textarea>` and/or an `<input>` element in their a
     - For use case 1: call `getBoundingClientRect()`.
     - For use case 2: create a Highlight object and use `CSS.highlights.set('syntax-highlight')`.
 
-This is roughly the same sample code from the example above, some functionality is omitted for brevity:
+This is roughly the sample code from the aforementioned use cases, some functionality is omitted for brevity:
 
 ```html
 <form id="messageForm" onsubmit="return handleSubmit(event)">
@@ -115,7 +113,7 @@ function highlightSyntax(start_index, end_index) {
     // Create range
     const range = document.createRange();
     range.setStart(measuringDiv.firstChild, start_index);
-    range.setStart(measuringDiv.firstChild, end_index);
+    range.setEnd(measuringDiv.firstChild, end_index);
 
     // Add highlight
     highlight.add(range);
@@ -206,7 +204,7 @@ nameField.addEventListener('input', (e) => {
             // Create Range
             const range = document.createRange()
             range.setStart(nameField.firstChild, position);
-            range.setStart(nameField.firstChild, position-previousWord.length);
+            range.setEnd(nameField.firstChild, position-previousWord.length);
             previousWord = '';
             // Add highlight
             highlight.add(range);
@@ -253,9 +251,9 @@ The `FormControlRange` interface extends `AbstractRange` and provides a controll
 - `cloneContents()`
 - `cloneRange()`
 
-Additional methods can be later introduced progressively based on developer need.
+These limitations are enforced by having each `FormControlRange` instance internally wrap a standard `Range` object. Additional methods can be later introduced progressively based on developer needs.
 
-Furthermore, it is important to reiterate that despite being similar to the regular `Range` interface, FormControlRange extends `AbstractRange` and thus can be taken as an argument in methods that allow `AbstractRange`, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API).
+Furthermore, it is important to reiterate that despite being similar to the regular `Range` interface, `FormControlRange` extends `AbstractRange` and thus can be taken as an argument in methods that allow `AbstractRange`, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API).
 
 The constructor for `FormControlRange` is the following:
 
@@ -417,7 +415,7 @@ This alternative has the following disadvantages:
     
 ### getRangeFromValue()
 
-The following proposal considered adding a `getRangeFromValue()` method directly to `<textarea>` and `<input>` elements that would return a regular `Range` object. However, this approach held concerns regarding how using certain Range API methods (namely, those mentioned in the [Proposed Approach](#proposed-approach) section) with text control elements would result in the exposure of inner browser implementation details through Range attributes like `startContainer` and `endContainer`, creating security and encapsulation concerns.
+The following proposal considered adding a `getRangeFromValue()` method directly to `<textarea>` and `<input>` elements that would return a regular `Range` object. However, this approach held concerns regarding how using certain Range API methods (namely, those mentioned in the [Proposed Approach](#proposed-approach) section) with text control elements would result in the exposure of inner browser implementation details through Range attributes like `startContainer` and `endContainer`, creating encapsulation concerns.
 
 ```javascript
 // getRangeFromValue() sample usage
@@ -471,7 +469,7 @@ range.startContainer        // Returns startNode
 formRange.startContainer    // Flag is on: Throws exception
 ```
 
-This approach addresses privacy and security concerns for ranges in form controls. It also offers better compatibility than the `FormControlRange` interface, since it would work seamlessly with APIs that involve `Range` (not only `AbstractRange`) objects, such as the Selection API:
+This approach addresses encapsulation concerns for ranges in form controls. It also offers better compatibility than the `FormControlRange` interface, since it would work seamlessly with APIs that involve `Range` (not only `AbstractRange`) objects, such as the Selection API:
 
 ```javascript
 // Using this approach
