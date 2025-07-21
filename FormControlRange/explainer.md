@@ -223,7 +223,7 @@ nameField.addEventListener('input', (e) => {
 
 ### Goal
 
-Provide a way of retrieving a `FormControlRange`—a specialized type of `Range` object—that represents part or all of the `value` of `<textarea>` and `<input>` elements, and limits access to the standard Range API to enforce encapsulation.
+Provide a way of retrieving a `FormControlRange`—a specialized type of `Range` object—that represents part or all of the `value` of `<textarea>` and `<input>` elements, enabling range-based operations such as getting bounding rects and setting custom highlights, while limiting access to the standard Range API to enforce encapsulation.
 
 ### Non-goals
 
