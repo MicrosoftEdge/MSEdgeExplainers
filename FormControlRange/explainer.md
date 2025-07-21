@@ -10,7 +10,7 @@
 - [WHATWG tracking issue](https://github.com/whatwg/html/issues/10614)
 - [CSSWG issue tracking initial discussions](https://github.com/w3c/csswg-drafts/issues/10346)
 - [TPAC 2024 WHATWG meeting minutes on initial proposal](https://github.com/whatwg/meta/issues/326#issuecomment-2377500295)
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/GetSelectionBoundingClientRect)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/FormControlRange)
 
 ## Introduction
 
