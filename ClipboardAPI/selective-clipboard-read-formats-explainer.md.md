@@ -4,6 +4,7 @@
 
  
 **Author:**  Abhishek Singh(abhisheksing@microsoft.com)
+
 **Co-authors:**  Rohan Raja(roraja@microsoft.com), Rakesh Goulikar(rakesh.goulikar@microsoft.com)
 
 
@@ -11,16 +12,16 @@
 
 ## Introduction
 
-This proposal introduces selective clipboard format reading, an enhancement to the Asynchronous Clipboard read API that allows web applications to selectively read specific MIME types from the clipboard, making reads more efficient by avoiding retrieval of formats that are not needed.
+This proposal introduces selective clipboard format reading, an enhancement to the [Asynchronous Clipboard read](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that allows web applications to selectively read specific MIME types from the clipboard, making reads more efficient by avoiding retrieval of formats that are not needed.
 
 ```js
 // Example Javascript code
 const items = await navigator.clipboard.read({
-  types: ['txt/plain', 'txt/html']  // Specify mime types to be fetched from platform clipboard
+  types: ['text/plain', 'text/html']  // Specify mime types to be fetched from platform clipboard
 });
 ```
 
-The current implementation of [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) copies all available clipboard formats from the operating system's memory into the browser's memory, regardless of what the web application needs. This blanket approach can introduce significant latency—especially when the clipboard includes large payloads such as images or complex HTML content.
+The current implementation of [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) copies all available clipboard formats from the operating system's Clipboard into the browser's memory, regardless of what the web application needs. This blanket approach can introduce significant latency—especially when the clipboard includes large payloads such as images or complex HTML content.
 
 Letting web authors specify which formats to read (like only `["text/plain"]` or `["text/html"]`) in the [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API helps the browser avoid copying unnecessary data from the OS clipboard. This saves CPU cycles, reducing latency in the API call, while also optimizing power usage by the browser.
 
@@ -50,6 +51,7 @@ The impact is especially pronounced in applications that handle high volumes (hu
 - It does not propose a change to how clipboard formats are written—only how they are read.
 - This proposal does not define any rules for how the browser should prioritize or rank different clipboard formats internally.
 - This proposal does not change the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). It continues to require user activation and adhere to existing security boundaries.
+- This proposal does not introduce any changes to the current accessibility model of Async Clipboard API.
 
 ---
 
@@ -57,14 +59,12 @@ The impact is especially pronounced in applications that handle high volumes (hu
 
 We propose API signature changes to the [clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that allow web authors to specify the MIME types they intend to read. This browser implementation will selectively read only the requested formats, instead of reading all available data formats as is currently done.
 
-### Proposed API Signature
-
 We propose to rename the optional argument "ClipboardUnsanitizedFormats" of [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API to `ClipboardReadOptions` and extend this object to include a new `types` property which is a list of mime types to be retrieved.
 
 ```js
-// Example Javascript code and Interface definition Language
+// Example Javascript code
 const items = await navigator.clipboard.read({
-  types: ['txt/plain', 'txt/html']
+  types: ['text/plain', 'text/html']
 });
 ```
 
