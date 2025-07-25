@@ -73,12 +73,6 @@ const availableTypes = item.types; // ['text/plain']. Note: Only available reque
 const plainTextBlob = await item.getType('text/plain');
 const text = await plainTextBlob.text();
 ```
-```js
-// Example Javascript code
-const items = await navigator.clipboard.read({
-  types: ['text/plain', 'text/html']
-});
-```
 
 **IDL:**
 ```webidl
@@ -97,12 +91,9 @@ dictionary ClipboardReadOptions {
 
 ## Boundary Scenarios
 
-- If the clipboard format requested by the application is either invalid or not present in the clipboard, the resolved [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) will have `undefined` for that format.
+- The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) property of ClipboardItem will return only those types out of provided input types which are available in the system clipboard. If a particular type is requested in the input but not present in the platform clipboard or is invalid, then the [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) value won’t include that format, and any call to [getType(type)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) for that format will result in a rejected promise. This way, a web author can verify if a requested type is present in the platform clipboard.
 - If multiple instances of the same format are provided in the request, the duplicates will be ignored and only one instance will be considered during processing.
 
-**Behaviour of [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) property of [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem):**
-
-The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) property will return only those types out of provided input types which are available in the system clipboard. If a particular type is requested in the input but not present in the platform clipboard, then the [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) value won’t include that format, and any call to [getType(type)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) for that format will result in a rejected promise. This way, a web author can verify if a requested type is present in the platform clipboard.
 ```js
 // Scenario: OS clipboard contains 'text/plain' and 'text/html' data
 const items = await navigator.clipboard.read({
@@ -184,6 +175,8 @@ Reference : [Github discussion](https://github.com/w3c/clipboard-apis/issues/191
 Many thanks for valuable feedback and advice from:
 
 - Evan Stade (estade@chromium.org)
+- Daniel Clark (daniec@microsoft.com)
 - Sanket Joshi (sajos@microsoft.com)
 - Anupam Snigdha (snianu@microsoft.com)
+
   
