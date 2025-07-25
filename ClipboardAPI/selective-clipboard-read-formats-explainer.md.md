@@ -43,6 +43,7 @@ The impact is especially pronounced in large-scale web applications—such as on
 - Improve responsiveness in copy-paste operations, especially for large data sizes.
 - Optimize performance by avoiding unnecessary data reads, especially when web authors may only need specific formats like plaintext or HTML.
 - Ensure interoperability across different platforms.
+- This proposal does not change the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). It continues to require user activation and adhere to existing security boundaries.
 
 ---
 
@@ -51,8 +52,6 @@ The impact is especially pronounced in large-scale web applications—such as on
 - This proposal does not currently address changes to [readText()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-readtext) or [write()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-write) methods.
 - It does not propose a change to how clipboard formats are written—only how they are read.
 - This proposal does not define any rules for how the browser should prioritize or rank different clipboard formats internally.
-- This proposal does not change the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). It continues to require user activation and adhere to existing security boundaries.
-- This proposal does not introduce any changes to the current accessibility model of Async Clipboard API.
 
 ---
 
@@ -62,6 +61,18 @@ We propose API signature changes to the [clipboard.read()](https://www.w3.org/TR
 
 We propose to rename the optional argument "ClipboardUnsanitizedFormats" of [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API to `ClipboardReadOptions` and extend this object to include a new `types` property which is a list of mime types to be retrieved.
 
+```js
+// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
+const items = await navigator.clipboard.read({
+  types: ['text/plain']
+});
+
+const item = items[0];
+const availableTypes = item.types; // ['text/plain']. Note: Only available requested types are present.
+
+const plainTextBlob = await item.getType('text/plain');
+const text = await plainTextBlob.text();
+```
 ```js
 // Example Javascript code
 const items = await navigator.clipboard.read({
