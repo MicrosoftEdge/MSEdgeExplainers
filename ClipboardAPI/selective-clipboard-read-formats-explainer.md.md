@@ -7,6 +7,7 @@
 
 **Co-authors:**  Rohan Raja(roraja@microsoft.com), Rakesh Goulikar(rakesh.goulikar@microsoft.com)
 
+**Participate:** [GitHub Issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SelectiveCLipboardFormatRead)
 
 ---
 
@@ -21,9 +22,9 @@ const items = await navigator.clipboard.read({
 });
 ```
 
-The current implementation of [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) copies all available clipboard formats from the operating system's Clipboard into the browser's memory, regardless of what the web application needs. This blanket approach can introduce significant latency—especially when the clipboard includes large payloads such as images or complex HTML content.
+The current implementation of [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) copies all available clipboard formats from the operating system's Clipboard into the browser's memory, regardless of what the web application needs.
 
-Letting web authors specify which formats to read (like only `["text/plain"]` or `["text/html"]`) in the [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API helps the browser avoid copying unnecessary data from the OS clipboard. This saves CPU cycles, reducing latency in the API call, while also optimizing power usage by the browser.
+Letting web authors specify which formats to read (like only `["text/plain"]` or `["text/html"]`) in the [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API helps the browser avoid copying unnecessary data from the OS clipboard. This saves CPU cycles, improves perceived responsiveness in the API call, while also optimizing power usage by the browser.
 
 ---
 
@@ -33,13 +34,13 @@ Web applications that support rich content editing—such as document editors, e
 
 However, the current [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read), that gets triggered by the paste options, indiscriminately fetches all available formats from the clipboard, regardless of what the application needs. This blanket behaviour adds significant overhead, especially when large data formats like HTML or images are present and are not required by the app.
 
-The impact is especially pronounced in applications that handle high volumes (hundreds of millions) of paste interactions—such as online spreadsheets and document editors—where responsiveness during paste operations is critical. Delays caused by fetching and discarding irrelevant clipboard data degrade user experience and add avoidable memory and CPU costs.
+The impact is especially pronounced in large-scale web applications—such as online spreadsheets and document editors—that collectively handle hundreds of millions of paste interactions across their user base, where maintaining responsiveness during each operation is critical. Delays caused by fetching and discarding irrelevant clipboard data degrade user experience and add avoidable memory and CPU costs.
 
 ---
 
 ## Goals
 
-- Reduce latency in copy-paste operations, especially for large data sizes.
+- Improve responsiveness in copy-paste operations, especially for large data sizes.
 - Optimize performance by avoiding unnecessary data reads, especially when web authors may only need specific formats like plaintext or HTML.
 - Ensure interoperability across different platforms.
 
@@ -90,8 +91,23 @@ dictionary ClipboardReadOptions {
 
 **Behaviour of [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) property of [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem):**
 
-The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) property will return only those types out of provided input types which are available in the system clipboard. If a particular type is requested in the input but not present in the platform clipboard, then the [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) value won’t include that format. This way, a web author can verify if a requested type is present in the platform clipboard.
+The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) property will return only those types out of provided input types which are available in the system clipboard. If a particular type is requested in the input but not present in the platform clipboard, then the [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboardreadoptions-types) value won’t include that format, and any call to [getType(type)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) for that format will result in a rejected promise. This way, a web author can verify if a requested type is present in the platform clipboard.
+```js
+// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
+const items = await navigator.clipboard.read({
+  types: ['text/plain', 'text/javascript', 'text/plain'],
+  unsanitized: ['text/html']
+});
 
+const item = items[0];
+
+// Only returns types that were both requested AND available on clipboard
+const availableTypes = item.types; // ['text/plain']
+
+const plainText = await item.getType('text/plain'); // ✅ Resolves successfully
+const jsText = await item.getType('text/javascript'); // ❌ Throws error: The type was not found
+const html = await item.getType('text/html'); // ❌ Throws error: The type was not found
+```
 ---
 
 ## Pros
@@ -111,7 +127,7 @@ Adding both `[types]`and `[unsanitized]` to `[ClipboardReadOptions]` may cause c
 
 An alternative approach defers clipboard data retrieval from the OS until the web app explicitly calls [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype). In this model, [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) returns [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) objects listing available MIME types, but without the data. The browser fetches the requested data only when [getType(mimeType)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) is called, caching it to avoid repeated clipboard accesses for the same type. 
 
-If the clipboard contents change between the call to [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and a subsequent call to [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype), the promise may be resolved with `undefined` in case the requested type is no longer present in the clipboard. This behaviour is consistent with the current Clipboard API semantics.
+If the clipboard contents change between the call to [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and a subsequent call to [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype), the promise may be rejected in case the requested type is no longer present in the clipboard. This behaviour is consistent with the current Clipboard API semantics.
 
 ```js
 // No data is read from the clipboard after read call completes
@@ -134,7 +150,7 @@ const plainText = await item.getType('text/plain'); // Data is lazily fetched he
 - This approach is not backward compatible because [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) no longer stores Blob data at [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) time. As a result, it can't be used as a persistent cache for clipboard contents like today, where [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) reliably returns the same data without re-reading the system clipboard.
 - Another drawback of this approach is that the behavior may feel unintuitive: calling [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) suggests immediate clipboard access, but actual data retrieval is deferred until [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) is invoked.
 - **Potential Hidden Latency:** Developers must anticipate possible delays when calling [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) which is not expected in today’s implementations.
-- Clipboard state may change between [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) calls, leading to promises resolving to `undefined`.
+- Clipboard state may change between [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) calls, leading to promise being rejected with error message 'The type was not found'.
 
 ---
 
@@ -146,4 +162,17 @@ We ran experiments simulating real-world clipboard usage to evaluate the perform
 
 As we scaled up the data size, we observed that read times increased proportionally with payload size, reinforcing that the benefits of selective reads become more significant with larger clipboard data. Moreover, the type of format had a notable impact on performance. HTML formats consistently exhibited higher read latencies compared to plain text—even when only slightly larger in size—likely due to additional processing like browser-side sanitization for security. Avoiding unnecessary HTML reads can deliver substantial latency improvements, especially in mixed-format clipboards where the application only needs text.
 
+**Reproducibility :**
+For developers interested in reproducing these results or running similar benchmarks, we’ve published a minimal experiment demonstrating selective clipboard format reads and associated timing comparisons.
+View the experimental setup [here](https://ashishkum-ms.github.io/cr-contributions/sfr/performace_experiment.html).
+
 ---
+## References and Acknowledgements 
+Reference : [Github discussion](https://github.com/w3c/clipboard-apis/issues/191)
+
+Many thanks for valuable feedback and advice from:
+
+- Evan Stade (estade@chromium.org)
+- Sanket Joshi (sajos@microsoft.com)
+- Anupam Snigdha (snianu@microsoft.com)
+  
