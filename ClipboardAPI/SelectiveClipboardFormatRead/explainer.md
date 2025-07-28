@@ -168,7 +168,7 @@ As we scaled up the data size, we observed that read times increased proportiona
 
 **Reproducibility :**
 For developers interested in reproducing these results or running similar benchmarks, we’ve published a minimal [experiment](./experiment.html) demonstrating selective clipboard format reads and associated timing comparisons.
-To use live demo, open [this](https://ashishkum-ms.github.io/cr-contributions/sfr/performace_experiment.htm) in a browser that supports the Selective CLipboard Format Read.
+To use live demo, open [this](https://ashishkum-ms.github.io/cr-contributions/sfr/performace_experiment.html) in a browser that supports the Selective CLipboard Format Read.
 
 ## References and Acknowledgements 
 Reference : [Github discussion](https://github.com/w3c/clipboard-apis/issues/191)
