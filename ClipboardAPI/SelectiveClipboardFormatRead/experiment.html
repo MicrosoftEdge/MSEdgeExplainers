@@ -67,8 +67,6 @@
   <div class="log" id="log"></div>
 
   <script>
-    let testResults = [];
-
     function log(message, type = 'info') {
       const logElement = document.getElementById('log');
       const timestamp = new Date().toLocaleTimeString();
@@ -186,34 +184,26 @@
       }
     }
 
+    let resultNumber = 1;
     // Adds result to the table
-    function addResult(dataType, readTime) {
+    function addResult(readType, readTime) {
       const tableBody = document.getElementById('results-body');
       const row = document.createElement('tr');
-      const resultNumber = testResults.length + 1;
       const timestamp = new Date().toLocaleTimeString();
 
       row.innerHTML = `
-                <td>${resultNumber}</td>
+                <td>${resultNumber++}</td>
                 <td>${timestamp}</td>
-                <td>${dataType}</td>
+                <td>${readType}</td>
                 <td>${readTime.toFixed(2)}</td>
             `;
 
       tableBody.appendChild(row);
-
-      // Store result
-      testResults.push({
-        number: resultNumber,
-        timestamp: timestamp,
-        dataType: dataType,
-        readTime: readTime
-      });
     }
 
     function clearResults() {
       document.getElementById('results-body').innerHTML = '';
-      testResults = [];
+      resultNumber = 1;
       log("Results table cleared", "info");
     }
 
