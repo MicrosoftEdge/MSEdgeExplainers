@@ -84,15 +84,9 @@ Handling tool cools in the main thread with the option of workers serves a few p
 - **Complexity overhead**: In cases where the site UI is very complex, developers will likely need to do some refactoring or add JavaScript that handles app and UI state with appropriate outputs.
 - **Tool discoverability**: There is no built-in mechanism for client applications to discover which sites provide callable tools without visiting or querying them directly. Search engines, or directories of some kind may play a role in helping client applications determine whether a site has relevant tools for the task it is trying to perform.
 
-### API Options
+### API
 
-The `window.agent` interface is introduced to represent an abstract AI agent that is connected to the page and uses the page's context. Below are the options being considered for the exact interface:
-
-#### Option 1: Combined tool definition and implementation
-
-The simplest approach, and one that aligns closely with libraries like the MCP SDK is to have a single API that lets the web developer declare tools and provide their implementations in a single call:
-
-**Example:**
+The `window.agent` interface is introduced to represent an abstract AI agent that is connected to the page and uses the page's context. The `agent` object has a single method `provideContext` that's used to update the context (currently just tools) available to the agent. The method takes an object with a `tools` property which is a list of tool descriptors. The tool descriptors look as shown in this example below, which aligns with the Prompt API's [tool use](https://github.com/webmachinelearning/prompt-api#tool-use) specification, and other libraries like the MCP SDK:
 
 ```js
 // Declare tool schema and implementation functions.
@@ -101,14 +95,14 @@ window.agent.provideContext({
         {
             name: "add-todo",
             description: "Add a new todo item to the list",
-            params: {
+            inputSchema: {
                 type: "object",
                 properties: {
                     text: { type: "string", description: "The text of the todo item" }
                 },
                 required: ["text"]
             },
-            async run(params) => {
+            async execute({ text }) => {
                 // Add todo item and update UI.
                 return /* structured content response */
             }
@@ -116,40 +110,49 @@ window.agent.provideContext({
     ]
 });
 ```
+
+The `provideContext` method can be called multiple times. Subsequent calls clear any pre-existing tools and other context before registering the new ones. This is useful for single-page web apps that frequently change UI state and could benefit from presenting different tools depending on which state the UI is currently in.
+
 **Advantages:**
 
+- Aligns with existing APIs.
 - Simple for web developers to use.
 - Enforces a single function per tool.
 
 **Disadvantages:**
 
-- Must navigate to the page and run JavaScript for tools to be defined.
+- Must navigate to the page and run JavaScript for agent to discover tools.
 
-#### Option 2: Separate tool definition and implementation (**Recommended**)
+If Web Model Context gains traction in the web developer community, it will become important for agents to have a way to discover which sites have tools that are relevant to a user's request. Discovery is a topic that may warrant its own explainer, but suffice to say, it may be beneficial for agents to have a way to know what capabilities a page offers without having to navigate to the web site first. As an example, a future iteration of this feature could introduce declarative tools definitions that are placed in an app manifest so that agents would only need to fetch the manifest with a simple HTTP GET request. Agents will of course still need to navigate to the site to actually use its tools, but a manifest makes it far less costly to discover these tools and reason about their relevance to the user's task.
 
-Defining and implementing the tools separately opens the possibility of declaring tools outside of JavaScript. A future iteration of this feature could for example introduce tools that are defined declaratively in an app manifest so that agents can discover these without needing to visit the web site first. Agents will of course still need to navigate to the site to actually use its tools, but a manifest makes it far less costly to discover these tools and reason about their relevance to the user's task.
+To make such a scenario easier, it would be beneficial to support an alternate means of tool call execution; one that separates the tool defintion and schema (which may exist in an external manifest file) from the implementation function.
 
-**Example:**
+One way to do this is to handle tool calls as events, as shown below:
 
-```js
-// 1. Declare tool schema to agent.
-window.agent.provideContext({
-    tools: [
+```json
+// 1. manifest.json: Define tools declaratively. Exact syntax TBD.
+
+{
+    // .. other manifest fields ..
+    "tools": [
         {
-            name: "add-todo",
-            description: "Add a new todo item to the list",
-            params: {
-                type: "object",
-                properties: {
-                    text: { type: "string", description: "The text of the todo item" }
+            "name": "add-todo",
+            "description": "Add a new todo item to the list",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "text": { "type": "string", "description": "The text of the todo item" }
                 },
-                required: ["text"]
+                "required": ["text"]
             },
         }
     ]
-});
+}
+```
 
-// 2. Handle tool calls as events.
+```js
+// 2. script.js: Handle tool calls as events.
+
 window.agent.addEventListener('toolcall', async e => {
     if (e.name === "add-todo") {
         // Add todo item and update UI.
@@ -158,17 +161,21 @@ window.agent.addEventListener('toolcall', async e => {
     } // etc...
 });
 ```
+
 Tool calls are handled as events. Since event handler functions can't respond to the agent by returning a value directly, the `'toolcall'` event object has a `respondWith()` method that needs to be called to signal completion and respond to the agent. This is based on the existing service worker `'fetch'` event.
 
 **Advantages:**
 
-- Allows multiple different discovery mechanisms.
+- Allows additional context different discovery mechanisms without rendering a page.
 
 **Disadvantages:**
 
 - Slightly harder to keep definition and implementation in sync.
+- Potentially large switch-case in event handler.
 
-Although this API is slightly more complex than the former, support for declaring tools outside of JavaScript will likely be important to support agents' ability to discover tools without needing to navigate to a page. It is also simple to write a wrapper around the Option 2 API that makes it look like Option 1, which could be useful for sites that don't want to take advantage of the declarative approach.
+#### Recommendation
+
+A **hybrid** approach of both of the examples above is recommended as this would make it easy for web developers to get started adding tools to their page, while leaving open the possibility of manifest-based approaches in the future. To implement this hybrid approach, a `"toolcall"` event is dispatched on every incoming tool call _before_ executing the tool's `execute` function. The event handler can handle the tool call by calling the event's `preventDefault()` method, and then responding to the agent with `respondWith()` as shown above. If the event handle does not call `preventDefault()` then the browser's default behavior for tool calls will occur. The `execute` function for the requested tool is called. If a tool with the requested name does not exist, then the browser responds to the agent with an error.
 
 #### Other API alternatives considered
 
@@ -201,7 +208,7 @@ The page shows the stamps currently in the database and has a form to add a new 
 
 sing the Web Model Context API, the author can add just a few simple tools to the page for adding, updating, and retrieving stamps. With these relatively simple tools, an AI agent would have the ability to perform complex tasks like the ones illustrated above on behalf of the user.
 
-The example below walks through adding one such tool, the "add-stamp" tool, using Option #2 of the Web Model Context API, so that AI agents can update the stamp collection.
+The example below walks through adding one such tool, the "add-stamp" tool, using the Web Model Context API, so that AI agents can update the stamp collection.
 
 The webpage today is designed with a visual UX in mind. It uses simple JavaScript with a `'submit'` event handler that reads the form fields, adds the new record, and refreshes the UI:
 
@@ -236,47 +243,49 @@ function addStamp(stampName, stampDescription, stampYear, stampImageUrl) {
 }
 ```
 
-To let AI agents use this functionality, the author first defines the available tools. The `agent` property on the `Window` is checked to ensure the browser supports Web Model Context. If supported, the `provideContext()` method is called, passing in an array of tools with a single item, a definition for the new "Add Stamp" tool. The tool accepts as parameters the same set of fields that are present in the HTML form, since this tool and the form should be functionally equivalent.
+To let AI agents use this functionality, the author defines the available tools. The `agent` property on the `Window` is checked to ensure the browser supports Web Model Context. If supported, the `provideContext()` method is called, passing in an array of tools with a single item, a definition for the new "Add Stamp" tool. The tool accepts as parameters the same set of fields that are present in the HTML form, since this tool and the form should be functionally equivalent.
 
 ```js
-window.agent.provideContext({
-    tools: [
-        {
-            name: "add-stamp",
-            description: "Add a new stamp to the collection",
-            params: {
-                type: "object",
-                properties: {
-                    name: { type: "string", description: "The name of the stamp" },
-                    description: { type: "string", description: "A brief description of the stamp" },
-                    year: { type: "number", description: "The year the stamp was issued" },
-                    imageUrl: { type: "string", description: "An optional image URL for the stamp" }
+if ("agent" in window) {
+    window.agent.provideContext({
+        tools: [
+            {
+                name: "add-stamp",
+                description: "Add a new stamp to the collection",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        name: { type: "string", description: "The name of the stamp" },
+                        description: { type: "string", description: "A brief description of the stamp" },
+                        year: { type: "number", description: "The year the stamp was issued" },
+                        imageUrl: { type: "string", description: "An optional image URL for the stamp" }
+                    },
+                    required: ["name", "description", "year"]
                 },
-                required: ["name", "description", "year"]
-            },
-        }
-    ]
-});
+                async execute({ name, description, year, imageUrl }) {
+                    // TODO
+                }
+            }
+        ]
+    });
+}
 ```
 
-Now the author needs to handle tool calls coming from connected agents. After defining the "Add Stamp" tool above, the author handles the `'toolcall'` event and implements the tools operations. The tool needs to update the stamp database, and refresh the UI to reflect the change to the database. Since the code to do this is already available in the `addStamp()` function written earlier, the event handler is very simple and just needs to call this helper when an "add-stamp" tool call is received. After calling the helper, the event handler needs to signal completion and should also provide some sort of feedback to the client application that requested the tool call. It calls `e.respondWith()` with a text message indicating the stamp was added:
+Now the author needs to implement the tool. The tool needs to update the stamp database, and refresh the UI to reflect the change to the database. Since the code to do this is already available in the `addStamp()` function written earlier, the tool implementation is very simple and just needs to call this helper when an "add-stamp" tool call is received. After calling the helper, the tool needs to signal completion and should also provide some sort of feedback to the client application that requested the tool call. It returns a text message indicating the stamp was added:
 
 ```js
-window.addEventListener('toolcall', async (e) => {
-    if (e.name === 'add-stamp') {
-        const { name, description, year, imageUrl } = e.input;
-        addStamp(name, description, year, imageUrl);
+async execute({ name, description, year, imageUrl }) {
+    addStamp(name, description, year, imageUrl);
 
-        return e.respondWith({
-            content: [
-                {
-                    type: "text",
-                    text: `Stamp "${name}" added successfully! The collection now contains ${stamps.length} stamps.`,
-                },
-            ]
-        });
-    }
-});
+    return {
+        content: [
+            {
+                type: "text",
+                text: `Stamp "${name}" added successfully! The collection now contains ${stamps.length} stamps.`,
+            },
+        ]
+    };
+}
 ```
 ### Future improvements to this example
 
