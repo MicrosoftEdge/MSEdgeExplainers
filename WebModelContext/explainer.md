@@ -111,7 +111,7 @@ window.agent.provideContext({
 });
 ```
 
-The `provideContext` method can be called multiple times. Calling the method more than once clears any pre-existing tools and other context before registering the new ones. This is useful for single-page web apps that frequently change UI state and could benefit from presenting different tools depending on which state the UI is currently in.
+The `provideContext` method can be called multiple times. Subsequent calls clear any pre-existing tools and other context before registering the new ones. This is useful for single-page web apps that frequently change UI state and could benefit from presenting different tools depending on which state the UI is currently in.
 
 **Advantages:**
 
