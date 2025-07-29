@@ -47,7 +47,7 @@ if ('clipboard' in navigator && 'addEventListener' in navigator.clipboard) {
 
 ## Availability: Try it with Origin Trials!
 
-The `clipboardchange` event is currently available as an [Origin Trial](https://developer.chrome.com/docs/web-platform/origin-trials/). This allows you to use the feature on your production site and provide valuable feedback to browser vendors before it's finalized.
+The `clipboardchange` event is currently available as an [Origin Trial](https://developer.chrome.com/docs/web-platform/origin-trials/) in Chrome and Microsoft Edge versions 140-142. This allows you to use the feature on your production site and provide valuable feedback to browser vendors before it's finalized.
 
 To participate, you'll need to:
 1.  **Register for the Origin Trial:** [Link to your Origin Trial registration page will go here].
@@ -68,7 +68,9 @@ Your feedback is crucial to the development of this feature. If you encounter an
 
 We look forward to hearing from you!
 
-## Further Reading
+## Further Reading and References
 
-*   [W3C Specification (Editor's Draft)](https://w3c.github.io/clipboard-apis/)
 *   [Explainer Document](./clipboard-change-event-explainer.md)
+*   [Chrome Platform Status Entry](https://chromestatus.com/feature/5085102657503232)
+*   [W3C Specification Proposed Changes (PR)](https://github.com/w3c/clipboard-apis/pull/239)
+*   [W3C Specification (Current Editor's Draft)](https://w3c.github.io/clipboard-apis/#clipboard-event-clipboardchange)
