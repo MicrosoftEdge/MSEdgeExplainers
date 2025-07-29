@@ -53,16 +53,16 @@ The impact is especially pronounced in large-scale web applications—such as on
 
 ## Goals
 
-- Improve responsiveness in copy-paste operations, especially for large data sizes.
-- Optimize performance by avoiding unnecessary data reads, especially when web authors may only need specific formats like plaintext or HTML.
+- Improve responsiveness in copy-paste operations for large data sizes by optimizing performance and avoiding unnecessary data reads—especially when only specific formats like plaintext or HTML are needed by web authors.
 - Ensure interoperability across different platforms.
-- This proposal does not change the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). It continues to require user activation and adhere to existing security boundaries.
 
 ## Non-Goals
 
 - This proposal does not currently address changes to [readText()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-readtext) or [write()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-write) methods.
 - It does not propose a change to how clipboard formats are written—only how they are read.
 - This proposal does not define any rules for how the browser should prioritize or rank different clipboard formats internally.
+- This proposal does not change the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). It continues to require user activation and adhere to existing security boundaries.
+
 
 ## Proposal
 
