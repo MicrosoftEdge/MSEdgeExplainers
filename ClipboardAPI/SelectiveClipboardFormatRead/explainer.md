@@ -22,7 +22,8 @@
   - [Pros of Alternate Approach](#pros-of-alternate-approach)
   - [Cons of Alternate Approach](#cons-of-alternate-approach)
 - [Appendix](#appendix)
-  - [Read Time Analysis and Takeaways](#read-time-analysis-and-takeaways)
+  - [Appendix 1: Proposed IDL](#appendix-1-proposed-idl)
+  - [Appendix 2: Read Time Analysis and Takeaways](#appendix-2-read-time-analysis-and-takeaways)
 - [References and Acknowledgements](#references-and-acknowledgements)
 - [Issue Tracker](#issue-tracker)
 
@@ -82,7 +83,7 @@ const availableTypes = item.types; // ['text/plain']. Note: Only available reque
 const plainTextBlob = await item.getType('text/plain');
 const text = await plainTextBlob.text();
 ```
-Please refer Appendix 1 for the proposed IDL.
+Please refer [Appendix 1](#appendix-1-proposed-idl) for the proposed IDL.
 
 ## Boundary Scenarios
 
@@ -161,7 +162,7 @@ dictionary ClipboardReadOptions {
 };
 ```
 
-### Appendix 2 : Read Time Analysis and Takeaways
+### Appendix 2: Read Time Analysis and Takeaways
 
 We ran experiments simulating real-world clipboard usage to evaluate the performance impact of selectively reading specific clipboard formats. The results showed substantial improvements in the read time when applications read only the required formats instead of the entire clipboard. For example, in a scenario where the clipboard payload was 7.7 MB (comprising 0.7 MB of plain text and 7 MB of HTML), selectively reading just the text reduced the read time by 93%—from 179.5 ms down to 10.8 ms.
 
