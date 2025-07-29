@@ -53,7 +53,7 @@ The impact is especially pronounced in large-scale web applications—such as on
 
 ## Goals
 
-- Improve responsiveness in copy-paste operations for large data sizes by optimizing performance and avoiding unnecessary data reads—especially when only specific formats like plaintext or HTML are needed by web authors.
+- Improve copy-paste responsiveness for large data by avoiding unnecessary reads—especially when only specific formats like plaintext or HTML are needed by web authors.
 - Ensure interoperability across different platforms.
 
 ## Non-Goals
@@ -82,19 +82,7 @@ const availableTypes = item.types; // ['text/plain']. Note: Only available reque
 const plainTextBlob = await item.getType('text/plain');
 const text = await plainTextBlob.text();
 ```
-
-**IDL:**
-```webidl
-[Exposed=Window]
-interface Clipboard {
-    Promise<sequence<ClipboardItem>> read(optional ClipboardReadOptions options = {});
-};
-
-dictionary ClipboardReadOptions {
-    sequence<DOMString> types;        // Optional: Filter returned clipboard items by MIME types
-    sequence<DOMString> unsanitized;  // Optional: Request unsanitized data for specific MIME types
-};
-```
+Please refer Appendix 1 for the proposed IDL.
 
 ## Boundary Scenarios
 
@@ -160,7 +148,20 @@ const plainText = await item.getType('text/plain'); // Data is lazily fetched he
 
 ## Appendix
 
-### Read Time Analysis and Takeaways
+### Appendix 1: Proposed IDL 
+```webidl
+[Exposed=Window]
+interface Clipboard {
+    Promise<sequence<ClipboardItem>> read(optional ClipboardReadOptions options = {});
+};
+
+dictionary ClipboardReadOptions {
+    sequence<DOMString> types;        // Optional: Filter returned clipboard items by MIME types
+    sequence<DOMString> unsanitized;  // Optional: Request unsanitized data for specific MIME types
+};
+```
+
+### Appendix 2 : Read Time Analysis and Takeaways
 
 We ran experiments simulating real-world clipboard usage to evaluate the performance impact of selectively reading specific clipboard formats. The results showed substantial improvements in the read time when applications read only the required formats instead of the entire clipboard. For example, in a scenario where the clipboard payload was 7.7 MB (comprising 0.7 MB of plain text and 7 MB of HTML), selectively reading just the text reduced the read time by 93%—from 179.5 ms down to 10.8 ms.
 
