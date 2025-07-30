@@ -5,8 +5,7 @@
 - [Kevin Babbitt](https://github.com/kbabbitt) (Microsoft)
 
 ## Participate
-- [Issue tracker]
-- [Discussion forum]
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/AtRuleFeatureDetection)
 
 ## Table of Contents
 
@@ -36,7 +35,7 @@
 ## Introduction
 
 Feature detection is a [W3C TAG design principle](https://www.w3.org/TR/design-principles/#feature-detect)
-and a feature that Web authors rely on for graceful degradation of their pages.
+and a tool that Web authors rely on for graceful degradation of their pages.
 
 [CSS Conditional Rules](https://www.w3.org/TR/css-conditional/) introduces the `@supports` rule and API
 extensions to allow authors to feature-detect CSS properties.
@@ -47,10 +46,10 @@ support for at-rules, including specific features of at-rules.
 
 There have been many scenarios described that call for feature detection of at-rules and sub-portions of at-rule grammar. Some examples:
 
-1. In the [Blink intent-to-ship thread for `@property`](https://groups.google.com/a/chromium.org/g/blink-dev/c/3ygpsew53a0/m/Ar_OPlthAwAJ), it was pointed out that authors need a mechanism to detect support so that they can fall back to `CSS.registerProperty()` if needed.
-2. A [StackOverflow question](https://stackoverflow.com/questions/44244221/is-it-possible-to-do-a-css-supports-check-on-a-media-rule) asks whether it is possible to detect support for `@media` features, for example to detect if the user agent can return a yes/no answer for `@media (pointer)`.
-3. A [Mastodon post](https://mastodon.social/@xro/113106213499516093) asks whether it is possible to test for style query support.
-4. At time of writing, several in-development CSS features propose to implement new at-rules. These include [`@sheet`](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md) as well as [CSS Functions and Mixins](https://css.oddbird.net/sasslike/mixins-functions/).
+- In the [Blink intent-to-ship thread for `@property`](https://groups.google.com/a/chromium.org/g/blink-dev/c/3ygpsew53a0/m/Ar_OPlthAwAJ), it was pointed out that authors need a mechanism to detect support so that they can fall back to `CSS.registerProperty()` if needed.
+- A [StackOverflow question](https://stackoverflow.com/questions/44244221/is-it-possible-to-do-a-css-supports-check-on-a-media-rule) asks whether it is possible to detect support for `@media` features, for example to detect if the user agent can return a yes/no answer for `@media (pointer)`.
+- A [Mastodon post](https://mastodon.social/@xro/113106213499516093) asks whether it is possible to test for style query support.
+- At time of writing, several in-development CSS features propose to implement new at-rules. These include [`@sheet`](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md) as well as [CSS Functions and Mixins](https://css.oddbird.net/sasslike/mixins-functions/).
 
 ### Goals
 
@@ -85,12 +84,12 @@ Accordingly, this explainer does not propose making `@charset` feature-detectabl
 
 ## Proposed Approach
 
-The `at-rule()` function can be used in the following ways:
+The `at-rule()` function can be used for feature detection in the following ways:
 
 ### Detect whether an at-rule name is recognized at all
 
-This is the simplest form. An at-rule name is passed to the function; the result is true if the implementation
-would recognize it as an at-rule in any context, false otherwise.
+In its simplest form, the `at-rule()` function can be passed just an at-rule name.
+The result is true if the implementation would recognize it as an at-rule in any context, false otherwise.
 This form is useful for detecting entire new features implemented as at-rules, including features such as
 [`@starting-style`](https://www.w3.org/TR/css-transitions-2/#defining-before-change-style)
 that do not appear at top-level stylesheet context.
@@ -121,8 +120,6 @@ It may also be useful as a shorter alternative to the second form for feature-de
 valid when nested inside another at-rule, such as
 [`@swash`](https://www.w3.org/TR/css-fonts/#font-feature-values-syntax)
 and other font feature value types within `@font-feature-values`.
-However, authors should consider the possibility of such an at-rule later becoming valid in a new and different
-context, which may result in a false positive.
 
 ```css
 @supports at-rule(@swash) {
@@ -145,12 +142,19 @@ context, which may result in a false positive.
 }
 ```
 
+However, authors should consider the possibility of such an at-rule later becoming valid in a new and different
+context, which may result in a false positive. For example, one might write `@supports at-rule(@top-left)` 
+intending to detect support for the `@top-left` rule nested within `@page`. But later, if a new feature comes 
+along that implements a nested `@top-left` at-rule for a different purpose, the feature query would return true
+on implementations that *do* support this new feature but *do not* support `@page`.
+
 ### Detect whether an at-rule, with optional prelude and/or block, is supported
 
 This form resembles existing use of feature detection in CSS. An at-rule block, including optional prelude
 and/or declaration block, is passed as the function parameter. If the at-rule block is accepted by the 
-implementation *without relying on forgiving catch-all grammar*, the support query returns true; otherwise it 
-returns false.
+implementation *without relying on
+[forgiving catch-all grammar](#special-case-the-forgiving-grammar-of-media-queries)*,
+the support query returns true; otherwise it returns false.
 
 This is useful for detecting new enhancements to existing at-rules. Often it is not necessary to pass the entire
 at-rule that the author intends to use; an abbreviated subset can be "close enough" to make the right decision.
@@ -182,7 +186,7 @@ That allows for at-rules with positional requirements, such as `@import`, to be 
 
 #### Special case: The forgiving grammar of media queries
 
-Above, "forgiving catch-all grammar" refers to cases where it would be undesirable for an entire at-rule to be 
+"Forgiving catch-all grammar" refers to cases where it would be undesirable for an entire at-rule to be 
 thrown away just because a small part of it is unrecognized. One example is in media queries:
 
 ```css
@@ -201,8 +205,8 @@ Suppose an author instead wants to condition part of their stylesheet on whether
 must at least parse the above media query. If feature detection were determined purely based on whether the 
 at-rule parses successfully, it would not be possible to feature-detect support for `fancy-display`. The 
 exception we carve out allows us to handle this situation: Implementations that recognize `fancy-display` will 
-parse it on their "known media features" path, and implementations that don't recognize it will parse it on their 
-"forgiving catch-all" path.
+parse that feature name on their "known media features" path, and implementations that don't recognize it will 
+parse it on their "forgiving catch-all" path.
 
 ```css
 /* This @supports query returns true if the implementation knows what a fancy-display is. */
@@ -246,7 +250,7 @@ The query would thus be quite verbose:
 ```css
 /* Testing as a full at-rule using the previous form */
 @supports at-rule(@font-face {font-family: test; src: local(test); font-feature-settings: "hwid"} ) {
-    ...
+    /* ... */
 }
 ```
 
@@ -255,7 +259,7 @@ With this form, the author can simplify to:
 ```css
 /* Simpler query using this form */
 @supports at-rule(@font-face; font-feature-settings: "hwid") {
-    ...
+    /* ... */
 }
 ```
 
@@ -269,10 +273,10 @@ Feedback from other implementors will be collected as part of the Blink launch p
 
 ## References & acknowledgements
 
-This explainer describes the completion of a feature into which others have
-already put significant work. Many thanks for the efforts of:
+This explainer describes a feature which others have already put significant work into.
+Many thanks for the efforts of:
 
-- @xfq, who brought the original feature request to the CSSWG in Issue [#2463](https://github.com/w3c/csswg-drafts/issues/2463).
-- @tabatkins, who proposed expansion of the grammar in Issue [#6966](https://github.com/w3c/csswg-drafts/issues/6966).
-- @sesse, who implemented the behavior that the CSSWG resolved on in #2463 in Chromium behind a feature flag.
-- @andruud, who raised important clarifying questions in Issues [#11116](https://github.com/w3c/csswg-drafts/issues/11116), [#11117](https://github.com/w3c/csswg-drafts/issues/11117), and [#11118](https://github.com/w3c/csswg-drafts/issues/11118).
+- Fuqiao Xue, who brought the original feature request to the CSSWG in Issue [#2463](https://github.com/w3c/csswg-drafts/issues/2463).
+- Tab Atkins-Bittner, who proposed expansion of the grammar in Issue [#6966](https://github.com/w3c/csswg-drafts/issues/6966).
+- Steinar H. Gunderson, who implemented the behavior that the CSSWG resolved on in [#2463](https://github.com/w3c/csswg-drafts/issues/2463) in Chromium behind a feature flag.
+- Anders Hartvoll Ruud, who raised important clarifying questions in Issues [#11116](https://github.com/w3c/csswg-drafts/issues/11116), [#11117](https://github.com/w3c/csswg-drafts/issues/11117), and [#11118](https://github.com/w3c/csswg-drafts/issues/11118).
