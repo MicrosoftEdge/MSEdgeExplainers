@@ -53,7 +53,7 @@ Web applications that support rich content editing—such as document editors, e
 
 However, the current [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read), that gets triggered by the paste options, indiscriminately fetches all available formats from the clipboard, regardless of what the application needs. This blanket behaviour adds significant overhead, especially when large data formats like HTML or images are present and are not required by the app.
 
-The impact is especially pronounced in large-scale web applications—such as online spreadsheets and document editors—that collectively handle hundreds of millions of paste interactions across their user base, where maintaining responsiveness during each operation is critical. Delays caused by fetching and discarding irrelevant clipboard data degrade user experience and add avoidable memory and CPU costs.
+The impact is especially pronounced in large-scale web applications—such as online spreadsheets and document editors—that collectively handle hundreds of millions of paste interactions across their user base, where maintaining responsiveness during each operation is critical. Delays caused by fetching and discarding irrelevant clipboard data degrade user experience and add avoidable memory and CPU costs.(refer [Appendix 2](#appendix-2-read-time-analysis-and-takeaways) for an example read-time analysis demonstrating performance impact in a representative scenario)
 
 ## Goals
 
