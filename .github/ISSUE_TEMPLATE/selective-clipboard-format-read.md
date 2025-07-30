@@ -1,7 +1,7 @@
 ---
-name: Selective CLipboard Format Read
+name: Selective Clipboard Format Read
 about: new issue
-title: "[Selective CLipboard Format Read] <TITLE HERE>"
+title: "[Selective Clipboard Format Read] <TITLE HERE>"
 labels: SelectiveClipboardFormatRead
 assignees: ragoulik
 

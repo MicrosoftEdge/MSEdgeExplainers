@@ -5,8 +5,10 @@
 **Author:**  [Abhishek Singh](https://github.com/abhishek06020)(abhisheksing@microsoft.com)
 
 **Co-authors:**  [Rohan Raja](https://github.com/roraja)(roraja@microsoft.com), [Rakesh Goulikar](https://github.com/ragoulik)(ragoulik@microsoft.com)
+
 ## Participate
-[Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SelectiveCLipboardFormatRead) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=ragoulik&labels=SelectiveCLipboardFormatRead&template=selective-clipboard-format-read.md&title=%5BSelective+Clipboard+Format+Read%5D+%3CTITLE+HERE%3E)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SelectiveClipboardFormatRead)
+- [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=ragoulik&labels=SelectiveClipboardFormatRead&template=selective-clipboard-format-read.md&title=%5BSelective+Clipboard+Format+Read%5D+%3CTITLE+HERE%3E)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -27,7 +29,6 @@
   - [Appendix 1: Proposed IDL](#appendix-1-proposed-idl)
   - [Appendix 2: Read Time Analysis and Takeaways](#appendix-2-read-time-analysis-and-takeaways)
 - [References and Acknowledgements](#references-and-acknowledgements)
-- [Issue Tracker](#issue-tracker)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -61,8 +62,7 @@ The impact is especially pronounced in large-scale web applications—such as on
 
 ## Non-Goals
 
-- This proposal does not currently address changes to [readText()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-readtext) or [write()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-write) methods.
-- It does not propose a change to how clipboard formats are written—only how they are read.
+- Modifying clipboard writing or other clipboard APIs such as [readText()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-readtext).
 - This proposal does not define any rules for how the browser should prioritize or rank different clipboard formats internally.
 - This proposal does not change the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). It continues to require user activation and adhere to existing security boundaries.
 
@@ -85,6 +85,32 @@ const availableTypes = item.types; // ['text/plain']. Note: Only available reque
 const plainTextBlob = await item.getType('text/plain');
 const text = await plainTextBlob.text();
 ```
+
+**Example: Retrieving unsanitized HTML content**
+```js
+// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
+const items = await navigator.clipboard.read({
+  types: ['text/html'],
+  unsanitized: ['text/html']
+});
+
+const item = items[0];
+const availableTypes = item.types; // ['text/html']
+
+const unsanitizedHtml = await item.getType('text/html');
+```
+
+**Example: Undefined or empty requested types**
+```js
+// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
+const items = await navigator.clipboard.read({
+  types: []
+});
+
+const item = items[0];
+const availableTypes = item.types; // ['text/plain', 'text/html']. Note all available types are present.
+```
+
 Please refer [Appendix 1](#appendix-1-proposed-idl) for the proposed IDL.
 
 ## Boundary Scenarios
@@ -104,9 +130,16 @@ const item = items[0];
 // Only returns types that were both requested AND available on clipboard
 const availableTypes = item.types; // ['text/plain']
 
-const plainText = await item.getType('text/plain'); // ✅ Resolves successfully
-const jsText = await item.getType('text/javascript'); // ❌ Throws error: The type was not found
-const html = await item.getType('text/html'); // ❌ Throws error: The type was not found
+// ✅ Resolves successfully
+const plainText = await item.getType('text/plain');
+
+// ❌ Throws error: The type was not found
+//  Type is requested in the types filter but it is invalid  
+const jsText = await item.getType('text/javascript');
+
+// ❌ Throws error: The type was not found
+// Type is valid and available in OS clipboard but not requested in the types filter
+const html = await item.getType('text/html');
 ```
 
 ## Pros
@@ -146,7 +179,7 @@ const plainText = await item.getType('text/plain'); // Data is lazily fetched he
 
 - This approach is not backward compatible because [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) no longer stores Blob data at [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) time. As a result, it can't be used as a persistent cache for clipboard contents like today, where [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) reliably returns the same data without re-reading the system clipboard.
 - Another drawback of this approach is that the behavior may feel unintuitive: calling [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) suggests immediate clipboard access, but actual data retrieval is deferred until [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) is invoked.
-- **Potential Hidden Latency:** Developers must anticipate potential latency when calling [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) which contrasts with today’s expectation of immediate access.
+- Developers must anticipate potential latency when calling [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) which contrasts with today’s expectation of immediate access.
 - Clipboard state may change between [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) calls, leading to promise being rejected with error message 'The type was not found'.
 
 ## Appendix
@@ -182,6 +215,3 @@ Many thanks for valuable feedback and advice from:
 - [Daniel Clark](https://github.com/dandclark) (daniec@microsoft.com)
 - [Sanket Joshi](https://github.com/sanketj)
 - [Anupam Snigdha](https://github.com/snianu) (snianu@microsoft.com)
-
-
-  
