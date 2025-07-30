@@ -4,7 +4,7 @@
 
 **Author:**  [Abhishek Singh](https://github.com/abhishek06020)
 
-**Co-authors:**  [Ashish Kumar](https://github.com/ashishkum-ms), [Rakesh Goulikar](https://github.com/ragoulik), [Rohan Raja](https://github.com/roraja), [Shweta Bindal](https://github.com/shwetabindal)
+**Co-authors:**  [Ashish Kumar](https://github.com/ashishkum-ms), [Rakesh Goulikar](https://github.com/ragoulik), [Rohan Raja](https://github.com/roraja), [Shweta Bindal](https://github.com/shwetabin)
 
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SelectiveClipboardFormatRead)
