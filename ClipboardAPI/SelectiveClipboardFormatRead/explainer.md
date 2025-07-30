@@ -4,7 +4,7 @@
 
 **Author:**  [Abhishek Singh](https://github.com/abhishek06020)
 
-**Co-authors:**  [Rohan Raja](https://github.com/roraja), [Ashish Kumar](https://github.com/ashishkum-ms), [Shweta Bindal](https://github.com/shwetabindal), [Rakesh Goulikar](https://github.com/ragoulik)
+**Co-authors:**  [Ashish Kumar](https://github.com/ashishkum-ms), [Rakesh Goulikar](https://github.com/ragoulik), [Rohan Raja](https://github.com/roraja), [Shweta Bindal](https://github.com/shwetabindal)
 
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SelectiveClipboardFormatRead)
@@ -70,12 +70,13 @@ The impact is especially pronounced in large-scale web applications, such as onl
 
 We propose API signature changes to the [clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that allow web authors to specify the MIME types they intend to read. This browser implementation will selectively read only the requested formats, instead of reading all available data formats as is currently done.
 
-We propose to rename the optional argument `ClipboardUnsanitizedFormats` of [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API to `ClipboardReadOptions` and extend this object to include a new `types` property which is a list of mime types to be retrieved.
+We propose to rename the optional argument [`ClipboardUnsanitizedFormats`](https://www.w3.org/TR/clipboard-apis/#dictdef-clipboardunsanitizedformats) of [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API to [`ClipboardReadOptions`](#appendix-1-proposed-idl) and extend this object to include a new `types` property which is a list of mime types to be retrieved.
 
 Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) without specifying types or with empty MIME types will continue to behave as before, receiving all available clipboard formats.
 
-If a MIME type is provided in `[unsanitized]` but not requested in `[types]`, the clipboard content for the provided type will not be read from the OS clipboard and hence will be unavailable in the clipboard read response.
+If a MIME type is provided in [`unsanitized`](https://www.w3.org/TR/clipboard-apis/#dom-clipboardunsanitizedformats-unsanitized) but not requested in `types`, the clipboard content for the provided type will not be read from the OS clipboard and hence will be unavailable in the clipboard read response.
 
+**Example: Selective reading of requested MIME types**
 ```js
 // Scenario: OS clipboard contains 'text/plain' and 'text/html' data
 const items = await navigator.clipboard.read({
@@ -89,7 +90,7 @@ const plainTextBlob = await item.getType('text/plain');
 const text = await plainTextBlob.text();
 ```
 
-**Example: Retrieving unsanitized HTML content**
+**Example: Reading unsanitized HTML**
 ```js
 // Scenario: OS clipboard contains 'text/plain' and 'text/html' data
 const items = await navigator.clipboard.read({
@@ -103,7 +104,7 @@ const availableTypes = item.types; // ['text/html']
 const unsanitizedHtml = await item.getType('text/html');
 ```
 
-**Example: Undefined or empty requested types**
+**Example: Default behavior with empty or undefined types**
 ```js
 // Scenario: OS clipboard contains 'text/plain' and 'text/html' data
 const items = await navigator.clipboard.read({
@@ -151,7 +152,7 @@ const html = await item.getType('text/html');
 
 ## Cons
 
-- Adding both `[types]`and `[unsanitized]` to `[ClipboardReadOptions]` may cause confusion about how they interact.
+- Adding both `[types]` and `[unsanitized]` to [`ClipboardReadOptions`](#appendix-1-proposed-idl) may cause confusion about how they interact.
 
 ## Considered Alternative: No API Signature Change but Defer Actual Read Until ClipboardItem.getType()
 
@@ -185,7 +186,7 @@ const plainText = await item.getType('text/plain'); // Data is lazily fetched he
 
 ## Accessibility, Privacy, and Security Considerations
 
-This proposal has no known impact on accessibility or privacy and does not alter the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)).A user gesture requirement (transient user activation) and existing async clipboard API security measures (focus document, permission prompts) will remain as they are.
+This proposal has no known impact on accessibility or privacy and does not alter the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). A user gesture requirement (transient user activation) and existing async clipboard API security measures (focus document, permission prompts) will remain as they are.
 
 
 ## Appendix
@@ -217,7 +218,7 @@ To use live demo, open [this](https://ashishkum-ms.github.io/cr-contributions/sf
 Reference : [Github discussion](https://github.com/w3c/clipboard-apis/issues/191)
 
 Many thanks for valuable feedback and advice from:
-- [Evan Stade](https://github.com/evanstade) (estade@chromium.org)
-- [Daniel Clark](https://github.com/dandclark) (daniec@microsoft.com)
+- [Anupam Snigdha](https://github.com/snianu)
+- [Daniel Clark](https://github.com/dandclark)
+- [Evan Stade](https://github.com/evanstade)
 - [Sanket Joshi](https://github.com/sanketj)
-- [Anupam Snigdha](https://github.com/snianu) (snianu@microsoft.com)
