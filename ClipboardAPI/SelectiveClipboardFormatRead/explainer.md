@@ -2,9 +2,9 @@
 
 ## Improving Paste Performance through Selective Clipboard Reads
 
-**Author:**  [Abhishek Singh](https://github.com/abhishek06020)(abhisheksing@microsoft.com)
+**Author:**  [Abhishek Singh](https://github.com/abhishek06020)
 
-**Co-authors:**  [Rohan Raja](https://github.com/roraja)(roraja@microsoft.com), [Rakesh Goulikar](https://github.com/ragoulik)(ragoulik@microsoft.com)
+**Co-authors:**  [Rohan Raja](https://github.com/roraja), [Ashish Kumar](https://github.com/ashishkum-ms), [Shweta Bindal](https://github.com/shwetabindal), [Rakesh Goulikar](https://github.com/ragoulik)
 
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/SelectiveClipboardFormatRead)
@@ -25,6 +25,7 @@
 - [Considered Alternative: No API Signature Change but Defer Actual Read Until ClipboardItem.getType()](#considered-alternative-no-api-signature-change-but-defer-actual-read-until-clipboarditemgettype)
   - [Pros of Alternate Approach](#pros-of-alternate-approach)
   - [Cons of Alternate Approach](#cons-of-alternate-approach)
+- [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
 - [Appendix](#appendix)
   - [Appendix 1: Proposed IDL](#appendix-1-proposed-idl)
   - [Appendix 2: Read Time Analysis and Takeaways](#appendix-2-read-time-analysis-and-takeaways)
@@ -182,7 +183,7 @@ const plainText = await item.getType('text/plain'); // Data is lazily fetched he
 - Developers must anticipate potential latency when calling [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) which contrasts with today’s expectation of immediate access.
 - Clipboard state may change between [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) calls, leading to promise being rejected with error message 'The type was not found'.
 
-### Accessibility, Privacy, and Security Considerations
+## Accessibility, Privacy, and Security Considerations
 
 This proposal has no known impact on accessibility or privacy and does not alter the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)).A user gesture requirement (transient user activation) and existing async clipboard API security measures (focus document, permission prompts) will remain as they are.
 
