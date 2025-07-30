@@ -64,14 +64,16 @@ The impact is especially pronounced in large-scale web applications—such as on
 
 - Modifying clipboard writing or other clipboard APIs such as [readText()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-readtext).
 - This proposal does not define any rules for how the browser should prioritize or rank different clipboard formats internally.
-- This proposal does not change the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). It continues to require user activation and adhere to existing security boundaries.
-
 
 ## Proposal
 
 We propose API signature changes to the [clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that allow web authors to specify the MIME types they intend to read. This browser implementation will selectively read only the requested formats, instead of reading all available data formats as is currently done.
 
 We propose to rename the optional argument `ClipboardUnsanitizedFormats` of [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API to `ClipboardReadOptions` and extend this object to include a new `types` property which is a list of mime types to be retrieved.
+
+Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) without specifying types or with empty MIME types will continue to behave as before, receiving all available clipboard formats.
+
+If a MIME type is provided in `[unsanitized]` but not requested in `[types]`, the clipboard content for the provided type will not be read from the OS clipboard and hence will be unavailable in the clipboard read response.
 
 ```js
 // Scenario: OS clipboard contains 'text/plain' and 'text/html' data
@@ -113,6 +115,7 @@ const availableTypes = item.types; // ['text/plain', 'text/html']. Note all avai
 
 Please refer [Appendix 1](#appendix-1-proposed-idl) for the proposed IDL.
 
+
 ## Boundary Scenarios
 
 - The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-types) property of ClipboardItem will return only the intersection of the requested types and the types available in the system clipboard. If a particular type is requested in the input but not present in the platform clipboard or is invalid, then the [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-types) value won’t include that format, and any call to [getType(type)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) for that format will result in a rejected promise with error message "The type was not found". This way, a web author can verify if a requested type is present in the platform clipboard.
@@ -143,14 +146,11 @@ const html = await item.getType('text/html');
 ```
 
 ## Pros
-
- **Backward Compatible :**  
-   Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) without specifying any MIME types will continue to behave as before, receiving all available clipboard formats.
+- This approach is backward compatible.
 
 ## Cons
 
-**Potential Confusion Between `[types]` and `[unsanitized]` Options :**
-Adding both `[types]`and `[unsanitized]` to `[ClipboardReadOptions]` may cause confusion about how they interact. For example, what happens if a MIME type is listed in `[unsanitized]` but not in `[types]`? While the spec can clarify that `[types]` filtering applies first, this isn’t immediately obvious from the API shape and could lead to subtle bugs if misunderstood.
+- Adding both `[types]`and `[unsanitized]` to `[ClipboardReadOptions]` may cause confusion about how they interact.
 
 ## Considered Alternative: No API Signature Change but Defer Actual Read Until ClipboardItem.getType()
 
@@ -182,6 +182,11 @@ const plainText = await item.getType('text/plain'); // Data is lazily fetched he
 - Developers must anticipate potential latency when calling [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) which contrasts with today’s expectation of immediate access.
 - Clipboard state may change between [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) calls, leading to promise being rejected with error message 'The type was not found'.
 
+### Accessibility, Privacy, and Security Considerations
+
+This proposal has no known impact on accessibility or privacy and does not alter the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)).A user gesture requirement (transient user activation) and existing async clipboard API security measures (focus document, permission prompts) will remain as they are.
+
+
 ## Appendix
 
 ### Appendix 1: Proposed IDL 
@@ -204,7 +209,7 @@ We ran experiments simulating real-world clipboard usage to evaluate the perform
 As we scaled up the data size, we observed that read times increased proportionally with payload size, reinforcing that the benefits of selective reads become more significant with larger clipboard data. Moreover, the type of format had a notable impact on performance. HTML formats consistently exhibited higher read latencies compared to plain text—even when only slightly larger in size—likely due to additional processing like browser-side sanitization for security. Avoiding unnecessary HTML reads can deliver substantial latency improvements, especially in mixed-format clipboards where the application only needs text.
 
 **Reproducibility :**
-For developers interested in reproducing these results or running similar benchmarks, we’ve published a minimal [experiment](./experiment.html) demonstrating selective clipboard format reads and associated timing comparisons.
+For developers interested in reproducing these results or running similar benchmarks, we’ve published a minimal [experiment](./experiment.html) demonstrating Selective Clipboard Format Read and associated timing comparisons.
 To use live demo, open [this](https://ashishkum-ms.github.io/cr-contributions/sfr/performace_experiment.html) in a browser that supports the Selective Clipboard Format Read.
 
 ## References and Acknowledgements 
