@@ -50,15 +50,15 @@ Letting web authors specify which formats to read (like only `["text/plain"]` or
 
 ## User Problem
 
-Web applications that support rich content editing—such as document editors, email clients, and data grids—routinely deal with multiple types of clipboard payloads, including large HTML fragments, images, and custom MIME types. These apps often implement features like “Paste as plain text” or “Paste with formatting,” where only a subset of the clipboard data is needed.
+Web applications that support rich content editing, such as document editors, email clients, and data grids, routinely deal with multiple types of clipboard payloads, including large HTML fragments, images, and custom MIME types. These apps often implement features like “Paste as plain text” or “Paste with formatting,” where only a subset of the clipboard data is needed.
 
 However, the current [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read), that gets triggered by the paste options, indiscriminately fetches all available formats from the clipboard, regardless of what the application needs. This blanket behaviour adds significant overhead, especially when large data formats like HTML or images are present and are not required by the app.
 
-The impact is especially pronounced in large-scale web applications—such as online spreadsheets and document editors—that collectively handle hundreds of millions of paste interactions across their user base, where maintaining responsiveness during each operation is critical. Delays caused by fetching and discarding irrelevant clipboard data degrade user experience and add avoidable memory and CPU costs.(refer [Appendix 2](#appendix-2-read-time-analysis-and-takeaways) for an example read-time analysis demonstrating performance impact in a representative scenario)
+The impact is especially pronounced in large-scale web applications, such as online spreadsheets and document editors, that collectively handle hundreds of millions of paste interactions across their user base, where maintaining responsiveness during each operation is critical. Delays caused by fetching and discarding irrelevant clipboard data degrade user experience and add avoidable memory and CPU costs.(refer [Appendix 2](#appendix-2-read-time-analysis-and-takeaways) for an example read-time analysis demonstrating performance impact in a representative scenario)
 
 ## Goals
 
-- Improve copy-paste responsiveness for large data by avoiding unnecessary reads—especially when only specific formats like plaintext or HTML are needed by web authors.
+- Improve copy-paste responsiveness for large data by avoiding unnecessary reads, especially when only specific formats like plaintext or HTML are needed by web authors.
 - Ensure interoperability across different platforms.
 
 ## Non-Goals
@@ -207,7 +207,7 @@ dictionary ClipboardReadOptions {
 
 We ran experiments simulating real-world clipboard usage to evaluate the performance impact of selectively reading specific clipboard formats. The results showed substantial improvements in the read time when applications read only the required formats instead of the entire clipboard. For example, in a scenario where the clipboard payload was 7.7 MB (comprising 0.7 MB of plain text and 7 MB of HTML), selectively reading just the text reduced the read time by 93%—from 179.5 ms down to 10.8 ms.
 
-As we scaled up the data size, we observed that read times increased proportionally with payload size, reinforcing that the benefits of selective reads become more significant with larger clipboard data. Moreover, the type of format had a notable impact on performance. HTML formats consistently exhibited higher read latencies compared to plain text—even when only slightly larger in size—likely due to additional processing like browser-side sanitization for security. Avoiding unnecessary HTML reads can deliver substantial latency improvements, especially in mixed-format clipboards where the application only needs text.
+As we scaled up the data size, we observed that read times increased proportionally with payload size, reinforcing that the benefits of selective reads become more significant with larger clipboard data. Moreover, the type of format had a notable impact on performance. HTML formats consistently exhibited higher read latencies compared to plain text, even when only slightly larger in size, likely due to additional processing like browser-side sanitization for security. Avoiding unnecessary HTML reads can deliver substantial latency improvements, especially in mixed-format clipboards where the application only needs text.
 
 **Reproducibility :**
 For developers interested in reproducing these results or running similar benchmarks, we’ve published a minimal [experiment](./experiment.html) demonstrating Selective Clipboard Format Read and associated timing comparisons.
