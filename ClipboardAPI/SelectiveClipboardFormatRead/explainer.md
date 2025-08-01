@@ -166,8 +166,8 @@ If the clipboard contents change between the call to [read()](https://www.w3.org
 const items = await navigator.clipboard.read(); // [text, img]
 const item = items[0]; // text
 
-// getTypes returns all available data types present at the time of read call
-const allTypes = item.getTypes(); // [text, img]
+// returns all available data types present at the time of read call
+const allTypes = item.types; // [text, img]
 
 const plainText = await item.getType('text/plain'); // Data is lazily fetched here
 ```
