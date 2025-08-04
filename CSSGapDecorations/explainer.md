@@ -50,6 +50,7 @@ content location of future work and discussions.
   - [Future ideas](#future-ideas)
     - [Images](#images)
     - [Corner joins](#corner-joins)
+    - [Propagation of gap decorations into subgrids](#propagation-of-gap-decorations-into-subgrids)
     - [Placement of gap decorations](#placement-of-gap-decorations)
       - [Grid](#grid)
       - [Flex, multi-column, and masonry](#flex-multi-column-and-masonry)
@@ -381,6 +382,18 @@ was suggested that we apply a `border-radius` like property to gap decorations
 to allow for more flexible styling near intersections. We could also potentially
 reuse concepts from `corner-shape` for even more flexibility. This idea is tracked
 in [CSSWG Issue 12150](https://github.com/w3c/csswg-drafts/issues/12150).
+
+### Propagation of gap decorations into subgrids
+
+CSS Grid Level 2 defines the
+[subgrid](https://www.w3.org/TR/css-grid-2/#subgrids) feature. A subgrid matches
+up its grid lines to lines in the parent grid. Accordingly, gaps will also align
+between a subgrid and its parent grid, though the sizes of these gaps may
+differ. There may be use cases for propagating gap decorations from the parent
+grid into corresponding gaps in the subgrid; we could perhaps do this with a
+special keyword on the `*-rule-width`, `*-rule-style`, and `*-rule-color`
+properties. See [CSSWG Issue
+12326](https://github.com/w3c/csswg-drafts/issues/12326) for futher discussion.
 
 ### Placement of gap decorations
 
