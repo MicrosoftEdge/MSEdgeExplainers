@@ -50,11 +50,9 @@ The lack of intuitive messaging and the complexity involved in re-enabling permi
 
 This creates a recurring failure loop—where the application’s functionality appears broken, and the user is left without any actionable recovery path. 
 
- 
+**User anecdote:**
 
-User anecdote  
-
-“I had a window pop up on a website where I was copying text and pictures to my clipboard. The popup window said something about the clipboard, and I mistakenly clicked block. Now I can no longer copy pictures to my clipboard on this website. How do I un-block the clipboard function on this website?”  Source: How do I unblock the clipboard for a website - Microsoft Q&A 
+“I had a window pop up on a website where I was copying text and pictures to my clipboard. The popup window said something about the clipboard, and I mistakenly clicked block. Now I can no longer copy pictures to my clipboard on this website. How do I un-block the clipboard function on this website?”  Source: [How do I unblock the clipboard for a website - Microsoft Q&A](https://learn.microsoft.com/en-in/answers/questions/766718/how-do-i-unblock-the-clipboard-for-a-website) 
 
 The table below outlines user problems and scenarios, mapped to their intent to use the clipboard and the corresponding permission state at that moment. 
 
