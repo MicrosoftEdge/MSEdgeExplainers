@@ -2,9 +2,11 @@
 
 ## Improving permission control for clipboard reads through permission element
 
-**Author:**  [Utkarsh Pathak](https://github.com/utpathak)
-
-**Co-authors:**  [Abhishek Singh](https://github.com/abhishek06020), [Tanu Jain](https://github.com/tanujain_microsoft), [Rakesh Goulikar](https://github.com/ragoulik)
+## Authors:
+- [Utkarsh Pathak](https://github.com/utpathak)
+- [Abhishek Singh](https://github.com/abhishek06020)
+- [Tanu Jain](https://github.com/tanujain_microsoft)
+- [Rakesh Goulikar](https://github.com/ragoulik)
 
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/pepcforclipboardread)
@@ -42,7 +44,7 @@ This proposal introduces an extension of the [permission element](https://www.w3
 This explainer outlines how the dedicated permission element model can bring clarity and consistency to clipboard interactions, building upon the same foundation as camera and microphone permissions. 
 
 
-## User Problem
+## User-Facing Problem
 
 Users encounter clipboard permission prompts while performing actions like copy or paste on the web based on the state of the permissions. However, these prompts are frequently misunderstood, dismissed, or denied—sometimes accidentally, sometimes intentionally, and often due to unclear messaging. Once denied, clipboard operations silently fail with no further guidance, leaving users confused about what went wrong. 
 
@@ -134,7 +136,7 @@ This element will behave similarly to microphone/camera permission buttons but a
 - UI When permission is denied:     
 ![](img/permission%20denied.png)
 
-## Considered Alternatives:
+## Alternatives Considered:
 
 ### 1. Extending the Permissions API to Provide an Anchor Point
 
@@ -172,7 +174,7 @@ We considered modifying the regular, usage-triggered permission flow to allow us
 
 This proposal does not introduce new risks or changes to accessibility, privacy, or security for clipboard operations. It maintains the fundamental permission and security requirements of the async Clipboard API (navigator.clipboard), including the need for a secure context and a user gesture to access clipboard contents. 
 
-## References and Acknowledgements 
+## References & Acknowledgements 
 Reference : [Github discussion](https://github.com/WICG/PEPC/blob/main/explainer.md)
 
 Many thanks for valuable feedback and advice from:
