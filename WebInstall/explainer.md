@@ -68,7 +68,7 @@ To install a web app, a web site would use the promise-based method `navigator.i
         *  `id`: string with the processed `manifest_id` of the installed app.
 * Be rejected if the app installation did not complete. It'll reject with a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) value of:
     * `AbortError`: The installation/UX/permission (prompt) was closed/cancelled.
-    * `DataError`: There is no manifest file present, there is no `id` field defined in the manifest or there is a mismatch between the `id` passed as a parameter and the processed `id`. 
+    * `DataError`: There is no manifest file present, there is no `id` field defined in the manifest. 
 
 
 #### **Signature of the `install` method**
