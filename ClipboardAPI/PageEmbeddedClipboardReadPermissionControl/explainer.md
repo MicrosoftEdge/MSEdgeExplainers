@@ -10,7 +10,7 @@
 
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/pepcforclipboardread)
-- [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=ragoulik&labels=pepcforclipboardread&template=pepc-for-clipboard-read.md&title=%5BPEPC+for+clipboard+read%5D+%3CTITLE+HERE%3E)
+- [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=ragoulik&labels=PepcForClipboardRead&template=pepc-for-clipboard-read.md&title=%5BPEPC+for+clipboard+read%5D+%3CTITLE+HERE%3E)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
