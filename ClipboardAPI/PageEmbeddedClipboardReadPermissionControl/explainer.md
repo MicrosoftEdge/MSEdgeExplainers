@@ -9,7 +9,7 @@
 - [Rakesh Goulikar](https://github.com/ragoulik)
 
 ## Participate
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/pepcforclipboardread)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PepcForClipboardRead)
 - [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=ragoulik&labels=PepcForClipboardRead&template=pepc-for-clipboard-read.md&title=%5BPEPC+for+clipboard+read%5D+%3CTITLE+HERE%3E)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -17,24 +17,26 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [User Problem](#user-problem)
+- [User-Facing Problem](#user-facing-problem)
 - [Goals](#goals)
 - [Non-Goals](#non-goals)
 - [Proposal](#proposal)
-- [Considered Alternatives](#considered-alternatives)
-  - [Extending the Permissions API to Provide an Anchor Point](#extending-the-permissions-api-to-provide-an-anchor-point)
-    - [Pros of First Alternate Approach](#pros-of-first-alternate-approach)
-    - [Cons of First Alternate Approach](#cons-of-first-alternate-approach)
-  - [Allowing Recovery via the Regular Permission Flow](#allowing-recovery-via-the-regular-permission-flow)
-    - [Pros of Second Alternate Approach](#pros-of-second-alternate-approach)
-    - [Cons of Second Alternate Approach](#cons-of-second-alternate-approach)  
+- [The PEPC element extended to clipboard-read permission]   (#the-pepc-element-extended-to-clipboard-read-permission)
+- [Alternatives considered](#alternatives-considered)
+  - [1. Extending the permissions API to provide an anchor point](#1-extending-the-permissions-api-to-provide-an-anchor-point)
+    - [Pros of first alternate approach](#pros-of-first-alternate-approach)
+    - [Cons of first alternate approach](#cons-of-first-alternate-approach)
+  - [2. Allowing recovery via the regular permission flow](#2-allowing-recovery-via-the-regular-permission-flow)
+    - [Pros of second alternate approach](#pros-of-second-alternate-approach)
+    - [Cons of second alternate approach](#cons-of-second-alternate-approach)  
+- [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
 - [References and Acknowledgements](#references-and-acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Introduction
 
-This proposal introduces an extension of the [permission element](https://www.w3.org/TR/permissions) to support clipboard read permissions (clipboard-read). The goal is to make clipboard access predictable, recoverable, and user-friendly by allowing developers to declaratively request permissions in context, using clearly labelled, browser-controlled UI affordances. 
+This proposal introduces an extension of the [permission element](https://wicg.github.io/PEPC/permission-element.html) to support clipboard read permissions (clipboard-read). The goal is to make clipboard access predictable, recoverable, and user-friendly by allowing developers to declaratively request permissions in context, using clearly labelled, browser-controlled UI affordances. 
 
 ```html
 // Example html code
@@ -78,13 +80,13 @@ The table below outlines user problems and scenarios, mapped to their intent to 
 
 ## Goals
 
-- Improve User Clarity Around Clipboard Permission Prompts: 
+- Improve user clarity around clipboard permission prompts: 
  Help users better understand why clipboard read access is being requested, so that they can make informed choices when prompted by the browser 
 
-- Enable User Recovery Paths for Denied Clipboard Permissions: 
+- Enable user recovery paths for denied clipboard permissions: 
  Offer UI affordances or mechanisms that let users easily reverse an accidental "Block" decision, either directly in the browser or through app-driven nudges. 
 
-- Align Clipboard Permission UX with Broader Web Permissions Model 
+- Align clipboard permission UX with broader web permissions model:
  Ensure that improvements to clipboard permission flows are consistent with the evolving privacy and permissions architecture of the web platform. 
 
 ## Non-Goals
@@ -95,50 +97,36 @@ The table below outlines user problems and scenarios, mapped to their intent to 
 
 ## Proposal
 
-We propose supporting a new permission type for the <permission> HTML element: 
+We propose supporting a new permission type for the ```<permission>```(#https://github.com/WICG/PEPC/blob/main/explainer.md) HTML element: 
 
 clipboard-read: Allows reading from the user's clipboard. 
 
-This element will behave similarly to microphone/camera permission buttons but are tailored to the paste UX. 
+This type will behave similar to microphone/camera permission buttons but are tailored to the psting operation using the async clipboard read API(```navigator.clipboard.read()```). 
 
 ```html
-// Example html code
-<style> 
-
-  permission { 
-
-    background-color: lightgray; 
-
-    color: black; 
-
-    border-radius: 10px; 
-
-  } 
-
-</style> 
-
+// Example html to define clipboard-read type for the permission element
 <permission type="clipboard-read"></permission> 
 ```
 
-![](img/Use%20clipboard-read.png)
+<img src="img/use-clipboard-read.png" alt="Button Preview" width="200"/>
 
 
-## The permission UI extended to clipboard permissions: 
+## The PEPC element extended to clipboard-read permission: 
 
-- Standard UI:   
-![](img/First%20Prompt.png)
+- Prompt shown at the first clipboard read access on a domain:   
+![](img/first-prompt.png)
 
-- UI When permission is already granted:    
-![](img/permission%20granted.png)
+- Prompt shown when clipboard-read permission was already granted but user clicks on permission element:    
+![](img/permission-granted.png)
 
-- UI When permission is denied:     
-![](img/permission%20denied.png)
+- Prompt shown when clipboard-read permission was already denied but user clicks on permission element:     
+![](img/permission-denied.png)
 
-## Alternatives Considered:
+## Alternatives considered:
 
-### 1. Extending the Permissions API to Provide an Anchor Point
+### 1. Extending the permissions API to provide an anchor point
 
-This approach extends the permissions API with a request () function that accepts and HTML element as an anchor for positioning the permission prompt.
+This approach extends the [permissions API](#https://w3c.github.io/permissions) with a request () function that accepts an HTML element as an anchor for positioning the permission prompt.
 
 ```html
 <p id="pepc_anchor">This is where the permission prompt will be anchored</p> 
@@ -150,30 +138,32 @@ document.getElementById('pepc_anchor'),
 </script> 
 ```
 
-#### Pros of First Alternate Approach
+#### Pros of first alternate approach
 
 - Adress prompt positioning for better user experience and getting out of failure loop. 
 
-#### Cons of First Alternate Approach
+#### Cons of first alternate approach
 
 - It doesn’t provide robust user intent as a user click can’t be assured, leaving the doors open to abuse by malicious sites. 
 
-### 2. Allowing Recovery via the Regular Permission Flow
+### 2. Allowing recovery via the regular permission flow
 
 We considered modifying the regular, usage-triggered permission flow to allow users to recover from blocked states. 
 
-#### Pros of Second Alternate Approach
+#### Pros of second alternate approach
 - Streamlines the user journey by enabling reconsideration within the current flow; reduces need for complex browser/OS settings navigation. 
 
-#### Cons of Second Alternate Approach
+#### Cons of second alternate approach
 - This needs to be carefully balanced against preventing spam. Solutions like reputation-based mechanisms or heuristics were deemed ethically and technically difficult, prone to manipulation, and unlikely to achieve the same high precision of user intent as a direct interaction with a dedicated element. An unpredictable heuristic would also lead to a poor developer and user experience. 
 
 ## Accessibility, Privacy, and Security Considerations
 
-This proposal does not introduce new risks or changes to accessibility, privacy, or security for clipboard operations. It maintains the fundamental permission and security requirements of the async Clipboard API (navigator.clipboard), including the need for a secure context and a user gesture to access clipboard contents. 
+This proposal does not introduce new risks or changes to accessibility, privacy, or security for clipboard operations. It maintains the fundamental permission and security requirements of the async Clipboard read API (```navigator.clipboard.read()```), including the need for a secure context and a user gesture to access clipboard contents. Apart from the requirements for clipboard-read, all accessibility, privacy, or security concerns and mitigations which were applicable to any PEPC element are also applicable here.
+
+[PEPC Security and Abuse Mitigations](#https://github.com/WICG/PEPC/blob/main/explainer.md#security-abuse)
 
 ## References & Acknowledgements 
-Reference : [Github discussion](https://github.com/WICG/PEPC/blob/main/explainer.md)
+Reference : [PEPC explainer](https://github.com/WICG/PEPC/blob/main/explainer.md)
 
 Many thanks for valuable feedback and advice from:
 - [Rohan Raja](https://github.com/roraja)
