@@ -108,7 +108,7 @@ This type will behave similar to microphone/camera permission buttons but are ta
 <permission type="clipboard-read"></permission> 
 ```
 
-<img src="img/use-clipboard-read.png" alt="Button Preview" width="200"/>
+![](img/use-clipboard-read.png)
 
 
 ## The PEPC element extended to clipboard-read permission: 
