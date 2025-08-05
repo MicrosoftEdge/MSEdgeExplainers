@@ -97,18 +97,18 @@ The table below outlines user problems and scenarios, mapped to their intent to 
 
 ## Proposal
 
-We propose supporting a new permission type for the ```<permission>```(#https://github.com/WICG/PEPC/blob/main/explainer.md) HTML element: 
+We propose supporting a new permission type for the [```<permission>```](#https://github.com/WICG/PEPC/blob/main/explainer.md) HTML element: 
 
-clipboard-read: Allows reading from the user's clipboard. 
+clipboard-read: Allows reading from the user's clipboard when an async clipboard read is initiated. 
 
-This type will behave similar to microphone/camera permission buttons but are tailored to the psting operation using the async clipboard read API(```navigator.clipboard.read()```). 
+This type will behave similar to microphone/camera permission buttons but is tailored to the pasting operation using the async clipboard read API(```navigator.clipboard.read()```). 
 
 ```html
 // Example html to define clipboard-read type for the permission element
 <permission type="clipboard-read"></permission> 
 ```
 
-![](img/use-clipboard-read.png)
+![](./img/use-clipboard-read.png)
 
 
 ## The PEPC element extended to clipboard-read permission: 
