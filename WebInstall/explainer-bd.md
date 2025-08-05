@@ -30,7 +30,7 @@ Moreover, the **Web Install API feature is beneficial for app discovery**: it al
 * **Enable installation of _background document_ web apps.**
 * Allow the web app to report to the installation origin the outcome of the installation.
 * Extend the functionality of `beforeinstallprompt` that cannot install content other than the current loaded web application.
-* Enable UAs to [supress potential installation-prompt spam](#avoiding-installation-prompt-spamming).
+* Enable UAs to [suppress potential installation-prompt spam](#avoiding-installation-prompt-spamming).
 * Track campaign IDs for marketing campaigns (with the [Acquisition Info API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AcquisitionInfo/explainer.md)).
 
 ## Non-goals
