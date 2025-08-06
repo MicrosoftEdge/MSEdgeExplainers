@@ -30,13 +30,13 @@
 
 ## Introduction
 
-This proposal is there to support the implementation of a new type clipboard-read within the [permission element](https://wicg.github.io/PEPC/permission-element.html), leveraging the existing PEPC infrastructure. The goal is to make clipboard access predictable, recoverable, and user-friendly by enabling developers to provide users with contextual, browser-controlled UI for requesting clipboard permissions.
+This proposal is to support the implementation of a new type ```clipboard-read``` within the [permission element](https://wicg.github.io/PEPC/permission-element.html), leveraging the existing PEPC infrastructure. The goal is to make clipboard access predictable, recoverable, and user-friendly by enabling developers to provide users with contextual, browser-controlled UI for requesting clipboard permissions.
 
 This explainer outlines how the dedicated [permission element](#https://wicg.github.io/PEPC/permission-element.html) model can bring clarity and consistency to clipboard interactions, building upon the same foundation as camera and microphone permissions. 
 
 ## User-Facing Problem
 
-Users encounter clipboard permission prompts while performing actions like copy or paste on the web based on the state of the permissions. However, these prompts are frequently misunderstood, dismissed, or denied—sometimes accidentally, sometimes intentionally, and often due to unclear messaging. Once denied, clipboard operations silently fail with no further guidance, leaving users confused about what went wrong. 
+Users encounter clipboard permission prompts while performing actions like copy or paste on the web, depending on the current permission state. However, these prompts are frequently misunderstood, dismissed, or denied—sometimes accidentally, sometimes intentionally, and often due to unclear messaging. Once denied, clipboard operations silently fail with no further guidance, leaving users confused about what went wrong. 
 
 The lack of intuitive messaging and the complexity involved in re-enabling permissions results in a frustrating and broken user experience. Users are often unaware that their copy/paste action failed due to permission denial, and even when they realize it, they struggle to locate the settings needed to restore clipboard access. 
 
@@ -44,7 +44,8 @@ This creates a recurring failure loop—where the application’s functionality 
 
 **User anecdote:**
 
-“I had a window pop up on a website where I was copying text and pictures to my clipboard. The popup window said something about the clipboard, and I mistakenly clicked block. Now I can no longer copy pictures to my clipboard on this website. How do I un-block the clipboard function on this website?”  Source: [How do I unblock the clipboard for a website - Microsoft Q&A](https://learn.microsoft.com/en-in/answers/questions/766718/how-do-i-unblock-the-clipboard-for-a-website) 
+“I had a window pop up on a website where I was copying text and pictures to my clipboard. The popup window said something about the clipboard, and I mistakenly clicked block. Now I can no longer copy pictures to my clipboard on this website. How do I un-block the clipboard function on this website?”
+Source: [How do I unblock the clipboard for a website - Microsoft Q&A](https://learn.microsoft.com/en-in/answers/questions/766718/how-do-i-unblock-the-clipboard-for-a-website) 
 
 The table below outlines user problems and scenarios, mapped to their intent to use the clipboard and the corresponding permission state at that moment. 
 
@@ -68,8 +69,8 @@ The table below outlines user problems and scenarios, mapped to their intent to 
 
 ## Goals
 
-- Improve user clarity around clipboard permission prompts: 
- Help users better understand why clipboard read access is being requested, so that they can make informed choices when prompted by the browser 
+- Improve user clarity around clipboard permission prompts:
+ Help users better understand why clipboard read access is being requested, so that they can make informed choices when prompted by the browser.
 
 - Enable user recovery paths for denied clipboard permissions: 
  Offer UI affordances or mechanisms that let users easily reverse an accidental "Block" decision, either directly in the browser or through app-driven nudges. 
@@ -79,7 +80,7 @@ The table below outlines user problems and scenarios, mapped to their intent to 
 
 ## Non-Goals
 
-- The proposal will not introduce a way to bypass explicit user permission for clipboard reads, nor will it reduce privacy protections around clipboard access. 
+- The proposal does not introduce a way to bypass explicit user permission for clipboard reads, nor does it reduce privacy protections around clipboard access. 
 
 - The scope of this proposal is limited to read access via the Clipboard API; it does not include any modifications to the flow of clipboard write permissions. 
 
@@ -92,7 +93,7 @@ clipboard-read: Allows reading from the user's clipboard when an [async clipboar
 Similar to microphone or camera permission prompts, this type handles permission requests for retrieving clipboard data asynchronously using clipboard read API [```navigator.clipboard.read()```](https://w3c.github.io/clipboard-apis/#dom-clipboard-read). 
 
 ```html
-// Example html to define clipboard-read type for the permission element
+// Example HTML to define clipboard-read type for the permission element
 <permission type="clipboard-read"></permission> 
 ```
 
