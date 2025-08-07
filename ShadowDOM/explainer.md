@@ -37,6 +37,7 @@ content location of future work and discussions.
   - [Use case](#use-case)
     - [Media site control widgets](#media-site-control-widgets)
     - [Anywhere web components are used](#anywhere-web-components-are-used)
+    - [Streaming SSR](#streaming-ssr)
   - [Alternatives to using style in DSD](#alternatives-to-using-style-in-dsd)
     - [Constructable Stylesheets](#constructable-stylesheets)
     - [Using `rel="stylesheet"` attribute](#using-relstylesheet-attribute)
@@ -45,6 +46,7 @@ content location of future work and discussions.
     - [Scoping](#scoping)
     - [`<script>` vs `<style>` For CSS Modules](#script-vs-style-for-css-modules)
     - [Behavior with script disabled](#behavior-with-script-disabled)
+    - [Detailed Parsing Workflow](#detailed-parsing-workflow)
   - [Other declarative modules](#other-declarative-modules)
   - [Alternate proposals](#alternate-proposals)
     - [Local References For Link Rel](#local-references-for-link-rel)
@@ -189,6 +191,32 @@ When asked about pain points in [Web Components](https://2023.stateofhtml.com/en
 
 For additional use cases, please see issue [939](https://github.com/WICG/webcomponents/issues/939)
 
+### Streaming SSR
+
+With Server-Side-Rendering (SSR), servers emit HTML markup to the client's web browser. When this markup is emitted as a stream, the full document's DOM structure may not have been determined ahead of time. Standard DOM scoping
+behaves such that Shadow DOM nodes can only access identifiers in their own shadow root and in the light DOM. This situation makes it impossible to share styles between shadow roots, leading to duplication of style rules and markup.
+This dupliction is especially painful for SSR scenarios, which are typically heavily optimized for performance.
+
+The proposed global scope for declarative CSS Modules is essential to this scenario because it allows nested shadow roots to share a global set of styles. Standard DOM scoping rules would not work here, as demonstrated by the following example:
+
+```html
+<template shadowrootmode="open">
+  <!-- Emit styles that might need to be shared later. -->
+  <style type="css-module" specifier="my-component-styles">...</style>
+  <div>...component content...</div>
+  <!-- A child compontent is emitted that needs the same set of shared styles. Since the shared styles were already emitted above, they can be re-used with `adoptedstylesheets`. -->
+  <template shadowrootmode="open" adoptedstylesheets="my-component-styles">
+    <!-- Styles are shared from the parent shadow root (this would not work with standard DOM scoping, which can only access identifiers in this shadow root and the light DOM). -->  
+    <div>...component content...</div>
+  </template>
+</template>
+<!-- Sibling component with shared styles. Again, since shared styles were already emitted, they can be re-used via `adoptedstylesheets`. -->
+<template shadowrootmode="open" adoptedstylesheets="my-component-styles">
+  <!-- Styles are shared from the sibling shadow root (this would also not work with standard DOM scoping). -->
+  <div>...component content...</div>
+</template>
+```
+
 ## Alternatives to using style in DSD
 ### Constructable Stylesheets
 Developers can create stylesheets that can be applied to multiple shadow roots, using existing JavaScript, as outlined by the example below.
@@ -256,7 +284,7 @@ Another advantage of this proposal is that it can allow multiple module specifie
 </style>
 
 <my-element>
-  <template shadowrootmode="open" adoptedstylesheets="foo, bar">
+  <template shadowrootmode="open" adoptedstylesheets="foo bar">
     <!-- ... -->
   </template>
 </my-element>
@@ -276,6 +304,79 @@ Earlier versions of this document used the `<script>` tag for declaring CSS Modu
 
 User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not been verified yet.
 
+### Detailed Parsing Workflow
+
+In the following example:
+
+```html
+<style type="css-module" specifier="foo">
+  #content {
+    color: red;
+  }
+</style>
+<my-element>
+  <template shadowrootmode="open" adoptedstylesheets="foo">
+    <!-- ... -->
+  </template>
+</my-element>
+```
+
+Upon parsing the `<style>` tag above, an entry is added to the module map with the specifier of "foo" whose contents is a `CSSStyleSheet` object reflecting the parsed CSS contents of the `<style>` tag.
+
+As with existing `<style>` tags, if the CSS contains invalid syntax, the rules up to the invalid syntax are included, and everything after the invalid syntax is excluded from the associated `CSSStyleSheet`.
+
+When the `<template>` element is constructed, the `adoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute is looked up in the module map. If an entry with that specifier
+exists in the module map, the associated `CSSStyleSheet` is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets).
+If an entry with that specifier does not exist in the module map, an empty `CSSStyleSheet` object is inserted into the module map with the specified `specifier`.
+
+This may also happen in reversed order, as in the following example:
+
+```html
+<my-element>
+  <template shadowrootmode="open" adoptedstylesheets="foo">
+    <!-- ... -->
+  </template>
+</my-element>
+<style type="css-module" specifier="foo">
+  #content {
+    color: red;
+  }
+</style>
+```
+
+When the `<template>` element is parsed, an entry is added to the module map with the specifier of "foo" whose contents is an empty `CSSStyleSheet` object.
+
+When the `<style>` attribute is parsed, the module map is queried for an existing entry. Since there is an existing empty `CSSStyleSheet` object from the prior step, its contents are synchronously replaced with a
+new `CSSStyleSheet` based on the contents of the `<style>` tag.
+
+This replacement always occurs when an existing `specifier` is encountered, ensuring that the active `CSSStyleSheet` object associated with a given `specifier` is always the most recently specified entry.
+
+For example, with the following markup:
+
+```html
+<style type="css-module" specifier="foo">
+  #content {
+    color: red;
+  }
+</style>
+<style type="css-module" specifier="foo">
+  #content {
+    color: blue;
+  }
+</style>
+<my-element>
+  <template shadowrootmode="open" adoptedstylesheets="foo">
+    <!-- ... -->
+  </template>
+</my-element>
+```
+
+The contents of the first Declarative CSS Module with `specifier="foo"` (with `color: red`) are first parsed and the module map is updated with a `CSSStyleSheet` object with a `specifier` of "foo". 
+
+Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`), the existing `CSSStyleSheet` object with a `specifier` of "foo" is replaced in the module map with the second `CSSStyleSheet` object.
+
+The `<template>` with `adoptedstylesheets="foo"` will use the second definition (with `color: blue`).
+
 ## Other declarative modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
 ```html
@@ -288,7 +389,7 @@ An advantage of this approach is that it can be extended to solve similar issues
 <!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by
 cloning the contents of the HTML module given by the "/foo.html" specifier, instead of
 parsing HTML inside the <template>. -->
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="/foo.css" shadowroothtml="/foo.html"></template>
+  <template shadowrootmode="open" adoptedstylesheets="foo" shadowroothtml="/foo.html"></template>
 </my-element>
 ```
 
@@ -306,7 +407,7 @@ This approach could also be expanded to SVG modules, similar to the HTML Modules
 <!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by
 cloning the contents of the SVG module given by the "/foo.svg" specifier, instead of
 parsing SVG inside the <template>. -->
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="/foo.css" shadowroothtml="/foo.html"></template>
+  <template shadowrootmode="open" adoptedstylesheets="/foo.css" shadowroothtml="/foo.html"></template>
 </my-element>
 ```
 SVG makes heavy use of IDREF's, for example `href` on `<use>` and SVG filters. Per existing Shadow DOM behavior, these IDREF's would be scoped per shadow root.
@@ -570,11 +671,11 @@ The following table compares pros and cons of the various proposals:
 | 5 | `adoptedstylesheets` attribute | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ No |
 
 ## Open issues
-* What happens if a `<template shadowrootadoptedstylesheets="">` references a specifier that was imported as a non-inline CSS module whose fetch hasn’t completed yet?
+* What happens if a `<template adoptedstylesheets="">` references a specifier that was imported as a non-inline CSS module whose fetch hasn’t completed yet?
 
   Leading idea: upon creation, the shadow root would contain an empty `CSSStyleSheet`, which is the `CSSStyleSheet` for the CSS module script. When the fetch is completed and the CSS module script is fully created, this `CSSStyleSheet` is populated. This would require some changes to how module creation works in the HTML spec.
 
-* What happens if a `<template shadowrootadoptedstylesheets="">` references a specifier that hasn't been imported or declared inline yet?
+* What happens if a `<template adoptedstylesheets="">` references a specifier that hasn't been imported or declared inline yet?
 
   The most conservative answer would be to not create the shadow root at all, which is also what happens if the `shadowrootmode` attribute has an invalid value.
 * Render thread blocking – to avoid an FOUC, developers may want to block rendering until styles are available. There are many ways that this could be accomplished – for instance, `<link rel="..." blocking="render">`
