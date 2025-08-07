@@ -10,11 +10,11 @@ _Enabling web apps to provide context and tools that can be accessed from other 
 
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-**This document status**: Active
+**This document status**: **ARCHIVED**
 
-**Expected venue**: [W3C Web Incubation Working Group](https://wicg.io)
+**Current venue**: [Web Machine Learning Working Group](https://www.w3.org/groups/wg/webmachinelearning/) | [webmachinelearning/webmodelcontext](https://github.com/webmachinelearning/webmodelcontext) | ![GitHub issues](https://img.shields.io/github/issues/webmachinelearning/webmodelcontext)
 
-**Current version**: [This document](./explainer.md)
+**Current version**: [Web Model Context API explainer](https://github.com/webmachinelearning/webmodelcontext/blob/main/docs/explainer.md)
 
 ## TL:DR;
 
