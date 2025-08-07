@@ -5,7 +5,7 @@
 ## Authors:
 - [Utkarsh Pathak](https://github.com/utpathak)
 - [Abhishek Singh](https://github.com/abhishek06020)
-- [Tanu Jain](https://github.com/tanujain_microsoft)
+- [Tanu Jain](https://github.com/tanu18)
 - [Rakesh Goulikar](https://github.com/ragoulik)
 
 ## Participate
