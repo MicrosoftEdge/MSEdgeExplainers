@@ -8,7 +8,7 @@ proposal](https://github.com/w3c/csswg-drafts/issues/8930))
 
 ## Participate
 
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSTooltipPseudo)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/TooltipPseudo)
 - [CSSWG Github Proposal](https://github.com/w3c/csswg-drafts/issues/8930)
 
 ## Status of this Document
@@ -37,7 +37,7 @@ content location of future work and discussions.
 - [Existing and upcoming tools available for custom tooltips](#existing-and-upcoming-tools-available-for-custom-tooltips)
   - [Use an existing library or component](#use-an-existing-library-or-component)
   - [Create a fully custom tooltip](#create-a-fully-custom-tooltip)
-    - [Utilize `popover`, CSS anchor positioning, and/or `interesttarget`](#utilize-popover-css-anchor-positioning-andor-interesttarget)
+    - [Utilize `popover`, CSS anchor positioning, and/or `interestfor`](#utilize-popover-css-anchor-positioning-andor-interestfor)
 - [Current landscape of built-in tooltips](#current-landscape-of-built-in-tooltips)
   - [Simple tooltips across browsers](#simple-tooltips-across-browsers)
     - [Chromium](#chromium)
@@ -75,7 +75,7 @@ content location of future work and discussions.
   - [Customizing `::tooltip` user interactions](#customizing-tooltip-user-interactions)
   - [CSS Anchor Positioning tooltip defaults](#css-anchor-positioning-tooltip-defaults)
 - [Considered alternatives](#considered-alternatives)
-  - [Alternative 1: The `interesttarget` attribute](#alternative-1-the-interesttarget-attribute)
+  - [Alternative 1: The `interestfor` attribute](#alternative-1-the-interestfor-attribute)
 - [References & acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -122,7 +122,7 @@ on the same OS, ensuring an interoperable experience for authors.
 
 * This proposal is not meant to support tooltips with arbitrary HTML content, which
 can be covered by existing solutions, like `popover`, CSS Anchor positioning, and
-the not-yet-available `interesttarget` attribute.
+the not-yet-available `interestfor` attribute.
 * Provide a means to set a [pointer](#tooltip-pointerarrow) on the `title` based
 tooltip. The solution should be specified to allow for this functionality in
 the future, though.
@@ -182,7 +182,7 @@ pseudos, which can make getting accessibility correct quite difficult.
 As such, this solution requires a lot of work to get right, especially if all they
 want to do is adjust a few simple styles on the built-in tooltip.
 
-#### Utilize `popover`, CSS anchor positioning, and/or `interesttarget`
+#### Utilize `popover`, CSS anchor positioning, and/or `interestfor`
 
 Although creating a custom tooltip can be cumbersome for an author who is looking
 to just adjust a few simple styles, they do have some new (and upcoming) web
@@ -196,18 +196,18 @@ easily:
   - [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position-1/),
     which is not yet baseline, but is part of the [Interop 2025 effort](
     https://github.com/web-platform-tests/interop/blob/main/2025/README.md#css-anchor-positioning).
-  - The [`interesttarget`](
+  - The [`interestfor`](
     https://open-ui.org/components/interest-invokers.explainer/#keyboard) attribute,
     which is currently being investigated, with a prototype already in working
     shape in Chromium.
 
-One benefit that authors get with `interesttarget` over the other existing solutions
+One benefit that authors get with `interestfor` over the other existing solutions
 is that it creates a more accessible experience out-of-the-box and handles input
 handling for the author, creating a more seamless approach than is available with
 the `popover`attribute on its own. It is also a great solution if an author wants
 custom HTML within their tooltip, as opposed to simple textual content.
 
-However, `interesttarget` does have some limitations. Currently, `interesttarget`
+However, `interestfor` does have some limitations. Currently, `interestfor`
 is only allowed on buttons and links, which is more limited than the `title`
 attribute.
 _____________________________
@@ -257,7 +257,9 @@ following result:
 ![Screenshot of tooltip in Chromium on Mac](
 images/simple-button-chromium-mac.png)
 
-On mobile, tooltips are not activatable in Chromium.
+On mobile, tooltips are not activatable in Chromium, with the
+exception of tooltips on an image, which do appear in the context
+menu upon long press on Android.
 
 #### Gecko
 
@@ -285,7 +287,9 @@ result:
 ![Screenshot of tooltip in Gecko on Mac](
 images/simple-button-firefox-mac.png)
 
-On mobile, tooltips are not activatable in Gecko.
+On mobile, tooltips are not activatable in Gecko, with the
+exception of tooltips on an image, which do appear in the context
+menu upon long press.
 
 #### Webkit
 
@@ -299,7 +303,9 @@ similarly to Chromium and Firefox on MacOS.
 ![Screenshot of tooltip in Webkit on Mac](
 images/simple-button-webkit-mac.png)
 
-On mobile, tooltips are not activatable in Webkit.
+On mobile, tooltips are not activatable in Webkit, with the
+exception of tooltips on an image, which do appear in the context
+menu upon long press.
 
 ### Longer tooltips across browsers
 
@@ -474,7 +480,11 @@ This proposal sizes the default `::tooltip`-based tooltip according to
 default sizing definitions (where the size of the tooltip is based on
 the size of its content.) This also means that the tooltip will be
 constrained by the viewport in the inline direction, but may overflow
-the viewport in the block direction, if too large.
+the viewport in the block direction, if too large, as depicted in
+the image, below.
+
+![Screenshot of a tooltip with base tooltip pseudo styling overflowing
+the viewport in the block direction](images/tooltip-overflow.png)
 
 We could instead consider whether the default tooltip in this case should
 have a non-default sizing definition. For example, the width of the
@@ -523,11 +533,11 @@ These proposed set of initial UA styles is a starting point and is
 open to further discussion.
 
 To see some of these styles in action, check out the [CodePen demo](
-https://codepen.io/alisonmaher/pen/MYYxpJZ) utilizing `interesttarget`
+https://codepen.io/alisonmaher/pen/MYYxpJZ) utilizing `interestfor`
 to render the tooltip. You'll note that this requires some changes
 to the styles above (notably, this doesn't include the defined
 `transition` and sets `margin` to `0` to account for the default
-`popover` styles). Since this is based on `interesttarget`, at the
+`popover` styles). Since this is based on `interestfor`, at the
 time of writing, this demo is required to be tested in a Chromium-based
 browser with [Web Platform Experimental features flag](
 chrome://flags/#enable-experimental-web-platform-features) enabled.
@@ -547,7 +557,9 @@ properties should be styleable within a `::tooltip` pseudo element.
 As such, the complete list of properties is up for discussion, but
 as the proposal notes, the core set of properties should include:
 - `content` for setting the text displayed in the tooltip (whether
-authors should be allowed to change this is up for debate)
+authors should be allowed to change this is up for debate, as it
+may have some accessibility implications if the tooltip and `title`
+have different text)
 - `appearance` as a means to trigger new default tooltip styles
 - All font properties, `text-transform`, `letter-spacing`,
 `word-spacing`, and the i18n text properties
@@ -602,9 +614,9 @@ Currently, browsers show `title`-based tooltips when a user hovers
 over the element associated with the tooltip.
 
 No major browser engine appears to currently support touch interactions
-for these built-in tooltips, but this should be something for browser
-vendors to consider along with support for `::tooltip`, similar to
-what is [proposed with `interesttarget`](
+for these built-in tooltips, except for tooltips on images. However, this should
+be something for browser vendors to consider along with support for
+`::tooltip`, similar to what is [proposed with `interestfor`](
 https://open-ui.org/components/interest-invokers.explainer/#hids-and-interest).
 
 All browsers, except Microsoft Edge, also do not invoke the `title`-based
@@ -625,7 +637,7 @@ baseline, but it is part of [Interop 2025](
 https://github.com/web-platform-tests/interop/blob/main/2025/README.md#css-anchor-positioning).
 
 There is also a thought on whether `::tooltip` should be defined to be
-based on `interesttarget`, given there is an overlap between the two
+based on `interestfor`, given there is an overlap between the two
 features. However, this is something that should likely be left up to the
 UA on the technology involved in rendering their tooltips, as long as
 the base set of styles and specified interactions are met.
@@ -724,9 +736,10 @@ utilizing `content: none` as follows:
 ```
 
 Whether authors should be able to change the `content` of these tooltips
-is still an open question. If we decide that is not allowed, this would
-require a different mechanism (like utilizing `visibility`) if we want
-to support this use case for authors.
+is still an open question. There may be accessibility implications with
+allowing the tooltip text to be different than the `title`. If we decide
+that is not allowed, this would require a different mechanism (like
+utilizing `visibility`) if we want to support this use case for authors.
 
 ### Scenario 5: Providing custom positioning to a tooltip
 
@@ -751,8 +764,8 @@ accessible, and per guidance should also be dismissible.
 
 ### What is the current accessibility experience of tooltips across browsers?
 
-Unlike [`interesttarget`](
-https://open-ui.org/components/interest-invokers.explainer/#why-is-interesttarget-not-unlimited-like-title-is),
+Unlike [`interestfor`](
+https://open-ui.org/components/interest-invokers.explainer/#why-is-interestfor-not-unlimited-like-title-is),
 the `title` attribute is allowed on any element, even if that element
 isn't interactable. This can pose problems for accessiblity, because
 if the element isn't focusable, it means that the associated tooltip
@@ -835,7 +848,7 @@ this proposal.
 
 - [What styles should be allowed within the `::tooltip` pseudo
 element?](https://github.com/w3c/csswg-drafts/issues/9447)
-- Should `::tooltip` be based on `interesttarget` or should that
+- Should `::tooltip` be based on `interestfor` or should that
 detail be left up to the UA?
 - Should we consider another method for triggering `::tooltip` and its
 base styles than the `appearance` property?
@@ -849,7 +862,7 @@ sizing properties?
 - What are the right default UA styles for `::tooltip`?
 - Does it make sense for `::tooltip` to be a [Tree-Abiding
 Pseudo-element](https://drafts.csswg.org/css-pseudo/#treelike)?
-- How should `::tooltip` interact with `interesttarget` and any other
+- How should `::tooltip` interact with `interestfor` and any other
 `popover` on the same element?
 - Are there other ways we improve the current accessibility landscape
 of the `title` attribute?
@@ -895,7 +908,7 @@ in future versions of the feature.
 ### CSS Anchor Positioning tooltip defaults
 
 If an author would like to produce consistent positioning that is acheived
-with `::tooltip` when creating fully custom tooltips via `interesttarget` or other
+with `::tooltip` when creating fully custom tooltips via `interestfor` or other
 methods, we may want to consider adding new keywords to CSS Anchor Positioning
 properties for the default behavior defined for `::tooltip` in the UA stylesheet.
 
@@ -904,14 +917,14 @@ as built-in tooltips.
 
 ## Considered alternatives
 
-### Alternative 1: The `interesttarget` attribute
+### Alternative 1: The `interestfor` attribute
 
-`interesttarget` is a great solution for authors when creating custom tooltips.
-However, if an author is only adjusting a few simple styles, `interesttarget` may
+`interestfor` is a great solution for authors when creating custom tooltips.
+However, if an author is only adjusting a few simple styles, `interestfor` may
 be a bit more cumbersome than utilizing the browser built-in tooltips and adjusting
 such styles in CSS.
 
-`interesttarget` is also limited to links and buttons, although this restriction
+`interestfor` is also limited to links and buttons, although this restriction
 could be expanded in the future.
 
 ## References & acknowledgements

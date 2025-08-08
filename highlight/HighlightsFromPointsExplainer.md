@@ -1,8 +1,8 @@
 # HighlightsFromPoint API Explainer
 
-Authors: [Stephanie Zhang](https://github.com/stephanieyzhang), [Sanket Joshi](https://github.com/sanketj), [Fernando Fiori](https://github.com/ffiori)
+Authors: [Stephanie Zhang](https://github.com/stephanieyzhang), [Fernando Fiori](https://github.com/ffiori)
 
-Previous authors: [Dan Clark](https://github.com/dandclark), [Luis Sánchez Padilla](https://github.com/luisjuansp)
+Previous authors: [Dan Clark](https://github.com/dandclark), [Luis Sánchez Padilla](https://github.com/luisjuansp), [Sanket Joshi](https://github.com/sanketj)
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -16,19 +16,19 @@ This document is intended as a starting point for engaging the community and sta
 These use cases require that the users not only be able to see the highlighted portion of the document, but have the ability to interact with it.
 
 Here are some inspirational examples of how users may interact with highlighted ranges:
- - When a user clicks on content that a different user has selected or is editing, display some information about the user currently working on that content.
+ - When a user clicks on a misspelled word, the web app may display UI with suggested replacement text.
+ - When a user hovers over content that a different user has selected or is editing, display some information about the user currently working on that content.
  - When a user clicks a highlighted result from find-on-page, the selection may be moved to cover the result so that it can be copied or edited easily.
- - When a user hovers over a misspelled word, the web app may display UI with suggested replacement text.
  - When a user clicks an annotation in a document, the web app may emphasize and scroll into view the corresponding annotation in a pane which lists all the annotations in the document.
 
 Currently, web developers who want to implement some sort of interaction with custom highlights need to use workarounds that are cumbersome to code and maintain and that potentially incur performance penalties.
 
 ## Customer Problem Example
 
-For example, let's have a deeper look at the case of online collaboration mentioned above where it's needed to show the name of the user who is selecting some piece of text upon clicking on it.
-This could look as follows, where the chunks of text each user selected are highlighted with a different color and a tooltip is shown:
+For example, let's have a deeper look at the case of spellchecking mentioned above where it's needed to show a text replacement suggestion when the user clicks on some misspelled word.
+This could look as follows, where the misspelled word that is clicked changes its background color and a tooltip is shown with a text suggestion:
 
-![online-collaboration-example](example-text-editor-online-collaboration.gif)
+![spellcheck-example](example-spellchecker.gif)
 
 In the [Appendix](#example-code-without-highlightsfrompoint) there is a full example of code showing how this could be achieved with custom highlights, but let's focus on the section where the event listeners are added:
 
@@ -43,17 +43,21 @@ function isPointInsideDOMRect(x, y, rect) {
 function createActiveHighlights(x, y) {
     resetActiveHighlights();
     for (highlight of CSS.highlights.values()) {
-        let username = highlightToUsername.get(highlight);
-        if (username != undefined) {
-            for (highlightAbstractRange of highlight.values()) {
-                let range = new Range();
-                range.setStart(highlightAbstractRange.startContainer, highlightAbstractRange.startOffset);
-                range.setEnd(highlightAbstractRange.endContainer, highlightAbstractRange.endOffset);
-                for (rect of range.getClientRects()) {
-                    if (isPointInsideDOMRect(x, y, rect)) {
-                        setActiveHighlight(highlight, username, x, y);
-                    }
+        for (highlightAbstractRange of highlight.values()) {
+            // Need to create a Range for getClientRects() because it can be a StaticRange.
+            let range = new Range();
+            range.setStart(highlightAbstractRange.startContainer, highlightAbstractRange.startOffset);
+            range.setEnd(highlightAbstractRange.endContainer, highlightAbstractRange.endOffset);
+            let rangeIsHit = false;
+            for (rect of range.getClientRects()) {
+                if (isPointInsideDOMRect(x, y, rect)) {
+                    setActiveHighlight(highlight, highlightAbstractRange, x, y);
+                    rangeIsHit = true;
+                    break;
                 }
+            }
+            if (rangeIsHit) {
+                break;
             }
         }
     }
@@ -83,31 +87,28 @@ The `highlightsFromPoint()` API aims to provide a robust mechanism for identifyi
 Some considerations about it:
 
 - **Multiple Overlapping Highlights**: When multiple highlights overlap from different features (e.g., a spell-checker and a find-on-page feature), it's crucial to identify all highlights at a specific point. This ensures that all relevant highlights are accurately identified, enabling web developers to handle overlapping highlights more effectively.
-- **Performance Optimization**: By providing a dedicated API for hit-testing highlights, the method can optimize performance. Instead of relying on more complex and potentially slower methods to determine which highlights are under a specific point, this method offers a streamlined and efficient way to perform this task, improving overall performance (refer to the [Performance Analysis](#performance-analysis) in the Appendix for more details on an example).
+- **Performance Optimization**: By providing a dedicated API for hit-testing highlights, the method can optimize performance. Instead of relying on more complex and potentially slower implementations to determine which highlights are under a specific point, this method offers a streamlined and efficient way to perform this task, improving overall performance by avoiding significant Javascript overhead computation (refer to the [Performance Analysis](#performance-analysis) in the Appendix for more details on an example).
 - **Shadow DOM Handling**: Highlights within shadow DOMs require special handling to maintain encapsulation. The method can be designed to respect shadow DOM boundaries, ensuring highlights inside shadows are managed correctly. This helps maintain the integrity of the shadow DOM while still allowing highlights to be identified and interacted with.
 
-The `highlightsFromPoint()` method proposed would be part of the `CSS.highlights` interface. It would return a sequence of highlights at a specified point, ordered by [priority](https://drafts.csswg.org/css-highlight-api-1/#priorities). The developer has the option to pass in `options`, which is an optional dictionary where the key maps to an array of `ShadowRoot` objects. The API can search for and return highlights within the provided shadow DOM. The approach of passing an `options` parameter of `ShadowRoot` object is similar to the [caretPositionFromPoint()](https://drafts.csswg.org/cssom-view/#dom-document-caretpositionfrompoint) and [getHTML()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml) methods. 
+The `highlightsFromPoint()` method proposed would be part of the `CSS.highlights` interface. It would return a sequence of highlights at a specified point with their corresponding ranges that are hit, ordered by [priority](https://drafts.csswg.org/css-highlight-api-1/#priorities). The returned objects would be dictionaries that contain one highlight and a non-empty sequence of ranges each.
+The developer has the possibility to pass in `options`, which is an optional dictionary where the key maps to an array of `ShadowRoot` objects. The API can search for and return highlights within the provided shadow DOM. The approach of passing an `options` parameter of `ShadowRoot` object is similar to the [caretPositionFromPoint()](https://drafts.csswg.org/cssom-view/#dom-document-caretpositionfrompoint) and [getHTML()](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml) methods. 
 
 ### Customer Problem Example Using highlightsFromPoint
 
-Now going back to the text editor online collaboration example discussed in [Customer Problem Example](#customer-problem-example) section, let's see how `createActiveHighlights` could be implemented using the proposed API:
+Now going back to the spellcheck example discussed in [Customer Problem Example](#customer-problem-example) section, let's see how `createActiveHighlights` could be implemented using the proposed API:
 
 ```html
 function createActiveHighlights(x, y) {
     resetActiveHighlights();
-    let highlights = CSS.highlights.highlightsFromPoint(event.clientX, event.clientY);
-    for (highlight of highlights) {
-        let username = highlightToUsername.get(highlight);
-        if (username != undefined) {
-            setActiveHighlight(highlight, username, x, y);
-        }
+    for (highlightHitResult of CSS.highlights.highlightsFromPoint(x, y)) {
+        setActiveHighlight(highlightHitResult.highlight, highlightHitResult.ranges[0], x, y);
     }
 }
 ```
 
 This piece of code is significantly smaller and simpler than the solution that was shown in the previous section without `highlightsFromPoint`. More specifically:
-- There's no need to iterate over all the ranges of the highlights registered anymore, now `highlightsFromPoint` gives us only the highlights that are under the point `(x,y)`.
-- There's no need to deal with ranges and rectangles anymore because that's handled by the API.
+- There's no need to iterate over all the ranges of the highlights registered anymore, now `highlightsFromPoint` gives us only the highlights and ranges that are under the point `(x,y)`. Note that in this particular example we know that if a highlight is hit, there's only one range that was hit because there's no overlapping ranges in the spellchecker.
+- There's no need to deal with creating new `Ranges` and rectangles anymore because that's handled by the API.
 
 You can refer to a full implementation in the [Appendix](#example-code-using-highlightsfrompoint).
 
@@ -130,7 +131,7 @@ for (highlight of highlightToUsername.keys()) {
             resetActiveHighlights();
             highlightsHit = true;
         }
-        createActiveHighlight(event.currentTarget, event.pageX, event.pageY);
+        createActiveHighlight(event.currentTarget, event.ranges[0], event.pageX, event.pageY);
     });
 }
 
@@ -165,19 +166,16 @@ We can conclude the `highlightsFromPoint()` API proposed in this explainer is si
 
 ### Promise-based API
 
-Another asynchronous variation for `highlightsFromPoint` could be returning a [Promise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-objects), which returns the highlights present at the given point upon resolving.
+Another asynchronous variation for `highlightsFromPoint` could be returning a [Promise](https://tc39.es/ecma262/multipage/control-abstraction-objects.html#sec-promise-objects), which returns the highlights and their ranges present at the given point upon resolving.
 This is some example code for how to implement the online collaboration website with it:
 
 ```html
 function createActiveHighlights(x, y) {
     let highlightsPromise = CSS.highlights.highlightsFromPoint(event.clientX, event.clientY);
-    highlightsPromise.then((highlights) => {
+    highlightsPromise.then((highlightHitResults) => {
         resetActiveHighlights();
-        for (highlight of highlights) {
-            let username = highlightToUsername.get(highlight);
-            if (username != undefined) {
-                setActiveHighlight(highlight, username, x, y);
-            }
+        for (result of highlightHitResults) {
+            setActiveHighlight(result.highlight, result.ranges[0], x, y);
         }
     });
     return highlightsPromise;
@@ -201,6 +199,7 @@ The API introduces no new security risks.
 ## Relevant Discussions
   1. [[css-highlight-api] Approaches for dispatching highlight pointer events · Issue #7513 · w3c/csswg-drafts (github.com)](https://github.com/w3c/csswg-drafts/issues/7513)
   2. [[css-highlight-api] Exposing shadow DOM highlights in highlightsFromPoint() · Issue #7766 · w3c/csswg-drafts (github.com)](https://github.com/w3c/csswg-drafts/issues/7766)
+  3. [[css-highlight-api] Should highlightsFromPoint also return ranges under the hit point? · Issue #12031 · w3c/csswg-drafts (github.com)](https://github.com/w3c/csswg-drafts/issues/12031)
 
   ---
   [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/highlightsFromPoint) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=highlightsfrompoint.md)
@@ -210,19 +209,23 @@ The API introduces no new security risks.
 ### highlightsFromPoint IDL Proposed
 
 ```html
-interface HighlightRegistry {
-  // Returned values in priority order.
-  sequence<Highlight> highlightsFromPoint(float x, float y, optional HighlightsFromPointOptions options = {});
+partial interface HighlightRegistry {
+	sequence<HighlightHitResult> highlightsFromPoint(float x, float y, optional HighlightsFromPointOptions options = {});
+};
+
+dictionary HighlightHitResult {
+	Highlight highlight;
+	sequence<AbstractRange> ranges;
 };
 
 dictionary HighlightsFromPointOptions {
-  sequence<ShadowRoot> shadowRoots = [];
+	sequence<ShadowRoot> shadowRoots = [];
 };
 ```
 
 ### Example Code Without highlightsFromPoint
 
-This is the full implementation for the text editor online collaboration example mentioned in [Customer Problem Example](#customer-problem-example) section. This is one way the code for it could be written nowadays without highlightsFromPoint API.
+This is the full implementation for the spellcheck example mentioned in [Customer Problem Example](#customer-problem-example) section. This is one way the code for it could be written nowadays without highlightsFromPoint API.
 
 ```html
 <!DOCTYPE html>
@@ -233,17 +236,23 @@ This is the full implementation for the text editor online collaboration example
         padding: 20px;
         font-size: 22px;
     }
-    div::highlight(selection-highlight-Alice) {
-        background-color: rgba(0, 255, 0, 0.3);
+    div::highlight(spellcheck-highlight) {
+        text-decoration-color: red;
+        text-decoration-style: wavy;
+        text-decoration-line: underline;
+        text-decoration-thickness: 0.5px;
     }
-    div::highlight(selection-highlight-Bob) {
-        background-color: rgba(0, 255, 255, 0.3);
+    div::highlight(active-spellcheck-highlight) {
+        background-color: rgba(255, 48, 0, 0.25);
     }
-    div::highlight(active-selection-highlight-Alice) {
-        background-color: rgba(0, 255, 0, 1);
+    div::highlight(grammar-highlight) {
+        text-decoration-color: blue;
+        text-decoration-style: double;
+        text-decoration-line: underline;
+        text-decoration-thickness: 0.3px;
     }
-    div::highlight(active-selection-highlight-Bob) {
-        background-color: rgba(0, 255, 255, 1);
+    div::highlight(active-grammar-highlight) {
+        background-color: rgba(0, 85, 204, 0.25);
     }
     #cursorBox {
         position: absolute;
@@ -256,50 +265,68 @@ This is the full implementation for the text editor online collaboration example
 </style>
 </head>
 <body>
-<div contenteditable="true" spellcheck="false">
-This is an example for using custom highlights in online collaboration.</br>
-This simulates a text document that Alice and Bob are editing, besides you, the user seeing this.</br>
-This is some text that Alice selected on her text editor session.</br>
-This whole sentence is what Bob has selected on his.</br>
+<div id="text" contenteditable="true" spellcheck="false">
+Tihs is a misspelled word.</br>
+This textt has more spellin errors and one grammar errors.</br>
 </br>
-Clicking on those highlighted pieces of text shows which user selected them and intensifies the background color.</br> 
+Clicking on the underlined words suggests a possible replacement and intensifies the background color.</br> 
 </div>
 <div id="cursorBox"></div>
 <script>
     let cursorBox = document.getElementById('cursorBox');
-    let div = document.querySelector('div');
-    let aliceTextNode = div.childNodes[4];
-    let aliceRange = new StaticRange({startContainer: aliceTextNode, startOffset: 0, endContainer: aliceTextNode, endOffset: 18});
-    let bobTextNode = div.childNodes[6];
-    let bobRange = new StaticRange({startContainer: bobTextNode, startOffset: 0, endContainer: bobTextNode, endOffset: bobTextNode.textContent.length});
+    let textNode = document.getElementById('text');
+    let spellingRanges = [
+        new StaticRange({startContainer: textNode.childNodes[0], startOffset: 1, endContainer: textNode.childNodes[0], endOffset: 5}),
+        new StaticRange({startContainer: textNode.childNodes[2], startOffset: 6, endContainer: textNode.childNodes[2], endOffset: 11}),
+        new StaticRange({startContainer: textNode.childNodes[2], startOffset: 21, endContainer: textNode.childNodes[2], endOffset: 28})
+    ];
+    let spellingHighlight = new Highlight(...spellingRanges);
+    CSS.highlights.set('spellcheck-highlight', spellingHighlight);
+    let grammarRanges = [
+        new StaticRange({startContainer: textNode.childNodes[2], startOffset: 52, endContainer: textNode.childNodes[2], endOffset: 58})
+    ];
+    let grammarHighlight = new Highlight(...grammarRanges);
+    CSS.highlights.set('grammar-highlight', grammarHighlight);
 
-    let aliceHighlightName = 'selection-highlight-Alice';
-    let aliceHighlight = new Highlight(aliceRange);
-    let aliceActiveHighlight = new Highlight(aliceRange);
-    CSS.highlights.set(aliceHighlightName, aliceHighlight);
-    let bobHighlightName = 'selection-highlight-Bob';
-    let bobHighlight = new Highlight(bobRange);
-    let bobActiveHighlight = new Highlight(bobRange);
-    CSS.highlights.set(bobHighlightName, bobHighlight);
+    let spellingHighlightActive = new Highlight();
+    CSS.highlights.set('active-spellcheck-highlight', spellingHighlightActive);
+    let grammarHighlightActive = new Highlight();
+    CSS.highlights.set('active-grammar-highlight', grammarHighlightActive);
 
-    let highlightToUsername = new Map([
-        [aliceHighlight, "Alice"],
-        [bobHighlight, "Bob"]
+    let highlightToActiveHighlight = new Map([
+        [spellingHighlight, spellingHighlightActive],
+        [grammarHighlight, grammarHighlightActive]
+    ]);
+
+    let spellcheckerSuggestion = new Map([
+        ["Tihs", "This"],
+        ["textt", "text"],
+        ["spellin", "spelling"],
+        ["errors", "error"]
     ]);
 
     function resetActiveHighlights() {
-        for (username of highlightToUsername.values()) {
-            let activeHighlightName = 'active-selection-highlight-' + username;
-            CSS.highlights.delete(activeHighlightName);
-        }
+        spellingHighlightActive.clear();
+        grammarHighlightActive.clear();
         cursorBox.style.display = 'none';
         cursorBox.textContent = '';
     }
 
-    function setActiveHighlight(highlight, username, x, y) {
-        let activeHighlightName = 'active-selection-highlight-' + username;
-        CSS.highlights.set(activeHighlightName, highlight);
-        cursorBox.textContent += (cursorBox.textContent.length ? ', ' : '') + username;
+    function getTextFromAbstractRange(abstractRange) {
+        let range = new Range();
+        range.setStart(abstractRange.startContainer, abstractRange.startOffset);
+        range.setEnd(abstractRange.endContainer, abstractRange.endOffset);
+        return range.toString();
+    }
+
+    function setActiveHighlight(highlight, range, x, y) {
+        let activeHighlight = highlightToActiveHighlight.get(highlight);
+        if (activeHighlight == undefined) {
+            return;
+        }
+    
+        activeHighlight.add(range);
+        cursorBox.textContent = spellcheckerSuggestion.get(getTextFromAbstractRange(range));
         cursorBox.style.display = 'block';
         cursorBox.style.left = (x + 2) + 'px';
         cursorBox.style.top = (y - cursorBox.getBoundingClientRect().height - 6) + 'px';
@@ -315,24 +342,21 @@ Clicking on those highlighted pieces of text shows which user selected them and 
     function createActiveHighlights(x, y) {
         resetActiveHighlights();
         for (highlight of CSS.highlights.values()) {
-            let username = highlightToUsername.get(highlight);
-            if (username != undefined) {
-                for (highlightAbstractRange of highlight.values()) {
-                    // Need to create a Range for getClientRects() because it can be a StaticRange.
-                    let range = new Range();
-                    range.setStart(highlightAbstractRange.startContainer, highlightAbstractRange.startOffset);
-                    range.setEnd(highlightAbstractRange.endContainer, highlightAbstractRange.endOffset);
-                    let rangeIsHit = false;
-                    for (rect of range.getClientRects()) {
-                        if (isPointInsideDOMRect(x, y, rect)) {
-                            setActiveHighlight(highlight, username, x, y);
-                            rangeIsHit = true;
-                            break;
-                        }
-                    }
-                    if (rangeIsHit) {
+            for (highlightAbstractRange of highlight.values()) {
+                // Need to create a Range for getClientRects() because it can be a StaticRange.
+                let range = new Range();
+                range.setStart(highlightAbstractRange.startContainer, highlightAbstractRange.startOffset);
+                range.setEnd(highlightAbstractRange.endContainer, highlightAbstractRange.endOffset);
+                let rangeIsHit = false;
+                for (rect of range.getClientRects()) {
+                    if (isPointInsideDOMRect(x, y, rect)) {
+                        setActiveHighlight(highlight, highlightAbstractRange, x, y);
+                        rangeIsHit = true;
                         break;
                     }
+                }
+                if (rangeIsHit) {
+                    break;
                 }
             }
         }
@@ -352,7 +376,7 @@ Clicking on those highlighted pieces of text shows which user selected them and 
 
 ### Example Code Using highlightsFromPoint
 
-This is the full implementation for the text editor online collaboration example mentioned in [Customer Problem Example](#customer-problem-example-using-highlightsfrompoint) section, using the new highlightsFromPoint API proposed.
+This is the full implementation for the spellcheck example mentioned in [Customer Problem Example](#customer-problem-example-using-highlightsfrompoint) section, using the new highlightsFromPoint API proposed.
 
 ```html
 <!DOCTYPE html>
@@ -363,18 +387,23 @@ This is the full implementation for the text editor online collaboration example
         padding: 20px;
         font-size: 22px;
     }
-    div::highlight(selection-highlight-Alice) {
-        background-color: rgba(0, 255, 0, 0.3);
-
+    div::highlight(spellcheck-highlight) {
+        text-decoration-color: red;
+        text-decoration-style: wavy;
+        text-decoration-line: underline;
+        text-decoration-thickness: 0.5px;
     }
-    div::highlight(selection-highlight-Bob) {
-        background-color: rgba(0, 255, 255, 0.3);
+    div::highlight(active-spellcheck-highlight) {
+        background-color: rgba(255, 48, 0, 0.25);
     }
-    div::highlight(active-selection-highlight-Alice) {
-        background-color: rgba(0, 255, 0, 1);
+    div::highlight(grammar-highlight) {
+        text-decoration-color: blue;
+        text-decoration-style: double;
+        text-decoration-line: underline;
+        text-decoration-thickness: 0.3px;
     }
-    div::highlight(active-selection-highlight-Bob) {
-        background-color: rgba(0, 255, 255, 1);
+    div::highlight(active-grammar-highlight) {
+        background-color: rgba(0, 85, 204, 0.25);
     }
     #cursorBox {
         position: absolute;
@@ -387,50 +416,68 @@ This is the full implementation for the text editor online collaboration example
 </style>
 </head>
 <body>
-<div contenteditable="true" spellcheck="false">
-This is an example for using custom highlights in online collaboration.</br>
-This simulates a text document that Alice and Bob are editing, besides you, the user seeing this.</br>
-This is some text that Alice selected on her text editor session.</br>
-This whole sentence is what Bob has selected on his.</br>
+<div id="text" contenteditable="true" spellcheck="false">
+Tihs is a misspelled word.</br>
+This textt has more spellin errors and one grammar errors.</br>
 </br>
-Clicking on those highlighted pieces of text shows which user selected them and intensifies the background color.</br> 
+Clicking on the underlined words suggests a possible replacement and intensifies the background color.</br> 
 </div>
 <div id="cursorBox"></div>
 <script>
     let cursorBox = document.getElementById('cursorBox');
-    let div = document.querySelector('div');
-    let aliceTextNode = div.childNodes[4];
-    let aliceRange = new StaticRange({startContainer: aliceTextNode, startOffset: 0, endContainer: aliceTextNode, endOffset: 18});
-    let bobTextNode = div.childNodes[6];
-    let bobRange = new StaticRange({startContainer: bobTextNode, startOffset: 0, endContainer: bobTextNode, endOffset: bobTextNode.textContent.length});
+    let textNode = document.getElementById('text');
+    let spellingRanges = [
+        new StaticRange({startContainer: textNode.childNodes[0], startOffset: 1, endContainer: textNode.childNodes[0], endOffset: 5}),
+        new StaticRange({startContainer: textNode.childNodes[2], startOffset: 6, endContainer: textNode.childNodes[2], endOffset: 11}),
+        new StaticRange({startContainer: textNode.childNodes[2], startOffset: 21, endContainer: textNode.childNodes[2], endOffset: 28})
+    ];
+    let spellingHighlight = new Highlight(...spellingRanges);
+    CSS.highlights.set('spellcheck-highlight', spellingHighlight);
+    let grammarRanges = [
+        new StaticRange({startContainer: textNode.childNodes[2], startOffset: 52, endContainer: textNode.childNodes[2], endOffset: 58})
+    ];
+    let grammarHighlight = new Highlight(...grammarRanges);
+    CSS.highlights.set('grammar-highlight', grammarHighlight);
 
-    let aliceHighlightName = 'selection-highlight-Alice';
-    let aliceHighlight = new Highlight(aliceRange);
-    let aliceActiveHighlight = new Highlight(aliceRange);
-    CSS.highlights.set(aliceHighlightName, aliceHighlight);
-    let bobHighlightName = 'selection-highlight-Bob';
-    let bobHighlight = new Highlight(bobRange);
-    let bobActiveHighlight = new Highlight(bobRange);
-    CSS.highlights.set(bobHighlightName, bobHighlight);
+    let spellingHighlightActive = new Highlight();
+    CSS.highlights.set('active-spellcheck-highlight', spellingHighlightActive);
+    let grammarHighlightActive = new Highlight();
+    CSS.highlights.set('active-grammar-highlight', grammarHighlightActive);
 
-    let highlightToUsername = new Map([
-        [aliceHighlight, "Alice"],
-        [bobHighlight, "Bob"]
+    let highlightToActiveHighlight = new Map([
+        [spellingHighlight, spellingHighlightActive],
+        [grammarHighlight, grammarHighlightActive]
+    ]);
+
+    let spellcheckerSuggestion = new Map([
+        ["Tihs", "This"],
+        ["textt", "text"],
+        ["spellin", "spelling"],
+        ["errors", "error"]
     ]);
 
     function resetActiveHighlights() {
-        for (username of highlightToUsername.values()) {
-            let activeHighlightName = 'active-selection-highlight-' + username;
-            CSS.highlights.delete(activeHighlightName);
-        }
+        spellingHighlightActive.clear();
+        grammarHighlightActive.clear();
         cursorBox.style.display = 'none';
         cursorBox.textContent = '';
     }
 
-    function setActiveHighlight(highlight, username, x, y) {
-        let activeHighlightName = 'active-selection-highlight-' + username;
-        CSS.highlights.set(activeHighlightName, highlight);
-        cursorBox.textContent += (cursorBox.textContent.length ? ', ' : '') + username;
+    function getTextFromAbstractRange(abstractRange) {
+        let range = new Range();
+        range.setStart(abstractRange.startContainer, abstractRange.startOffset);
+        range.setEnd(abstractRange.endContainer, abstractRange.endOffset);
+        return range.toString();
+    }
+
+    function setActiveHighlight(highlight, range, x, y) {
+        let activeHighlight = highlightToActiveHighlight.get(highlight);
+        if (activeHighlight == undefined) {
+            return;
+        }
+    
+        activeHighlight.add(range);
+        cursorBox.textContent = spellcheckerSuggestion.get(getTextFromAbstractRange(range));
         cursorBox.style.display = 'block';
         cursorBox.style.left = (x + 2) + 'px';
         cursorBox.style.top = (y - cursorBox.getBoundingClientRect().height - 6) + 'px';
@@ -438,12 +485,8 @@ Clicking on those highlighted pieces of text shows which user selected them and 
 
     function createActiveHighlights(x, y) {
         resetActiveHighlights();
-        let highlights = CSS.highlights.highlightsFromPoint(x, y);
-        for (highlight of highlights) {
-            let username = highlightToUsername.get(highlight);
-            if (username != undefined) {
-                setActiveHighlight(highlight, username, x, y);
-            }
+        for (highlightHitResult of CSS.highlights.highlightsFromPoint(x, y)) {
+            setActiveHighlight(highlightHitResult.highlight, highlightHitResult.ranges[0], x, y);
         }
     }
 
@@ -461,7 +504,7 @@ Clicking on those highlighted pieces of text shows which user selected them and 
 
 ### Performance Analysis
 
-We compared the performance of the two approaches presented for the online collaboration example analyzed throughout this explainer: with and without the proposed `highlightsFromPoint` API.
+We compared the performance of the two approaches presented for the spellcheck example analyzed throughout this explainer: with and without the proposed `highlightsFromPoint` API.
 We compared how long it takes for the event listener added for `'click'` events to complete in both cases when it happens over a highlighted portion and when it happens over unaffected text. For this, we slightly modified the listener as shown below and also implemented a `testPerformance` function as follows, adding a hundred extra highlights to stress the test:
 
 ```html
@@ -482,58 +525,57 @@ function wait(ms) {
 async function testPerformance() {
     let mouseclickEvent = new Event('click');
     let highlightRange = new Range();
-    highlightRange.setStart(bobRange.startContainer, bobRange.startOffset);
-    highlightRange.setEnd(bobRange.endContainer, bobRange.endOffset);
+    highlightRange.setStart(textNode.childNodes[2], 21);
+    highlightRange.setEnd(textNode.childNodes[2], 28);
     let rangeRect = highlightRange.getClientRects()[0];
 
-    mouseclickEvent.pageX = rangeRect.left + rangeRect.width/2;
-    mouseclickEvent.pageY = rangeRect.top + rangeRect.height/2;
-
+    mouseclickEvent.pageX = rangeRect.left + rangeRect.width/2.0;
+    mouseclickEvent.pageY = rangeRect.top + rangeRect.height/2.0;
+    
     // Add more highlights to stress the test.
     for(let i=0; i<100; i++){
-        let h = new Highlight(bobRange);
+        let h = new Highlight(new StaticRange({startContainer: textNode.childNodes[0], startOffset: 1, endContainer: textNode.childNodes[0], endOffset: 5}));
         let name = "highlight-" + i;
         CSS.highlights.set(name, h);
-        highlightToUsername.set(h, name)
     }
 
     // First dispatches can be outliers.
     for(let i=0; i<100; i++){
-        div.dispatchEvent(mouseclickEvent);
+        document.dispatchEvent(mouseclickEvent);
     }
     await wait(100); 
     
-    // Measure the time it takes to process a click event on a highlight.
+    // Measure the time it takes to process a mouseclick event on a highlight.
     accumulatedTime = 0;
     eventsFired = 0;
     for(let i=0; i<1000; i++){
-        div.dispatchEvent(mouseclickEvent);
+        document.dispatchEvent(mouseclickEvent);
     }
     await wait(1000); 
-    console.log("Avg time it took to process a click event on a highlight (ms): " + (accumulatedTime/eventsFired));
+    console.log("Avg time it took to process a mouseclick event on a highlight: "+(accumulatedTime/eventsFired));
 
-    // Now measure the time it takes to process a click event on the div but outside of highlights.
+    // Now measure the time it takes to process a mouseclick event on the div but outside of highlights.
     mouseclickEvent.pageY = rangeRect.top - 1;
     accumulatedTime = 0;
     eventsFired = 0;
     for(let i=0; i<1000; i++){
-        div.dispatchEvent(mouseclickEvent);
+        document.dispatchEvent(mouseclickEvent);
     }
     await wait(1000); 
-    console.log("Avg time it took to process a click event outside of highlights (ms): " + (accumulatedTime/eventsFired));
+    console.log("Avg time it took to process a mouseclick event outside of highlights: "+(accumulatedTime/eventsFired));
 }
 
 testPerformance();
 ```
 
-After executing both examples, we got the following results showing a ~1.7x improvement on clicking over highlights and a ~18x improvement on clicking outside of any highlights when using `highlightsFromPoint`:
+After executing both examples, we got the following results showing a ~4.1x improvement on clicking over highlights and a ~3.8x improvement on clicking outside of any highlights when using `highlightsFromPoint`:
 
 - Using `highlightsFromPoint`:
-    - Average time it took to process a click event over highlights (ms): 7.689199999928475
-    - Average time it took to process a click event outside of highlights (ms): 0.023700000166893005
+    - Average time it took to process a click event over highlights (ms): 0.209
+    - Average time it took to process a click event outside of highlights (ms): 0.131
 
 - Not using `highlightsFromPoint`:
-    - Average time it took to process a click event over highlights (ms): 13.20869999974966
-    - Average time it took to process a click event outside of highlights (ms): 0.43030000013113023
+    - Average time it took to process a click event over highlights (ms): 0.868
+    - Average time it took to process a click event outside of highlights (ms): 0.497
 
-When the mouse click event happens outside of the higlights, the performance profiler from developer tools shows that `createActiveHighlights` takes more time dealing with the ranges and getting the rectangles compared to the version that uses `highlightsFromPoint`. And when the event happens on a highlight, the call to `highlightsFromPoint` takes less time than all the necessary calls to `getClientRects` that are fired in the version that doesn't use the new API. Both measurements indicate that using the new API gives a performance advantage by getting rid of all the Javascript overhead that the program requires when implementing this use case with the current APIs available.
+When the mouse click event happens outside of the higlights, the performance profiler from developer tools shows that `createActiveHighlights` takes more time dealing with the `Ranges` and getting the rectangles compared to the version that uses `highlightsFromPoint`. And when the event happens on a highlight, the call to `highlightsFromPoint` takes less time than all the necessary calls to `getClientRects` that are fired in the version that doesn't use the new API. Both measurements indicate that using the new API gives a performance advantage by getting rid of all the Javascript overhead that the program requires when implementing this use case with the current APIs available.

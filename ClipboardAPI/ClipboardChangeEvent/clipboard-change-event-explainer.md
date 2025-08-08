@@ -99,7 +99,7 @@ interface ClipboardChangeEvent : Event {
   function onClipboardChanged(event) {
     document.getElementById("text_paste_button").disabled = !(event.types.includes('text/plain'));
     document.getElementById("html_paste_button").disabled = !(event.types.includes('text/html'));
-    document.getElementById("png_paste_button").disabled = !(event.types.includes('img/png'));
+    document.getElementById("png_paste_button").disabled = !(event.types.includes('image/png'));
   }
 
   navigator.clipboard.addEventListener("clipboardchange", onClipboardChanged);

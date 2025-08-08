@@ -475,7 +475,9 @@ onmessage = (event) => {
 ```
 As shown, serialization on the main thread (approx. 130.30 ms) occurs synchronously during the `postMessage` call, blocking other main thread work. Similarly, deserialization on the worker thread (approx. 114.30 ms) is a significant operation that blocks the worker's event loop during message processing, delaying the execution of the `onmessage` handler and any subsequent tasks.
 
-In this example, the worker log `message queue wait time + etc: 130.40 ms` indicates the time elapsed from when the main thread initiated the `postMessage` (including its ~130.30 ms serialization block) to when the worker’s `onmessage` handler began execution. This suggests that the message queue wait time is nearly zero, and the delay is primarily caused by serialization on the sender side. However, the timing of deserialization, which the [specification](https://html.spec.whatwg.org/multipage/web-messaging.html#dom-window-postmessage-options-dev) suggests should occur before the message event, can vary across browsers. For example, browsers like Chromium, may delay this process until the message data is actually accessed for the first time. This inconsistency, combined with a busy event loop that makes it difficult to distinguish serialization, actual queueing, deserialization, and task execution delays even with manual instrumentation, further underscores the need for an API to expose this particular timing information.
+In this example, the worker log `message queue wait time + etc: 130.40 ms` indicates the time elapsed from when the main thread initiated the `postMessage` (including its ~130.30 ms serialization block) to when the worker’s `onmessage` handler began execution. This suggests that the message queue wait time is nearly zero, and the delay is primarily caused by serialization on the sender side. However, the cost of data handling is difficult to estimate because the size of the message payload can vary depending on the scenario.
+
+Another issus is that the timing of deserialization, which the [specification](https://html.spec.whatwg.org/multipage/web-messaging.html#dom-window-postmessage-options-dev) suggests should occur before the message event, can vary across browsers. For example, browsers like Chromium may delay this process until the message data is actually accessed for the first time. This inconsistency, combined with a busy event loop that makes it difficult to distinguish serialization, actual queueing, deserialization, and task execution delays even with manual instrumentation, further underscores the need for an API to expose this timing information.
 
 ### Summary of Problems
 
@@ -836,7 +838,7 @@ Thank you to Abhishek Shanthkumar, Alex Russell, Andy Luhrs, Dave Meyers, Ethan 
 
 # References
 - [Event Timing API](https://w3c.github.io/event-timing/)
-- [Extending Long Tasks API to Web Workers](https://github.com/joone/MSEdgeExplainers/blob/add_id_src_type/LongTasks/explainer.md)
+- [Extending Long Tasks API to Web Workers](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LongTasks/explainer.md)
 - https://developer.mozilla.org/en-US/docs/Web/API/PerformanceLongTaskTiming
 - https://developer.mozilla.org/en-US/docs/Web/API/PerformanceScriptTiming
 - https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent
