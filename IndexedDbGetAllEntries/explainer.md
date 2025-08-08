@@ -9,6 +9,13 @@
 - https://github.com/w3c/IndexedDB/issues/206
 - https://github.com/w3c/IndexedDB/issues/130
 
+## Status of this Document
+This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+
+* This document status: **Archived**
+* Expected venue: [W3C Web Applications Working Group](https://www.w3.org/groups/wg/webapps/)
+* Current version: this document
+
 ## Introduction
 
 [`IndexedDB`](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) is a transactional database for client-side storage. Each record in the database contains a key-value pair. [`getAll()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAll) enumerates database record values sorted by key in ascending order. [`getAllKeys()`](https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore/getAllKeys) enumerates database record primary keys sorted by key in ascending order.
