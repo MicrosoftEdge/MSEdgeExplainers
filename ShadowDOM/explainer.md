@@ -163,7 +163,7 @@ For additional use cases, please see issue [939](https://github.com/WICG/webcomp
 
 With Server-Side-Rendering (SSR), servers emit HTML markup to the client's web browser. When this markup is emitted as a stream, the full document's DOM structure may not have been determined ahead of time. Standard DOM scoping
 behaves such that Shadow DOM nodes can only access identifiers in their own shadow root and in the light DOM. This situation makes it impossible to share styles between shadow roots, leading to duplication of style rules and markup.
-This dupliction is especially painful for SSR scenarios, which are typically heavily optimized for performance.
+This duplication is especially painful for SSR scenarios, which are typically heavily optimized for performance.
 
 The proposed global scope for declarative CSS Modules is essential to this scenario because it allows nested shadow roots to share a global set of styles. Standard DOM scoping rules would not work here, as demonstrated by the following example:
 
@@ -298,7 +298,7 @@ While this approach doesn't map as closely to the existing `adoptedStyleSheets` 
 
 The `adoptedstylesheets` attribute as specified accepts a list a stylesheets. Multiple stylesheets can be added to a shadow root's adoped stylesheet list with the `<link>` proposal by including multiple `<link>` tags.
 
-Looking forward, the `<link>` approach directyly compatible with the proposed CSS `@sheet` feature, which allows a single CSS file to contain multiple stylesheets. This allows developers to specify a single named stylesheet that is applied from the CSS definition, rather than applying the global contents of the entire sheet.
+Looking forward, the `<link>` approach directly compatible with the proposed CSS `@sheet` feature, which allows a single CSS file to contain multiple stylesheets. This allows developers to specify a single named stylesheet that is applied from the CSS definition, rather than applying the global contents of the entire sheet.
 
 ### Detailed Parsing Workflow
 
@@ -395,7 +395,7 @@ shadowRoot.adoptedStyleSheets = [sheet];
 
 The important factor for this scenario is that the `specifier` attribute on the `<style>` tag is explicitly *not* a URL, it is a [DOMString](https://webidl.spec.whatwg.org/#idl-DOMString) that is not [treated as a URL](https://html.spec.whatwg.org/#treated-as-a-url). This allows for disambiguating between a URL that gets fetched in this scenario or a Declarative CSS Module that is synchronously queried from the module map.
 
-If a module is imported imperatively in this fashon and the Declarative CSS Module is not in the [module map](https://html.spec.whatwg.org/#module-map), the import fails, even if it is added declaratively at a later time.
+If a module is imported imperatively in this fashion and the Declarative CSS Module is not in the [module map](https://html.spec.whatwg.org/#module-map), the import fails, even if it is added declaratively at a later time.
 
 ### Use with Import Maps
 
@@ -423,7 +423,7 @@ For example, given the following HTML:
 </my-element>
 ```
 
-The style rules from the Declarative CSS Module would first be inserted into the module map with a specifer of "foo". The import map would then be processed, but since "foo" is not a valid URL, the module specifier map is invalid. When the `<template>` element's `adoptedstylesheets` property is evaluated, the import map does not apply, and thus the `<template>` element's specified `adoptedstylesheets` of "bar" is not located.
+The style rules from the Declarative CSS Module would first be inserted into the module map with a specifier of "foo". The import map would then be processed, but since "foo" is not a valid URL, the module specifier map is invalid. When the `<template>` element's `adoptedstylesheets` property is evaluated, the import map does not apply, and thus the `<template>` element's specified `adoptedstylesheets` of "bar" is not located.
 
 ## Other declarative modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
