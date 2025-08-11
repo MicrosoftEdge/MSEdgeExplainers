@@ -20,7 +20,7 @@ Background information about `PerformanceResourceTiming` can be found [here](htt
 Increasing the speed of content delivery significantly enhances user experience by minimizing delays and frustrations associated with slow-loading
 websites; and data compression plays a vital role in increasing content delivery speed. For the purpose of implementing data compression,
  [Content-Encoding](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Encoding) has been a very popular tool. It's widely
- supported and it's a foundation of some advanced compression mechanism like [Compression Dictionary Transport](https://www.ietf.org/archive/id/draft-ietf-httpbis-compression-dictionary-19.html).
+ supported and it's a foundation of some advanced compression mechanisms like [Compression Dictionary Transport](https://www.ietf.org/archive/id/draft-ietf-httpbis-compression-dictionary-19.html).
 
 When web sites use `Content-Encoding` to optimize content delivery, often they rely on `PerformanceResourceTiming` to collect and analyze the performance data of different compression strategies
 to find out the optimal solution. Often, it's very helpful or necessary to determine what `Content-Encoding` is used for a `PerformanceEntry` reported by `PerformanceResourceTiming`. In the past,
@@ -54,7 +54,7 @@ https://github.com/whatwg/fetch/pull/1796
 
 ## Design details
 
-- At `fetch` stage, an arbitrary `contentEncoding` value in the response header is allowed. This is needed for the case service worker getting resources in proprietary encoding.
+- At `fetch` stage, an arbitrary `contentEncoding` value in the response header is allowed. This is needed for the case where a service worker is getting resources in a proprietary encoding.
 
 - The `contentEncoding` value to be exposed to `resourceTiming`(in the [response body info](https://fetch.spec.whatwg.org/#response-body-info)) is subject to filtering. The value
   is exposed only if it is a registered value at the [HTTP Content Coding Registry](https://www.iana.org/assignments/http-parameters/http-parameters.xhtml) and it is an encoding
@@ -67,7 +67,10 @@ None.
 
 ## Stakeholder Feedback/Opposition
 
-According to https://github.com/whatwg/fetch/pull/1742, at least two implementers are interested and none opposed, citing  W3C WebPerf call on Feb 29, 2024. But according to the [WebPerf WG minutes](https://docs.google.com/document/d/1qPPCtpg1MyVw3GGmd6VKZCdCyqoDub6Xgc8ANnq8SRI/edit#heading=h.wkdzwqaypyq6), only Chromium is known to have approved this feature.
+According to https://github.com/whatwg/fetch/pull/1742, at least two implementers are interested and none opposed, citing  W3C WebPerf call on Feb 29, 2024. But according to the [WebPerf WG minutes](https://docs.google.com/document/d/1qPPCtpg1MyVw3GGmd6VKZCdCyqoDub6Xgc8ANnq8SRI/edit#heading=h.wkdzwqaypyq6), only Chromium is known to have approved this feature at that time.
+
+As on 08/11/2025, Webkit is [supportive](https://github.com/WebKit/standards-positions/issues/467).  There is [no signal](https://github.com/mozilla/standards-positions/issues/1189) from Mozilla.
+
 
 ## References & acknowledgements
 `jxck@chromium.org` did a significant amount of work toward this change, below is the link where a number of prototype CL/PR/bug filings can be found at the first comment:
