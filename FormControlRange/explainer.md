@@ -235,6 +235,10 @@ Provide a way of retrieving a `FormControlRange`—a specialized type of `Range`
 
 The `FormControlRange` interface extends `AbstractRange` and provides a controlled way to create limited `Range` objects for the entirety or a part of the `value` of `<textarea>` and `<input>` elements. To protect the inner workings of these elements, `FormControlRange` instances have several limitations on the methods and attributes (from the Range API) that can be accessed through JavaScript.
 
+Unlike `StaticRange`, `FormControlRange` is **live** — it tracks changes to the underlying text in the `<textarea>` or `<input>` element and automatically updates its start and end positions,  similar to how a regular `Range` tracks DOM mutations. This ensures that operations like `getBoundingClientRect()` or `toString()` always reflect the element’s current content, even after edits.
+
+This live-update behavior also aligns conceptually with [Keith Cirkel’s Richer Text Fields proposal](https://open-ui.org/components/richer-text-fields.explainer/), which takes a broader approach to enabling richer interactions in form controls. While that proposal covers more editing capabilities, `FormControlRange` focuses on a limited, encapsulated `AbstractRange`-based API, but both aim to support dynamic interaction with text as it changes.
+
 **Initially available methods and properties:**
 - `getBoundingClientRect()`: Returns the bounding rectangle of the range
 - `getClientRects()`: Returns a list of rectangles for the range  
@@ -386,6 +390,53 @@ input.addEventListener('input', (e) => {
 });
 ```
 
+## Live Range Examples
+
+The examples below demonstrate how `FormControlRange` updates in real time as the text content of the control changes, without requiring manual offset adjustments.
+
+---
+
+### Example 1: Popup Follows Caret Position
+```js
+<textarea id="messageArea"></textarea>
+<div id="popup">Popup</div>
+const textarea = document.querySelector("#messageArea");
+const popup = document.querySelector("#popup");
+
+// Create a live, collapsed range at the caret.
+const caretRange = new FormControlRange();
+caretRange.setFormControlRange(textarea, textarea.selectionStart, textarea.selectionStart);
+
+textarea.addEventListener("input", () => {
+  // Position popup under caret.
+  const rect = caretRange.getBoundingClientRect();
+  popup.style.left = `${rect.left}px`;
+  popup.style.top = `${rect.bottom}px`;
+});
+```
+As the user types, the popup stays positioned under the caret without manually recalculating offsets.
+
+### Example 2: Highlight Follows Word Through Edits
+```js
+<textarea id="messageArea">hello world</textarea>
+const textarea = document.querySelector("#messageArea");
+
+// Create a live range covering "hello".
+const wordRange = new FormControlRange();
+wordRange.setFormControlRange(textarea, 0, 5);
+
+// Apply highlight to that live range.
+const highlight = new Highlight(wordRange);
+CSS.highlights.set("tracked-word", highlight);
+
+// Reapply the same highlight object after each edit.
+// The live range automatically adjusts as text changes — no offset recalculation needed.
+textarea.addEventListener("input", () => {
+  CSS.highlights.set("tracked-word", highlight);
+});
+```
+If text is inserted before `"hello"`, the highlight automatically shifts so it still covers the same word.
+
 ## Alternatives considered
 
 Apart from the solutions described in the [User-Facing Problem](#user-facing-problem) section, we have also considered the following alternatives:
@@ -531,3 +582,7 @@ Many thanks for valuable feedback and advice from:
 - [Mike Jackson](https://github.com/mwjacksonmsft)
 - [Sanket Joshi](https://github.com/sanketj)
 - [Siye Liu](https://github.com/siliu1)
+
+### Related Work
+
+- [Richer Text Fields proposal](https://open-ui.org/components/richer-text-fields.explainer/) by Keith Cirkel, which takes a broader approach to enabling richer interactions in form controls but shares the goal of supporting dynamic text interaction.
