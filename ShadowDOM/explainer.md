@@ -258,6 +258,8 @@ Another advantage of this proposal is that it can allow multiple module specifie
 </my-element>
 ```
 
+Due to the global nature of `specifier` in this context, it could be called `exportspecifier`, which would emphasize that it is global.
+
 ### Scoping
 
 The module map exists today as a global registry per document, not scoped to a particular shadow root. Many developers have expressed interest in such a global map for sharing stylesheets, as it allows for nested shadow roots to access a base set of shared styles without needing to redefine them at each level of shadow root nesting.
@@ -294,7 +296,9 @@ Another option is to instead use existing HTML concepts for applying stylesheets
 
 While this approach doesn't map as closely to the existing `adoptedStyleSheets` API, it more closely follows existing HTML semantics. It also allows for a rich set of [features](https://html.spec.whatwg.org/#the-link-element) offered by the `<link>` element, such as media queries.
 
-Looking forward, it's also directly compatible with the proposed CSS `@sheet` feature, which allows a single CSS file to contain multiple stylesheets. This allows developers to specify a single named stylesheet that is applied from the CSS definition, rather than applying the global contents of the sheet.
+The `adoptedstylesheets` attribute as specified accepts a list a stylesheets. Multiple stylesheets can be added to a shadow root's adoped stylesheet list with the `<link>` proposal by including multiple `<link>` tags.
+
+Looking forward, the `<link>` approach directyly compatible with the proposed CSS `@sheet` feature, which allows a single CSS file to contain multiple stylesheets. This allows developers to specify a single named stylesheet that is applied from the CSS definition, rather than applying the global contents of the entire sheet.
 
 ### Detailed Parsing Workflow
 
@@ -318,7 +322,7 @@ Upon parsing the `<style>` tag above, an entry is added to the module map with t
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
 When the `<template>` element is constructed, the `adoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute is looked up in the module map. If an entry with that specifier
-exists in the module map, the associated `CSSStyleSheet` is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in array order, as specified in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections).
+exists in the module map, the associated `CSSStyleSheet` is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections).
 If an entry with that specifier does not exist in the module map, an empty `CSSStyleSheet` object is inserted into the module map with the specified `specifier`.
 
 This may also happen in reversed order, as in the following example:
@@ -340,7 +344,7 @@ When the `<template>` element is parsed, an entry is added to the module map wit
 
 When the `<style>` element's `specifier` attribute is parsed, the module map is queried for an existing entry. Since there is an existing empty `CSSStyleSheet` object from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
 
-This replacement always occurs when an existing `specifier` is encountered, ensuring that the active `CSSStyleSheet` object associated with a given `specifier` is always the most recently specified entry.
+This replacement always occurs when an existing `specifier` is encountered, ensuring that the active `CSSStyleSheet` object associated with a given `specifier` is always the most recently parsed entry.
 
 For example, with the following markup:
 
@@ -370,7 +374,7 @@ The `<template>` with `adoptedstylesheets="foo"` will use the second definition 
 
 ### Use with Imperative Module Scripts
 
-Declarative CSS Modules can be used with imperative module scripts.
+Declarative CSS Modules can be used with imperative module scripts from within a static import.
 
 Consider the following example:
 
@@ -386,6 +390,8 @@ Script can later insert this module into an `adoptedStyleSheets` array as follow
 import sheet from "foo" with { type: "css" };
 shadowRoot.adoptedStyleSheets = [sheet];
 ```
+
+...assuming that "foo" hasn't been used as the key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects it to a URL.
 
 The important factor for this scenario is that the `specifier` attribute on the `<style>` tag is explicitly *not* a URL, it is a [DOMString](https://webidl.spec.whatwg.org/#idl-DOMString) that is not [treated as a URL](https://html.spec.whatwg.org/#treated-as-a-url). This allows for disambiguating between a URL that gets fetched in this scenario or a Declarative CSS Module that is synchronously queried from the module map.
 
@@ -410,7 +416,7 @@ For example, given the following HTML:
 }
 </script>
 <my-element>
-  <!-- "bar" is not mapped to "foo" given the invalid import map! -->
+  <!-- "bar" is not mapped to "foo" due to the invalid import map! -->
   <template shadowrootmode="open" adoptedstylesheets="bar">
     ...
   </template>
@@ -421,6 +427,7 @@ The style rules from the Declarative CSS Module would first be inserted into the
 
 ## Other declarative modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
+
 ```html
 <template type="module" specifier="/foo.html">
 <!-- This template defines an HTML module whose contents are given by the markup
@@ -636,9 +643,9 @@ Stylesheets defined via `@sheet` are not global - they are scoped per shadow roo
   </template>
 </template>
  ```
-Text within both shadow roots in the above example should be blue due to the `adoptedstylesheets` at each Shadow DOM layer. Note that it is not currently possible to export stylesheets *out* of shadow roots.
+Text within both shadow roots in the above example should be blue due to the `adoptedstylesheets` at each Shadow DOM layer. Note that it is not currently possible to export stylesheets *out* of shadow roots, which is a deal-breaker for the [Streaming SSR](#streaming-ssr) example outlined above.
 
-Note that `@sheet` is not implemented by any rendering engine as of September 2024.
+An alternative to this entire proposal would be to make `@sheet` identifiers cross shadow boundaries, which would also allow for sharing styles across shadow roots. However, without a way to import inline `<style>` blocks into shadow roots, as proposed in [Local References in Link Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md#local-references-in-link-tags), this behavior would be limited to external .css files. Due to DOM scoping, [Local References in Link Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md#local-references-in-link-tags) would not work as required in a [Streaming SSR](#streaming-ssr) scenario.
 
 ### [Id-based `adoptedstylesheet` attribute on template](https://github.com/WICG/webcomponents/issues/939#issue-971914425)
 This proposal will add a new markup-based `adoptedstylesheets` property that closely matches the existing JavaScript property. The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object.
