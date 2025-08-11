@@ -46,7 +46,10 @@ content location of future work and discussions.
     - [Scoping](#scoping)
     - [`<script>` vs `<style>` For CSS Modules](#script-vs-style-for-css-modules)
     - [Behavior with script disabled](#behavior-with-script-disabled)
+    - [Applying AdoptedStyleSheets](#applying-adopted-stylesheets)
     - [Detailed Parsing Workflow](#detailed-parsing-workflow)
+    - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
+    - [Use with Import Maps](#use-with-import-maps)
   - [Other declarative modules](#other-declarative-modules)
   - [Alternate proposals](#alternate-proposals)
     - [Local References For Link Rel](#local-references-for-link-rel)
@@ -85,7 +88,7 @@ This example shows how a developer might use DSD to initialize a shadow root wit
     <template shadowrootmode="open">
        <style>
          :host {
-          border: 1px solid #e0e0e0;
+            border: 1px solid #e0e0e0;
           }
        </style>
     </template>
@@ -111,8 +114,6 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
   between the parent document and the shadow root in order to provide a cohesive look and feel for
   end users across different websites. Let's take a look at this simple media control widget:
 
-  ![image](images/mediacontrol.jpeg)
-
   In this example, the global styles in the parent document provide basic styling for the page
   layout and the controls. This ensures that the controls used within the shadow DOM adhere to the
   site's overall styling.
@@ -121,59 +122,26 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
 <head>
     <style>
         /* Global styles for the parent document */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-        button, input[type="range"] {
-            cursor: pointer;
-            margin: 5px;
-        }
+        ...
     </style>
 </head>
 ```
 Meanwhile, the styles defined within the Shadow DOM are specific to the media control widget. These styles ensure that the widget looks consistent and isn't affected by other styles on the page.
 ```js
-// Shared stylesheet for all <media-control> elements
 const sheet = new CSSStyleSheet();
 sheet.replaceSync(`
-    .media-control-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        border: 1px solid #ccc;
-        padding: 16px;
-        background-color: #fff;
-    }
-    .controls {
-        margin-top: 8px;
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-    button, input[type="range"] {
-        cursor: pointer;
-        margin: 5px;
-    }
+  // Shared stylesheet for all <media-control> elements.
+  ...
 `);
 
 class MediaControl extends HTMLElement {
     constructor() {
         super();
 
-        // Attach a shadow root to the element.
         const shadow = this.attachShadow({ mode: 'open' });
-
-        // Adopt the shared styles
         shadow.adoptedStyleSheets.push(sheet);
 
-        // Initialize content from template here
+        // Initialize content from template here.
     }
 }
 customElements.define("media-control", MediaControl);
@@ -189,7 +157,7 @@ When asked about pain points in [Web Components](https://2023.stateofhtml.com/en
 * "I love to write my custom web components. It is supper easy to write, maintain. It organizes project structure in some small chunks. But I don't use shadow dom, because of css styles which i don't know how to share between web components"
 * "Shadow DOM encapsulation is too much. E.g. No way to adopt form styling from the surrounding page for common elements (buttons, inputs, etc) unless I'm willing to put them in light DOM"
 
-For additional use cases, please see issue [939](https://github.com/WICG/webcomponents/issues/939)
+For additional use cases, please see issue [939](https://github.com/WICG/webcomponents/issues/939).
 
 ### Streaming SSR
 
@@ -202,7 +170,7 @@ The proposed global scope for declarative CSS Modules is essential to this scena
 ```html
 <template shadowrootmode="open">
   <!-- Emit styles that might need to be shared later. -->
-  <style type="css-module" specifier="my-component-styles">...</style>
+  <style type="module" specifier="my-component-styles">...</style>
   <div>...component content...</div>
   <!-- A child compontent is emitted that needs the same set of shared styles. Since the shared styles were already emitted above, they can be re-used with `adoptedstylesheets`. -->
   <template shadowrootmode="open" adoptedstylesheets="my-component-styles">
@@ -248,7 +216,7 @@ Global styles can be included in a single stylesheet, which is then importable i
 ## Proposal: Inline, declarative CSS module scripts
 This proposal builds on [CSS module scripts](https://web.dev/articles/css-module-scripts), enabling authors to declare a CSS module inline in an HTML file and link it to a DSD using its [module specifier](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string). A `type=”css-module”` attribute on the `<script>` element would define it as a CSS  module script and the specifier attribute would add it to the module cache as if it had been imported. This allows the page to render with the necessary CSS modules attached to the correct scopes without needing to load them multiple times. Note that module maps are global, meaning that modules defined in a Shadow DOM will be accessible throughout the document context.
 ```js
-<style type="css-module" specifier="foo">
+<style type="module" specifier="foo">
   #content {
     color: red;
   }
@@ -258,7 +226,7 @@ Given this `<style>` tag, the styles could be applied to a DSD as follows:
 ```html
 <my-element>
   <template shadowrootmode="open" adoptedstylesheets="foo">
-    <!-- ... -->
+    ...
   </template>
 </my-element>
 ```
@@ -271,13 +239,13 @@ import styles from '/foo.css' with { type: 'css' };
 ```
 Another advantage of this proposal is that it can allow multiple module specifiers in the `adoptedstylesheets` property:
 ```html
-<style type="css-module" specifier="foo">
+<style type="module" specifier="foo">
   #content {
     color: red;
   }
 </style>
 
-<style type="css-module" specifier="bar">
+<style type="module" specifier="bar">
   #content {
     font-family: sans-serif;
   }
@@ -285,7 +253,7 @@ Another advantage of this proposal is that it can allow multiple module specifie
 
 <my-element>
   <template shadowrootmode="open" adoptedstylesheets="foo bar">
-    <!-- ... -->
+    ...
   </template>
 </my-element>
 ```
@@ -304,29 +272,53 @@ Earlier versions of this document used the `<script>` tag for declaring CSS Modu
 
 User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not been verified yet.
 
+### Applying AdoptedStyleSheets
+
+The samples listed use a proposed `adoptedstylesheets` attribute on the `<template>` tag with a space-separated list of specifiers. This closely maps to the existing Javascript `adoptedStyleSheets` property.
+
+Another option is to instead use existing HTML concepts for applying stylesheets into shadow roots, such as the `<link>` tag, as demonstrated by the following example:
+
+```html
+<style type="module" specifier="foo">
+  #content {
+    color: red;
+  }
+</style>
+
+<my-element>
+  <template shadowrootmode="open">
+    <link rel="adoptedstylesheet" specifier="foo">
+  </template>
+</my-element>
+```
+
+While this approach doesn't map as closely to the existing `adoptedStyleSheets` API, it more closely follows existing HTML semantics. It also allows for a rich set of [features](https://html.spec.whatwg.org/#the-link-element) offered by the `<link>` element, such as media queries.
+
+Looking forward, it's also directly compatible with the proposed CSS `@sheet` feature, which allows a single CSS file to contain multiple stylesheets. This allows developers to specify a single named stylesheet that is applied from the CSS definition, rather than applying the global contents of the sheet.
+
 ### Detailed Parsing Workflow
 
 In the following example:
 
 ```html
-<style type="css-module" specifier="foo">
+<style type="module" specifier="foo">
   #content {
     color: red;
   }
 </style>
 <my-element>
   <template shadowrootmode="open" adoptedstylesheets="foo">
-    <!-- ... -->
+    ...
   </template>
 </my-element>
 ```
 
-Upon parsing the `<style>` tag above, an entry is added to the module map with the specifier of "foo" whose contents is a `CSSStyleSheet` object reflecting the parsed CSS contents of the `<style>` tag.
+Upon parsing the `<style>` tag above, an entry is added to the module map with the specifier of "foo" whose contents is a `CSSStyleSheet`, following the same steps as [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script).
 
-As with existing `<style>` tags, if the CSS contains invalid syntax, the rules up to the invalid syntax are included, and everything after the invalid syntax is excluded from the associated `CSSStyleSheet`.
+As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
 When the `<template>` element is constructed, the `adoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute is looked up in the module map. If an entry with that specifier
-exists in the module map, the associated `CSSStyleSheet` is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets).
+exists in the module map, the associated `CSSStyleSheet` is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in array order, as specified in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections).
 If an entry with that specifier does not exist in the module map, an empty `CSSStyleSheet` object is inserted into the module map with the specified `specifier`.
 
 This may also happen in reversed order, as in the following example:
@@ -334,10 +326,10 @@ This may also happen in reversed order, as in the following example:
 ```html
 <my-element>
   <template shadowrootmode="open" adoptedstylesheets="foo">
-    <!-- ... -->
+    ...
   </template>
 </my-element>
-<style type="css-module" specifier="foo">
+<style type="module" specifier="foo">
   #content {
     color: red;
   }
@@ -346,27 +338,26 @@ This may also happen in reversed order, as in the following example:
 
 When the `<template>` element is parsed, an entry is added to the module map with the specifier of "foo" whose contents is an empty `CSSStyleSheet` object.
 
-When the `<style>` attribute is parsed, the module map is queried for an existing entry. Since there is an existing empty `CSSStyleSheet` object from the prior step, its contents are synchronously replaced with a
-new `CSSStyleSheet` based on the contents of the `<style>` tag.
+When the `<style>` element's `specifier` attribute is parsed, the module map is queried for an existing entry. Since there is an existing empty `CSSStyleSheet` object from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
 
 This replacement always occurs when an existing `specifier` is encountered, ensuring that the active `CSSStyleSheet` object associated with a given `specifier` is always the most recently specified entry.
 
 For example, with the following markup:
 
 ```html
-<style type="css-module" specifier="foo">
+<style type="module" specifier="foo">
   #content {
     color: red;
   }
 </style>
-<style type="css-module" specifier="foo">
+<style type="module" specifier="foo">
   #content {
     color: blue;
   }
 </style>
 <my-element>
   <template shadowrootmode="open" adoptedstylesheets="foo">
-    <!-- ... -->
+    ...
   </template>
 </my-element>
 ```
@@ -376,6 +367,57 @@ The contents of the first Declarative CSS Module with `specifier="foo"` (with `c
 Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`), the existing `CSSStyleSheet` object with a `specifier` of "foo" is replaced in the module map with the second `CSSStyleSheet` object.
 
 The `<template>` with `adoptedstylesheets="foo"` will use the second definition (with `color: blue`).
+
+### Use with Imperative Module Scripts
+
+Declarative CSS Modules can be used with imperative module scripts.
+
+Consider the following example:
+
+```html
+<style type="module" specifier="foo">
+  ...
+</style>
+```
+
+Script can later insert this module into an `adoptedStyleSheets` array as follows:
+
+```js
+import sheet from "foo" with { type: "css" };
+shadowRoot.adoptedStyleSheets = [sheet];
+```
+
+The important factor for this scenario is that the `specifier` attribute on the `<style>` tag is explicitly *not* a URL, it is a [DOMString](https://webidl.spec.whatwg.org/#idl-DOMString) that is not [treated as a URL](https://html.spec.whatwg.org/#treated-as-a-url). This allows for disambiguating between a URL that gets fetched in this scenario or a Declarative CSS Module that is synchronously queried from the module map.
+
+If a module is imported imperatively in this fashon and the Declarative CSS Module is not in the [module map](https://html.spec.whatwg.org/#module-map), the import fails, even if it is added declaratively at a later time.
+
+### Use with Import Maps
+
+[Import maps](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) allow for module script specifiers to be modified via a JSON map. Import maps would not apply to Declarative CSS Modules because the `specifier` in this scenario is not a URL, and the definition of a [valid module specifier map](https://html.spec.whatwg.org/multipage/webappapis.html#valid-module-specifier-map) requires that the values are valid URL.
+
+For example, given the following HTML:
+
+```html
+<style type="module" specifier="foo">
+  ...
+</style>
+<!-- Invalid import map, because "foo" is not a URL! -->
+<script type="importmap">
+{
+  "imports": {
+    "bar": "foo"
+  }
+}
+</script>
+<my-element>
+  <!-- "bar" is not mapped to "foo" given the invalid import map! -->
+  <template shadowrootmode="open" adoptedstylesheets="bar">
+    ...
+  </template>
+</my-element>
+```
+
+The style rules from the Declarative CSS Module would first be inserted into the module map with a specifer of "foo". The import map would then be processed, but since "foo" is not a valid URL, the module specifier map is invalid. When the `<template>` element's `adoptedstylesheets` property is evaluated, the import map does not apply, and thus the `<template>` element's specified `adoptedstylesheets` of "bar" is not located.
 
 ## Other declarative modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
@@ -416,12 +458,12 @@ CSS Modules are not the only type of module - there are also JavasScript, JSON, 
 
 | Module type    | Script Module                                            | Declarative Module                                                        |
 | -------------- | -------------------------------------------------------- | --------------------------------------------------------------------------|
-| JavaScript     | `import { foo } from "./bar.js";`                        | `<script type="script-module" specifier="/bar.js"></script>`              |
-| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<style type="css-module" specifier="bar"></style>`                |
-| JSON           | `import foo from "./bar.json" with { type: "json" };`    | `<script type="json-module" specifier="/bar.json"></script>`              |
-| HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<script type="html-module" specifier="/bar.html"></script>`              |
-| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<script type="svg-module" specifier="/bar.svg"></script>`                |
-| WASM           | `import {foo} from "bar.wasm" with {type: "wasm"};`      | `<script type="wasm-module" specifier="/bar.wasm"></script>`              |
+| JavaScript     | `import { foo } from "./bar.js";`                        | `<script type="module" specifier="bar"></script>`                         |
+| CSS            | `import foo from "./bar.css" with { type: "css" };`      | `<style type="module" specifier="bar"></style>`                           |
+| JSON           | `import foo from "./bar.json" with { type: "json" };`    | `<script type="json-module" specifier="bar"></script>`                    |
+| HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<template type="html-module" specifier="bar"></template>`                |
+| SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<template type="svg-module" specifier="bar"></template>`                 |
+| WASM           | `import {foo} from "bar.wasm" with {type: "wasm"};`      | `<script type="wasm-module" specifier="bar"></script>`                    |
 
 ## Alternate proposals
 
@@ -487,7 +529,7 @@ Here is an example that shows how the proposed `adoptStyles` is used declarative
 <custom-element >
   <template shadowroot="open" adoptstyles="inherit.theme, inherit.base">
     <style>
-      /* Shadow DOM specific styles */
+      ...
     </style>
     <button class="button shadow-button">Click Me</button>
   </template>
@@ -599,7 +641,7 @@ Text within both shadow roots in the above example should be blue due to the `ad
 Note that `@sheet` is not implemented by any rendering engine as of September 2024.
 
 ### [Id-based `adoptedstylesheet` attribute on template](https://github.com/WICG/webcomponents/issues/939#issue-971914425)
-This proposal will add a new markup-based `adoptedstylesheets` property that closely matches the existing JavaScript property.  The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object.
+This proposal will add a new markup-based `adoptedstylesheets` property that closely matches the existing JavaScript property. The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object.
 ```html
 <style type="css" id="shared_shadow_styles">
     :host {
