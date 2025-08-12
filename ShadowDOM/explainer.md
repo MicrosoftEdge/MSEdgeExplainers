@@ -109,14 +109,7 @@ Some developers have expressed interest in CSS selectors crossing through the Sh
 
 ## Use case
 ### Media site control widgets
-  Sharing styles between the parent document and shadow root is also fairly common for media site
-  control widgets such as play/pause buttons, volume sliders, and progress bars, to share styles
-  between the parent document and the shadow root in order to provide a cohesive look and feel for
-  end users across different websites. Let's take a look at this simple media control widget:
-
-  In this example, the global styles in the parent document provide basic styling for the page
-  layout and the controls. This ensures that the controls used within the shadow DOM adhere to the
-  site's overall styling.
+Consider a media site that uses control widgets such as play/pause buttons, volume sliders, and progress bars that are implemented as web components with shadow roots. The site might want to share styles between the top-level document and the shadow roots to provide a cohesive look and feel throughout all the site's controls.
 
 ```html
 <head>
@@ -296,8 +289,8 @@ Upon parsing the `<style>` tag above, an entry is added to the [module map](http
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
 When the `<template>` element is constructed, the `shadowrootadoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute is looked up in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). If an entry with that specifier
-exists in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), the associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections).
-If an entry with that specifier does not exist in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) object is inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specified `specifier`.
+exists in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with a type of "css", the associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections).
+If an entry with that specifier does not exist in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) object with type of "css" is inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specified `specifier`.
 
 This may also happen in reversed order, as in the following example:
 
@@ -314,9 +307,9 @@ This may also happen in reversed order, as in the following example:
 </style>
 ```
 
-When the `<template>` element is parsed, an entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specifier of "foo" whose contents is an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script).
+When the `<template>` element is parsed, an entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specifier of "foo" with a type of "css" whose contents is an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script).
 
-When the `<style>` element's `specifier` attribute is parsed, the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) is queried for an existing entry. Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
+When the `<style>` element's `specifier` attribute is parsed, the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) is queried for an existing entry. Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a type of "css" from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
 
 This replacement always occurs when an existing `specifier` is encountered, ensuring that the active [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) associated with a given `specifier` is always the most recently parsed entry.
 
@@ -340,13 +333,13 @@ For example, with the following markup:
 </my-element>
 ```
 
-The contents of the first Declarative CSS Module with `specifier="foo"` (with `color: red`) are first parsed and the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) is updated with a [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a `specifier` of "foo". 
+The contents of the first Declarative CSS Module with `specifier="foo"` (with `color: red`) are first parsed and the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) is updated with a [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a `specifier` of "foo" and a type of "css".
 
-Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`), the existing [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) object with a `specifier` of "foo" is replaced in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the second [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script).
+Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`) and with a type of "css", the existing [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) object with a `specifier` of "foo" is replaced in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the second [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script).
 
 The `<template>` with `shadowrootadoptedstylesheets="foo"` will use the second definition (with `color: blue`).
 
-This may also occur when the `<style>` element is a child of the `<template>` that adopts it, as show in the following example:
+This may also occur when the `<style>` element is a child of the `<template>` that adopts it, as shown in the following example:
 
 ```html
 <my-element>
@@ -361,7 +354,7 @@ This may also occur when the `<style>` element is a child of the `<template>` th
 </my-element>
 ```
 
-In this example, the `<template>` element is parsed first. Upon encountering `shadowrootadoptedstylesheets` attribute, the specifier "foo" is queried in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). No exising entry is found in the module map, so an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is inserted into the module map with a key of "foo". Upon parsing the `<style>` tag, a new [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is constructed with the contents of the `<style>` tag, which is then inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
+In this example, the `<template>` element is parsed first. Upon encountering `shadowrootadoptedstylesheets` attribute, the specifier "foo" is queried in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). No exising entry is found in the module map, so an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is inserted into the module map with a key of "foo". Upon parsing the `<style>` tag, a new [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a type of "css" is constructed with the contents of the `<style>` tag, which is then inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
 
 ### Use with Imperative Module Scripts
 
