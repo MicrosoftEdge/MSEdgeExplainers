@@ -140,7 +140,7 @@ class MediaControl extends HTMLElement {
 customElements.define("media-control", MediaControl);
 document.body.appendChild(document.createElement("media-control"));
 ```
-Both the controls in the parent document and the controls inside the media control widget share the same base styles for cursor and margin.
+Both the controls in the parent document and the controls inside the media control widget are able to share the same base styles through `adoptedStyleSheets`.
 
 ### Anywhere web components are used
 When asked about pain points in [Web Components](https://2023.stateofhtml.com/en-US/features/web_components/), the number one issue, with 13% of the vote, is styling and customization. Many respondents specifically mentioned the difficulty of style sharing issues within the shadow DOM:
@@ -207,7 +207,7 @@ Using `<link rel="stylesheet">` to share styles across Shadow DOM boundaries hel
 Global styles can be included in a single stylesheet, which is then importable into each shadow root to avoid redundancy. Inline `<style>` blocks do not support `@import` rules, so this approach must be combined with either of the aforementioned Constructable Stylesheets or `<link rel>` approaches. If the stylesheet is not already loaded, this could lead to an FOUC.
 
 ## Proposal: Inline, declarative CSS module scripts
-This proposal builds on [CSS module scripts](https://web.dev/articles/css-module-scripts), enabling authors to declare a CSS module inline in an HTML file and link it to a DSD using its [module specifier](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string). A `type=”css-module”` attribute on the `<script>` element would define it as a CSS  module script and the specifier attribute would add it to the module cache as if it had been imported. This allows the page to render with the necessary CSS modules attached to the correct scopes without needing to load them multiple times. Note that [module maps](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) are global, meaning that modules defined in a Shadow DOM will be accessible throughout the document context.
+This proposal builds on [CSS module scripts](https://web.dev/articles/css-module-scripts), enabling authors to declare a CSS module inline in an HTML file and link it to a DSD using its [module specifier](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string). A `type=”module”` attribute on the `<style>` element would define it as a CSS module script and the specifier attribute would add it to the module cache as if it had been imported. This allows the page to render with the necessary CSS modules attached to the correct scopes without needing to load them multiple times. Note that [module maps](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) are global, meaning that modules defined in a Shadow DOM will be accessible throughout the document context.
 ```js
 <style type="module" specifier="foo">
   #content {
@@ -284,7 +284,7 @@ In the following example:
 </my-element>
 ```
 
-Upon parsing the `<style>` tag above, an entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) whose key is the specifier `"foo"` and whose value is a new [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) created by running the steps to [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) with `source` being the text of the `<style>` tag.
+Upon parsing the `<style>` tag above, an entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) whose key is the specifier `"foo"` and whose value is a new [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) created by running the steps to [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) with `source` being the text of the `<style>` tag. Note that [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) throws a script error when encountering `@import` rules, which is not possible while parsing. One option would be to fail parsing when `@import` is encountered, resulting in an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) being added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map).
 
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
@@ -422,7 +422,7 @@ An advantage of this approach is that it can be extended to solve similar issues
 <!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by
 cloning the contents of the HTML module given by the "/foo.html" specifier, instead of
 parsing HTML inside the <template>. -->
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="foo" shadowroothtml="/foo.html"></template>
+  <template shadowrootmode="open" shadowroothtml="/foo.html"></template>
 </my-element>
 ```
 
@@ -440,7 +440,7 @@ This approach could also be expanded to SVG modules, similar to the HTML Modules
 <!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by
 cloning the contents of the SVG module given by the "/foo.svg" specifier, instead of
 parsing SVG inside the <template>. -->
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="/foo.css" shadowroothtml="/foo.html"></template>
+  <template shadowrootmode="open" shadowroothtml="/foo.html"></template>
 </my-element>
 ```
 SVG makes heavy use of IDREF's, for example `href` on `<use>` and SVG filters. Per existing Shadow DOM behavior, these IDREF's would be scoped per shadow root.
@@ -501,7 +501,7 @@ Looking forward, the `<link>` approach is directly compatible with the proposed 
 
 <my-element>
   <template shadowrootmode="open">
-    <link rel="adoptedstylesheet" specifier="foo" sheet="my_sheet">
+    <link rel="adoptedstylesheet" specifier="foo" sheet="my_cool_sheet">
   </template>
 </my-element>
 ```
@@ -721,7 +721,7 @@ Web developers often seek polyfills to allow them to use new web platform featur
 ```html
 <script>
   function supportsDeclarativeAdoptedStyleSheets() {
-    return document.createElement('template').adoptedStyleSheets != undefined;
+    return document.createElement('template').shadowRootAdoptedStyleSheets != undefined;
   }
 
   if (!supportsDeclarativeAdoptedStyleSheets()) {
@@ -737,7 +737,7 @@ This suggestion looks like the following:
 ```html
 <my-element>
    <template shadowrootmode="open" shadowrootadoptedstylesheets="/foo.css">
-       <link rel="stylesheet" href="/foo.css" noadoptedstylesheets> <!-- no-op on browsers that support adoptedstylesheets on <template> tags -->
+       <link rel="stylesheet" href="/foo.css" noadoptedstylesheets> <!-- no-op on browsers that support shadowrootadoptedstylesheets on <template> tags -->
    </template>
 </my-element>
 ```
