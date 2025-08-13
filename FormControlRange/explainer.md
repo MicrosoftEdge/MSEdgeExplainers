@@ -237,7 +237,7 @@ The `FormControlRange` interface extends `AbstractRange` and provides a controll
 
 Unlike `StaticRange`, `FormControlRange` is **live** — it tracks changes to the underlying text in the `<textarea>` or `<input>` element and automatically updates its start and end positions,  similar to how a regular `Range` tracks DOM mutations. This ensures that operations like `getBoundingClientRect()` or `toString()` always reflect the element’s current content, even after edits.
 
-This live-update behavior also aligns conceptually with [Keith Cirkel’s Richer Text Fields proposal](https://open-ui.org/components/richer-text-fields.explainer/), which takes a broader approach to enabling richer interactions in form controls. While that proposal covers more editing capabilities, `FormControlRange` focuses on a limited, encapsulated `AbstractRange`-based API, but both aim to support dynamic interaction with text as it changes.
+This live-update behavior also aligns conceptually with the `InputRange()` from [Keith Cirkel’s Richer Text Fields proposal](https://open-ui.org/components/richer-text-fields.explainer/), which takes a broader approach to enabling richer interactions in form controls. While that proposal covers more editing capabilities, `FormControlRange` focuses on a limited, encapsulated `AbstractRange`-based API, but both aim to support dynamic interaction with text as it changes.
 
 **Initially available methods and properties:**
 - `getBoundingClientRect()`: Returns the bounding rectangle of the range
