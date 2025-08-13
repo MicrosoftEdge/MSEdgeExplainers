@@ -375,7 +375,7 @@ import sheet from "foo" with { type: "css" };
 shadowRoot.adoptedStyleSheets = [sheet];
 ```
 
-...assuming that "foo" hasn't been used as the key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects it to a URL.
+...assuming that "foo" hasn't been used as the key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects it to a URL. If "foo" has used as a key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects to a URL, that URL will be fetched instead of locating the declarative version.
 
 The important factor for this scenario is that the `specifier` attribute on the `<style>` tag is explicitly *not* a URL, it is a [DOMString](https://webidl.spec.whatwg.org/#idl-DOMString) that is not [treated as a URL](https://html.spec.whatwg.org/#treated-as-a-url). This allows for disambiguating between a URL that gets fetched in this scenario or a Declarative CSS Module that is synchronously queried from the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map).
 
