@@ -4,6 +4,7 @@
 
 - [Andres Regalado Rosas](t-andresre@microsoft.com)
 - [Ana Sollano Kim](https://github.com/anaskim)
+- [Stephanie Zhang](https://github.com/stephanieyzhang)
 
 ## Participate
 
@@ -570,6 +571,10 @@ This change would enable APIs like the Selection API to support `FormControlRang
 The resulting `AbstractRange` inheritance structure would look like this:
 
 ![abstractrange-family](abstractrange-family.jpg)
+
+## Potential Future Work
+It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment-3113360213) that custom elements could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure.  
+Such use cases might also prompt revisiting the current `FormControlRange` name in favor of something broader, such as `ElementRange`, to better reflect its applicability beyond form controls.
 
 ## References & acknowledgements
 
