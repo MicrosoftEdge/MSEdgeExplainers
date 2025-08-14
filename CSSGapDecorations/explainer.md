@@ -584,12 +584,15 @@ at most a single decoration style for a given container.
 Many thanks for valuable feedback and advice from:
 
 - <a href="https://github.com/alico-cra">@alico-cra</a>
+- Ahmad Shadeed
 - Alison Maher
 - Benoît Rouleau
 - Ian Kilpatrick
 - Josh Tumath
 - Kurt Catti-Schmidt
 - Lea Verou
+- Oliver Williams
 - Rachel Andrew
+- Sam Davis Omekara Jr.
 - Sebastian Zartner
 - Tab Atkins-Bittner
