@@ -478,9 +478,9 @@ Another option is to instead use existing HTML concepts for applying stylesheets
 </my-element>
 ```
 
-While this approach doesn't map as closely to the existing `adoptedStyleSheets` API, it more closely follows existing HTML semantics. It also allows for a rich set of [features](https://html.spec.whatwg.org/#the-link-element) offered by the `<link>` element, such as media queries.
+While this approach doesn't map as closely to the existing `adoptedStyleSheets` API, it more closely follows existing HTML semantics. It also allows for a rich set of [features](https://html.spec.whatwg.org/#the-link-element) offered by the `<link>` element, such as media queries. However, a small disadvantage is that the `<link>` element has many additional properties that would not apply in this scenario, such as `crossorigin`, `fetchpriority`, `referrerpolicy`.
 
-The `shadowrootadoptedstylesheets` attribute as specified accepts a list a stylesheets. Multiple stylesheets can be added to a shadow root's adoped stylesheet list with the `<link>` proposal by including multiple `<link>` tags.
+The `shadowrootadoptedstylesheets` attribute as specified accepts a list a stylesheets. Multiple stylesheets can be added to a shadow root's adopted stylesheet list with the `<link>` proposal by including multiple `<link>` tags.
 
 Looking forward, the `<link>` approach is directly compatible with the proposed CSS `@sheet` feature, which allows a single CSS file to contain multiple stylesheets. This allows developers to specify a single named stylesheet that is applied from the CSS definition, rather than applying the global contents of the entire sheet, as illustrated by the following example:
 
@@ -593,7 +593,7 @@ This proposal builds on [using multiple sheets per file](https://github.com/w3c/
   @sheet sheet2 { *: color: blue; }
 </style>
 
-<template shadowrootmode="open" shadowrootadoptedstylesheets="sheet1, sheet2">
+<template shadowrootmode="open" shadowrootadoptedstylesheets="sheet1 sheet2">
   <span>I'm in the shadow DOM</span>
 </template>
  ```
@@ -633,7 +633,7 @@ With this behavior, the following example would have a gray background and blue 
   @sheet sheet2 { *: color: blue; }
 </style>
 <span>I am in the light DOM</span>
-<template shadowrootmode="open" shadowrootadoptedstylesheets="sheet1, sheet2">
+<template shadowrootmode="open" shadowrootadoptedstylesheets="sheet1 sheet2">
   <span>I'm in the shadow DOM</span>
 </template>
  ```
@@ -704,7 +704,7 @@ Web authors can use the `shadowrootadoptedstylesheets` property on the `<templat
 ```
 One requirement of this approach is that the current `adoptedStyleSheets` JavaScript property would need to lift the “constructable” requirement for `adoptedStyleSheets`. This was recently agreed upon by the CSSWG but has not been implemented yet: [ Can we lift the restriction on constructed flag for adoptedStyleSheets?](https://github.com/w3c/csswg-drafts/issues/10013#issuecomment-2165396092)
 
-One limitation of this approach is that shared styles that need to be applied exclusively to shadow roots (and not the main document) will need to include a CSS `:host` selector. This is not necessary for JavaScript-based adopedStylesheets but will be necessary for declarative stylesheets, as there is currently no way in HTML to create stylesheets without applying them to the document they are defined in. This could also be addressed via a new type value on `<style>` tags and rel value on `<link>` tags, potentially `“adopted-css”`.
+One limitation of this approach is that shared styles that need to be applied exclusively to shadow roots (and not the main document) will need to include a CSS `:host` selector. This is not necessary for JavaScript-based adoptedStylesheets but will be necessary for declarative stylesheets, as there is currently no way in HTML to create stylesheets without applying them to the document they are defined in. This could also be addressed via a new type value on `<style>` tags and rel value on `<link>` tags, potentially `“adopted-css”`.
 
 A challenge that arises is dealing with scopes and idrefs. If a declarative stylesheet can only be used within a single scope, it ends up being as limited as a regular `<style>` tag since it would need to be duplicated for every scope. A cross-scope idref system would enable nested shadow roots to access global stylesheets. This proposal recommends adding a new cross-scope ID `xid` attribute that SSR code would generate to be used with the first scope and referenced in later scope. See example in [Declarative CSS Module Scripts](https://github.com/WICG/webcomponents/issues/939#issue-971914425)
 
@@ -769,9 +769,6 @@ The following table compares pros and cons of the various proposals:
 | 5 | `adoptedstylesheets` attribute | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ No |
 
 ## Open issues
-* What happens if a `<template shadowrootadoptedstylesheets="">` references a specifier that hasn't been imported or declared inline yet?
-
-  The most conservative answer would be to not create the shadow root at all, which is also what happens if the `shadowrootmode` attribute has an invalid value.
 * Render thread blocking – to avoid an FOUC, developers may want to block rendering until styles are available. There are many ways that this could be accomplished – for instance, `<link rel="..." blocking="render">`
 * For declarative CSS Modules, the only way to apply styles *only* to shadow elements is via a `:host` selector. This might not be feasible for large, complex sites, and could lead to duplicated styles. A new attribute on the `<style>` tag (`type=adoptedStyles`) could address this, as would a new tag (`<adoptedStyle>`).
 * `cloneNode` – there are several complications with cloneNode
