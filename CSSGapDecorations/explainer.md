@@ -46,7 +46,6 @@ content location of future work and discussions.
     - [Scenario 1: Horizontal lines between CSS grid rows](#scenario-1-horizontal-lines-between-css-grid-rows)
     - [Scenario 2: Lines dividing items in both directions of a grid](#scenario-2-lines-dividing-items-in-both-directions-of-a-grid)
     - [Scenario 3: Segmented gap decorations](#scenario-3-segmented-gap-decorations)
-  - [Open questions](#open-questions)
   - [Future ideas](#future-ideas)
     - [Images](#images)
     - [Corner joins](#corner-joins)
@@ -345,12 +344,6 @@ example
 <image
 src="images/csswg-drafts-issues-2748-issuecomment-446781218-last-example.png">
 
-## Open questions
-
-- How do gap decorations apply to subgrids?
-- Can we construct an all-encompassing `rule` shorthand? The challenge here
-  is that `/` is already heavily loaded in the longhands.
-
 ## Future ideas
 
 ### Images
@@ -393,7 +386,7 @@ differ. There may be use cases for propagating gap decorations from the parent
 grid into corresponding gaps in the subgrid; we could perhaps do this with a
 special keyword on the `*-rule-width`, `*-rule-style`, and `*-rule-color`
 properties. See [CSSWG Issue
-12326](https://github.com/w3c/csswg-drafts/issues/12326) for futher discussion.
+12326](https://github.com/w3c/csswg-drafts/issues/12326) for further discussion.
 
 ### Placement of gap decorations
 
