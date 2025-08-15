@@ -51,7 +51,7 @@ content location of future work and discussions.
     - [Use with Import Maps](#use-with-import-maps)
   - [Other declarative modules](#other-declarative-modules)
   - [Alternate proposals](#alternate-proposals)
-    - [Using A Link Tag To Adopt Stylesheets](using-a-link-tag-to-adopt-stylesheets)
+    - [Using A Link Tag To Adopt Stylesheets](#using-a-link-tag-to-adopt-stylesheets)
     - [Local References For Link Rel](#local-references-for-link-rel)
     - [Key Differences Between This Proposal And Local References For Link Rel](#key-differences-between-this-proposal-and-local-references-for-link-rel)
     - [Layer and adoptStyles](#layer-and-adoptstyles)
@@ -166,9 +166,9 @@ The proposed global scope for declarative CSS Modules is essential to this scena
   <!-- Emit styles that might need to be shared later. -->
   <style type="module" specifier="my-component-styles">...</style>
   <div>...component content...</div>
-  <!-- A child compontent is emitted that needs the same set of shared styles. Since the shared styles were already emitted above, they can be re-used with `shadowrootadoptedstylesheets`. -->
+  <!-- A child component is emitted that needs the same set of shared styles. Since the shared styles were already emitted above, they can be re-used with `shadowrootadoptedstylesheets`. -->
   <template shadowrootmode="open" shadowrootadoptedstylesheets="my-component-styles">
-    <!-- Styles are shared from the parent shadow root (this would not work with standard DOM scoping, which can only access identifiers in this shadow root and the light DOM). -->  
+    <!-- Styles are shared from the parent shadow root (this would not work with standard DOM scoping, which can only access identifiers in this shadow root and the light DOM). -->
     <div>...component content...</div>
   </template>
 </template>
@@ -290,7 +290,7 @@ Upon parsing the `<style>` tag above, an entry is added to the [module map](http
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
 When the `<template>` element is constructed, the `shadowrootadoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute is looked up in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). If an entry with that specifier
-exists in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with a type of "css" and without a status of "fetching", the associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). Because [module maps](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) are keyed on module type as well as URL, an entry with the same specifier but a different type would be considered a separate entry. For compatibility, non-declarative (fetched) module entries should be prioritized over declarative entries. This means that if an entry exists in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with a status of "fetching", the processing of a corresponding entry in the declarative `adoptedstylesheets` list should be skipped. Likewise, an existing entry in the module map set to null should also be skipped when processing the declarative `adoptedstylesheets` list, indicating that the author prioritized a network request that failed. If an entry with that specifier does not exist in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) object with type of "css" is inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specified `specifier`.
+exists in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with a type of "css" and without a status of "fetching", the associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script)'s default export of type [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). Because [module maps](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) are keyed on module type as well as URL, an entry with the same specifier but a different type would be considered a separate entry. For compatibility, non-declarative (fetched) module entries should be prioritized over declarative entries. This means that if an entry exists in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with a status of "fetching", the processing of a corresponding entry in the declarative `adoptedstylesheets` list should be skipped. Likewise, an existing entry in the module map set to null should also be skipped when processing the declarative `adoptedstylesheets` list, indicating that the author prioritized a network request that failed. If an entry with that specifier does not exist in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) object with type of "css" is inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specified `specifier`.
 
 This may also happen in reversed order, as in the following example:
 
@@ -307,7 +307,7 @@ This may also happen in reversed order, as in the following example:
 </style>
 ```
 
-When the `<template>` element is parsed, an entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specifier of "foo" with a type of "css" whose contents is an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script).
+When the `<template>` element is parsed, a [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specifier of "foo" and a type of "css", whose associated [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) is  empty .
 
 When the `<style>` element's `specifier` attribute is parsed, the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) is queried for an existing entry. Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a type of "css" from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
 
@@ -335,7 +335,7 @@ For example, with the following markup:
 
 The contents of the first Declarative CSS Module with `specifier="foo"` (with `color: red`) are first parsed and the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) is updated with a [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a `specifier` of "foo" and a type of "css".
 
-Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`) and with a type of "css", the existing [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) object with a `specifier` of "foo" is replaced in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the second [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script).
+Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`), the `specifier` attribute initiates querying the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a key of "foo" and a type of "css" from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
 
 The `<template>` with `shadowrootadoptedstylesheets="foo"` will use the second definition (with `color: blue`).
 
@@ -354,7 +354,7 @@ This may also occur when the `<style>` element is a child of the `<template>` th
 </my-element>
 ```
 
-In this example, the `<template>` element is parsed first. Upon encountering `shadowrootadoptedstylesheets` attribute, the specifier "foo" is queried in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). No exising entry is found in the module map, so an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is inserted into the module map with a key of "foo". Upon parsing the `<style>` tag, a new [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a type of "css" is constructed with the contents of the `<style>` tag, which is then inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
+In this example, the `<template>` element is parsed first. Upon encountering `shadowrootadoptedstylesheets` attribute, the specifier "foo" is queried in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). No existing entry is found in the module map, so an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is inserted into the module map with a key of "foo". Upon parsing the Declarative CSS Module, the `specifier` attribute initiates querying the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
 
 ### Use with Imperative Module Scripts
 
@@ -413,16 +413,16 @@ The style rules from the Declarative CSS Module would first be inserted into the
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
 
 ```html
-<template type="module" specifier="/foo.html">
+<template type="module" specifier="foo">
 <!-- This template defines an HTML module whose contents are given by the markup
-     placed here, inserted into the module map with the specifier "/foo.html" -->
+     placed here, inserted into the module map with the specifier "foo" -->
 ...
 </template>
 <my-element>
 <!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by
-cloning the contents of the HTML module given by the "/foo.html" specifier, instead of
+cloning the contents of the HTML module given by the "foo" specifier, instead of
 parsing HTML inside the <template>. -->
-  <template shadowrootmode="open" shadowroothtml="/foo.html"></template>
+  <template shadowrootmode="open" shadowroothtml="foo"></template>
 </my-element>
 ```
 
@@ -431,16 +431,16 @@ In this example we’ve leveraged the module system to implement declarative tem
 This approach could also be expanded to SVG modules, similar to the HTML Modules example above.
 
 ```html
-<template type="module" specifier="/foo.svg">
+<template type="module" specifier="foo">
 <!-- This template defines an SVG module whose contents are given by the SVG markup
-     placed here, inserted into the module map with the specifier "/foo.svg" -->
+     placed here, inserted into the module map with the specifier "foo" -->
 ...
 </template>
 <my-element>
 <!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by
-cloning the contents of the SVG module given by the "/foo.svg" specifier, instead of
+cloning the contents of the SVG module given by the "foo" specifier, instead of
 parsing SVG inside the <template>. -->
-  <template shadowrootmode="open" shadowroothtml="/foo.html"></template>
+  <template shadowrootmode="open" shadowroothtml="foo"></template>
 </my-element>
 ```
 SVG makes heavy use of IDREF's, for example `href` on `<use>` and SVG filters. Per existing Shadow DOM behavior, these IDREF's would be scoped per shadow root.
@@ -746,6 +746,17 @@ This suggestion looks like the following:
 
 This proposal expands the concept of [module specifiers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string) to export entries into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). This concept could also apply to the `<script>` tag when [inline module scripts](https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-inline-module-script-graph) are specified, giving the ability for these scripts to [export](https://tc39.es/ecma262/#sec-exports) values, something they are not currently capable of (see [this issue](https://github.com/whatwg/html/issues/11202)).
 
+```js
+<script type="module" specifier="exportsfoo">
+const foo = 42;
+export {foo};
+</script>
+<script type="module">
+import {foo} from "exportsfoo";
+...
+</script>
+```
+
 ## Summary
 The following table compares pros and cons of the various proposals: 
 
@@ -758,10 +769,6 @@ The following table compares pros and cons of the various proposals:
 | 5 | `adoptedstylesheets` attribute | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ No |
 
 ## Open issues
-* What happens if a `<template shadowrootadoptedstylesheets="">` references a specifier that was imported as a non-inline CSS module whose fetch hasn’t completed yet?
-
-  Leading idea: upon creation, the shadow root would contain an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script), which is the [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) for the CSS module script. When the fetch is completed and the CSS module script is fully created, this[CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is populated. This would require some changes to how module creation works in the HTML spec.
-
 * What happens if a `<template shadowrootadoptedstylesheets="">` references a specifier that hasn't been imported or declared inline yet?
 
   The most conservative answer would be to not create the shadow root at all, which is also what happens if the `shadowrootmode` attribute has an invalid value.
