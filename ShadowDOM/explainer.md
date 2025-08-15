@@ -285,7 +285,7 @@ In the following example:
 </my-element>
 ```
 
-Upon parsing the `<style>` tag above, an entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) whose key is the specifier `"foo"` and whose value is a new [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) created by running the steps to [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) with `source` being the text of the `<style>` tag. Note that [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) throws a script error when encountering `@import` rules, which is not possible while parsing. One option would be to fail parsing when `@import` is encountered, resulting in a null [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) being added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), which is the same result as a failed fetch (per step 13.1 of the [script module fetch algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script).
+Upon parsing the `<style>` tag above, an entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) whose key is the specifier `"foo"` and whose value is a new [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) created by running the steps to [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) with `source` being the text of the `<style>` tag. Note that [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) throws a script error when encountering `@import` rules, which is not possible while parsing. One option would be to fail parsing when `@import` is encountered, resulting in a null [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) being added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), which is the same result as a failed fetch (per step 13.1 of the [script module fetch algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script)). The resulting [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) would implicitly have a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#creating-a-json-module-script) of "css", given that it originated from a `<style>` tag. 
 
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
@@ -736,7 +736,7 @@ This suggestion looks like the following:
 
 ```html
 <my-element>
-   <template shadowrootmode="open" shadowrootadoptedstylesheets="/foo.css">
+   <template shadowrootmode="open" shadowrootadoptedstylesheets="foo">
        <link rel="stylesheet" href="/foo.css" noadoptedstylesheets> <!-- no-op on browsers that support shadowrootadoptedstylesheets on <template> tags -->
    </template>
 </my-element>
@@ -744,7 +744,7 @@ This suggestion looks like the following:
 
 ## Future Work
 
-This proposal expands the concept of [module specifiers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string) to export entries into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). This concept could also apply to the `<script>` tag when [inline module scripts](https://html.spec.whatwg.org/multipage/scripting.html#the-script-element) are specified, giving the ability for these scripts to [export](https://tc39.es/ecma262/#sec-exports) values, something they are not currently capable of.
+This proposal expands the concept of [module specifiers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string) to export entries into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). This concept could also apply to the `<script>` tag when [inline module scripts](https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-inline-module-script-graph) are specified, giving the ability for these scripts to [export](https://tc39.es/ecma262/#sec-exports) values, something they are not currently capable of (see [this issue](https://github.com/whatwg/html/issues/11202)).
 
 ## Summary
 The following table compares pros and cons of the various proposals: 
