@@ -399,15 +399,24 @@ properties. See [CSSWG Issue
 
 An author may want to apply different sets of gap decorations to different
 regions of a given container layout. We refer to such regions as a *gap
-decoration areas*.
+decoration areas*. The examples below illustrate how these might work on a grid
+container; gap decoration areas on other container types have not yet been
+explored.
 
-The author defines these areas using the `rule-areas` property. In grid and
-masonry containers, these areas are defined using tuples of line names or numbers,
-similar to the `grid-area` property, each of which is assigned a name:
+The author defines these areas using the `rule-areas` property. Each area is
+defined by giving it first a name, then a tuple of numbers or line names which
+work exactly as they would in the `grid-area` property:
 
 ```css
   rule-areas: --first-row 1 / 1 / 2 / -1, --first-column 1 / 1 / -1 / 2;
 ```
+
+On a grid container, the above value of `rule-areas` would define an area named
+`--first-row` that includes the grid lines within and around the first row (row
+line 1, column line 1 to row line 2, column line -1) and an area named
+`--first-column` that includes the grid lines within and around the first column
+(row line 1, column line 1 to row line -1, column line 2). These areas are
+inclusive of the grid lines on their edges.
 
 Then, on other gap decoration properties such as `*-rule-width`, `*-rule-style`,
 and `*-rule-color`, the author can then specify first a "default" set of values
@@ -415,8 +424,15 @@ for the container, then a named area, then a set of values that applies to that
 area, and so on:
 
 ```css
-  rule: 1px solid black, 1px solid gray [--first-row] 3px solid black [--first-column] 1px solid blue;
+  rule: 1px solid black, 1px solid gray [--first-row] 3px solid black, 5px solid black [--first-column] 1px solid blue;
 ```
+
+Cycling behavior applies in named areas the same as it does elsewhere, and where
+multiple values would cover the same segment of a gap, the last one that applies
+will "win". Thus, the value above would apply alternating 1px solid black and
+1px solid gray rules to the grid in general, then override gaps in the first row
+with alternating 3px solid black and 5px solid black rules, then on top of that
+override gaps in the first column with 1px solid blue rules.
 
 #### Scenario: Calendar grid with header column
 
