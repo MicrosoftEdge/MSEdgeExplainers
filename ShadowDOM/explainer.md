@@ -698,7 +698,7 @@ or
 ```
 Web authors can use the `shadowrootadoptedstylesheets` property on the `<template>` element to associate the stylesheets with a declarative shadow root.
 ```html
-<template shadowrootmode="open" shadowrootadoptedstylesheets="shared_shadow_styles, external_shared_shadow_styles">
+<template shadowrootmode="open" shadowrootadoptedstylesheets="shared_shadow_styles external_shared_shadow_styles">
       <!-- -->
 </template>
 ```
@@ -744,7 +744,7 @@ This suggestion looks like the following:
 
 ## Future Work
 
-This proposal expands the concept of [module specifiers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string) to export entries into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). This concept could also apply to the `<script>` tag when [inline module scripts](https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-inline-module-script-graph) are specified, giving the ability for these scripts to [export](https://tc39.es/ecma262/#sec-exports) values, something they are not currently capable of (see [this issue](https://github.com/whatwg/html/issues/11202)).
+This proposal expands the concept of [module specifiers](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string) to allow content in <style> elements to create named [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) entries without referencing an external file. This concept could also apply to the `<script>` tag when [inline module scripts](https://html.spec.whatwg.org/multipage/webappapis.html#fetch-an-inline-module-script-graph) are specified, giving the ability for these scripts to [export](https://tc39.es/ecma262/#sec-exports) values, something they are not currently capable of (see [this issue](https://github.com/whatwg/html/issues/11202)).
 
 ```js
 <script type="module" specifier="exportsfoo">
@@ -771,9 +771,7 @@ The following table compares pros and cons of the various proposals:
 ## Open issues
 * What happens if a `<template shadowrootadoptedstylesheets="">` references a specifier that was imported as a non-inline CSS module whose fetch hasn’t completed yet?
   Leading idea: Non-declarative imports don't apply for declarative shadow roots if their status is set to "pending". Alternatively, we could disallow any non-declartive imports on `<template shadowrootadoptedstylesheets="">`.
-* Render thread blocking – to avoid an FOUC, developers may want to block rendering until styles are available. There are many ways that this could be accomplished – for instance, `<link rel="..." blocking="render">`
-* For declarative CSS Modules, the only way to apply styles *only* to shadow elements is via a `:host` selector. This might not be feasible for large, complex sites, and could lead to duplicated styles. A new attribute on the `<style>` tag (`type=adoptedStyles`) could address this, as would a new tag (`<adoptedStyle>`).
-* `cloneNode` – there are several complications with cloneNode
+
 
 ## References and acknowledgements
 Many thanks for valuable feedback and advice from other contributors:
