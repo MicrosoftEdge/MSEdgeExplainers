@@ -26,7 +26,8 @@ Web component authors often want to create custom elements that inherit the beha
 
 ## Proposal: add static `behavesLike` property with behavior-specific interface mixins
 
-Web component authors can now create custom elements with native behaviors by adding a static `behavesLike` property to their custom element class definition. This property can be set to string values that represent native element types:
+We propose enabling web component authors to create custom elements with native behaviors by adding a static `behavesLike` property to their custom element class definition. This property can be set to string values that represent native element types:
+
 ```js
     class CustomButton extends HTMLElement {
         static behavesLike = 'button';
@@ -42,7 +43,8 @@ The initial set of `behavesLike` values being proposed are listed below. Support
 
 If `behavesLike` is assigned any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown during `customElements.define()`.
 
-`behavesLike` is a static property that must be set during class definition and cannot be changed after the custom element is defined. This works similar to how [`formAssociated`](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements-face-example) is a static property that determines form association capabilities.
+`behavesLike` is a static property that must be set in the class definition and cannot be changed after the custom element is defined. This works similarly to the static [`formAssociated`](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements-face-example) property that determines form association capabilities.
+
 
 ### `static behavesLike = 'button'` and `elementInternals.buttonMixin`
 When `static behavesLike = 'button'` is set in a custom element's class definition, the custom element will gain support for all button-specific attributes and properties.
@@ -103,7 +105,7 @@ Below is an example showcasing a custom button being used as a popup invoker wit
         
         set popoverTargetElement(element) {
             if (this.internals_.buttonMixin) {
-            this.internals_.buttonMixin.popoverTargetElement = element;
+                this.internals_.buttonMixin.popoverTargetElement = element;
             }
         }
     }
@@ -193,7 +195,8 @@ interface LabelInternals {
 };
 ```
 
-### Order of precedence for used values: Element attributes/properties > `ElementInternals` properties > default properties via `behavesLike`
+### Order of precedence for used values: Element content attributes > `ElementInternals` properties > default properties via `behavesLike`
+
 When `behavesLike` is set, the custom element will be assigned the same defaults as the corresponding native element. For example, if `behavesLike = 'button'` is set, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternals.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
 
 ### `behavesLike` with `extends`/`is` customized built-ins
