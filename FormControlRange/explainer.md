@@ -224,7 +224,7 @@ nameField.addEventListener('input', (e) => {
 
 ### Goal
 
-Provide a way to create a `FormControlRange` for text within `<textarea>` and `<input>` elements, enabling operations like getting bounding rects and setting custom highlights while preserving the encapsulation of these form controls.
+Provide a way to obtain a `FormControlRange`—a specialized, live range for `<textarea>` and `<input>` values implemented as an `AbstractRange` subclass—that enables range-based operations (e.g. getting bounding rects, setting custom highlights, etc.) while restricting standard `Range` mutations to preserve encapsulation of these form controls.
 
 ### Non-goals
 
