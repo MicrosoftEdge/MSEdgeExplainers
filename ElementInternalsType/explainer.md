@@ -3,6 +3,7 @@
 ## Authors:
 - [Sanket Joshi](https://github.com/sanketj)
 - [Alex Keng](https://github.com/alexkeng)
+- [Ana Sollano Kim](https://github.com/anaskim)
 - [Chris Holt](https://github.com/chrisdholt)
 
 ## Participate
@@ -65,7 +66,7 @@ When `static behavesLike = 'button'` is set in a custom element's class definiti
 - `popovertargetaction` - Indicates whether a targeted popover element is to be toggled, shown, or hidden
 - `command` - Indicates to the targeted element which action to take
 - `commandfor` - Targets another element to be invoked
-- `interesttarget` - [currently experimental in Chromium](https://groups.google.com/a/chromium.org/g/blink-dev/c/LLgsMjTzmAY/m/5GUjSYC2AQAJ)
+- `interesttarget` - [currently experimental in Chromium](https://chromestatus.com/feature/4530756656562176?gate=4768466822496256)
 
 **Supported properties:**
 The `elementInternals.buttonMixin` property provides access to a `ButtonInternals` interface that exposes button-specific properties:
@@ -119,8 +120,11 @@ Below is an example showcasing a custom button being used as a popup invoker wit
 **Implicit button behavior:**
 Beyond attributes and properties, custom elements with `behavesLike = 'button'` also gain native button behaviors:
 - **Default submit behavior**: The default `type` is "submit", the button will submit its associated form when activated
-- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (eg, a text input) will trigger the custom button's submit behavior
+- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (eg, a text input) will trigger the custom button's submit behavior if the button's `type` is "submit".
 - **Form association**: The custom element automatically becomes form-associated and participates in form submission and validation
+- **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
+- **Focusable by default**: The element becomes focusable and participates in tab navigation without requiring `tabindex`
+- **Default ARIA semantics**: Have an [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role
 
 ### `static behavesLike = 'label'` and `elementInternals.labelMixin`
 When `static behavesLike = 'label'` is set in a custom element's class definition, the custom element will gain support for all label-specific attributes and properties.
@@ -159,6 +163,7 @@ Below is an example showcasing a custom label being used to label a checkbox wit
 Beyond attributes and properties, custom elements with `behavesLike = 'label'` also gain native label behaviors:
 - **Implicit association**: If no `for` attribute is specified, the first labelable element descendant automatically becomes the labeled control
 - **Click delegation**: Clicking the custom label will activate its associated control (focus text inputs, toggle checkboxes, etc.)
+- **Accessibility integration**: The label becomes the associated element's accessible name for screen readers and other assistive technologies
 
 
 ### Behavior-specific interfaces
@@ -208,7 +213,7 @@ This is because `behavesLike` functionality depends on `ElementInternals` (for i
 Setting `behavesLike` gives a custom element native element like behavior, but the custom element's appearance does not change. In other words, the custom element does not take on default, author-specified or user-specified styles from the native element.
 
 ### `behavesLike` and `formAssociated`
-If the element type specified by `behavesLike` is already a [form-associated element](https://html.spec.whatwg.org/multipage/forms.html#form-associated-element) (such as `'button'`), then `static formAssociated = true;` becomes a no-op since the element will automatically gain form association capabilities from its specified behavior.
+If the element type specified by `behavesLike` is already a [form-associated element](https://html.spec.whatwg.org/multipage/forms.html#form-associated-element) (such as `'button'`), then `static formAssociated = true/false;` becomes a no-op since the element will automatically gain form association capabilities from its specified behavior.
 
 ## Alternatives considered
 
@@ -237,7 +242,7 @@ This approach had several design issues:
 
 **Timing and mutability concerns:**
 - **When to set**: Unclear whether the property should be set in the constructor, `connectedCallback()`, or elsewhere
-- **Immutability enforcement**: Complex logic needed to prevent the property from being changed after initial setting
+- **Immutability enforcement**: Additional logic needed to prevent the property from being changed after initial setting
 
 ### `extends` and `is` attribute approach
 
@@ -253,6 +258,8 @@ Both `extends` and `is` are supported in Firefox and Chromium-based browsers. Ho
 
 [WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455)
 
+[WHATWG resolution to accept using static property instead of `elementInternals.type`](https://github.com/whatwg/html/issues/11390#issuecomment-3190443053)
+
 ## References & acknowledgements
 
 Many thanks for valuable feedback and advice from:
@@ -262,4 +269,5 @@ Many thanks for valuable feedback and advice from:
 - [Keith Cirkel](https://github.com/keithamus)
 - [Steve Orvell](https://github.com/sorvell)
 - [Daniel Clark](https://github.com/dandclark)
+- [Leo Lee](https://github.com/leotlee)
 - [Open UI Community Group](https://www.w3.org/community/open-ui/)
