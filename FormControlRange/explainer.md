@@ -17,7 +17,7 @@
 
 The current `Range` interface methods do not support retrieving or creating ranges that represent the `value` (rather than the element itself) of `<textarea>` and `<input>` elements. As a result, if web developers want to use the `getBoundingClientRect()` method in a `<textarea>` or `<input>` element to position a popup beneath the user's current caret for delivering contextual autocomplete suggestions or marking syntax errors as users type using the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), they must find workarounds. These workarounds often involve cloning these elements and their styles into `<div>`s, which is both difficult to maintain and may impact the web application's performance.
 
-This proposal aims to address these issues by introducing `FormControlRange`, a new `AbstractRange` subclass that serves as a way to reference spans of text within form control elements. 
+This proposal aims to address these issues by introducing `FormControlRange`, a new `AbstractRange` subclass that serves as a way to reference spans of text within form control elements while preserving encapsulation. 
 
 ## User-Facing Problem
 
@@ -254,14 +254,14 @@ FormControlRange exposes useful endpoint information while maintaining encapsula
 - `toString()`: Returns the text content of the range
 - `setFormControlRange(element, startOffset, endOffset)`: Sets endpoints directly in value space
   - `element`: Must be a supported text control (`<input>` or `<textarea>`)
-  - `startOffset`: Index into element's value where range should start (0 ≤ startOffset ≤ endOffset)
-  - `endOffset`: Index into element's value where range should end (endOffset ≤ element.value.length)
+  - `startOffset`: Index into element's value where range should start (`0 ≤ startOffset ≤ endOffset`)
+  - `endOffset`: Index into element's value where range should end (`endOffset ≤ element.value.length`)
   - Throws `IndexSizeError` if bounds are invalid
-  - Throws `NotSupportedError` if element is not a supported text control type
-- `setStart(node, offset)`, `setEnd(node, offset)`: Allowed only when node is the host form control and the offset is a valid value index. Otherwise throws `NotSupportedError`
+  - Throws `NotSupportedError` if `element` is not a supported text control type
 
 #### Unavailable Methods
-The following methods are not available to prevent mutation of inner browser implementation details:
+The following methods are not available to avoid exposing or mutating inner browser implementation details:
+- `setStart()`, `setEnd()` (use `setFormControlRange()` instead)
 - `setStartBefore()`, `setStartAfter()`, `setEndBefore()`, `setEndAfter()`
 - `selectNode()`, `selectNodeContents()`
 - `surroundContents()`
@@ -434,15 +434,11 @@ const textarea = document.querySelector("#messageArea");
 const wordRange = new FormControlRange();
 wordRange.setFormControlRange(textarea, 0, 5);
 
-// Apply highlight to that live range.
+// Bind a highlight to that live range once.
 const highlight = new Highlight(wordRange);
 CSS.highlights.set("tracked-word", highlight);
 
-// Reapply the same highlight object after each edit.
-// The live range automatically adjusts as text changes — no offset recalculation needed.
-textarea.addEventListener("input", () => {
-  CSS.highlights.set("tracked-word", highlight);
-});
+// No input-handler needed: as the control’s value changes, the range stays in sync and the highlight repaints automatically.
 ```
 If text is inserted before `"hello"`, the highlight automatically shifts so it still covers the same word.
 
@@ -526,20 +522,20 @@ This `setFormControlRange()` method would set a new flag `IsFormControl()` in th
 
 ```javascript
 range.startContainer        // Returns startNode
-formRange.startContainer    // Flag is on: Throws exception
+formRange.startContainer    // Returns the host <textarea>/<input> element
 ```
 
-This approach addresses encapsulation concerns for ranges in form controls. It also offers better compatibility than the `FormControlRange` interface, since it would work seamlessly with APIs that involve `Range` (not only `AbstractRange`) objects, such as the Selection API:
+This approach addresses encapsulation concerns for ranges in form controls. It also offers better compatibility than the `FormControlRange` interface, since it remains a `Range` and is compatible at the type level with APIs that involve `Range` (not only `AbstractRange`) objects, such as the Selection API. However, Selection behavior for value-space ranges is not defined today and would require additional spec work.
 
 ```javascript
 // Using this approach
-selection.addRange(formRange)     // Works as intended.
+selection.addRange(formRange)     // Type-checks; actual behavior would need explicit spec rules
 
 // Using FormControlRange interface
 selection.addRange(formRange2)    // Throws exception: "parameter 1 is not of type Range."
 ```
 
-Ultimately, the `FormControlRange` interface was chosen instead. While the `setFormControlRange()` approach offered better API compatibility, it did not provide an explicit distinction between regular and form control ranges—both would be of type `Range`, potentially confusing web authors about why some methods may or may not be available depending on how the `Range` was set (using `setStart()` and `setEnd()` or `setFormControlRange()`).
+Ultimately, the `FormControlRange` interface was chosen instead. While the `setFormControlRange()` approach offered better type-level compatibility, it did not provide an explicit distinction between regular and form control ranges—both would be of type `Range`, potentially confusing web authors about why some methods may or may not be available depending on how the `Range` was set (using `setStart()` and `setEnd()` or `setFormControlRange()`), and it would still require additional spec work to define Selection behavior for value-space ranges.
 
 ## Other Considerations
 
