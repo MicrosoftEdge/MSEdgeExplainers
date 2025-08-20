@@ -250,24 +250,126 @@ A partial solution for this problem already exists today. Authors can specify th
 
 Both `extends` and `is` are supported in Firefox and Chromium-based browsers. However, this solution has limitations, such as not being able to attach shadow trees to (most) customized built-in elements. Citing these limitations, Safari doesn't plan to support customized built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
 
-## Stakeholder Feedback / Opposition
+### Compositional Mixins via `elementInternals.addMixin()`
 
-- Chromium : Positive
-- WebKit : Positive based on https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
-- Gecko : No official signal, but no objections shared in the discussion here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
+This alternative proposes a compositional API that allows web developers to opt into specific native behaviors using mixins. These can be added via a method like `elementInternals.addMixin()`, injecting native-like capabilities (e.g., form participation, activation behavior) into custom elements. The approach supports both built-in mixins (provided by the platform) and user-defined ones, enabling flexible combinations of behaviors.
 
-[WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455)
+```js
+function MyCustomBehaviorMixin(Base) {
+  return class extends Base {
+    connectedCallback() {
+      super.connectedCallback?.();
+      this.setAttribute('data-enhanced', 'true');
+      this.addEventListener('mouseover', () => {
+        this.style.backgroundColor = 'lightblue';
+      });
+    }
+  };
+}
 
-[WHATWG resolution to accept using static property instead of `elementInternals.type`](https://github.com/whatwg/html/issues/11390#issuecomment-3190443053)
+class CustomButton extends HTMLElement {
+  constructor() {
+    super();
+    const internals = this.attachInternals();
+    // Add browser built-in behavior for activation
+    internals.addMixin(ButtonActivationMixin);
+    // Add custom behavior
+    internals.addMixin(MyCustomBehaviorMixin);
+  }
+}
+customElements.define('custom-button', CustomButton);
+```
 
-## References & acknowledgements
+#### ButtonActivationMixin (Built-in Mixin)
 
-Many thanks for valuable feedback and advice from:
+A browser-implemented mixin that encapsulates the native behavior of a  element. When applied, it enables:
 
-- [Mason Freed](https://github.com/mfreed7)
-- [Justin Fagnani](https://github.com/justinfagnani)
-- [Keith Cirkel](https://github.com/keithamus)
-- [Steve Orvell](https://github.com/sorvell)
-- [Daniel Clark](https://github.com/dandclark)
-- [Leo Lee](https://github.com/leotlee)
-- [Open UI Community Group](https://www.w3.org/community/open-ui/)
+- Keyboard activation (e.g., triggering on `Enter` or `Space`).
+- Click handling and dispatching of click events.
+- Participation in form submission if applicable.
+- All properties and attributes from the native element's implementation.
+- Accessibility roles and ARIA integration.
+
+This mixin would be part of the platform, with the goal of ensuring consistent behavior across custom elements that opt into it.
+
+#### MyCustomBehaviorMixin (User-defined Mixin)
+
+A web author-implemented mixin that adds custom logic or features to an element. In the sample code above, it:
+
+- Adds a data-enhanced attribute when the element is connected.
+- Changes the background color on mouseover.
+- Demonstrates how web developers can encapsulate reusable behaviors.
+
+Compositional Mixins via `elementInternals.addMixin()` has the following disadvantages:
+
+- **Blurs the boundary of built-in elements**: Custom elements could combine capabilities from multiple built-in elements (e.g., behave like both a button and a label), potentially introducing confusion in expected behavior. The platform may need more concrete real-world use cases before moving in this direction.
+- **Implicit behavior flags still needed**: Some behaviors (e.g., native button or label functionality) still require implicit flags to activate. This reintroduces the need for a static property like `static behavesLike = 'button'`, which the mixin model aimed to avoid.
+
+### Compositional Mixins via Subclass Factories
+
+This alternative proposes leveraging JavaScript subclass factories to compose native-like behaviors into custom elements. This approach aligns with existing JavaScript patterns and avoids introducing new platform-level APIs.
+Web authors would use mixin functions that return subclasses of `HTMLElement`, each encapsulating a specific behavior (e.g., form association, activation). These mixins could be layered to create elements with multiple built-in capabilities.
+
+```js
+function ButtonCustomMixin(Base) {
+  return class extends Base {
+    static get observedAttributes() {
+      return ['command'];
+    }
+
+    constructor() {
+      super();
+      this._command = null;
+    }
+
+    get command() {
+      return this._command;
+    }
+
+    set command(value) {
+      this._command = value;
+      this.setAttribute('command', value);
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      if (name === 'command') {
+        this.command = newValue;
+      }
+    }
+
+    connectedCallback() {
+      if (this.hasAttribute('command')) {
+        this.command = this.getAttribute('command');
+      }
+
+      this.addEventListener('click', (e) => {
+        if (this.command) {
+          // Custom behavior: dispatch a command event with the command name
+          this.dispatchEvent(new CustomEvent('custom-command', {
+            detail: { name: this.command },
+            bubbles: true,
+            composed: true
+          }));
+        }
+      });
+    }
+  };
+}
+
+class CustomButton extends ButtonCustomMixin(HTMLButtonElement) {
+  constructor() {
+    super();
+    this.internals = this.attachInternals();
+  }
+}
+customElements.define('custom-button', CustomButton, { extends: 'button' });
+```
+
+In the sample code above,  a custom command behavior is shown. Instead of linking to a `<command>` element (as in native HTML), this implementation dispatches a custom-command event when clicked, passing the command name in the event's detail. This pattern allows web authors to define their own command-handling logic elsewhere in the application, offering greater flexibility than the native model.
+
+Compositional Mixins via Subclass Factories has the following disadvantages:
+
+- **Blurs the boundary of built-in elements**: Similar to the compositional mixins via `elementInternals.addMixin()` alternative, custom elements could combine capabilities from multiple built-in elements. This may introduce ambiguity in behavior and expectations.
+- **Increased complexity for declarative usage**: Supporting mixins via subclass factories in declarative HTML (e.g., `<my-element behaves-like="button">`) would be significantly more complex than a single type string.
+- **Prototype chain manipulation**: While subclass factories are idiomatic in JavaScript, they can result in deep and complex prototype chains. This may complicate debugging, degrade performance, and hinder interoperability with platform features such as accessibility and form controls
+- **Unproven feasibility in the platform**: The subclass factory pattern has never been used in the web platform before. While it is common in userland JavaScript, we currently lack sufficient technical knowledge to confirm whether this approach is feasible or compatible with the platform’s internals. This introduces uncertainty about its viability.
