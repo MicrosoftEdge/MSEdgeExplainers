@@ -373,3 +373,25 @@ Compositional Mixins via Subclass Factories has the following disadvantages:
 - **Increased complexity for declarative usage**: Supporting mixins via subclass factories in declarative HTML (e.g., `<my-element behaves-like="button">`) would be significantly more complex than a single type string.
 - **Prototype chain manipulation**: While subclass factories are idiomatic in JavaScript, they can result in deep and complex prototype chains. This may complicate debugging, degrade performance, and hinder interoperability with platform features such as accessibility and form controls
 - **Unproven feasibility in the platform**: The subclass factory pattern has never been used in the web platform before. While it is common in userland JavaScript, we currently lack sufficient technical knowledge to confirm whether this approach is feasible or compatible with the platform’s internals. This introduces uncertainty about its viability.
+
+## Stakeholder Feedback / Opposition
+
+- Chromium : Positive
+- WebKit : Positive based on https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
+- Gecko : No official signal, but no objections shared in the discussion here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
+
+[WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455)
+
+[WHATWG resolution to accept using static property instead of `elementInternals.type`](https://github.com/whatwg/html/issues/11390#issuecomment-3190443053)
+
+## References & acknowledgements
+
+Many thanks for valuable feedback and advice from:
+
+- [Mason Freed](https://github.com/mfreed7)
+- [Justin Fagnani](https://github.com/justinfagnani)
+- [Keith Cirkel](https://github.com/keithamus)
+- [Steve Orvell](https://github.com/sorvell)
+- [Daniel Clark](https://github.com/dandclark)
+- [Leo Lee](https://github.com/leotlee)
+- [Open UI Community Group](https://www.w3.org/community/open-ui/)
