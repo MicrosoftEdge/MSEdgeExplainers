@@ -39,7 +39,7 @@ content location of future work and discussions.
 
 ## Introduction
 
-The `webkit-app-region` and `app-region` properties exist as a styling feature used primarily in desktop web applications to define draggable regions of a window. This is useful when applications recreate a custom title bar or title bar region, as it **allows users to click and drag the window to move it when the default OS window chrome is not present**.
+The `-webkit-app-region` and `app-region` properties exist as a styling feature used primarily in desktop web applications to define draggable regions of a window. This is useful when applications recreate a custom title bar or title bar region, as it **allows users to click and drag the window to move it when the default OS window chrome is not present**.
 
 This property is used by several technologies to move a window in the OS, including:
 * [Web Apps through the WCO API](https://wicg.github.io/window-controls-overlay/)
@@ -114,17 +114,17 @@ And here is the HTML code for the example:
 
 In this example, the 'WCO' feature is enabled, hence the window has lost the meaningful area to be moved across the screen.
 
-The (Generic Beautiful) button the button has the `app-region` set to `drag`. This button can how be used to drag the window around.
+The (Generic Beautiful) button has the `app-region` set to `drag`. This button can how be used to drag the window around.
 
 > Note: This is just an example to test the _current_ behaviour on elements that have animations. the `app-region` is generally used on emulated titlebars or other UX designed to let the end user move the window around.
 
 ### `app-region` and pointer events
 
-Current implementations of `app-region` **ignore pointer events**. Interactive elements inside an area defined with `app-region: drag` will require a `app-region: no-drag` to be accessible.
+Current implementations of `app-region` **ignore pointer events**. Interactive elements inside an area defined with `app-region: drag` will require a `app-region: no-drag` to be interacted with.
 
 ### Suppression of `app-region`
 
-The `app-region` property applies to a DOM element, and allows it to become a point from where to drag and move a window. If this element's `visibility` is `hidden` or `collapsed`.
+The `app-region` property applies to a DOM element, and allows it to become a point from where to drag and move a window. If this element's `visibility` is `hidden` or `collapsed`, or if the element is occluded by an element with a higher `z-index` then the window can't be dragged from that element.
 
 ### `app-region` and animations
 The property works and while the user continues to keep their pointer down, even of the animation has moved the element away from where that pointer is, they can continue with the window movement they started. 
