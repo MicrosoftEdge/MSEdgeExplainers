@@ -6,7 +6,7 @@
 
 ## Participate
 
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Draggable)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Draggable%20App%20Region)
 
 ## Status of this Document
 
