@@ -434,7 +434,7 @@ const textarea = document.querySelector("#messageArea");
 const wordRange = new FormControlRange();
 wordRange.setFormControlRange(textarea, 0, 5);
 
-// Bind a highlight to that live range once.
+// Bind a highlight to that live range.
 const highlight = new Highlight(wordRange);
 CSS.highlights.set("tracked-word", highlight);
 
@@ -535,7 +535,7 @@ selection.addRange(formRange)     // Type-checks; actual behavior would need exp
 selection.addRange(formRange2)    // Throws exception: "parameter 1 is not of type Range."
 ```
 
-Ultimately, the `FormControlRange` interface was chosen instead. While the `setFormControlRange()` approach offered better type-level compatibility, it did not provide an explicit distinction between regular and form control ranges—both would be of type `Range`, potentially confusing web authors about why some methods may or may not be available depending on how the `Range` was set (using `setStart()` and `setEnd()` or `setFormControlRange()`), and it would still require additional spec work to define Selection behavior for value-space ranges.
+Ultimately, the `FormControlRange` interface was chosen instead. While the `setFormControlRange()` approach offered better type-level compatibility, it did not provide an explicit distinction between regular and form control ranges—both would be of type `Range`, potentially confusing web authors about why some methods may or may not be available depending on how the `Range` was set (using `setStart()` and `setEnd()` or `setFormControlRange()`).
 
 ## Other Considerations
 
