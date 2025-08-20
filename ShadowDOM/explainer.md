@@ -770,7 +770,7 @@ The following table compares pros and cons of the various proposals:
 
 ## Open issues
 * What happens if a `<template shadowrootadoptedstylesheets="">` references a specifier that was imported as a non-inline CSS module whose fetch hasn’t completed yet?
-  Leading idea: Disallow any non-declartive imports on `<template shadowrootadoptedstylesheets="">`. This seems the safest for backwards compatibility, and a developer is unlikely to do specify a declarative and non-declarative specifier on purpose. Alternatively, non-declarative imports don't apply for declarative shadow roots if their status is set to "pending".
+  Leading idea: Disallow any non-declarative imports on `<template shadowrootadoptedstylesheets="">`. This is the simplest approach that will minimize the possibility of an FOUC and non-deterministic behavior based on network timing, at the expense of flexibility. If mixing imperative and declarative CSS modules is a scenario we want to support, an alternative way of handling this case is that non-declarative imports are skipped when processing declarative shadow roots if their status is still "pending" at the time that the declarative shadow root is parsed. Otherwise they are applied in the same way as a declarative import.
 * Was it ever intentional that `<script type="importmap">` works inside a shadow root?
 
 ## References and acknowledgements
