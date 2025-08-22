@@ -35,12 +35,7 @@ This feature addresses:
 The feature was implemented to align Chromium with the [`W3C spec`](https://www.w3.org/TR/input-events-2/) and other major browsers. It resolves a long-standing issue tracked in [Chromium Bug 401593412](https://issues.chromium.org/issues/401593412).
 
 ### How does it work?
-The implementation consists of three CLs:
-- [CL 6687446](https://chromium-review.googlesource.com/c/chromium/src/+/6687446): Adds [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) to `insertFromPaste` events.
-- [CL 6830870](https://chromium-review.googlesource.com/c/chromium/src/+/6830870): Adds [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) to `insertReplacementText` events.
-- [CL 6817846](https://chromium-review.googlesource.com/c/chromium/src/+/6817846): Adds [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) to `insertFromDrop` events.
-
-In each case, the [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property is attached only when the target is a [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) element, excluding form controls ([`input`](https://html.spec.whatwg.org/multipage/input.html#the-input-element) or [`textarea`](https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element)).
+In the implementation, [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property is attached only when the target is a [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) element, excluding form controls ([`input`](https://html.spec.whatwg.org/multipage/input.html#the-input-element) or [`textarea`](https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element)).
 
 ### Code Example
 #### Before the Fix
@@ -68,7 +63,7 @@ editor.addEventListener("input", (event) => {
 - Exposing [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) for all elements: This was rejected to preserve existing behavior for form controls and avoid unintended side effects.
 
 ## Security and Privacy
-The [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property is exposed only when the browser determines it is appropriate based on the input event type and context. It is scoped to [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) elements and does not alter Chromium’s drag-and-drop security model.
+This proposal has no known impact on accessibility or privacy and does not alter the permission or security model. The [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property is exposed only when the browser determines it is appropriate based on the input event type and context. It is scoped to [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) elements and does not alter Chromium’s drag-and-drop security model.
 
 ## Performance Impact
 The feature introduces minimal overhead, as [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) is conditionally attached only when relevant. No significant performance regressions were observed during testing.
