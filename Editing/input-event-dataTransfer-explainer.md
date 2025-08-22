@@ -7,6 +7,9 @@
 Feature request: [InputEvent#dataTransfer is null for contenteditable host and insertFromPaste input](https://issues.chromium.org/issues/401593412)
 Spec: [Input Event Types](https://w3c.github.io/input-events/#overview)
 
+## Table of Contents
+
+
 ## Introduction
 This document explains the rationale, design, and implementation of the [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) feature in Chromium. It outlines how this feature improves developer experience and aligns with web standards.
 
