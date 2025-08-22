@@ -49,7 +49,7 @@ Most code that manipulates the DOM, then calls any API that returns sizing infor
   foo.style.maxWidth = "75%";
   // Explicitly yield to main thread here.
   scheduler.yield();
-  // Because the DOM is "dirty" (has chaged since JS started 
+  // Because the DOM is "dirty" (has changed since JS started 
   // running), all frame-generation phases will execute:
   // style recalc -> layout -> paint -> composite.
 </script>
