@@ -229,7 +229,7 @@ The shadow root will be created with its `adoptedStyleSheets` array containing t
 
 An inline CSS module script could also be imported in a JavaScript module in the usual way:
 ```html
-import styles from '/foo.css' with { type: 'css' };
+import styles from 'foo' with { type: 'css' };
 ```
 Another advantage of this proposal is that it can allow multiple module specifiers in the `shadowrootadoptedstylesheets` property:
 ```html
