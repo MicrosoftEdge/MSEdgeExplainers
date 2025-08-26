@@ -4,17 +4,82 @@
 - Pranav Modi (pranavmodi@microsoft.com)
 
 ## Participate
-Feature request: [InputEvent#dataTransfer is null for contenteditable host and insertFromPaste input](https://issues.chromium.org/issues/401593412)
-Spec: [Input Event Types](https://w3c.github.io/input-events/#overview)
+- Feature request: [InputEvent#dataTransfer is null for contenteditable host and insertFromPaste input](https://issues.chromium.org/issues/401593412)
+- Spec: [Input Event Types](https://w3c.github.io/input-events/#overview)
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 ## Table of Contents
 
+  - [User-Facing Problem](#user-facing-problem)
+  - [Goals](#goals)
+  - [Non-goals](#non-goals)
+  - [Motivation](#motivation)
+  - [Explainer](#explainer)
+    - [What is it?](#what-is-it)
+    - [Why now?](#why-now)
+    - [How does it work?](#how-does-it-work)
+    - [Code Example](#code-example)
+      - [Before the Fix](#before-the-fix)
+      - [After the Fix](#after-the-fix)
+  - [Considered Alternatives](#considered-alternatives)
+  - [Security and Privacy](#security-and-privacy)
+  - [Performance Impact](#performance-impact)
+  - [Interoperability](#interoperability)
+  - [References](#references)
 
-## Introduction
-This document explains the rationale, design, and implementation of the [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) feature in Chromium. It outlines how this feature improves developer experience and aligns with web standards.
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## User-Facing Problem
+When [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) was NULL, Users
+
+- Couldn’t access the actual content being pasted or dropped.
+- Couldn’t differentiate between rich and plain text.
+- Couldn’t intercept or sanitize HTML before it was rendered.
+- Couldn’t process dropped files without relying on separate drop event listeners.
+- Couldn’t build consistent logic across beforeinput, input, and drop events.
+
+Exposing [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) empowers developers to build smarter, safer, and more responsive applications. It bridges the gap between browser-native behavior and developer control, enabling features that were previously impossible or unreliable.
+
+A user pastes formatted content (e.g., bold text, lists, links) into a custom editor. The browser renders it correctly using its internal dataTransfer, but developers listening to the input event with inputType = "insertFromPaste" couldn’t access [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) — it was null.
+
+```js
+editor.addEventListener("input", (event) => {
+  if (event.inputType === "insertFromPaste" && event.dataTransfer) { // fails on the second condition and lines 49, 50 and so on not executed.
+    const html = event.dataTransfer.getData("text/html");
+    const text = event.dataTransfer.getData("text/plain");
+    // Use html/text for sanitization, logging, or formatting
+  }
+});
+```
+After the fix, [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) is exposed on the input event, enabling full control.
 
 ## Goals
 The goal of this feature is to expose the [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property on [`InputEvent`](https://w3c.github.io/input-events/#interface-InputEvent) objects for specific input types [`insertFromPaste`, `insertReplacementText`, and `insertFromDrop`](https://w3c.github.io/input-events/#overview) in [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) contexts. This enables developers to access drag-and-drop and clipboard data during input events, improving support for rich text editors and other interactive content tools.
+What Developers Can Do With [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) (Now That It's Exposed)
+1. Access Rich Clipboard Data
+   - Developers can inspect dataTransfer.getData("text/html") to:
+     - Sanitize pasted HTML for security.
+     - Preserve formatting in custom editors.
+     - Detect and block unwanted content (e.g., scripts, tracking pixels).
+
+2. Customize Paste/Drop Behavior
+   - Developers can override default behavior based on:
+     - MIME types in dataTransfer.items.
+     - Source metadata (e.g., URLs, app-specific formats).
+     - User intent (e.g., distinguish between plain text and rich content).
+
+3. Audit and Logging
+   - Developers can log what was pasted or dropped for:
+     - Accessibility tracking.
+     - Undo/redo history.
+     - Security audits.
+
+4. Improve Accessibility and UX
+   - For spelling corrections (insertReplacementText), developers can:
+     - Track automated vs manual changes.
+     - Provide visual feedback or undo options.
+     - Integrate with grammar tools or custom dictionaries.
 
 ## Non-goals
 This feature does not:
@@ -77,9 +142,6 @@ This feature aligns Chromium with the [`W3C Input Events Level 2 specification`]
 ## References
 - [Spec: Input Events Level 2](https://w3c.github.io/input-events/#dom-inputevent-datatransfer)
 - [Bug: Chromium Issue 401593412](https://issues.chromium.org/issues/401593412)
-- [CL 6687446](https://chromium-review.googlesource.com/c/chromium/src/+/6687446)
-- [CL 6830870](https://chromium-review.googlesource.com/c/chromium/src/+/6830870)
-- [CL 6817846](https://chromium-review.googlesource.com/c/chromium/src/+/6817846)
 - [MDN: InputEvent.dataTransfer](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/dataTransfer)
 
 ---
