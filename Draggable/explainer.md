@@ -59,7 +59,7 @@ The property is not currently standard, this leaves a gap on implementations tha
 
 ## Feature Usage
 
-There is interest in stadarising this feature as it is already 'widely' used on the platform and it enables a basic expected interaction for applications. At the time of writing (August 2025), `-webkit-app-region` shows a [0.79%](https://chromestatus.com/metrics/css/timeline/popularity/412) of page loads using it and `app-region` a [0.24%](https://chromestatus.com/metrics/css/timeline/popularity/702), adding to approximately a 1% of all page loads relying on the property. The lack of definition and assumptions on what the feature does can be confusing for users, and undesirable for technologies that need to rely on this property.
+There is interest in standardizing this feature as it is already 'widely' used on the platform and it enables a basic expected interaction for applications. At the time of writing (August 2025), `-webkit-app-region` shows [0.79%](https://chromestatus.com/metrics/css/timeline/popularity/412) of page loads using it and `app-region` [0.24%](https://chromestatus.com/metrics/css/timeline/popularity/702). The lack of definition and assumptions on what the feature does can be confusing for users, and undesirable for technologies that need to rely on this property.
 
 * [User asking about definition of property in IDEs](https://stackoverflow.com/questions/54448328/why-is-webkit-app-region-not-a-defined-css-property-in-most-code-editors).
 * [Confusion on how the feature works](https://github.com/electron/electron/issues/1354).
