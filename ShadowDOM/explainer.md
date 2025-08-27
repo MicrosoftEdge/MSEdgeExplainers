@@ -263,7 +263,7 @@ A global map does come with some tradeoffs, particularly when names collide. Wit
 
 ### `<script>` vs `<style>` For CSS Modules
 
-Earlier versions of this document used the `<script>` tag for declaring CSS Modules, which would be more consistent with the current set of module types (as they are all script-related). Developer feedback has shown a strong preference for using the `<style>` tag when declaring CSS Modules, so this proposal has been updated accordingly. This concept of using an existing tag for definining Declarative CSS Modules could be expanded for future declarative modules such as HTML and SVG. The `<script>` tag remains a natural wrapper for [other declarative modules](#other-declarative-modules) that are script-based, such as JavaScript, JSON, and WASM.
+Earlier versions of this document used the `<script>` tag for declaring CSS Modules, which would be more consistent with the current set of module types (as they are all script-related). Developer feedback has shown a strong preference for using the `<style>` tag when declaring CSS Modules, so this proposal has been updated accordingly. This concept of using an existing tag for defining Declarative CSS Modules could be expanded for future declarative modules such as HTML and SVG. The `<script>` tag remains a natural wrapper for [other declarative modules](#other-declarative-modules) that are script-based, such as JavaScript, JSON, and WASM.
 
 ### Behavior with script disabled
 
