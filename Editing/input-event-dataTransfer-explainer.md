@@ -1,4 +1,4 @@
-# Explainer: [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) Feature
+# Explainer: [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) Feature For [`Contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) Host
 
 ## Authors:
 - Pranav Modi (pranavmodi@microsoft.com)
