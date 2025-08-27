@@ -11,22 +11,22 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 ## Table of Contents
 
-  - [User-Facing Problem](#user-facing-problem)
-  - [Goals](#goals)
-  - [Non-goals](#non-goals)
-  - [Motivation](#motivation)
-  - [Explainer](#explainer)
-    - [What is it?](#what-is-it)
-    - [Why now?](#why-now)
-    - [How does it work?](#how-does-it-work)
-    - [Code Example](#code-example)
-      - [Before the Fix](#before-the-fix)
-      - [After the Fix](#after-the-fix)
-  - [Considered Alternatives](#considered-alternatives)
-  - [Security and Privacy](#security-and-privacy)
-  - [Performance Impact](#performance-impact)
-  - [Interoperability](#interoperability)
-  - [References](#references)
+- [User-Facing Problem](#user-facing-problem)
+- [Goals](#goals)
+- [Non-goals](#non-goals)
+- [Motivation](#motivation)
+- [Explainer](#explainer)
+  - [What is it?](#what-is-it)
+  - [Why now?](#why-now)
+  - [How does it work?](#how-does-it-work)
+  - [Code Example](#code-example)
+    - [Before the Fix](#before-the-fix)
+    - [After the Fix](#after-the-fix)
+- [Considered Alternatives](#considered-alternatives)
+- [Security and Privacy](#security-and-privacy)
+- [Performance Impact](#performance-impact)
+- [Interoperability](#interoperability)
+- [References and Acknowledgements](#references-and-acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
