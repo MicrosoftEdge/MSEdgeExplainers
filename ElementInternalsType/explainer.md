@@ -48,10 +48,9 @@ If `behavesLike` is assigned any other value, a ["NotSupportedError"](https://we
 
 
 ### `static behavesLike = 'button'` and `elementInternals.buttonMixin`
-When `static behavesLike = 'button'` is set in a custom element's class definition, the custom element will gain support for all button-specific attributes and properties.
+When `static behavesLike = 'button'` is set in a custom element's class definition, the custom element will gain support for all button-specific attributes, properties, and methods.
 
 **Supported attributes:**
-- `autofocus` - Automatically focus the form control when the page is loaded
 - `disabled` - Whether the form control is disabled
 - `form` - Associates the element with a form element
 - `formaction` - URL to use for form submission
@@ -69,7 +68,7 @@ When `static behavesLike = 'button'` is set in a custom element's class definiti
 - `interesttarget` - [currently experimental in Chromium](https://chromestatus.com/feature/4530756656562176?gate=4768466822496256)
 
 **Supported properties:**
-The `elementInternals.buttonMixin` property provides access to a `ButtonInternals` interface that exposes button-specific properties:
+The `elementInternals.buttonMixin` property provides access to button-specific properties:
 - `disabled` - reflects the `disabled` attribute
 - `form` - returns the associated HTMLFormElement
 - `formAction` - reflects the `formaction` attribute  
@@ -88,6 +87,12 @@ The `elementInternals.buttonMixin` property provides access to a `ButtonInternal
 - `commandForElement` - returns the Element referenced by the `commandfor` attribute  
 - `popoverTargetAction` - returns the value of the `popovertargetaction` attribute
 - `popoverTargetElement` - returns the Element referenced by the `popovertarget` attribute
+
+**Supported methods:**
+The `elementInternals.buttonMixin` property also provides access to button-specific methods:
+- `checkValidity()` - returns true if the element's value has no validity problems; If false, the method also fires an invalid event on the custom element.
+- `reportValidity()` - performs the same validity checking steps as the checkValidity() method, and if the invalid event isn't canceled, reports the problem to the user
+- `setCustomValidity(message)` - sets a custom error message that is displayed when the form is submitted
 
 Below is an example showcasing a custom button being used as a popup invoker with access to both attributes and DOM properties:
 
