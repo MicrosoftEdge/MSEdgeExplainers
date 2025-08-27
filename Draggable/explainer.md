@@ -114,7 +114,7 @@ And here is the HTML code for the example:
 
 In this example, the 'WCO' feature is enabled, hence the window has lost the meaningful area to be moved across the screen.
 
-The (Generic Beautiful) button has the `app-region` set to `drag`. This button can how be used to drag the window around.
+The (Generic Beautiful) button has the `app-region` set to `drag`. This button can be used to drag the window around.
 
 > Note: This is just an example to test the _current_ behaviour on elements that have animations. The `app-region` is generally used on emulated titlebars or other UX designed to let the end user move the window around.
 
