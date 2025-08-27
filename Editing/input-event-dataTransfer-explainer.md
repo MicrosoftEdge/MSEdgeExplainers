@@ -43,8 +43,20 @@ Exposing [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inp
 
 A user pastes formatted content (e.g., bold text, lists, links) into a custom editor. The browser renders it correctly using its internal dataTransfer, but developers listening to the input event with inputType = "insertFromPaste" couldn’t access [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) — it was null.
 
+```html
+<p contenteditable="true">
+  Go on, try pasting some content into this editable paragraph and see what
+  happens!
+</p>
+
+<p class="result"></p>
+```
+
 ```js
+const editable = document.querySelector("p[contenteditable]");
+const result = document.querySelector(".result");
 editor.addEventListener("input", (event) => {
+  result.textContent = event.dataTransfer.getData("text/html"); // Fails as error - Cannot read properties of null (reading 'getData')
   if (event.inputType === "insertFromPaste" && event.dataTransfer) { // fails on the second condition and lines 49, 50 and so on not executed.
     const html = event.dataTransfer.getData("text/html");
     const text = event.dataTransfer.getData("text/plain");
