@@ -462,7 +462,7 @@ parsing SVG inside the <template>. -->
 ```
 SVG makes heavy use of IDREF's, for example `href` on `<use>` and SVG filters. Per existing Shadow DOM behavior, these IDREF's would be scoped per shadow root.
 
-CSS Modules are not the only type of module - there are also JavasScript, JSON, SVG, HTML, and WASM that need to be considered.
+CSS Modules are not the only type of module - there are also JavaScript, JSON, SVG, HTML, and WASM that need to be considered.
 
 | Module type    | Script Module                                            | Declarative Module                                                        |
 | -------------- | -------------------------------------------------------- | --------------------------------------------------------------------------|
