@@ -1,4 +1,4 @@
-# Explainer: [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) Feature in Chromium
+# Explainer: [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) Feature
 
 ## Authors:
 - Pranav Modi (pranavmodi@microsoft.com)
@@ -84,7 +84,7 @@ What Developers Can Do With [`dataTransfer`](https://html.spec.whatwg.org/multip
 ## Non-goals
 This feature does not:
 - Modify the behavior of form controls like [`<input>`](https://html.spec.whatwg.org/multipage/input.html#the-input-element) and [`<textarea>`](https://html.spec.whatwg.org/multipage/form-elements.html#the-textarea-element).
-- Change the underlying drag-and-drop security model in Chromium.
+- Change the underlying drag-and-drop security model.
 - Introduce new input types or event interfaces.
 
 ## Motivation
@@ -131,17 +131,21 @@ editor.addEventListener("input", (event) => {
 - Exposing [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) for all elements: This was rejected to preserve existing behavior for form controls and avoid unintended side effects.
 
 ## Security and Privacy
-This proposal has no known impact on accessibility or privacy and does not alter the permission or security model. The [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property is exposed only when the browser determines it is appropriate based on the input event type and context. It is scoped to [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) elements and does not alter Chromium’s drag-and-drop security model.
+This proposal has no known impact on accessibility or privacy and does not alter the permission or security model. The [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property is exposed only when the browser determines it is appropriate based on the input event type and context. It is scoped to [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) elements and does not alter drag-and-drop security model.
 
 ## Performance Impact
 The feature introduces minimal overhead, as [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) is conditionally attached only when relevant. No significant performance regressions were observed during testing.
 
 ## Interoperability
-This feature aligns Chromium with the [`W3C Input Events Level 2 specification`](https://www.w3.org/TR/input-events-2/) and matches behavior in Safari and Firefox. It improves cross-browser consistency for developers.
+This feature aligns with the [`W3C Input Events Level 2 specification`](https://www.w3.org/TR/input-events-2/) and matches behavior in Safari and Firefox. It improves cross-browser consistency for developers.
 
-## References
+## References and Acknowledgements 
 - [Spec: Input Events Level 2](https://w3c.github.io/input-events/#dom-inputevent-datatransfer)
 - [Bug: Chromium Issue 401593412](https://issues.chromium.org/issues/401593412)
 - [MDN: InputEvent.dataTransfer](https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/dataTransfer)
 
+Many thanks for valuable feedback and advice from:
+- [Rohan Raja](https://github.com/roraja)
+- [Rakesh Goulikar](https://github.com/ragoulik)
+- [Samba Murthy Bandaru](https://github.com/sambandaru)
 ---
