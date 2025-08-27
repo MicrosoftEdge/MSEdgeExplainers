@@ -56,7 +56,7 @@
 12.  Do features in this specification allow an origin some measure of control over
      a user agent's native UI?
 
-    Yes. The `app-region` property allows a DOM element to be a source from where to drag and move a window around in hte screen if the platform's default UX is not present.
+    Yes. The `app-region` property allows a DOM element to be a source from where to drag and move a window around in the screen if the platform's default UX is not present.
 
 
 13.  What temporary identifiers do the features in this specification create or
