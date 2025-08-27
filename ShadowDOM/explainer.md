@@ -491,10 +491,10 @@ The following example demonstrates how a JavaScript module could be exported dec
 
 ```html
 <script type="json-module" specifier="foo">
-  export const people_in_space = {"people": [{"craft": "ISS", "name": "Oleg Kononenko"}, {"craft": "ISS", "name": "Nikolai Chub"}], "number": 2, "message": "success"};
+{"people": [{"craft": "ISS", "name": "Oleg Kononenko"}, {"craft": "ISS", "name": "Nikolai Chub"}], "number": 2, "message": "success"};
 </script>
 <script type="module">
-  import {people_in_space} from "foo" with { type: "json" };
+  import people_in_space from "foo" with { type: "json" };
   console.log(people_in_space.message);
 </script>
 ```
