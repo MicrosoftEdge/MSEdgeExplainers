@@ -46,6 +46,7 @@ content location of future work and discussions.
     - [Scoping](#scoping)
     - [`<script>` vs `<style>` For CSS Modules](#script-vs-style-for-css-modules)
     - [Behavior with script disabled](#behavior-with-script-disabled)
+    - [Updates to Module Map Key](#updates-to-module-map-key)
     - [Detailed Parsing Workflow](#detailed-parsing-workflow)
     - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
     - [Use with Import Maps](#use-with-import-maps)
@@ -262,11 +263,26 @@ A global map does come with some tradeoffs, particularly when names collide. Wit
 
 ### `<script>` vs `<style>` For CSS Modules
 
-Earlier versions of this document used the `<script>` tag for declaring CSS Modules. Developer feedback has shown a strong preference for using the `<style>` tag when declaring CSS Modules, so this proposal has been updated accordingly. The `<script>` tag remains a more natural wrapper for [other declarative modules](#other-declarative-modules).
+Earlier versions of this document used the `<script>` tag for declaring CSS Modules, which would be more consistent with the current set of module types (as they are all script-related). Developer feedback has shown a strong preference for using the `<style>` tag when declaring CSS Modules, so this proposal has been updated accordingly. This concept of using an existing tag for definining Declarative CSS Modules could be expanded for future declarative modules such as HTML and SVG. The `<script>` tag remains a natural wrapper for [other declarative modules](#other-declarative-modules) that are script-based, such as JavaScript, JSON, and WASM.
 
 ### Behavior with script disabled
 
 User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not been verified yet.
+
+### Updates to Module Map Key
+
+A significant piece of this proposal involves modifying the [module map](https://html.spec.whatwg.org/#module-map) to be keyed by a string instead of a URL. A string is a superset of a URL, so this modification will not break existing scenarios. 
+
+This proposal could avoid this requirement by instead requiring a declarative specifier to be a [URL fragment](https://url.spec.whatwg.org/#concept-url-fragment), but we believe this would introduce several potentially confusing and undesirable outcomes:
+
+1. A fragment element's [indicated element's](https://html.spec.whatwg.org/#find-a-potential-indicated-element) content must match the MIME Type of the outer document, per https://html.spec.whatwg.org/#scrolling-to-a-fragment. In the case of CSS Modules within an HTML document, the CSS content is of type "text/css", but the outer document's MIME type of "text/html". The entire document in this scenario is served with a MIME Type of "text/html" regardless, but it could be confusing to make an exception for nested fragments with different types of content.
+2. The [Find a potential indicated element](https://html.spec.whatwg.org/#find-a-potential-indicated-element) algorithm only searches the top-level document and does not query shadow roots. While this proposal does not require the [find a potential indicated element](https://html.spec.whatwg.org/#find-a-potential-indicated-element) to function (the indicated element in this case is the element that is directly modifying the module map, so there is no element to find), it could be confusing to introduce a new fragment syntax intended for use in shadow roots that violates this principle.
+3. [Import maps](https://html.spec.whatwg.org/#import-map) only make sense for external URL's, as they map pieces of a URL to a final resolved URL. For a same-document reference, it could be confusing to have a URL identifier that does not participate in the [resolved module set](https://html.spec.whatwg.org/#resolved-module-set). Alternatively, this situation could be avoided by adding carve-outs to the [import map resolution algorithm](https://html.spec.whatwg.org/#merge-existing-and-new-import-maps) for declarative modules.
+4. HTML documents are already using fragments for many different concepts, such as [fragment navigations](https://html.spec.whatwg.org/#navigate-fragid), [history updates](https://html.spec.whatwg.org/#url-and-history-update-steps), [internal resource links](https://html.spec.whatwg.org/#process-internal-resource-links), [SVG href targets](https://www.w3.org/TR/SVG2/struct.html#UseElement), and more. Although these use cases are very different, a common factor between them is that they all reference elements in the main document, and cannot refer to elements within a shadow root. An important piece of this proposal is that nested shadow roots can modify the global module map. Introducing a new scoping behavior for fragments that does not fit this model could be confusing to authors. 
+
+Another alternative could be to define a new [scheme](https://url.spec.whatwg.org/#concept-url-scheme) for local references. This is a potential solution, however, it could be cumbersome for developers to have to always use the full URL (including scheme) for specifiers. It also may not be compatible with existing [custom scheme handlers](https://html.spec.whatwg.org/#custom-handlers).
+
+For these reasons, we believe that modifying the [module map](https://html.spec.whatwg.org/#module-map) to be keyed by a string instead of a URL is a more natural solution for developers.
 
 ### Detailed Parsing Workflow
 
@@ -455,6 +471,32 @@ CSS Modules are not the only type of module - there are also JavasScript, JSON, 
 | HTML           | `import {foo} from "bar.html" with {type: "html"};`      | `<template type="html-module" specifier="bar"></template>`                |
 | SVG            | `import {foo} from "bar.svg" with {type: "svg"};`        | `<template type="svg-module" specifier="bar"></template>`                 |
 | WASM           | `import {foo} from "bar.wasm" with {type: "wasm"};`      | `<script type="wasm-module" specifier="bar"></script>`                    |
+
+Modules that support declarative content (such as CSS Modules and HTML Modules) need both a declarative export mechanism (`<style type="module">` for CSS Modules) and a declarative import mechanism (the `adoptedstylesheets` attribute and/or the `<link>` tag for CSS Modules), while purely script-based modules types (such as JavaScript, JSON, and WASM) only require a declarative export mechanism, as they are expected to be imported via script.  
+
+The following example demonstrates how a JavaScript module could be exported declaratively and imported imperatively:
+
+```html
+<script type="module" specifier="foo">
+  export const magic_number = 42;
+</script>
+<script type="module">
+  import {magic_number} from "foo" with { type: "javascript-or-wasm" };
+  console.log(magic_number);
+</script>
+```
+
+...and likewise for a JSON module:
+
+```html
+<script type="json-module" specifier="foo">
+  export const people_in_space = {"people": [{"craft": "ISS", "name": "Oleg Kononenko"}, {"craft": "ISS", "name": "Nikolai Chub"}], "number": 2, "message": "success"};
+</script>
+<script type="module">
+  import {people_in_space} from "foo" with { type: "json" };
+  console.log(people_in_space.message);
+</script>
+```
 
 ## Alternate proposals
 
