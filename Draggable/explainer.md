@@ -120,7 +120,7 @@ The (Generic Beautiful) button has the `app-region` set to `drag`. This button c
 
 ### `app-region` and pointer events
 
-Current implementations of `app-region` **ignore pointer events**. Interactive elements inside an area defined with `app-region: drag` will require a `app-region: no-drag` to be interacted with.
+Current implementations of `app-region` **consume all pointer events**, even if they don't result in a drag. Interactive elements inside an area defined with `app-region: drag` will require a `app-region: no-drag` to be interacted with.
 
 ### Suppression of `app-region`
 
