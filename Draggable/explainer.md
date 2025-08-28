@@ -127,7 +127,7 @@ Current implementations of `app-region` **consume all pointer events**, even if 
 The `app-region` property applies to a DOM element, and allows it to become a point from where to drag and move a window. If this element's `visibility` is `hidden` or `collapsed`, or if the element is occluded by an element with a higher `z-index` then the window can't be dragged from that element.
 
 ### `app-region` and animations
-The property works and while the user continues to keep their pointer down, even of the animation has moved the element away from where that pointer is, they can continue with the window movement they started. 
+A drag operation started in an `app-region` continues so long as the user continues to keep their pointer down, even if an animation has moved the element away from where that pointer is.
 
 ## Sample use case
 
