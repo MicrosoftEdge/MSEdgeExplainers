@@ -586,6 +586,9 @@ How should `FormControlRange` behave when callers provide reversed offsets (i.e.
 Consider the following ideas:
 - Throw `IndexSizeError`.
 - Convert to a collapsed range (by clipping or reordering endpoints).
+    - Which direction should the collapse target?
+        - Collapse to `max(startOffset, endOffset)` (matches DOM `Range`).
+        - Collapse to `min(startOffset, endOffset)`.
 - Preserve a backwards range (allow `startOffset > endOffset` and define direction-aware behavior for text, `toString()`, and layout methods).
 
 Example:
@@ -597,7 +600,7 @@ const range = new FormControlRange();
 range.setFormControlRange(input, 4, 0);
 // Candidates:
 // - Throw: setFormControlRange throws IndexSizeError
-// - Collapse: range.startOffset === range.endOffset === 0
+// - Collapse: range.startOffset === range.endOffset === 4
 // - Backwards: range.startOffset === 4; range.endOffset === 0
 </script>
 ```
