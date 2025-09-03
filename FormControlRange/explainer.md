@@ -580,6 +580,30 @@ The resulting `AbstractRange` inheritance structure would look like this:
 It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment-3113360213) that custom elements could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure.  
 Such use cases might also prompt revisiting the current `FormControlRange` name in favor of something broader, such as `ElementRange`, to better reflect its applicability beyond form controls.
 
+## Open Questions
+How should `FormControlRange` behave when callers provide reversed offsets (i.e. `startOffset > endOffset`)? 
+
+Consider the following ideas:
+- Throw `IndexSizeError`.
+- Convert to a collapsed range (by clipping or reordering endpoints).
+- Preserve a backwards range (allow `startOffset > endOffset` and define direction-aware behavior for text, `toString()`, and layout methods).
+
+Example:
+
+```html
+<input value="abcd">
+<script>
+const range = new FormControlRange();
+range.setFormControlRange(input, 4, 0);
+// Candidates:
+// - Throw: setFormControlRange throws IndexSizeError
+// - Collapse: range.startOffset === range.endOffset === 0
+// - Backwards: range.startOffset === 4; range.endOffset === 0
+</script>
+```
+
+Note: With reversed endpoints, DOM `Range` setters collapse them to a single point, whereas `Selection` preserves directionality (anchor/focus). Collapsing is the current interoperable behavior, but alternatives remain open for discussion.
+
 ## References & acknowledgements
 
 Many thanks for valuable feedback and advice from:
