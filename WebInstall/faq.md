@@ -15,6 +15,11 @@ As of today, the concept of what "installation" means can vary per browser and p
 
 **Which stakeholders are supportive of Web Install?**
 
+- Chromium browsers are supportive of the feature. Both the web apps teams at Google and Microsoft have collaborated in shaping the API.
+- It was expressed in the [TAG review](https://github.com/w3ctag/design-reviews/issues/1051#issuecomment-2943539903) that they would like to see current-document capability "deployed" and want to see the background-document part of the API incubated. Based on this feedback we have separated the Web Install explainer to two different documents to address one in the WebApps WG and the other one in WICG.
+    - _"We would like to see same-origin installability deployed and tested in the ecosystem, as we believe it will help to validate the user experience and inform any future work toward cross-origin installability."_
+- Developers are supportive of the feature, as seen in multiple comments [here](https://github.com/w3ctag/ethical-web-principles/issues/120#issuecomment-2285348765), [here](https://www.reddit.com/r/PWA/comments/1m0lf1o/web_install_is_in_dev_trial/) and [here](https://elk.zone/social.vivaldi.net/@brucelawson/115105502259864988).
+
 ## API shape
 
 **Is the web app `id` override mechanism necessary for Web Install to work?**
