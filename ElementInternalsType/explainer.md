@@ -255,6 +255,73 @@ A partial solution for this problem already exists today. Authors can specify th
 
 Both `extends` and `is` are supported in Firefox and Chromium-based browsers. However, this solution has limitations, such as not being able to attach shadow trees to (most) customized built-in elements. Citing these limitations, Safari doesn't plan to support customized built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
 
+### `ElementInternals` feature decomposition approach
+
+An alternative approach focuses on decomposing native element behaviors into granular, specific pieces of functionality that can be individually exposed through `ElementInternals`. This approach builds on the existing pattern established by form-associated custom elements (FACEs) and accessibility semantics (ARIAMixin), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
+
+Key characteristics of this approach include:
+
+- **Granular control**: Features like form submission, popover invocation, and labeling are exposed individually through `ElementInternals`.
+- **Explicit opt-in**: Each behavior is enabled via static properties and `ElementInternals` methods.
+- **Composable design**: Multiple behaviors can be combined on a single element.
+- **Clear semantics**: Each API explicitly defines the algorithms and behaviors it affects.
+- **Behavioral dependencies**: Some functionality may require additional behaviors to ensure full accessibility and usability. For example, enabling popover targeting alone may still require button-like accessibility semantics (default `button` ARIA role), focusability (inclusion in tab order without explicit `tabindex`), and activation behaviors (click events on Enter/Space key press) to deliver a complete user experience. This differs from form association, which doesn't inherently include accessibility roles or interaction behaviors.
+
+```js
+class CustomButton extends HTMLElement {
+  static buttonActivationBehaviors = true;
+
+  constructor() {
+    super();
+    this.internals_ = this.attachInternals();
+  }
+
+  get popoverTargetElement() {
+    return this.internals_.popoverTargetElement ?? null;
+  }
+
+  set popoverTargetElement(element) {
+    this.internals_.popoverTargetElement = element;
+  }
+
+  get commandForElement() {
+    return this.internals_.commandForElement ?? null;
+  }
+
+  set commandForElement(element) {
+    this.internals_.commandForElement = element;
+  }
+}
+
+// Corresponding ElementInternals interface extensions
+partial interface ElementInternals {
+  // Button activation behaviors
+  attribute Element? popoverTargetElement;
+  attribute DOMString popoverTargetAction;
+  attribute Element? commandForElement;
+};
+```
+
+This approach offers several benefits:
+
+- **Clear semantics**: Each feature explicitly defines which specification algorithms it modifies.
+- **Flexible composition**: Developers can mix and match only the behaviors they need.
+- **Evolutionary path**: New behaviors can be added incrementally without breaking existing APIs
+- **Future-compatible**: Provides a foundation for reducing boilerplate, whether through userland solutions or platform support.
+
+However, this approach also introduces the following trade-offs:
+
+- **Developer burden**: Requires significant boilerplate to expose native element-like APIs.
+- **Discoverability**: It can be difficult to identify all the pieces needed to emulate a specific native element.
+- **Implementation complexity**:Involves maintaining a larger number of individual features.
+- **Incomplete functionality from isolated features**: Individual behaviors may not provide complete functionality without additional supporting behaviors. For instance, a custom element with only `popoverTargetElement` functionality would need additional properties and behaviors to be fully usable:
+  - **Accessibility**: Default ARIA role (`button`), accessible name computation, and focus management.
+  - **Interaction**: Keyboard activation (Enter/Space), mouse click handling, and focus indicators.
+  - **Visual feedback**: Focus rings.
+  - **Integration**: Proper event dispatching
+  
+  As a result, developers may need to opt into multiple related behaviors, which can diminish the benefits of granularity.
+
 ## Stakeholder Feedback / Opposition
 
 - Chromium : Positive
