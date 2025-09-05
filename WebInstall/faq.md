@@ -30,6 +30,8 @@ We think that to provide an upgrade path for web applications it is beneficial f
 
 **Are the dialogs used for Web Install new?**
 
+No. Throughout the Web Install UX flow there are several dialogs, and all of them already exist. For the permission prompt, this is no different from the prompt from other permissions like geolocation or camera access. The installation prompts also already exist for the `beforeinstallprompt` event as well. All UX surfaces have gone through a [Chromium UX review]() as well. _We acknowledge that the prompt text needs twaeking and will continue to iterate on making sure that the purpose of the prompts presented to the user are understood_. 
+
 ## Spam concerns
 
 **Does the capability to install web apps incur in potential spamming?**
