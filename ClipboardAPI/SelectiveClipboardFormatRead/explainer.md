@@ -72,7 +72,7 @@ We propose API signature changes to the [clipboard.read()](https://www.w3.org/TR
 
 We propose to rename the optional argument [`ClipboardUnsanitizedFormats`](https://www.w3.org/TR/clipboard-apis/#dictdef-clipboardunsanitizedformats) of [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API to [`ClipboardReadOptions`](#appendix-1-proposed-idl) and extend this object to include a new `types` property which is a list of mime types to be retrieved.
 
-Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) without specifying types or with empty MIME types will continue to behave as before, receiving all available clipboard formats.
+Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) will continue to behave as before when `types` is `undefined`, receiving all available clipboard formats.
 
 If a MIME type is provided in [`unsanitized`](https://www.w3.org/TR/clipboard-apis/#dom-clipboardunsanitizedformats-unsanitized) but not requested in `types`, the clipboard content for the provided type will not be read from the OS clipboard and hence will be unavailable in the clipboard read response.
 
@@ -104,15 +104,21 @@ const availableTypes = item.types; // ['text/html']
 const unsanitizedHtml = await item.getType('text/html');
 ```
 
-**Example: Default behavior with empty or undefined types**
+**Example: When types is undefined or empty**
 ```js
 // Scenario: OS clipboard contains 'text/plain' and 'text/html' data
-const items = await navigator.clipboard.read({
+
+// Example 1: Default behavior with no types
+const items1 = await navigator.clipboard.read(); // or navigator.clipboard.read({types: undefined});
+const item1 = items1[0];
+const availableTypes1 = item1.types; // ['text/plain', 'text/html']
+
+// Example 2: Behavior with empty types
+const items2 = await navigator.clipboard.read({
   types: []
 });
-
-const item = items[0];
-const availableTypes = item.types; // ['text/plain', 'text/html']. Note all available types are present.
+const item2 = items2[0];
+const availableTypes2 = item2.types; // []
 ```
 
 Please refer [Appendix 1](#appendix-1-proposed-idl) for the proposed IDL.
@@ -215,7 +221,9 @@ For developers interested in reproducing these results or running similar benchm
 To use live demo, open [this](https://ashishkum-ms.github.io/cr-contributions/sfr/performace_experiment.html) in a browser that supports the Selective Clipboard Format Read.
 
 ## References and Acknowledgements 
-Reference : [Github discussion](https://github.com/w3c/clipboard-apis/issues/191)
+References :
+- [Github discussion](https://github.com/w3c/clipboard-apis/issues/191)
+- [Clipboard APIs spec issue](https://github.com/w3c/clipboard-apis/issues/240)
 
 Many thanks for valuable feedback and advice from:
 - [Anupam Snigdha](https://github.com/snianu)
