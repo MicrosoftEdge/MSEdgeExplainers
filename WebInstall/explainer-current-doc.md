@@ -33,7 +33,7 @@ This document is a starting point for engaging the community and standards bodie
 
 The **Web Install API provides a way to democratise and decentralise web application acquisition**, by enabling ["do-it-yourself" end users and developers](https://www.w3.org/TR/ethical-web-principles/#control) to have control over the application discovery and distribution process. It provides the tools needed to allow a web site to install a web app.
 
-> **Note:** The Web Install API can be used to install the current loaded web app, as explained in this document. It can also be used to install other web apps. Refer to [this document](./explainer-background-document.md) for the _background document_ functionality.
+> **Note:** The Web Install API can be used to install the current loaded web app, as explained in this document. It can also be used to install other web apps. Refer to [this document](./explainer-background-doc.md) for the _background document_ functionality.
 
 ## User-facing problem
 
