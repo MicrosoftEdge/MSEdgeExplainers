@@ -262,10 +262,14 @@ An alternative approach focuses on decomposing native element behaviors into gra
 Key characteristics of this approach include:
 
 - **Granular control**: Features like form submission, popover invocation, and labeling are exposed individually through `ElementInternals`.
-- **Explicit opt-in**: Each behavior is enabled via static properties and `ElementInternals` methods.
+- **Explicit opt-in**: Each behavior is enabled via static properties and `ElementInternals` properties.
 - **Composable design**: Multiple behaviors can be combined on a single element.
 - **Clear semantics**: Each API explicitly defines the algorithms and behaviors it affects.
-- **Behavioral dependencies**: Some functionality may require additional behaviors to ensure full accessibility and usability. For example, enabling popover targeting alone may still require button-like accessibility semantics (default `button` ARIA role), focusability (inclusion in tab order without explicit `tabindex`), and activation behaviors (click events on Enter/Space key press) to deliver a complete user experience. This differs from form association, which doesn't inherently include accessibility roles or interaction behaviors.
+- **Behavioral dependencies**: Some functionality may require additional behaviors to ensure full accessibility and usability. For example, enabling popover targeting alone may still require button-like accessibility semantics, focusability, and activation behaviors to deliver a complete user experience. This differs from form association, which doesn't inherently include accessibility roles or interaction behaviors. For instance, a custom element with only `popoverTargetElement` functionality would need additional properties and behaviors to be fully usable:
+  - **Accessibility**: Default ARIA role (`button`), accessible name computation, and focus management.
+  - **Interaction**: Keyboard activation (Enter/Space), mouse click handling, and focus indicators.
+  - **Visual feedback**: Focus rings.
+  - **Integration**: Proper event dispatching
 
 ```js
 class CustomButton extends HTMLElement {
@@ -302,6 +306,56 @@ partial interface ElementInternals {
 };
 ```
 
+**Supported attributes:**
+
+When `static buttonActivationBehaviors = true` is set, the custom element would gain support for button-specific attributes:
+
+- `popovertarget` - Targets a popover element to toggle, show, or hide
+- `popovertargetaction` - Indicates whether a targeted popover element is to be toggled, shown, or hidden
+- `command` - Indicates to the targeted element which action to take
+- `commandfor` - Targets another element to be invoked
+
+When `static formAssociated = true` and additional form-related static properties are set, the custom element would gain support for form-specific attributes:
+
+- `disabled` - Whether the form control is disabled
+- `form` - Associates the element with a form element
+- `formaction` - URL to use for form submission
+- `formenctype` - Entry list encoding type to use for form submission
+- `formmethod` - Variant to use for form submission
+- `formnovalidate` - Bypass form control validation for form submission
+- `formtarget` - Navigable for form submission
+- `name` - Name of the element to use for form submission
+- `type` - Type of button (submit/reset/button)
+- `value` - Value to be used for form submission
+
+**Supported properties:**
+
+The `ElementInternals` interface would be extended with properties corresponding to the enabled behaviors:
+
+For button activation behaviors:
+
+- `popoverTargetElement` - Returns the Element referenced by the `popovertarget` attribute
+- `popoverTargetAction` - Returns the value of the `popovertargetaction` attribute
+- `commandForElement` - Returns the Element referenced by the `commandfor` attribute
+
+For form-related behaviors:
+- `disabled` - Reflects the `disabled` attribute
+- `form` - Returns the associated HTMLFormElement
+- `formAction` - Reflects the `formaction` attribute
+- `formEnctype` - Reflects the `formenctype` attribute
+- `formMethod` - Reflects the `formmethod` attribute
+- `formNoValidate` - Reflects the `formnovalidate` attribute
+- `formTarget` - Reflects the `formtarget` attribute
+- `name` - Reflects the `name` attribute
+- `type` - Reflects the `type` attribute
+- `value` - Reflects the `value` attribute
+- `willValidate` - Indicates whether the element is a candidate for constraint validation
+- `validity` - Returns the ValidityState representing validation states
+- `validationMessage` - Returns localized validation message
+
+**Supported Methods:**
+Unlike the main `behavesLike` proposal which provides access to methods like `checkValidity()`, `reportValidity()`, and `setCustomValidity()` through behavior-specific mixins, this feature decomposition approach would only expose properties and attributes. Developers would need to implement method wrappers manually to call the underlying `ElementInternals` methods, adding to the boilerplate burden mentioned in the trade-offs below.
+
 This approach offers several benefits:
 
 - **Clear semantics**: Each feature explicitly defines which specification algorithms it modifies.
@@ -313,14 +367,8 @@ However, this approach also introduces the following trade-offs:
 
 - **Developer burden**: Requires significant boilerplate to expose native element-like APIs.
 - **Discoverability**: It can be difficult to identify all the pieces needed to emulate a specific native element.
-- **Implementation complexity**:Involves maintaining a larger number of individual features.
-- **Incomplete functionality from isolated features**: Individual behaviors may not provide complete functionality without additional supporting behaviors. For instance, a custom element with only `popoverTargetElement` functionality would need additional properties and behaviors to be fully usable:
-  - **Accessibility**: Default ARIA role (`button`), accessible name computation, and focus management.
-  - **Interaction**: Keyboard activation (Enter/Space), mouse click handling, and focus indicators.
-  - **Visual feedback**: Focus rings.
-  - **Integration**: Proper event dispatching
-  
-  As a result, developers may need to opt into multiple related behaviors, which can diminish the benefits of granularity.
+- **Implementation complexity**: Involves maintaining a larger number of individual features.
+- **Reduced granularity benefits**: Since developers may need to opt into multiple related behaviors to achieve complete functionality, this can diminish the benefits of the granular approach.
 
 ## Stakeholder Feedback / Opposition
 
