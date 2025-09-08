@@ -1,5 +1,6 @@
 # Explainer: [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) Feature For [`Contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) Host
 
+
 ## Authors:
 - Pranav Modi (pranavmodi@microsoft.com)
 
@@ -11,6 +12,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 ## Table of Contents
 
+- [Introduction](#introduction)
 - [User-Facing Problem](#user-facing-problem)
 - [Goals](#goals)
 - [Non-goals](#non-goals)
@@ -30,6 +32,11 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+
+## Introduction
+
+Modern web applications rely heavily on rich text editing experiences, especially within [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) elements. However, developers have long faced limitations when handling paste and drop operations due to the absence of the [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property on [Input Event Types](https://w3c.github.io/input-events/#overview) objects. This explainer introduces a new feature that exposes [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) for specific input types [`insertFromPaste`, `insertReplacementText`, and `insertFromDrop`](https://w3c.github.io/input-events/#overview) within [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) contexts.
+
 ## User-Facing Problem
 When [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) was NULL, Users
 
@@ -39,9 +46,9 @@ When [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransf
 - Couldn’t process dropped files without relying on separate drop event listeners.
 - Couldn’t build consistent logic across beforeinput, input, and drop events.
 
-Exposing [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) empowers developers to build smarter, safer, and more responsive applications. It bridges the gap between browser-native behavior and developer control, enabling features that were previously impossible or unreliable.
+Exposing [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) bridges the gap between browser-native behavior and developer control, enabling features that were previously impossible or unreliable.
 
-A user pastes formatted content (e.g., bold text, lists, links) into a custom editor. The browser renders it correctly using its internal dataTransfer, but developers listening to the input event with inputType = "insertFromPaste" couldn’t access [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) — it was null.
+A user pastes formatted content (e.g., bold text, lists, links) into a custom editor. The developers listening to the input event with inputType = "insertFromPaste" in the following example couldn’t access [`InputEvent.dataTransfer`](https://w3c.github.io/input-events/#dom-inputevent-datatransfer) — it was null.
 
 ```html
 <p contenteditable="true">
@@ -64,7 +71,7 @@ editor.addEventListener("input", (event) => {
   }
 });
 ```
-After the fix, [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) is exposed on the input event, enabling full control.
+After the fix, [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) is exposed on the input event, enabling full control over `dataTransfer` attributes. The web app now has access to the data which got pasted/dropped which it can use to perform operations like formatting, sanitizing (we can avoid logging since it can raise privacy concerns). Also, we provide the missing capability to the `inputEvent` fired on drag/drop, clipboard paste etc. to have `dataTransfer` populated and web devs can use this simple event to handle input processing for all sceanarios instead of hooking to individual events like ondrop, onpaste (ontype).
 
 ## Goals
 The goal of this feature is to expose the [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property on [`InputEvent`](https://w3c.github.io/input-events/#interface-InputEvent) objects for specific input types [`insertFromPaste`, `insertReplacementText`, and `insertFromDrop`](https://w3c.github.io/input-events/#overview) in [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) contexts. This enables developers to access drag-and-drop and clipboard data during input events, improving support for rich text editors and other interactive content tools.
