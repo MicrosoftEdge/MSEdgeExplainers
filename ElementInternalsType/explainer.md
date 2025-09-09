@@ -308,25 +308,12 @@ partial interface ElementInternals {
 
 **Supported attributes:**
 
-When `static buttonActivationBehaviors = true` is set, the custom element would gain support for button-specific attributes:
+When `static buttonActivationBehaviors = true` is set, the custom element would gain support for button activation-specific attributes:
 
 - `popovertarget` - Targets a popover element to toggle, show, or hide
 - `popovertargetaction` - Indicates whether a targeted popover element is to be toggled, shown, or hidden
 - `command` - Indicates to the targeted element which action to take
 - `commandfor` - Targets another element to be invoked
-
-When `static formAssociated = true` and additional form-related static properties are set, the custom element would gain support for form-specific attributes:
-
-- `disabled` - Whether the form control is disabled
-- `form` - Associates the element with a form element
-- `formaction` - URL to use for form submission
-- `formenctype` - Entry list encoding type to use for form submission
-- `formmethod` - Variant to use for form submission
-- `formnovalidate` - Bypass form control validation for form submission
-- `formtarget` - Navigable for form submission
-- `name` - Name of the element to use for form submission
-- `type` - Type of button (submit/reset/button)
-- `value` - Value to be used for form submission
 
 **Supported properties:**
 
@@ -338,23 +325,8 @@ For button activation behaviors:
 - `popoverTargetAction` - Returns the value of the `popovertargetaction` attribute
 - `commandForElement` - Returns the Element referenced by the `commandfor` attribute
 
-For form-related behaviors:
-- `disabled` - Reflects the `disabled` attribute
-- `form` - Returns the associated HTMLFormElement
-- `formAction` - Reflects the `formaction` attribute
-- `formEnctype` - Reflects the `formenctype` attribute
-- `formMethod` - Reflects the `formmethod` attribute
-- `formNoValidate` - Reflects the `formnovalidate` attribute
-- `formTarget` - Reflects the `formtarget` attribute
-- `name` - Reflects the `name` attribute
-- `type` - Reflects the `type` attribute
-- `value` - Reflects the `value` attribute
-- `willValidate` - Indicates whether the element is a candidate for constraint validation
-- `validity` - Returns the ValidityState representing validation states
-- `validationMessage` - Returns localized validation message
-
 **Supported Methods:**
-Unlike the main `behavesLike` proposal which provides access to methods like `checkValidity()`, `reportValidity()`, and `setCustomValidity()` through behavior-specific mixins, this feature decomposition approach would only expose properties and attributes. Web authors would need to implement method wrappers manually to call the underlying `ElementInternals` methods, adding to the boilerplate burden mentioned in the trade-offs below.
+Unlike the main `behavesLike` proposal which provides access to methods like `checkValidity()`, `reportValidity()`, and `setCustomValidity()` through behavior-specific mixins, this feature decomposition approach would only expose properties and attributes.
 
 This approach offers several benefits:
 
