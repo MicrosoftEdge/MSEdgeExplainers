@@ -62,7 +62,7 @@ Installation of a _background document_ is when the install API is invoked to in
 
 ### **Suite of Web Apps**
 
-Building on the previous use case, the website can also provide a way to directly acquire other applications it might offer, like a dedicated "kids" version of the app, or a "sports" version of the app. Another example would be a family of software applications, like a productivity or photography suite, where each application is accessed from a different web page. The developer is in control and can effectively advertise and control their applications, without having to redirect users to platform-specific proprietary repositories, which is what happens now.
+An example would be a family of software applications, like a productivity or photography suite, where each application is accessed from a different web page. The developer is in control and can effectively advertise and control their applications, without having to redirect users to platform-specific proprietary repositories, which is what happens now.
 
 ### **SERP app install**
 
@@ -90,7 +90,6 @@ The Web Install API consists of the extension to the navigator interface with an
 
 * `install_url`: a url meant for installing an app. This url can be any url in scope of the manifest file that links to it. For an optimal user experience, it is recommended that developers use an `install_url` that does not redirect and only contains content that is relevant for installation purposes (essentially just a reference to the web manifest).
 * `manifest_id`: declares the specific application to be installed. This is the unique id of the application that will be installed. As a parameter, this value must match the `id` value specified in the manifest file or the processed `id` string once an application is installed.
-* optional [parameters](#parameters).
 
 The `manifest_id` is the *what* to install, the `install_url` is the *where* to find it.
 
@@ -118,7 +117,7 @@ This signature is intended to install background documents that don't necessaril
 
 > **Note:** according to the manifest spec, if there is no `id` member present, the processed string resolves to that of the `start_url`.
 
-> **Note:** Three signatures exist to accommodate all possibilities of existing apps. We acknowledge that only around 4% (as of 2024) of web apps have defined `id`s in their manifest. We also know that `id`s are a crucial part to support to avoid situations of multiple *same* applications with no path to being updated. For apps that have an `id` defined in their manifest, the 1 param signature is useful. For apps that do not define the `id` field, they can be installed with the 2 parameter signature.
+> **Note:** We acknowledge that only around 4% (as of 2024) of web apps have defined `id`s in their manifest. We also know that `id`s are a crucial part to support to avoid situations of multiple *same* applications with no path to being updated. For apps that have an `id` defined in their manifest, the 1 param signature is useful. For apps that do not define the `id` field, they can be installed with the 2 parameter signature.
 
 ### Steps to install the app
 
