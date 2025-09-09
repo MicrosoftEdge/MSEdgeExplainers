@@ -257,7 +257,7 @@ Both `extends` and `is` are supported in Firefox and Chromium-based browsers. Ho
 
 ### `ElementInternals` feature decomposition approach
 
-An alternative approach focuses on decomposing native element behaviors into granular, specific pieces of functionality that can be individually exposed through `ElementInternals`. This approach builds on the existing pattern established by form-associated custom elements (FACEs) and accessibility semantics (ARIAMixin), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
+An alternative approach focuses on decomposing native element behaviors into granular, specific functionalities that can be individually exposed through `ElementInternals`. This approach builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
 
 Key characteristics of this approach include:
 
@@ -265,7 +265,7 @@ Key characteristics of this approach include:
 - **Explicit opt-in**: Each behavior is enabled via static properties and `ElementInternals` properties.
 - **Composable design**: Multiple behaviors can be combined on a single element.
 - **Clear semantics**: Each API explicitly defines the algorithms and behaviors it affects.
-- **Behavioral dependencies**: Some functionality may require additional behaviors to ensure full accessibility and usability. For example, enabling popover targeting alone may still require button-like accessibility semantics, focusability, and activation behaviors to deliver a complete user experience. This differs from form association, which doesn't inherently include accessibility roles or interaction behaviors. For instance, a custom element with only `popoverTargetElement` functionality would need additional properties and behaviors to be fully usable:
+- **Behavioral dependencies**: Some functionality may require additional behaviors to ensure full accessibility and usability. For example, enabling popover targeting alone requires button-like accessibility semantics, focusability, and activation behaviors to deliver a complete user experience. This differs from form association, which doesn't inherently include accessibility roles or interaction behaviors. For instance, a custom element with only `popoverTargetElement` functionality would need additional properties and behaviors to be fully usable:
   - **Accessibility**: Default ARIA role (`button`), accessible name computation, and focus management.
   - **Interaction**: Keyboard activation (Enter/Space), mouse click handling, and focus indicators.
   - **Visual feedback**: Focus rings.
@@ -354,12 +354,12 @@ For form-related behaviors:
 - `validationMessage` - Returns localized validation message
 
 **Supported Methods:**
-Unlike the main `behavesLike` proposal which provides access to methods like `checkValidity()`, `reportValidity()`, and `setCustomValidity()` through behavior-specific mixins, this feature decomposition approach would only expose properties and attributes. Developers would need to implement method wrappers manually to call the underlying `ElementInternals` methods, adding to the boilerplate burden mentioned in the trade-offs below.
+Unlike the main `behavesLike` proposal which provides access to methods like `checkValidity()`, `reportValidity()`, and `setCustomValidity()` through behavior-specific mixins, this feature decomposition approach would only expose properties and attributes. Web authors would need to implement method wrappers manually to call the underlying `ElementInternals` methods, adding to the boilerplate burden mentioned in the trade-offs below.
 
 This approach offers several benefits:
 
 - **Clear semantics**: Each feature explicitly defines which specification algorithms it modifies.
-- **Flexible composition**: Developers can mix and match only the behaviors they need.
+- **Flexible composition**: Web delopers can mix and match only the behaviors they need.
 - **Evolutionary path**: New behaviors can be added incrementally without breaking existing APIs
 - **Future-compatible**: Provides a foundation for reducing boilerplate, whether through userland solutions or platform support.
 
@@ -368,7 +368,43 @@ However, this approach also introduces the following trade-offs:
 - **Developer burden**: Requires significant boilerplate to expose native element-like APIs.
 - **Discoverability**: It can be difficult to identify all the pieces needed to emulate a specific native element.
 - **Implementation complexity**: Involves maintaining a larger number of individual features.
-- **Reduced granularity benefits**: Since developers may need to opt into multiple related behaviors to achieve complete functionality, this can diminish the benefits of the granular approach.
+- **Reduced granularity benefits**: Since web authors may need to opt into multiple related behaviors to achieve complete functionality, this can diminish the benefits of the granular approach. While it might seem appealing to have highly granular options like `static canUsePopoverTarget = true`, in practice this cannot be implemented without also including accessibility semantics, focusability, click event handling, and other core native element behaviors.
+
+The main difference between this approach and the `behavesLike` proposal is whether web developers should be able to compose different behavior bundles (e.g., combining button activation with label behaviors). However, such composition introduces significant complexity:
+
+```js
+class CustomElement extends HTMLElement {
+  static buttonActivationBehaviors = true;
+  static labelBehaviors = true;
+
+  constructor() {
+    super();
+    this.internals_ = this.attachInternals();
+  }
+
+  get popoverTargetElement() {
+    return this.internals_.popoverTargetElement ?? null;
+  }
+
+  set popoverTargetElement(element) {
+    this.internals_.popoverTargetElement = element;
+  }
+
+  get control() {
+    return this.internals_.control ?? null;
+  }
+
+  set htmlFor(value) {
+    this.internals_.htmlFor = value;
+  }
+}
+```
+
+- **Conflicting semantics**: Combining button activation behavior with label behavior introduces ambiguity about the element's ARIA role (should it be `button` or `label`?).
+- **Interaction conflicts**: When clicked, should the element trigger a `clickevent` (button behavior) and also transfer focus to a labeled control (label behavior)? This dual behavior would be confusing and potentially harmful to user experience.
+- **Specification complexity**: Each combination of behaviors would require careful specification of how conflicts are resolved, leading to an increase in edge cases.
+
+Given these challenges, web authors would likely default to using single behavior bundles. This makes the composability of this approach more theoretical than practical, while adding unnecessary complexity to both implementation and specification.
 
 ## Stakeholder Feedback / Opposition
 
