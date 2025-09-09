@@ -120,7 +120,7 @@ This signature is intended to install background documents that don't necessaril
 
 > **Note:** Three signatures exist to accommodate all possibilities of existing apps. We acknowledge that only around 4% (as of 2024) of web apps have defined `id`s in their manifest. We also know that `id`s are a crucial part to support to avoid situations of multiple *same* applications with no path to being updated. For apps that have an `id` defined in their manifest, the 1 param signature is useful. For apps that do not define the `id` field, they can be installed with the 2 parameter signature.
 
-### **Installing the web app**
+### Steps to install the app
 
 To install an application with the Web Install API, the process is as follows:
 
@@ -143,30 +143,6 @@ To install an application with the Web Install API, the process is as follows:
 5. If `<manifest_id>` matches the processed `id` from the manifest of the fetched document, continue. Else reject with `DataError`.
 6. UA shows the acquisition confirmation UX (prompt/dialog). If the user accepts, continue. Else reject with `AbortError`.
 7. Promise resolves with processed `id` of installed app and application follows the platform's post-install UX (adds to Dock/opens app/adds to mobile app drawer).
-
-
-### Steps to install the app
-
-#### Background Document (1 param)
-
-1. User gesture activates code that calls the `install(<install_url>)` method.
-2. If the `<install_url>` is not the current document, the UA asks for permission to perform installations (it not previously granted). Else reject with `AbortError`. 
-3. UA tries to fetch the background document present at the `<install_url>` and its manifest file.
-4. If fetched document has a manifest file, continue. Else reject with `DataError`.
-5. If manifest file linked to the fetched document has an `id` field defined, continue. Else reject with `DataError`.
-6. UA shows the acquisition/installation confirmation UX (prompt/dialog). If the user accepts, continue. Else reject with `AbortError`. 
-7. Promise resolves with processed `id` of installed app and application follows the platform's post-install UX (adds to Dock/opens app/adds to mobile app drawer).
-
-#### Background Document (2 param)
-
-1. User gesture activates code that calls the `install(<install_url>, <manifest_id>)` method. 
-2. If the `<install_url>` is not the current document, the UA asks for permission to perform installations (if not previously granted). Else reject with `AbortError`. 
-3. UA tries to fetch the background document present at the `<install_url>` and its manifest file.
-4. If fetched document has a manifest file, continue. Else reject with `DataError`.
-5. If `<manifest_id>` matches the processed `id` from the manifest of the fetched document, continue. Else reject with `DataError`.
-6. UA shows the acquisition confirmation UX (prompt/dialog). If the user accepts, continue. Else reject with `AbortError`.
-7. Promise resolves with processed `id` of installed app and application follows the platform's post-install UX (adds to Dock/opens app/adds to mobile app drawer).
-
 
 > **Note:** if an application is installed, the UA can choose to display UX to launch this application. The behaviour for this case is the same as if the app is not installed: The promise would resolve if the application opens, and rejects otherwise, with an `AbortError`.
 
