@@ -372,7 +372,7 @@ class CustomElement extends HTMLElement {
 }
 ```
 
-- **Conflicting semantics**: Combining button activation behavior with label behavior introduces ambiguity about the element's ARIA role (should it be `button` or `label`?).
+- **Conflicting semantics**: Combining button activation behavior with label behavior introduces ambiguity about the element's ARIA role (should it be `button` or have no corresponding role since labels don't have an implicit ARIA role?).
 - **Interaction conflicts**: When clicked, should the element trigger a `clickevent` (button behavior) and also transfer focus to a labeled control (label behavior)? This dual behavior would be confusing and potentially harmful to user experience.
 - **Specification complexity**: Each combination of behaviors would require careful specification of how conflicts are resolved, leading to an increase in edge cases.
 
