@@ -46,12 +46,13 @@ content location of future work and discussions.
     - [Scoping](#scoping)
     - [`<script>` vs `<style>` For CSS Modules](#script-vs-style-for-css-modules)
     - [Behavior with script disabled](#behavior-with-script-disabled)
-    - [Updates to Module Map Key](#updates-to-module-map-key)
+    - [Syntactic Sugar For Import Maps with DataURI](#syntactic-sugar-for-import-maps-with-datauri)
     - [Detailed Parsing Workflow](#detailed-parsing-workflow)
     - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
     - [Use with Import Maps](#use-with-import-maps)
   - [Other declarative modules](#other-declarative-modules)
   - [Alternate proposals](#alternate-proposals)
+    - [Updates to Module Map Key](#updates-to-module-map-key)
     - [Using A Link Tag To Adopt Stylesheets](#using-a-link-tag-to-adopt-stylesheets)
     - [Local References For Link Rel](#local-references-for-link-rel)
     - [Key Differences Between This Proposal And Local References For Link Rel](#key-differences-between-this-proposal-and-local-references-for-link-rel)
@@ -269,20 +270,50 @@ Earlier versions of this document used the `<script>` tag for declaring CSS Modu
 
 User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not been verified yet.
 
-### Updates to Module Map Key
+### Syntactic Sugar For Import Maps with DataURI
 
-A significant piece of this proposal involves modifying the [module map](https://html.spec.whatwg.org/#module-map) to be keyed by a string instead of a URL (the current key is a (URL, module type) pair, which this proposal updates to a (string, module type) pair). A string is a superset of a URL, so this modification will not break existing scenarios. 
+The simplest approach for Declarative CSS Modules is to treat them as syntactic sugar that generates an Import Map entry containing a specifier and a dataURI containing the module contents.
 
-This proposal could avoid this requirement by instead requiring a declarative specifier to be a [URL fragment](https://url.spec.whatwg.org/#concept-url-fragment), but we believe this would introduce several potentially confusing and undesirable outcomes:
+For example, a Declarative CSS Module defined as follows:
+```html
+<style type="module" specifier="foo">
+  #content { color: red; }
+</style>
+```
 
-1. The [Find a potential indicated element](https://html.spec.whatwg.org/#find-a-potential-indicated-element) algorithm only searches the top-level document and does not query shadow roots. While this proposal does not require the [find a potential indicated element](https://html.spec.whatwg.org/#find-a-potential-indicated-element) to function (the indicated element in this case is the `<style>` element that is directly modifying the module map, so there is no element to find), it could be confusing to introduce a new fragment syntax intended for use in shadow roots that violates this principle.
-2. [Import maps](https://html.spec.whatwg.org/#import-map) remap URL's, which allows relative and bare URL's to map to a full URL. It's not clear if there is a use case for remapping same-document references with import maps that cannot be accomplished by adjusting the local reference's identifier. If import maps are performed on a same-document URL reference, an import map entry intended for an external URL could unintentially break a local reference. [Import map resolution](https://html.spec.whatwg.org/#resolving-a-url-like-module-specifier) could be adjusted to skip same-document references, but it could be confusing to have a URL identifier that does not participate in the [resolved module set](https://html.spec.whatwg.org/#resolved-module-set).
-3. HTML documents are already using fragments for many different concepts, such as [fragment navigations](https://html.spec.whatwg.org/#navigate-fragid), [history updates](https://html.spec.whatwg.org/#url-and-history-update-steps), [internal resource links](https://html.spec.whatwg.org/#process-internal-resource-links), [SVG href targets](https://www.w3.org/TR/SVG2/struct.html#UseElement), and more. Although these use cases are very different, a common factor between them is that they all reference elements in the main document, and cannot refer to elements within a shadow root. An important piece of this proposal is that nested shadow roots can modify the global module map. Introducing a new scoping behavior for fragments that does not fit this model could be confusing to authors.
-4. URL's that consist only of a fragment resolve to a [relative URL](https://url.spec.whatwg.org/#relative-url-string), with the base url defined as the source document per [the URL parsing algorithm](https://url.spec.whatwg.org/#url-parsing). This means that using a fragment-only syntax (which would be desired in this scenario) could break if a [`<base>` element](https://html.spec.whatwg.org/#the-base-element) exists that remaps the document's base URL.
+...would be syntactic sugar for:
 
-Another alternative could be to define a new [scheme](https://url.spec.whatwg.org/#concept-url-scheme) for local references. This is a potential solution, however, since the containing HTML document already has a scheme, this option would require developers to always specify the [scheme](https://url.spec.whatwg.org/#concept-url-scheme) per [absolute URL with fragment string](https://url.spec.whatwg.org/#absolute-url-with-fragment-string) processing, rather than just the fragment (a fragment-only URL is valid due to the way [relative URL](https://url.spec.whatwg.org/#relative-url-string) processing applies). Developers might find it cumbersome to specify the scheme for local references versus an approach that requires only an identifier (for example, `localid://foo` versus `#foo` or `foo`). A new scheme could also imply scoping behaviors that are not supported, such as [external-file references](https://www.w3.org/TR/SVG2/linking.html#definitions) that are valid in SVG, or potentially even imply that module identifiers can span between `<iframe>` documents. A new scheme may also not be compatible with existing [custom scheme handlers](https://html.spec.whatwg.org/#custom-handlers).
+```html
+<script type="importmap">
+{
+  "imports": {
+    "foo": "data:text/css,#content { color: red; }"
+  }
+}
+</script>
+```
 
-For these reasons, we believe that modifying the [module map](https://html.spec.whatwg.org/#module-map) to be keyed by a string instead of a URL is a more natural solution for developers, as it avoids all of these situations.
+...and importing the module declaratively like this:
+
+```html
+<template shadowrootmode="open" shadowrootadoptedstylesheets="foo">...</template>
+```
+
+...could be syntactic sugar for:
+
+```html
+<script type="module">
+const shadowRoot = ...;
+import("foo", {with:{ type: "css" }}).then(foo=>shadowRoot.adoptedStyleSheets.push(foo));
+</script>
+```
+
+This approach is much simpler than other proposals and avoids nearly all of the issues associated with other proposals because it builds on existing concepts.
+
+This approach does have a few limitations though:
+- The `<style>` definition *must* occur before it is imported, otherwise the import map will not be populated. Based on developer feedback, this is not a major limitation.
+- Since Import Maps have no knowledge of an underlying type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing types (e.g. one Javascript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. There are a few possible solutions to this issue. The simplest is that developers could be instructed to avoid name collisions for declarative modules of different types (for example, using the type as a prefix). Another option is for a type prefix to automatically be added as part of the syntatic sugar for declarative modules, but this would require developers to manually add the prefix when mixing declarative and imperative definitions. Alternatively, the JSON defintion for Import Maps could support an underlying `type` property when a dataURI is specified, mapping the dataURI type to supported Module Record types. For example, "text/css" could be mapped to a "CSS" module type, and likewise, "text/javascript" could be mapped to a Javascript module type. This approach would require adding several special cases for Import Map resolution for each of the module types.
+
 
 ### Detailed Parsing Workflow
 
@@ -301,14 +332,15 @@ In the following example:
 </my-element>
 ```
 
-Upon parsing the `<style>` tag above, an entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) whose key is the specifier `"foo"` and whose value is a new [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) created by running the steps to [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) with `source` being the text of the `<style>` tag. Note that [create a CSS module script](https://html.spec.whatwg.org/#creating-a-css-module-script) throws a script error when encountering `@import` rules, which is not possible while parsing. One option would be to fail parsing when `@import` is encountered, resulting in a null [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) being added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), which is the same result as a failed fetch (per step 13.1 of the [script module fetch algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#fetch-a-single-module-script)). The resulting [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) would implicitly have a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#creating-a-json-module-script) of "css", given that it originated from a `<style>` tag. 
+Upon parsing the `<style>` tag above, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing a [map](https://infra.spec.whatwg.org/#ordered-map) with a key of "imports". The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is another JSON [map](https://infra.spec.whatwg.org/#ordered-map) with a single entry with a [key](https://infra.spec.whatwg.org/#map-key) containing the value of the `specifier` attribute on the `<style>` tag (in this case, "foo"). The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is a [dataURI](https://www.rfc-editor.org/rfc/rfc2397) with a [scheme](https://url.spec.whatwg.org/#concept-url-scheme) of "data", a [media type](https://www.rfc-editor.org/rfc/rfc2397) of "text/css", and [data](https://www.rfc-editor.org/rfc/rfc2397) consisting of a [UTF-8 percent encoded](https://url.spec.whatwg.org/#utf-8-percent-encode) value of the [text content](https://html.spec.whatwg.org/#get-the-text-steps) of the `<style>` tag.
+
+ This generated [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) then performs the [parse an map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) algorithm as a typical [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) would be processed.
+
+When the `<template>` element is constructed, the `shadowrootadoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute performs an [import](https://html.spec.whatwg.org/multipage/webappapis.html#integration-with-the-javascript-module-system) of that specifier with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css". If the result of that import is successful, the associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script)'s default export of type [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). This would allow for importing both Declarative CSS Modules and previously-fetched imperative CSS Modules via the `shadowrootadoptedstylesheets` attribute.
 
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
-When the `<template>` element is constructed, the `shadowrootadoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute is looked up in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). If an entry with that specifier
-exists in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with a type of "css" and without a status of "fetching", the associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script)'s default export of type [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). Because [module maps](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) are keyed on module type as well as URL, an entry with the same specifier but a different type would be considered a separate entry. For compatibility, non-declarative (fetched) module entries should be prioritized over declarative entries. This means that if an entry exists in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with a status of "fetching", the processing of a corresponding entry in the declarative `adoptedstylesheets` list should be skipped. Likewise, an existing entry in the module map set to null should also be skipped when processing the declarative `adoptedstylesheets` list, indicating that the author prioritized a network request that failed. If an entry with that specifier does not exist in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) object with type of "css" is inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specified `specifier`.
-
-This may also happen in reversed order, as in the following example:
+Styles would not be applied in reversed order, as in the following example:
 
 ```html
 <my-element>
@@ -323,11 +355,11 @@ This may also happen in reversed order, as in the following example:
 </style>
 ```
 
-When the `<template>` element is parsed, a [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) entry is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with the specifier of "foo" and a type of "css", whose associated [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) is  empty .
+When the `<template>` element is parsed, an [import](https://html.spec.whatwg.org/multipage/webappapis.html#integration-with-the-javascript-module-system) of "foo" with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css". This import is unsuccessful, as the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) does not contain an entry with a specifier of "foo".
 
-When the `<style>` element's `specifier` attribute is parsed, the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) is queried for an existing entry. Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a type of "css" from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
+When the `<style>` element's `specifier` attribute is parsed, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing the contents as a dataURI as specified above. Since the `adoptedStyleSheets` (backing list)[https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets] associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) was not populated, no styles are applied to the [shadow root](https://dom.spec.whatwg.org/#interface-shadowroot).
 
-This replacement always occurs when an existing `specifier` is encountered, ensuring that the active [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) associated with a given `specifier` is always the most recently parsed entry.
+This replacement always occurs when the first instance of a given `specifier` is encountered, because the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps) enforces that only the first specifier with a given URL is mapped.
 
 For example, with the following markup:
 
@@ -349,13 +381,13 @@ For example, with the following markup:
 </my-element>
 ```
 
-The contents of the first Declarative CSS Module with `specifier="foo"` (with `color: red`) are first parsed and the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) is updated with a [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a `specifier` of "foo" and a type of "css".
+The contents of the first Declarative CSS Module with `specifier="foo"` (with `color: red`) are first parsed and the [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) is created as specified above.
 
-Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`), the `specifier` attribute initiates querying the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) with a key of "foo" and a type of "css" from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
+Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`), an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) is created as specified above. Per the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps), only the first specifier with a given URL is mapped.
 
-The `<template>` with `shadowrootadoptedstylesheets="foo"` will use the second definition (with `color: blue`).
+The `<template>` with `shadowrootadoptedstylesheets="foo"` will use the first definition (with `color: red`).
 
-This may also occur when the `<style>` element is a child of the `<template>` that adopts it, as shown in the following example:
+This scenario may also occur when the `<style>` element is a child of the `<template>` that adopts it, as shown in the following example:
 
 ```html
 <my-element>
@@ -370,7 +402,9 @@ This may also occur when the `<style>` element is a child of the `<template>` th
 </my-element>
 ```
 
-In this example, the `<template>` element is parsed first. Upon encountering `shadowrootadoptedstylesheets` attribute, the specifier "foo" is queried in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). No existing entry is found in the module map, so an empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) is inserted into the module map with a key of "foo". Upon parsing the Declarative CSS Module, the `specifier` attribute initiates querying the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map). Since there is an existing empty [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script) from the prior step, its contents are synchronously replaced, following the steps to [replace a stylesheet](https://www.w3.org/TR/cssom-1/#synchronously-replace-the-rules-of-a-cssstylesheet).
+In this example, the `<template>` element is parsed first. When the `<template>` element is parsed, an [import](https://html.spec.whatwg.org/multipage/webappapis.html#integration-with-the-javascript-module-system) of "foo" with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css". This import is unsuccessful, as the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) does not contain an entry with a specifier of "foo".
+
+The contents of the Declarative CSS Module with `specifier="foo"` (with `color: red`) are then parsed and an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) is created as specified above. Since the `<template>` element failed to import a module, the `color: red` styles will not be applied, although subsequent `<template>` elements could adopt a stylesheet with `specifier="foo"` now that it has been defined.
 
 ### Use with Imperative Module Scripts
 
@@ -393,37 +427,7 @@ shadowRoot.adoptedStyleSheets = [sheet];
 
 ...assuming that "foo" hasn't been used as the key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects it to a URL. If "foo" has used as a key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects to a URL, that URL will be fetched instead of locating the declarative version.
 
-The important factor for this scenario is that the `specifier` attribute on the `<style>` tag is explicitly *not* a URL, it is a [DOMString](https://webidl.spec.whatwg.org/#idl-DOMString) that is not [treated as a URL](https://html.spec.whatwg.org/#treated-as-a-url). This allows for disambiguating between a URL that gets fetched in this scenario or a Declarative CSS Module that is synchronously queried from the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map).
-
 If a module is imported imperatively in this fashion and the Declarative CSS Module is not in the [module map](https://html.spec.whatwg.org/#module-map), the import fails, even if it is added declaratively at a later time.
-
-### Use with Import Maps
-
-[Import maps](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) allow for module script specifiers to be modified via a JSON map. Import maps would not apply to Declarative CSS Modules because the `specifier` in this scenario is not a URL, and the definition of a [valid module specifier map](https://html.spec.whatwg.org/multipage/webappapis.html#valid-module-specifier-map) requires that the values are valid URL.
-
-For example, given the following HTML:
-
-```html
-<style type="module" specifier="foo">
-  ...
-</style>
-<!-- Invalid import map, because "foo" is not a URL! -->
-<script type="importmap">
-{
-  "imports": {
-    "bar": "foo"
-  }
-}
-</script>
-<my-element>
-  <!-- "bar" is not mapped to "foo" due to the invalid import map! -->
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="bar">
-    ...
-  </template>
-</my-element>
-```
-
-The style rules from the Declarative CSS Module would first be inserted into the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) with a specifier of "foo". The import map would then be processed, but since "foo" is not a valid URL, the module specifier map is invalid. When the `<template>` element's `shadowrootadoptedstylesheets` property is evaluated, the import map does not apply, and thus the `<template>` element's specified `shadowrootadoptedstylesheets` of "bar" is not located.
 
 ## Other declarative modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
@@ -442,7 +446,7 @@ parsing HTML inside the <template>. -->
 </my-element>
 ```
 
-In this example we’ve leveraged the module system to implement declarative template refs.
+In this example we’ve leveraged [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) to implement declarative template refs.
 
 This approach could also be expanded to SVG modules, similar to the HTML Modules example above.
 
@@ -499,6 +503,19 @@ The following example demonstrates how a JavaScript module could be exported dec
 ```
 
 ## Alternate proposals
+
+### Updates to Module Map Key
+
+An alternative proposal involves modifying the [module map](https://html.spec.whatwg.org/#module-map) to be keyed by a string instead of a URL (the current key is a (URL, module type) pair, which would be changed to a (string, module type) pair). A string is a superset of a URL, so this modification would not break existing scenarios. 
+
+This requirement could be avoided by instead requiring a declarative specifier to be a [URL fragment](https://url.spec.whatwg.org/#concept-url-fragment), but we believe this would introduce several potentially confusing and undesirable outcomes:
+
+1. The [Find a potential indicated element](https://html.spec.whatwg.org/#find-a-potential-indicated-element) algorithm only searches the top-level document and does not query shadow roots. While this proposal does not require the [find a potential indicated element](https://html.spec.whatwg.org/#find-a-potential-indicated-element) to function (the indicated element in this case is the `<style>` element that is directly modifying the module map, so there is no element to find), it could be confusing to introduce a new fragment syntax intended for use in shadow roots that violates this principle.
+2. [Import maps](https://html.spec.whatwg.org/#import-map) remap URL's, which allows relative and bare URL's to map to a full URL. It's not clear if there is a use case for remapping same-document references with import maps that cannot be accomplished by adjusting the local reference's identifier. If import maps are performed on a same-document URL reference, an import map entry intended for an external URL could unintentially break a local reference. [Import map resolution](https://html.spec.whatwg.org/#resolving-a-url-like-module-specifier) could be adjusted to skip same-document references, but it could be confusing to have a URL identifier that does not participate in the [resolved module set](https://html.spec.whatwg.org/#resolved-module-set).
+3. HTML documents are already using fragments for many different concepts, such as [fragment navigations](https://html.spec.whatwg.org/#navigate-fragid), [history updates](https://html.spec.whatwg.org/#url-and-history-update-steps), [internal resource links](https://html.spec.whatwg.org/#process-internal-resource-links), [SVG href targets](https://www.w3.org/TR/SVG2/struct.html#UseElement), and more. Although these use cases are very different, a common factor between them is that they all reference elements in the main document, and cannot refer to elements within a shadow root. An important piece of this proposal is that nested shadow roots can modify the global module map. Introducing a new scoping behavior for fragments that does not fit this model could be confusing to authors.
+4. URL's that consist only of a fragment resolve to a [relative URL](https://url.spec.whatwg.org/#relative-url-string), with the base url defined as the source document per [the URL parsing algorithm](https://url.spec.whatwg.org/#url-parsing). This means that using a fragment-only syntax (which would be desired in this scenario) could break if a [`<base>` element](https://html.spec.whatwg.org/#the-base-element) exists that remaps the document's base URL.
+
+Another alternative could be to define a new [scheme](https://url.spec.whatwg.org/#concept-url-scheme) for local references. This is a potential solution, however, since the containing HTML document already has a scheme, this option would require developers to always specify the [scheme](https://url.spec.whatwg.org/#concept-url-scheme) per [absolute URL with fragment string](https://url.spec.whatwg.org/#absolute-url-with-fragment-string) processing, rather than just the fragment (a fragment-only URL is valid due to the way [relative URL](https://url.spec.whatwg.org/#relative-url-string) processing applies). Developers might find it cumbersome to specify the scheme for local references versus an approach that requires only an identifier (for example, `localid://foo` versus `#foo` or `foo`). A new scheme could also imply scoping behaviors that are not supported, such as [external-file references](https://www.w3.org/TR/SVG2/linking.html#definitions) that are valid in SVG, or potentially even imply that module identifiers can span between `<iframe>` documents. A new scheme may also not be compatible with existing [custom scheme handlers](https://html.spec.whatwg.org/#custom-handlers).
 
 ### Using A Link Tag To Adopt Stylesheets
 
