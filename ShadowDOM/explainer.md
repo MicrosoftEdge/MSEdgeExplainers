@@ -304,7 +304,7 @@ For example, a Declarative CSS Module defined as follows:
 ```html
 <script type="module">
 const shadowRoot = ...;
-import("foo", {with:{ type: "css" }}).then(foo=>shadowRoot.adoptedStyleSheets.push(foo));
+import("foo", {with: { type: "css" }}).then(foo=>shadowRoot.adoptedStyleSheets.push(foo));
 </script>
 ```
 
@@ -828,7 +828,7 @@ The following table compares pros and cons of the various proposals:
 | 5 | `adoptedstylesheets` attribute | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ No |
 
 ## Open issues
-* Since Import Maps have no knowledge of an underlying type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing types (e.g. one Javascript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. There are a few possible solutions to this issue. The simplest is that developers could be instructed to avoid name collisions for declarative modules of different types (for example, using the type as a prefix). Another option is for a type prefix to automatically be added as part of the syntatic sugar for declarative modules, but this would require developers to manually add the prefix when mixing declarative and imperative definitions. Alternatively, the JSON defintion for Import Maps could support an underlying `type` property when a dataURI is specified, mapping the dataURI type to supported Module Record types. For example, "text/css" could be mapped to a "CSS" module type, and likewise, "text/javascript" could be mapped to a Javascript module type. This approach would require adding several special cases for Import Map resolution for each of the module types.
+* Since Import Maps have no knowledge of an underlying type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing types (e.g. one Javascript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. There are a few possible solutions to this issue. The simplest is that developers could be instructed to avoid name collisions for declarative modules of different types (for example, using the type as a prefix). Another option is for a type prefix to automatically be added as part of the syntactic sugar for declarative modules, but this would require developers to manually add the prefix when mixing declarative and imperative definitions. Alternatively, the JSON definition for Import Maps could support an underlying `type` property when a dataURI is specified, mapping the dataURI type to supported Module Record types. For example, "text/css" could be mapped to a "CSS" module type, and likewise, "text/javascript" could be mapped to a Javascript module type. This approach would require adding several special cases for Import Map resolution for each of the module types.
 
 ## References and acknowledgements
 Many thanks for valuable feedback and advice from other contributors:
