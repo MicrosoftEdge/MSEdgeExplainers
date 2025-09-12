@@ -310,7 +310,7 @@ import("foo", {with: { type: "css" }}).then(foo=>shadowRoot.adoptedStyleSheets.p
 
 This approach is much simpler than other proposals and avoids nearly all of the issues associated with other proposals because it builds on existing concepts.
 
-This approach does have a few limitations though:
+This approach does have a few limitations:
 - The `<style>` definition *must* occur before it is imported, otherwise the import map will not be populated. Based on developer feedback, this is not a major limitation.
 - Since Import Maps have no knowledge of an underlying type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing types (e.g. one JavaScript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. See [Open Issues](#open-issues) for some potential solutions to this scenario.
 
@@ -333,6 +333,8 @@ In the following example:
 ```
 
 Upon parsing the `<style>` tag above, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing a [map](https://infra.spec.whatwg.org/#ordered-map) with a key of "imports". The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is another JSON [map](https://infra.spec.whatwg.org/#ordered-map) with a single entry with a [key](https://infra.spec.whatwg.org/#map-key) containing the value of the `specifier` attribute on the `<style>` tag (in this case, "foo"). The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is a [data URI](https://www.rfc-editor.org/rfc/rfc2397) with a [scheme](https://url.spec.whatwg.org/#concept-url-scheme) of "data", a [media type](https://www.rfc-editor.org/rfc/rfc2397) of "text/css", and [data](https://www.rfc-editor.org/rfc/rfc2397) consisting of a [UTF-8 percent encoded](https://url.spec.whatwg.org/#utf-8-percent-encode) value of the [text content](https://html.spec.whatwg.org/#get-the-text-steps) of the `<style>` tag.
+
+Note that unlike a regular `<style>` tag with CSS content, the `sheet` attribute defined in the [LinkStyle interface](https://www.w3.org/TR/cssom-1/#the-linkstyle-interface) would always be empty for Declarative CSS Modules. Similarly, updating the text content of the `<style>` tag would not update the generated [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string), which is exactly how [import maps](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) behave when their text content is modified.
 
  This generated [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) then performs the [parse an import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) algorithm as a typical [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) would be processed.
 
@@ -359,7 +361,7 @@ When the `<template>` element is parsed, an [import](https://html.spec.whatwg.or
 
 When the `<style>` element's `specifier` attribute is parsed, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing the contents as a data URI as specified above. Since the `adoptedStyleSheets` [backing list](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) was not populated, no styles are applied to the [shadow root](https://dom.spec.whatwg.org/#interface-shadowroot).
 
-This behavior always occurs when the first instance of a given `specifier` is encountered, because the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps) enforces that only the first specifier with a given URL is mapped.
+This behavior always occurs when the first instance of a given `specifier` is encountered, because the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps) enforces that only the first instance of a given specifier mapping is applied, and subsequent duplicate specifier mappings are ignored.
 
 For example, with the following markup:
 
@@ -383,7 +385,7 @@ For example, with the following markup:
 
 The contents of the first Declarative CSS Module with `specifier="foo"` (with `color: red`) are first parsed and the [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) is created as specified above.
 
-Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`), an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) is created as specified above. Per the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps), only the first specifier with a given URL is mapped.
+Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `color: blue`), an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) is created as specified above. Per the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps), only the first instance of a given specifier mapping is applied, and subsequent duplicate specifier mappings are ignored.
 
 The `<template>` with `shadowrootadoptedstylesheets="foo"` will use the first definition (with `color: red`).
 
