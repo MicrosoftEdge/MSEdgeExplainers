@@ -46,7 +46,7 @@ content location of future work and discussions.
     - [Scoping](#scoping)
     - [`<script>` vs `<style>` For CSS Modules](#script-vs-style-for-css-modules)
     - [Behavior with script disabled](#behavior-with-script-disabled)
-    - [Syntactic Sugar For Import Maps with DataURI](#syntactic-sugar-for-import-maps-with-datauri)
+    - [Syntactic Sugar For Import Maps with Data URI](#syntactic-sugar-for-import-maps-with-data-uri)
     - [Detailed Parsing Workflow](#detailed-parsing-workflow)
     - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
     - [Use with Import Maps](#use-with-import-maps)
@@ -270,9 +270,9 @@ Earlier versions of this document used the `<script>` tag for declaring CSS Modu
 
 User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not been verified yet.
 
-### Syntactic Sugar For Import Maps with DataURI
+### Syntactic Sugar For Import Maps with Data URI
 
-The simplest approach for Declarative CSS Modules is to treat them as syntactic sugar that generates an Import Map entry containing a specifier and a dataURI containing the module contents.
+The simplest approach for Declarative CSS Modules is to treat them as syntactic sugar that generates an Import Map entry containing a specifier and a data URI containing the module contents.
 
 For example, a Declarative CSS Module defined as follows:
 ```html
@@ -332,7 +332,7 @@ In the following example:
 </my-element>
 ```
 
-Upon parsing the `<style>` tag above, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing a [map](https://infra.spec.whatwg.org/#ordered-map) with a key of "imports". The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is another JSON [map](https://infra.spec.whatwg.org/#ordered-map) with a single entry with a [key](https://infra.spec.whatwg.org/#map-key) containing the value of the `specifier` attribute on the `<style>` tag (in this case, "foo"). The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is a [dataURI](https://www.rfc-editor.org/rfc/rfc2397) with a [scheme](https://url.spec.whatwg.org/#concept-url-scheme) of "data", a [media type](https://www.rfc-editor.org/rfc/rfc2397) of "text/css", and [data](https://www.rfc-editor.org/rfc/rfc2397) consisting of a [UTF-8 percent encoded](https://url.spec.whatwg.org/#utf-8-percent-encode) value of the [text content](https://html.spec.whatwg.org/#get-the-text-steps) of the `<style>` tag.
+Upon parsing the `<style>` tag above, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing a [map](https://infra.spec.whatwg.org/#ordered-map) with a key of "imports". The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is another JSON [map](https://infra.spec.whatwg.org/#ordered-map) with a single entry with a [key](https://infra.spec.whatwg.org/#map-key) containing the value of the `specifier` attribute on the `<style>` tag (in this case, "foo"). The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is a [data URI](https://www.rfc-editor.org/rfc/rfc2397) with a [scheme](https://url.spec.whatwg.org/#concept-url-scheme) of "data", a [media type](https://www.rfc-editor.org/rfc/rfc2397) of "text/css", and [data](https://www.rfc-editor.org/rfc/rfc2397) consisting of a [UTF-8 percent encoded](https://url.spec.whatwg.org/#utf-8-percent-encode) value of the [text content](https://html.spec.whatwg.org/#get-the-text-steps) of the `<style>` tag.
 
  This generated [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) then performs the [parse an import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) algorithm as a typical [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) would be processed.
 
@@ -357,7 +357,7 @@ Styles would not be applied in reversed order, as in the following example:
 
 When the `<template>` element is parsed, an [import](https://html.spec.whatwg.org/multipage/webappapis.html#integration-with-the-javascript-module-system) of "foo" with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css" is performed. This import is unsuccessful, as the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) does not contain an entry with a specifier of "foo".
 
-When the `<style>` element's `specifier` attribute is parsed, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing the contents as a dataURI as specified above. Since the `adoptedStyleSheets` [backing list](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) was not populated, no styles are applied to the [shadow root](https://dom.spec.whatwg.org/#interface-shadowroot).
+When the `<style>` element's `specifier` attribute is parsed, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing the contents as a data URI as specified above. Since the `adoptedStyleSheets` [backing list](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) was not populated, no styles are applied to the [shadow root](https://dom.spec.whatwg.org/#interface-shadowroot).
 
 This replacement always occurs when the first instance of a given `specifier` is encountered, because the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps) enforces that only the first specifier with a given URL is mapped.
 
@@ -828,7 +828,7 @@ The following table compares pros and cons of the various proposals:
 | 5 | `adoptedstylesheets` attribute | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ No |
 
 ## Open issues
-* Since Import Maps have no knowledge of an underlying type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing types (e.g. one JavaScript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. There are a few possible solutions to this issue. The simplest is that developers could be instructed to avoid name collisions for declarative modules of different types (for example, using the type as a prefix). Another option is for a type prefix to automatically be added as part of the syntactic sugar for declarative modules, but this would require developers to manually add the prefix when mixing declarative and imperative definitions. Alternatively, the JSON definition for Import Maps could support an underlying `type` property when a dataURI is specified, mapping the dataURI type to supported Module Record types. For example, "text/css" could be mapped to a "CSS" module type, and likewise, "text/javascript" could be mapped to a JavaScript module type. This approach would require adding several special cases for Import Map resolution for each of the module types.
+* Since Import Maps have no knowledge of an underlying type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing types (e.g. one JavaScript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. There are a few possible solutions to this issue. The simplest is that developers could be instructed to avoid name collisions for declarative modules of different types (for example, using the type as a prefix). Another option is for a type prefix to automatically be added as part of the syntactic sugar for declarative modules, but this would require developers to manually add the prefix when mixing declarative and imperative definitions. Alternatively, the JSON definition for Import Maps could support an underlying `type` property when a data URI is specified, mapping the data URI type to supported Module Record types. For example, "text/css" could be mapped to a "CSS" module type, and likewise, "text/javascript" could be mapped to a JavaScript module type. This approach would require adding several special cases for Import Map resolution for each of the module types.
 
 ## References and acknowledgements
 Many thanks for valuable feedback and advice from other contributors:
