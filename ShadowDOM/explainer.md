@@ -359,7 +359,7 @@ When the `<template>` element is parsed, an [import](https://html.spec.whatwg.or
 
 When the `<style>` element's `specifier` attribute is parsed, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing the contents as a data URI as specified above. Since the `adoptedStyleSheets` [backing list](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) was not populated, no styles are applied to the [shadow root](https://dom.spec.whatwg.org/#interface-shadowroot).
 
-This replacement always occurs when the first instance of a given `specifier` is encountered, because the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps) enforces that only the first specifier with a given URL is mapped.
+This behavior always occurs when the first instance of a given `specifier` is encountered, because the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps) enforces that only the first specifier with a given URL is mapped.
 
 For example, with the following markup:
 
