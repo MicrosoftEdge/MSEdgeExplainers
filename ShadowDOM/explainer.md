@@ -342,7 +342,7 @@ When the `<template>` element is constructed, the `shadowrootadoptedstylesheets`
 
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
-Styles would not be applied in reversed order, as in the following example:
+Styles would not be applied retroactively, as in the following example:
 
 ```html
 <my-element>
