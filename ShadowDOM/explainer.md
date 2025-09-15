@@ -308,7 +308,7 @@ import("foo", {with: { type: "css" }}).then(foo=>shadowRoot.adoptedStyleSheets.p
 </script>
 ```
 
-This approach is much simpler than other proposals and avoids nearly all of the issues associated with other proposals because it builds on existing concepts.
+This approach is much simpler than [alternate proposals](#alternate-proposals) and avoids nearly all of the issues associated with them because it builds on existing concepts.
 
 This approach does have a few limitations:
 - The `<style>` definition *must* occur before it is imported, otherwise the import map will not be populated. Based on developer feedback, this is not a major limitation.
