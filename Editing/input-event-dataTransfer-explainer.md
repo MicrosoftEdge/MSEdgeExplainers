@@ -56,7 +56,7 @@ const editable = document.querySelector("p[contenteditable]");
 const result = document.querySelector(".result");
 editor.addEventListener("input", (event) => {
   result.textContent = event.dataTransfer.getData("text/html"); // Fails as error - Cannot read properties of null (reading 'getData')
-  if (event.inputType === "insertFromPaste" && event.dataTransfer) { // fails on the second condition and lines 49, 50 and so on not executed.
+  if (event.inputType === "insertFromPaste" && event.dataTransfer) { // fails on the second condition and lines below are not executed.
     const html = event.dataTransfer.getData("text/html");
     const text = event.dataTransfer.getData("text/plain");
     // Use html/text for sanitization, logging, or formatting
