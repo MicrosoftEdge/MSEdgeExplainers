@@ -67,6 +67,97 @@ partial interface ElementInternals {
 
 ## Examples
 
+### Custom button with popover invocation
+
+This example shows how to create a custom button that can invoke a popover element using the `commandfor` and `command` attributes:
+
+```js
+class CustomButton extends HTMLElement {
+    static buttonActivationBehaviors = true;
+}
+
+customElements.define('custom-button', CustomButton);
+```
+
+```html
+<custom-button commandfor="my-popover" command="toggle-popover">
+    Toggle the popover
+</custom-button>
+
+<div id="my-popover" popover>
+    <p>This popover is controlled by the custom button!</p>
+</div>
+```
+
+### Custom button with dialog invocation
+
+This example demonstrates invoking a dialog:
+
+```js
+class CustomButton extends HTMLElement {
+    static buttonActivationBehaviors = true;
+}
+
+customElements.define('custom-button', CustomButton);
+```
+
+```html
+<custom-button commandfor="my-dialog" command="showModal">
+    Open Dialog
+</custom-button>
+
+<dialog id="my-dialog">
+    <p>This is a dialog opened by the custom button!</p>
+    <custom-button commandfor="mydialog" command="close">Close</custom-button>
+</dialog>
+```
+
+### Custom button with imperative property configuration
+
+This example shows how to configure the `commandForElement` and `command` properties imperatively:
+
+```js
+class CustomButton extends HTMLElement {
+    static buttonActivationBehaviors = true;
+
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
+    }
+
+    get commandForElement() {
+        return this.internals_.commandForElement ?? null;
+    }
+
+    set commandForElement(element) {
+        this.internals_.commandForElement = element;
+    }
+
+    get command() {
+        return this.internals_.command ?? '';
+    }
+
+    set command(value) {
+        this.internals_.command = value;
+    }
+}
+
+customElements.define('custom-button', CustomButton);
+```
+
+```html
+<custom-button id="my-button">Custom button</custom-button>
+<div id="my-popover" popover>Popover content</div>
+
+<script>
+  const button = document.getElementById('my-button');
+  const popover = document.getElementById('my-popover');
+  
+  button.commandForElement = popover;
+  button.command = 'toggle-popover';
+</script>
+```
+
 ## Alternatives considered
 
 ### Static `behavesLike` property with behavior-specific interface mixins
