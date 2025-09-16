@@ -1,4 +1,4 @@
-# Custom Elements with Native Element Behaviors
+# Custom Elements with Button Activation Behaviors
 
 ## Authors:
 - [Sanket Joshi](https://github.com/sanketj)
@@ -11,19 +11,18 @@
 - [OpenUI issue tracking initial discussions and WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088)
 
 ## Introduction
-Web component authors often want to create custom elements that inherit the behaviors and properties of native HTML elements. These types of custom elements are referred to as "customized built-in elements" or just "customized built-ins". By customizing built-in elements, custom elements can leverage the built-in functionality of standard elements while extending their capabilities to meet specific needs. Some of the use cases enabled by customized built-ins are listed below.
+Web component authors often want to create custom elements that have the  activation behaviors from the native button element. Some of the key use cases are listed below:
 
-- Custom buttons can provide unique styles and additional functionality, such as split or toggle button semantics, while still maintaining [native button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-button) behavior such as being a [popover invoker](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement).
-- Custom buttons can extend native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit). Similarly, custom buttons that extend native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset).
-- Custom labels can provide additional functionality, such as tooltips and icons, while still supporting associations with [labelable elements](https://html.spec.whatwg.org/multipage/forms.html#category-label) via the `for` attribute or nesting a labelable element inside the custom label.
+- Custom buttons can be a [popover invoker](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement) while providing unique styles and additional functionality. 
+- Custom buttons can provide native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit). Similarly, custom buttons can also provide native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior that can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset).
 
 ### Goals
-- A solution for customized built-in elements that provides an improvement over `extends`/`is`, in terms of interoperability and functionality.
-- Supporting key customized built-in use cases, starting with button and label behaviors. Support for additional behaviors can be added over time.
+- A solution to support key button activation use cases, particularly command invocation and form submission
+- Building on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) to provide a familiar developer experience.
 
 ### Non-goals
-- Deprecation of `extends`/`is`.
-- A declarative version of this proposal. This requires finding a general solution for declarative custom elements. This is a broader problem that should be explored separately.
+- Providing a comprehensive solution as an alternative to the customized built-in (`extends`/`is`) solution.
+- A declarative version of this proposal. This requires finding a general solution for declarative custom elements, which should be explored separately.
 
 ## Proposal: add static `buttonActivationBehaviors` property 
 We propose enabling web component authors to create custom elements with button activation behaviors by adding a static `buttonActivationBehaviors` property to their custom element class definition.
