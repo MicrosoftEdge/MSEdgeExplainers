@@ -16,12 +16,15 @@ Web component authors often want to create custom elements that have the  activa
 - Custom buttons can be a [popover invoker](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement) while providing unique styles and additional functionality. 
 - Custom buttons can provide native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit). Similarly, custom buttons can also provide native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior that can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset).
 
+Currently, web developers face challenges when trying to implement these behaviors in custom elements. The existing customized built-in approach using `extends` and `is` provides built-in button functionality but lacks full cross-browser support. As a result, developers are forced to manually reimplement button behaviors from scratch, leading to inconsistent implementations, accessibility issues, and development overhead.
+
+This proposal addresses these challenges by introducing a standardized way for custom elements to opt into specific button activation behaviors through a simple static property declaration. By building on the established pattern of [form-associated custom elements](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements), this approach provides a familiar developer experience while ensuring cross-browser compatibility and proper integration with platform features like the [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API).
+
 ### Goals
 - A solution to support key button activation use cases, particularly command invocation and form submission
-- Building on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) to provide a familiar developer experience.
 
 ### Non-goals
-- Providing a comprehensive solution as an alternative to the customized built-in (`extends`/`is`) solution.
+- Providing a comprehensive solution as an alternative to the customized built-in solution.
 - A declarative version of this proposal. This requires finding a general solution for declarative custom elements, which should be explored separately.
 
 ## Proposal: add static `buttonActivationBehaviors` property 
@@ -39,7 +42,6 @@ customElements.define('custom-button', CustomButton);
 
 When `static buttonActivationBehaviors = true` is set, the custom element would gain support for button activation-specific attributes:
 
-- `disabled` - Whether the form control is disabled
 - `commandfor` - Targets another element to be invoked
 - `command` - Indicates to the targeted element which action to take
 
@@ -47,7 +49,6 @@ When `static buttonActivationBehaviors = true` is set, the custom element would 
 
 The `ElementInternals` interface would be extended with button activation-specific properties:
 
-- `disabled` - reflects the `disabled` attribute
 - `commandForElement` - reflects the `commandfor` attribute
 - `command` - reflects the `command` attribute
 
@@ -58,7 +59,6 @@ The `ElementInternals` interface would be extended with button activation-specif
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
-  attribute boolean disabled;
   attribute Element? commandForElement;
   attribute DOMString command;
 };
@@ -156,6 +156,68 @@ customElements.define('custom-button', CustomButton);
   button.command = 'toggle-popover';
 </script>
 ```
+
+## add `buttonType` property in `ElementInternals`
+
+To provide submit and reset functionality, this proposal also introduces a `buttonType` property to `ElementInternals` that controls the behavior when the custom button is activated.
+
+The `ElementInternals` interface would be extended with:
+
+- `buttonType` - controls the activation behavior of the button (values: "button", "submit", "reset")
+
+**IDL definitions:**
+```webidl
+partial interface ElementInternals {
+  attribute DOMString buttonType;
+};
+```
+
+**Button type behaviors:**
+
+- `"button"` (default) - No special form behavior, only fires click events and command invocation
+- `"submit"` - Submits the associated form when activated
+- `"reset"` - Resets the associated form when activated
+
+**Example usage:**
+
+```js
+class CustomButton extends HTMLElement {
+    static buttonActivationBehaviors = true;
+    static observedAttributes = ['type'];
+
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'type') {
+            this.internals_.buttonType = newValue;
+        }
+    }
+}
+
+customElements.define('custom-button', CustomButton);
+```
+
+```html
+<form>
+    <!-- Submit button -->
+    <custom-button type="submit">Submit Form</custom-button>
+    
+    <!-- Reset button -->
+    <custom-button type="reset">Reset Form</custom-button>
+    
+    <!-- Regular button -->
+    <custom-button commandfor="my-dialog" command="showModal">
+        Open Dialog
+    </custom-button>
+</form>
+```
+
+**Rationale for the `buttonType` property:**
+
+The `buttonType` property is essential because it allows custom element authors to create a single custom button class that can handle all three native button behaviors without requiring separate class definitions. Without this property, new static properties (eg. `enableSubmitBehavior = true`) would be needed to support the submit and reset behaviors, and developers would need to create three different custom element classes (e.g., `custom-submit-button`, `custom-reset-button`, `custom-regular-button`) just to support the different type values from the native button element. This approach provides the same flexibility as the native `<button>` element's `type` attribute, wihch let custom element users configure the behaviors declaratively through the custom element's attributes.
 
 ## Alternatives considered
 
