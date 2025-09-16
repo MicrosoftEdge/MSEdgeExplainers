@@ -25,128 +25,47 @@ Web component authors often want to create custom elements that inherit the beha
 - Deprecation of `extends`/`is`.
 - A declarative version of this proposal. This requires finding a general solution for declarative custom elements. This is a broader problem that should be explored separately.
 
-## Proposal: `ElementInternals` feature decomposition approach
-
+## Proposal: add static `buttonActivationBehaviors` property 
+We propose enabling web component authors to create custom elements with button activation behaviors by adding a static `buttonActivationBehaviors` property to their custom element class definition.
 This proposal focuses on decomposing native element behaviors into granular, specific functionalities that can be individually exposed through `ElementInternals`. This approach builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
-
-Key characteristics of this approach include:
-
-- **Granular control**: Features like form submission, popover invocation, and labeling are exposed individually through `ElementInternals`.
-- **Explicit opt-in**: Each behavior is enabled via static properties and `ElementInternals` properties.
-- **Composable design**: Multiple behaviors can be combined on a single element.
-- **Clear semantics**: Each API explicitly defines the algorithms and behaviors it affects.
-- **Behavioral dependencies**: Some functionality may require additional behaviors to ensure full accessibility and usability. For example, enabling popover targeting alone requires button-like accessibility semantics, focusability, and activation behaviors to deliver a complete user experience. This differs from form association, which doesn't inherently include accessibility roles or interaction behaviors. For instance, a custom element with only `popoverTargetElement` functionality would need additional properties and behaviors to be fully usable:
-  - **Accessibility**: Default ARIA role (`button`), accessible name computation, and focus management.
-  - **Interaction**: Keyboard activation (Enter/Space), mouse click handling, and focus indicators.
-  - **Visual feedback**: Focus rings.
-  - **Integration**: Proper event dispatching
 
 ```js
 class CustomButton extends HTMLElement {
-  static buttonActivationBehaviors = true;
-
-  constructor() {
-    super();
-    this.internals_ = this.attachInternals();
-  }
-
-  get popoverTargetElement() {
-    return this.internals_.popoverTargetElement ?? null;
-  }
-
-  set popoverTargetElement(element) {
-    this.internals_.popoverTargetElement = element;
-  }
-
-  get commandForElement() {
-    return this.internals_.commandForElement ?? null;
-  }
-
-  set commandForElement(element) {
-    this.internals_.commandForElement = element;
-  }
+    static buttonActivationBehaviors = true;
 }
-
-// Corresponding ElementInternals interface extensions
-partial interface ElementInternals {
-  // Button activation behaviors
-  attribute Element? popoverTargetElement;
-  attribute DOMString popoverTargetAction;
-  attribute Element? commandForElement;
-};
+customElements.define('custom-button', CustomButton);
 ```
 
 **Supported attributes:**
 
 When `static buttonActivationBehaviors = true` is set, the custom element would gain support for button activation-specific attributes:
 
-- `popovertarget` - Targets a popover element to toggle, show, or hide
-- `popovertargetaction` - Indicates whether a targeted popover element is to be toggled, shown, or hidden
-- `command` - Indicates to the targeted element which action to take
+- `disabled` - Whether the form control is disabled
 - `commandfor` - Targets another element to be invoked
+- `command` - Indicates to the targeted element which action to take
 
 **Supported properties:**
 
-The `ElementInternals` interface would be extended with properties corresponding to the enabled behaviors:
+The `ElementInternals` interface would be extended with button activation-specific properties:
 
-For button activation behaviors:
+- `disabled` - reflects the `disabled` attribute
+- `commandForElement` - reflects the `commandfor` attribute
+- `command` - reflects the `command` attribute
 
-- `popoverTargetElement` - Returns the Element referenced by the `popovertarget` attribute
-- `popoverTargetAction` - Returns the value of the `popovertargetaction` attribute
-- `commandForElement` - Returns the Element referenced by the `commandfor` attribute
+**Supported events:**
 
-**Supported Methods:**
-Unlike alternative approaches which provide access to methods like `checkValidity()`, `reportValidity()`, and `setCustomValidity()` through behavior-specific mixins, this feature decomposition approach would only expose properties and attributes.
+- `command` event - Fired on the element referenced by `commandfor`.
 
-This approach offers several benefits:
-
-- **Clear semantics**: Each feature explicitly defines which specification algorithms it modifies.
-- **Flexible composition**: Web developers can mix and match only the behaviors they need.
-- **Evolutionary path**: New behaviors can be added incrementally without breaking existing APIs
-- **Future-compatible**: Provides a foundation for reducing boilerplate, whether through userland solutions or platform support.
-
-However, this approach also introduces the following trade-offs:
-
-- **Developer burden**: Requires significant boilerplate to expose native element-like APIs.
-- **Discoverability**: It can be difficult to identify all the pieces needed to emulate a specific native element.
-- **Implementation complexity**: Involves maintaining a larger number of individual features.
-- **Reduced granularity benefits**: Since web authors may need to opt into multiple related behaviors to achieve complete functionality, this can diminish the benefits of the granular approach. While it might seem appealing to have highly granular options like `static canUsePopoverTarget = true`, in practice this cannot be implemented without also including accessibility semantics, focusability, click event handling, and other core native element behaviors.
-
-The main difference between this approach and the `behavesLike` proposal is whether web developers should be able to compose different behavior bundles (e.g., combining button activation with label behaviors). However, such composition introduces significant complexity:
-
-```js
-class CustomElement extends HTMLElement {
-  static buttonActivationBehaviors = true;
-  static labelBehaviors = true;
-
-  constructor() {
-    super();
-    this.internals_ = this.attachInternals();
-  }
-
-  get popoverTargetElement() {
-    return this.internals_.popoverTargetElement ?? null;
-  }
-
-  set popoverTargetElement(element) {
-    this.internals_.popoverTargetElement = element;
-  }
-
-  get control() {
-    return this.internals_.control ?? null;
-  }
-
-  set htmlFor(value) {
-    this.internals_.htmlFor = value;
-  }
-}
+**IDL definitions:**
+```webidl
+partial interface ElementInternals {
+  attribute boolean disabled;
+  attribute Element? commandForElement;
+  attribute DOMString command;
+};
 ```
 
-- **Conflicting semantics**: Combining button activation behavior with label behavior introduces ambiguity about the element's ARIA role (should it be `button` or have no corresponding role since labels don't have an implicit ARIA role?).
-- **Interaction conflicts**: When clicked, should the element trigger a `clickevent` (button behavior) and also transfer focus to a labeled control (label behavior)? This dual behavior would be confusing and potentially harmful to user experience.
-- **Specification complexity**: Each combination of behaviors would require careful specification of how conflicts are resolved, leading to an increase in edge cases.
-
-Given these challenges, web authors would likely default to using single behavior bundles. This makes the composability of this approach more theoretical than practical, while adding unnecessary complexity to both implementation and specification.
+## Examples
 
 ## Alternatives considered
 
