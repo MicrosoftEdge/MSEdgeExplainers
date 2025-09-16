@@ -19,9 +19,9 @@ Please describe the issue you encountered. Also tell us, what did you expect to 
 
 In Edge, go to `edge://on-device-internals/` and find the Device performance class value under Tools.
 
-### Is device capable?
+### Is translation model downloaded?
 
-In Edge, go to `edge://on-device-internals/` and find the Device capable value under Model Status.
+In Edge, go to `edge://on-device-translation-internals` and ensure that language packs for your source and target languages have been installed.
 
 ### Edge channel and version
 
@@ -32,8 +32,4 @@ For example: Edge Dev 142.0.3553.0.
 
 Please provide the following information about your device: Operating system, version, and architecture.
 For example: Windows 11, version 24H2, x64
-
-### GPU information
-
-Tell us the GPU information of your device. Go to `edge://gpu` and search for GL_RENDERER.
 ---
