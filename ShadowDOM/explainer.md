@@ -287,7 +287,7 @@ For example, a Declarative CSS Module defined as follows:
 <script type="importmap">
 {
   "imports": {
-    "foo": "data:text/css,#23content { color: red; }"
+    "foo": "data:text/css,%23content { color: red; }"
   }
 }
 </script>
