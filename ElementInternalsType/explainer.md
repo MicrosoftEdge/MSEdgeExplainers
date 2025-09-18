@@ -25,7 +25,7 @@ This proposal addresses these challenges by introducing a standardized way for c
 - A solution to support key button activation use cases, particularly command invocation and form submission
 
 ### Non-goals
-- Providing a comprehensive solution as an alternative to the customized built-in solution.
+- Providing a comprehensive alternative to the customized built-in solution (`extends` and `is`), i.e., enabling a custom element to do everything a native button does.
 - A declarative version of this proposal. This requires finding a general solution for declarative custom elements, which should be explored separately.
 
 ## Proposal: add static `buttonActivationBehaviors` property 
@@ -76,8 +76,6 @@ Beyond attributes, properties, and events, custom elements with `buttonActivatio
 ### Order of precedence regarding ARIA role
 The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role  via `buttonActivationBehaviors`
 
-When `buttonActivationBehaviors = true`, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternals.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
-
 ### `buttonActivationBehaviors` does not change element appearance
 Setting `buttonActivationBehaviors` gives a custom element button activation behaviors, but the custom element's appearance does not change. In other words, the custom element does not take on default, author-specified or user-specified styles that target the native button element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
 
@@ -106,29 +104,6 @@ customElements.define('custom-button', CustomButton);
 <div id="my-popover" popover>
     <p>This popover is controlled by the custom button!</p>
 </div>
-```
-
-### Custom button with dialog invocation
-
-This example demonstrates invoking a dialog:
-
-```js
-class CustomButton extends HTMLElement {
-    static buttonActivationBehaviors = true;
-}
-
-customElements.define('custom-button', CustomButton);
-```
-
-```html
-<custom-button commandfor="my-dialog" command="showModal">
-    Open Dialog
-</custom-button>
-
-<dialog id="my-dialog">
-    <p>This is a dialog opened by the custom button!</p>
-    <custom-button commandfor="mydialog" command="close">Close</custom-button>
-</dialog>
 ```
 
 ### Custom button with imperative property configuration
@@ -165,15 +140,15 @@ customElements.define('custom-button', CustomButton);
 ```
 
 ```html
-<custom-button id="my-button">Custom button</custom-button>
-<div id="my-popover" popover>Popover content</div>
+<custom-button id="my-button">Open Dialog</custom-button>
+<dialog id="my-dialog">Dialog content</dialog>
 
 <script>
   const button = document.getElementById('my-button');
-  const popover = document.getElementById('my-popover');
+  const dialog = document.getElementById('my-dialog');
   
-  button.commandForElement = popover;
-  button.command = 'toggle-popover';
+  button.commandForElement = dialog;
+  button.command = 'show-modal';
 </script>
 ```
 
@@ -194,7 +169,7 @@ partial interface ElementInternals {
 
 **Activation behaviors:**
 - `"button"` - No special form behavior, only fires click events and command invocation
-- `"submit"` - Submits the associated form when activated
+- `"submit"` - (Default value) Submits the associated form when activated
 - `"reset"` - Resets the associated form when activated
 
 **Rationale for the `buttonType` property:**
