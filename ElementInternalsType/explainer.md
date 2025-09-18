@@ -17,7 +17,7 @@ Web component authors often want to create custom elements that have the  activa
 
 - Custom buttons can provide native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit). Similarly, custom buttons can also provide native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior that can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset) (as discussed [here](https://github.com/WICG/webcomponents/issues/814)).
 
-Currently, web developers face challenges when trying to implement these behaviors in custom elements. The existing customized built-in approach using `extends` and `is` provides built-in button functionality but lacks full cross-browser support. As a result, developers are forced to manually reimplement button behaviors from scratch, leading to inconsistent implementations, accessibility issues, and development overhead.
+Currently, web developers face challenges when trying to implement these behaviors in custom elements. The existing customized built-in approach using `extends` and `is` provides native button functionality but lacks full cross-browser support. As a result, developers are forced to manually reimplement button behaviors from scratch, leading to inconsistent implementations, accessibility issues, and development overhead.
 
 This proposal addresses these challenges by introducing a standardized way for custom elements to opt into specific button activation behaviors through a simple static property declaration. By building on the established pattern of [form-associated custom elements](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements), this approach provides a familiar developer experience while ensuring cross-browser compatibility and proper integration with platform features like the [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API).
 
@@ -55,7 +55,8 @@ The `ElementInternals` interface would be extended with button activation-specif
 
 **Supported events:**
 
-- `command` event - Fired on the element referenced by `commandfor`.
+- `command` event - Fired on the element referenced by `commandfor`
+- `click` event - Fired on the custom element
 
 **IDL definitions:**
 ```webidl
@@ -64,6 +65,24 @@ partial interface ElementInternals {
   attribute DOMString command;
 };
 ```
+
+**Implicit behaviors:**
+Beyond attributes, properties, and events, custom elements with `buttonActivationBehaviors = true` also gain native behaviors related to button activation:
+- **Form association**: The custom element automatically becomes form-associated
+- **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
+- **Focusable by default**: The element becomes focusable and participates in tab navigation without requiring `tabindex`
+- **Default ARIA semantics**: Have an [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role. Note ElementInternals.role is not changed. This is following the pattern where Element.role does not reflect native `<button>`'s `button` ARIA role.
+
+### Order of precedence regarding ARIA role
+The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role  via `buttonActivationBehaviors`
+
+When `buttonActivationBehaviors = true`, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternals.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
+
+### `buttonActivationBehaviors` does not change element appearance
+Setting `buttonActivationBehaviors` gives a custom element button activation behaviors, but the custom element's appearance does not change. In other words, the custom element does not take on default, author-specified or user-specified styles that target the native button element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
+
+### `buttonActivationBehaviors` and `formAssociated`
+If `buttonActivationBehaviors` is set to true, `static formAssociated = true/false;` becomes a no-op since the element will automatically gain form association capabilities from `buttonActivationBehaviors`.
 
 ## Examples
 
@@ -158,7 +177,7 @@ customElements.define('custom-button', CustomButton);
 </script>
 ```
 
-## add `buttonType` property in `ElementInternals`
+## Add `buttonType` property in `ElementInternals`
 
 To provide submit and reset functionality, this proposal also introduces a `buttonType` property to `ElementInternals` that controls the behavior when the custom button is activated.
 
@@ -173,11 +192,33 @@ partial interface ElementInternals {
 };
 ```
 
-**Button type behaviors:**
-
-- `"button"` (default) - No special form behavior, only fires click events and command invocation
+**Activation behaviors:**
+- `"button"` - No special form behavior, only fires click events and command invocation
 - `"submit"` - Submits the associated form when activated
 - `"reset"` - Resets the associated form when activated
+
+**Rationale for the `buttonType` property:**
+
+The `buttonType` property is essential because it allows custom element authors to create a single custom button class that can handle all three native button behaviors without requiring separate class definitions. Without this property, new static properties (eg. `enableSubmitBehavior = true`) would be needed to support the submit and reset behaviors, and developers would need to create three different custom element classes, e.g., `custom-submit-button`, `custom-reset-button`, `custom-regular-button`, just to support the different type values from the native button element. This approach provides the same flexibility as the native `<button>` element's `type` attribute, wihch let custom element users configure the behaviors declaratively through the custom element's attributes.
+
+**Supported attributes when `buttonType="submit"`:**
+- `formaction` - URL to use for form submission
+- `formenctype` - Entry list encoding type to use for form submission
+- `formmethod` - Variant to use for form submission
+- `formnovalidate` - Bypass form control validation for form submission
+- `formtarget` - Navigable for form submission
+
+**Supported properties when `buttonType="submit"`:**
+
+The `ElementInternals` interface would be extended with these properties which are applicable only when `buttonType="submit"`:
+- `formAction` - reflects the `formaction` attribute  
+- `formEnctype` - reflects the `formenctype` attribute
+- `formMethod` - reflects the `formmethod` attribute
+- `formNoValidate` - reflects the `formnovalidate` attribute
+- `formTarget` - reflects the `formtarget` attribute
+
+**Implicit behaviors:**
+- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (eg, a text input) will trigger the custom button's submit behavior if the custom button's `internals_.buttonType` is `"submit"`.
 
 **Example usage:**
 
@@ -215,10 +256,6 @@ customElements.define('custom-button', CustomButton);
     </custom-button>
 </form>
 ```
-
-**Rationale for the `buttonType` property:**
-
-The `buttonType` property is essential because it allows custom element authors to create a single custom button class that can handle all three native button behaviors without requiring separate class definitions. Without this property, new static properties (eg. `enableSubmitBehavior = true`) would be needed to support the submit and reset behaviors, and developers would need to create three different custom element classes (e.g., `custom-submit-button`, `custom-reset-button`, `custom-regular-button`) just to support the different type values from the native button element. This approach provides the same flexibility as the native `<button>` element's `type` attribute, wihch let custom element users configure the behaviors declaratively through the custom element's attributes.
 
 ## Alternatives considered
 
