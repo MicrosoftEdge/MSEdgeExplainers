@@ -251,7 +251,7 @@ customElements.define('custom-button', CustomButton);
     <custom-button type="reset">Reset Form</custom-button>
     
     <!-- Regular button -->
-    <custom-button commandfor="my-dialog" command="showModal">
+    <custom-button type="button" commandfor="my-dialog" command="showModal">
         Open Dialog
     </custom-button>
 </form>
