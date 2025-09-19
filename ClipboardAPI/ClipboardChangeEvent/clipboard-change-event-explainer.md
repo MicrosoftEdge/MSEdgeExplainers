@@ -24,12 +24,13 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
   - [4.1 Proposed IDL and example javascript code:](#41-proposed-idl-and-example-javascript-code)
     - [4.1.1 IDL changes](#411-idl-changes)
     - [4.1.2 Sample JS code](#412-sample-js-code)
-  - [4.2 Clipboard data types - Available in event payload](#42-clipboard-data-types---available-in-event-payload)
+  - [4.2 Clipboard data types and changeId - Available in event payload](#42-clipboard-data-types-and-changeid---available-in-event-payload)
   - [4.3 Clipboard contents - Not available in event payload](#43-clipboard-contents---not-available-in-event-payload)
-  - [4.4 Permissions and Interop - No user permission required](#44-permissions-and-interop---no-user-permission-required)
+  - [4.4 Permissions and Interop - Sticky activation required](#44-permissions-and-interop---sticky-activation-required)
       - [Pros](#pros)
   - [4.5 Page focus requirement](#45-page-focus-requirement)
-  - [4.6 Event bubble up and cancellation](#46-event-bubble-up-and-cancellation)
+  - [4.6 Multi-window deduplication with changeId](#46-multi-window-deduplication-with-changeid)
+  - [4.7 Event bubble up and cancellation](#47-event-bubble-up-and-cancellation)
 - [5 Alternatives considered](#5-alternatives-considered)
   - [5.1 Transient user activation requirement](#51-transient-user-activation-requirement)
       - [Pros:](#pros)
@@ -40,6 +41,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
   - [6.2 Permission prompt mechanism in various browsers](#62-permission-prompt-mechanism-in-various-browsers)
   - [6.3 Reading clipboard contents within the clipboardchange event handler](#63-reading-clipboard-contents-within-the-clipboardchange-event-handler)
   - [6.4 Custom clipboard data types and clipboardchange event](#64-custom-clipboard-data-types-and-clipboardchange-event)
+  - [6.5 Partition-based changeId behavior](#65-partition-based-changeid-behavior)
 - [7 Open issues](#7-open-issues)
   - [7.1 Fencedframe](#71-fencedframe)
 - [8 References & acknowledgements](#8-references--acknowledgements)
@@ -88,18 +90,40 @@ Additionally we must ensure that we monitor the clipboard only when absolutely r
 
 #### 4.1.1 IDL changes
 ```typescript
+dictionary ClipboardChangeEventInit : EventInit {
+  sequence<DOMString> types = [];
+  bigint changeId;
+};
+
 interface ClipboardChangeEvent : Event {
+  constructor(DOMString type, optional ClipboardChangeEventInit eventInitDict = {});
   readonly attribute FrozenArray<DOMString> types;
+  readonly attribute bigint changeId;
 };
 ```
 
 #### 4.1.2 Sample JS code
 ```javascript
+  // For applications with multiple windows, track processed change IDs to avoid duplication
+  const processedChangeIds = new Set();
+
   // Event handler for clipboardchange event which contains the data types present in clipboard
   function onClipboardChanged(event) {
+    // Check if this clipboard change has already been processed by another window
+    if (processedChangeIds.has(event.changeId)) {
+      console.log('Clipboard change already processed by another window');
+      return;
+    }
+    
+    // Mark this change as processed
+    processedChangeIds.add(event.changeId);
+    
+    // Update UI based on available clipboard types
     document.getElementById("text_paste_button").disabled = !(event.types.includes('text/plain'));
     document.getElementById("html_paste_button").disabled = !(event.types.includes('text/html'));
     document.getElementById("png_paste_button").disabled = !(event.types.includes('image/png'));
+    
+    console.log(`Clipboard changed with ID: ${event.changeId}, available types: ${event.types}`);
   }
 
   navigator.clipboard.addEventListener("clipboardchange", onClipboardChanged);
@@ -107,34 +131,98 @@ interface ClipboardChangeEvent : Event {
 
 A sample web application which demonstrates the usage of "clipboardchange" event for showing available paste formats for rich web editors [Scenario 2.2](#21-scenario-show-available-paste-formats-in-web-based-editors) can be found [here](./clipboard-change-event-example-app.html).
 
-### 4.2 Clipboard data types - Available in event payload
+### 4.2 Clipboard data types and changeId - Available in event payload
 
-The ClipboardChange event object will have a `types` member that lists all the available native formats available on the clipboard. [Custom formats](#64-custom-clipboard-data-types-and-clipboardchange-event) will not be included in this list.
+The ClipboardChange event object will have a `types` member that lists all the available native formats available on the clipboard, and a `changeId` member that provides a unique identifier for each clipboard change operation. [Custom formats](#64-custom-clipboard-data-types-and-clipboardchange-event) will not be included in the types list.
 
 ```typescript
 interface ClipboardChangeEvent{
   types: Array<string>; // MIME types available in the clipboard when the event was fired
+  changeId: bigint; // Unique identifier for this specific clipboard change operation
 }
 ```
+
 The `types` member can be used to detect available data types present on the clipboard and then reflect the same on the UI as per [this scenario](#21-scenario-show-available-paste-formats-in-web-based-editors).
+
+The `changeId` provides a unique identifier for each clipboard change operation. For the same clipboard change, all windows and tabs within the same partition will receive events with identical `changeId` values, enabling applications with multiple windows to deduplicate events and avoid redundant processing. The identifier is partition-specific and does not provide cross-partition correlation capabilities.
 
 ### 4.3 Clipboard contents - Not available in event payload
 
 This API doesn't intend to provide any user clipboard contents as part of the event payload.
 
-### 4.4 Permissions and Interop - No user permission required 
+### 4.4 Permissions and Interop - Sticky activation required
 
-When fired, this API indicates that the clipboard has changed and provides the current MIME types present on the clipboard. Since the actual contents of the clipboard are not exposed, there is no need for user permissions.
+The `clipboardchange` event requires [sticky activation](https://html.spec.whatwg.org/multipage/interaction.html#sticky-activation) to fire, ensuring that the user has interacted with the page at some point. This prevents passive monitoring of clipboard changes by malicious sites without any user interaction.
+
+**Exception for persistent permissions**: In user agents that support persistent clipboard permissions, sites with such permissions can receive `clipboardchange` events without sticky activation, as the permission already grants access to more sensitive clipboard data.
+
+When fired, this API indicates that the clipboard has changed and provides the current MIME types present on the clipboard. Since the actual contents of the clipboard are not exposed, user permissions are only needed for the sticky activation requirement (or existing persistent clipboard permissions).
 
 ##### Pros
-1.) Simpler user experience with no permission prompts / user gesture requirements.
-2.) Provides interop out of the box without need to implement new permissions.
+1. Prevents malicious sites from passively monitoring clipboard changes without user interaction.
+2. Provides interop with existing permission models - sites with clipboard permissions get enhanced functionality.
+3. Simpler user experience for legitimate use cases while maintaining security.
 
 ### 4.5 Page focus requirement
 
-The clipboardchange event will not fire if the target document is not focused. If clipboard changes occur while the document is not in focus, a single clipboardchange event will be fired when the document comes back into focus. Historical clipboard change information will not be available, only the available types when the page gained focus will be included in the types member.
+The clipboardchange event will not fire if the target document does not have system focus. If clipboard changes occur while the document is not in focus, a single clipboardchange event will be fired when the document regains system focus. Historical clipboard change information will not be available, only the available types when the page gained focus will be included in the types member.
 
-### 4.6 Event bubble up and cancellation 
+This focus requirement works in conjunction with the sticky activation requirement to ensure clipboard monitoring only occurs for actively engaged users.
+
+### 4.6 Multi-window deduplication with changeId
+
+The `changeId` property enables applications with multiple windows or tabs to avoid processing the same clipboard change multiple times. When a clipboard change occurs, all windows and tabs within the same partition receive a `clipboardchange` event with an identical `changeId` value.
+
+```javascript
+class ClipboardManager {
+  constructor() {
+    this.processedChangeIds = new Set();
+    this.maxCacheSize = 1000; // Prevent memory leaks
+  }
+
+  handleClipboardChange(event) {
+    // Check if we've already processed this clipboard change
+    if (this.processedChangeIds.has(event.changeId)) {
+      console.log('Skipping duplicate clipboard change event');
+      return;
+    }
+
+    // Add to processed set
+    this.processedChangeIds.add(event.changeId);
+    
+    // Prevent memory leaks by limiting cache size
+    if (this.processedChangeIds.size > this.maxCacheSize) {
+      const firstId = this.processedChangeIds.values().next().value;
+      this.processedChangeIds.delete(firstId);
+    }
+
+    // Process the clipboard change
+    this.updateUI(event.types);
+    this.syncWithServer(event.changeId, event.types);
+  }
+
+  updateUI(types) {
+    // Update paste buttons based on available types
+    document.getElementById("paste-text").disabled = !types.includes('text/plain');
+    document.getElementById("paste-html").disabled = !types.includes('text/html');
+    document.getElementById("paste-image").disabled = !types.includes('image/png');
+  }
+
+  syncWithServer(changeId, types) {
+    // Sync clipboard metadata with server for multi-device support
+    fetch('/api/clipboard-sync', {
+      method: 'POST',
+      body: JSON.stringify({ changeId: changeId.toString(), types })
+    });
+  }
+}
+
+const clipboardManager = new ClipboardManager();
+navigator.clipboard.addEventListener("clipboardchange", 
+  event => clipboardManager.handleClipboardChange(event));
+```
+
+### 4.7 Event bubble up and cancellation 
 
 Since the clipboardchange event is not triggered by a user action and the event is not associated to any DOM element, hence this event doesn't bubble up and is not cancellable.
 
@@ -197,6 +285,16 @@ To get the changed clipboard data within the event handler, the [read](https://w
 ### 6.4 Custom clipboard data types and clipboardchange event
 
 Custom clipboard data types are not part of this event because if custom MIME types are exposed (without user consent) a web page can know which applications a user is working on providing fingerprinting surface for malicious sites. Moreover, not all browsers support custom clipboard data types.
+
+### 6.5 Partition-based changeId behavior
+
+The `changeId` property is generated using partition-specific transformations, ensuring that:
+
+1. **Same partition consistency**: All documents within the same [partition](https://w3ctag.github.io/privacy-principles/#dfn-partition) receive identical `changeId` values for the same clipboard change.
+2. **Cross-partition isolation**: Different partitions receive different `changeId` values for the same underlying system clipboard change, preventing correlation across partition boundaries.
+3. **Privacy protection**: The partition-based approach provides stronger privacy boundaries than origin-based approaches, especially important for clipboard monitoring capabilities.
+
+This design aligns with modern web platform privacy principles where partitions provide the appropriate isolation boundary for features with privacy implications.
 
 ## 7 Open issues
 
