@@ -284,13 +284,6 @@ class CustomButton extends HTMLElement {
     set command(value) {
         this.internals_.command = value;
     }
-
-    // Manual accessible name computation support
-    connectedCallback() {
-        if (!this.internals_.ariaLabel && !this.getAttribute('aria-label')) {
-            this.internals_.ariaLabel = this.textContent.trim();
-        }
-    }
 }
 ```
 
