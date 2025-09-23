@@ -309,17 +309,23 @@ The `ElementInternals` interface would be extended with minimal command invocati
 - `commandForElement` - reflects the `commandfor` attribute
 - `command` - reflects the `command` attribute
 
-Unlike the main proposal, this approach does not automatically provide:
+**What the Invoker Commands API provides automatically:**
 
-- Default ARIA role assignment
-- Automatic focusability (`tabindex` management)
-- Built-in accessible name computation
+- **Keyboard activation**: Enter/Space key handling for command invocation (but only when the element is focusable)
+- **Mouse click handling**: Click event handling for command invocation
+- **Command event dispatching**: Automatic `command` event dispatching to the target element
+- **Click event firing**: Automatic `click` event firing on the custom element when activated
 
-The Invoker Commands API automatically provides:
+**What developers must implement manually:**
 
-- Keyboard activation (Enter/Space) for command invocation
-- Mouse click handling for command invocation
-- Command event dispatching to the target element
+- **Focusability**: The element is NOT focusable by default - developers must set `tabIndex = 0` or use the `tabindex` attribute
+- **Tab navigation**: Without focusability, the element won't participate in keyboard navigation
+- **ARIA role assignment**: No automatic role - developers must set `this.internals_.role = 'button'` for proper semantics
+- **Visual focus indicators**: CSS focus styles (`:focus`, `:focus-visible`) must be implemented
+- **Active/pressed states**: Visual feedback for interaction states
+- **Accessible name computation**: While automatic once a role is assigned, the role itself must be set manually
+
+**Important note**: If the element is not made focusable (via `tabIndex` or `tabindex` attribute), the keyboard activation provided by the Invoker Commands API will not work, as the element cannot receive keyboard focus.
 
 **Supported events:**
 
