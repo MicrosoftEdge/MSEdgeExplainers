@@ -253,44 +253,44 @@ Key characteristics of this approach include:
 
 ```js
 class CustomButton extends HTMLElement {
-  static canUseCommandInvocation = true;
+    static canUseCommandInvocation = true;
 
-  constructor() {
-    super();
-    this.internals_ = this.attachInternals();
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
 
-    // In the decomposition approach, developers must manually handle:
-    // 1. ARIA role assignment
-    this.internals_.role = 'button';
+        // In the decomposition approach, developers must manually handle:
+        // 1. ARIA role assignment
+        this.internals_.role = 'button';
 
-    // 2. Focus management - make element focusable
-    if (!this.hasAttribute('tabindex')) {
-      this.tabIndex = 0;
+        // 2. Focus management - make element focusable
+        if (!this.hasAttribute('tabindex')) {
+            this.tabIndex = 0;
+        }
     }
-  }
 
-  get commandForElement() {
-    return this.internals_.commandForElement ?? null;
-  }
-
-  set commandForElement(element) {
-    this.internals_.commandForElement = element;
-  }
-  
-  get command() {
-    return this.internals_.command ?? '';
-  }
-
-  set command(value) {
-    this.internals_.command = value;
-  }
-
-  // Manual accessible name computation support
-  connectedCallback() {
-    if (!this.internals_.ariaLabel && !this.getAttribute('aria-label')) {
-      this.internals_.ariaLabel = this.textContent.trim();
+    get commandForElement() {
+        return this.internals_.commandForElement ?? null;
     }
-  }
+
+    set commandForElement(element) {
+        this.internals_.commandForElement = element;
+    }
+    
+    get command() {
+        return this.internals_.command ?? '';
+    }
+
+    set command(value) {
+        this.internals_.command = value;
+    }
+
+    // Manual accessible name computation support
+    connectedCallback() {
+        if (!this.internals_.ariaLabel && !this.getAttribute('aria-label')) {
+            this.internals_.ariaLabel = this.textContent.trim();
+        }
+    }
 }
 ```
 
@@ -350,53 +350,52 @@ The decomposition approach allows developers to combine individual behavior bund
 
 ```js
 class CustomElement extends HTMLElement {
-  static canUseCommandInvocation = true;
-  static canUseLabel = true;
+    static canUseCommandInvocation = true;
+    static canUseLabel = true;
 
-  constructor() {
-    super();
-    this.internals_ = this.attachInternals();
-    
-    // Manual role conflict resolution - developers must decide
-    // whether this should be a button or label
-    this.internals_.role = 'button'; // or no role for label behavior?
-    
-    // Manual focus management for button behavior
-    if (!this.hasAttribute('tabindex')) {
-      this.tabIndex = 0;
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
+
+        // Manual role conflict resolution - developers must decide
+        // whether this should be a button or label
+        this.internals_.role = 'button'; // or no role for label behavior?
+        
+        // Manual focus management for button behavior
+        if (!this.hasAttribute('tabindex')) {
+            this.tabIndex = 0;
+        }
+
+        // Manual event handling for label behavior (command invocation is automatic)
+        this.addEventListener('click', this.handleLabelClick.bind(this));
     }
-    
-    // Manual event handling for label behavior (command invocation is automatic)
-    this.addEventListener('click', this.handleLabelClick.bind(this));
-  }
 
-  get commandForElement() {
-    return this.internals_.commandForElement ?? null;
-  }
-
-  set commandForElement(element) {
-    this.internals_.commandForElement = element;
-  }
-
-  get control() {
-    return this.internals_.control ?? null;
-  }
-
-  set htmlFor(value) {
-    this.internals_.htmlFor = value;
-  }
-  
-  // Manual handling of label behavior (command invocation is handled automatically)
-  handleLabelClick(event) {
-    // Should this also transfer focus to labeled control (label behavior)?
-    // Developers must resolve this conflict manually since command invocation
-    // is automatically handled by the Invoker Commands API
-    
-    if (this.control) {
-      // Label behavior: focus the labeled control
-      this.control.focus();
+    get commandForElement() {
+        return this.internals_.commandForElement ?? null;
     }
-  }
+
+    set commandForElement(element) {
+        this.internals_.commandForElement = element;
+    }
+
+    get control() {
+        return this.internals_.control ?? null;
+    }
+
+    set htmlFor(value) {
+        this.internals_.htmlFor = value;
+    }
+
+    // Manual handling of label behavior (command invocation is handled automatically)
+    handleLabelClick(event) {
+        // Should this also transfer focus to labeled control (label behavior)?
+        // Developers must resolve this conflict manually since command invocation
+        // is automatically handled by the Invoker Commands API
+        if (this.control) {
+            // Label behavior: focus the labeled control
+            this.control.focus();
+        }
+    }
 }
 ```
 
