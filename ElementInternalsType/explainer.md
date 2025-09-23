@@ -234,6 +234,178 @@ customElements.define('custom-button', CustomButton);
 
 ## Alternatives considered
 
+### ElementInternals feature decomposition approach
+An alternative approach focuses on decomposing native element behaviors into granular, specific functionalities that can be individually exposed through `ElementInternals`. This approach builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
+
+**Key difference from the main proposal**: Unlike the main proposal which includes implicit (default) behaviors when `buttonActivationBehaviors = true`, this decomposition approach provides only the minimal command invocation functionality. The Invoker Commands API provides a way to declaratively assign behaviors to buttons, allowing control of interactive elements when the button is activated (clicked or invoked via keypress), but web developers must manually handle accessibility features like ARIA roles, accessible name computation, and focus management.
+
+Key characteristics of this approach include:
+
+- **Granular control**: Features are exposed individually through `ElementInternals`.
+- **Explicit opt-in**: Each behavior is enabled via static properties and `ElementInternals` properties.
+- **Composable design**: Multiple behaviors can be combined on a single element.
+- **Clear semantics**: Each API explicitly defines the algorithms and behaviors it affects.
+- **Manual accessibility implementation**: Unlike the main proposal, developers must manually implement accessibility semantics, focusability, and some activation behaviors to deliver a complete user experience. For instance, a custom element with only `commandForElement` functionality would need additional manual implementation for:
+  - **Accessibility**: ARIA role assignment (`button`), accessible name computation, and focus management.
+  - **Focusability**: Making the element focusable and ensuring proper tab navigation.
+  - **Visual feedback**: Focus rings and interaction states.
+  - **Integration**: Proper integration with form submission and other non-command behaviors.
+
+```js
+class CustomButton extends HTMLElement {
+  static canUseCommandInvocation = true;
+
+  constructor() {
+    super();
+    this.internals_ = this.attachInternals();
+
+    // In the decomposition approach, developers must manually handle:
+    // 1. ARIA role assignment
+    this.internals_.role = 'button';
+
+    // 2. Focus management - make element focusable
+    if (!this.hasAttribute('tabindex')) {
+      this.tabIndex = 0;
+    }
+  }
+
+  get commandForElement() {
+    return this.internals_.commandForElement ?? null;
+  }
+
+  set commandForElement(element) {
+    this.internals_.commandForElement = element;
+  }
+  
+  get command() {
+    return this.internals_.command ?? '';
+  }
+
+  set command(value) {
+    this.internals_.command = value;
+  }
+
+  // Manual accessible name computation support
+  connectedCallback() {
+    if (!this.internals_.ariaLabel && !this.getAttribute('aria-label')) {
+      this.internals_.ariaLabel = this.textContent.trim();
+    }
+  }
+}
+```
+
+**IDL definitions:**
+```webidl
+partial interface ElementInternals {
+  attribute Element? commandForElement;
+  attribute DOMString command;
+};
+```
+
+**Supported attributes:**
+
+When `static canUseCommandInvocation = true` is set, the custom element would gain support for button activation-specific attributes:
+
+- `commandfor` - Targets another element to be invoked
+- `command` - Indicates to the targeted element which action to take
+
+**Supported properties:**
+
+The `ElementInternals` interface would be extended with minimal command invocation properties:
+
+- `commandForElement` - reflects the `commandfor` attribute
+- `command` - reflects the `command` attribute
+
+Unlike the main proposal, this approach does not automatically provide:
+
+- Default ARIA role assignment
+- Automatic focusability (`tabindex` management)
+- Built-in accessible name computation
+
+The Invoker Commands API automatically provides:
+
+- Keyboard activation (Enter/Space) for command invocation
+- Mouse click handling for command invocation
+- Command event dispatching to the target element
+
+**Supported events:**
+
+- `command` event - Automatically fired by the Invoker Commands API on the element referenced by `commandfor` when the custom element is activated
+- `click` event - Automatically fired by the Invoker Commands API on the custom element when activated
+
+This approach offers several benefits:
+
+- **Clear semantics**: Each feature explicitly defines which specification algorithms it modifies.
+- **Flexible composition**: Web delopers can mix and match only the behaviors they need.
+- **Evolutionary path**: New behaviors can be added incrementally without breaking existing APIs.
+
+However, this approach also introduces the following trade-offs:
+
+- **Developer burden**: Requires significant boilerplate to expose native element-like APIs and manually implement accessibility features that are provided automatically in the main proposal. Developers must handle ARIA roles, focus management, accessible name computation, and form integration themselves.
+- **Implementation complexity**: Involves maintaining a larger number of individual features and ensuring all accessibility requirements are met manually.
+- **Accessibility risks**: Without automatic defaults, developers may forget to implement critical accessibility features, leading to inaccessible custom elements.
+- **Reduced granularity benefits**: Since web authors may need to opt into multiple related behaviors and manually implement accessibility features to achieve complete functionality, this can diminish the benefits of the granular approach. While it might seem appealing to have highly granular options like `static canUseCommandInvocation = true`, in practice the manual implementation requirements for accessibility semantics, focusability, and other core behaviors significantly increase development complexity.
+
+The decomposition approach allows developers to combine individual behavior bundles (e.g., `canUseCommandInvocation` with `canUseLabel`). However, such fine-grained composition introduces significant complexity:
+
+```js
+class CustomElement extends HTMLElement {
+  static canUseCommandInvocation = true;
+  static canUseLabel = true;
+
+  constructor() {
+    super();
+    this.internals_ = this.attachInternals();
+    
+    // Manual role conflict resolution - developers must decide
+    // whether this should be a button or label
+    this.internals_.role = 'button'; // or no role for label behavior?
+    
+    // Manual focus management for button behavior
+    if (!this.hasAttribute('tabindex')) {
+      this.tabIndex = 0;
+    }
+    
+    // Manual event handling for label behavior (command invocation is automatic)
+    this.addEventListener('click', this.handleLabelClick.bind(this));
+  }
+
+  get commandForElement() {
+    return this.internals_.commandForElement ?? null;
+  }
+
+  set commandForElement(element) {
+    this.internals_.commandForElement = element;
+  }
+
+  get control() {
+    return this.internals_.control ?? null;
+  }
+
+  set htmlFor(value) {
+    this.internals_.htmlFor = value;
+  }
+  
+  // Manual handling of label behavior (command invocation is handled automatically)
+  handleLabelClick(event) {
+    // Should this also transfer focus to labeled control (label behavior)?
+    // Developers must resolve this conflict manually since command invocation
+    // is automatically handled by the Invoker Commands API
+    
+    if (this.control) {
+      // Label behavior: focus the labeled control
+      this.control.focus();
+    }
+  }
+}
+```
+
+- **Conflicting semantics**: Combining command invocation behavior with label behavior introduces ambiguity about the element's ARIA role (should it be `button` or have no corresponding role since labels don't have an implicit ARIA role?).
+- **Interaction conflicts**: When clicked, the Invoker Commands API will automatically trigger command invocation, but should the element also transfer focus to a labeled control (label behavior)? This dual behavior would be confusing and potentially harmful to user experience.
+- **Specification complexity**: Each combination of behaviors would require careful specification of how conflicts are resolved, leading to an increase in edge cases.
+
+Given these challenges, web authors would likely default to using single behavior bundles. This makes the composability of this approach more theoretical than practical, while adding unnecessary complexity to both implementation and specification.
+
 ### Static `behavesLike` property with behavior-specific interface mixins
 
 An alternative approach enables web component authors to create custom elements with native behaviors by adding a static `behavesLike` property to their custom element class definition. This property can be set to string values that represent native element types:
