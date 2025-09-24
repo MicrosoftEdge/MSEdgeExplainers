@@ -63,8 +63,8 @@ If these properties are accessed on a custom element that does not have `static 
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
-  attribute Element? commandForElement;
-  attribute DOMString command;
+  [Reflect] attribute Element? commandForElement;
+  [ReflectSetter] attribute DOMString command;
 };
 ```
 
@@ -196,6 +196,17 @@ The `ElementInternals` interface would be extended with these properties which a
 - `formNoValidate` - reflects the `formnovalidate` attribute
 - `formTarget` - reflects the `formtarget` attribute
 
+**IDL definitions:**
+```webidl
+partial interface ElementInternals {
+  [ReflectSetter] attribute USVString formAction;
+  attribute DOMString formEnctype;
+  attribute DOMString formMethod;
+  [Reflect] attribute boolean formNoValidate;
+  [Reflect] attribute DOMString formTarget;
+};
+```
+
 If these properties are accessed on a custom element that does not have both `static buttonActivationBehaviors = true` and `buttonType = "submit"`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
 **Implicit behaviors:**
@@ -298,8 +309,8 @@ class CustomButton extends HTMLElement {
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
-  attribute Element? commandForElement;
-  attribute DOMString command;
+  [Reflect] attribute Element? commandForElement;
+  [ReflectSetter] attribute DOMString command;
 };
 ```
 
