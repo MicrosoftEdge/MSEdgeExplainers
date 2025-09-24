@@ -172,6 +172,8 @@ partial interface ElementInternals {
 - `"submit"` - (Default value) Submits the associated form when activated
 - `"reset"` - Resets the associated form when activated
 
+If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown during `customElements.define()`.
+
 **Rationale for the `buttonType` property:**
 
 The `buttonType` property is essential because it allows custom element authors to create a single custom button class that can handle all three native button behaviors without requiring separate class definitions. Without this property, new static properties (eg. `enableSubmitBehavior = true`) would be needed to support the submit and reset behaviors, and developers would need to create three different custom element classes, e.g., `custom-submit-button`, `custom-reset-button`, `custom-regular-button`, just to support the different type values from the native button element. This approach provides the same flexibility as the native `<button>` element's `type` attribute, wihch let custom element users configure the behaviors declaratively through the custom element's attributes.
@@ -258,15 +260,6 @@ class CustomButton extends HTMLElement {
     constructor() {
         super();
         this.internals_ = this.attachInternals();
-
-        // In the decomposition approach, developers must manually handle:
-        // 1. ARIA role assignment
-        this.internals_.role = 'button';
-
-        // 2. Focus management - make element focusable
-        if (!this.hasAttribute('tabindex')) {
-            this.tabIndex = 0;
-        }
     }
 
     get commandForElement() {
@@ -283,6 +276,17 @@ class CustomButton extends HTMLElement {
 
     set command(value) {
         this.internals_.command = value;
+    }
+
+    connectedCallback() {
+        // In the decomposition approach, developers must manually handle:
+        // 1. ARIA role assignment
+        this.internals_.role = 'button';
+
+        // 2. Focus management - make element focusable
+        if (!this.hasAttribute('tabindex')) {
+            this.tabIndex = 0;
+        }
     }
 }
 ```
@@ -355,18 +359,6 @@ class CustomElement extends HTMLElement {
     constructor() {
         super();
         this.internals_ = this.attachInternals();
-
-        // Manual role conflict resolution - developers must decide
-        // whether this should be a button or label
-        this.internals_.role = 'button'; // or no role for label behavior?
-        
-        // Manual focus management for button behavior
-        if (!this.hasAttribute('tabindex')) {
-            this.tabIndex = 0;
-        }
-
-        // Manual event handling for label behavior (command invocation is automatic)
-        this.addEventListener('click', this.handleLabelClick.bind(this));
     }
 
     get commandForElement() {
@@ -394,6 +386,20 @@ class CustomElement extends HTMLElement {
             // Label behavior: focus the labeled control
             this.control.focus();
         }
+    }
+
+    connectedCallback() {
+        // Manual role conflict resolution - developers must decide
+        // whether this should be a button or label
+        this.internals_.role = 'button'; // or no role for label behavior?
+        
+        // Manual focus management for button behavior
+        if (!this.hasAttribute('tabindex')) {
+            this.tabIndex = 0;
+        }
+
+        // Manual event handling for label behavior (command invocation is automatic)
+        this.addEventListener('click', this.handleLabelClick.bind(this));
     }
 }
 ```
