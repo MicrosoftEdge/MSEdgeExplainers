@@ -73,7 +73,7 @@ Beyond attributes, properties, and events, custom elements with `buttonActivatio
 - **Form association**: The custom element automatically becomes form-associated
 - **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
 - **Focusable by default**: The element becomes focusable and participates in tab navigation without requiring `tabindex`
-- **Default ARIA semantics**: Have an [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role. Note ElementInternals.role is not changed. This is following the pattern where Element.role does not reflect native `<button>`'s `button` ARIA role.
+- **Default ARIA semantics**: Have a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role. Note ElementInternals.role is not changed. This is following the pattern where Element.role does not reflect native `<button>`'s `button` ARIA role.
 
 ### Order of precedence regarding ARIA role
 The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role  via `buttonActivationBehaviors`
@@ -517,7 +517,7 @@ Beyond attributes and properties, custom elements with `behavesLike = 'button'` 
 - **Form association**: The custom element automatically becomes form-associated and participates in form submission and validation
 - **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
 - **Focusable by default**: The element becomes focusable and participates in tab navigation without requiring `tabindex`
-- **Default ARIA semantics**: Have an [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role
+- **Default ARIA semantics**: Have a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role
 
 #### `static behavesLike = 'label'` and `elementInternals.labelMixin`
 When `static behavesLike = 'label'` is set in a custom element's class definition, the custom element will gain support for all label-specific attributes and properties.
