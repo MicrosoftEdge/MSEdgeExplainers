@@ -53,6 +53,8 @@ The `ElementInternals` interface would be extended with button activation-specif
 - `commandForElement` - reflects the `commandfor` attribute
 - `command` - reflects the `command` attribute
 
+If these properties are accessed on a custom element that does not have `static buttonActivationBehaviors = true`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
+
 **Supported events:**
 
 - `command` event - Fired on the element referenced by `commandfor`
@@ -172,11 +174,11 @@ partial interface ElementInternals {
 - `"submit"` - (Default value) Submits the associated form when activated
 - `"reset"` - Resets the associated form when activated
 
-If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown during `customElements.define()`.
+If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
 **Rationale for the `buttonType` property:**
 
-The `buttonType` property is essential because it allows custom element authors to create a single custom button class that can handle all three native button behaviors without requiring separate class definitions. Without this property, new static properties (eg. `enableSubmitBehavior = true`) would be needed to support the submit and reset behaviors, and developers would need to create three different custom element classes, e.g., `custom-submit-button`, `custom-reset-button`, `custom-regular-button`, just to support the different type values from the native button element. This approach provides the same flexibility as the native `<button>` element's `type` attribute, wihch let custom element users configure the behaviors declaratively through the custom element's attributes.
+The `buttonType` property is essential because it allows custom element authors to create a single custom button class that can handle all three native button behaviors without requiring separate class definitions. Without this property, new static properties (e.g. `enableSubmitBehavior = true`) would be needed to support the submit and reset behaviors, and developers would need to create three different custom element classes, e.g., `custom-submit-button`, `custom-reset-button`, `custom-regular-button`, just to support the different type values from the native button element. This approach provides the same flexibility as the native `<button>` element's `type` attribute, wihch let custom element users configure the behaviors declaratively through the custom element's attributes.
 
 **Supported attributes when `buttonType="submit"`:**
 - `formaction` - URL to use for form submission
@@ -194,8 +196,10 @@ The `ElementInternals` interface would be extended with these properties which a
 - `formNoValidate` - reflects the `formnovalidate` attribute
 - `formTarget` - reflects the `formtarget` attribute
 
+If these properties are accessed on a custom element that does not have both `static buttonActivationBehaviors = true` and `buttonType = "submit"`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
+
 **Implicit behaviors:**
-- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (eg, a text input) will trigger the custom button's submit behavior if the custom button's `internals_.buttonType` is `"submit"`.
+- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger the custom button's submit behavior if the custom button's `internals_.buttonType` is `"submit"`.
 
 **Example usage:**
 
@@ -509,7 +513,7 @@ Below is an example showcasing a custom button being used as a popup invoker wit
 **Implicit button behavior:**
 Beyond attributes and properties, custom elements with `behavesLike = 'button'` also gain native button behaviors:
 - **Default submit behavior**: The default `type` is "submit", the button will submit its associated form when activated
-- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (eg, a text input) will trigger the custom button's submit behavior if the button's `type` is "submit".
+- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger the custom button's submit behavior if the button's `type` is "submit".
 - **Form association**: The custom element automatically becomes form-associated and participates in form submission and validation
 - **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
 - **Focusable by default**: The element becomes focusable and participates in tab navigation without requiring `tabindex`
