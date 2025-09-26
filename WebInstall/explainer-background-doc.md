@@ -276,6 +276,7 @@ To protect the user's privacy, the API does not create any new error names for t
 
 **The promise will reject with an `AbortError` if:**
 * Installation was closed/cancelled.
+* The install permission is required but hasn't been granted.
 
 **The promise will reject with a `DataError` if:**
 * No manifest file present or invalid install URL.
@@ -283,11 +284,10 @@ To protect the user's privacy, the API does not create any new error names for t
 * There is a mismatch between the `id` passed as parameter and the processed `id` from the manifest.
 
 **The promise will reject with an `NotAllowedError` if:**
-* The install permission is required but hasn't been granted.
+* Invocation happens without a user activation.
 
 **The promise will reject with an `InvalidStateError` if:**
 * User is outside of the main frame.
-* Invocation happens without a user activation.
 
 #### Example: combining errors to mitigate private data leaking
 
@@ -315,7 +315,7 @@ The install capability should not work on *incognito*, and the promise should al
 - A [declarative version](#declarative-install) of the Install API is also possible to be part of a future version of the API. This provides another entry point to the install capability.
 - A version of [Web Install that uses PEPC](#pepc-version-of-the-api) instead of the current permission model is an interesting idea as future work, pending the evolution and shipment of the PEPC proposal.
 
-## Stakeholder Feedback / Opposition
+## Stakeholder Feedback / Opposition / FAQs
 
 Refer to [this document](./faq.md) for stakeholder feedback for the Web Install API.
 

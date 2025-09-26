@@ -69,10 +69,6 @@ Picture a user browsing on their favorite video streaming web app. The user migh
 
 ![Same domain install flow](./samedomaininstall.png) 
 
-## User research
-
-[TODO: UXR about the click drop rate in the app acquisition funnel]
-
 ## Proposed approach
 
 As exemplified in the [use case](#use-cases), an end user can be browsing the web, and a web application can present UX to [acquire](#web-application-acquisition) "itself". We propose an open, ergonomic and standard way of acquiring web applications that enables end users to easily and safely install content on their devices. The proposed approach is a new API in the shape of  promise-based method `navigator.install();`. This promise will:
@@ -172,29 +168,29 @@ The main benefit from this alternative would be a clearer user intent on a UX su
 * The biggest risk for the API is installation spamming. To minimize this behaviour, installing a PWA using the Web Install API requires [transient activation](https://html.spec.whatwg.org/multipage/interaction.html#activation-triggering-input-event).
 
 ### Feature does not work on Incognito or private mode
-The install capability should not work on _incognito_, and the promise should always reject if called in a private browsing context. 
+The install capability should not work on off-the-record profiles, including _incognito_ and guest modes, and the promise should always reject if called in a private browsing context. 
 
 ### Rejecting promise with limited existing `DOMException` names
 
 To protect the user's privacy, the API does not create any new error names for the `DOMException`, instead it uses common existing names: `AbortError`, `DataError`, `NotAllowError` and `InvalidStateError`. This makes it harder for the developer to know if an installation failed because of a mismatch in id values, a wrong manifest file URL or if there is no id defined in the manifest.
 
 * The promise will reject with an `AbortError` if:
+    * The install permission is required but hasn't been granted.
     * Installation was closed/cancelled.
 * The promise will reject with a `DataError` if:
     * No manifest file present or invalid install URL.
     * No `id` field defined in the manifest file.
 * The promise will reject with an `NotAllowedError` if:
-    * The install permission is required but hasn't been granted.
+    * Invocation happens without a user activation.
 * The promise will reject with an `InvalidStateError` if:
     * User is outside of the main frame.
-    * Invocation happens without a user activation.
 
 ## Future Work
 
 - A [declarative version](#declarative-install) of the Install API is also possible to be part of a future version of the API. This provides another entry point to the install capability.
 - A version of [Web Install that uses PEPC](#pepc-version-of-the-api) instead of the current permission model is an interesting idea as future work, pending the evolution and shipment of the PEPC proposal.
 
-## Stakeholder Feedback / Opposition
+## Stakeholder Feedback / Opposition / FAQs
 
 Refer to [this document](./faq.md) for stakeholder feedback for the Web Install API.
 
