@@ -154,4 +154,5 @@ Many thanks for valuable feedback and advice from:
 - [Rohan Raja](https://github.com/roraja)
 - [Rakesh Goulikar](https://github.com/ragoulik)
 - [Samba Murthy Bandaru](https://github.com/sambandaru)
+- [Daniel Clark](https://github.com/dandclark)
 ---
