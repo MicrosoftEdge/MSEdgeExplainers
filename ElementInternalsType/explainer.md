@@ -11,7 +11,7 @@
 - [OpenUI issue tracking initial discussions'`](https://github.com/openui/open-ui/issues/1088)
 
 ## Introduction
-Web component authors often want to create custom elements that have the  activation behaviors from the native button element. Some of the key use cases are listed below:
+Web component authors often want to create custom elements that have the activation behaviors from the native button element. Some of the key use cases are listed below:
 
 - Custom buttons can be [popover invokers](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement) while providing unique styles and additional functionality (as discussed [here](https://github.com/openui/open-ui/issues/1088)). 
 
@@ -73,7 +73,7 @@ Beyond attributes, properties, and events, custom elements with `buttonActivatio
 - **Conditional form association**: The custom element automatically becomes form-associated only when `buttonType` is set to `"submit"` or `"reset"`
 
 ### Order of precedence regarding ARIA role
-The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role  via `buttonActivationBehaviors`
+The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role via `buttonActivationBehaviors`
 
 ### `buttonActivationBehaviors` does not change element appearance
 Setting `buttonActivationBehaviors` gives a custom element button activation behaviors, but it does not take on default, author-specified or user-specified styles that target the native button element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
@@ -137,7 +137,7 @@ customElements.define('custom-button', CustomButton);
 <script>
   const button = document.getElementById('my-button');
   const dialog = document.getElementById('my-dialog');
-  
+
   button.commandForElement = dialog;
   button.command = 'show-modal';
 </script>
@@ -185,7 +185,7 @@ The `buttonType` property is essential because it allows custom element authors 
 
 **Supported properties when `buttonType="submit"`:**
 The `ElementInternals` interface would be extended with these properties which are applicable only when `buttonType="submit"`:
-- `formAction` - reflects the `formaction` attribute  
+- `formAction` - reflects the `formaction` attribute
 - `formEnctype` - reflects the `formenctype` attribute
 - `formMethod` - reflects the `formmethod` attribute
 - `formNoValidate` - reflects the `formnovalidate` attribute
@@ -205,7 +205,7 @@ partial interface ElementInternals {
 ```
 
 **Implicit behaviors:**
-- **Form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger  submit behavior if the custom element `buttonType` is `"submit"`.
+- **Form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger submit behavior if the custom element `buttonType` is `"submit"`.
 
 ### Example
 
@@ -232,10 +232,10 @@ customElements.define('custom-button', CustomButton);
 <form>
     <!-- Submit button -->
     <custom-button type="submit">Submit Form</custom-button>
-    
+
     <!-- Reset button -->
     <custom-button type="reset">Reset Form</custom-button>
-    
+
     <!-- Regular button -->
     <custom-button type="button" commandfor="my-dialog" command="showModal">
         Open Dialog
@@ -441,7 +441,7 @@ When `static behavesLike = 'button'` is set in a custom element's class definiti
 The `elementInternals.buttonMixin` property provides access to button-specific properties:
 - `disabled` - reflects the `disabled` attribute
 - `form` - returns the associated HTMLFormElement
-- `formAction` - reflects the `formaction` attribute  
+- `formAction` - reflects the `formaction` attribute
 - `formEnctype` - reflects the `formenctype` attribute
 - `formMethod` - reflects the `formmethod` attribute
 - `formNoValidate` - reflects the `formnovalidate` attribute
@@ -454,7 +454,7 @@ The `elementInternals.buttonMixin` property provides access to button-specific p
 - `validity` - returns the ValidityState representing validation states
 - `validationMessage` - returns localized validation message
 - `command` - returns the value of the `command` attribute
-- `commandForElement` - returns the Element referenced by the `commandfor` attribute  
+- `commandForElement` - returns the Element referenced by the `commandfor` attribute
 - `popoverTargetAction` - returns the value of the `popovertargetaction` attribute
 - `popoverTargetElement` - returns the Element referenced by the `popovertarget` attribute
 
@@ -488,8 +488,8 @@ customElements.define('custom-button', CustomButton);
 ```
 
 ```html
-    <custom-button popovertarget="my-popover">Open popover</custom-button>
-    <div id="my-popover" popover>This is popover content.</div>
+<custom-button popovertarget="my-popover">Open popover</custom-button>
+<div id="my-popover" popover>This is popover content.</div>
 ```
 
 **Implicit button behavior:**
@@ -531,8 +531,8 @@ customElements.define('custom-label', CustomLabel);
 ```
 
 ```html
-   <custom-label for='my-checkbox'>Toggle checkbox</custom-label>
-   <input type='checkbox' id='my-checkbox' />
+<custom-label for='my-checkbox'>Toggle checkbox</custom-label>
+<input type='checkbox' id='my-checkbox' />
 ```
 
 **Implicit label behavior:**
@@ -573,7 +573,7 @@ partial interface LabelInternals {
 When `behavesLike` is set, the custom element will be assigned the same defaults as the corresponding native element. For example, if `behavesLike = 'button'` is set, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternals.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
 
 #### `behavesLike` with `extends`/`is` customized built-ins
-If a custom element is defined with both `static behavesLike` and  `extends`/`is`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown during `customElements.define()`.
+If a custom element is defined with both `static behavesLike` and `extends`/`is`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown during `customElements.define()`.
 
 This is because `behavesLike` functionality depends on `ElementInternals` (for its interface mixins, e.g., `elementInternals.buttonMixin`, `elementInternals.labelMixin`) which won't be available if the element is defined with `extends`/`is` (https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals)
 
