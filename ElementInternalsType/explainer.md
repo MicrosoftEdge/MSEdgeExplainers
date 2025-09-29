@@ -45,14 +45,14 @@ When `static buttonActivationBehaviors = true` is set, the custom element would 
 - `command` - Indicates to the targeted element which action to take
 
 **Supported properties:**
-The `ElementInternals` interface would be extended with button activation-specific properties:
-- `commandForElement` - reflects the `commandfor` attribute
-- `command` - reflects the `command` attribute
+The `ElementInternals` Interface would be extended with button activation-specific properties:
+- `commandForElement` - Reflects the `commandfor` attribute
+- `command` - Reflects the `command` attribute
 
 If these properties are accessed on a custom element that does not have `static buttonActivationBehaviors = true`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
 **Supported events:**
-- `command` event - Fired on the element referenced by `commandfor`
+- `command` event - Fired on the element referenced by `commandfor` when the custom element is activated
 - `click` event - Fired on the custom element
 
 **IDL definitions:**
@@ -86,7 +86,6 @@ This example shows how to create a custom button that can invoke a popover eleme
 class CustomButton extends HTMLElement {
     static buttonActivationBehaviors = true;
 }
-
 customElements.define('custom-button', CustomButton);
 ```
 
@@ -128,7 +127,6 @@ class CustomButton extends HTMLElement {
         this.internals_.command = value;
     }
 }
-
 customElements.define('custom-button', CustomButton);
 ```
 
@@ -227,7 +225,6 @@ class CustomButton extends HTMLElement {
         }
     }
 }
-
 customElements.define('custom-button', CustomButton);
 ```
 
@@ -251,7 +248,14 @@ customElements.define('custom-button', CustomButton);
 ### 1. ElementInternals feature decomposition approach
 This alternative approach focuses on decomposing native element behaviors into granular functionalities exposed through `ElementInternals`. This approach also builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
 
-**Key difference from the main proposal**: Unlike the main proposal which includes implicit (default) behaviors when `buttonActivationBehaviors = true`, this decomposition approach provides only the minimal command invocation functionality. The Invoker Commands API provides a way to declaratively assign behaviors to buttons, allowing control of interactive elements when the button is activated (clicked or invoked via keypress), but web developers must manually handle accessibility features like ARIA roles and focus management.
+```js
+class CustomButton extends HTMLElement {
+    static canUseCommandInvocation = true;
+}
+customElements.define('custom-button', CustomButton);
+```
+
+**Key difference from the main proposal**: Unlike the main proposal which includes implicit (default) behaviors when `buttonActivationBehaviors = true`, this decomposition approach provides only the minimal command invocation functionality. The [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API) provides a way to declaratively assign behaviors to buttons, allowing control of interactive elements when the button is activated (clicked or invoked via keypress), but web developers must manually handle accessibility features like ARIA roles and focus management.
 
 Key characteristics of this approach include:
 - **Granular control**: Features are exposed individually through `ElementInternals`.
@@ -298,6 +302,7 @@ class CustomButton extends HTMLElement {
         }
     }
 }
+customElements.define('custom-button', CustomButton);
 ```
 
 **IDL definitions:**
@@ -314,35 +319,19 @@ When `static canUseCommandInvocation = true` is set, the custom element would ga
 - `command` - Indicates to the targeted element which action to take
 
 **Supported properties:**
-The `ElementInternals` interface would be extended with minimal command invocation properties:
-- `commandForElement` - reflects the `commandfor` attribute
-- `command` - reflects the `command` attribute
+The `ElementInternals` Interface would be extended with minimal command invocation properties:
+- `commandForElement` - Reflects the `commandfor` attribute
+- `command` - Reflects the `command` attribute
 
 **Supported events:**
-- `command` event - Automatically fired by the Invoker Commands API on the element referenced by `commandfor` when the custom element is activated
-- `click` event - Automatically fired by the Invoker Commands API on the custom element when activated
-
-The Invoker Commands API automatically provides:
-- **Keyboard activation**: Enter/Space key handling for command invocation (but only when the element is focusable)
-- **Mouse click handling**: Click event handling for command invocation
-- **Command event dispatching**: Automatic `command` event dispatching to the target element
-- **Click event firing**: Automatic `click` event firing on the custom element when activated
-
-Developers might want to implement:
-- **Focusability**: The element is NOT focusable by default - developers can change the `tabindex` attribute
-- **Tab navigation**: Without focusability, the element won't participate in keyboard navigation
-- **ARIA role assignment**: No automatic role - developers must set `this.internals_.role = 'button'` for proper semantics
-
-**Benefits of this approach**
-- **Clear semantics**: Each feature explicitly defines which specification algorithms it modifies
-- **Flexible composition**: Web delopers can mix and match only the behaviors they need
-- **Evolutionary path**: New behaviors can be added incrementally without breaking existing APIs
+- `command` event - Fired on the element referenced by `commandfor` when the custom element is activated
+- `click` event - Fired on the custom element
 
 **Trade-offs of this approach**
 - **Developer burden**: Requires significant boilerplate to expose native element-like APIs and manually implement accessibility features that are provided automatically in the main proposal. Developers must handle ARIA roles and focus management.
 - **Implementation complexity**: Involves maintaining a larger number of individual features and ensuring all accessibility requirements are met manually.
-- **Accessibility risks**: Without automatic defaults, developers may forget to implement critical accessibility features, leading to inaccessible custom elements.
 - **Reduced granularity benefits**: Since web authors may need to opt into multiple related behaviors and manually implement accessibility features to achieve complete functionality, this can diminish the benefits of the granular approach. While it might seem appealing to have highly granular options like `static canUseCommandInvocation = true`, in practice the manual implementation requirements for accessibility semantics, focusability, and other core behaviors significantly increase development complexity.
+- **Accessibility risks**: Without automatic defaults, developers may forget to implement critical accessibility features, leading to inaccessible custom elements.
 
 The decomposition approach allows developers to combine individual behavior bundles (e.g., `canUseCommandInvocation` with `canUseLabel`). However, such fine-grained composition introduces significant complexity:
 
@@ -397,22 +386,25 @@ class CustomElement extends HTMLElement {
         this.addEventListener('click', this.handleLabelClick.bind(this));
     }
 }
+customElements.define('custom-button', CustomButton);
 ```
 
 - **Conflicting semantics**: Combining command invocation behavior with label behavior introduces ambiguity about the element's ARIA role (should it be `button` or have no corresponding role since labels don't have an implicit ARIA role?).
-- **Interaction conflicts**: When clicked, the Invoker Commands API will automatically trigger command invocation, but should the element also transfer focus to a labeled control (label behavior)? This dual behavior would be confusing and potentially harmful to user experience.
+- **Interaction conflicts**: When clicked, the [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API) will automatically trigger command invocation, but should the element also transfer focus to a labeled control (label behavior)? This dual behavior would be confusing and potentially harmful to user experience.
 - **Specification complexity**: Each combination of behaviors would require careful specification of how conflicts are resolved, leading to an increase in edge cases.
 
 Given these challenges, web authors would likely default to using single behavior bundles. This makes the composability of this approach more theoretical than practical, while adding unnecessary complexity to both implementation and specification.
+
+We consulted the [ARIA Working Group](https://github.com/w3c/aria/issues/2637) on this approach versus the main proposal with built-in defaults (implicit behaviors), and the [overwhelming consensus](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) was to provide accessibility defaults that can be potentially overwritten by "power users" (main proposal).
 
 ### 2. Static `behavesLike` property with behavior-specific interface mixins
 This alternative approach enables web component authors to create custom elements with native behaviors by adding a static `behavesLike` property to their custom element class definition. This property can be set to string values that represent native element types:
 
 ```js
-    class CustomButton extends HTMLElement {
-        static behavesLike = 'button';
-    }
-    customElements.define('custom-button', CustomButton);
+class CustomButton extends HTMLElement {
+    static behavesLike = 'button';
+}
+customElements.define('custom-button', CustomButton);
 ```
 
 Additionally, this approach includes behavior-specific interface mixins that expose the full set of properties available to each element type. These mixins are available through `buttonMixin` and `labelMixin` properties on `ElementInternals`.
@@ -524,19 +516,18 @@ The `elementInternals.labelMixin` property provides access to a `LabelInternals`
 #### Example
 
 ```js
-    class CustomLabel extends HTMLElement {
-        static behavesLike = 'label';
-
-        constructor() {
-            super();
-            this.internals_ = this.attachInternals();
-        }
-
-        get control() {
-            return this.internals.labelMixin?.control ?? null;
-        }
+class CustomLabel extends HTMLElement {
+    static behavesLike = 'label';
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
     }
-    customElements.define('custom-label', CustomLabel);
+
+    get control() {
+        return this.internals.labelMixin?.control ?? null;
+    }
+}
+customElements.define('custom-label', CustomLabel);
 ```
 
 ```html
