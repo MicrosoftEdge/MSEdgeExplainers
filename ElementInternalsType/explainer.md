@@ -8,7 +8,7 @@
 
 ## Participate
 - [WHATWG tracking issue](https://github.com/whatwg/html/issues/11061)
-- [OpenUI issue tracking initial discussions and WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088)
+- [OpenUI issue tracking initial discussions'`](https://github.com/openui/open-ui/issues/1088)
 
 ## Introduction
 Web component authors often want to create custom elements that have the  activation behaviors from the native button element. Some of the key use cases are listed below:
@@ -28,9 +28,9 @@ This proposal addresses these challenges by introducing a standardized way for c
 - Providing a comprehensive alternative to the customized built-in solution (`extends` and `is`), i.e., enabling a custom element to do everything a native button does.
 - A declarative version of this proposal. This requires finding a general solution for declarative custom elements, which should be explored separately.
 
-## Proposal: add static `buttonActivationBehaviors` property 
+## Proposal: add static `buttonActivationBehaviors` property
 We propose enabling web component authors to create custom elements with button activation behaviors by adding a static `buttonActivationBehaviors` property to their custom element class definition.
-This proposal focuses on decomposing native element behaviors specific functionalities that can be individually exposed through `ElementInternals`. This approach builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
+This proposal focuses on decomposing native element behaviors into specific functionalities that can be individually exposed through `ElementInternals`. This approach builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
 
 ```js
 class CustomButton extends HTMLElement {
@@ -40,54 +40,46 @@ customElements.define('custom-button', CustomButton);
 ```
 
 **Supported attributes:**
-
 When `static buttonActivationBehaviors = true` is set, the custom element would gain support for button activation-specific attributes:
-
 - `commandfor` - Targets another element to be invoked
 - `command` - Indicates to the targeted element which action to take
 
 **Supported properties:**
-
 The `ElementInternals` interface would be extended with button activation-specific properties:
-
 - `commandForElement` - reflects the `commandfor` attribute
 - `command` - reflects the `command` attribute
 
 If these properties are accessed on a custom element that does not have `static buttonActivationBehaviors = true`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
 **Supported events:**
-
 - `command` event - Fired on the element referenced by `commandfor`
 - `click` event - Fired on the custom element
 
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
-  [Reflect] attribute Element? commandForElement;
-  [ReflectSetter] attribute DOMString command;
+  [CEReactions, Reflect] attribute Element? commandForElement;
+  [CEReactions, ReflectSetter] attribute DOMString command;
 };
 ```
 
+**Note**: Future work may include adding support for the `interestfor` attribute, which is currently [shipping in Chromium](https://chromestatus.com/feature/4530756656562176?gate=4768466822496256) as an experimental feature for interest-based element targeting.
+
 **Implicit behaviors:**
 Beyond attributes, properties, and events, custom elements with `buttonActivationBehaviors = true` also gain native behaviors related to button activation:
-- **Form association**: The custom element automatically becomes form-associated
 - **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
-- **Focusable by default**: The element becomes focusable and participates in tab navigation without requiring `tabindex`
-- **Default ARIA semantics**: Have a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role. Note ElementInternals.role is not changed. This is following the pattern where Element.role does not reflect native `<button>`'s `button` ARIA role.
+- **Focusable by default**: The element becomes focusable and participates in tab navigation without a developer-defined tabindex
+- **Default ARIA semantics**: Have a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role. Note `ElementInternals.role` is not changed. This is following the pattern where `Element.role` does not reflect the `button` ARIA role of native `<button>`s
+- **Conditional form association**: The custom element automatically becomes form-associated only when `buttonType` is set to `"submit"` or `"reset"`
 
 ### Order of precedence regarding ARIA role
 The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role  via `buttonActivationBehaviors`
 
 ### `buttonActivationBehaviors` does not change element appearance
-Setting `buttonActivationBehaviors` gives a custom element button activation behaviors, but the custom element's appearance does not change. In other words, the custom element does not take on default, author-specified or user-specified styles that target the native button element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
-
-### `buttonActivationBehaviors` and `formAssociated`
-If `buttonActivationBehaviors` is set to true, `static formAssociated = true/false;` becomes a no-op since the element will automatically gain form association capabilities from `buttonActivationBehaviors`.
+Setting `buttonActivationBehaviors` gives a custom element button activation behaviors, but it does not take on default, author-specified or user-specified styles that target the native button element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
 
 ## Examples
-
 ### Custom button with popover invocation
-
 This example shows how to create a custom button that can invoke a popover element using the `commandfor` and `command` attributes:
 
 ```js
@@ -109,7 +101,6 @@ customElements.define('custom-button', CustomButton);
 ```
 
 ### Custom button with imperative property configuration
-
 This example shows how to configure the `commandForElement` and `command` properties imperatively:
 
 ```js
@@ -155,29 +146,36 @@ customElements.define('custom-button', CustomButton);
 ```
 
 ## Add `buttonType` property in `ElementInternals`
-
-To provide submit and reset functionality, this proposal also introduces a `buttonType` property to `ElementInternals` that controls the behavior when the custom button is activated.
+To provide submit and reset functionality, this proposal also introduces a `buttonType` property to `ElementInternals` that controls the behavior when the custom element is activated.
 
 The `ElementInternals` interface would be extended with:
-
 - `buttonType` - controls the activation behavior of the button (values: "button", "submit", "reset")
+
+If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
-  attribute DOMString buttonType;
+  [CEReactions] attribute DOMString buttonType;
 };
 ```
 
 **Activation behaviors:**
 - `"button"` - No special form behavior, only fires click events and command invocation
-- `"submit"` - (Default value) Submits the associated form when activated
+- `"submit"` - Submits the associated form when activated
 - `"reset"` - Resets the associated form when activated
 
-If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
+Following the [HTML specification for button's type attribute](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type), the default `buttonType` is `"submit"` unless both the `command` and `commandfor` content attributes are present, in which case the default is `"button"`.
+
+### `buttonType` and `formAssociated`
+When `buttonActivationBehaviors` is set to true, the custom element's form association behavior depends on the `buttonType` value:
+
+- **`buttonType = "submit"` or `"reset"`**: The element automatically becomes form-associated and `static formAssociated = true/false;` becomes a no-op.
+- **`buttonType = "button"`**: The element does not become form-associated automatically. If form association is needed, `static formAssociated = true` must be explicitly set.
+
+This mirrors the behavior of native `<button>` elements, where only submit and reset buttons participate in form submission and validation.
 
 **Rationale for the `buttonType` property:**
-
 The `buttonType` property is essential because it allows custom element authors to create a single custom button class that can handle all three native button behaviors without requiring separate class definitions. Without this property, new static properties (e.g. `enableSubmitBehavior = true`) would be needed to support the submit and reset behaviors, and developers would need to create three different custom element classes, e.g., `custom-submit-button`, `custom-reset-button`, `custom-regular-button`, just to support the different type values from the native button element. This approach provides the same flexibility as the native `<button>` element's `type` attribute, wihch let custom element users configure the behaviors declaratively through the custom element's attributes.
 
 **Supported attributes when `buttonType="submit"`:**
@@ -188,7 +186,6 @@ The `buttonType` property is essential because it allows custom element authors 
 - `formtarget` - Navigable for form submission
 
 **Supported properties when `buttonType="submit"`:**
-
 The `ElementInternals` interface would be extended with these properties which are applicable only when `buttonType="submit"`:
 - `formAction` - reflects the `formaction` attribute  
 - `formEnctype` - reflects the `formenctype` attribute
@@ -196,23 +193,23 @@ The `ElementInternals` interface would be extended with these properties which a
 - `formNoValidate` - reflects the `formnovalidate` attribute
 - `formTarget` - reflects the `formtarget` attribute
 
+If any of these properties are accessed on a custom element that does not have both `static buttonActivationBehaviors = true` and `buttonType = "submit"`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
+
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
-  [ReflectSetter] attribute USVString formAction;
-  attribute DOMString formEnctype;
-  attribute DOMString formMethod;
-  [Reflect] attribute boolean formNoValidate;
-  [Reflect] attribute DOMString formTarget;
+  [CEReactions, ReflectSetter] attribute USVString formAction;
+  [CEReactions] attribute DOMString formEnctype;
+  [CEReactions] attribute DOMString formMethod;
+  [CEReactions, Reflect] attribute boolean formNoValidate;
+  [CEReactions, Reflect] attribute DOMString formTarget;
 };
 ```
 
-If these properties are accessed on a custom element that does not have both `static buttonActivationBehaviors = true` and `buttonType = "submit"`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
-
 **Implicit behaviors:**
-- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger the custom button's submit behavior if the custom button's `internals_.buttonType` is `"submit"`.
+- **Form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger  submit behavior if the custom element `buttonType` is `"submit"`.
 
-**Example usage:**
+### Example
 
 ```js
 class CustomButton extends HTMLElement {
@@ -251,22 +248,19 @@ customElements.define('custom-button', CustomButton);
 
 ## Alternatives considered
 
-### ElementInternals feature decomposition approach
-An alternative approach focuses on decomposing native element behaviors into granular functionalities that can be individually exposed through `ElementInternals`. This approach also builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
+### 1. ElementInternals feature decomposition approach
+This alternative approach focuses on decomposing native element behaviors into granular functionalities exposed through `ElementInternals`. This approach also builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
 
-**Key difference from the main proposal**: Unlike the main proposal which includes implicit (default) behaviors when `buttonActivationBehaviors = true`, this decomposition approach provides only the minimal command invocation functionality. The Invoker Commands API provides a way to declaratively assign behaviors to buttons, allowing control of interactive elements when the button is activated (clicked or invoked via keypress), but web developers must manually handle accessibility features like ARIA roles, accessible name computation, and focus management.
+**Key difference from the main proposal**: Unlike the main proposal which includes implicit (default) behaviors when `buttonActivationBehaviors = true`, this decomposition approach provides only the minimal command invocation functionality. The Invoker Commands API provides a way to declaratively assign behaviors to buttons, allowing control of interactive elements when the button is activated (clicked or invoked via keypress), but web developers must manually handle accessibility features like ARIA roles and focus management.
 
 Key characteristics of this approach include:
-
 - **Granular control**: Features are exposed individually through `ElementInternals`.
 - **Explicit opt-in**: Each behavior is enabled via static properties and `ElementInternals` properties.
 - **Composable design**: Multiple behaviors can be combined on a single element.
 - **Clear semantics**: Each API explicitly defines the algorithms and behaviors it affects.
-- **Manual accessibility implementation**: Unlike the main proposal, developers must manually implement accessibility semantics, focusability, and some activation behaviors to deliver a complete user experience. For instance, a custom element with only `commandForElement` functionality would need additional manual implementation for:
-  - **Accessibility**: ARIA role assignment (`button`), accessible name computation, and focus management.
+- **Manual accessibility implementation**: Unlike the main proposal, developers must manually implement accessibility semantics and focusability behaviors to deliver a complete user experience. For instance, a custom element with only `commandForElement` functionality would need additional manual implementation for:
+  - **Accessibility**: ARIA role assignment (`button`).
   - **Focusability**: Making the element focusable and ensuring proper tab navigation.
-  - **Visual feedback**: Focus rings and interaction states.
-  - **Integration**: Proper integration with form submission and other non-command behaviors.
 
 ```js
 class CustomButton extends HTMLElement {
@@ -309,57 +303,43 @@ class CustomButton extends HTMLElement {
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
-  [Reflect] attribute Element? commandForElement;
-  [ReflectSetter] attribute DOMString command;
+  [CEReactions, Reflect] attribute Element? commandForElement;
+  [CEReactions, ReflectSetter] attribute DOMString command;
 };
 ```
 
 **Supported attributes:**
-
 When `static canUseCommandInvocation = true` is set, the custom element would gain support for button activation-specific attributes:
-
 - `commandfor` - Targets another element to be invoked
 - `command` - Indicates to the targeted element which action to take
 
 **Supported properties:**
-
 The `ElementInternals` interface would be extended with minimal command invocation properties:
-
 - `commandForElement` - reflects the `commandfor` attribute
 - `command` - reflects the `command` attribute
 
-**What the Invoker Commands API provides automatically:**
+**Supported events:**
+- `command` event - Automatically fired by the Invoker Commands API on the element referenced by `commandfor` when the custom element is activated
+- `click` event - Automatically fired by the Invoker Commands API on the custom element when activated
 
+The Invoker Commands API automatically provides:
 - **Keyboard activation**: Enter/Space key handling for command invocation (but only when the element is focusable)
 - **Mouse click handling**: Click event handling for command invocation
 - **Command event dispatching**: Automatic `command` event dispatching to the target element
 - **Click event firing**: Automatic `click` event firing on the custom element when activated
 
-**What developers must implement manually:**
-
-- **Focusability**: The element is NOT focusable by default - developers must set `tabIndex = 0` or use the `tabindex` attribute
+Developers might want to implement:
+- **Focusability**: The element is NOT focusable by default - developers can change the `tabindex` attribute
 - **Tab navigation**: Without focusability, the element won't participate in keyboard navigation
 - **ARIA role assignment**: No automatic role - developers must set `this.internals_.role = 'button'` for proper semantics
-- **Visual focus indicators**: CSS focus styles (`:focus`, `:focus-visible`) must be implemented
-- **Active/pressed states**: Visual feedback for interaction states
-- **Accessible name computation**: While automatic once a role is assigned, the role itself must be set manually
 
-**Important note**: If the element is not made focusable (via `tabIndex` or `tabindex` attribute), the keyboard activation provided by the Invoker Commands API will not work, as the element cannot receive keyboard focus.
+**Benefits of this approach**
+- **Clear semantics**: Each feature explicitly defines which specification algorithms it modifies
+- **Flexible composition**: Web delopers can mix and match only the behaviors they need
+- **Evolutionary path**: New behaviors can be added incrementally without breaking existing APIs
 
-**Supported events:**
-
-- `command` event - Automatically fired by the Invoker Commands API on the element referenced by `commandfor` when the custom element is activated
-- `click` event - Automatically fired by the Invoker Commands API on the custom element when activated
-
-This approach offers several benefits:
-
-- **Clear semantics**: Each feature explicitly defines which specification algorithms it modifies.
-- **Flexible composition**: Web delopers can mix and match only the behaviors they need.
-- **Evolutionary path**: New behaviors can be added incrementally without breaking existing APIs.
-
-However, this approach also introduces the following trade-offs:
-
-- **Developer burden**: Requires significant boilerplate to expose native element-like APIs and manually implement accessibility features that are provided automatically in the main proposal. Developers must handle ARIA roles, focus management, accessible name computation, and form integration themselves.
+**Trade-offs of this approach**
+- **Developer burden**: Requires significant boilerplate to expose native element-like APIs and manually implement accessibility features that are provided automatically in the main proposal. Developers must handle ARIA roles and focus management.
 - **Implementation complexity**: Involves maintaining a larger number of individual features and ensuring all accessibility requirements are met manually.
 - **Accessibility risks**: Without automatic defaults, developers may forget to implement critical accessibility features, leading to inaccessible custom elements.
 - **Reduced granularity benefits**: Since web authors may need to opt into multiple related behaviors and manually implement accessibility features to achieve complete functionality, this can diminish the benefits of the granular approach. While it might seem appealing to have highly granular options like `static canUseCommandInvocation = true`, in practice the manual implementation requirements for accessibility semantics, focusability, and other core behaviors significantly increase development complexity.
@@ -425,9 +405,8 @@ class CustomElement extends HTMLElement {
 
 Given these challenges, web authors would likely default to using single behavior bundles. This makes the composability of this approach more theoretical than practical, while adding unnecessary complexity to both implementation and specification.
 
-### Static `behavesLike` property with behavior-specific interface mixins
-
-An alternative approach enables web component authors to create custom elements with native behaviors by adding a static `behavesLike` property to their custom element class definition. This property can be set to string values that represent native element types:
+### 2. Static `behavesLike` property with behavior-specific interface mixins
+This alternative approach enables web component authors to create custom elements with native behaviors by adding a static `behavesLike` property to their custom element class definition. This property can be set to string values that represent native element types:
 
 ```js
     class CustomButton extends HTMLElement {
@@ -464,7 +443,7 @@ When `static behavesLike = 'button'` is set in a custom element's class definiti
 - `popovertargetaction` - Indicates whether a targeted popover element is to be toggled, shown, or hidden
 - `command` - Indicates to the targeted element which action to take
 - `commandfor` - Targets another element to be invoked
-- `interesttarget` - [currently experimental in Chromium](https://chromestatus.com/feature/4530756656562176?gate=4768466822496256)
+- `interestfor` - [Shipping in Chromium](https://chromestatus.com/feature/4530756656562176?gate=4768466822496256)
 
 **Supported properties:**
 The `elementInternals.buttonMixin` property provides access to button-specific properties:
@@ -493,29 +472,29 @@ The `elementInternals.buttonMixin` property also provides access to button-speci
 - `reportValidity()` - performs the same validity checking steps as the checkValidity() method, and if the invalid event isn't canceled, reports the problem to the user
 - `setCustomValidity(message)` - sets a custom error message that is displayed when the form is submitted
 
-Below is an example showcasing a custom button being used as a popup invoker with access to both attributes and DOM properties:
+#### Example
 
 ```js
-    class CustomButton extends HTMLElement {
-        static behavesLike = 'button';
+class CustomButton extends HTMLElement {
+    static behavesLike = 'button';
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
+    }
 
-        constructor() {
-            super();
-            this.internals_ = this.attachInternals();
-        }
-
-        get popoverTargetElement() {
-            return this.internals_.buttonMixin?.popoverTargetElement ?? null;
-        }
-        
-        set popoverTargetElement(element) {
-            if (this.internals_.buttonMixin) {
-                this.internals_.buttonMixin.popoverTargetElement = element;
-            }
+    get popoverTargetElement() {
+        return this.internals_.buttonMixin?.popoverTargetElement ?? null;
+    }
+    
+    set popoverTargetElement(element) {
+        if (this.internals_.buttonMixin) {
+            this.internals_.buttonMixin.popoverTargetElement = element;
         }
     }
-    customElements.define('custom-button', CustomButton);
+}
+customElements.define('custom-button', CustomButton);
 ```
+
 ```html
     <custom-button popovertarget="my-popover">Open popover</custom-button>
     <div id="my-popover" popover>This is popover content.</div>
@@ -524,13 +503,13 @@ Below is an example showcasing a custom button being used as a popup invoker wit
 **Implicit button behavior:**
 Beyond attributes and properties, custom elements with `behavesLike = 'button'` also gain native button behaviors:
 - **Default submit behavior**: The default `type` is "submit", the button will submit its associated form when activated
-- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger the custom button's submit behavior if the button's `type` is "submit".
+- **Implicit form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger the custom element's submit behavior if the button's `type` is "submit"
 - **Form association**: The custom element automatically becomes form-associated and participates in form submission and validation
 - **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
 - **Focusable by default**: The element becomes focusable and participates in tab navigation without requiring `tabindex`
 - **Default ARIA semantics**: Have a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role
 
-#### `static behavesLike = 'label'` and `elementInternals.labelMixin`
+##### `static behavesLike = 'label'` and `elementInternals.labelMixin`
 When `static behavesLike = 'label'` is set in a custom element's class definition, the custom element will gain support for all label-specific attributes and properties.
 
 **Supported attributes:**
@@ -542,7 +521,7 @@ The `elementInternals.labelMixin` property provides access to a `LabelInternals`
 - `control` - returns the Element referenced by the `for` attribute (the labeled control)
 - `form` - returns the HTMLFormElement that the labeled control is associated with, or null if none
 
-Below is an example showcasing a custom label being used to label a checkbox with access to both attributes and DOM properties:
+#### Example
 
 ```js
     class CustomLabel extends HTMLElement {
@@ -559,10 +538,12 @@ Below is an example showcasing a custom label being used to label a checkbox wit
     }
     customElements.define('custom-label', CustomLabel);
 ```
+
 ```html
    <custom-label for='my-checkbox'>Toggle checkbox</custom-label>
    <input type='checkbox' id='my-checkbox' />
 ```
+
 **Implicit label behavior:**
 Beyond attributes and properties, custom elements with `behavesLike = 'label'` also gain native label behaviors:
 - **Implicit association**: If no `for` attribute is specified, the first labelable element descendant automatically becomes the labeled control
@@ -570,17 +551,11 @@ Beyond attributes and properties, custom elements with `behavesLike = 'label'` a
 - **Accessibility integration**: The label becomes the associated element's accessible name for screen readers and other assistive technologies
 
 #### Behavior-specific interfaces
-
 This approach includes behavior-specific interfaces (`buttonMixin`, `labelMixin`) that provide access to DOM properties corresponding to element-specific attributes.
 
 **Interface availability:**
 - `elementInternals.buttonMixin` returns a `ButtonInternals` interface when `behavesLike` is `'button'`, otherwise `null`
 - `elementInternals.labelMixin` returns a `LabelInternals` interface when `behavesLike` is `'label'`, otherwise `null`
-
-**Benefits of the interface mixin approach:**
-- **Complete API surface**: Provides both attribute and property access, matching native elements
-- **Discoverability**: Grouped interfaces make it clear which properties are available for each behavior
-- **No naming conflicts**: Avoids conflicts when different element types have properties with the same name.
 
 **IDL definitions:**
 ```webidl
@@ -589,14 +564,14 @@ partial interface ElementInternals {
   readonly attribute LabelInternals? labelMixin;
 };
 
-interface ButtonInternals {
+partial interface ButtonInternals {
   attribute Element? popoverTargetElement;
   attribute Element? commandForElement; 
   attribute DOMString popoverTargetAction;
   // ... additional properties skipped for brevity
 };
 
-interface LabelInternals {
+partial interface LabelInternals {
   attribute DOMString htmlFor;
   readonly attribute Element? control;
   // ... additional properties skipped for brevity
@@ -604,7 +579,6 @@ interface LabelInternals {
 ```
 
 #### Order of precedence for used values: Element content attributes > `ElementInternals` properties > default properties via `behavesLike`
-
 When `behavesLike` is set, the custom element will be assigned the same defaults as the corresponding native element. For example, if `behavesLike = 'button'` is set, the custom element's default ARIA role will become `button` and this will be the used role if no explicit role is specified by the author. If the author sets `elementInternals.role`, the value of `elementInternals.role` will be the used role, taking precedence over the default role. If the author sets the `role` attribute on the custom element, the value of the `role` attribute will be the used role, taking precedence over both `elementInternals.role` and the default role.
 
 #### `behavesLike` with `extends`/`is` customized built-ins
@@ -613,56 +587,54 @@ If a custom element is defined with both `static behavesLike` and  `extends`/`is
 This is because `behavesLike` functionality depends on `ElementInternals` (for its interface mixins, e.g., `elementInternals.buttonMixin`, `elementInternals.labelMixin`) which won't be available if the element is defined with `extends`/`is` (https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals)
 
 #### `behavesLike` does not change element appearance
-Setting `behavesLike` gives a custom element native element like behavior, but the custom element's appearance does not change. In other words, the custom element does not take on default, author-specified or user-specified styles that target the native element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
+Setting `behavesLike` gives a custom element native element like behavior, but it does not take on default, author-specified or user-specified styles that target the native element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
 
 #### `behavesLike` and `formAssociated`
 If the element type specified by `behavesLike` is already a [form-associated element](https://html.spec.whatwg.org/multipage/forms.html#form-associated-element) (such as `'button'`), then `static formAssociated = true/false;` becomes a no-op since the element will automatically gain form association capabilities from its specified behavior.
 
-### `elementInternals.type` property approach
+**Benefits of this approach**
+- **Complete API surface**: Provides both attribute and property access, matching native elements
+- **Discoverability**: Grouped interfaces make it clear which properties are available for each behavior
+- **No naming conflicts**: Avoids conflicts when different element types have properties with the same name.
 
-An earlier version of this proposal used a `type` property on `ElementInternals` that could be set at runtime in the constructor. This approach had several characteristics:
+### 3. `elementInternals.type` property approach
+This alternative approach introduces a `type` property on `ElementInternals` that could be set at runtime in the constructor.
 
+Key characteristics of this approach include:
 - `elementInternals.type` could be set to values like `'button'`, `'submit'`, `'reset'`, `'label'`
-- The property could only be set once and would throw if set again
+- The property could only be set once and would throw an exception if set again
 - Setting occurred in the constructor after calling `attachInternals()`
 
 ```js
-// Earlier elementInternals.type approach
 class CustomButton extends HTMLElement {
     constructor() {
         super();
         this.internals_ = this.attachInternals();
-        this.internals_.type = 'button'; // Runtime setting
+        this.internals_.type = 'button';
     }
 }
 ```
-This approach had several design issues:
 
-**Semantic inconsistency:**
-- **Mixed abstraction levels**: Values like `'button'`, `'submit'`, `'reset'`, `'label'` mixed element types (button, label) with button subtypes (submit, reset), creating unclear semantics about what the property actually represented
+**Trade-offs of this approach**
+- **Semantic inconsistency: Mixed abstraction levels**. Values like `'button'`, `'submit'`, `'reset'`, `'label'` mixed element types (button, label) with button subtypes (submit, reset), creating unclear semantics about what the property actually represented
+- **Timing concern: When to set**. Unclear whether the property should be set in the constructor, `connectedCallback()`, or elsewhere
+- **Mutability concern: Immutability enforcement**. Additional logic needed to prevent the property from being changed after initial setting
 
-**Timing and mutability concerns:**
-- **When to set**: Unclear whether the property should be set in the constructor, `connectedCallback()`, or elsewhere
-- **Immutability enforcement**: Additional logic needed to prevent the property from being changed after initial setting
-
-### `extends` and `is` attribute approach
-
-A partial solution for this problem already exists today. Authors can specify the `extends` option when [defining a custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define). Authors can then use the `is` attribute to give a built-in element a custom name, thereby turning it into a customized built-in element.
+### 4. `extends` and `is` attribute approach
+A partial solution for the key use cases described above already exists today. Authors can specify the `extends` option when [defining a custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#dom-customelementregistry-define). Authors can then use the `is` attribute to give a built-in element a custom name, thereby turning it into a customized built-in element.
 
 Both `extends` and `is` are supported in Firefox and Chromium-based browsers. However, this solution has limitations, such as not being able to attach shadow trees to (most) customized built-in elements. Citing these limitations, Safari doesn't plan to support customized built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
 
 ## Stakeholder Feedback / Opposition
-
-- Chromium : Positive
-- WebKit : Positive based on https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
-- Gecko : No official signal, but no objections shared in the discussion here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
+- Chromium: Positive
+- WebKit: Positive based on https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
+- Gecko: No official signal, but no objections shared in the discussion here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
 
 [WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455)
 
 [WHATWG resolution to accept using static property instead of `elementInternals.type`](https://github.com/whatwg/html/issues/11390#issuecomment-3190443053)
 
 ## References & acknowledgements
-
 Many thanks for valuable feedback and advice from:
 
 - [Mason Freed](https://github.com/mfreed7)
@@ -675,3 +647,5 @@ Many thanks for valuable feedback and advice from:
 - [Daniel Clark](https://github.com/dandclark)
 - [Leo Lee](https://github.com/leotlee)
 - [Open UI Community Group](https://www.w3.org/community/open-ui/)
+- [WHATWG](https://whatwg.org/)
+- [ARIA Working Group](https://www.w3.org/WAI/about/groups/ariawg/)
