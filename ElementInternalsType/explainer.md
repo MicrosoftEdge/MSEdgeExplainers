@@ -150,8 +150,6 @@ The `ElementInternals` interface would be extended with:
 
 If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
-The custom element automatically becomes form-associated only when `buttonType` is set to `"submit"` or `"reset"`.
-
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
