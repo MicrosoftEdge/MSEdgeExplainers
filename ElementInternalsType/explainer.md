@@ -163,7 +163,7 @@ partial interface ElementInternals {
 - `"submit"` - Submits the associated form when activated
 - `"reset"` - Resets the associated form when activated
 
-Following the [HTML specification for button's type attribute](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type), the default `buttonType` is `"submit"` unless both the `command` and `commandfor` content attributes are present, in which case the default is `"button"`.
+Following the [HTML specification for button's type attribute](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type), the default `buttonType` is `"submit"` unless either the `command` or `commandfor` content attributes are present, in which case the default is `"button"`.
 
 ### `buttonType` and `formAssociated`
 When `buttonActivationBehaviors` is set to true, the custom element's form association behavior depends on the `buttonType` value:
@@ -328,7 +328,7 @@ The `ElementInternals` Interface would be extended with minimal command invocati
 - `click` event - Fired on the custom element
 
 **Trade-offs of this approach**
-- **Developer burden**: Requires significant boilerplate to expose native element-like APIs and manually implement accessibility features that are provided automatically in the main proposal. Developers must handle ARIA roles and focus management.
+- **Developer burden**: Requires extra boilerplate to expose native element-like APIs and manually implement accessibility features that are provided automatically in the main proposal. Developers must handle ARIA roles and focus management.
 - **Implementation complexity**: Involves maintaining a larger number of individual features and ensuring all accessibility requirements are met manually.
 - **Reduced granularity benefits**: Since web authors may need to opt into multiple related behaviors and manually implement accessibility features to achieve complete functionality, this can diminish the benefits of the granular approach. While it might seem appealing to have highly granular options like `static canUseCommandInvocation = true`, in practice the manual implementation requirements for accessibility semantics, focusability, and other core behaviors significantly increase development complexity.
 - **Accessibility risks**: Without automatic defaults, developers may forget to implement critical accessibility features, leading to inaccessible custom elements.
@@ -501,7 +501,7 @@ Beyond attributes and properties, custom elements with `behavesLike = 'button'` 
 - **Focusable by default**: The element becomes focusable and participates in tab navigation without requiring `tabindex`
 - **Default ARIA semantics**: Have a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role
 
-##### `static behavesLike = 'label'` and `elementInternals.labelMixin`
+#### `static behavesLike = 'label'` and `elementInternals.labelMixin`
 When `static behavesLike = 'label'` is set in a custom element's class definition, the custom element will gain support for all label-specific attributes and properties.
 
 **Supported attributes:**
@@ -555,14 +555,14 @@ partial interface ElementInternals {
   readonly attribute LabelInternals? labelMixin;
 };
 
-partial interface ButtonInternals {
+interface ButtonInternals {
   attribute Element? popoverTargetElement;
   attribute Element? commandForElement; 
   attribute DOMString popoverTargetAction;
   // ... additional properties skipped for brevity
 };
 
-partial interface LabelInternals {
+interface LabelInternals {
   attribute DOMString htmlFor;
   readonly attribute Element? control;
   // ... additional properties skipped for brevity
