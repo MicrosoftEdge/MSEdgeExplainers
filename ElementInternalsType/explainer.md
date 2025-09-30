@@ -70,7 +70,6 @@ Beyond attributes, properties, and events, custom elements with `buttonActivatio
 - **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
 - **Focusable by default**: The element becomes focusable and participates in tab navigation without a developer-defined tabindex
 - **Default ARIA semantics**: Have a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role. Note `ElementInternals.role` is not changed. This is following the pattern where `Element.role` does not reflect the `button` ARIA role of native `<button>`s
-- **Conditional form association**: The custom element automatically becomes form-associated only when `buttonType` is set to `"submit"` or `"reset"`
 
 ### Order of precedence regarding ARIA role
 The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role via `buttonActivationBehaviors`
@@ -150,6 +149,8 @@ The `ElementInternals` interface would be extended with:
 - `buttonType` - controls the activation behavior of the button (values: "button", "submit", "reset")
 
 If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
+
+The custom element automatically becomes form-associated only when `buttonType` is set to `"submit"` or `"reset"`.
 
 **IDL definitions:**
 ```webidl
@@ -551,7 +552,6 @@ A partial solution for the key use cases described above already exists today. A
 Both `extends` and `is` are supported in Firefox and Chromium-based browsers. However, this solution has limitations, such as not being able to attach shadow trees to (most) customized built-in elements. Citing these limitations, Safari doesn't plan to support customized built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
 
 ### Future Considerations
-## Composition, behavior, and accessibility 
 If additional behaviors are introduced in the future, how should potential conflicts be addressed? For example:
 
 - **Conflicting semantics**: How should we handle ambiguity when combining command invocation behavior with label behavior? Should the element have an ARIA role of `button`, or none at all since labels lack an implicit ARIA role?
