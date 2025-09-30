@@ -76,7 +76,7 @@ Beyond attributes, properties, and events, custom elements with `buttonActivatio
 The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role via `buttonActivationBehaviors`
 
 ### `buttonActivationBehaviors` does not change element appearance
-Setting `buttonActivationBehaviors` gives a custom element button activation behaviors, but it does not take on default, author-specified or user-specified styles that target the native button element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
+Setting `buttonActivationBehaviors` gives a custom element button activation behaviors, but the custom element's appearance does not change.  In other words, the custom element does not take on default, author-specified or user-specified styles that target the native button element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
 
 ## Examples
 ### Custom button with popover invocation
@@ -243,6 +243,69 @@ customElements.define('custom-button', CustomButton);
 </form>
 ```
 
+**Notes on composition**
+Composition introduces significant complexity:
+
+```js
+class CustomElement extends HTMLElement {
+    static buttonActivationBehaviors = true;
+    static labelBehaviors = true;
+
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
+    }
+
+    get commandForElement() {
+        return this.internals_.commandForElement ?? null;
+    }
+
+    set commandForElement(element) {
+        this.internals_.commandForElement = element;
+    }
+
+    get control() {
+        return this.internals_.control ?? null;
+    }
+
+    set htmlFor(value) {
+        this.internals_.htmlFor = value;
+    }
+
+    // Manual handling of label behavior (command invocation is handled automatically)
+    handleLabelClick(event) {
+        // Should this also transfer focus to labeled control (label behavior)?
+        // Developers must resolve this conflict manually since command invocation
+        // is automatically handled by the Invoker Commands API
+        if (this.control) {
+            // Label behavior: focus the labeled control
+            this.control.focus();
+        }
+    }
+
+    connectedCallback() {
+        // Manual role conflict resolution - developers must decide
+        // whether this should be a button or label
+        this.internals_.role = 'button'; // or no role for label behavior?
+        
+        // Manual focus management for button behavior
+        if (!this.hasAttribute('tabindex')) {
+            this.tabIndex = 0;
+        }
+
+        // Manual event handling for label behavior (command invocation is automatic)
+        this.addEventListener('click', this.handleLabelClick.bind(this));
+    }
+}
+customElements.define('custom-element', CustomButton);
+```
+
+- **Conflicting semantics**: Combining command invocation behavior with label behavior introduces ambiguity about the element's ARIA role (should it be `button` or have no corresponding role since labels don't have an implicit ARIA role?).
+- **Interaction conflicts**: When clicked, the [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API) will automatically trigger command invocation, but should the element also transfer focus to a labeled control (label behavior)? This dual behavior would be confusing and potentially harmful to user experience.
+- **Specification complexity**: Each combination of behaviors would require careful specification of how conflicts are resolved, leading to an increase in edge cases.
+
+Given these challenges, web authors would likely default to using single behavior bundles. This makes the composability of this approach more theoretical than practical, while adding unnecessary complexity to both implementation and specification.
+
 ## Alternatives considered
 
 ### 1. ElementInternals feature decomposition approach
@@ -258,7 +321,6 @@ customElements.define('custom-button', CustomButton);
 **Key difference from the main proposal**: Unlike the main proposal which includes implicit (default) behaviors when `buttonActivationBehaviors = true`, this decomposition approach provides only the minimal command invocation functionality. The [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API) provides a way to declaratively assign behaviors to buttons, allowing control of interactive elements when the button is activated (clicked or invoked via keypress), but web developers must manually handle accessibility features like ARIA roles and focus management.
 
 Key characteristics of this approach include:
-- **Granular control**: Features are exposed individually through `ElementInternals`.
 - **Explicit opt-in**: Each behavior is enabled via static properties and `ElementInternals` properties.
 - **Composable design**: Multiple behaviors can be combined on a single element.
 - **Clear semantics**: Each API explicitly defines the algorithms and behaviors it affects.
@@ -332,68 +394,6 @@ The `ElementInternals` Interface would be extended with minimal command invocati
 - **Implementation complexity**: Involves maintaining a larger number of individual features and ensuring all accessibility requirements are met manually.
 - **Reduced granularity benefits**: Since web authors may need to opt into multiple related behaviors and manually implement accessibility features to achieve complete functionality, this can diminish the benefits of the granular approach. While it might seem appealing to have highly granular options like `static canUseCommandInvocation = true`, in practice the manual implementation requirements for accessibility semantics, focusability, and other core behaviors significantly increase development complexity.
 - **Accessibility risks**: Without automatic defaults, developers may forget to implement critical accessibility features, leading to inaccessible custom elements.
-
-The decomposition approach allows developers to combine individual behavior bundles (e.g., `canUseCommandInvocation` with `canUseLabel`). However, such fine-grained composition introduces significant complexity:
-
-```js
-class CustomElement extends HTMLElement {
-    static canUseCommandInvocation = true;
-    static canUseLabel = true;
-
-    constructor() {
-        super();
-        this.internals_ = this.attachInternals();
-    }
-
-    get commandForElement() {
-        return this.internals_.commandForElement ?? null;
-    }
-
-    set commandForElement(element) {
-        this.internals_.commandForElement = element;
-    }
-
-    get control() {
-        return this.internals_.control ?? null;
-    }
-
-    set htmlFor(value) {
-        this.internals_.htmlFor = value;
-    }
-
-    // Manual handling of label behavior (command invocation is handled automatically)
-    handleLabelClick(event) {
-        // Should this also transfer focus to labeled control (label behavior)?
-        // Developers must resolve this conflict manually since command invocation
-        // is automatically handled by the Invoker Commands API
-        if (this.control) {
-            // Label behavior: focus the labeled control
-            this.control.focus();
-        }
-    }
-
-    connectedCallback() {
-        // Manual role conflict resolution - developers must decide
-        // whether this should be a button or label
-        this.internals_.role = 'button'; // or no role for label behavior?
-        
-        // Manual focus management for button behavior
-        if (!this.hasAttribute('tabindex')) {
-            this.tabIndex = 0;
-        }
-
-        // Manual event handling for label behavior (command invocation is automatic)
-        this.addEventListener('click', this.handleLabelClick.bind(this));
-    }
-}
-customElements.define('custom-button', CustomButton);
-```
-
-- **Conflicting semantics**: Combining command invocation behavior with label behavior introduces ambiguity about the element's ARIA role (should it be `button` or have no corresponding role since labels don't have an implicit ARIA role?).
-- **Interaction conflicts**: When clicked, the [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API) will automatically trigger command invocation, but should the element also transfer focus to a labeled control (label behavior)? This dual behavior would be confusing and potentially harmful to user experience.
-- **Specification complexity**: Each combination of behaviors would require careful specification of how conflicts are resolved, leading to an increase in edge cases.
-
-Given these challenges, web authors would likely default to using single behavior bundles. This makes the composability of this approach more theoretical than practical, while adding unnecessary complexity to both implementation and specification.
 
 We consulted the [ARIA Working Group](https://github.com/w3c/aria/issues/2637) on this approach versus the main proposal with built-in defaults (implicit behaviors), and the [overwhelming consensus](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) was to provide accessibility defaults that can be potentially overwritten by "power users" (main proposal).
 
@@ -578,7 +578,7 @@ If a custom element is defined with both `static behavesLike` and `extends`/`is`
 This is because `behavesLike` functionality depends on `ElementInternals` (for its interface mixins, e.g., `elementInternals.buttonMixin`, `elementInternals.labelMixin`) which won't be available if the element is defined with `extends`/`is` (https://html.spec.whatwg.org/multipage/custom-elements.html#dom-attachinternals)
 
 #### `behavesLike` does not change element appearance
-Setting `behavesLike` gives a custom element native element like behavior, but it does not take on default, author-specified or user-specified styles that target the native element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
+Setting `behavesLike` gives a custom element native element like behavior, but the custom element's appearance does not change. In other words, the custom element does not take on default, author-specified or user-specified styles that target the native element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
 
 #### `behavesLike` and `formAssociated`
 If the element type specified by `behavesLike` is already a [form-associated element](https://html.spec.whatwg.org/multipage/forms.html#form-associated-element) (such as `'button'`), then `static formAssociated = true/false;` becomes a no-op since the element will automatically gain form association capabilities from its specified behavior.
