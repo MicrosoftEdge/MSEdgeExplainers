@@ -51,8 +51,7 @@ A user pastes formatted content (e.g., bold text, lists, links) into a custom ed
 const editable = document.querySelector("p[contenteditable]");
 const result = document.querySelector(".result");
 editor.addEventListener("input", (event) => {
-  result.textContent = event.dataTransfer.getData("text/html"); // Fails as error - Cannot read properties of null (reading 'getData')
-  if (event.inputType === "insertFromPaste" && event.dataTransfer) { // fails on the second condition and lines below are not executed.
+  if (event.inputType === "insertFromPaste" && event.dataTransfer) { // fails on the second condition and lines below are not executed as event.dataTransfer is NULL.
     const html = event.dataTransfer.getData("text/html");
     const text = event.dataTransfer.getData("text/plain");
     // Use html/text for sanitization, logging, or formatting
@@ -76,7 +75,6 @@ What developers can do with [`dataTransfer`](https://html.spec.whatwg.org/multip
    - Developers can inspect dataTransfer.getData("text/html") to:
      - Sanitize pasted HTML for security.
      - Preserve formatting in custom editors.
-     - Detect and block unwanted content (e.g., scripts, tracking pixels).
 
 2. Customize Paste/Drop Behavior
    - Developers can override default behavior based on:
@@ -137,7 +135,7 @@ In the implementation, [`dataTransfer`](https://html.spec.whatwg.org/multipage/d
 - Exposing [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) for all elements: This was rejected to preserve existing behavior for form controls and avoid unintended side effects.
 
 ## Security and Privacy
-This proposal has no known impact on accessibility or privacy and does not alter the permission or security model. The [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property is exposed only when the browser determines it is appropriate based on the input event type and context. It is scoped to [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) elements and does not alter drag-and-drop security model.
+This proposal has no known impact on accessibility or privacy and does not alter the permission or security model. The [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) property is exposed only when the browser determines it is appropriate based on the input event type and context. It is scoped to [`contenteditable`](https://html.spec.whatwg.org/multipage/interaction.html#attr-contenteditable) elements and does not alter drag-and-drop security model. No new information is exposed to sites because the same information is also exposed during the [`beforeinput`](https://w3c.github.io/input-events/#event-type-beforeinput) event.
 
 ## Performance Impact
 The feature introduces minimal overhead, as [`dataTransfer`](https://html.spec.whatwg.org/multipage/dnd.html#datatransfer) is conditionally attached only when relevant. No significant performance regressions were observed during testing.
