@@ -607,7 +607,7 @@ range.setFormControlRange(input, 4, 0);
 
 Note: With reversed endpoints, DOM `Range` setters collapse them to a single point, whereas `Selection` preserves directionality (anchor/focus). Collapsing is the current interoperable behavior, but alternatives remain open for discussion.
 
-#### Is `setFormControlRange()` redundant with the type name? Would `setRange`, `set`, `setStartAndEnd `, or something else better align with `Range`/`StaticRange` naming? 
+#### Is `setFormControlRange()` redundant with the type name? Would `setRange`, `set`, `setStartAndEnd`, or something else better align with `Range`/`StaticRange` naming? 
 
 ## References & acknowledgements
 
