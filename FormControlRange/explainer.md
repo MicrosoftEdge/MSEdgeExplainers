@@ -581,7 +581,7 @@ It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment
 Such use cases might also prompt revisiting the current `FormControlRange` name in favor of something broader, such as `ElementRange`, to better reflect its applicability beyond form controls.
 
 ## Open Questions
-How should `FormControlRange` behave when callers provide reversed offsets (i.e. `startOffset > endOffset`)? 
+#### How should `FormControlRange` behave when callers provide reversed offsets (i.e. `startOffset > endOffset`)? 
 
 Consider the following ideas:
 - Throw `IndexSizeError`.
@@ -606,6 +606,8 @@ range.setFormControlRange(input, 4, 0);
 ```
 
 Note: With reversed endpoints, DOM `Range` setters collapse them to a single point, whereas `Selection` preserves directionality (anchor/focus). Collapsing is the current interoperable behavior, but alternatives remain open for discussion.
+
+#### Is `setFormControlRange()` redundant with the type name? Would `setRange`, `set`, `setStartAndEnd`, or something else better align with `Range`/`StaticRange` naming? 
 
 ## References & acknowledgements
 
