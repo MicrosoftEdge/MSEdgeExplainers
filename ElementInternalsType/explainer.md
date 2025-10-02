@@ -49,6 +49,8 @@ The `ElementInternals` Interface would be extended with button activation-specif
 - `commandForElement` - Reflects the `commandfor` attribute
 - `command` - Reflects the `command` attribute
 
+If these properties are accessed on a custom element that does not have `static buttonActivationBehaviors = true`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
+
 **Supported events:**
 - `command` event - Fired on the element referenced by `commandfor` when the custom element is activated
 - `click` event - Fired on the custom element
@@ -146,7 +148,7 @@ To provide submit and reset functionality, this proposal also introduces a `butt
 The `ElementInternals` interface would be extended with:
 - `buttonType` - controls the activation behavior of the button (values: "button", "submit", "reset")
 
-If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
+If `buttonType` is set to any other value, it will fall back to the default value.
 
 **IDL definitions:**
 ```webidl
