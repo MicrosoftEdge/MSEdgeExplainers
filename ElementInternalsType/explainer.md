@@ -13,7 +13,7 @@
 ## Introduction
 Web component authors often want to create custom elements that have the activation behaviors from the native button element. Some of the key use cases are listed below:
 
-- Custom buttons can be [popover invokers](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement) while providing unique styles and additional functionality (as discussed [here](https://github.com/openui/open-ui/issues/1088)). 
+- Custom buttons can be [popover invokers](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement) while providing unique styles and additional functionality (as discussed [here](https://github.com/openui/open-ui/issues/1088)).
 
 - Custom buttons can provide native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit). Similarly, custom buttons can also provide native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior that can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset) (as discussed [here](https://github.com/WICG/webcomponents/issues/814)).
 
@@ -267,7 +267,7 @@ class CustomButton extends HTMLElement {
     set commandForElement(element) {
         this.internals_.commandForElement = element;
     }
-    
+
     get command() {
         return this.internals_.command ?? '';
     }
@@ -397,7 +397,7 @@ class CustomButton extends HTMLElement {
     get popoverTargetElement() {
         return this.internals_.buttonMixin?.popoverTargetElement ?? null;
     }
-    
+
     set popoverTargetElement(element) {
         if (this.internals_.buttonMixin) {
             this.internals_.buttonMixin.popoverTargetElement = element;
@@ -477,7 +477,7 @@ partial interface ElementInternals {
 
 interface ButtonInternals {
   attribute Element? popoverTargetElement;
-  attribute Element? commandForElement; 
+  attribute Element? commandForElement;
   attribute DOMString popoverTargetAction;
   // ... additional properties skipped for brevity
 };
@@ -584,7 +584,7 @@ class CustomElement extends HTMLElement {
         // Manual role conflict resolution - developers must decide
         // whether this should be a button or label
         this.internals_.role = 'button'; // or no role for label behavior?
-        
+
         // Manual focus management for button behavior
         if (!this.hasAttribute('tabindex')) {
             this.tabIndex = 0;
