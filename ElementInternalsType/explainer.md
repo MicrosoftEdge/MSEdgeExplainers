@@ -8,7 +8,7 @@
 
 ## Participate
 - [WHATWG tracking issue](https://github.com/whatwg/html/issues/11061)
-- [OpenUI issue tracking initial discussions'`](https://github.com/openui/open-ui/issues/1088)
+- [OpenUI issue tracking initial discussions`](https://github.com/openui/open-ui/issues/1088)
 
 ## Introduction
 Web component authors often want to create custom elements that have the activation behaviors from the native button element. Some of the key use cases are listed below:
@@ -49,8 +49,6 @@ The `ElementInternals` Interface would be extended with button activation-specif
 - `commandForElement` - Reflects the `commandfor` attribute
 - `command` - Reflects the `command` attribute
 
-If these properties are accessed on a custom element that does not have `static buttonActivationBehaviors = true`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
-
 **Supported events:**
 - `command` event - Fired on the element referenced by `commandfor` when the custom element is activated
 - `click` event - Fired on the custom element
@@ -67,9 +65,9 @@ partial interface ElementInternals {
 
 **Implicit behaviors:**
 Beyond attributes, properties, and events, custom elements with `buttonActivationBehaviors = true` also gain native behaviors related to button activation:
-- **Click event activation**: Fire click events when activated via mouse click, Enter key, Space key, or other activation methods
+- **Click event activation**: The element fires click events when activated via mouse click, Enter key, Space key, or other activation methods
 - **Focusable by default**: The element becomes focusable and participates in tab navigation without a developer-defined tabindex
-- **Default ARIA semantics**: Have a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role. Note `ElementInternals.role` is not changed. This is following the pattern where `Element.role` does not reflect the `button` ARIA role of native `<button>`s
+- **Default ARIA semantics**: The element has a [button](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/button_role) default ARIA role. Note `ElementInternals.role` is not changed. This is following the pattern where `Element.role` does not reflect the `button` ARIA role of native `<button>`s
 
 ### Order of precedence regarding ARIA role
 The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role via `buttonActivationBehaviors`
@@ -148,7 +146,7 @@ To provide submit and reset functionality, this proposal also introduces a `butt
 The `ElementInternals` interface would be extended with:
 - `buttonType` - controls the activation behavior of the button (values: "button", "submit", "reset")
 
-If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
+If `buttonType` is set to any other value, it will fall back to the default value.
 
 **IDL definitions:**
 ```webidl
@@ -191,17 +189,6 @@ The `ElementInternals` interface would be extended with these properties which a
 - `formTarget` - reflects the `formtarget` attribute
 
 If any of these properties are accessed on a custom element that does not have both `static buttonActivationBehaviors = true` and `buttonType = "submit"`, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
-
-**IDL definitions:**
-```webidl
-partial interface ElementInternals {
-  [CEReactions, ReflectSetter] attribute USVString formAction;
-  [CEReactions] attribute DOMString formEnctype;
-  [CEReactions] attribute DOMString formMethod;
-  [CEReactions, Reflect] attribute boolean formNoValidate;
-  [CEReactions, Reflect] attribute DOMString formTarget;
-};
-```
 
 **Implicit behaviors:**
 - **Form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger submit behavior if the custom element `buttonType` is `"submit"`.
@@ -614,7 +601,7 @@ These questions are important for long-term design, but they are outside the sco
 
 ## Stakeholder Feedback / Opposition
 - Chromium: Positive
-- WebKit: No official signal, but generally positive based on comment here: https://github.com/whatwg/html/issues/11061#issuecomment-3284087247
+- WebKit: No official signal
 - Gecko: No official signal, but no objections shared in the discussion here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
 
 [WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455)
