@@ -8,7 +8,7 @@
 
 ## Participate
 - [WHATWG tracking issue](https://github.com/whatwg/html/issues/11061)
-- [OpenUI issue tracking initial discussions`](https://github.com/openui/open-ui/issues/1088)
+- [OpenUI issue tracking initial discussions](https://github.com/openui/open-ui/issues/1088)
 
 ## Introduction
 Web component authors often want to create custom elements that have the activation behaviors from the native button element. Some of the key use cases are listed below:
@@ -146,7 +146,7 @@ To provide submit and reset functionality, this proposal also introduces a `butt
 The `ElementInternals` interface would be extended with:
 - `buttonType` - controls the activation behavior of the button (values: "button", "submit", "reset")
 
-If `buttonType` is set to any other value, it will fall back to the default value.
+If `buttonType` is set to any other value, a ["NotSupportedError"](https://webidl.spec.whatwg.org/#notsupportederror) [DOMException](https://webidl.spec.whatwg.org/#dfn-DOMException) should be thrown.
 
 **IDL definitions:**
 ```webidl
