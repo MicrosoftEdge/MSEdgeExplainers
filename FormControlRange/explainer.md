@@ -577,8 +577,14 @@ The resulting `AbstractRange` inheritance structure would look like this:
 ![abstractrange-family](abstractrange-family.jpg)
 
 ## Potential Future Work
+### Extending to Custom Elements and Potential Renaming
 It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment-3113360213) that custom elements could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure.  
 Such use cases might also prompt revisiting the current `FormControlRange` name in favor of something broader, such as `ElementRange`, to better reflect its applicability beyond form controls.
+
+### Relationship to CSS Anchor Positioning
+As noted in the [W3C TAG early design review](https://github.com/w3ctag/design-reviews/issues/1142), some of the positioning use cases addressed by `FormControlRange` (such as anchoring popups or highlights to caret positions) could also be explored declaratively through future extensions to [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position/).
+
+While `FormControlRange` focuses on providing a programmatic mechanism aligned with existing Range APIs, a complementary declarative model in CSS could offer improved performance, reduced scripting overhead, and more consistent accessibility behavior.
 
 ## Open Questions
 #### How should `FormControlRange` behave when callers provide reversed offsets (i.e. `startOffset > endOffset`)? 
