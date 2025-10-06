@@ -2,6 +2,7 @@
 
 **Authors**
 * [Nishitha Burman Dey](https://github.com/nishitha-burman)
+
 Much of this explainer synthesizes and consolidates prior discussions and contributions from [Diego Perez Botero](https://github.com/Diego-Perez-Botero), [Henrik Boström](https://github.com/henbos), [Philipp Hancke](https://github.com/fippo), [Sun Shin](https://github.com/xingri), and other members of the WebRTC working group.
 
 ## Participate
