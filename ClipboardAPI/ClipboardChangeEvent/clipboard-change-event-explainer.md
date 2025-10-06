@@ -6,6 +6,7 @@
 ## Participate
 Feature request: [Async Clipboard: Add support for 'clipboardchange' event [41442253] - Chromium](https://issues.chromium.org/issues/41442253)
 Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#clipboard-event-clipboardchange)
+Storage Standard: [Storage Standard (WHATWG)](https://storage.spec.whatwg.org/)
 
 ## Table of Contents
 
@@ -41,7 +42,7 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
   - [6.2 Permission prompt mechanism in various browsers](#62-permission-prompt-mechanism-in-various-browsers)
   - [6.3 Reading clipboard contents within the clipboardchange event handler](#63-reading-clipboard-contents-within-the-clipboardchange-event-handler)
   - [6.4 Custom clipboard data types and clipboardchange event](#64-custom-clipboard-data-types-and-clipboardchange-event)
-  - [6.5 Partition-based changeId behavior](#65-partition-based-changeid-behavior)
+  - [6.5 Storage shelf-based changeId behavior](#65-storage-shelf-based-changeid-behavior)
 - [7 Open issues](#7-open-issues)
   - [7.1 Fencedframe](#71-fencedframe)
 - [8 References & acknowledgements](#8-references--acknowledgements)
@@ -50,9 +51,9 @@ Spec: [Clipboard API and events (w3.org)](https://www.w3.org/TR/clipboard-apis/#
 
 ## 1. Introduction
 
-The `clipboardchange` event aims to provide an efficient and secure way of notifying web applications about changes to the system clipboard. This allows web applications to provide rich user experiences like dynamic contextual menu options based on available clipboard MIME types and ability to efficiently sync clipboard in web based virtual desktop clients.
+The `clipboardchange` event aims to provide an efficient and secure way of notifying web applications about changes to the system clipboard. This allows web applications to provide rich user experiences like dynamic contextual menu options based on available clipboard [MIME types](https://mimesniff.spec.whatwg.org/#mime-type) and ability to efficiently sync clipboard in web based virtual desktop clients.
 
-Today, this can be achieved in Chromium by calling async clipboard read API in a polling approach (assuming clipboard-read permissions are granted) which is obviously inefficient. Also, polling is not feasible on [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) and [Safari](https://webkit.org/blog/10855/async-clipboard-api/) as these browsers rely on combination of user activation and user gesture for reading clipboard through async API.
+Today, this can be achieved in Chromium by calling async clipboard read API in a polling approach (assuming clipboard-read permissions are granted) which is obviously inefficient. Also, polling is not feasible on [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) and [Safari](https://webkit.org/blog/10855/async-clipboard-api/) as these browsers rely on combination of [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation) and user gesture for reading clipboard through async API.
 
 Hence `clipboardchange` event is being proposed. This event will be fired, in a secure manner by firing only when document is in focus and requiring that clipboard contents are not part of this event.
 
@@ -81,7 +82,7 @@ When a user copies text or an image on their local machine, a web-based remote d
 
 
 ## 3. Motivation - Alternative to inefficient polling of clipboard
-Today, a web-app can monitor the system clipboard by polling and reading the clipboard through async clipboard API at regular intervals. However, polling is not efficient. Moreover, browsers like Firefox and Safari [require user gesture](#63-reading-clipboard-contents-within-the-clipboardchange-event-handler) for reading clipboard which makes polling infeasible in those browsers. This feature aims to introduce an efficient way of notifying web apps when clipboard changes which works in all browsers.
+Today, a web-app can monitor the system clipboard by polling and reading the clipboard through [async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) at regular intervals. However, polling is not efficient. Moreover, browsers like Firefox and Safari [require user gesture](#63-reading-clipboard-contents-within-the-clipboardchange-event-handler) for reading clipboard which makes polling infeasible in those browsers. This feature aims to introduce an efficient way of notifying web apps when clipboard changes which works in all browsers.
 Additionally we must ensure that we monitor the clipboard only when absolutely required, that is, there is at least one document having required permissions and is listening to the clipboard change event. This will be described in design details.
 
 ## 4. Proposed Approach
@@ -138,13 +139,13 @@ The ClipboardChange event object will have a `types` member that lists all the a
 ```typescript
 interface ClipboardChangeEvent{
   types: Array<string>; // MIME types available in the clipboard when the event was fired
-  changeId: bigint; // Unique identifier for this specific clipboard change operation
+  changeId: bigint; // 128-bit unique identifier for this specific clipboard change operation
 }
 ```
 
 The `types` member can be used to detect available data types present on the clipboard and then reflect the same on the UI as per [this scenario](#21-scenario-show-available-paste-formats-in-web-based-editors).
 
-The `changeId` provides a unique identifier for each clipboard change operation. For the same clipboard change, all windows and tabs within the same partition will receive events with identical `changeId` values, enabling applications with multiple windows to deduplicate events and avoid redundant processing. The identifier is partition-specific and does not provide cross-partition correlation capabilities.
+The `changeId` is a cryptographically derived 128-bit integer that provides a unique identifier for each clipboard change operation. The only guarantee is that after something is written to the clipboard, `changeId` will yield a different value than it did before the write operation. For the same clipboard change, all windows and tabs within the same [storage shelf](https://storage.spec.whatwg.org/#storage-shelf) will receive events with identical `changeId` values, enabling applications with multiple windows to deduplicate events and avoid redundant processing.
 
 ### 4.3 Clipboard contents - Not available in event payload
 
@@ -165,13 +166,13 @@ When fired, this API indicates that the clipboard has changed and provides the c
 
 ### 4.5 Page focus requirement
 
-The clipboardchange event will not fire if the target document does not have system focus. If clipboard changes occur while the document is not in focus, a single clipboardchange event will be fired when the document regains system focus. Historical clipboard change information will not be available, only the available types when the page gained focus will be included in the types member.
+The clipboardchange event will not fire if the target document does not have [system focus](https://html.spec.whatwg.org/multipage/interaction.html#system-focus). If clipboard changes occur while the document is not in focus, a single clipboardchange event will be fired when the document regains [system focus](https://html.spec.whatwg.org/multipage/interaction.html#system-focus). Historical clipboard change information will not be available, only the available types when the page gained focus will be included in the types member.
 
 This focus requirement works in conjunction with the sticky activation requirement to ensure clipboard monitoring only occurs for actively engaged users.
 
 ### 4.6 Multi-window deduplication with changeId
 
-The `changeId` property enables applications with multiple windows or tabs to avoid processing the same clipboard change multiple times. When a clipboard change occurs, all windows and tabs within the same partition receive a `clipboardchange` event with an identical `changeId` value.
+The `changeId` property enables applications with multiple windows or tabs to avoid processing the same clipboard change multiple times. When a clipboard change occurs, all windows and tabs within the same [storage shelf](https://storage.spec.whatwg.org/#storage-shelf) receive a `clipboardchange` event with an identical `changeId` value.
 
 ```javascript
 class ClipboardManager {
@@ -270,7 +271,7 @@ One clear issue with this approach is that we are providing all the methods of D
 
 ### 6.2 Permission prompt mechanism in various browsers
 
-Today browser engines have different approaches to clipboard API permissions. While Chromium has [this permissions model](https://github.com/w3c/clipboard-apis/blob/main/explainer.adoc#clipboard-permissions) for clipboard, [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) and [Safari](https://webkit.org/blog/10855/async-clipboard-api/) rely on combination of user activation and user gesture for web pages to access user clipboard contents. This strict requirement is present because a user's clipboard contents are highly sensitive and can contain private data like passwords, security tokens. 
+Today browser engines have different approaches to clipboard API permissions. While Chromium has [this permissions model](https://github.com/w3c/clipboard-apis/blob/main/explainer.adoc#clipboard-permissions) for clipboard, [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API) and [Safari](https://webkit.org/blog/10855/async-clipboard-api/) rely on combination of [user activation](https://html.spec.whatwg.org/multipage/interaction.html#activation) and user gesture for web pages to access user clipboard contents. This strict requirement is present because a user's clipboard contents are highly sensitive and can contain private data like passwords, security tokens. 
  
 **Permission prompt in Chromium**
 ![](img/chrome-permission-prompt.png)
@@ -280,21 +281,21 @@ Today browser engines have different approaches to clipboard API permissions. Wh
 
 ### 6.3 Reading clipboard contents within the clipboardchange event handler
 
-To get the changed clipboard data within the event handler, the [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) can be used, given the web page has sufficient permissions. Note that in browsers which don't have permission based access to clipboard (like Firefox), a call to async clipboard read might require user gesture like clicking paste tablet. In those browsers, web authors can instead show a "Sync" button on the UI, which can be enabled upon receiving clipboardchange event and disabled again once user clicks the "Sync" button. 
+To get the changed clipboard data within the event handler, the [read](https://w3c.github.io/clipboard-apis/#dom-clipboard-read) or [readText](https://w3c.github.io/clipboard-apis/#dom-clipboard-readtext) methods of the [Async clipboard API](https://w3c.github.io/clipboard-apis/#async-clipboard-api) can be used, given the web page has sufficient [permissions](https://w3c.github.io/permissions/). Note that in browsers which don't have permission based access to clipboard (like Firefox), a call to async clipboard read might require user gesture like clicking paste tablet. In those browsers, web authors can instead show a "Sync" button on the UI, which can be enabled upon receiving clipboardchange event and disabled again once user clicks the "Sync" button. 
 
 ### 6.4 Custom clipboard data types and clipboardchange event
 
 Custom clipboard data types are not part of this event because if custom MIME types are exposed (without user consent) a web page can know which applications a user is working on providing fingerprinting surface for malicious sites. Moreover, not all browsers support custom clipboard data types.
 
-### 6.5 Partition-based changeId behavior
+### 6.5 Storage shelf-based changeId behavior
 
-The `changeId` property is generated using partition-specific transformations, ensuring that:
+The `changeId` property is generated to ensure proper isolation between storage contexts:
 
-1. **Same partition consistency**: All documents within the same [partition](https://w3ctag.github.io/privacy-principles/#dfn-partition) receive identical `changeId` values for the same clipboard change.
-2. **Cross-partition isolation**: Different partitions receive different `changeId` values for the same underlying system clipboard change, preventing correlation across partition boundaries.
-3. **Privacy protection**: The partition-based approach provides stronger privacy boundaries than origin-based approaches, especially important for clipboard monitoring capabilities.
+1. **Same storage shelf consistency**: All documents within the same [storage shelf](https://storage.spec.whatwg.org/#storage-shelf) receive identical `changeId` values for the same clipboard change.
+2. **Cross-storage shelf isolation**: Different [storage shelves](https://storage.spec.whatwg.org/#storage-shelf) receive different `changeId` values for the same underlying system clipboard change, preventing correlation across storage boundaries.
+3. **Privacy protection**: The [storage shelf](https://storage.spec.whatwg.org/#storage-shelf)-based approach provides strong privacy boundaries, ensuring that clipboard monitoring capabilities cannot be used for cross-site tracking.
 
-This design aligns with modern web platform privacy principles where partitions provide the appropriate isolation boundary for features with privacy implications.
+This design aligns with modern web platform privacy principles where storage shelves provide the appropriate isolation boundary for features with privacy implications.
 
 ## 7 Open issues
 
