@@ -165,7 +165,8 @@ class CustomButton extends HTMLElement {
     handleClick() {
         const targetId = this.getAttribute('commandfor');
         const command = this.getAttribute('command');
-        const taret = document.getElementById(targetId);
+        const target = document.getElementById(targetId);
+
 
         target.executeCommand(command);
     }
