@@ -183,11 +183,11 @@ if (targetElement) {
         } else if (command === "hide-popover") {
             this.hidePopover();
         } else if (command === "show-modal") {
-            // show-modal implementation
+            this.showModal()
         } else if (command === "close") {
-            // close implementation
+            this.close()
         } else if (command === "request-close") {
-            // request-close implementation
+            this.requestClose()
         }
     };
 }
