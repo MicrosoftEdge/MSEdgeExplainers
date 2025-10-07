@@ -166,32 +166,31 @@ class CustomButton extends HTMLElement {
         const command = this.getAttribute('command');
         const target = document.getElementById(targetId);
 
-        if (target && typeof target.executeCommand === 'function') {
-            target.executeCommand(command);
+        if (target) {
+            if (command === "toggle-popover") {
+                target.togglePopover();
+            } else if (command === "show-popover") {
+                target.showPopover();
+            } else if (command === "hide-popover") {
+                target.hidePopover();
+            } else if (command === "show-modal") {
+                target.showModal()
+            } else if (command === "close") {
+                target.close()
+            } else if (command === "request-close") {
+                target.requestClose()
+            } 
+                
+            // Create and fire command event at the target element
+            const commandEvent = new CustomEvent('command', {
+                bubbles: true,
+                cancelable: true
+            });
+            commandEvent.command = command;
+            target.dispatchEvent(commandEvent);
         }
     }
 }
-
-const targetElement = document.getElementById('my-target');
-
-if (targetElement) {
-    targetElement.executeCommand = function(command) {
-        if (command === "toggle-popover") {
-            this.togglePopover();
-        } else if (command === "show-popover") {
-            this.showPopover();
-        } else if (command === "hide-popover") {
-            this.hidePopover();
-        } else if (command === "show-modal") {
-            this.showModal()
-        } else if (command === "close") {
-            this.close()
-        } else if (command === "request-close") {
-            this.requestClose()
-        }
-    };
-}
-
 customElements.define('custom-button', CustomButton);
 ```
 ### With `buttonActivationBehaviors` when supporting command/commandfor attributes
