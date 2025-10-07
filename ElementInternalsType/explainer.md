@@ -142,7 +142,8 @@ customElements.define('custom-button', CustomButton);
 </script>
 ```
 
-## Add `buttonType` property in `ElementInternals`
+## Future Work
+### Add `buttonType` property in `ElementInternals`
 To provide submit and reset functionality, this proposal also introduces a `buttonType` property to `ElementInternals` that controls the behavior when the custom element is activated.
 
 The `ElementInternals` interface would be extended with:
@@ -164,7 +165,7 @@ partial interface ElementInternals {
 
 Following the [HTML specification for button's type attribute](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type), the default `buttonType` is `"submit"` unless either the `command` or `commandfor` content attributes are present, in which case the default is `"button"`.
 
-### `buttonType` and `formAssociated`
+#### `buttonType` and `formAssociated`
 When `buttonActivationBehaviors` is set to true, the custom element's form association behavior depends on the `buttonType` value:
 
 - **`buttonType = "submit"` or `"reset"`**: The element automatically becomes form-associated and `static formAssociated = true/false;` becomes a no-op.
@@ -195,7 +196,7 @@ If any of these properties are accessed on a custom element that does not have b
 **Implicit behaviors:**
 - **Form submission**: When associated with a `<form>`, pressing Enter on an associated form control (e.g., a text input) will trigger submit behavior if the custom element `buttonType` is `"submit"`.
 
-### Example
+#### Example
 
 ```js
 class CustomButton extends HTMLElement {
@@ -230,7 +231,66 @@ customElements.define('custom-button', CustomButton);
     </custom-button>
 </form>
 ```
+### Open questions
+If additional behaviors are introduced in the future, how should potential conflicts be addressed? For example:
 
+- **Conflicting semantics**: How should we handle ambiguity when combining command invocation behavior with label behavior? Should the element have an ARIA role of `button`, or none at all since labels lack an implicit ARIA role?
+- **Interaction conflicts**: When clicked, the [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API) will automatically trigger command invocation, but should the element also transfer focus to a labeled control (label behavior)? Would this dual behavior create confusion or negatively impact the user experience?
+- **Specification complexity**: How can we define conflict resolution for these combinations without introducing excessive edge cases and complexity?
+
+```js
+class CustomElement extends HTMLElement {
+    static buttonActivationBehaviors = true;
+    static labelBehaviors = true;
+
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
+    }
+
+    get commandForElement() {
+        return this.internals_.commandForElement ?? null;
+    }
+
+    set commandForElement(element) {
+        this.internals_.commandForElement = element;
+    }
+
+    get control() {
+        return this.internals_.control ?? null;
+    }
+
+    set htmlFor(value) {
+        this.internals_.htmlFor = value;
+    }
+
+    // Manual handling of label behavior (command invocation is handled automatically)
+    handleLabelClick(event) {
+        // Should this also transfer focus to labeled control (label behavior)?
+        // Developers must resolve this conflict manually since command invocation
+        // is automatically handled by the Invoker Commands API
+        if (this.control) {
+            // Label behavior: focus the labeled control
+            this.control.focus();
+        }
+    }
+
+    connectedCallback() {
+        // Manual role conflict resolution - developers must decide
+        // whether this should be a button or label
+        this.internals_.role = 'button'; // or no role for label behavior?
+
+        // Manual focus management for button behavior
+        if (!this.hasAttribute('tabindex')) {
+            this.tabIndex = 0;
+        }
+
+        // Manual event handling for label behavior (command invocation is automatic)
+        this.addEventListener('click', this.handleLabelClick.bind(this));
+    }
+}
+customElements.define('custom-element', CustomButton);
+```
 ## Alternatives considered
 
 ### 1. ElementInternals feature decomposition approach
@@ -538,68 +598,6 @@ A partial solution for the key use cases described above already exists today. A
 
 Both `extends` and `is` are supported in Firefox and Chromium-based browsers. However, this solution has limitations, such as not being able to attach shadow trees to (most) customized built-in elements. Citing these limitations, Safari doesn't plan to support customized built-ins in this way and have shared their objections here: https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274. As such, `extends` and `is` are not on a path to full interoperability today.
 
-### Future Considerations
-If additional behaviors are introduced in the future, how should potential conflicts be addressed? For example:
-
-- **Conflicting semantics**: How should we handle ambiguity when combining command invocation behavior with label behavior? Should the element have an ARIA role of `button`, or none at all since labels lack an implicit ARIA role?
-- **Interaction conflicts**: When clicked, the [Invoker Commands API](https://developer.mozilla.org/en-US/docs/Web/API/Invoker_Commands_API) will automatically trigger command invocation, but should the element also transfer focus to a labeled control (label behavior)? Would this dual behavior create confusion or negatively impact the user experience?
-- **Specification complexity**: How can we define conflict resolution for these combinations without introducing excessive edge cases and complexity?
-
-```js
-class CustomElement extends HTMLElement {
-    static buttonActivationBehaviors = true;
-    static labelBehaviors = true;
-
-    constructor() {
-        super();
-        this.internals_ = this.attachInternals();
-    }
-
-    get commandForElement() {
-        return this.internals_.commandForElement ?? null;
-    }
-
-    set commandForElement(element) {
-        this.internals_.commandForElement = element;
-    }
-
-    get control() {
-        return this.internals_.control ?? null;
-    }
-
-    set htmlFor(value) {
-        this.internals_.htmlFor = value;
-    }
-
-    // Manual handling of label behavior (command invocation is handled automatically)
-    handleLabelClick(event) {
-        // Should this also transfer focus to labeled control (label behavior)?
-        // Developers must resolve this conflict manually since command invocation
-        // is automatically handled by the Invoker Commands API
-        if (this.control) {
-            // Label behavior: focus the labeled control
-            this.control.focus();
-        }
-    }
-
-    connectedCallback() {
-        // Manual role conflict resolution - developers must decide
-        // whether this should be a button or label
-        this.internals_.role = 'button'; // or no role for label behavior?
-
-        // Manual focus management for button behavior
-        if (!this.hasAttribute('tabindex')) {
-            this.tabIndex = 0;
-        }
-
-        // Manual event handling for label behavior (command invocation is automatic)
-        this.addEventListener('click', this.handleLabelClick.bind(this));
-    }
-}
-customElements.define('custom-element', CustomButton);
-```
-
-These questions are important for long-term design, but they are outside the scope of this proposal. Our goal here is to acknowledge them without attempting to resolve them.
 
 ## Stakeholder Feedback / Opposition
 - Chromium: Positive
