@@ -375,7 +375,7 @@ The `ElementInternals` Interface would be extended with minimal command invocati
 **Trade-offs of this approach**
 - **Accessibility risks**: Without automatic defaults, developers may forget to implement critical accessibility features, leading to inaccessible custom elements.
 
-We consulted the [ARIA Working Group](https://github.com/w3c/aria/issues/2637) on this approach versus the main proposal with built-in defaults (implicit behaviors), and the [overwhelming consensus](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) was to provide accessibility defaults that can be potentially overwritten by "power users" (main proposal).
+We consulted the [ARIA Working Group](https://github.com/w3c/aria/issues/2637) on this approach versus the main proposal with built-in defaults (implicit behaviors), and the [overwhelming consensus](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) was to provide accessibility defaults that can be potentially overwritten by "power users" through `elementInternals.role`.
 
 ### 2. Static `behavesLike` property with behavior-specific interface mixins
 This alternative approach enables web component authors to create custom elements with native behaviors by adding a static `behavesLike` property to their custom element class definition. This property can be set to string values that represent native element types:
