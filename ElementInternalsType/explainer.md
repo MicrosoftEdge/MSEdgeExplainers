@@ -72,9 +72,6 @@ Beyond attributes, properties, and events, custom elements with `buttonActivatio
 ### Order of precedence regarding ARIA role
 The order is `<custom-button role=foo>` > `ElementInternals.role` > default `button` role via `buttonActivationBehaviors`
 
-### `buttonActivationBehaviors` does not change element appearance
-Setting `buttonActivationBehaviors` gives a custom element button activation behaviors, but the custom element's appearance does not change.  In other words, the custom element does not take on default, author-specified or user-specified styles that target the native button element, since the custom element has a different tag name (e.g., `<fancy-button>` instead of `<button>`).
-
 ## Examples
 ### Custom button with popover invocation
 This example shows how to create a custom button that can invoke a popover element using the `commandfor` and `command` attributes:
