@@ -202,27 +202,21 @@ customElements.define('custom-button', CustomButton);
 ```
 
 ## Future Work
-### Add `buttonType` property in `ElementInternals`
-To provide submit and reset functionality, this proposal also introduces a `buttonType` property to `ElementInternals` that controls the behavior when the custom element is activated.
+### Add `buttonType` property on `ElementInternals`
+To support _submit_ and _reset_ functionality, this proposal can be extended with a new `buttonType` property on `ElementInternals`, which defines how the custom element behaves when activated:
 
-The `ElementInternals` interface would be extended with:
-- `buttonType` - controls the activation behavior of the button (values: "button", "submit", "reset")
+- `"button"` - (Default) No special form behavior, only fires click events and command invocation
+- `"submit"` - Submits the associated form when activated
+- `"reset"` - Resets the associated form when activated
 
 If `buttonType` is set to any other value, it will fall back to the default value.
 
 **IDL definitions:**
 ```webidl
 partial interface ElementInternals {
-  [CEReactions] attribute DOMString buttonType;
+  attribute DOMString buttonType;
 };
 ```
-
-**Activation behaviors:**
-- `"button"` - No special form behavior, only fires click events and command invocation
-- `"submit"` - Submits the associated form when activated
-- `"reset"` - Resets the associated form when activated
-
-Following the [HTML specification for button's type attribute](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type), the default `buttonType` is `"submit"` unless either the `command` or `commandfor` content attributes are present, in which case the default is `"button"`.
 
 #### `buttonType` and `formAssociated`
 When `buttonActivationBehaviors` is set to true, the custom element's form association behavior depends on the `buttonType` value:
