@@ -191,7 +191,7 @@ if (targetElement) {
         }
     };
 }
-```
+
 customElements.define('custom-button', CustomButton);
 ```
 ### With `buttonActivationBehaviors` when supporting command/commandfor attributes
