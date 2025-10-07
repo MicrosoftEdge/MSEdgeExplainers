@@ -139,6 +139,66 @@ customElements.define('custom-button', CustomButton);
   button.command = 'show-modal';
 </script>
 ```
+## Comparison
+
+### Without `buttonActivationBehaviors` when supporting command/commandfor attributes
+```js
+class CustomButton extends HTMLElement {
+    constructor() {
+        super();
+        this.internals_ = this.attachInternals();
+    }
+
+    connectedCallback() {
+        // In the decomposition approach, developers must manually handle:
+        // 1. ARIA role assignment
+        this.internals_.role = 'button';
+
+        // 2. Focus management - make element focusable
+        if (!this.hasAttribute('tabindex')) {
+            this.tabIndex = 0;
+        }
+
+        this.addEventListener('click', this.handleClick);
+    }
+
+    handleClick() {
+        const targetId = this.getAttribute('commandfor');
+        const command = this.getAttribute('command');
+        const taret = document.getElementById(targetId);
+
+        target.executeCommand(command);
+    }
+
+  const targetElement = document.getElementById('my-target');
+
+  if (targetElement) {
+    targetElement.executeCommand = function(command) {
+      if (command === "toggle-popover") {
+        this.togglePopover();
+      else if (command === "show-popover") {
+        this.showPopover();
+      else if (command === "hide-popover") {
+        this.hidePopover();
+      else if (command === "show-modal") {
+        // show-modal implementation
+      else if (command === "close") {
+        // close implementation
+      else if (command === "request-close") {
+        // request-close implementation
+      }
+    };
+  }  
+}
+customElements.define('custom-button', CustomButton);
+```
+### With `buttonActivationBehaviors` when supporting command/commandfor attributes
+```js
+class CustomButton extends HTMLElement {
+    static buttonActivationBehaviors = true;
+}
+customElements.define('custom-button', CustomButton);
+```
 
 ## Future Work
 ### Add `buttonType` property in `ElementInternals`
