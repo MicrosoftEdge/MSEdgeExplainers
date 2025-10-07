@@ -599,8 +599,8 @@ Both `extends` and `is` are supported in Firefox and Chromium-based browsers. Ho
 
 ## Stakeholder Feedback / Opposition
 - Chromium: Positive
-- WebKit: No official signal
-- Gecko: No official signal, but no objections shared in the discussion here: https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455
+- WebKit: No [official signal](https://github.com/WebKit/standards-positions/issues/513)
+- Gecko: No [official signal](https://github.com/mozilla/standards-positions/issues/1250)
 
 [WHATWG resolution to accept `elementInternals.type = 'button'`](https://github.com/openui/open-ui/issues/1088#issuecomment-2372520455)
 
