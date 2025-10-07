@@ -15,7 +15,7 @@ Web component authors often want to create custom elements that have the activat
 
 - Custom buttons can be [popover invokers](https://html.spec.whatwg.org/multipage/popover.html#popoverinvokerelement) while providing unique styles and additional functionality (as discussed [here](https://github.com/openui/open-ui/issues/1088)).
 
-- Custom buttons can provide native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit). Similarly, custom buttons can also provide native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior that can implicitly [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset) (as discussed [here](https://github.com/WICG/webcomponents/issues/814)).
+- Custom buttons can provide native [submit button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-submit) behavior so that the custom button can implicitly [submit forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-submit) (as discussed [here](https://github.com/WICG/webcomponents/issues/814)). Similarly, custom buttons can also provide native [reset button](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-reset) behavior that can [reset forms](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#concept-form-reset) .
 
 Currently, web developers face challenges when trying to implement these behaviors in custom elements. The existing customized built-in approach using `extends` and `is` provides native button functionality but lacks full cross-browser support. As a result, developers are forced to manually reimplement button behaviors from scratch, leading to inconsistent implementations, accessibility issues, and development overhead.
 
@@ -25,12 +25,12 @@ This proposal addresses these challenges by introducing a standardized way for c
 - A solution to support key button activation use cases, particularly command invocation and form submission
 
 ### Non-goals
-- Providing a comprehensive alternative to the customized built-in solution (`extends` and `is`), i.e., enabling a custom element to do everything a native button does.
+- Providing an alternative to the customized built-in solution (`extends` and `is`), i.e., enabling a custom element to do everything a native button does.
 - A declarative version of this proposal. This requires finding a general solution for declarative custom elements, which should be explored separately.
 
 ## Proposal: add static `buttonActivationBehaviors` property
 We propose enabling web component authors to create custom elements with button activation behaviors by adding a static `buttonActivationBehaviors` property to their custom element class definition.
-This proposal focuses on decomposing native element behaviors into specific functionalities that can be individually exposed through `ElementInternals`. This approach builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
+This approach builds on the existing pattern established by form-associated custom elements ([FACEs](https://html.spec.whatwg.org/dev/custom-elements.html#form-associated-custom-elements)) and accessibility semantics ([ARIAMixin](https://www.w3.org/TR/wai-aria-1.2/#ARIAMixin)), where specific capabilities are exposed as discrete APIs that web developers can combine as needed.
 
 ```js
 class CustomButton extends HTMLElement {
@@ -62,8 +62,6 @@ partial interface ElementInternals {
   [CEReactions, ReflectSetter] attribute DOMString command;
 };
 ```
-
-**Note**: Future work may include adding support for the `interestfor` attribute, which is currently [shipping in Chromium](https://chromestatus.com/feature/4530756656562176?gate=4768466822496256) as an experimental feature for interest-based element targeting.
 
 **Implicit behaviors:**
 Beyond attributes, properties, and events, custom elements with `buttonActivationBehaviors = true` also gain native behaviors related to button activation:
