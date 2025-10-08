@@ -137,7 +137,7 @@ customElements.define('custom-button', CustomButton);
 </script>
 ```
 ## Comparison
-Tthe following examples demonstrate how much JS code can be saved with this proposal when a custom element author wants to support `command`/`commandfor` attributes:
+The following examples demonstrate how much JS code can be saved with this proposal when a custom element author wants to support `command`/`commandfor` attributes:
 ### Without `buttonActivationBehaviors`
 ```js
 class CustomButton extends HTMLElement {
