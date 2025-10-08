@@ -137,8 +137,8 @@ customElements.define('custom-button', CustomButton);
 </script>
 ```
 ## Comparison
-
-### Without `buttonActivationBehaviors` when supporting command/commandfor attributes
+Tthe following examples demonstrate how much JS code can be saved with this proposal when a custom element author wants to support `command`/`commandfor` attributes:
+### Without `buttonActivationBehaviors`
 ```js
 class CustomButton extends HTMLElement {
     constructor() {
@@ -147,10 +147,10 @@ class CustomButton extends HTMLElement {
     }
 
     connectedCallback() {
-        // 1. ARIA role assignment
+        // ARIA role assignment
         this.internals_.role = 'button';
 
-        // 2. Focus management - make element focusable
+        // Make element focusable
         if (!this.hasAttribute('tabindex')) {
             this.tabIndex = 0;
         }
@@ -190,7 +190,7 @@ class CustomButton extends HTMLElement {
 }
 customElements.define('custom-button', CustomButton);
 ```
-### With `buttonActivationBehaviors` when supporting command/commandfor attributes
+### With `buttonActivationBehaviors`
 ```js
 class CustomButton extends HTMLElement {
     static buttonActivationBehaviors = true;
