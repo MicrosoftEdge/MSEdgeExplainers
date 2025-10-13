@@ -1,4 +1,11 @@
 # Comparing proposals
+## Authors:
+- [Ana Sollano Kim](https://github.com/anaskim)
+- [Jayson Chen](https://github.com/ja-y-son)
+
+## Last updated:
+October 2025
+
 ## Microsoft's previous proposal
 Taken from [HTML Modules Explainer](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md)
 
@@ -6,33 +13,21 @@ Taken from [HTML Modules Explainer](https://github.com/WICG/webcomponents/blob/g
 
 ```html
 <resource-1 id="resource1">...</resource-1>
-<resource-2 id="resource2">...</resource-2>
-<resource-3 id="resource3">...</resource-3>
+<resource-2>...</resource-2>
 
+<!--Exporting resources via inline script-->
 <script type="module">
+    // Use `import.meta.document`
     let resource = import.meta.document.getElementById("resource1");
     export { resource }
 </script>
 ```
 
-or
+or just
 
 ```html
 <!--Default export-->
 <resource-1 id="resource1">...</resource-1>
-```
-
-**Exporting resources:**
-
-```js
-let resource = import.meta.document.getElementById("resource1");
-export { resource }
-```
-
-Script within an HTML Module can look up resources via
-
-```js
-import.meta.document.getElementById(...)
 ```
 
 **Importing resources:**
@@ -58,7 +53,7 @@ let resource = Resource1.getElementById("resource1");
 - Introduces `import.meta.document` property for inline module scripts that refers to the HTML Module document.
 - Offers a way for an HTML Module to specify its exports using inline script elements. They can export elements, classes, or functions.
 - If no script specifies a default export, the entire HTML document becomes the default export.
-- No declarative way to export.
+- Does not support declarative exports.
 - Imports resources using the ES Module syntax.
 
 ## Rob Eisenberg's proposal
@@ -124,15 +119,15 @@ HTML document
 **Note:** A `<link>` element with a new `rel` type can be used instead of introducing the `<import>` element.
 
 ### Key characteristics
-- Introduces HTML Modules as a new type of HTML "document" that contains exportable resource definitions, which can be imported into  HTML documents, other HTML Modules, and/or ES Modules.
-- Offers a declarative format to export HTML resources via the `export` attribute.
-- Imports resources using the ES Module syntax and also declaratively using the proposed new element `<import src="...">`
+- Introduces HTML Modules as a new type of HTML "document" that contains exportable resource definitions. These can be imported into  HTML documents, other HTML Modules, and/or ES Modules.
+- Offers a declarative format for exporting HTML resources via the `export` attribute.
+- Imports resources using both ES Module syntax and also declaratively via a new element `<import src="...">`
 - Proposes that all nodes are exported as a `DocumentFragment`, except for `<template>`, `<style>`, `<element>` (new), `<registry>` (new).
 
 ## Notable differences
-1. Microsoft's previous proposal only defines an imperative way of exporting resources, while Rob Eisenberg's proposal offers both declarative and imperative versions.
-2. Similarly, Microsoft's previousl proposal only proposes to use the ES Modlue syntax to import resources, while Rob Eisenberg's proposal introduces the new `<import>` element (though it may be replaced with a `<link rel="...">` element).
-3. Both support default exports via different approaches:
+1. Microsoft's previous proposal defines only an imperative way to export resources, while Rob Eisenberg's proposal introduces a declarative version.
+2. Microsoft's previous proposal relies on ES Module syntax for importing resources, while Rob Eisenberg's proposal introduces a new `<import>` element (which may be replaced with a `<link rel="...">` element).
+3. Both proposals support default exports via different approaches:
 
 ### Microsoft's previous proposal for default exports
 #### Export
