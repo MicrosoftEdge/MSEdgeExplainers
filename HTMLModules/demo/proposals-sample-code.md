@@ -116,7 +116,11 @@ HTML document
 <import src="./module.html#Resource2">
 ```
 
-**Note:** A `<link>` element with a new `rel` type can be used instead of introducing the `<import>` element.
+**Note:** A [`<link>`](https://html.spec.whatwg.org/multipage/semantics.html#the-link-element) element with a new [`rel`](https://html.spec.whatwg.org/multipage/semantics.html#attr-link-rel) type can be used instead of introducing the `<import>` element.
+
+```html
+<link href="./module.html#Resource2" rel="module" type="text/html" />
+```
 
 ### Key characteristics
 - Introduces HTML Modules as a new type of HTML "document" that contains exportable resource definitions. These can be imported into  HTML documents, other HTML Modules, and/or ES Modules.
@@ -126,7 +130,31 @@ HTML document
 
 ## Notable differences
 1. Microsoft's previous proposal defines only an imperative way to export resources, while Rob Eisenberg's proposal introduces a declarative version.
-2. Microsoft's previous proposal relies on ES Module syntax for importing resources, while Rob Eisenberg's proposal introduces a new `<import>` element (which may be replaced with a `<link rel="...">` element).
+
+### Microsoft's previous proposal to export resources imperatively
+
+```html
+<resource-1 id="resource1">...</resource-1>
+
+<!--Exporting resources via inline script-->
+<script type="module">
+    // Use `import.meta.document`
+    let resource = import.meta.document.getElementById("resource1");
+    export { resource }
+</script>
+```
+
+### Rob Eisenberg's proposal to export resources declaratively
+
+```html
+<!--Default export-->
+<resource-1 export>...</resource-1>
+
+<!--Named export as Resource2-->
+<resource-2 export id="Resource2">...</resource-2>
+```
+
+2. Microsoft's previous proposal relies on ES Module syntax for importing resources, while Rob Eisenberg's proposal introduces a new `<import>` element (which may be replaced with a `<link rel="module" type="text/html" />` element).
 3. Both proposals support default exports via different approaches:
 
 ### Microsoft's previous proposal for default exports
@@ -159,3 +187,10 @@ In HTML
 ```html
 <import from="./module.html"></import>
 ```
+
+## Open questions
+- Do we have an imperative export use case? Both imperative import makes sense, but if we can export declaratively does it make sense to keep looking into imperative import?
+- Do we need new `<!DOCTYPE>`? Does it make sense to separate module use cases from normal HTML? In other words, unless the HTML file is declared as a module file, no export will be made and it will be treated as normal html.
+- On scripts:
+  - For most simple use cases, are `<script>` elements necessary? Can we include them in the next stage of this feature?
+  - Should `<script>` elements be allowed to import other modules?
