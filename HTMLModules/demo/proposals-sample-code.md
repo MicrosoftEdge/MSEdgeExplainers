@@ -194,3 +194,24 @@ In HTML
 - On scripts:
   - For most simple use cases, are `<script>` elements necessary? Can we include them in the next stage of this feature?
   - Should `<script>` elements be allowed to import other modules?
+- On usage:
+  - Imperatively: Do we import the module/custom element and treat it as `HTMLElement` classes?
+
+```js
+import { content } from "./module.html" with { type: "html" };
+customElements.define('custom', content);
+```
+
+  - Declaratively: Do we use a [`<link>`](https://html.spec.whatwg.org/multipage/semantics.html#the-link-element) element and by default assume all the custom elements defined are available to use using their specifier?
+
+```html
+<!--html_module.html-->
+<div export specifier="custom-element">
+   <h1>title></h1>
+   <h1>super cool title</h1>
+</div>
+
+<!--index.html-->
+<link ref="./html_module.html" rel="html-module">
+<custom-element></custom-element>    <!--available!!!-->
+```
