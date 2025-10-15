@@ -46,15 +46,16 @@ content location of future work and discussions.
     - [Scenario 1: Horizontal lines between CSS grid rows](#scenario-1-horizontal-lines-between-css-grid-rows)
     - [Scenario 2: Lines dividing items in both directions of a grid](#scenario-2-lines-dividing-items-in-both-directions-of-a-grid)
     - [Scenario 3: Segmented gap decorations](#scenario-3-segmented-gap-decorations)
-  - [Open questions](#open-questions)
   - [Future ideas](#future-ideas)
     - [Images](#images)
     - [Corner joins](#corner-joins)
     - [Propagation of gap decorations into subgrids](#propagation-of-gap-decorations-into-subgrids)
     - [Placement of gap decorations](#placement-of-gap-decorations)
-      - [Grid](#grid)
-      - [Flex, multi-column, and masonry](#flex-multi-column-and-masonry)
-      - [Scenario: Defining different lines for different gaps, applied to a sub-area of the grid](#scenario-defining-different-lines-for-different-gaps-applied-to-a-sub-area-of-the-grid)
+      - [Scenario: Calendar grid with header column](#scenario-calendar-grid-with-header-column)
+      - [Scenario: Different lines for different gaps, applied to a sub-area of a grid](#scenario-different-lines-for-different-gaps-applied-to-a-sub-area-of-a-grid)
+      - [Scenario: Grid layout with white space in leading columns](#scenario-grid-layout-with-white-space-in-leading-columns)
+      - [Scenario: Column decorations only in specific gaps](#scenario-column-decorations-only-in-specific-gaps)
+      - [Scenario: Periodic Table omitting decorations from certain areas](#scenario-periodic-table-omitting-decorations-from-certain-areas)
   - [Dropped ideas](#dropped-ideas)
     - [Logical properties for flex and masonry containers](#logical-properties-for-flex-and-masonry-containers)
   - [Considered alternatives](#considered-alternatives)
@@ -123,15 +124,13 @@ For property grammar details, please see the
 
 In addition to replicating the existing column-rule properties in the row
 direction, we expand the syntax of both sets of properties to allow for multiple
-definitions. Authors may use familiar syntax from CSS Grid such as `repeat()`
-and `auto` to create patterns of line definitions that apply within a given gap
-decoration area. Note that while `repeat()` and `auto` are inspired by CSS Grid,
-they may also be used to create patterns of decorations in flex, multi-column,
-and masonry containers.
+definitions. If a given property has fewer list entries than the number of gaps,
+the list is cycled through from the beginning as needed.
 
-If the number of specified values (after expanding any repeats) in a given list
-is less than the number of gaps in the corresponding direction in the gap
-decoration area, the list cycles back to the beginning.
+Authors may also use familiar syntax from CSS Grid such as `repeat()`
+and `auto` to create patterns of line definitions. Note that while `repeat()` and `auto`
+are inspired by CSS Grid, they may also be used to create patterns of decorations
+in flex, multi-column, and masonry containers.
 
 Shorthands are also available to combine the width, style, and color properties.
 
@@ -151,7 +150,7 @@ Shorthands are also available to combine the width, style, and color properties.
   display: grid;
   grid-template: repeat(auto-fill, 30px) / repeat(3, 100px);
   grid-gap: 10px;
-  row-rule: 2px solid black / 1px solid lightgray;
+  row-rule: 2px solid black, 1px solid lightgray;
 }
 ```
 <image src="images/example-heavy-light.png">
@@ -171,7 +170,7 @@ simpler for gap decorations as there are fewer unknowns to consider.
   dispay: grid;
   grid-template: repeat(auto-fill, 30px) / repeat(3, 100px);
   row-gap: 9px;
-  row-rule: 5px solid black / repeat(auto, 1px solid black) / 3px solid black;
+  row-rule: 5px solid black, repeat(auto, 1px solid black), 3px solid black;
 }
 .item {
   height: 30px;
@@ -276,14 +275,14 @@ When row and column gap decorations overlap, authors can control their painting
 order.
 
 ```css
-gap-rule-paint-order: [ row-over-column | column-over-row ]
+rule-overlap: [ row-over-column | column-over-row ]
 ```
 
 ```css
 .row-over-column {
   row-rule: 6px solid red;
   column-rule: 6px solid blue;
-  gap-rule-paint-order: row-over-column;
+  rule-overlap: row-over-column;
 }
 ```
 <image src="images/example-row-over-column.png">
@@ -292,7 +291,7 @@ gap-rule-paint-order: [ row-over-column | column-over-row ]
 .column-over-row {
   row-rule: 5px solid red;
   column-rule: 5px solid blue;
-  gap-rule-paint-order: column-over-row;
+  rule-overlap: column-over-row;
 }
 ```
 <image src="images/example-column-over-row.png">
@@ -324,7 +323,7 @@ https://github.com/w3c/csswg-drafts/issues/2748#issuecomment-595663212
 
 ```css
 .container {
-  gap-rule: thick solid green;
+  rule: thick solid green;
 }
 ```
 
@@ -337,19 +336,13 @@ example
 
 ```css
 .container {
-  gap-rule: 1px solid black;
+  rule: 1px solid black;
   column-rule-outset: 0px;
 }
 ```
 
 <image
 src="images/csswg-drafts-issues-2748-issuecomment-446781218-last-example.png">
-
-## Open questions
-
-- How do gap decorations apply to subgrids?
-- Can we construct an all-encompassing `gap-rule` shorthand? The challenge here
-  is that `/` is already heavily loaded in the longhands.
 
 ## Future ideas
 
@@ -393,68 +386,130 @@ differ. There may be use cases for propagating gap decorations from the parent
 grid into corresponding gaps in the subgrid; we could perhaps do this with a
 special keyword on the `*-rule-width`, `*-rule-style`, and `*-rule-color`
 properties. See [CSSWG Issue
-12326](https://github.com/w3c/csswg-drafts/issues/12326) for futher discussion.
+12326](https://github.com/w3c/csswg-drafts/issues/12326) for further discussion.
 
 ### Placement of gap decorations
 
-Allow authors to specify where gap decorations start and end within a container.
+An author may want to apply different sets of gap decorations to different
+regions of a given container layout. We refer to such regions as a *gap
+decoration areas*. The examples below illustrate how these might work on a grid
+container; gap decoration areas on other container types have not yet been
+explored.
 
-An author may specify more than one such region and apply a different set of gap
-decorations to each. Within this document, we refer to such a region as a *gap
-decoration area*. Much like CSS Transitions and Animations, all gap decoration
-properties may take a comma-delimited list of values. Each entry in such a list
-is applied to the corresponding entry in the list of gap decoration areas. If a
-given property's list length is shorter than the gap decoration area list
-length, the shorter list cycles back to the beginning as needed.
+The author defines these areas using the `rule-areas` property. Each area is
+defined by giving it first a name, then a tuple of numbers or line names which
+work exactly as they would in the `grid-area` property:
 
-Gap decoration area properties are defined per container type.
+```css
+  rule-areas: --first-row 1 / 1 / 2 / -1, --first-column 1 / 1 / -1 / 2;
+```
 
-#### Grid
+On a grid container, the above value of `rule-areas` would define an area named
+`--first-row` that includes the grid lines within and around the first row (row
+line 1, column line 1 to row line 2, column line -1) and an area named
+`--first-column` that includes the grid lines within and around the first column
+(row line 1, column line 1 to row line -1, column line 2). These areas are
+inclusive of the grid lines on their edges.
 
-In grid containers, the author may specify any grid line based placement, as in
-[the 'grid-row-start', 'grid-row-end', 'grid-column-start', and
-'grid-column-end'
-properties](https://drafts.csswg.org/css-grid-2/#line-placement). The
-corresponding width-style-color gap decoration tuples in the row and column
-directions will apply in that area. The initial value is `1 / 1 / -1 / -1` to
-cover the entire grid.
+Then, on other gap decoration properties such as `*-rule-width`, `*-rule-style`,
+and `*-rule-color`, the author can then specify first a "default" set of values
+for the container, then a named area, then a set of values that applies to that
+area, and so on:
+
+```css
+  rule: 1px solid black, 1px solid gray [--first-row] 3px solid black, 5px solid black [--first-column] 1px solid blue;
+```
+
+Cycling behavior applies in named areas the same as it does elsewhere, and where
+multiple values would cover the same segment of a gap, the last one that applies
+will "win". Thus, the value above would apply alternating 1px solid black and
+1px solid gray rules to the grid in general, then override gaps in the first row
+with alternating 3px solid black and 5px solid black rules, then on top of that
+override gaps in the first column with 1px solid blue rules.
+
+#### Scenario: Calendar grid with header column
 
 ```css
 .grid-multiple-decoration-areas {
   display: grid;
   grid-template-rows: [top] 30px [main-top] repeat(6, 30px) [bottom];
   grid-template-columns: [left] 100px [main-left] repeat(3, 100px) [right];
-  grid-gap: 10px;
-  grid-row-rule-area: left / top / main-left / bottom,
-                      main-left / main-top / right / bottom;
-  row-rule: 1px solid lightblue,
-            1px solid black;
-  grid-column-rule-area: main-left / top / main-left / bottom;
-  column-rule: 1px solid lightblue;
+  gap: 10px;
+  rule-areas: --month-column left / top / main-left / bottom;
+  row-rule: 1px solid black [--month-column] 1px solid lightblue;
+  column-rule: [--month-column] 1px solid lightblue;
 }
 ```
 
 <image src="images/example-multiple-areas.png">
 
-#### Flex, multi-column, and masonry
-
-Gap decoration area properties for these container types are not yet defined.
-
-#### Scenario: Defining different lines for different gaps, applied to a sub-area of the grid
+#### Scenario: Different lines for different gaps, applied to a sub-area of a grid
 
 https://github.com/w3c/csswg-drafts/issues/2748#issuecomment-595889781
 
 ```css
 .container {
-  gap-rule-style: solid:
-  gap-rule-color: lightgray;
-  column-rule-width: 1px repeat(auto, 2px) 1px;
-  row-rule-width: 0px repeat(auto, 2px 1px);
-  grid-gap-rule-area: 2 / 2 / -1 / -1;
+  rule-style: solid:
+  rule-color: lightgray;
+  rule-areas: --main 2 / 2 / -1 / -1;
+  column-rule-width: [--main] 1px repeat(auto, 2px) 1px;
+  row-rule-width: [--main] 0px repeat(auto, 2px 1px);
 }
 ```
 
 <image src="images/csswg-drafts-issues-2748-issuecomment-595889781.png">
+
+#### Scenario: Grid layout with white space in leading columns
+
+https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1099
+
+```css
+.layout {
+  display: grid;
+  grid-template-areas:
+    ". . content author"
+    ". . content social";
+  rule-areas: --left 1 / 1 / 2 / -1;
+  rule: 1px solid gray [--left] none;
+  rule-outset: 3px;
+  border-top: 1px solid gray;
+}
+```
+
+<image src="images/explainer-issue-1099.png">
+
+#### Scenario: Column decorations only in specific gaps
+
+https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1100
+
+```css
+.layout {
+  display: grid;
+  grid-template-columns: 400px 1000px;
+  column-gap: 90px;
+  row-gap: 50px;
+  rule-areas: --main 2 / 2 / 2 / -1;
+  column-rule: [--main] 1px solid white;
+}
+```
+
+<image src="images/explainer-issue-1100.png">
+
+#### Scenario: Periodic Table omitting decorations from certain areas
+
+https://github.com/w3c/csswg-drafts/issues/12024#issuecomment-3086244002
+
+```css
+.container {
+  display: grid;
+  grid-template: repeat(4, 280px) / repeat(8, auto);
+  gap: 20px;
+  rule-areas: --top-center 1 / 4 / 2 / 6, --bottom-left -2 / 1 / -1 / 2, --bottom-right -2 / -1 / -1 / -1;
+  column-rule: 18px solid red [--top-center] none [--bottom-left] none [--bottom-right] none;
+}
+```
+
+<image src="images/csswg-drafts-issue-12024-issuecomment-3086244002-first-example.png">
 
 ## Dropped ideas
 
@@ -538,12 +593,15 @@ at most a single decoration style for a given container.
 Many thanks for valuable feedback and advice from:
 
 - <a href="https://github.com/alico-cra">@alico-cra</a>
+- Ahmad Shadeed
 - Alison Maher
 - Benoît Rouleau
 - Ian Kilpatrick
-- Josh Thumath
+- Josh Tumath
 - Kurt Catti-Schmidt
 - Lea Verou
+- Oliver Williams
 - Rachel Andrew
+- Sam Davis Omekara Jr.
 - Sebastian Zartner
 - Tab Atkins-Bittner
