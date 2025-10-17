@@ -350,7 +350,7 @@ There are several options for managing the lifetime of the generated Blob object
 would give developers some options for managing Blob lifetimes, but once revoked, Blob URLs cannot be reused, so re-inserting the `<style type="module">` tag cannot undo it being
 removed. Generating a new Blob URL and adding it to the Import Map will not work either, since Import Maps will ignore subsequent entries with an existing specifier. Alternatively,
 Blob URLs generated with Declarative CSS Modules could be tied to the lifetime of the document, with no options for revoking them. This would result in consistent behaviors for developers,
-at the expense of flexibility with resource management.
+at the expense of flexibility with resource management. Not revoking the Blob URL aligns with how Import Maps behave, so it is the preferred option.
 
 ### Detailed Parsing Workflow
 
