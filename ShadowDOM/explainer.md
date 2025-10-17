@@ -270,7 +270,7 @@ Earlier versions of this document used the `<script>` tag for declaring CSS Modu
 
 User agents allow for disabling JavaScript, and declarative modules should still work with JavaScript disabled. However, the module graph as it exists today only functions with script enabled. Browser engines should confirm whether this is feasible with their current implementations. Chromium has been verified as compatible, but other engines such as WebKit and Gecko have not been verified yet.
 
-### Syntactic Sugar For Import Maps with Data URI
+### Syntactic Sugar For Import Maps with Data URI or Blob
 
 The simplest approach for Declarative CSS Modules is to treat them as syntactic sugar that generates an Import Map entry containing a specifier and a data URI containing the module contents.
 
@@ -313,7 +313,44 @@ This approach is much simpler than [alternate proposals](#alternate-proposals) a
 This approach does have a few limitations:
 - The `<style>` definition *must* occur before it is imported, otherwise the import map will not be populated. Based on developer feedback, this is not a major limitation.
 - Since Import Maps have no knowledge of an underlying type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing types (e.g. one JavaScript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. See [Open Issues](#open-issues) for some potential solutions to this scenario.
+- The DataURI must be URL-Encoded, because many CSS selectors have special meaning in URL's. One example is the `#` class selector in CSS, which is a fragment identifier in URL's and can only
+exist once in a URL.
 
+Alternatively, a Blob URL could be used instead of a DataURI. Using a Blob URL offers several performance advantages over a DataURI, such as avoiding URL-encoding and a much
+smaller Import Map value string stored in memory. 
+
+Using Blob URLs, a Declarative CSS Module defined as follows:
+```html
+<style type="module" specifier="foo">
+  #content { color: red; }
+</style>
+```
+
+...would be syntactic sugar for:
+
+```html
+<script>
+  let blob_url = URL.createObjectURL(new Blob(["#content { color: red; }"], {type: "text/css"}));
+</script>
+<script type="importmap">
+{
+  "imports": {
+    "foo": "<value of `blob_url`>"
+  }
+}
+</script>
+```
+
+Importing via `shadowrootadoptedstylesheets` would work exactly the same as the DataURI example above.
+
+Blob URL's are active for the lifetime of the page they were created and are revoked via `revokeObjectURL`. A developer could theoretically discover the URL generated from
+a Declarative CSS Module and revoke it, but this doesn't expose any new issues as this scenario is already possible to do imperatively.
+
+There are several options for managing the lifetime of the generated Blob object. For instance, it could be revoked when the `<style type="module">` that created it is disconnected. This
+would give developers some options for managing Blob lifetimes, but once revoked, Blob URL's cannot be reused, so re-inserting the `<style type="module">` tag cannot undo it being
+removed. Generating a new Blob URL and adding it to the Import Map will not work either, since Import Maps will ignore subsequent entries with an existing specifier. Alternatively,
+Blob URL's generated with Declarative CSS Modules could be tied to the lifetime of the document, with no options for revoking them. This would result in consistent behaviors for developers,
+at the expense of flexibility with resource management.
 
 ### Detailed Parsing Workflow
 
@@ -332,7 +369,7 @@ In the following example:
 </my-element>
 ```
 
-Upon parsing the `<style>` tag above, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing a [map](https://infra.spec.whatwg.org/#ordered-map) with a key of "imports". The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is another JSON [map](https://infra.spec.whatwg.org/#ordered-map) with a single entry with a [key](https://infra.spec.whatwg.org/#map-key) containing the value of the `specifier` attribute on the `<style>` tag (in this case, "foo"). The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is a [data URI](https://www.rfc-editor.org/rfc/rfc2397) with a [scheme](https://url.spec.whatwg.org/#concept-url-scheme) of "data", a [media type](https://www.rfc-editor.org/rfc/rfc2397) of "text/css", and [data](https://www.rfc-editor.org/rfc/rfc2397) consisting of a [UTF-8 percent encoded](https://url.spec.whatwg.org/#utf-8-percent-encode) value of the [text content](https://html.spec.whatwg.org/#get-the-text-steps) of the `<style>` tag.
+Upon parsing the `<style>` tag above, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing a [map](https://infra.spec.whatwg.org/#ordered-map) with a key of "imports". The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is another JSON [map](https://infra.spec.whatwg.org/#ordered-map) with a single entry with a [key](https://infra.spec.whatwg.org/#map-key) containing the value of the `specifier` attribute on the `<style>` tag (in this case, "foo"). The [value](https://infra.spec.whatwg.org/#map-value) associated with this key is a [data URI](https://www.rfc-editor.org/rfc/rfc2397) with a [scheme](https://url.spec.whatwg.org/#concept-url-scheme) of "data", a [media type](https://www.rfc-editor.org/rfc/rfc2397) of "text/css", and [data](https://www.rfc-editor.org/rfc/rfc2397) consisting of a [UTF-8 percent encoded](https://url.spec.whatwg.org/#utf-8-percent-encode) value of the [text content](https://html.spec.whatwg.org/#get-the-text-steps) of the `<style>` tag. Alternatively, the value of the Import Map entry could be a [Blob URI](https://w3c.github.io/FileAPI/#dfn-Blob) with a [media type](https://www.rfc-editor.org/rfc/rfc2397) of "text/css" and a value of the [text content](https://html.spec.whatwg.org/#get-the-text-steps) of the `<style>` tag.
 
 Note that unlike a regular `<style>` tag with CSS content, the `sheet` attribute defined in the [LinkStyle interface](https://www.w3.org/TR/cssom-1/#the-linkstyle-interface) would always be empty for Declarative CSS Modules. Similarly, updating the text content of the `<style>` tag would not update the generated [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string), which is exactly how [import maps](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) behave when their text content is modified.
 
