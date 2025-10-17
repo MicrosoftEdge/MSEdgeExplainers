@@ -313,10 +313,10 @@ This approach is much simpler than [alternate proposals](#alternate-proposals) a
 This approach does have a few limitations:
 - The `<style>` definition *must* occur before it is imported, otherwise the import map will not be populated. Based on developer feedback, this is not a major limitation.
 - Since Import Maps have no knowledge of an underlying type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing types (e.g. one JavaScript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. See [Open Issues](#open-issues) for some potential solutions to this scenario.
-- The DataURI must be URL-encoded, because many CSS selectors have special meaning in URLs. One example is the `#` ID selector in CSS, which is a fragment identifier in URLs and can only
+- The data URI must be URL-encoded, because many CSS selectors have special meaning in URLs. One example is the `#` ID selector in CSS, which is a fragment identifier in URLs and can only
 exist once in a URL.
 
-Alternatively, a Blob URL could be used instead of a DataURI. Using a Blob URL offers several performance advantages over a DataURI, such as avoiding URL-encoding and a much
+Alternatively, a Blob URL could be used instead of a data URI. Using a Blob URL offers several performance advantages over a data URI, such as avoiding URL-encoding and a much
 smaller Import Map value string stored in memory. 
 
 Using Blob URLs, a Declarative CSS Module defined as follows:
@@ -330,7 +330,7 @@ Using Blob URLs, a Declarative CSS Module defined as follows:
 
 ```html
 <script>
-  let blob_url = URL.createObjectURL(new Blob(["#content { color: red; }"], {type: "text/css"}));
+  const blob_url = URL.createObjectURL(new Blob(["#content { color: red; }"], {type: "text/css"}));
 </script>
 <script type="importmap">
 {
@@ -341,9 +341,9 @@ Using Blob URLs, a Declarative CSS Module defined as follows:
 </script>
 ```
 
-Importing via `shadowrootadoptedstylesheets` would work exactly the same as the DataURI example above.
+Importing via `shadowrootadoptedstylesheets` would work exactly the same as the data URI example above.
 
-Blob URLs are active for the lifetime of the page they were created and are revoked via `revokeObjectURL`. A developer could theoretically discover the URL generated from
+Blob URLs are active for the lifetime of the page on which they were created and are revoked via `revokeObjectURL`. A developer could theoretically discover the URL generated from
 a Declarative CSS Module and revoke it, but this doesn't expose any new issues as this scenario is already possible to do imperatively.
 
 There are several options for managing the lifetime of the generated Blob object. For instance, it could be revoked when the `<style type="module">` that created it is disconnected. This
