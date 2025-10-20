@@ -27,7 +27,7 @@ This proposal addresses these challenges by introducing a standardized way for c
 ### Non-goals
 - Providing an alternative to the customized built-in solution (`extends` and `is`), i.e., enabling a custom element to do everything a native button does.
 - A declarative version of this proposal. This requires finding a general solution for declarative custom elements, which should be explored separately.
-- Providing guidance on how to indicate that new behavior has been added to an element, which is discussed (here)[https://github.com/WICG/webcomponents/issues/1029].
+- Providing guidance on how to indicate that new behavior has been added to an element, which is discussed [here](https://github.com/WICG/webcomponents/issues/1029).
 
 ## Proposal: add static `buttonActivationBehaviors` property
 We propose enabling web component authors to create custom elements with button activation behaviors by adding a static `buttonActivationBehaviors` property to their custom element class definition.
