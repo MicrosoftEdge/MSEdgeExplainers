@@ -2,6 +2,7 @@
 
 **Authors**
 * [Nishitha Burman Dey](https://github.com/nishitha-burman)
+* [Steve Becker](https://github.com/SteveBeckerMSFT)
 
 Much of this explainer synthesizes and consolidates prior discussions and contributions from [Diego Perez Botero](https://github.com/Diego-Perez-Botero), [Henrik Boström](https://github.com/henbos), [Philipp Hancke](https://github.com/fippo), [Sun Shin](https://github.com/xingri), and other members of the WebRTC working group.
 
@@ -36,34 +37,58 @@ Feedback from Xbox Cloud Gaming, Nvidia GeForce Now and similar partners shows:
 * Without this signal, developers cannot confidently diagnose or reduce fallback incidence. 
 
 ## Proposed Approach
-Introduce an event on [`RTCRtpReceiver`](https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpReceiver) ([see slide 30](https://docs.google.com/presentation/d/1FpCAlxvRuC0e52JrthMkx-ILklB5eHszbk8D3FIuSZ0/edit?slide=id.g2452ff65d17_0_71#slide=id.g2452ff65d17_0_71)) that fires when:
-* A decoder error occurs (e.g. bitstream decode failure)
+Introduce an event on [`RTCRtpReceiver`](https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpReceiver) ([see slide 30](https://docs.google.com/presentation/d/1FpCAlxvRuC0e52JrthMkx-ILklB5eHszbk8D3FIuSZ0/edit?slide=id.g2452ff65d17_0_71#slide=id.g2452ff65d17_0_71)) that fires when a decoder error occurs:
 * The engine falls back from hardware to software decoding
 * No software decoder is available (e.g. in the case of H.265)
 
 This enables applications to alert users, re-negotiate codecs, and debug issues without requiring [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) permissions.
 
 ### Example
+
 ```JavaScript
 const pc = new RTCPeerConnection();
 
-pc.ontrack = (event) => {
-
+pc.addEventListener('track', (event) => {
   const receiver = event.receiver;
 
-  receiver.addEventListener("decodererror", () => {
+  // Listen for decoder state changes
+  receiver.addEventListener('decoderstatechange', (ev) => {
 
-    console.warn("Decoder error: decoder fell back or failed");
+    // Adapt application behavior based on power efficiency
+    if (!ev.powerEfficient) {
+        // Notify the user
+        showToast("Playback quality may be reduced");
 
-    // Log telemetry signal
-    logMetric("decoder_error");
+        // Lower resolution or disable heavy post-processing
+        adjustQuality('low');
 
-    // Notify the user in a simple way
-    showToast("Playback quality may be reduced");
-
+        // Log telemetry signal with codec and RTP timestamp
+        logMetric(`Decoder fallback: codec=${ev.codecString}, rtp=${ev.rtpTimestamp}`);
+    }
   });
+});
+
+```
+### Proposed IDL
+
+```JavaScript
+partial interface RTCRtpReceiver {
+attribute EventHandler ondecoderstatechange;
 };
 
+interface RTCDecoderStateChangeEvent : Event {
+constructor(DOMString type, RTCDecoderStateChangeEventInit eventInitDict);
+
+// Media timeline reference
+readonly attribute unsigned long rtpTimestamp;
+
+// Codec now in effect after the change.
+readonly attribute DOMString codecString; 
+
+// Align with MediaCapabilitiesInfo, powerEfficient changes primarily based on hardware/software decoder
+// https://www.w3.org/TR/media-capabilities/#media-capabilities-info
+readonly attribute boolean powerEfficient;
+};
 ```
 ## Alternatives Considered
 1. Use [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) info via WebRTC Stats API
@@ -98,8 +123,8 @@ Last discussed in the 2025-09-16 WebRTC WG Call: [Slides 17-21](https://docs.goo
 
 ## References & Acknowledgements 
 Many thanks for valuable feedback and advice from:
-* [Steve Becker](https://github.com/SteveBeckerMSFT)
 * [Nic Champagne Williamson](https://github.com/champnic)
+* [Gabriel Brito](https://github.com/gabrielsanbrito)
 
 Links to past working group meetings where this has been discussed:
 * 2025-09-16 WebRTC WG Call: [Slides 17-21](https://docs.google.com/presentation/d/11rr8X4aOao1AmvyoDLX8o9CPCmnDHkWGRM3nB4Q_104/edit?slide=id.g37afa1cfe47_0_26#slide=id.g37afa1cfe47_0_26) & [minutes](https://www.w3.org/2025/09/16-webrtc-minutes.html)
