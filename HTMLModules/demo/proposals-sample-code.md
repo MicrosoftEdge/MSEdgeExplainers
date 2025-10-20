@@ -6,6 +6,9 @@
 ## Last updated:
 October 2025
 
+## Status:
+Draft
+
 ## Microsoft's previous proposal
 Taken from [HTML Modules Explainer](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md)
 
@@ -189,7 +192,7 @@ In HTML
 ```
 
 ## Open questions
-- Do we have an imperative export use case? Both imperative import makes sense, but if we can export declaratively does it make sense to keep looking into imperative import?
+- Do we have an imperative export use case? If we can export declaratively, does it make sense to keep looking into imperative export?
 - Do we need new `<!DOCTYPE>`? Does it make sense to separate module use cases from normal HTML? In other words, unless the HTML file is declared as a module file, no export will be made and it will be treated as normal html.
 - On scripts:
   - For most simple use cases, are `<script>` elements necessary? Can we include them in the next stage of this feature?
