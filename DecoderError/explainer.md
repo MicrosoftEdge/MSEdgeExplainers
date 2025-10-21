@@ -3,8 +3,10 @@
 **Authors**
 * [Nishitha Burman Dey](https://github.com/nishitha-burman)
 * [Steve Becker](https://github.com/SteveBeckerMSFT)
+* [Diego Perez Botero](https://github.com/Diego-Perez-Botero)
+* [Philipp Hancke](https://github.com/fippo)
 
-Much of this explainer synthesizes and consolidates prior discussions and contributions from [Diego Perez Botero](https://github.com/Diego-Perez-Botero), [Henrik Boström](https://github.com/henbos), [Philipp Hancke](https://github.com/fippo), [Sun Shin](https://github.com/xingri), and other members of the WebRTC working group.
+Much of this explainer synthesizes and consolidates prior discussions and contributions from members of the WebRTC working group.
 
 ## Participate
 * [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DecoderError)
@@ -127,6 +129,8 @@ Last discussed in the 2025-09-16 WebRTC WG Call: [Slides 17-21](https://docs.goo
 Many thanks for valuable feedback and advice from:
 * [Nic Champagne Williamson](https://github.com/champnic)
 * [Gabriel Brito](https://github.com/gabrielsanbrito)
+* [Henrik Boström](https://github.com/henbos)
+* [Sun Shin](https://github.com/xingri)
 
 Links to past working group meetings where this has been discussed:
 * 2025-09-16 WebRTC WG Call: [Slides 17-21](https://docs.google.com/presentation/d/11rr8X4aOao1AmvyoDLX8o9CPCmnDHkWGRM3nB4Q_104/edit?slide=id.g37afa1cfe47_0_26#slide=id.g37afa1cfe47_0_26) & [minutes](https://www.w3.org/2025/09/16-webrtc-minutes.html)
