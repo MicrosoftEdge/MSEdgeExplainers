@@ -19,7 +19,7 @@ This proposal introduces a runtime event to notify applications when a decoder e
 End users of game streaming services may experience increased latency, degraded quality, and battery drain when the browser switches from hardware to software decoding. Developers currently lack a way to detect this fallback in real time without prompting users for camera/mic permissions. In the past, developers used to rely on [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) info, but as of Chromium M110+ it requires [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) permissions. This is not ideal because the UI prompt is invasive, it’s excessive since it grants access to the camera and mic hardware when apps don’t need it, and it has a high failure rate since users have little reason to grant the permission unless they want to use voice chat. This gap makes it difficult to diagnose performance regressions and provide troubleshooting guidance.  
 
 ## Goals
-* Enable developers to detect runtime decoder fallback from hardware to software in a non-invasive way without requiring additional permissions.
+* Enable developers to detect runtime decoder fallback from hardware to software in a non-invasive way without requiring additional permissions (does not require `getUserMedia()` permissions).
 * Allow applications to diagnose regressions (e.g. codec negotiation issues, device specific problems).
 * Support user experience improvements by enabling apps to adapt (e.g. lowering resolution, re-negotiating codecs), alerting end users when software decode occurs, and displaying troubleshooting information. 
 
@@ -90,6 +90,8 @@ readonly attribute DOMString codecString;
 readonly attribute boolean powerEfficient;
 };
 ```
+**Note:** If streaming begins with `powerEfficient` as `false`, the event will fire.
+
 ## Alternatives Considered
 1. Use [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) info via WebRTC Stats API
     * Rejected because it now requires [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) permissions, which are invasive and have a high failure rate. 
