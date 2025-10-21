@@ -90,7 +90,7 @@ readonly attribute DOMString codecString;
 readonly attribute boolean powerEfficient;
 };
 ```
-**Note:** If streaming begins with `powerEfficient` as `false`, the event will fire.
+**Note:** The event fires at the beginning of streaming.
 
 ## Alternatives Considered
 1. Use [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) info via WebRTC Stats API
