@@ -1,4 +1,4 @@
-# Decoder Fallback
+# RTCRtpReceiver Decoder Fallback
 
 **Authors**
 * [Nishitha Burman Dey](https://github.com/nishitha-burman)
@@ -9,13 +9,13 @@
 Much of this explainer synthesizes and consolidates prior discussions and contributions from members of the WebRTC working group.
 
 ## Participate
-* [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DecoderError)
+* [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DecoderFallback)
 * [Discussion forum](https://github.com/w3c/webrtc-extensions/issues/146)
 
 ## Introduction
 Game streaming platforms like Xbox Cloud Gaming and Nvidia GeForce Now rely on hardware decoding in browsers to deliver low-latency, power efficient experiences. However, there is currently no reliable way for these applications to detect when decoding silently falls back to software during a stream. 
 
-This proposal introduces a runtime event to notify applications when a decoder error or fallback occurs. The goal is to give developers actionable visibility into runtime behavior without exposing new fingerprinting vectors or hardware details.
+This proposal introduces a runtime event to notify applications when a decoder fallback occurs. The goal is to give developers actionable visibility into runtime behavior without exposing new fingerprinting vectors or hardware details.
 
 ## User-Facing Problem
 End users of game streaming services may experience increased latency, degraded quality, and battery drain when the browser switches from hardware to software decoding. Developers currently lack a way to detect this fallback in real time without prompting users for camera/mic permissions. In the past, developers used to rely on [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) info, but as of Chromium M110+ it requires [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) permissions. This is not ideal because the UI prompt is invasive, it’s excessive since it grants access to the camera and mic hardware when apps don’t need it, and it has a high failure rate since users have little reason to grant the permission unless they want to use voice chat. This gap makes it difficult to diagnose performance regressions and provide troubleshooting guidance.  
