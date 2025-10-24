@@ -1,4 +1,4 @@
-# Decoder Error
+# Decoder Fallback
 
 **Authors**
 * [Nishitha Burman Dey](https://github.com/nishitha-burman)
