@@ -9,7 +9,7 @@
 Much of this explainer synthesizes and consolidates prior discussions and contributions from members of the WebRTC working group.
 
 ## Participate
-* [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DecoderFallback)
+* [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/RTCRtpReceiverDecoderFallback)
 * [Discussion forum](https://github.com/w3c/webrtc-extensions/issues/146)
 
 ## Introduction
