@@ -7,8 +7,6 @@
 
 ## Participate
 - [How does document policy work in workers?](https://github.com/WICG/js-self-profiling/issues/33)
-- [Feature-Policy and Workers](https://github.com/w3c/webappsec-permissions-policy/issues/207)
-- [Enable Document Policy in Dedicated Workers Discussion](https://issues.chromium.org/issues/450845903)
 
 ## Introduction
 
@@ -166,4 +164,4 @@ partial dictionary WorkerOptions {
 
 Many thanks for valuable feedback and advice from:
 - [Alex Russell](https://github.com/slightlyoff)
-- [Ian Clelland] (https://github.com/clelland) (Google)
+- [Ian Clelland](https://github.com/clelland) (Google)
