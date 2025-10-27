@@ -240,6 +240,33 @@ into the intersection and negative values receding from it.
 ```
 <image src="images/example-column-outset-minus-5px.png">
 
+Authors may also adjust endpoints more granularly, making a distinction between "edge"
+endpoints (which fall on the edge of the container),
+and "interior" endpoints (any endpoint that is not an "edge").
+
+```css
+.edge-interior-outsets {
+  column-rule-edge-outset: 0px;
+  column-rule-interior-outset: 5px;
+}
+```
+
+<image src="images/example-column-interior-outset-5px.png">
+
+Similarly, authors can have even more granular control to adjust the positions of endpoints,
+making a distinction between "start" and "end" endpoints, in addition to the "edge" and "interior" distinction.
+
+```css
+.start-end-edge-interior-outsets {
+  column-rule-start-edge-outset: 0px;
+  column-rule-end-edge-outset: 8px;
+  column-rule-start-interior-outset: 0px;
+  column-rule-end-interior-outset: 8px;
+}
+```
+
+<image src="images/example-column-start-end-edge-interior-outsets.png">
+
 ### Interaction with spanning items
 
 Authors may also change the set of intersections where gap decorations break,
