@@ -75,9 +75,6 @@ Document-Policy: js-profiling
 ```
 Having this header in the script response enables Document-Policy in the worker, allowing developers to use features that the policy supports.
 
-**Blob Worker:**
-Worker inherits creator's effective policy (e.g., self-js-profiling on/off).
-
 **Using Profiler in Worker:**
 
 If Document-Policy is enabled in the worker, developers can use the Profiler:
