@@ -54,7 +54,7 @@ Memory usage is bounded by the size of each chunk plus the backlog of unhandled 
 
 ### Questions
 
-- What should return of ReadableStream.read() be? Float32Array with BYOB or AudioBuffer?
+- What should return of `ReadableStreamDefaultReader.read()` be? Float32Array with BYOB or AudioBuffer?
 
 ### Pros
 
