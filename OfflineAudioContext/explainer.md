@@ -31,7 +31,9 @@ The user in this context is the web developer using the WebAudio API to perform 
 
 ## Proposed Approach
 
-The preferred approach is to add an `outputMode` to `startRendering()` to allow consumers to define the behavior of the offline rendering.
+The preferred approach is to allow `startRendering()` to be configured to stream output via a `StartRenderingOptions` object which will have a `mode` property. This `mode` can be set to `"stream"` which will stream data rather than allocating an `AudioBuffer` up front.
+
+The object allows for future flexibility of the new API surface.
 
 ```typescript
 interface StartRenderingOptions {
