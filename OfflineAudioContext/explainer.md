@@ -11,7 +11,7 @@
 
 ## Introduction
 
-WebAudio `OfflineAudioContext.startRendering()` allocates an `AudioBuffer` large enough to hold the entire render WebAudio graph before returning. For example, a 4 hour audio graph at 48 kHz with 4 channels will create gigabytes of in-memory float32 data in the `AudioBuffer`. This behaviour makes the API is unsuitable for very long offline renders or very large channel/length combinations. There is no simple way to chunk the output or consume it as a stream.
+WebAudio `OfflineAudioContext.startRendering()` allocates an `AudioBuffer` large enough to hold the entire render WebAudio graph before returning. For example, a 4 hour audio graph at 48 kHz with 4 channels will create gigabytes of in-memory float32 data in the `AudioBuffer`. This behaviour makes the API unsuitable for very long offline renders or very large channel/length combinations. There is no simple way to chunk the output or consume it as a stream.
 
 The [spec](https://webaudio.github.io/web-audio-api/#dom-offlineaudiocontext-startrendering) explicitly states at step 5: "Create a new AudioBuffer ... with ... length and sampleRate ... Assign this buffer to an internal slot" which means the API design currently mandates the full buffer allocation.
 
