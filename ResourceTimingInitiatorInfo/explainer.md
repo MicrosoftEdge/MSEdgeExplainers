@@ -70,6 +70,7 @@ There are a number of advantages to this approach.
 ### 3. UA only partially implements the `initiator Info`.
 When the `initiator info` is missing for some resources, the partial resource dependency information is still useful. Therefore, a UA can release a partial `initiator info` implementation and make improvements later.
 
+It's expected that some UAs skip resources for the following reasons: rarity of such resources; excessive complexty in implementation; resources being fetched with deprecated HTML/CSS/JS features.
 
 ## Alternatives considered
 
