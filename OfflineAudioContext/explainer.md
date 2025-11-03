@@ -96,7 +96,7 @@ while (true) {
 
 There is an open question of what data format `startRenderingStream()` should return. The options under consideration are `AudioBuffer`, `Float32Array` planar or `Float32Array` interleaved.
 
-#### AudioBuffer
+#### `AudioBuffer`
 
 **Pros**
 
@@ -107,7 +107,7 @@ There is an open question of what data format `startRenderingStream()` should re
 
 - does not allow developers to BYOB (bring your own buffer) and BYOB helps developers manage memory usage, so `AudioBuffer` removes a bit of control
 
-#### Float32Array
+#### `f32-planar` per channel
 
 **Pros**
 
@@ -118,7 +118,7 @@ There is an open question of what data format `startRenderingStream()` should re
 - requires the output of `startStreamingRendering()` to return an array of `Float32Array` in planar format for each output channel
 - this leaves a question of what to do if only one channel is read by the consumer, i.e. what should happen to the other channel's data?
 
-#### Float32Array
+#### `f32-interleaved`
 
 **Pros**
 
@@ -128,6 +128,10 @@ There is an open question of what data format `startRenderingStream()` should re
 **Cons**
 
 - introduces a new type to the WebAudio spec, `f32-interleave` which does not exist at the moment
+
+#### Recommendation
+
+`f32-interleaved` as it is the most interoperable with other media APIs, like WebCodecs, and simplifies processing with other data streams such as video.
 
 ## Alternative 1 - Modify existing `startRendering` method to allow streaming output
 
