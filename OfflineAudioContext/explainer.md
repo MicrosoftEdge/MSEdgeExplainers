@@ -102,7 +102,7 @@ The options under consideration are `AudioBuffer`, `Float32Array` planar or `Flo
 
 - `AudioBuffer` is semantically closest to the `startRendering()` API and does not add a new type to the WebAudio spec but not does not allow developers to BYOB (bring your own buffer). BYOB helps developers manage memory usage So `AudioBuffer` removes a bit of control.
 - `Float32Array` planar also already exists, `f32-planar`, in the WebAudio spec. Requires the output of `startStreamingRendering()` to return an array of `Float32Array` in planar format for each output channel. This leaves a question of what to do if only one channel is read by the consumer, what should happen to the other channel's data?
-- `Float32Array` interleaved introduces a new type to the WebAudioSpec, `f32-interleaved`, but allows streaming out a single stream, rather than one for each channel as is necessary with `f32-planaer`. It also WebCodecs making it simpler to consume in WebCodecs APIs
+- `Float32Array` interleaved introduces a new type to the WebAudioSpec, `f32-interleaved`, but allows streaming out a single stream, rather than one for each channel as is necessary with `f32-planar`. It also WebCodecs making it simpler to consume in WebCodecs APIs
 
 ## Alternative 1 - Modify existing `startRendering` method to allow streaming output
 
@@ -139,7 +139,7 @@ while (true) {
 }
 ```
 
-The existing API remains unchanged for backwards compatability:
+The existing API remains unchanged for backwards compatibility:
 
 ```js
 /**
