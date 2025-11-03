@@ -11,72 +11,121 @@
 
 ## Introduction
 
-WebAudio `OfflineAudioContext.startRendering()` allocates an `AudioBuffer` large enough to hold the entire render WebAudio graph before returning. For example, a 4 hour audio graph at 48 kHz with 4 channels will create gigabytes of in-memory float32 data in the `AudioBuffer`. This behaviour makes the API unsuitable for very long offline renders or very large channel/length combinations. There is no simple way to chunk the output or consume it as a stream.
+[WebAudio](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) provides a powerful and versatile API for performing audio-processing workflows entirely in the browser. It supports creating complex node-based audio graphs with effects and processing and which are ultimately output to system out (speakers) or an in-memory AudioBuffer for further processing. WebAudio can be used for many different workloads in the browser. An example relevant to this discussion is web-based video editors, like clipchamp.com, which can use WebAudio to build up complex audio graphs based on multiple input files which are composed, trimmed and processed according to a linear timeline, and ultimately rendered faster-than-realtime (offline context) for writing to a file, or realtime for previewing in the browser.
 
-The [spec](https://webaudio.github.io/web-audio-api/#dom-offlineaudiocontext-startrendering) explicitly states at step 5: "Create a new AudioBuffer ... with ... length and sampleRate ... Assign this buffer to an internal slot" which means the API design currently mandates the full buffer allocation.
+WebAudio works well in a realtime playback context but it is not suitable for offline context processing due to a limitation in the design of WebAudio's [OfflineAudioContext API](https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext). The design of the API requires allocating potentially gigabytes of AudioBuffer data before the processed AudioGraph result can be used for other purposes.
 
-The participants on the [GitHub discussion](https://github.com/WebAudio/web-audio-api/issues/2445) agree that incremental delivery of data is necessary. Either streaming chunks of rendered audio or dispatching data in bits rather than everything at once so that memory usage is bounded and the data can be processed/consumed as it is produced.
+This document will propose improvements to the API so that WebAudio can be used for all offline contexts, and by extension, for a broader range of audio processing workloads in the browser.
 
 ## User-Facing Problem
 
-The user in this context is the web developer using the WebAudio API to perform media processing workflows. Ideally developers could use the feature-rich WebAudio API for realtime and faster-than-realtime processing, without taking a dependency on a 3rd party library. However, in reality, the current WebAudio OfflineAudioContext API is not suitable for faster-than-raltime processing so the developer needs to create a WASM audio processing library or use an existing 3rd party dependency to achieve this goal.
+The [OfflineAudioContext API](https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext) works well for rendering small audio graphs but it does not scale for larger projects because it allocates the full graph's AudioBuffer up-front. For example, rendering a 2 hour video composition project in clipchamp.com in an offline context would require an extremely large AudioBuffer allocation. `OfflineAudioContext.startRendering()` allocates an `AudioBuffer` large enough to hold the entire rendered WebAudio graph before returning. In the case of a 2 hour audio graph at 48 kHz with 4 channels, this results in gigabytes of in-memory float32 data in the `AudioBuffer`. This behaviour makes the API unsuitable for very long offline renders or very large channel/length combinations. There is no simple way to chunk the output or consume it as a stream.
+
+The implication of this API design is that an end-user's computer must have enough available memory to render the whole project even if the output will eventually be written to a file. In situations with limited hardware resources or low-powered devices, this limitation makes WebAudio unusable as an offline processor. If memory capacity is exceeded on a user's machine then the processing will stop and the browser may terminate the tab/window leading to potential loss of data for the user and a poor user experience.
+
+Another implication is that video data streamed out of WebCodecs cannot be interleaved easily with audio data because the audio data is delivered as one large chunk at the end of the processing. To use clipchamp.com again as an example, during a video export the process video and audio are muxed into a .mp4 file. The video and audio streams need to be interleaved/muxed in the correct order before writing to the file; the audio data cannot simply be appended at the end. However, as described above, the current OfflineAudioContext API delivers the audio data in a single chunk which means developers need to work through decomposing the stream so that it can be interleaved correctly with the video. If the audio data was streamed out in the same way that video is streamed out of WebCodecs then it would simplify the workflow.
+
+A workaround to this limitations is for developers to build custom WASM audio-processing which can stream out data incrementally so that the full AudioBuffer is not allocated and therefore memory pressure is not applied to a user's machine. While this works around the API constraint, these 3rd party libraries require complex integration, increase maintenance burden, introduce variability across platforms and ultimately duplicate features which already exist in WebAudio, for the sole purpose of providing streaming output.
 
 ### Goals
 
-- Allow streaming data out of a WebAudio `OfflineAudioContext.startRendering()` for rendering large WebAudio graphs faster-than-realtime
+- Allow streaming data out of a WebAudio in an offline context for rendering large audio graphs
 
 ### Non-goals
 
 - Change the existing `startRendering()` behavior, this API change is additive
 
-## Proposed Approach
+## Proposed Approach - Add `startRenderingStream()` function
 
-The preferred approach is to allow `startRendering()` to be configured to stream output via a `StartRenderingOptions` object which will have a `mode` property. This `mode` can be set to `"stream"` which will stream data rather than allocating an `AudioBuffer` up front.
+The preferred approach is adding a new method `startRenderingStream()` that yields buffers of interleaved audio samples in a Float32Array, or another format as outlined in Open Questions. In this scenario, the user can read chunks as they arrive and consume them for storage, transcoding via WebCodecs, sending to a server, etc.
 
-The object allows for future flexibility of the new API surface.
-
-```typescript
-interface StartRenderingOptions {
-    mode: "audiobuffer" | "stream"
+```js
+// From https://developer.mozilla.org/en-US/docs/Web/API/AudioData/format
+enum AudioFormat {
+    "u8",
+    "s16",
+    "s32",
+    "f32",
+    "u8-planar",
+    "s16-planar",
+    "s32-planar",
+    "f32-planar"
 }
 
-interface OfflineAudioContext {
-  startRendering(options?: startRenderingOptions}
-  ): Promise<AudioBuffer | ReadableStream | void>;
+dictionary OfflineAudioRenderingOptions {
+    required AudioFormat format = "f32";
 }
+
+partial interface OfflineAudioContext {
+    // Returns a stream that yields buffers of interleaved audio samples in Float32Array or whatever format is specified
+    Promise<ReadableStream> startRenderingStream(options?: OfflineAudioRenderingOptions);
+};
 ```
 
-If the `startRendering` function is passed `{ mode = "stream" }` then it will render the audio graph in quantums (e.g., 128 frames at a time), and enqueue chunks onto a return `ReadableStream`, rather than rendering the whole graph into an `AudioBuffer` up front as it does currently. `startRendering` will return a [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream/getReader) promise. A `reader` can be retrieved off the `ReadableStream` for reading chunks. `reader.read()` will resolve stream values to an `AudioBuffer` until it is done. When no more data is available it will set `done = true`.
+Usage example:
 
-In this mode, the user can read chunks as they arrive and consume them for storage, transcoding via WebCodecs, sending to a server, etc. An alternative is to allow BYOB reading, in this case `reader.read()` will return a Float32Array.
+```js
+const context = new OfflineAudioContext(2, 44100, 44100);
 
-Memory usage is bounded by the size of each chunk plus the backlog of unhandled buffers.
+// Add some nodes to build a graph...
 
-### Questions
+const reader = context.startRenderingStream({ format: "f32-planar" }).reader();
+while (true) {
+  // get the next chunk of data from the stream
+  const result = await reader.read();
 
-- What should return of `ReadableStreamDefaultReader.read()` be? Float32Array with BYOB or AudioBuffer?
+  // the reader returns done = true when there are no more chunks to consume
+  if (result.done) {
+    break;
+  }
+
+  const buffers = result.value;
+}
+```
 
 ### Pros
 
 - Aligns well with other web streaming APIs, similar to [WebCodecs](https://streams.spec.whatwg.org/#readablestream)
 - Works with very large durations, no upper limit to WebAudio graph duration
-- Flexible usage scenarios for the consumers
 
 ### Cons
 
-- Requires spec change
 - Need to define sensible chunk sizes, backpressure, error handling, and end-of-stream
 
-### Implement OfflineAudioContext.startRendering() streaming behaviour with this approach
+### Open questions
 
-#### Option 1: AudioBuffer stream
+#### Output format
+
+What data format should `startRenderingStream()` return?
+
+The options under consideration are `AudioBuffer`, `Float32Array` planar or `Float32Array` interleaved.
+
+- `AudioBuffer` is semantically closest to the `startRendering()` API and does not add a new type to the WebAudio spec but not does not allow developers to BYOB (bring your own buffer). BYOB helps developers manage memory usage So `AudioBuffer` removes a bit of control.
+- `Float32Array` planar also already exists, `f32-planar`, in the WebAudio spec. Requires the output of `startStreamingRendering()` to return an array of `Float32Array` in planar format for each output channel. This leaves a question of what to do if only one channel is read by the consumer, what should happen to the other channel's data?
+- `Float32Array` interleaved introduces a new type to the WebAudioSpec, `f32-interleaved`, but allows streaming out a single stream, rather than one for each channel as is necessary with `f32-planaer`. It also WebCodecs making it simpler to consume in WebCodecs APIs
+
+## Alternative 1 - Modify existing `startRendering` method to allow streaming output
+
+An alternative approach is to add options to `startRendering()` to configure the operating mode. The mode can be set to `stream` to achieve streaming output. This is similar to the proposed approach but rather than adding a new function, it re-uses the existing `startRendering()` function.
+
+```typescript
+interface OfflineAudioRenderingOptions {
+    mode: "audiobuffer" | "stream"
+}
+
+interface OfflineAudioContext {
+    Promise<AudioBuffer | ReadableStream> startRendering(optional: startRenderingOptions);
+}
+```
+
+#### Implement OfflineAudioContext.startRendering() streaming behaviour with this approach
+
 ```js
 const offlineContext = new OfflineAudioContext(...);
 
 // ... build up WebAudio graph
 
-const stream = await offlineContext.startRendering(options: { mode: "stream"});
-const reader = stream.getReader();
+const reader = await offlineContext.startRendering(options: { mode: "stream"}).reader();
 while (true) {
     // get the next chunk of data from the stream
     const result = await reader.read();
@@ -90,33 +139,8 @@ while (true) {
 }
 ```
 
-#### Option 2: BYOB reading with Float32Array stream
-```js
-/**
- * New API
- */
-const offlineContext = new OfflineAudioContext(...);
+The existing API remains unchanged for backwards compatability:
 
-// ... build up WebAudio graph
-
-const stream = await offlineContext.startRendering(options: { mode: "stream"});
-const reader = stream.getReader({ mode: 'byob' });
-let buffer = new ArrayBuffer(...);
-while (true) {
-    const result = await reader.read(new Float32Array(buffer));
-
-    // the reader returns done = true when there are no more chunks to consume
-    if (result.done) {
-        break;
-    }
-
-    // process result...
-
-    buffer = result.value.buffer;
-}
-```
-
-In both cases, the existing API remains unchanged for backwards compatability:
 ```js
 /**
  * Existing API unchanged
@@ -129,9 +153,16 @@ const offlineContext = new OfflineAudioContext(...);
 const renderedBuffer = await offlineContext.startRendering();
 ```
 
-## Alternatives considered
+### Pros
 
-### [Alternative 1]
+- The same pros as the proposed approach
+
+### Cons
+
+- The same cons at the proposed approach
+- Less explicit than the proposed approach as it overloads an existing public API function. It is safer and simpler to add a new function and not change the behaviour of an existing function
+
+## Alternative 2: emit `ondataavailable` events
 
 Keep current `startRendering()` API but do not allocate the full `AudioBuffer`. After starting, periodically emit events on the context or a new interface such as `ondataavailable(chunk: AudioBuffer)`.
 
@@ -139,33 +170,13 @@ The user can subscribe and collect chunks for processing.
 
 At the end, the API may optionally still provide a full `AudioBuffer`.
 
-#### Pros
+### Pros
 
--   Simple to integrate with existing event-driven patterns.
+- Simple to integrate with existing event-driven patterns
 
-#### Cons
+### Cons
 
-
--   Chunking semantics need spec
--   Memory benefit only if user discards chunks but at least this is the in user control
-
-#### Concerns
-
--   Browser vendors may implement the chunking API but still allocate full buffer internally defeating memory reduction goal unless spec mandates avoiding full allocation.
-[Describe an alternative which was considered,
-and why you decided against it.
-This alternative may have been part of a prior proposal in the same area,
-or it may be new.
-If you did any research in making this decision, discuss it here.]
-
-### [Alternative 2]
-
-[You may not have decided about some alternatives.
-Describe them as open questions here, and adjust the description once you make a decision.]
-
-### [Alternative 3]
-
-[etc.]
+- None of note but lacking support in the community discussion
 
 ## Accessibility, Internationalization, Privacy, and Security Considerations
 
@@ -174,13 +185,8 @@ that have been taken into account during the design process.]
 
 ## Stakeholder Feedback / Opposition
 
-[Implementors and other stakeholders may already have publicly stated positions on this work. If you can, list them here with links to evidence as appropriate.]
-
-- [Implementor A] : Positive
-- [Stakeholder B] : No signals
-- [Implementor C] : Negative
-
-[If appropriate, explain the reasons given by other implementors for their concerns.]
+- Web community : Positive
+  The participants on the [GitHub discussion](https://github.com/WebAudio/web-audio-api/issues/2445) agree that incremental delivery of data is necessary. Either streaming chunks of rendered audio or dispatching data in bits rather a single AudioBuffer so that memory usage is bounded and the data can be processed/consumed as it is produced.
 
 ## References & acknowledgements
 
