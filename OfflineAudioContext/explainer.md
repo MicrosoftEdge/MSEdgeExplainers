@@ -193,6 +193,9 @@ that have been taken into account during the design process.]
 
 Many thanks for valuable feedback and advice from:
 
+- [Hongchan Choi](https://github.com/hoch)
+- [Paul Adenot](https://github.com/padenot)
+- [John Weisz](https://github.com/JohnWeisz)
 - [Nishitha Dey](https://github.com/nishitha-burman)
 - [Gabriel Brito](https://github.com/gabrielsanbrito)
 - [Steve Becker](https://github.com/SteveBeckerMSFT)
