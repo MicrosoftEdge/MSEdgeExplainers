@@ -4,10 +4,10 @@
 
 - [Matt Birman](mailto:mattbirman@microsoft.com)
 
-## Table of Contents
+## Participate
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+- [Issue tracker]()
+- [Discussion forum](https://github.com/WebAudio/web-audio-api/issues/2445)
 
 ## Introduction
 
