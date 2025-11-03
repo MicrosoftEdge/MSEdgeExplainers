@@ -162,7 +162,7 @@ const renderedBuffer = await offlineContext.startRendering();
 - The same cons at the proposed approach
 - Less explicit than the proposed approach as it overloads an existing public API function. It is safer and simpler to add a new function and not change the behaviour of an existing function
 
-## Alternative 2: emit `ondataavailable` events
+## Alternative 2 - emit `ondataavailable` events
 
 Keep current `startRendering()` API but do not allocate the full `AudioBuffer`. After starting, periodically emit events on the context or a new interface such as `ondataavailable(chunk: AudioBuffer)`.
 
@@ -186,24 +186,16 @@ that have been taken into account during the design process.]
 ## Stakeholder Feedback / Opposition
 
 - Web community : Positive
+
   The participants on the [GitHub discussion](https://github.com/WebAudio/web-audio-api/issues/2445) agree that incremental delivery of data is necessary. Either streaming chunks of rendered audio or dispatching data in bits rather a single AudioBuffer so that memory usage is bounded and the data can be processed/consumed as it is produced.
 
 ## References & acknowledgements
 
-[Your design will change and be informed by many people; acknowledge them in an ongoing way! It helps build community and, as we only get by through the contributions of many, is only fair.]
-
-[Unless you have a specific reason not to, these should be in alphabetical order.]
-
 Many thanks for valuable feedback and advice from:
 
-- [Person 1]
-- [Person 2]
-- [etc.]
+- [Nishitha Dey](https://github.com/nishitha-burman)
+- [Gabriel Brito](https://github.com/gabrielsanbrito)
+- [Steve Becker](https://github.com/SteveBeckerMSFT)
+- [Jasmine Minter](https://github.com/matanui159)
+- [Hayden Warmington](https://github.com/dosatross)
 
-Thanks to the following proposals, projects, libraries, frameworks, and languages
-for their work on similar problems that influenced this proposal.
-
-- [Framework 1]
-- [Project 2]
-- [Proposal 3]
-- [etc.]
