@@ -48,10 +48,9 @@ const context = new OfflineAudioContext({ numberOfChannels: 2, length: 44100, sa
 
 // Add some nodes to build a graph...
 
-if ("startRendering" in OfflineAudioContext) {
+if ("startRenderingStream" in context) {
   const reader = context.startRenderingStream({ format: "f32-interleaved" }).getReader(); 
-  const isRenderingCompleted = false;
-  while (!isRenderingCompleted) {
+  while (true) {
     // get the next chunk of data from the stream
     const result = await reader.read();
 
@@ -71,21 +70,8 @@ if ("startRendering" in OfflineAudioContext) {
 Proposed interface:
 
 ```js
-// From https://developer.mozilla.org/en-US/docs/Web/API/AudioData/format
-enum AudioFormat {
-    "u8",
-    "s16",
-    "s32",
-    "f32",
-    "u8-planar",
-    "s16-planar",
-    "s32-planar",
-    "f32-planar"
-    "f32-interleaved"
-}
-
 dictionary OfflineAudioRenderingOptions {
-    required AudioFormat format = "f32-interleaved";
+    required AudioFormat format = "f32";
 }
 
 partial interface OfflineAudioContext {
@@ -102,7 +88,7 @@ partial interface OfflineAudioContext {
 
 ### Cons
 
-- Need to define sensible chunk sizes, backpressure, error handling, and end-of-stream
+- None of note
 
 ### Output format
 
@@ -119,7 +105,7 @@ There is an open question of what data format `startRenderingStream()` should re
 
 - does not allow developers to BYOB (bring your own buffer) and BYOB helps developers manage memory usage, so `AudioBuffer` removes a bit of control
 
-#### `f32-planar` per channel
+#### Planar Float32Array
 
 **Pros**
 
@@ -130,7 +116,7 @@ There is an open question of what data format `startRenderingStream()` should re
 - requires the output of `startStreamingRendering()` to return an array of `Float32Array` in planar format for each output channel
 - this leaves a question of what to do if only one channel is read by the consumer, i.e. what should happen to the other channel's data?
 
-#### `f32-interleaved`
+#### Interleaved Float32Array
 
 **Pros**
 
@@ -139,7 +125,7 @@ There is an open question of what data format `startRenderingStream()` should re
 
 **Cons**
 
-- introduces a new type to the WebAudio spec, `f32-interleave` which does not exist at the moment
+- None of note
 
 #### Recommendation
 
@@ -157,8 +143,7 @@ const context = new OfflineAudioContext({ numberOfChannels: 2, length: 44100, sa
 // Add some nodes to build a graph...
 
 const reader = await context.startRendering(options: { mode: "stream"}).getReader();
-const isRenderingCompleted = false;
-while (!isRenderingCompleted) {
+while (true) {
     // get the next chunk of data from the stream
     const result = await reader.read();
 
