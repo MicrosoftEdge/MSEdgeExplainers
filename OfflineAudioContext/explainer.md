@@ -3,6 +3,8 @@
 ## Authors:
 
 - [Matt Birman](mailto:mattbirman@microsoft.com)
+- [Gabriel Brito](mailto:gabrielbrito@microsoft.com)
+- [Steve Becker](mailto:stevebe@microsoft.com)
 
 ## Participate
 
@@ -39,6 +41,35 @@ A workaround to these limitations is for developers to build custom WASM audio-p
 
 The preferred approach is adding a new method `startRenderingStream()` that yields buffers of interleaved audio samples in a Float32Array, or another format as outlined in Open Questions. In this scenario, the user can read chunks as they arrive and consume them for storage, transcoding via WebCodecs, sending to a server, etc.
 
+Usage example:
+
+```js
+const context = new OfflineAudioContext({ numberOfChannels: 2, length: 44100, sampleRate: 44100 });
+
+// Add some nodes to build a graph...
+
+if ("startRendering" in OfflineAudioContext) {
+  const reader = context.startRenderingStream({ format: "f32-interleaved" }).getReader(); 
+  const isRenderingCompleted = false;
+  while (!isRenderingCompleted) {
+    // get the next chunk of data from the stream
+    const result = await reader.read();
+
+    // the reader returns done = true when there are no more chunks to consume
+    if (result.done) {
+      break;
+    }
+
+    // result.value contains interleaved Float32Array values
+    const buffers = result.value;
+  }
+} else {
+  audioBuffer = await offlineAudioContext.startRendering();
+}
+```
+
+Proposed interface:
+
 ```js
 // From https://developer.mozilla.org/en-US/docs/Web/API/AudioData/format
 enum AudioFormat {
@@ -50,10 +81,11 @@ enum AudioFormat {
     "s16-planar",
     "s32-planar",
     "f32-planar"
+    "f32-interleaved"
 }
 
 dictionary OfflineAudioRenderingOptions {
-    required AudioFormat format = "f32";
+    required AudioFormat format = "f32-interleaved";
 }
 
 partial interface OfflineAudioContext {
@@ -62,29 +94,9 @@ partial interface OfflineAudioContext {
 };
 ```
 
-Usage example:
-
-```js
-const context = new OfflineAudioContext(2, 44100, 44100);
-
-// Add some nodes to build a graph...
-
-const reader = context.startRenderingStream({ format: "f32-planar" }).reader();
-while (true) {
-  // get the next chunk of data from the stream
-  const result = await reader.read();
-
-  // the reader returns done = true when there are no more chunks to consume
-  if (result.done) {
-    break;
-  }
-
-  const buffers = result.value;
-}
-```
-
 ### Pros
 
+- The new capability is feature detectable because it is a new function. Compared to Alternative 1 which cannot be easily detected
 - Aligns well with other web streaming APIs, similar to [WebCodecs](https://streams.spec.whatwg.org/#readablestream)
 - Works with very large durations, no upper limit to WebAudio graph duration
 
@@ -137,25 +149,16 @@ There is an open question of what data format `startRenderingStream()` should re
 
 An alternative approach is to add options to the existing `startRendering()` to configure its operating mode. The mode can be set to `stream` to achieve streaming output. This is similar to the proposed approach but rather than adding a new function, it re-uses an existing function.
 
-```js
-interface OfflineAudioRenderingOptions {
-    mode: "audiobuffer" | "stream"
-}
-
-interface OfflineAudioContext {
-    Promise<AudioBuffer | ReadableStream> startRendering(optional: startRenderingOptions);
-}
-```
-
 Usage example:
 
 ```js
-const offlineContext = new OfflineAudioContext(...);
+const context = new OfflineAudioContext({ numberOfChannels: 2, length: 44100, sampleRate: 44100 });
 
 // Add some nodes to build a graph...
 
-const reader = await offlineContext.startRendering(options: { mode: "stream"}).reader();
-while (true) {
+const reader = await context.startRendering(options: { mode: "stream"}).getReader();
+const isRenderingCompleted = false;
+while (!isRenderingCompleted) {
     // get the next chunk of data from the stream
     const result = await reader.read();
 
@@ -174,12 +177,28 @@ The existing API remains unchanged for backwards compatibility:
 /**
  * Existing API unchanged
  */
-const offlineContext = new OfflineAudioContext(...);
+const context = new OfflineAudioContext({
+  numberOfChannels: 2,
+  length: 44100,
+  sampleRate: 44100,
+});
 
 // Add some nodes to build a graph...
 
 // Full AudioBuffer is allocated
-const renderedBuffer = await offlineContext.startRendering();
+const renderedBuffer = await context.startRendering();
+```
+
+Proposed interface:
+
+```js
+interface OfflineAudioRenderingOptions {
+    mode: "audiobuffer" | "stream"
+}
+
+interface OfflineAudioContext {
+    Promise<AudioBuffer | ReadableStream> startRendering(optional: startRenderingOptions);
+}
 ```
 
 ### Pros
@@ -189,6 +208,7 @@ const renderedBuffer = await offlineContext.startRendering();
 ### Cons
 
 - The same cons at the proposed approach
+- It is not feature detectabl, as compared to the Proposed Approach, because it only adds options dictionary to an existing function
 - Less explicit than the proposed approach as it overloads an existing public API function. It is safer and simpler to add a new function and not change the behaviour of an existing function
 
 ## Alternative 2 - emit `ondataavailable` events
@@ -206,11 +226,6 @@ At the end, the API may optionally still provide a full `AudioBuffer`.
 ### Cons
 
 - None of note but lacking support in the community discussion
-
-## Accessibility, Internationalization, Privacy, and Security Considerations
-
-[Highlight any accessibility, internationalization, privacy, and security implications
-that have been taken into account during the design process.]
 
 ## Stakeholder Feedback / Opposition
 
