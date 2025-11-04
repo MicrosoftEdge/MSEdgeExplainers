@@ -99,7 +99,6 @@ There is an open question of what data format `startRenderingStream()` should re
 **Pros**
 
 - semantically closest to the `startRendering()` API
-- does not add a new type to the WebAudio spec
 
 **Cons**
 
@@ -121,7 +120,6 @@ There is an open question of what data format `startRenderingStream()` should re
 **Pros**
 
 - allows for streaming a single stream of data, rather than one for each channel
-- interoperates with WebCodecs APIs because they operate with interleaved streams of data
 
 **Cons**
 
