@@ -127,7 +127,7 @@ There is an open question of what data format `startRenderingStream()` should re
 
 #### Recommendation
 
-`f32-interleaved` as it is the most interoperable with other media APIs, like WebCodecs, and simplifies processing with other data streams such as video.
+`f32` [TODO - explain why]
 
 ## Alternative 1 - Modify existing `startRendering` method to allow streaming output
 
@@ -191,7 +191,7 @@ interface OfflineAudioContext {
 ### Cons
 
 - The same cons at the proposed approach
-- It is not feature detectabl, as compared to the Proposed Approach, because it only adds options dictionary to an existing function
+- It is not feature detectable, as compared to the Proposed Approach, because it only adds options dictionary to an existing function
 - Less explicit than the proposed approach as it overloads an existing public API function. It is safer and simpler to add a new function and not change the behaviour of an existing function
 
 ## Alternative 2 - emit `ondataavailable` events
