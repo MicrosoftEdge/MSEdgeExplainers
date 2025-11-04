@@ -49,7 +49,7 @@ const context = new OfflineAudioContext({ numberOfChannels: 2, length: 44100, sa
 // Add some nodes to build a graph...
 
 if ("startRenderingStream" in context) {
-  const reader = context.startRenderingStream({ format: "f32-interleaved" }).getReader(); 
+  const reader = context.startRenderingStream().getReader(); 
   while (true) {
     // get the next chunk of data from the stream
     const result = await reader.read();
@@ -70,13 +70,9 @@ if ("startRenderingStream" in context) {
 Proposed interface:
 
 ```js
-dictionary OfflineAudioRenderingOptions {
-    required AudioFormat format = "f32";
-}
-
 partial interface OfflineAudioContext {
     // Returns a stream that yields buffers of interleaved audio samples in Float32Array or whatever format is specified
-    Promise<ReadableStream> startRenderingStream(options?: OfflineAudioRenderingOptions);
+    Promise<ReadableStream> startRenderingStream();
 };
 ```
 
@@ -120,14 +116,11 @@ There is an open question of what data format `startRenderingStream()` should re
 **Pros**
 
 - allows for streaming a single stream of data, rather than one for each channel
+- enables BYOB reading
 
 **Cons**
 
 - None of note
-
-#### Recommendation
-
-`f32` [TODO - explain why]
 
 ## Alternative 1 - Modify existing `startRendering` method to allow streaming output
 
