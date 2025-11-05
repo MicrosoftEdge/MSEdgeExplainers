@@ -52,14 +52,14 @@ We propose Workers derive their Document Policy from the worker script's HTTP re
 
 **Dedicated Workers:**
 - For network scripts: Parse `Document-Policy` from the worker script's HTTP response headers
-- If no `Document-Policy` header is present: Feature is disabled by default (e.g., self-js-profiling not exposed)
+- If no `Document-Policy` header is present: Each feature uses its spec-defined default value (same as document contexts)
 - For local schemes (blob:, data:): Worker inherits the creator's Document Policy, since no response exists to consult
 
 **Shared Workers:**
-- For network scripts: The worker script response headers define the effective Document Policy
+- For network scripts: Document Policy is established from the worker script's HTTP response headers when the worker is first created
 - When multiple documents attach to the same worker:
-  - The first document that creates the worker establishes its effective document policy from the script's HTTP response header
-  - Later attachers with mismatched policies are ignored.
+  - The shared worker's policy remains fixed based on the script response, regardless of which document initiated the creation
+  - Documents can connect to the worker regardless of their own Document Policy settings
 - For local schemes: Behavior mirrors dedicated workers, inherit from the creator's policy
 
 **Service Workers:**
