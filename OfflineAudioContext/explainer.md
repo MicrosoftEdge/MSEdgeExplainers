@@ -84,7 +84,7 @@ enum AudioFormat {
 
 dictionary OfflineAudioRenderingOptions {
   // Output format
-  required AudioFormat format = "f32";
+  AudioFormat format = "f32";
   // The number of frames to render each iteration
   Number chunkSize = 128;
 }
