@@ -49,7 +49,7 @@ const context = new OfflineAudioContext({ numberOfChannels: 2, length: 44100, sa
 // Add some nodes to build a graph...
 
 if ("startRenderingStream" in context) {
-  const reader = context.startRenderingStream({ format: 'f32', length: 128 }).getReader();
+  const reader = context.startRenderingStream({ format: 'f32', chunkSize: 128 }).getReader();
   while (true) {
     // get the next chunk of data from the stream
     const result = await reader.read();
@@ -86,7 +86,7 @@ dictionary OfflineAudioRenderingOptions {
   // Output format
   required AudioFormat format = "f32";
   // The number of frames to render each iteration
-  Number length = 128;
+  Number chunkSize = 128;
 }
 
 partial interface OfflineAudioContext {
