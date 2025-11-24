@@ -162,6 +162,9 @@ Note that there is [positive](https://github.com/w3c/csswg-drafts/issues/7017#is
 ## Accessibility, Privacy, and Security Considerations
 There are no considerations at this time.
 
+## Open Questions
+The name `app-region` is not representative of the property's purpose. A new name would be in order to better represent the capability (`drag-area`?, `drag-point`?, `drag-behavior`?). See this [issue](https://github.com/w3c/csswg-drafts/issues/13102) to contribute to the discussion.
+
 ## References & acknowledgements
 
 This work aknowledges and thanks the following individuals for their contributions:
