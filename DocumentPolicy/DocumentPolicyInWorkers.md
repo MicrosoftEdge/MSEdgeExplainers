@@ -33,7 +33,7 @@ Extending the Document Policy into workers resolves these gaps, ensures consiste
 
 - Define how Document Policy applies to all worker types (Dedicated, Shared, and Service Workers)
 - Enable policy-gated features (like js-self-profiling) to work in workers when appropriately configured
-- Align Worker Policy Inheritance with existing standards
+- Clone Document Policy using the same rules as policy container cloning defined in the HTML spec
 
 ## Non-Goals
 
@@ -46,21 +46,23 @@ Extending the Document Policy into workers resolves these gaps, ensures consiste
 
 ## Proposed solution: Use Document Policy response headers as authoritative, inherit only for local schemes
 
-We propose Workers derive their Document Policy from the worker script's HTTP response headers. When no response exists (local blob:/data:), they inherit from the creator document.
+We propose workers derive their Document Policy from the worker script’s HTTP response. For local URLs (blob:, data:), the worker inherits the policy from the creating environment.
+
+**For network-loaded workers**: The worker's effective Document-Policy is taken only from the worker script's HTTP response, any creator policy is ignored (no merge/intersection). If the response lacks a Document-Policy header, the feature falls back to its spec-defined default (for js-profiling, typically off).
 
 ### Semantics by Worker Type
 
 **Dedicated Workers:**
 - For network scripts: Parse `Document-Policy` from the worker script's HTTP response headers
 - If no `Document-Policy` header is present: Each feature uses its spec-defined default value (same as document contexts)
-- For local schemes (blob:, data:): Worker inherits the creator's Document Policy, since no response exists to consult
+- For local schemes (blob:, data:): Worker clones the creator's Document Policy, since no HTTP response exists to consult (blob: URLs clone from the environment that created the blob, data: URLs clone from the document that created the worker)
 
 **Shared Workers:**
 - For network scripts: Document Policy is established from the worker script's HTTP response headers when the worker is first created
 - When multiple documents attach to the same worker:
   - The shared worker's policy remains fixed based on the script response, regardless of which document initiated the creation
   - Documents can connect to the worker regardless of their own Document Policy settings
-- For local schemes: Behavior mirrors dedicated workers, inherit from the creator's policy
+- For local schemes: Behavior mirrors dedicated workers, clone from the creator's policy
 
 **Service Workers:**
 - The SW registration script response is the authoritative source of Document Policy
@@ -96,7 +98,7 @@ The response-driven model avoids this ambiguity. Each origin controls its own fe
 
 Inheritance is therefore limited to local schemes (blob:, data:), which have no HTTP response to carry headers. This approach:
 - Aligns with Document Policy's header-based model
-- Matches how COEP and CSP already inherit for blob/data workers in the HTML specification
+- Consistent with other policies that [policy container](https://html.spec.whatwg.org/#initialize-worker-policy-container) model defines in the HTML spec.
 - Prevents cross-origin policy leakage
 - Ensures consistent, predictable behavior
 
@@ -151,7 +153,7 @@ partial dictionary WorkerOptions {
 
 ## Privacy, and Security Considerations
 
-- Document Policy inheritance is limited to same-origin and local scheme workers to prevent cross-origin policy leakage.
+- Document Policy inheritance is limited to local URLs (blob:, data:), consistent with the HTML policy container model, this prevents cross-origin policy leakage.
 - Inherited policies cannot expand privileges beyond what the creator or script origin allows.
 - Worker script responses define the effective policy, ensuring each origin controls its own features.
 - Service Workers always use their registration script’s policy, keeping background execution isolated.
