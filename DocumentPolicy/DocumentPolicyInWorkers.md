@@ -33,7 +33,7 @@ Extending the Document Policy into workers resolves these gaps, ensures consiste
 
 - Define how Document Policy applies to all worker types (Dedicated, Shared, and Service Workers)
 - Enable policy-gated features (like js-self-profiling) to work in workers when appropriately configured
-- Align Worker Policy Container inheritance with existing standards
+- Clone Document Policy using the same rules as policy container cloning defined in the HTML spec
 
 ## Non-Goals
 
