@@ -1368,15 +1368,16 @@ src/
 
 | Metric | Value |
 |--------|-------|
-| Lines of code added | ~800 |
-| Lines of code deleted | ~1200 |
-| Net LOC change | -400 (25% reduction) |
-| Files modified | 12 |
-| New Mojo messages | 3 |
+| New files created | 6 (AreaSelectionOverlayRunner, AreaSelectionOverlayController, AreaSelectionOverlayViews, area_selection.mojom updates) |
+| Files modified | ~15 (RenderFrameHost interfaces, AreaSelection, ContentWebShotDriver, build files) |
+| Lines of code added | ~2000 (new Views classes, interface layer, Mojo definitions) |
+| Lines of code deleted | ~200 (removed painted UI code, simplified some flows) |
+| Net LOC change | +1800 (new architecture with proper layering) |
+| New interfaces created | 1 (AreaSelectionOverlayRunner singleton) |
+| New Mojo methods | 5 (Show/Update/Hide/TemporarilyHide/Restore) |
 | Issues identified | 4 major |
 | Issues resolved | 2 major (keyboard handler, coordinate transformation) |
 | Issues unresolved | 2 major (premature overlay display, second invocation failure) |
-| Test cases added | 25 |
 | Development time | 3 weeks |
 
 ### C. Design Alternatives Considered
