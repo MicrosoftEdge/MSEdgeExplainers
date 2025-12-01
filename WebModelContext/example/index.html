@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stamp Collecting Database</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Historical Stamp Database</h1>
+        
+        <div id="content">
+            <!-- Stamp collection list -->
+            <div id="stampSection">
+                <h2>Browse Unique Stamps</h2>
+                <div id="stampCollection">
+                    <!-- Stamps loaded here -->
+                </div>
+            </div>
+
+            <!-- Add stamp Section -->
+            <div id="addStampSection">
+                <h2>Add a Historical Stamp</h2>
+                <form id="addStampForm">
+                    <input type="text" id="stampName" placeholder="Stamp Name" required>
+                    <textarea id="stampDescription" placeholder="Description" rows="3" required></textarea>
+                    <input type="number" id="stampYear" placeholder="Year (e.g., 1847)" required>
+                    <input type="text" id="stampImageUrl" placeholder="Image URL (optional)">
+                    <button type="submit">Add Stamp</button>
+                </form>
+
+                <div id="confirmationMessage"></div>
+            </div>
+        </div>
+    </div>
+    <script src="./script.js"></script>
+</body>
+</html>

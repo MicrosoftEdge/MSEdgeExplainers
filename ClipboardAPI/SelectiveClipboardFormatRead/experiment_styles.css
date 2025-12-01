@@ -1,0 +1,106 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.controls {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  border-radius: 5px;
+}
+
+button {
+  margin: 10px 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007cba;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #005a87;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.results-table th,
+.results-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.results-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.results-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.log {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  font-family: monospace;
+  height: 200px;
+  overflow-y: auto;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}
+
+.info {
+  color: blue;
+}
+
+.how-to-use {
+  background-color: #e8f4f8;
+  border-left: 4px solid #007cba;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+.how-to-use h3 {
+  margin-top: 0;
+  color: #005a87;
+  font-size: 18px;
+}
+
+.how-to-use ol {
+  padding-left: 20px;
+  line-height: 1.6;
+}
+
+.how-to-use li {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.how-to-use .note {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 15px;
+  font-size: 14px;
+}
