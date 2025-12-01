@@ -1,10 +1,62 @@
 # Performance control of embedded content
 
-## Authors
-- [Nishitha Burman Dey](https://github.com/nishitha-burman)
-- [Luis Flores](https://github.com/lflores-ms)
-- [Andy Luhrs](https://github.com/aluhrs13)
-- [Alex Russell](https://github.com/slightlyoff)
+**Authors:** [Nishitha Burman Dey](https://github.com/nishitha-burman), [Luis Flores](https://github.com/lflores-ms), [Andy Luhrs](https://github.com/aluhrs13), [Alex Russell](https://github.com/slightlyoff)
+
+This proposal introduces four [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md) configuration points to constrain the performance impact of iframes in the embedding document. Each configuration point enables monitoring for performance-impacting behavior in the iframe, and reports occurrences of such behavior as policy violations through [Reporting API](https://wicg.github.io/document-policy/#reporting). Violations are reported to both the embedding and embedded document. Resources that incur policy violations are blocked from loading.
+
+A working prototype for the first category `basic` is to be implemented in the following stages:
+* **Stage 1.** Configuration point and policy monitoring, reporting.
+* **Stage 2.** Resource blocking.
+* **Stage 3.** Cross-document reporting.
+
+More details on the behavior for the `basic` category can be found in ["basic" category overview](https://docs.google.com/document/d/1RGxvtkoQbvApLVdipiASoUQjC0Jf-IKD9qV1EfUJHAQ).
+
+![Example of resource blocked by policy](
+images/diagram.svg)
+
+## Participate
+<a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Performance%20Control%20of%20Embedded%20Content">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Performance%20Control%20of%20Embedded%20Content?label=issues)</a>
+[Open an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=performance-control-of-embedded-content.md)
+
+## Table of Contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Introduction](#introduction)
+- [Goals](#goals)
+- [Non-goals](#non-goals)
+- [Use cases and scenarios](#use-cases-and-scenarios)
+- [Proposed Solution](#proposed-solution)
+  - [Categories and criteria](#categories-and-criteria)
+  - [Discussion of different categories](#discussion-of-different-categories)
+  - [Example](#example)
+  - [API Design Discussion](#api-design-discussion)
+    - [Using multiple Document Policy configuration points](#using-multiple-document-policy-configuration-points)
+    - [Opt-in and policy negotiation](#opt-in-and-policy-negotiation)
+    - [Negotiation vs enforcement](#negotiation-vs-enforcement)
+    - [Open question: required policy and report-only mode](#open-question-required-policy-and-report-only-mode)
+  - [What should be standardized?](#what-should-be-standardized)
+- [Security and Privacy Considerations](#security-and-privacy-considerations)
+  - [Potential privacy implications of blocking embedded content](#potential-privacy-implications-of-blocking-embedded-content)
+  - [Global budgets and side-channel attacks](#global-budgets-and-side-channel-attacks)
+  - [Frame depth](#frame-depth)
+- [Dependencies on non-stable features](#dependencies-on-non-stable-features)
+- [Alternatives considered](#alternatives-considered)
+  - [Custom attributes and headers](#custom-attributes-and-headers)
+  - [Levels vs. categories](#levels-vs-categories)
+- [Open Issues](#open-issues)
+  - [Policy enforcement options](#policy-enforcement-options)
+  - [Limits need to be defined](#limits-need-to-be-defined)
+  - [Criteria and category definition, evolution](#criteria-and-category-definition-evolution)
+  - [Per-document constraints](#per-document-constraints)
+  - [Reporting 3rd party violations to embedder](#reporting-3rd-party-violations-to-embedder)
+  - [Interaction with Heavy Ad Interventions](#interaction-with-heavy-ad-interventions)
+  - [Open question: how can we ensure fair restrictions for various types of devices (e.g. low end vs. high end devices)?](#open-question-how-can-we-ensure-fair-restrictions-for-various-types-of-devices-eg-low-end-vs-high-end-devices)
+  - [Open question: how to determine categories/criteria/limits for desktop vs. mobile?](#open-question-how-to-determine-categoriescriterialimits-for-desktop-vs-mobile)
+- [References & acknowledgements](#references--acknowledgements)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Introduction
 
@@ -141,6 +193,9 @@ There are various layers of configuration that can happen and we need to ensure 
 
 ## Security and Privacy Considerations
 
+### Potential privacy implications of blocking embedded content
+We propose to [report violations across documents](#reporting-3rd-party-violations-to-embedder). These reports may expose information about the embedded document state to the embedder. We consider that because policies defined through Document Policy require opt-in, the embedded document accepts the risks by agreeing to the policy. See discussion in [#1077](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1077) (resource blocking) and [#1085](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1085) (reporting leaks).
+
 ### Global budgets and side-channel attacks
 The proposed criteria include budgets which are shared globally across documents. This could allow for documents to learn things about cross-origin documents, as described in the [Never Slow Mode explainer](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits). We consider the same alternatives introduced for NSM as viable for this proposal:
   * Require CORS
@@ -188,10 +243,19 @@ With this approach, adding a new group of constraints would only be possible by 
 
 ## Open Issues
 
-### Per-document constraints
-Document Policy directives are effective on a per-document basis. This generally makes it harder for constraints to have the desired impact to improve performance, as the overall cap on resources increases with the complexity of the page. We propose capping the overall complexity and resources through frame depth and count restrictions to avoid an unbound upper limit to page resource consumption.
+### Policy enforcement options
+We aim to block loading for resources that violate the `basic` policy. Non-breaking enforcement might help with adoption. See discussion in [#1082](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1082) and [#1079](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1079).
 
-What would be the appropriate frame count and depth limit? See related discussion in [Security and Privacy Considerations](#frame-depth).
+### Limits need to be defined
+We propose to have concrete limits managed by the platform, but defaults can't change without breakage. See discussion in [#1083](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1083) and [#1084](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1084).
+
+**`basic` category limits**
+* HTTP-based compression of text-based resources
+* Opt for compressed formats when available (non text-based resources)
+* Keep size of non-HTTP compressed resources low
+  * data: URLs: 100kB
+  * Images: 1MB
+  * Fonts: 96kB
 
 ### Criteria and category definition, evolution
 This proposal provides an affordance for web developers to gain back control over the performance of their web property. A set of performance-impacting criteria was derived from [Never Slow Mode](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file#global-limits) and experience in the field (see note in [Proposed Solution](#proposed-solution)). These criteria were then grouped into buckets, taking into account their overall impact, stage in the document lifetime and estimated effort from the developer to fix.
@@ -213,9 +277,19 @@ We expect these criteria and their specific limits to evolve with the web, which
 3. **Updated criteria under new category tags**
     | **Pros** | **Cons** |
     |---|---|
-    |- Web developers can anticipate and address violations. | - Requires changes from sites each time there's a change in a category. | 
+    |- Web developers can anticipate and address violations. | - Requires changes from sites each time there's a change in a category.<br>- New configuration point required for every policy change. |
 
-An ideal mechanism would allow for this evolution go happen in a controlled, predictable manner. An open point for discussion is whether it's a reasonable trade off for developers opting in to be expected to keep up with the platform as criteria evolves.
+4. **Use versioning**
+Bundle criteria updates into versions of the policy and let the document specify which policy version is requested or opted-in to by using a parameterized configuration point instead. Sites need to actively adopt new versions of the policy.
+    | **Pros** | **Cons** |
+    |---|---|
+    |- Web developers can anticipate and address violations.<br>- Changes can happen within the same configuration point. | - Requires changes from sites each time there's a change in a category. |
+Versioning is the preferred mechanim as it allows for policy evolution to happen in a controlled, predictable manner.
+
+### Per-document constraints
+Document Policy directives are effective on a per-document basis. This generally makes it harder for constraints to have the desired impact to improve performance, as the overall cap on resources increases with the complexity of the page. We propose capping the overall complexity and resources through frame depth and count restrictions to avoid an unbound upper limit to page resource consumption.
+
+What would be the appropriate frame count and depth limit? See related discussion in [Security and Privacy Considerations](#frame-depth).
 
 ### Reporting 3rd party violations to embedder
 Embedders are best equipped to influence change in the performance when they are aware of where the issues are. While Document Policy provides a Reporting API integration, this only reports violations to the endpoint of the document where the violation occurs. Embedders do not receive reports that the embedded content has incurred policy violations, which is a limitation. We are currently considering sending a minimal report to the embedder when a violation occurs in the embedded document.

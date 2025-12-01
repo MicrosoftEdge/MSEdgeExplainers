@@ -140,9 +140,9 @@ The GetTokenResult is a dictionary that contain either an error or the response 
 dictionary ErrorResult { 
     DOMString code, 
     DOMString? description, 
-    DOMString errorCode, 
+    DOMString? errorCode,
     DOMString? protocolError, 
-    DOMString status, 
+    DOMString? status,
     record<DOMString, DOMString>? properties 
 }   
 ```
@@ -278,6 +278,7 @@ The `SignOutResult` is also a dictionary that will contain an error in case ther
 
 ```
 dictionary SignOutResult  { 
+    boolean isSuccess,
     ErrorResult error 
 } 
 ```
