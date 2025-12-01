@@ -23,7 +23,7 @@ This document is a starting point for engaging the community and standards bodie
 2. [Definitions](#definitions)
 2. [User-facing problem](#user-facing-problem)  
 3. [Proposed approach](#proposed-approach)
-4. [Example `gamepadrawinputchange` event](#example-rawgamepadinputchange-event)
+4. [Example `gamepadrawinputchange` event](#example-gamepadrawinputchange-event)
 5. [Goals](#goals)
 6. [Non-goals](#non-goals)  
 7. [Developer code sample](#developer-code-sample)
@@ -126,7 +126,7 @@ Some modern controllers include capacitive or touch-sensitive surfaces (e.g., Du
 These properties, `axesChanged`, `buttonsPressed`, `buttonsReleased`, `buttonsValueChanged` and ` touchesChanged` properties are arrays of indices and follow the same indentification model as the [Gamepad.axes](https://w3c.github.io/gamepad/#dom-gamepad-axes) and [Gamepad.buttons](https://w3c.github.io/gamepad/#dom-gamepad-buttons) arrays.
 
 ### Event behavior
-Dispatched on the Window object: The `gamepadrawinputchange` event is dispatched on the Window object when the browser detects gamepad input changes during its polling cycle. The event inherits from GamepadEvent and carries the `.gamepad` attribute containing the current gamepad state.
+Dispatched on the Window object: The `gamepadrawinputchange` event is dispatched on the Window global object when the browser detects gamepad input changes during its polling cycle. The event inherits from GamepadEvent and carries the `.gamepad` attribute containing the current gamepad state.
 
 Event timing: A new `gamepadrawinputchange` event is dispatched each time the browser's gamepad polling mechanism detects state changes. The event includes delta information indicating which inputs changed since the last browser poll.
 
