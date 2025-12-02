@@ -1,4 +1,4 @@
-# Explainer: Preserving `dropEffect` Values from `dragover` to `drop` Events
+# Explainer: Preserving dropEffect values from dragover to drop events
 
 ## Authors:
 - Rohan Raja (roraja@microsoft.com)
@@ -7,7 +7,7 @@
 - Chromium Bug: [Issue 40068941](https://issues.chromium.org/issues/40068941)
 - Chromium Review: [CL 6818116](https://chromium-review.googlesource.com/c/chromium/src/+/6818116)
 - Spec: [HTML5 Drag and Drop Specification](https://www.w3.org/TR/2011/WD-html5-20110113/dnd.html#dndevents)
-- Open new issue: [Open New Issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?title=%5BPreserveDropEffect%5D+%3CTITLE+HERE%3E)
+- Open new issue: [Open New Issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=PreserveDropEffect&title=%5BPreserveDropEffect%5D+%3CTITLE+HERE%3E)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -19,8 +19,8 @@
 - [Non-goals](#non-goals)
 - [Motivation](#motivation)
   - [Code Example](#code-example)
-    - [Before the Fix](#before-the-fix)
-    - [After the Fix](#after-the-fix)
+    - [Before](#before)
+    - [After](#after)
   - [Real-World Use Case: File Manager](#real-world-use-case-file-manager)
 - [Considered Alternatives](#considered-alternatives)
   - [Alternative 1: Keeping the Current Behavior](#alternative-1-keeping-the-current-behavior)
@@ -35,9 +35,9 @@
 
 ## Introduction
 
-The HTML5 Drag and Drop API allows web applications to handle drag-and-drop operations through a series of events: `dragstart`, `dragenter`, `dragover`, `dragleave`, `drop`, and `dragend`. During these events, the `dataTransfer.dropEffect` property indicates which operation (copy, move, link, or none) should be performed. According to the [HTML5 specification](https://www.w3.org/TR/2011/WD-html5-20110113/dnd.html#dndevents), the `dropEffect` value set by web applications during the last `dragover` event should be preserved and available in the subsequent `drop` event.
+The HTML5 Drag and Drop API allows web applications to handle drag-and-drop operations through a series of events: `dragstart`, `dragenter`, `dragover`, `dragleave`, `drop`, and `dragend`. During these events, the [`dataTransfer.dropEffect`](https://www.w3.org/TR/2011/WD-html5-20110113/dnd.html#dom-datatransfer-dropeffect) property indicates which operation (copy, move, link, or none) should be performed. According to the [HTML5 specification](https://www.w3.org/TR/2011/WD-html5-20110113/dnd.html#dndevents), the `dropEffect` value set by web applications during the last `dragover` event should be preserved and available in the subsequent `drop` event.
 
-However, prior to this fix, Chromium based browsers were overwriting the web application's `dropEffect` value with the browser's own negotiated operation before the `drop` event fired, breaking specification compliance and limiting developer control over drag-and-drop behavior.
+However, Chromium-based browsers were overwriting the web application's `dropEffect` value with the browser's own negotiated operation before the `drop` event fired, breaking specification compliance and limiting developer control over drag-and-drop behavior.
 
 ## User-Facing Problem
 
@@ -46,7 +46,7 @@ Web developers building applications with drag-and-drop functionality need to:
 - Use this information in the `drop` event handler to perform the appropriate action
 - Provide consistent user feedback throughout the drag operation
 
-Before this fix, the `dropEffect` property was being reset by the browser before the `drop` event, making it impossible for developers to reliably determine what operation should be performed. This led to:
+Today in Chromium-based browsers, the `dropEffect` property is being reset by the browser before the `drop` event, making it impossible for developers to reliably determine what operation should be performed. This leads to:
 
 ```javascript
 const dropZone = document.getElementById('dropZone');
@@ -59,7 +59,7 @@ dropZone.addEventListener('dragover', (e) => {
 
 dropZone.addEventListener('drop', (e) => {
   e.preventDefault();
-  console.log('drop dropEffect:', e.dataTransfer.dropEffect); // Before fix: "none" or unpredictable
+  console.log('drop dropEffect:', e.dataTransfer.dropEffect); // Previously: "none" or unpredictable
   
   // Developer cannot reliably determine which operation to perform
   if (e.dataTransfer.dropEffect === 'copy') {
@@ -103,7 +103,7 @@ What developers can do with preserved `dropEffect`:
 ## Non-goals
 
 This feature does not:
-- Change the way `effectAllowed` is negotiated or processed
+- Change the way [`effectAllowed`](https://www.w3.org/TR/2011/WD-html5-20110113/dnd.html#dom-datatransfer-effectallowed) is negotiated or processed
 - Modify the cursor feedback during drag operations
 - Alter the security model or permissions for drag-and-drop
 - Add new drag-and-drop events or properties
@@ -121,7 +121,7 @@ This feature addresses:
 
 ### Code Example
 
-#### Before the Fix
+#### Before
 
 ```javascript
 const dropZone = document.getElementById('dropZone');
@@ -145,7 +145,7 @@ dropZone.addEventListener('drop', (e) => {
 });
 ```
 
-#### After the Fix
+#### After
 
 ```javascript
 const dropZone = document.getElementById('dropZone');
