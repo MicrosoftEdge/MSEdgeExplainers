@@ -163,7 +163,9 @@ Note that there is [positive](https://github.com/w3c/csswg-drafts/issues/7017#is
 There are no considerations at this time.
 
 ## Open Questions
-The name `app-region` is not representative of the property's purpose. A new name would be in order to better represent the capability (`drag-area`?, `drag-point`?, `drag-behavior`?). See this [issue](https://github.com/w3c/csswg-drafts/issues/13102) to contribute to the discussion.
+- The name `app-region` is not representative of the property's purpose. A new name would be in order to better represent the capability (`drag-area`?, `drag-point`?, `drag-behavior`?). See this [issue](https://github.com/w3c/csswg-drafts/issues/13102) to contribute to the discussion.
+
+- There are cases where 
 
 ## References & acknowledgements
 
