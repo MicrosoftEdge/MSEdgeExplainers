@@ -25,7 +25,7 @@ content location of future work and discussions.
 * Expected venue: [Web Components CG](https://w3c.github.io/webcomponents-cg/)
 * Current version: this document
 ## Table of Contents
-- [Declarative shadow DOM style sharing](#declarative-shadow-dom-style-sharing)
+- [Declarative adoptedStyleSheets for Sharing Styles In Declarative Shadow DOM](#declarative-adoptedstylesheets-for-sharing-styles-indeclarative-shadow-dom)
   - [Authors](#authors)
   - [Participate](#participate)
   - [Status of this Document](#status-of-this-document)
@@ -48,7 +48,7 @@ content location of future work and discussions.
     - [Syntactic Sugar For Import Maps with Data URI](#syntactic-sugar-for-import-maps-with-data-uri)
     - [Detailed Parsing Workflow](#detailed-parsing-workflow)
     - [Use with External CSS Files](#use-with-external-css-files)
-    - [Importing Other CSS Files With @import](#importing-other-css-files-with-@import)
+    - [Importing Other CSS Files With `@import`](#importing-other-css-files-with-import)
     - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
     - [Use with Import Maps](#use-with-import-maps)
   - [Other declarative modules](#other-declarative-modules)
@@ -68,20 +68,20 @@ content location of future work and discussions.
 
 
 ## Background
-With the use of web components in web development, web authors often encounter challenges in managing styles, such as distributing global styles into shadow roots and sharing styles across different shadow roots. Markup-based shadow DOM, or [Declarative shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom), is a new concept that makes it easier and more efficient to create a shadow DOM definition directly in HTML, without needing JavaScript for setup. [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) provides isolation for CSS, JavaScript, and HTML. Each shadow root has its own separate scope, which means styles defined inside one shadow root do not affect another or the main document.
+With the use of web components in web development, web authors often encounter challenges in managing styles, such as distributing global styles into shadow roots and sharing styles across different shadow roots. Markup-based shadow DOM, or [Declarative Shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom), is a new concept that makes it easier and more efficient to create a shadow DOM definition directly in HTML, without needing JavaScript for setup. [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) provides isolation for CSS, JavaScript, and HTML. Each shadow root has its own separate scope, which means styles defined inside one shadow root do not affect another or the main document.
 
-[Declarative shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom) is a markup-based (declarative) alternative to script-based (imperative) [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM). Imperative Shadow DOM currently supports the [adoptedStyleSheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets) property, which allows for sharing stylesheets between shadow roots, but Declarative Shadow DOM does not have a declarative solution for sharing inline styles. This proposal aims to address this gap with the introduction of `<style type="module">`, which defines inline style modules to share, and the `shadowrootadoptedstylesheets` attribute on the `<template>` tag as an analog to Imperative Shadow DOM's `adoptedStyleSheets` property.
+[Declarative Shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom) is a markup-based (declarative) alternative to script-based (imperative) [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM). Imperative Shadow DOM currently supports the [adoptedStyleSheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets) property, which allows for sharing stylesheets between shadow roots, but Declarative Shadow DOM does not have a declarative solution for sharing inline styles. This proposal aims to address this gap with the introduction of `<style type="module">`, which defines inline style modules to share, and the `shadowrootadoptedstylesheets` attribute on the `<template>` tag as an analog to Imperative Shadow DOM's `adoptedStyleSheets` property.
 
 ## Problem
-Sites that make use of [Declarative shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom) have reported that the lack of a way to reference repeated stylesheets creates large payloads that add large amounts of latency and increased memory overhead. Authors have repeatedly asked for a way to reference stylesheets from other DSD instances in the same way that frameworks leverage internal data structures to share constructable style sheets via `adoptedStyleSheets`. This Explainer explores several potential solutions.
+Sites that make use of [Declarative Shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom) have reported that the lack of a way to reference repeated stylesheets creates large payloads that add large amounts of latency and increased memory overhead. Authors have repeatedly asked for a way to reference stylesheets from other DSD instances in the same way that frameworks leverage internal data structures to share constructable style sheets via `adoptedStyleSheets`. This Explainer explores several potential solutions.
 
-Relying on JavaScript for declarative styling shadow roots via the imperative `adoptedStyleSheets` property is not ideal for several reasons:
+Relying on JavaScript for declaratively styling shadow roots via the imperative `adoptedStyleSheets` property is not ideal for several reasons:
 * One of the main goals of DSD is to not rely on JavaScript [for performance and accessibility purposes](https://web.dev/articles/declarative-shadow-dom), in addition to supporting users with JavaScript disabled.
-* Adding stylesheets via script may cause an FOUC (Flash of Unstyled Content).
+* Adding stylesheets via script may cause a FOUC (Flash of Unstyled Content).
 * The current `adoptedStyleSheets` property only supports Constructable Stylesheets, which must be created via JavaScript.
 
 While referencing an external file via the <link> tag for shared styles in DSD works today [(and is currently recommended by DSD implementors)](https://web.dev/articles/declarative-shadow-dom#server-rendering_with_style), it is not ideal for several reasons:
-* If the linked stylesheet has not been downloaded and parsed, there may be an FOUC.
+* If the linked stylesheet has not been downloaded and parsed, there may be a FOUC.
 * Google’s Lighthouse guidelines recommend minimizing network requests for best performance. Stylesheets included via <link> tags are always external resources that may initiate a network request.
 
 This example shows how a developer might use DSD to initialize a shadow root without JavaScript.
@@ -168,10 +168,10 @@ Step 3: Attach the Constructable Stylesheet to the shadow root:
 ```js
 shadow.adoptedStyleSheets = [constructableStylesheet];
 ```
-The downside of this approach is a potential FOUC, where the element is initially painted without styles, and then repainted with the Constructable Stylesheet. Another downside to this approach is that it requires script. Requiring script to apply styles somewhat defeats the purpose of [Declarative shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom).
+A downside of this approach is a potential FOUC, where the element is initially painted without styles, and then repainted with the Constructable Stylesheet. Another downside to this approach is that it requires script, which might be disabled. Even if enabled, requiring script to apply styles somewhat defeats the purpose of [Declarative Shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom).
 
 ### Using `rel="stylesheet"` attribute
-Using `<link rel="stylesheet">` to share styles across Shadow DOM boundaries helps maintain consistent design, reducing style duplication and potentially shrinking component sizes for faster load times. However, it can cause redundant network requests since each component that uses `<link rel="stylesheet">` within its Shadow DOM may trigger an expensive operation such as a network request or a disk access. Also note that `<link rel="stylesheet">` is not render blocking when it's in the `<body>` (as Declarative Shadow DOM nodes typically are), which can cause an FOUC.
+Using `<link rel="stylesheet">` to share styles across Shadow DOM boundaries helps maintain consistent design, avoids extraneous parsing that duplicated `<style>` tags would necessitate, and potentially shrinking component sizes for faster load times. However, it can cause redundant network requests since each component that uses `<link rel="stylesheet">` within its Shadow DOM may trigger an expensive operation such as a network request or a disk access. Also note that `<link rel="stylesheet">` is not render blocking when it's in the `<body>` (as Declarative Shadow DOM nodes typically are), which can cause a FOUC.
 
 ### CSS `@import` rules
 Global styles can be included in a single stylesheet, which is then importable into each shadow root to avoid redundancy. The downsides are the exact same as in [Using `rel="stylesheet"` attribute](#using-relstylesheet-attribute), with an additional disadvantage that multiple `@import` statements are loaded sequentially (while `<link>` tags will load them in parallel).
@@ -423,7 +423,7 @@ The `<template>` element's `shadowrootadoptedstylesheets` attribute does not dif
 ```
 
 ...where "foo.css" is an external CSS file. Note that `shadowrootadoptedstylesheets` only queries the module map - it doesn't perform a fetch. Developers must instead pre-fetch the CSS file and add it to the module map before the
-`<template>` tag is parsed. This can be done imperatively with a Javascript `import` statement within a `<script type="module">`, but requiring script for this scenario is not ideal.
+`<template>` tag is parsed. This can be done imperatively with a JavaScript `import` statement within a `<script type="module">`, but requiring script for this scenario is not ideal.
 
 This can be handled declaratively with the existing `<link rel="modulepreload">`, which fetches a module and adds it to the module map.
 
@@ -451,9 +451,9 @@ Note that the second `<template>` tag doesn't need a corresponding `<link rel="m
 
 ### Importing Other CSS Files With @import
 
-Imperative CSS Module Scripts cannot import other CSS Module Scripts. The existence of a CSS `@import` statement within the text content of an Imperative CSS Module Script fires a script error when imported. Many possible solutions for importing child CSS modules have been discussed in https://github.com/WICG/webcomponents/issues/870, but there is no agreed upon general solution.
+Imperative CSS Module Scripts cannot import other CSS Module Scripts. The existence of a CSS `@import` statement within the text content of an Imperative CSS Module Script results in a script error when imported. Many possible solutions for importing child CSS modules have been discussed in https://github.com/WICG/webcomponents/issues/870, but there is no agreed upon general solution.
 
-Given this existing limitation with `@import` for Imperative CSS Module Scripts, we do not believe this is a blocking issue for Declarative CSS Module Scripts. That said, Declarative CSS Module Scripts provide a new method for creating CSS Modules, which introduces another opportunity for addressing this limitation. This will be investigated as a separate proposal that can be addressed in parallel to this proposal.
+Given this existing limitation with `@import` for Imperative CSS Module Scripts, we do not believe that this is a blocking issue for Declarative CSS Module Scripts. That said, Declarative CSS Module Scripts provide a new method for creating CSS Modules, which introduces another opportunity for addressing this limitation. This will be investigated as a separate proposal that can be addressed in parallel to this proposal.
 
 Declarative CSS Modules cannot throw script errors when encountering an `@import` statement because script errors can only be thrown in a scripting environment. A reasonable alternative for Declarative CSS Modules is to fail parsing for the module when an `@import` is parsed and log an error in developer tools until a solution for importing nested CSS Modules has been implemented.
 
