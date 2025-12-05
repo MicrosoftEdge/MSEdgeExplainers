@@ -47,6 +47,8 @@ content location of future work and discussions.
     - [Behavior with script disabled](#behavior-with-script-disabled)
     - [Syntactic Sugar For Import Maps with Data URI](#syntactic-sugar-for-import-maps-with-data-uri)
     - [Detailed Parsing Workflow](#detailed-parsing-workflow)
+    - [Use with External CSS Files](#use-with-external-css-files)
+    - [Importing Other CSS Files With @import](#importing-other-css-files-with-@import)
     - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
     - [Use with Import Maps](#use-with-import-maps)
   - [Other declarative modules](#other-declarative-modules)
@@ -409,7 +411,7 @@ In this example, the `<template>` element is parsed first. When the `<template>`
 
 The contents of the Declarative CSS Module with `specifier="foo"` (with `color: red`) are then parsed and an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) is created as specified above. Since the `<template>` element failed to import a module, the `color: red` styles will not be applied, although subsequent `<template>` elements could adopt a stylesheet with `specifier="foo"` now that it has been defined.
 
-### Use with External CSS Files and `<link rel="modulepreload">`
+### Use with External CSS Files
 
 The `<template>` element's `shadowrootadoptedstylesheets` attribute does not differentiate between specifiers created declaratively (via `<style type="module>`) or external CSS files. This means that the following example is valid:
 
@@ -448,9 +450,9 @@ All together, a fully-functional example of using `shadowrootadoptedstylesheets`
 
 Note that the second `<template>` tag doesn't need a corresponding `<link rel="modulepreload">` - this only needs to happen once per external module, per document, to ensure that it's in the module map before `shadowrootadoptedstylesheets` is parsed.
 
-### Importing Other CSS Files from Within a Declarative Module Script (CSS @import)
+### Importing Other CSS Files With @import
 
-Imperative CSS Module Scripts cannot import other CSS Module Scripts. The existinence of a CSS `@import` statement within the text content of an Imperative CSS Module Script fires a script error when imported. Many possible solutions for importing child CSS modules have been discussed in https://github.com/WICG/webcomponents/issues/870, but there is no agreed upon general solution.
+Imperative CSS Module Scripts cannot import other CSS Module Scripts. The existence of a CSS `@import` statement within the text content of an Imperative CSS Module Script fires a script error when imported. Many possible solutions for importing child CSS modules have been discussed in https://github.com/WICG/webcomponents/issues/870, but there is no agreed upon general solution.
 
 Given this existing limitation with `@import` for Imperative CSS Module Scripts, we do not believe this is a blocking issue for Declarative CSS Module Scripts. That said, Declarative CSS Module Scripts provide a new method for creating CSS Modules, which introduces another opportunity for addressing this limitation. This will be investigated as a separate proposal that can be addressed in parallel to this proposal.
 
