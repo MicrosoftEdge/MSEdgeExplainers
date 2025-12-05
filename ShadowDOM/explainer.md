@@ -412,7 +412,7 @@ The contents of the Declarative CSS Module with `specifier="foo"` (with `color: 
 
 ### Use with External CSS Files
 
-The `<template>` element's `shadowrootadoptedstylesheets` attribute does not differentiate between specifiers created declaratively (via `<style type="module>`) or external CSS files. This means that the following example is valid:
+The `<template>` element's `shadowrootadoptedstylesheets` attribute does not differentiate between specifiers created declaratively (via `<style type="module">`) or external CSS files. This means that the following example is valid:
 
 ```html
 <my-element>
@@ -429,7 +429,7 @@ This can be handled declaratively with the existing `<link rel="modulepreload">`
 
 However, `<link rel="modulepreload">` does not currently work with CSS Module Scripts. This has been proposed by the WHATWG in [Issue 10233](https://github.com/whatwg/html/issues/10233) and makes sense to prioritize to allow external CSS files to work declaratively with `shadowrootadoptedstylesheets`.
 
-This alone does not make `shadowrootadoptedstylesheets` work well with external files, as `<link rel="modulepreload">` does not perform a synchronous fetch, and if the fetch has not completed by the time `shadowrootadoptedstylesheets`, the styles will not be available in the module map.
+This alone does not make `shadowrootadoptedstylesheets` work well with external files, as `<link rel="modulepreload">` does not perform a synchronous fetch, and if the fetch has not completed by the time the `shadowrootadoptedstylesheets` attribute is parsed, the styles will not be available in the module map.
 
 This scenario could be handled by supporting the `blocking` attribute on `<link rel="modulepreload">`, which should be considered for this feature.
 
