@@ -25,7 +25,7 @@ content location of future work and discussions.
 * Expected venue: [Web Components CG](https://w3c.github.io/webcomponents-cg/)
 * Current version: this document
 ## Table of Contents
-- [Declarative adoptedStyleSheets for Sharing Styles In Declarative Shadow DOM](#declarative-adoptedstylesheets-for-sharing-styles-indeclarative-shadow-dom)
+- [Declarative adoptedStyleSheets for Sharing Styles In Declarative Shadow DOM](#declarative-adoptedstylesheets-for-sharing-styles-in-declarative-shadow-dom)
   - [Authors](#authors)
   - [Participate](#participate)
   - [Status of this Document](#status-of-this-document)
@@ -48,7 +48,7 @@ content location of future work and discussions.
     - [Syntactic Sugar For Import Maps with Data URI](#syntactic-sugar-for-import-maps-with-data-uri)
     - [Detailed Parsing Workflow](#detailed-parsing-workflow)
     - [Use with External CSS Files](#use-with-external-css-files)
-    - [Importing Other CSS Files With `@import`](#importing-other-css-files-with-import)
+    - [Importing Other CSS Files With @import](#importing-other-css-files-with-import)
     - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
     - [Use with Import Maps](#use-with-import-maps)
   - [Other declarative modules](#other-declarative-modules)
@@ -171,7 +171,7 @@ shadow.adoptedStyleSheets = [constructableStylesheet];
 A downside of this approach is a potential FOUC, where the element is initially painted without styles, and then repainted with the Constructable Stylesheet. Another downside to this approach is that it requires script, which might be disabled. Even if enabled, requiring script to apply styles somewhat defeats the purpose of [Declarative Shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom).
 
 ### Using `rel="stylesheet"` attribute
-Using `<link rel="stylesheet">` to share styles across Shadow DOM boundaries helps maintain consistent design, avoids extraneous parsing that duplicated `<style>` tags would necessitate, and potentially shrinking component sizes for faster load times. However, it can cause redundant network requests since each component that uses `<link rel="stylesheet">` within its Shadow DOM may trigger an expensive operation such as a network request or a disk access. Also note that `<link rel="stylesheet">` is not render blocking when it's in the `<body>` (as Declarative Shadow DOM nodes typically are), which can cause a FOUC.
+Using `<link rel="stylesheet">` to share styles across Shadow DOM boundaries helps maintain consistent design, avoids extraneous parsing that duplicated `<style>` tags would necessitate, and  reduces component sizes for faster load times. However, it can cause redundant network requests since each component that uses `<link rel="stylesheet">` within its Shadow DOM may trigger an expensive operation such as a network request or a disk access. Also note that `<link rel="stylesheet">` is not render blocking when it's in the `<body>` (as Declarative Shadow DOM nodes typically are), which can cause a FOUC.
 
 ### CSS `@import` rules
 Global styles can be included in a single stylesheet, which is then importable into each shadow root to avoid redundancy. The downsides are the exact same as in [Using `rel="stylesheet"` attribute](#using-relstylesheet-attribute), with an additional disadvantage that multiple `@import` statements are loaded sequentially (while `<link>` tags will load them in parallel).
