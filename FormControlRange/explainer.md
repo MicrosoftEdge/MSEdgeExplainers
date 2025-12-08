@@ -1,4 +1,4 @@
-# FormControlRange
+# OpaqueRange
 
 ## Authors:
 
@@ -10,14 +10,17 @@
 
 - [WHATWG tracking issue](https://github.com/whatwg/html/issues/11478)
 - [CSSWG issue tracking initial discussions](https://github.com/w3c/csswg-drafts/issues/10346)
+- [TPAC 2025 WHATWG Meeting Minutes](https://www.w3.org/2025/11/11-whatwg-minutes.html)
 - [TPAC 2024 WHATWG meeting minutes on initial proposal](https://github.com/whatwg/meta/issues/326#issuecomment-2377500295)
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/FormControlRange)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/OpaqueRange)
 
 ## Introduction
 
 The current `Range` interface methods do not support retrieving or creating ranges that represent the `value` (rather than the element itself) of `<textarea>` and `<input>` elements. As a result, if web developers want to use the `getBoundingClientRect()` method in a `<textarea>` or `<input>` element to position a popup beneath the user's current caret for delivering contextual autocomplete suggestions or marking syntax errors as users type using the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), they must find workarounds. These workarounds often involve cloning these elements and their styles into `<div>`s, which is both difficult to maintain and may impact the web application's performance.
 
-This proposal aims to address these issues by introducing `FormControlRange`, a new `AbstractRange` subclass that serves as a way to reference spans of text within form control elements while preserving encapsulation. 
+This proposal aims to address these issues by introducing `OpaqueRange`, a new `AbstractRange` subclass that serves as a way to reference spans of an opaque string defined by a host specification (such as HTML) while preserving encapsulation.
+
+An opaque string is a host-defined text representation whose internal structure is not exposed to authors. For example, in HTML this is the element’s value string for `<textarea>` and text-supporting `<input>` types (e.g. `text`, `search`, `url`, etc.). Authors can treat it as a simple string of code units indexed by offsets, without observing or manipulating how the browser represents or stores it internally.
 
 ## User-Facing Problem
 
@@ -224,7 +227,7 @@ nameField.addEventListener('input', (e) => {
 
 ### Goal
 
-Provide a way to obtain a `FormControlRange`—a specialized, live range for `<textarea>` and `<input>` values implemented as an `AbstractRange` subclass—that enables range-based operations (e.g. getting bounding rects, setting custom highlights, etc.) while restricting standard `Range` mutations to preserve encapsulation of these form controls.
+Provide a way for host specifications (such as HTML) to obtain an `OpaqueRange` - a specialized, live `AbstractRange` whose boundary points are offsets into an implementation-defined opaque string defined by the host specification (for example, the `value` of `<textarea>`, text‑supporting `<input>`, or strings defined by custom elements in the future). This enables range-based operations (e.g. getting bounding rects, setting custom highlights, etc.) while restricting standard `Range` mutations to preserve encapsulation.
 
 ### Non-goals
 
@@ -234,34 +237,27 @@ Provide a way to obtain a `FormControlRange`—a specialized, live range for `<t
 
 ## Proposed Approach
 
-The `FormControlRange` interface extends `AbstractRange` and provides a controlled way to reference parts of the `value` of `<textarea>` and `<input>` elements. It exposes useful endpoint properties while limiting certain mutation methods to preserve encapsulation.
+The `OpaqueRange` interface extends `AbstractRange` and provides a controlled way for host specifications to reference parts of an opaque string they define (such as the text value of `<textarea>`, text‑supporting `<input>`, or a custom element-defined string). Host specifications are responsible for creating and updating `OpaqueRange` instances - web authors obtain them through host APIs (e.g. `getValueRange()` on text controls), rather than constructing or configuring them directly. `OpaqueRange` exposes useful endpoint information while limiting mutations that would otherwise expose or depend on internal implementation details.
 
-Unlike `StaticRange`, `FormControlRange` is **live** — it tracks changes to the underlying text in the `<textarea>` or `<input>` element and automatically updates its start and end positions,  similar to how a regular `Range` tracks DOM mutations. This ensures that operations like `getBoundingClientRect()` or `toString()` always reflect the element’s current content, even after edits.
+Unlike `StaticRange`, `OpaqueRange` is **live** — it tracks changes to the underlying opaque string and automatically updates its start and end offsets, similar to how a regular `Range` tracks DOM mutations. This ensures that operations like `getBoundingClientRect()` or `getClientRects()` always reflect the current content, even after edits.
 
-This live-update behavior also aligns conceptually with the `InputRange()` from [Keith Cirkel’s Richer Text Fields proposal](https://open-ui.org/components/richer-text-fields.explainer/), which takes a broader approach to enabling richer interactions in form controls. While that proposal covers more editing capabilities, `FormControlRange` focuses on a limited, encapsulated `AbstractRange`-based API, but both aim to support dynamic interaction with text as it changes.
+`OpaqueRange`'s live-update behavior also aligns conceptually with the `InputRange()` from [Keith Cirkel’s Richer Text Fields proposal](https://open-ui.org/components/richer-text-fields.explainer/), but is designed as a general-purpose API for referencing opaque strings as defined by host specifications, not limited to form controls.
 
 ### Properties and Methods
 
 #### Properties
-FormControlRange exposes useful endpoint information while maintaining encapsulation:
-- `startContainer` and `endContainer`: Return the host form control element (`<input>` or `<textarea>`). No internal/shadow nodes are exposed.
-- `startOffset` and `endOffset`: Return indices into the form control's `value`. These values match those passed to `setFormControlRange()` and are automatically updated as text changes.
+`OpaqueRange` exposes useful endpoint information while maintaining encapsulation:
+- `startOffset` and `endOffset`: Non‑negative integers that index into the opaque string defined by the host specification (for example, the value string of a `<textarea>` in HTML). These offsets are updated automatically as that string changes.
 - `collapsed`: Returns whether `startOffset` equals `endOffset`.
+- `startContainer` and `endContainer`: Return `null`. Container details are managed by the host specification, not stored by `OpaqueRange`.
 
 #### Available Methods
-- `getBoundingClientRect()`: Returns the bounding rectangle of the range
-- `getClientRects()`: Returns a list of rectangles for the range
-- `toString()`: Returns the text content of the range
-- `setFormControlRange(element, startOffset, endOffset)`: Sets endpoints directly in value space
-  - `element`: Must be a supported text control (`<input>` or `<textarea>`)
-  - `startOffset`: Index into element's value where range should start (`0 ≤ startOffset ≤ endOffset`)
-  - `endOffset`: Index into element's value where range should end (`endOffset ≤ element.value.length`)
-  - Throws `IndexSizeError` if bounds are invalid
-  - Throws `NotSupportedError` if `element` is not a supported text control type
+- `getBoundingClientRect()`: Returns the bounding rectangle of the rendered portion of the opaque string represented by the range, as defined by the embedding specification (e.g. the visible text inside a `<textarea>`).
+- `getClientRects()`: Returns a list of rectangles for the rendered portion of the opaque string represented by the range.
 
 #### Unavailable Methods
-The following methods are not available to avoid exposing or mutating inner browser implementation details:
-- `setStart()`, `setEnd()` (use `setFormControlRange()` instead)
+The following methods are not available on `OpaqueRange` in order to avoid exposing or mutating inner browser implementation details:
+- `setStart()`, `setEnd()`
 - `setStartBefore()`, `setStartAfter()`, `setEndBefore()`, `setEndAfter()`
 - `selectNode()`, `selectNodeContents()`
 - `surroundContents()`
@@ -271,25 +267,15 @@ The following methods are not available to avoid exposing or mutating inner brow
 - `cloneContents()`
 - `cloneRange()`
 
-Additional methods can be later introduced progressively based on developer needs.
+`OpaqueRange` does not expose the underlying opaque string directly (e.g. it does not provide a `toString()` method). Access to the host‑defined text is only available through host APIs.
 
-Furthermore, it is important to reiterate that despite being similar to the regular `Range` interface, `FormControlRange` extends `AbstractRange` and thus can be taken as an argument in methods that allow `AbstractRange`, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API).
+Additional methods can be later introduced progressively based on developer feedback and how host specifications use `OpaqueRange`.
 
-The constructor for `FormControlRange` is the following:
+`OpaqueRange` is a separate type from `Range`, but it extends `AbstractRange` and can therefore be passed to any API that accepts `AbstractRange`, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API).
 
-```javascript
-// Create a FormControlRange instance
-const formRange = new FormControlRange();
-```
+`OpaqueRange` instances are not constructed or configured directly by authors. Instead, they are obtained from element methods defined by host specifications (for example, `textarea.getValueRange(start, end)` in HTML), which create and update `OpaqueRange` objects according to the rules defined in those host specifications.
 
-The instance can be then set using the following method:
-
-```javascript
-// Set the range within a form control
-formRange.setFormControlRange(formControl, startOffset, endOffset);
-```
-
-The following sample code showcases how the new `FormControlRange` interface would solve the main use cases laid out in the [User-Facing Problem](#user-facing-problem) section.
+The following sample code showcases how the new `OpaqueRange` interface would solve the main use cases laid out in the [User-Facing Problem](#user-facing-problem) section. Here, `getValueRange()` is an example method defined by HTML; how ranges are allocated is up to host specifications.
 
 ```html
 <form id="messageForm" onsubmit="return handleSubmit(event)">
@@ -307,11 +293,10 @@ textarea.addEventListener('input', (e) => {
     const text = textarea.value;
     // Check if the last character typed was @ for Use Case 1
     if (text[selectionStart - 1] === '@') {
-        // Create FormControlRange using the proposed API
-        const formRange = new FormControlRange();
-        formRange.setFormControlRange(textarea, selectionStart, selectionStart);
+        // Obtain an OpaqueRange from the host API (e.g. getValueRange())
+        const range = textarea.getValueRange(selectionStart, selectionStart);
         // Use the range to obtain the bounding client rect
-        const rect = formRange.getBoundingClientRect();
+        const rect = range.getBoundingClientRect();
         // Position and show the user list
         userList.style.left = `${rect.left}px`;
         userList.style.top = `${rect.bottom}px`;
@@ -323,11 +308,10 @@ textarea.addEventListener('input', (e) => {
     // Check if the last character typed was " " for Use Case 2
     if (text[selectionStart - 1] === ' ') {
         if(!dictionary.has(previousWord)){
-            // Create FormControlRange
-            const formRange = new FormControlRange();
-            formRange.setFormControlRange(textarea, selectionStart-previousWord.length, selectionStart);
+            // Obtain an OpaqueRange from the host API (e.g. getValueRange())
+            const range = textarea.getValueRange(selectionStart-previousWord.length, selectionStart);
             // Add highlight
-            highlight.add(formRange);
+            highlight.add(range);
             // Apply highlight
             CSS.highlights.set('syntax-highlight', highlight);
             previousWord = '';
@@ -339,15 +323,9 @@ textarea.addEventListener('input', (e) => {
 });
 ```
 
-This implementation simplifies obtaining the caret's position inside `<input>` and `<textarea>` elements. It also allows web developers to use the Highlight API directly on those elements. The `FormControlRange` interface eliminates the need for cloning elements and copying styles, improving performance while maintaining the benefits of using native form controls, such as accessibility, built-in form validation, and consistent behavior across browsers.
+This implementation simplifies obtaining the caret's position inside `<input>` and `<textarea>` elements. It also allows web developers to use the Highlight API directly on those elements. The `OpaqueRange` interface eliminates the need for cloning elements and copying styles, improving performance while maintaining the benefits of using native form controls, such as accessibility, built-in form validation, and consistent behavior across browsers.
 
-As we want the `FormControlRange` interface to be aligned with the current selection APIs for `<textarea>` and `<input>` elements, such as [`select()`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-select), [`selectionStart`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionstart), and [`selectionEnd`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionend), the `<input>` types in which it will be available are listed in the [do not apply](https://html.spec.whatwg.org/multipage/input.html#do-not-apply) section:
-
-- Text
-- Search
-- Telephone
-- URL
-- Password
+A plausible host API is `getValueRange(start, end)` on `<textarea>` and on text-supporting `<input>` types, such as `text`, `search`, `tel`, `url`, and `password`, using the same offset units as `selectionStart`/`selectionEnd`.
 
 Following this same alignment with selection APIs, `startOffset` and `endOffset` are indices into `element.value`, matching the units used by [`selectionStart`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionstart) and [`selectionEnd`](https://html.spec.whatwg.org/#the-textarea-element:dom-textarea/input-selectionend).
 
@@ -367,11 +345,10 @@ input.addEventListener('input', (e) => {
     
     // Show emoji picker when user types ':' for Use Case 1
     if (text[selectionStart - 1] === ':') {
-        // Create FormControlRange using the proposed API
-        const formRange = new FormControlRange();
-        formRange.setFormControlRange(input, selectionStart, selectionStart);
+        // Obtain an OpaqueRange from the host API (e.g. getValueRange())
+        const range = input.getValueRange(selectionStart, selectionStart);
         // Use the range to obtain the bounding client rect
-        const rect = formRange.getBoundingClientRect();
+        const rect = range.getBoundingClientRect();
         // Position the emoji picker under the caret
         emojiPicker.style.position = 'fixed';
         emojiPicker.style.left = `${rect.left}px`;
@@ -383,11 +360,10 @@ input.addEventListener('input', (e) => {
     // Check if the last character typed was " " for Use Case 2
     if (text[selectionStart - 1] === ' ') {
         if(!dictionary.has(previousWord)){
-            // Create FormControlRange
-            const formRange = new FormControlRange();
-            formRange.setFormControlRange(input, selectionStart-previousWord.length, selectionStart);
+            // Obtain an OpaqueRange from the host API (e.g. getValueRange())
+            const range = input.getValueRange(selectionStart-previousWord.length, selectionStart);
             // Add highlight
-            highlight.add(formRange);
+            highlight.add(range);
             // Apply highlight
             CSS.highlights.set('syntax-highlight', highlight);
             previousWord = '';
@@ -401,7 +377,7 @@ input.addEventListener('input', (e) => {
 
 ## Live Range Examples
 
-The examples below demonstrate how `FormControlRange` updates in real time as the text content of the control changes, without requiring manual offset adjustments.
+The examples below demonstrate how `OpaqueRange` updates in real time as the text content of the control changes, without requiring manual offset adjustments.
 
 ---
 
@@ -413,12 +389,11 @@ const textarea = document.querySelector("#messageArea");
 const popup = document.querySelector("#popup");
 
 // Create a live, collapsed range at the caret.
-const caretRange = new FormControlRange();
-caretRange.setFormControlRange(textarea, textarea.selectionStart, textarea.selectionStart);
+const range = textarea.getValueRange(textarea.selectionStart, textarea.selectionStart);
 
 textarea.addEventListener("input", () => {
   // Position popup under caret.
-  const rect = caretRange.getBoundingClientRect();
+  const rect = range.getBoundingClientRect();
   popup.style.left = `${rect.left}px`;
   popup.style.top = `${rect.bottom}px`;
 });
@@ -431,11 +406,10 @@ As the user types, the popup stays positioned under the caret without manually r
 const textarea = document.querySelector("#messageArea");
 
 // Create a live range covering "hello".
-const wordRange = new FormControlRange();
-wordRange.setFormControlRange(textarea, 0, 5);
+const range = textarea.getValueRange(0, 5);
 
 // Bind a highlight to that live range.
-const highlight = new Highlight(wordRange);
+const highlight = new Highlight(range);
 CSS.highlights.set("tracked-word", highlight);
 
 // No input-handler needed: as the control’s value changes, the range stays in sync and the highlight repaints automatically.
@@ -467,7 +441,7 @@ This alternative has the following disadvantages:
 2. **Too specific**
     - This proposal is not compatible with the Highlight API, or any other Range API method, such as `Range.getClientRects()`.
     - It does not allow for obtaining the bounding rectangle of any text range other than the one currently selected.
-    - While this proposal addresses a specific issue with the Range API's interaction with `<textarea>` and `<input>` (namely, `getBoundingClientRect()`), a more general solution—like `FormControlRange`—could resolve this and other related problems more broadly.
+    - While this proposal addresses a specific issue with the Range API's interaction with `<textarea>` and `<input>` (namely, `getBoundingClientRect()`), a more general solution—like `OpaqueRange`—could resolve this and other related problems more broadly.
     
 ### getRangeFromValue()
 
@@ -502,7 +476,7 @@ const rect = range.getBoundingClientRect();
 showAutocomplete(rect.left, rect.bottom);
 ```
 
-While this approach would help solve the two main use cases stated above, `FormControlRange` was chosen instead because making changes or updating the behavior of `setStart()` and `setEnd()` in the Range API could cause issues for websites that rely on the current specified behavior. Additional changes would also be required to certain accessor methods in order to avoid exposing inner implementation details, as mentioned in the [getRangeFromValue()](#getrangefromvalue).
+While this approach would help solve the two main use cases stated above, `OpaqueRange` was chosen instead because making changes or updating the behavior of `setStart()` and `setEnd()` in the Range API could cause issues for websites that rely on the current specified behavior. Additional changes would also be required to certain accessor methods in order to avoid exposing inner implementation details, as mentioned in the [getRangeFromValue()](#getrangefromvalue).
 
 ### Extending the Range API (2nd Approach)
 
@@ -515,27 +489,41 @@ range.setStart(startNode, startOffset);
 range.setEnd(endNode, endOffset);
 
 // New method for form controls
-const formRange = new Range();
-formRange.setFormControlRange(textarea, startOffset, endOffset);
+const opaqueRange = new Range();
+opaqueRange.setOpaqueRange(textarea, startOffset, endOffset);
 ```
-This `setFormControlRange()` method would set a new flag `IsFormControl()` in the Range interface, that would be then used to regulate which attributes and methods the Range object can access. Continuing the previous example:
+This `setOpaqueRange()` method would set a new flag `IsFormControl()` in the Range interface, that would be then used to regulate which attributes and methods the Range object can access. Continuing the previous example:
 
 ```javascript
 range.startContainer        // Returns startNode
-formRange.startContainer    // Returns the host <textarea>/<input> element
+opaqueRange.startContainer    // Returns the host <textarea>/<input> element
 ```
 
-This approach addresses encapsulation concerns for ranges in form controls. It also offers better compatibility than the `FormControlRange` interface, since it remains a `Range` and is compatible at the type level with APIs that involve `Range` (not only `AbstractRange`) objects, such as the Selection API. However, Selection behavior for value-space ranges is not defined today and would require additional spec work.
+This approach addresses encapsulation concerns for ranges in form controls. It also offers better compatibility than the `OpaqueRange` interface, since it remains a `Range` and is compatible at the type level with APIs that involve `Range` (not only `AbstractRange`) objects, such as the Selection API. However, Selection behavior for value-space ranges is not defined today and would require additional spec work.
 
 ```javascript
 // Using this approach
-selection.addRange(formRange)     // Type-checks; actual behavior would need explicit spec rules
+selection.addRange(opaqueRange)     // Type-checks; actual behavior would need explicit spec rules
 
-// Using FormControlRange interface
-selection.addRange(formRange2)    // Throws exception: "parameter 1 is not of type Range."
+// Using OpaqueRange interface
+selection.addRange(opaqueRange2)    // Throws exception: "parameter 1 is not of type Range."
 ```
 
-Ultimately, the `FormControlRange` interface was chosen instead. While the `setFormControlRange()` approach offered better type-level compatibility, it did not provide an explicit distinction between regular and form control ranges—both would be of type `Range`, potentially confusing web authors about why some methods may or may not be available depending on how the `Range` was set (using `setStart()` and `setEnd()` or `setFormControlRange()`).
+Ultimately, the `OpaqueRange` interface was chosen instead. While the `setOpaqueRange()` approach offered better type-level compatibility, it did not provide an explicit distinction between regular and form control ranges—both would be of type `Range`, potentially confusing web authors about why some methods may or may not be available depending on how the `Range` was set (using `setStart()` and `setEnd()` or `setOpaqueRange()`).
+
+### FormControlRange (DOM-level alternative)
+
+As a later iteration of this work, we explored an interface named `FormControlRange`, a specialized `AbstractRange` subclass for `<textarea>` and text-supporting `<input>` elements. It provided start and end offsets into the element’s value string and supported layout methods (such as `getBoundingClientRect()`), demonstrating that value-space ranges could address the core use cases.
+
+However, this design had two limitations:
+
+1. **Scoped only to form controls**  
+   The interface was built directly around behaviors specific to `<textarea>` and text-supporting `<input>` types. This made it difficult to apply the same model to other hosts—such as custom elements—that may also want to expose encapsulated text surfaces.
+
+2. **Limited extensibility**  
+   Because the design encoded form-control-specific concepts into the API surface, extending it to additional environments would have required redefining or duplicating similar ideas elsewhere.
+
+`OpaqueRange` resolves these issues by providing a host-extensible abstraction. Host specifications (such as HTML) define their own opaque strings and create or update `OpaqueRange` instances accordingly, without the interface being tied to form controls or their internal mechanisms.
 
 ## Other Considerations
 
@@ -549,45 +537,33 @@ Ultimately, the `FormControlRange` interface was chosen instead. While the `setF
 
 ### Consistency
 
-- The process of creating and setting a `FormControlRange` object is similar to that of the regular Range interface, which is already familiar to web authors.
-
-```js
-
-const range = new Range();
-range.setStart(startNode, startOffset);
-range.setEnd(endNode, endOffset);
-
-const formRange = new FormControlRange();
-formRange.setFormControlRange(element, startOffset, endOffset);
-
-```
+`OpaqueRange` is always returned by the platform from `getValueRange()` on `<textarea>` and `<input>`. Authors do not construct or set up `OpaqueRange` directly.
 
 ### Compatibility
 
-The `FormControlRange` interface is currently compatible with any API that utilizes `AbstractRange` objects, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API). However, this means that `FormControlRange` is not compatible with methods and APIs that expect a regular `Range`.
+The `OpaqueRange` interface is currently compatible with any API that utilizes `AbstractRange` objects, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API). However, this means that `OpaqueRange` is not compatible with methods and APIs that expect a regular `Range`.
 
 To address this limitation, one proposed solution is to introduce a new interface called `DynamicRange`. This interface would serve as the counterpart to `StaticRange` and would also extend `AbstractRange`.
 
-A `DynamicRange` object would not have a direct use in JavaScript beyond serving as a parent class for `Range` and `FormControlRange`. However, common methods such as `getBoundingClientRect()` and `getClientRects()`—which are implemented in both `Range` and `FormControlRange`—could be moved into `DynamicRange` to reduce redundancy.
+A `DynamicRange` object would not have a direct use in JavaScript beyond serving as a parent class for `Range` and `OpaqueRange`. However, common methods such as `getBoundingClientRect()` and `getClientRects()`—which are implemented in both `Range` and `OpaqueRange`—could be moved into `DynamicRange` to reduce redundancy.
 
-This change would enable APIs like the Selection API to support `FormControlRange` simply by updating parameter types from `Range* new_range` to `DynamicRange* new_range`. Importantly, this would not introduce any backward compatibility issues: existing methods that expect a `Range` and are not intended to support `FormControlRange` would continue to function just as before.
+This change would enable APIs like the Selection API to support `OpaqueRange` simply by updating parameter types from `Range* new_range` to `DynamicRange* new_range`. Importantly, this would not introduce any backward compatibility issues: existing methods that expect a `Range` and are not intended to support `OpaqueRange` would continue to function just as before.
 
 The resulting `AbstractRange` inheritance structure would look like this:
 
 ![abstractrange-family](abstractrange-family.jpg)
 
 ## Potential Future Work
-### Extending to Custom Elements and Potential Renaming
-It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment-3113360213) that custom elements could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure.  
-Such use cases might also prompt revisiting the current `FormControlRange` name in favor of something broader, such as `ElementRange`, to better reflect its applicability beyond form controls.
+### Extending to Custom Elements
+It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment-3113360213) that custom elements and other host specifications could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure.  
 
 ### Relationship to CSS Anchor Positioning
-As noted in the [W3C TAG early design review](https://github.com/w3ctag/design-reviews/issues/1142), some of the positioning use cases addressed by `FormControlRange` (such as anchoring popups or highlights to caret positions) could also be explored declaratively through future extensions to [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position/).
+As noted in the [W3C TAG early design review](https://github.com/w3ctag/design-reviews/issues/1142), some of the positioning use cases addressed by `OpaqueRange` (such as anchoring popups or highlights to caret positions) could also be explored declaratively through future extensions to [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position/).
 
-While `FormControlRange` focuses on providing a programmatic mechanism aligned with existing Range APIs, a complementary declarative model in CSS could offer improved performance, reduced scripting overhead, and more consistent accessibility behavior.
+While `OpaqueRange` focuses on providing a programmatic mechanism aligned with existing Range APIs, a complementary declarative model in CSS could offer improved performance, reduced scripting overhead, and more consistent accessibility behavior.
 
 ## Open Questions
-#### How should `FormControlRange` behave when callers provide reversed offsets (i.e. `startOffset > endOffset`)? 
+#### How should `OpaqueRange` behave when callers provide reversed offsets (i.e. `startOffset > endOffset`)? 
 
 Consider the following ideas:
 - Throw `IndexSizeError`.
@@ -597,28 +573,13 @@ Consider the following ideas:
         - Collapse to `min(startOffset, endOffset)`.
 - Preserve a backwards range (allow `startOffset > endOffset` and define direction-aware behavior for text, `toString()`, and layout methods).
 
-Example:
-
-```html
-<input value="abcd">
-<script>
-const range = new FormControlRange();
-range.setFormControlRange(input, 4, 0);
-// Candidates:
-// - Throw: setFormControlRange throws IndexSizeError
-// - Collapse: range.startOffset === range.endOffset === 4
-// - Backwards: range.startOffset === 4; range.endOffset === 0
-</script>
-```
-
-Note: With reversed endpoints, DOM `Range` setters collapse them to a single point, whereas `Selection` preserves directionality (anchor/focus). Collapsing is the current interoperable behavior, but alternatives remain open for discussion.
-
-#### Is `setFormControlRange()` redundant with the type name? Would `setRange`, `set`, `setStartAndEnd`, or something else better align with `Range`/`StaticRange` naming? 
+<!-- Allocation, construction, and configuration of OpaqueRange would be defined by embedding specifications; authors do not construct or set OpaqueRange directly. -->
 
 ## References & acknowledgements
 
 Many thanks for valuable feedback and advice from:
 
+- [Anne van Kesteren](https://github.com/annevk)
 - [Daniel Clark](https://github.com/dandclark)
 - [Ian Sanders](https://github.com/iansan5653)
 - [Keith Cirkel](https://github.com/keithamus)
