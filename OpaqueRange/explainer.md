@@ -573,8 +573,6 @@ Consider the following ideas:
         - Collapse to `min(startOffset, endOffset)`.
 - Preserve a backwards range (allow `startOffset > endOffset` and define direction-aware behavior for text, `toString()`, and layout methods).
 
-<!-- Allocation, construction, and configuration of OpaqueRange would be defined by embedding specifications; authors do not construct or set OpaqueRange directly. -->
-
 ## References & acknowledgements
 
 Many thanks for valuable feedback and advice from:
