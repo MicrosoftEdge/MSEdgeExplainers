@@ -58,7 +58,7 @@ This proposal introduces `addBehavior` to `ElementInternals` which allows custom
 
 This approach enables dynamic composition, allowing elements to adopt behaviors based on attributes or state (e.g., a single `<custom-button>` class that can act as a submit button based on a `type` attribute).
 
-### Imperative API Design
+### Imperative addition
 
 - Behaviors are exposed as objects that can be attached to an element instance via `ElementInternals`.
 - Supports composition as web authors can add many behaviors.
@@ -250,6 +250,18 @@ customElements.define('fancy-button', FancyButton, { extends: 'button' });
 
 While customized built-ins are useful where supported, lack of WebKit support makes them unsuitable as the primary solution.
 
+### Alternative 5: Expose certain behavioural attributes via ElementInternals (Proposed)
+
+Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`) via `ElementInternals` so custom elements can adopt them without exposing the attribute to the user. See [issue #11752](https://github.com/whatwg/html/issues/11752).
+
+**Pros:**
+- Solves specific use cases like popovers and drag-and-drop.
+- Hides implementation details from the consumer.
+
+**Cons:**
+- Doesn't currently address form submission behavior.
+- Scoped to specific attributes rather than general behaviors.
+
 ## Accessibility and Security Considerations
 
 ### Accessibility
@@ -295,17 +307,18 @@ Many thanks for valuable feedback and advice from:
 
 Thanks to the following proposals, articles, frameworks, and languages for their work on similar problems that influenced this proposal.
 
-- [Real Mixins with JavaScript Classes](https://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/) by Justin Fagnani.
+- [Real Mixins with JavaScript Classes](https://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/) by [Justin Fagnani](https://github.com/justinfagnani).
 - [ElementInternals.type proposal](https://github.com/whatwg/html/issues/11061).
 - [Custom Attributes proposal](https://github.com/WICG/webcomponents/issues/1029).
 - [TC39 Maximally Minimal Mixins proposal](https://github.com/tc39/proposal-mixins).
 - Lit framework's [reactive controllers pattern](https://lit.dev/docs/composition/controllers/).
+- [Expose certain behavioural attributes via ElementInternals proposal](https://github.com/whatwg/html/issues/11752).
 
 ### Related Issues and Discussions
 
 - [WICG/webcomponents#814](https://github.com/WICG/webcomponents/issues/814) - Form submission from custom elements
 - [whatwg/html#9110](https://github.com/whatwg/html/issues/9110) - Popover invocation
-- [whatwg/html#5423](https://github.com/whatwg/html/issues/5423) - Label behaviors
+- [whatwg/html#5423](https://github.com/whatwg/html/issues/5423), [whatwg/html#11584](https://github.com/whatwg/html/issues/11584) - Label behaviors
 - [whatwg/html#10220](https://github.com/whatwg/html/issues/10220) - Custom elements as forms
 - [w3c/tpac2023-breakouts#44](https://github.com/w3c/tpac2023-breakouts/issues/44) - TPAC 2023 discussion
 - [WebKit/standards-positions#97](https://github.com/WebKit/standards-positions/issues/97) - WebKit position on customized built-ins
