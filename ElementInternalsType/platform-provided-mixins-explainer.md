@@ -123,7 +123,7 @@ The element gains:
 - Click and keyboard activation (Space/Enter).
 - Implicit ARIA `role="button"` that can be overriden by the web author.
 - Form submission on activation.
-- `:default` pseudo-class matching.
+- `:default` pseudo-class selection.
 - Participation in implicit form submission.
 
 ## Future Work
