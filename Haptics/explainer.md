@@ -31,35 +31,33 @@ Modern operating systems have embraced haptics as a core part of user experience
 An example scenario this proposal aims to support is dragging elements/windows to a snap point. This will enable a much more engaging and satisfying experience for end users.
 
 ## User-Facing Problem
-The [navigator.vibrate()](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate) API exists today to allow basic or developer-defined-patterned haptics. However, it is currently mobile-centric and not supported on desktop environments. It is also coarse-grained and requires the developer to manually program the pattern. 
+The [navigator.vibrate()](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate) API exists today to allow basic or developer-defined-patterned haptics. However, the current API is mobile-centric and lacks engine and device support. It is also coarse-grained and requires the developer to manually program the pattern which can be very confusing.
 
 ## Goals
 
 - Bring standardized, semantic haptic feedback to web apps across desktop and mobile platforms.
-- Focus on reactive haptics feedback (i.e. haptics immediately after user input), at least for v1.
+- Allow developers to signal intent/effect rather than programming raw patterns.
+- Focus on reactive haptics feedback (i.e. haptics immediately after user input).
 - Extensible interface for future haptics advancement on the web.
-- Use intent-driven effect names rather than raw waveforms.
 - Respect platform haptics user settings if available.
 - Minimize privacy/fingerprinting concerns.
 
 ## Non-goals
 
 - Guarantee identical tactile output across platforms - different platforms and user agents may choose varied output that best matches the intent.
-- Cover haptics notification scenarios (e.g. vibrate to alert users when long-running task is completed), at least for v1.
+- Cover haptics notification scenarios (e.g. vibrate to alert users when long-running task is completed).
 - Cover/replace API for highly specialized hardware, namely gamepad.
 
 ## Proposed Approach
 
-The Web Haptics API uses a pre-defined list of effects with an optional intensity parameter, without exposing raw waveform authoring or low-level parameters like duration, sharpness, or ramp. Developers request a named effect, and the user agent maps it to the closest native capability on the underlying OS. In order to minimize fingerprinting risks, the API does not currently allow developers to query haptics-capable hardware or available waveforms. Instead, haptics will be sent to the last input device if haptics-capable.
-
-The current solution extends the existing `navigator.vibrate` API in order to avoid creating more haptics-related API and complicating the ecosystem. As is the case with the current API, the extended API is not gated behind permission and requires [sticky user activation](https://developer.mozilla.org/en-US/docs/Web/Security/User_activation).
+The Web Haptics API uses a pre-defined list of effects with an optional intensity parameter, without exposing raw waveform authoring or low-level parameters like duration, sharpness, or ramp. Developers request a named effect, and the user agent maps it to the closest native capability (which may be a generic pattern if OS or hardware support is lacking). In order to minimize fingerprinting risks, the API does not currently allow developers to query haptics-capable hardware or available waveforms. Instead, haptics will be sent to the last input device if haptics-capable. The API is not gated behind permission but requires [sticky user activation](https://developer.mozilla.org/en-US/docs/Web/Security/User_activation).
 
 ```js
-navigator.vibrate(pattern, {waveform: waveform; intensity: intensity});
+navigator.playHaptics(effect, intensity);
 ```
 
-The additional `options` parameter for `navigator.vibrate` accepts:
-- waveform: a pre-defined set of waveform effects. Note that if `waveform` is specified and a `pattern` array is provided, `pattern` is ignored. The effects include - 
+The parameters for `navigator.playHaptics`:
+- effect: a pre-defined set of waveform effects (which can be extended in the future) that includes - 
     - Hover: a light, subtle cue that signals something is interactive or an action may follow.
     - Edge: a heavy boundary signal that indicates reaching the end of a range or hitting a limit.
     - Tick: a firm, pulse that marks discrete changes, like moving through a list or slider.
@@ -67,12 +65,9 @@ The additional `options` parameter for `navigator.vibrate` accepts:
     - Optional: a dynamic pulse that conveys motion, transitions, or intelligent system activity.
 - intensity: a normalized intensity value between 0.0 and 1.0. Note that if platform intensity setting is available, then effective intensity = system intensity value * developer specified intensity. Intensity defaults to 1 if left unspecified.
 
-There are notable limitations to this approach that are currently accepted as tradeoff for not introducing another haptics API. We may re-evaluate this based on feedback.
-- The semantics of the returned boolean will need to be preserved for interop. A different design would allow for returning `true`/`false` based on whether haptics is actually triggered.
-- Related to the previous point, it’s hard to do feature detection and error handling on extended options. 
-- A different API may also return a promise. 
+The API always returns `undefined`. No haptics is played if the last input device is not haptics-capable.
 
-## Sample code 
+## Sample code
 ```html
 <html>
    <head>
@@ -135,8 +130,8 @@ There are notable limitations to this approach that are currently accepted as tr
                draggable.style.left = `${tRect.left}px`;
                draggable.style.top = `${tRect.top}px`;
                // Trigger the haptic feedback
-               if ("vibrate" in navigator) {
-                  navigator.vibrate(0, {waveform: 'align', intensity: 1});
+               if (navigator.playHaptics) {
+                  navigator.playHaptics('align', 1);
                }
             } else if (snapped && distance >= SNAP_DISTANCE) {
                snapped = false;
@@ -149,21 +144,26 @@ There are notable limitations to this approach that are currently accepted as tr
 
 ## Alternatives considered
 
-- A similar declarative API without re-using `navigator.vibrate`
-    - Pros: the new API design is not limited by existing `navigator.vibrate` design. Developer will have better feature detection and the API can also return whether haptics is played successfully and can be async.
-    - Cons: New interface and added ecosystem complexity.
+Given this is an early brainstorming explainer, the API shape is very much open to change and we welcome feedback to ask us to revisit below and other alternatives.
+
+- Extending existing `navigator.vibrate`
+    - Pros: No newly introduced interface.
+    - Cons: Extending it would impose design limitation because of interop (even though it has limited support) and also hinder feature detection.
 
 - A pointer-event based API as previously defined in [explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md)
     - Pros: Closely tie haptics to input events.
-    - Cons: New interface and added ecosystem complexity. Can be more cumbersome than a declarative method. 
+    - Cons: Can be more cumbersome than a declarative method. 
 
 ## Accessibility, Internationalization, Privacy, and Security Considerations
 
 ### Privacy
-The current design does not expose means to query haptics-capable devices, available waveforms, or success in playing haptics to alleviate fingerprinting concerns.
+The current design does not expose means to query haptics-capable devices, available waveforms/effects, or success in playing haptics.
 
 ### Security
-The current design does not include permission gate for haptics but requires [sticky user activation](https://developer.mozilla.org/en-US/docs/Web/Security/User_activation). While there is potential concern for haptics spam, this can be mitigated by user agent stopping haptics when the user navigates away and there is no lasting user impact.
+The current design does not include permission gate for haptics but requires [sticky user activation](https://developer.mozilla.org/en-US/docs/Web/Security/User_activation). While there is potential concern for haptics abuse, this is manageable given -
+
+- User may choose to navigate away and there is no lasting impact on the user,
+- User agent may choose to apply additional throttle.
 
 ## Reference for relevant haptics APIs
 
@@ -178,17 +178,18 @@ Known platform-specific native haptics API:
 
 Relevant web APIs:
 - [navigator.vibrate](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate)
-- [(In-progress) Gamepad Event-Driven Input API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/6ea0b9190c7e8b0261323deaf060013d80a0b0ab/GamepadEventDrivenInputAPI/explainer.md)
 
 ## Open Questions
 
 - Feedback on the set of predefined waveforms and how well they can be implemented on different platforms.
-- How important is it for this API to inform developers whether the waveform they attempted to fire played successfully?
-- If a waveform pattern isn't available on the platform, what is the correct fallback behavior (map to closest pattern, generic vibration, no vibration) and whether this should be predetermined or left for user agent discretion?
-- While currently out of scope, what is the developer interest level for haptics notifications scenarios?
-- What is the developer interest on haptics device enumeration and whether this can be done in a way with minimum fingerprinting concern. 
+- Are there scenarios where developer may want to add delayed haptics effect?
+- Should this API return whether haptics is successfully played as opposed?
+- Is there developer interest on haptics device enumeration and whether this can be done in a way with minimum fingerprinting concern?
+- While currently out of scope, is the developer interest level for haptics notifications scenarios?
 
 ## Stakeholder Feedback / Opposition
+
+We have heard some early developer interest such as [dragging divider to a snap point in Slack](https://github.com/w3c/webappswg/issues/138#issuecomment-3514522699). 
 
 We intend to seek feedback via:
 
