@@ -2,7 +2,7 @@
 
 - _What information does this feature expose, and for what purposes?_
 
-    The feature exposes support of CSS "at-rules". This is important as it can allow authors to rely on graceful degradation of their pages. The `@supports` rule already allows to detect CSS properties, and the `at-rule()` feature aims to allow to detection for at-rules.
+    The feature exposes the browser's set of supported CSS "at-rules". This is important as it can allow authors to implement graceful degradation of their pages. The `@supports` rule already allows authors to feature-detect CSS properties, and the `at-rule()` feature aims to allow feature detection for at-rules.
 
     No identifying information is exposed. 
 
