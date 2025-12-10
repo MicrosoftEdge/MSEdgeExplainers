@@ -28,7 +28,7 @@
 
 - _Do the features in your specification expose information about the underlying platform to origins_
 
-    Yes. The feature allows a developer to tailor site UX depending on at-rule feature support. This is useful mostly for newer features that are launching, but once the feature is available as a standard  and implemented in the web platform it is something that is unlikely ti change.
+    Yes. The feature allows a developer to tailor site UX depending on at-rule feature support. This is useful mostly for newer features that are launching, but once an at-rule is available as a standard and implemented in the web platform it is something that is unlikely to change.
 
 - _Does this specification allow an origin to send data to the underlying platform?_
 
