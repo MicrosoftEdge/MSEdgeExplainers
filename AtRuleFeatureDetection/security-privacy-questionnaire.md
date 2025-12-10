@@ -72,7 +72,7 @@
 
 - _What happens when a document that uses your feature is kept alive in BFCache (instead of getting destroyed) after navigation, and potentially gets reused on future navigations back to the document?_
     
-    The feature would just reevaluate.
+    Browser support for a given at-rule does not change across navigations. Depending on the implementation, the browser might re-evaluate `@supports at-rule(...)` conditions, or it might use a previously cached evaluation result.
 
 - _What happens when a document that uses your feature gets disconnected?_
 
