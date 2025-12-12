@@ -1,4 +1,4 @@
-# Platform-Provided Behavior Mixins for Custom Elements (Draft, December 2025)
+# Platform-Provided Behavior Mixins for Custom Elements
 
 ## Authors:
 
@@ -7,7 +7,7 @@
 ## Participate
 
 - No issue filed yet.
-- Venue: WHATWG
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PlatformProvidedMixins)
 
 ## Introduction
 
@@ -17,7 +17,7 @@ Custom element authors frequently need their elements to leverage platform behav
 
 Custom element authors can't access platform behaviors that are built into native HTML elements. This forces them to either:
 
-1. Use customized built-ins (`is/extends` syntax), which [lack WebKit support](https://github.com/WebKit/standards-positions/issues/97#issuecomment-1328880274), have Shadow DOM limitations, and [can't use the ElementInternals API](https://github.com/whatwg/html/issues/5166).
+1. Use customized built-ins (`is/extends` syntax), which have Shadow DOM limitations and [can't use the ElementInternals API](https://github.com/whatwg/html/issues/5166).
 2. Try to reimplement platform logic in JavaScript, which is error-prone.
 3. Accept that their custom elements simply can't do what native elements can do.
 
@@ -25,15 +25,13 @@ This creates a gap between what's possible with native elements and custom eleme
 
 ### Goals
 
-Enable autonomous custom elements to:
-
-- Submit forms: trigger form submission like `<button type="submit">`.
+- Establish an extensible framework for custom elements to adopt platform behaviors.
+- Enable autonomous custom elements to trigger form submission like `<button type="submit">` as the initial capability of this framework.
 
 ### Non-goals
 
-- Providing generic button behaviors (like popover invocation) or reset behaviors in this initial proposal.
 - Recreating all native element behaviors in this initial proposal.
-- Changing customized built-ins.
+- Making updates to customized built-ins.
 
 ## User research
 
@@ -48,20 +46,42 @@ This proposal is informed by:
 
 2. TPAC discussions in [2023](https://www.w3.org/2023/09/tpac-breakouts/44-minutes.pdf) and [2025](https://www.w3.org/2025/11/12-custom-attrs-minutes.html) exploring alternatives to customized built-ins.
 
-3. Developer feedback from the Web Components community consistently requesting these capabilities. [Note: We should change this when we're ready to engage in the WCCG]
+3. Real-world use cases from frameworks that work around these limitations:
 
-4. Real-world use cases from design frameworks that work around these limitations.
+   - [Shoelace](https://github.com/shoelace-style/shoelace/blob/next/src/components/button/button.component.ts#L180): Uses `ElementInternals` but still requires manual wiring to intercept the click event on its internal shadow button (as shown below) and can't support implicit submission ("Enter to submit").
+
+   ```javascript
+   // button.component.ts
+   handleClick(event) {
+     if (this.type === 'submit') {
+       this._internals.form.requestSubmit(this);
+     }
+   }
+   ```
+
+   - [Material Web](https://github.com/material-components/material-web/blob/main/button/internal/button.ts): Renders a `<button>` inside the Shadow DOM for accessibility/clicks. They created a [dedicated class](https://github.com/material-components/material-web/blob/main/internal/controller/form-submitter.ts) to handle form submission and intercept the click event to call `form.requestSubmit(this)`.
+
+   - Older method (used by earlier design systems): To enable implicit submission, the component injects a hidden `<button type="submit">` into its own light DOM. This approach breaks encapsulation, risks unintended layout effects by participating in the parent’s flow or the surrounding container, and can pollute the accessibility tree.
+
+   ```html
+   <ds-button>
+     #shadow-root
+     <button>Click Me</button>
+     <button type="submit" style="display: none;"></button> 
+   </ds-button>
+   ```
 
 ## Proposed Approach
 
-This proposal introduces `addBehavior` to `ElementInternals` which allows custom elements to attach specific platform behaviors.
+This proposal introduces a `mixins` option to `attachInternals()` and a read-only `mixins` property on `ElementInternals` which allows custom elements to attach and inspect specific platform behaviors. This approach enables composition while keeping the API simple, allowing elements to adopt behaviors during initialization.
 
-This approach enables dynamic composition, allowing elements to adopt behaviors based on attributes or state (e.g., a single `<custom-button>` class that can act as a submit button based on a `type` attribute).
+### Configuration via attachInternals
 
-### Imperative addition
+- Behaviors are exposed as objects that can be passed to `attachInternals` in a `mixins` array.
+- `ElementInternals` instances expose a read-only `mixins` property returning the list of attached behaviors.
+- Supports composition as web authors can pass many behaviors.
 
-- Behaviors are exposed as objects that can be attached to an element instance via `ElementInternals`.
-- Supports composition as web authors can add many behaviors.
+*Note: The API uses the term "mixins" instead of "behaviors" to avoid potential confusion with the spelling of "behavior" vs "behaviour".*
 
 ### Platform-Provided Behavior Mixins
 
@@ -69,7 +89,7 @@ The platform would expose the following behavior mixin, mirroring the submission
 
 | Behavior Mixin | Provides |
 |----------------|----------|
-| `HTMLSubmitButtonBehavior` | Click/keyboard activation, form submission triggering, `:default` pseudo-class, implicit submission participation, implicit ARIA `role="button"`. |
+| `HTMLSubmitButtonMixin` | Click/keyboard activation, form submission triggering, `:default` pseudo-class, implicit submission participation, implicit ARIA `role="button"`. |
 
 *Note: While `HTMLButtonElement` also supports generic button behavior (type="button") and reset behavior (type="reset"), this proposal focuses exclusively on the submit behavior.*
 
@@ -78,44 +98,77 @@ Each platform behavior mixin must provide:
 - Event handling: Automatic wiring of platform events (click, keydown, etc.).
 - ARIA defaults: Implicit roles and properties for accessibility.
 
-### Imperative Composition via ElementInternals
+### Composition via attachInternals
 
-The imperative `addBehavior()` API provides several advantages for web component authors:
+Passing behaviors to `attachInternals()` provides several advantages for web component authors:
 
-1. Dynamic Behavior: Behaviors can be added at runtime based on attributes or property state. This matches the pattern of native elements like `<button>` which change behavior based on the `type` attribute.
-2. Single Class Definition: Authors can define a single `CustomButton` class that handles multiple modes (submit, reset, button) without needing to define separate classes for each behavior or create complex inheritance chains.
-3. Avoids Static Inheritance Pitfalls: Static mixins lock an element's behavior at definition time. If a developer wants a button that can toggle between "submit" and "button" modes, static mixins require swapping the entire element instance, whereas imperative attachment allows modifying the existing instance.
+- Behaviors are defined once during initialization, avoiding the complexity of managing behavior lifecycle (adding/removing) and state synchronization.
+- Authors can define a single class that handles multiple modes (submit, reset, button) by checking attributes before attaching internals, without needing to define separate classes for each behavior.
+- While this proposal focuses on an imperative API, the underlying model of attaching mixins via `ElementInternals` is compatible with future declarative APIs.
 
-### Use case: Custom Submit Buttons
+### Use case: Design System Button
 
-A custom button element that can submit its associated form.
+A design system button that maps semantic variants to platform behaviors.
 
 ```javascript
-class CustomButton extends HTMLElement {
+class DesignSystemButton extends HTMLElement {
     static formAssociated = true;
-    static observedAttributes = ['type'];
 
     constructor() {
         super();
-        this._internals = this.attachInternals();
     }
 
-    attributeChangedCallback(name, oldVal, newVal) {
-        if (name === 'type') {
-            // Dynamically attach behavior based on attribute
-            if (newVal === 'submit') {
-                this._internals.addBehavior(HTMLSubmitButtonBehavior);
-            }
+    connectedCallback() {
+        if (this._internals) {
+            return;
         }
+
+        // Map design system variants to platform behaviors.
+        const variant = this.getAttribute('variant') || 'neutral';
+        const mixins = [];
+
+        // 'primary' and 'destructive' variants imply form submission.
+        if (['primary', 'destructive'].includes(variant)) {
+            mixins.push(HTMLSubmitButtonMixin);
+        }
+
+        this._internals = this.attachInternals({ mixins });
+        this.render();
+    }
+
+    render() {
+        // Inspect attached behaviors to determine styling.
+        const isSubmit = this._internals.mixins.includes(HTMLSubmitButtonMixin);
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+            <style>
+                :host { 
+                    display: inline-block; 
+                    background: 'blue';
+                    color: white;
+                    cursor: pointer;
+                }
+                :host(:default) {
+                    box-shadow: 0 0 0 2px gold;
+                    font-weight: bold;
+                }
+            </style>
+            ${isSubmit ? '💾' : ''} <slot></slot>
+        `;
     }
 }
-customElements.define('custom-button', CustomButton);
+customElements.define('ds-button', DesignSystemButton);
 ```
 
 ```html
-<form action="/submit" method="post">
+<form action="/save" method="post">
     <input name="username" required>
-    <custom-button type="submit">Submit Form</custom-button>
+
+    <!-- Becomes a submit button based on variant. -->
+    <ds-button variant="primary">Save</ds-button>
+
+    <!-- Remains a regular button. -->
+    <ds-button variant="neutral">Cancel</ds-button>
 </form>
 ```
 
@@ -123,24 +176,23 @@ The element gains:
 - Click and keyboard activation (Space/Enter).
 - Implicit ARIA `role="button"` that can be overriden by the web author.
 - Form submission on activation.
-- `:default` pseudo-class selection.
+- `:default` pseudo-class matching.
 - Participation in implicit form submission.
+- Ability to inspect its own behaviors via `this._internals.mixins`.
 
 ## Future Work
 
 While this proposal focuses on form submission, the mixin pattern can be extended to other behaviors in the future:
 
-- **Generic Buttons**: `HTMLButtonBehavior` for non-submitting buttons (popover invocation, commands).
-- **Reset Buttons**: `HTMLResetButtonBehavior` for form resetting.
-- **Labels**: `HTMLLabelBehavior` for `for` attribute association and focus delegation.
-- **Forms**: `HTMLFormBehavior` for custom elements acting as form containers.
-- **Radio Groups**: `HTMLRadioGroupBehavior` for `name`-based mutual exclusion.
+- **Generic Buttons**: `HTMLButtonMixin` for non-submitting buttons (popover invocation, commands).
+- **Reset Buttons**: `HTMLResetButtonMixin` for form resetting.
+- **Inputs**: `HTMLInputMixin` for text entry, validation, and selection APIs.
+- **Labels**: `HTMLLabelMixin` for `for` attribute association and focus delegation.
+- **Forms**: `HTMLFormMixin` for custom elements acting as form containers.
+- **Radio Groups**: `HTMLRadioGroupMixin` for `name`-based mutual exclusion.
+- **Tables**: `HTMLTableMixin` for table layout semantics and accessibility.
 
-### Open Questions
-
-1. **Removal**: Should there be a `removeBehavior()`?
-2. **Ordering**: Does the order of `addBehavior()` calls matter?
-3. **Submit behavior prioritization**: Does solving the submit use case offer greater value over popovertarget, command invokers, label behaviors, etc.?
+*Conflict Resolution: As the number of available mixins grows, we must address how to handle collisions when multiple mixins attempt to control the same attributes or properties. We propose that the order of mixins in the array passed to `attachInternals` should determine precedence (e.g., last one wins), but specific heuristics for complex clashes need to be defined.*
 
 ## Alternatives considered
 
@@ -149,7 +201,7 @@ While this proposal focuses on form submission, the mixin pattern can be extende
 Behaviors are exposed as functions that take a superclass and return a subclass.
 
 ```javascript
-class CustomSubmitButton extends HTMLSubmitButtonBehavior(HTMLElement) { ... }
+class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 ```
 
 **Pros:**
@@ -158,6 +210,7 @@ class CustomSubmitButton extends HTMLSubmitButtonBehavior(HTMLElement) { ... }
 
 **Cons:**
 - Behavior is fixed at class definition time and authors might need to generate many class variations for different behavior combinations.
+- It strictly binds behavior to the JavaScript class hierarchy, making a future declarative syntax hard to implement without creating new classes.
 
 Rejected in favor of the imperative API because it prevents the "single class, multiple behaviors" pattern that is common in HTML (e.g., `<input>`, `<button>`).
 
@@ -242,13 +295,13 @@ customElements.define('fancy-button', FancyButton, { extends: 'button' });
 - Natural inheritance model.
 
 **Cons:**
-- Not supported in WebKit (deal-breaker for interoperability).
+- Interoperability issues across browsers.
 - Limited Shadow DOM support.
 - Can't use `ElementInternals` API.
 - The `is=` syntax isn't considered developer-friendly to some.
 - Doesn't support composing behaviors from different base elements.
 
-While customized built-ins are useful where supported, lack of WebKit support makes them unsuitable as the primary solution.
+While customized built-ins are useful where supported, the issues listed above makes them unsuitable as the primary solution.
 
 ### Alternative 5: Expose certain behavioural attributes via ElementInternals (Proposed)
 
@@ -262,31 +315,24 @@ Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`
 - Doesn't currently address form submission behavior.
 - Scoped to specific attributes rather than general behaviors.
 
-## Accessibility and Security Considerations
+## Accessibility, Security, and Privacy Considerations
 
 ### Accessibility
 
-- Platform behaviors must include proper ARIA roles and properties.
-- Custom elements using a platform-provided mixin must gain the same keyboard handling and focus management as native elements.
-- Behaviors must ensure custom elements appear correctly in accessibility trees.
-
-#### Mitigation
-
-- Each platform behavior explicitly specifies its accessibility requirements.
-- Behaviors automatically provide implicit ARIA roles that can be overridden by authors through `ElementInternals.role`.
-- Platform ensures proper integration with accessibility APIs.
+- Platform behaviors must provide appropriate default ARIA roles and states (e.g., `role="button"` for `HTMLSubmitButtonMixin`).
+- Custom elements using a platform-provided mixin must gain the same keyboard handling and focus management as their native counterparts (e.g., Space/Enter activation).
+- Authors must be able to override default semantics using `ElementInternals.role` and `ElementInternals.aria*` properties if the default behavior does not match their specific use case.
 
 ### Security
 
-- Form submission must respect same-origin policies.
-- Behaviors must not expose internal browser state.
+- This proposal exposes existing platform capabilities to custom elements, rather than introducing new capabilities.
+- Form submission triggered by mixins must respect the same security policies as native form submission.
+- All security checks that apply to native elements (e.g., form validation, submission restrictions) apply to custom elements using these mixins.
 
-#### Mitigation
+### Privacy
 
-- Behaviors integrate with existing platform security mechanisms.
-- No new capabilities beyond what native elements already provide.
-- All security checks that apply to native elements apply to custom elements with behaviors.
-- Behaviors are provided by the platform, not userland code.
+- The presence of specific mixins in the API surface can be used for fingerprinting or browser version detection. This is consistent with the introduction of any new Web Platform feature.
+- This proposal does not introduce new mechanisms for collecting or transmitting user data beyond what is already possible with native HTML elements.
 
 ## Stakeholder Feedback / Opposition
 
@@ -300,10 +346,10 @@ Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`
 
 Many thanks for valuable feedback and advice from:
 
-- [Chris Holt](https://github.com/chrisdholt)
-- [Justin Fagnani](https://github.com/justinfagnani)
-- [Keith Cirkel](https://github.com/keithamus)
-- [Rob Eisenberg](https://github.com/EisenbergEffect)
+- [Alex Russell](https://github.com/slightlyoff)
+- [Andy Luhrs](https://github.com/aluhrs13)
+- [Kevin Babbitt](https://github.com/kbabbitt)
+- [Kurt Catti-Schmidt](https://github.com/KurtCattiSchmidt)
 
 Thanks to the following proposals, articles, frameworks, and languages for their work on similar problems that influenced this proposal.
 
