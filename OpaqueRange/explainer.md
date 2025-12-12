@@ -43,6 +43,8 @@ If web authors already use a `<textarea>` and/or an `<input>` element in their a
     - For use case 1: call `getBoundingClientRect()`.
     - For use case 2: create a Highlight object and use `CSS.highlights.set('syntax-highlight')`.
 
+In practice, this approach is hard to get fully correct. Authors report issues keeping styles synchronized between the original control and the overlay, and can see noticeable visual lag during scrolling or layout changes where the overlay falls behind the underlying field. This class of problems has also come up in [CSSWG discussions](https://github.com/w3c/csswg-drafts/issues/8982) about adding APIs to observe computed style changes.
+
 This is roughly the sample code from the aforementioned use cases, some functionality is omitted for brevity:
 
 ```html
@@ -571,7 +573,7 @@ Consider the following ideas:
     - Which direction should the collapse target?
         - Collapse to `max(startOffset, endOffset)` (matches DOM `Range`).
         - Collapse to `min(startOffset, endOffset)`.
-- Preserve a backwards range (allow `startOffset > endOffset` and define direction-aware behavior for text, `toString()`, and layout methods).
+- Preserve a backwards range (allow `startOffset > endOffset`).
 
 ## References & acknowledgements
 
