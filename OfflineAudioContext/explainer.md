@@ -49,7 +49,7 @@ const context = new OfflineAudioContext({ numberOfChannels: 2, length: 44100, sa
 // Add some nodes to build a graph...
 
 if ("startRenderingStream" in context) {
-  const reader = context.startRenderingStream().getReader(); 
+  const reader = context.startRenderingStream({ format: 'f32', chunkSize: 128 }).getReader();
   while (true) {
     // get the next chunk of data from the stream
     const result = await reader.read();
@@ -70,9 +70,32 @@ if ("startRenderingStream" in context) {
 Proposed interface:
 
 ```js
+// From https://developer.mozilla.org/en-US/docs/Web/API/AudioData/format
+enum AudioFormat {
+  "u8",
+  "s16",
+  "s32",
+  "f32",
+  "u8-planar",
+  "s16-planar",
+  "s32-planar",
+  "f32-planar"
+}
+
+dictionary OfflineAudioRenderingOptions {
+  // Output format
+  AudioFormat format = "f32";
+  // The number of frames to render each iteration
+  Number chunkSize = 128;
+}
+
 partial interface OfflineAudioContext {
+    // Immediately stops the rendering, to implement a "cancel" button when rendering 
+    //  if startRenderingStream was called, this closes the stream
+    // If startRendering was called, this rejects the promise
+    Promise<void> close();
     // Returns a stream that yields buffers of interleaved audio samples in Float32Array or whatever format is specified
-    Promise<ReadableStream> startRenderingStream();
+    Promise<ReadableStream> startRenderingStream(optional OfflineAudioRenderingOptions);
 };
 ```
 
