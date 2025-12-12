@@ -62,7 +62,6 @@ The parameters for `navigator.playHaptics`:
     - Edge: a heavy boundary signal that indicates reaching the end of a range or hitting a limit.
     - Tick: a firm, pulse that marks discrete changes, like moving through a list or slider.
     - Align: a crisp confirmation when an object locks into place or aligns with guides or edges.
-    - Optional: a dynamic pulse that conveys motion, transitions, or intelligent system activity.
 - intensity: a normalized intensity value between 0.0 and 1.0. Note that if platform intensity setting is available, then effective intensity = system intensity value * developer specified intensity. Intensity defaults to 1 if left unspecified.
 
 The API always returns `undefined`. No haptics is played if the last input device is not haptics-capable.
@@ -148,7 +147,7 @@ Given this is an early brainstorming explainer, the API shape is very much open 
 
 - Extending existing `navigator.vibrate`
     - Pros: No newly introduced interface.
-    - Cons: Extending it would impose design limitation because of interop (even though it has limited support) and also hinder feature detection.
+    - Cons: Exsiting API includes the pattern param which may be confusing to use and the explainer currently does not plan to support. Extending the API also hinders feature detection. Hypothetical, but if the API evolves to return meaningful value then it would require a new API.
 
 - A pointer-event based API as previously defined in [explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md)
     - Pros: Closely tie haptics to input events.
