@@ -11,13 +11,13 @@
 
 ## Introduction
 
-Custom element authors frequently need their elements to leverage platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided mixins as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement platform behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes platform capabilities as composable mixins.
+Custom element authors frequently need their elements to leverage platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided mixins as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement native behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes platform capabilities as composable mixins.
 
 ## User-Facing Problem
 
 Custom element authors can't access platform behaviors that are built into native HTML elements. This forces them to either:
 
-1. Use customized built-ins (`is/extends` syntax), which have Shadow DOM limitations and [can't use the ElementInternals API](https://github.com/whatwg/html/issues/5166).
+1. Use customized built-ins (`is/extends` syntax), which have [Shadow DOM limitations](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#elements_you_can_attach_a_shadow_to) and [can't use the ElementInternals API](https://github.com/whatwg/html/issues/5166).
 2. Try to reimplement platform logic in JavaScript, which is error-prone.
 3. Accept that their custom elements simply can't do what native elements can do.
 
@@ -25,7 +25,7 @@ This creates a gap between what's possible with native elements and custom eleme
 
 ### Goals
 
-- Establish an extensible framework for custom elements to adopt platform behaviors.
+- Establish an extensible framework for custom elements to adopt platform behaviors for built in elements.
 - Enable autonomous custom elements to trigger form submission like `<button type="submit">` as the initial capability of this framework.
 
 ### Non-goals
@@ -73,7 +73,7 @@ This proposal is informed by:
 
 ## Proposed Approach
 
-This proposal introduces a `mixins` option to `attachInternals()` and a read-only `mixins` property on `ElementInternals` which allows custom elements to attach and inspect specific platform behaviors. This approach enables composition while keeping the API simple, allowing elements to adopt behaviors during initialization.
+This proposal introduces a `mixins` option to `attachInternals()` and a read-only `mixins` property on `ElementInternals` which allows custom elements to attach and inspect specific native behaviors. This approach enables composition while keeping the API simple, allowing elements to adopt behaviors during initialization.
 
 ### Configuration via attachInternals
 
@@ -105,6 +105,7 @@ Passing behaviors to `attachInternals()` provides several advantages for web com
 - Behaviors are defined once during initialization, avoiding the complexity of managing behavior lifecycle (adding/removing) and state synchronization.
 - Authors can define a single class that handles multiple modes (submit, reset, button) by checking attributes before attaching internals, without needing to define separate classes for each behavior.
 - While this proposal focuses on an imperative API, the underlying model of attaching mixins via `ElementInternals` is compatible with future declarative APIs.
+- A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active mixins, allowing for standard object-oriented extension patterns.
 
 ### Use case: Design System Button
 
@@ -123,7 +124,7 @@ class DesignSystemButton extends HTMLElement {
             return;
         }
 
-        // Map design system variants to platform behaviors.
+        // Map design system variants to native behaviors.
         const variant = this.getAttribute('variant') || 'neutral';
         const mixins = [];
 
@@ -271,7 +272,7 @@ HTMLElement.attributeRegistry.define('submit-button', SubmitButtonAttribute);
 - Doesn't solve the platform integration problem.
 - Still a proposal without implementation commitment.
 
-Custom attributes are complementary but don't provide access to platform behaviors. They're useful for userland behavior composition but can't trigger form submission, invoke popovers through platform code, etc.
+Custom attributes are complementary but don't provide access to native behaviors. They're useful for userland behavior composition but can't trigger form submission, invoke popovers through platform code, etc.
 
 ### Alternative 4: Customized Built-ins
 
@@ -291,12 +292,12 @@ customElements.define('fancy-button', FancyButton, { extends: 'button' });
 ```
 
 **Pros:**
-- Full access to all platform behaviors.
+- Full access to all native behaviors.
 - Natural inheritance model.
 
 **Cons:**
 - Interoperability issues across browsers.
-- Limited Shadow DOM support.
+- [Limited Shadow DOM support](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#elements_you_can_attach_a_shadow_to) - only certain elements can be shadow hosts
 - Can't use `ElementInternals` API.
 - The `is=` syntax isn't considered developer-friendly to some.
 - Doesn't support composing behaviors from different base elements.
@@ -314,6 +315,21 @@ Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`
 **Cons:**
 - Doesn't currently address form submission behavior.
 - Scoped to specific attributes rather than general behaviors.
+
+### Alternative 6: Fully Customizable Native Elements
+
+Modify existing native HTML elements to be fully stylable and customizable, similar to [Customizable Select](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select).
+
+**Pros:**
+- Developers can use standard HTML elements (`<button>`, `<select>`, etc.) without needing custom elements.
+- Accessibility and behavior are handled entirely by the browser.
+
+**Cons:**
+- Requires specification and implementation for every single HTML element.
+- Does not help developers who need to create a custom element for semantic or architectural reasons (e.g., a specific design system component with custom API).
+- Doesn't solve the problem of "autonomous custom elements" needing native capabilities; it just improves native elements.
+
+While valuable, this can be a parallel effort. Even if all native elements were customizable, there would still be valid use cases for autonomous custom elements that need to participate in native behaviors (like form submission) while maintaining their own identity and API.
 
 ## Accessibility, Security, and Privacy Considerations
 
