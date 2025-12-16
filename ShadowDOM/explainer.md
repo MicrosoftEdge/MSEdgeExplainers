@@ -515,16 +515,16 @@ Similarly, for external files, no styles are adopted into the `<template>` becau
 This could be addressed by treating the specifier as a dynamic reference and invalidating styles accordingly when that reference changes. However, supporting this scenario is not ideal for several reasons:
 * It would introduce a dependency on the module map to track all missing references and respond to updates. This is not ideal because it adds an additional performance cost for module map updates.
 * There is no way to support this scenario without causing a FOUC. FOUC should be avoided because it is a poor user experience and causes extra work for the renderer.
-* Once created, specifiers cannot change. Introducing new side effects when specifiers are created but not changed could be considered ununititive.
+* Once created, specifiers cannot change. Introducing new side effects when specifiers are created but not changed could be considered unintuitive.
 * This approach more closely aligns with the imperative `adoptedStyleSheets` API, as stylesheets must exist before they can be added to the `adoptedStyleSheets` array.
 
-For these reasons, we do not believe it is worth persuing making specifiers dynamic.
+For these reasons, we do not believe it is worth pursuing making specifiers dynamic.
 
 ### Why shadowrootadoptedstylesheets Does Not Perform a Fetch
 
 The current design does not fetch the specifiers listed in `shadowrootadoptedstylesheets` - they must be present in the module map at the time `shadowrootadoptedstylesheets` is parsed.
 
-There are several reaons for this behavior:
+There are several reasons for this behavior:
  * Fetching stylesheets at parse time would introduce a FOUC for the initial stylesheet fetch, with additional style invalidations upon each subsequent fetch complete. FOUC should be avoided because it is a poor user experience and causes extra work for the renderer.
  * A URL alone does not allow for any flexibility of the fetch. Properties such as [`fetchpriority`](https://html.spec.whatwg.org/#dom-link-fetchpriority) and [`blocking`](https://html.spec.whatwg.org/#attr-style-blocking) that `<link rel="modulepreload">` supports are not possible to apply with a URL alone.
  * There is already a mechanism for declaratively fetching modules with `<link rel="modulepreload">`.
