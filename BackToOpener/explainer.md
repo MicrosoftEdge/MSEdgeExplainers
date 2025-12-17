@@ -10,10 +10,6 @@ This document status: **Archived**
 Expected venue: N/A  
 Current version: We are pursuing this feature as a [Chromium user-agent feature](https://issues.chromium.org/issues/448173940) instead of a web platform one.
 
-## Participate
-
-- [Chromium Issue Tracker](https://issues.chromium.org/issues/448173940)
-
 <!-- - [Discussion forum] -->
 
 ## Introduction
