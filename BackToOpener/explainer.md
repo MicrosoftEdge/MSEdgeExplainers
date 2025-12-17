@@ -8,7 +8,7 @@ This document is intended as a starting point for engaging the community and sta
 
 This document status: **Archived**  
 Expected venue: N/A  
-Current version: We are pursuing this feature as a [Chromium user-agent feature](https://issues.chromium.org/issues/448173940) instead of a web platform one.
+Current version: We are pursuing this feature as a [Chromium feature](https://issues.chromium.org/issues/448173940) instead of a web platform one.
 
 <!-- - [Discussion forum] -->
 
