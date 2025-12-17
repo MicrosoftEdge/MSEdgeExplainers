@@ -938,6 +938,7 @@ The following table compares pros and cons of the various proposals:
 * Does the [`blocking` attribute](https://html.spec.whatwg.org/multipage/semantics.html#attr-style-blocking) on the `<style>` tag apply to CSS Modules? If so, how would it work?
 * What happens in scenarios that cross document boundaries, such as `Document.parseHTMLUnsafe`?
 * How can developers check for and polyfill `shadowrootadoptedstylesheets`, given that the template element disappears from the DOM?
+* Is it possible to define an intentional race between an async preload of an external stylesheet and a just-in-time definition of a declarative module and only apply the one that wins? This might not be possible due to the fact that specifiers are unique.
 
 ## References and acknowledgements
 Many thanks for valuable feedback and advice from other contributors:
