@@ -270,4 +270,4 @@ We'd love to hear your feedback!
 | [Confirmation of Action](Accessibility/ConfirmationOfAction/explainer.md) | This effort is being pursued in a similar proposal, [AriaNotify](Accessibility/AriaNotify/explainer.md)| 2023-11-13 |
 | [PerformanceNavigationTiming Protocol Launch](PerformanceNavigationTimingProtocolLaunchExtensions/explainer.md) | | 2024-04-22 |
 | [Extending Long Tasks API to Web Workers](LongTasks/explainer.md) | Rather than extending the Long Tasks API to monitor long tasks in web workers, we propose introducing [the Delayed Messages API](DelayedMessages/explainer.md) | 2025-06-09 |
-| [Back to Opener: Seamless Back Navigation in New Tabs](BackToOpener/explainer.md) | We are pursuing this feature as a [Chromium user-agent feature](https://issues.chromium.org/issues/448173940) instead of a web platform one. | 2025-08-28 |
+| [Back to Opener: Seamless Back Navigation in New Tabs](BackToOpener/explainer.md) | We are pursuing this feature as a [Chromium feature](https://issues.chromium.org/issues/448173940) instead of a web platform one. | 2025-08-28 |
