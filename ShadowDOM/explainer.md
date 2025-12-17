@@ -52,7 +52,7 @@ content location of future work and discussions.
     - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
     - [Static Versus Dynamic Values For shadowrootadoptedstylesheets Specifiers](#static-versus-dynamic-values-for-shadowrootadoptedstylesheets-specifiers)
     - [Why shadowrootadoptedstylesheets Does Not Perform a Fetch](#why-shadowrootadoptedstylesheets-does-not-perform-a-fetch)
-  - [Other declarative modules](#other-declarative-modules)
+  - [Other Declarative Modules](#other-declarative-modules)
   - [Alternate proposals](#alternate-proposals)
     - [Updates to Module Map Key](#updates-to-module-map-key)
     - [Using A Link Tag To Adopt Stylesheets](#using-a-link-tag-to-adopt-stylesheets)
