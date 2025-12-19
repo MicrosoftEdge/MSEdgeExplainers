@@ -11,21 +11,21 @@
 
 ## Introduction
 
-Custom element authors frequently need their elements to leverage platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided mixins as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement native behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes platform capabilities as composable mixins.
+Custom element authors frequently need their elements to leverage platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided mixins as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement native behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes native capabilities as composable mixins.
 
 ## User-Facing Problem
 
-Custom element authors can't access platform behaviors that are built into native HTML elements. This forces them to either:
+Custom element authors can't access native behaviors that are built into native HTML elements. This forces them to either:
 
 1. Use customized built-ins (`is/extends` syntax), which have [Shadow DOM limitations](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#elements_you_can_attach_a_shadow_to) and [can't use the ElementInternals API](https://github.com/whatwg/html/issues/5166).
-2. Try to reimplement platform logic in JavaScript, which is error-prone.
+2. Try to reimplement native logic in JavaScript, which is error-prone and often less performant.
 3. Accept that their custom elements simply can't do what native elements can do.
 
 This creates a gap between what's possible with native elements and custom elements, limiting web components and forcing developers into suboptimal patterns.
 
 ### Goals
 
-- Establish an extensible framework for custom elements to adopt platform behaviors for built in elements.
+- Establish an extensible framework for custom elements to adopt native behaviors for built in elements.
 - Enable autonomous custom elements to trigger form submission like `<button type="submit">` as the initial capability of this framework.
 
 ### Non-goals
@@ -38,7 +38,7 @@ This creates a gap between what's possible with native elements and custom eleme
 This proposal is informed by:
 
 1. Issue discussions spanning multiple years:
-   - [WICG/webcomponents#814](https://github.com/WICG/webcomponents/issues/814) - Form submission from custom elements (400+ comments)
+   - [WICG/webcomponents#814](https://github.com/WICG/webcomponents/issues/814) - Form submission
    - [whatwg/html#11061](https://github.com/whatwg/html/issues/11061) - ElementInternals.type proposal
    - [whatwg/html#9110](https://github.com/whatwg/html/issues/9110) - Popover invocation from custom elements
    - [whatwg/html#5423](https://github.com/whatwg/html/issues/5423) - Label behaviors
@@ -107,7 +107,7 @@ Passing behaviors to `attachInternals()` provides several advantages for web com
 - While this proposal focuses on an imperative API, the underlying model of attaching mixins via `ElementInternals` is compatible with future declarative APIs.
 - A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active mixins, allowing for standard object-oriented extension patterns.
 
-### Use case: Design System Button
+### Use case: Design system button
 
 A design system button that maps semantic variants to platform behaviors.
 
@@ -195,6 +195,80 @@ While this proposal focuses on form submission, the mixin pattern can be extende
 
 *Conflict Resolution: As the number of available mixins grows, we must address how to handle collisions when multiple mixins attempt to control the same attributes or properties. We propose that the order of mixins in the array passed to `attachInternals` should determine precedence (e.g., last one wins), but specific heuristics for complex clashes need to be defined.*
 
+### Future use case: Inheritance and composition
+
+The following example demonstrates how the API supports future scenarios with multiple mixins and inheritance, assuming additional mixins like `HTMLResetButtonMixin` become available.
+
+This example illustrates:
+1. How a parent and subclass cooperate to define the `mixins` array before calling `attachInternals`.
+2. How a class determines which mixin "wins" when multiple mixins provide conflicting behaviors.
+
+```javascript
+class CustomButton extends HTMLElement {
+    static formAssociated = true;
+
+    constructor() {
+        super();
+    }
+
+    // Protected method to extend the mixin list.
+    _getInitialMixins() {
+        // Default to submit behavior.
+        return [HTMLSubmitButtonMixin];
+    }
+
+    connectedCallback() {
+        if (this._internals) { 
+            return;
+        }
+
+        // Gather mixins.
+        const mixins = this._getInitialMixins();
+        // Initialize internals with the composed list.
+        this._internals = this.attachInternals({ mixins });
+        this.render();
+    }
+
+    render() {
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.innerHTML = `
+            <style>
+                :host {
+                    display: inline-block;
+                    cursor: pointer;
+                    border: 1px solid #767676;
+                    padding: 2px 6px;
+                }
+            </style>
+            <slot></slot>
+        `;
+    }
+}
+
+class ResetButton extends CustomButton {
+    _getInitialMixins() {
+        // Append HTMLResetButtonMixin.
+        return [...super._getInitialMixins(), HTMLResetButtonMixin];
+    }
+
+    render() {
+        super.render();
+
+        // Inspect the mixins to determine the "winning" behavior.
+        // This assumes the platform rule is "last mixin wins" for conflicts (order matters).
+        const mixins = this._internals.mixins;
+        const effectiveBehavior = mixins[mixins.length - 1];
+
+        if (effectiveBehavior === HTMLResetButtonMixin) {
+            // Visual indication of reset behavior
+            const style = document.createElement('style');
+            style.textContent = ':host { border: 1px dashed red; }';
+            this.shadowRoot.appendChild(style);
+        }
+    }
+}
+```
+
 ## Alternatives considered
 
 ### Alternative 1: Static Class Mixins
@@ -237,7 +311,7 @@ class CustomButton extends HTMLElement {
 **Cons:**
 - No composability as one custom element can only have one type.
 - Bundling behavior can get confusing as it isn't obvious what behaviors and attributes are added.
-- String APIs are error prone and hard to debug.
+- String APIs are error-prone and hard to debug.
 
 Too inflexible for the variety of use cases web developers need. While simpler, it doesn't solve the composability problem and it might be confusing for developers to use in practice.
 
