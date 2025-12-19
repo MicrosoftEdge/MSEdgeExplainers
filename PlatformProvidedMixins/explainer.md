@@ -389,6 +389,7 @@ Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`
 **Cons:**
 - Doesn't currently address form submission behavior.
 - Scoped to specific attributes rather than general behaviors.
+- Since the composition doesn't have an order/sequence to it, web authors would not be able to specify a desired "winner" when using multiple behaviors that happen to impact a shared value or behavior.
 
 ### Alternative 6: Fully Customizable Native Elements
 
