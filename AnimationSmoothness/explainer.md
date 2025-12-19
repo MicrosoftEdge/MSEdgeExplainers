@@ -1,4 +1,4 @@
-# A More Precise Way to Measure Animation Smoothness
+# Main Thread Animation Smoothness 
 
 [comment]: < ** (*Same-Origin*) >
 
@@ -8,13 +8,17 @@ Authors: [Jenna Sasson](https://github.com/jenna-sasson)
 
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
+A previous version of this explainer was shared with the title of “A More Precise Way to Measure Animation Smoothness.” After reviewing feedback, we have rescoped to an initial goal of creating a replacement for rAF polling to measure smoothness on the main thread. This is the most up to date version. 
+
 * This document status: **Active**
 * Expected venue: [W3C Web Performance Working Group](https://www.w3.org/groups/wg/webperf/)
 * **Current version: this document**
 
 ## Introduction
 
-Smooth web animation is essential for a positive user experience. To understand the user’s experience with animation, quantifying their experience is an important initial step that allows web and browser developers to optimize their pages/engines and generate a more pleasing user experience.
+Smooth web animation is essential for a positive user experience. To understand the user’s experience with animation, quantifying their experience is an important initial step that allows web and browser developers to optimize their pages/engines and generate a more pleasing user experience. 
+
+It is important to define what it means for the main thread to be considered smooth. Main thread smoothness is achieved when a frame is produced within a predefined threshold when a frame is expected. 
 
 Various metrics have been used in the past to try and understand the user’s experience in this space. Some of these were accessible to the webpage, while others were internal browser metrics. Examples of these include:
 
@@ -27,61 +31,19 @@ Various metrics have been used in the past to try and understand the user’s ex
 
 This proposal attempts to define an API that offers a comprehensive quantification of the user’s experience regarding animation smoothness, enabling developers to create better user experiences.
 
-## Goals
-
-* Webpage accessible API that captures user-perceived framerate accurately, taking into account both the main and compositor threads.
-* An approach that doesn’t cause webpage performance regressions.
-* Enabling a web developer to control what time interval is considered.
-* The solution will measure as many of the above properties as possible
-
-## Non-goals
-
-* Improving/controlling animation smoothness. This proposal is purely for an API to better understand existing behavior.
-* Evaluate an individual animation’s smoothness. The API is focused on the user’s overall experience for entire browser window’s content.
-
-## User Research
-
-## Use Cases
-
-### 1. Web Developers Understanding On-demand Animations
-
-Animation smoothness can be difficult to measure when relating to user interaction. An average metric isn't always effective because in certain apps, animation begins on a user click. There doesn't need to be a continuous measurement since without a user click, there is no animation. Some examples of this include scrolling a long grid or document, selecting or highlighting large areas of the screen, resizing images, dragging objects across the screen, or animations triggered by mouse movement or clicks.
-
-### 2. Measuring animation and graphics performance of browsers
-
-The public benchmark, MotionMark, measures how well different browsers render animation. For each test, MotionMark calculates the most complex animation that the browser can render at certain frame rate. The test starts with a very complex animation that makes the frame rate drop to about half of the expected rate. Then, MotionMark gradually reduces the animation's complexity until the frame rate returns to the expected rate. Through this process, MotionMark can determine the most complex animation that the browser can handle while maintaining an appropriate frame rate and uses this information to give the browser a score. To get an accurate score, it is crucial that MotionMark can measure frame rate precisely. Currently, MotionMark measures frame rate based on rAF calls, which can be impacted by other tasks on the main thread besides animation. It also doesn't take into account animations on the compositor thread. The method using rAF to measure frame rate doesn't reflect the user's actual experience.
-
-### 3. Gaming
-
-Higher frames per second (fps) lead to smoother animations and a more enjoyable gaming experience. Additionally, poor animation can significantly impact gameplay elements, like how quickly characters can move or decisions can be made, which affects the overall user experience. In continual tension with the desire for smooth animations, game developers are constantly striving to make their visuals higher quality and immersive. To guarantee smooth gameplay, developers need a way to understand how their game’s animations are performing.
-
-### 4. Testing animation performance on different hardware
-
-Testing the performance of animation on different hardware/browser combinations may expose performance issues that could not be seen with existing metrics.
-
-### 5. Improving animation libraries
-
-Animation libraries measure frame rate in different ways. For example, GSAP and PixiJS use tickers to measure FPS, but the developer must add custom logic to run each tick to measure frame rate. Three.js uses a second library, stats.js, to measure frame rate, and anime.js and Motion libraries use rAF calling. It would be beneficial for libraries to have a built-in way to measure FPS. A built-in method would be more convenient and allow for more seamless integration with each library's animation loop, leading to more accurate results. Immediate feedback would make debugging and resolving issues easier. Ideally, this would also standardize a way to measure FPS leading to consistency across libraries.
-
-## Prior Art
-
-The below prior art exists for understanding animation smoothness today.
-
-### RAF
-
-#### Description
+## Current Implementation
 
 One of the current ways to measure smoothness is by measuring frames per second (fps) using `requestAnimationFrame()` polling.
 
-Animation frames are rendered on the screen when there is a change that needs to be updated. If they are not updated in a certain amount of time, the browser drops a frame, which may affect animation smoothness.
+Animation frames are rendered on the screen when there is a change that needs to be updated. If frames are not updated in a certain amount of time, the browser drops a frame, which may affect animation smoothness. 
 
-The rAF method has the browser call a function (rAF) to update the animation before the screen refreshes. By counting how often rAF is called, you can determine the FPS. If the browser skips calling rAF, it means a frame was dropped. This method helps understand how well the browser handles animations and whether any frames are being dropped.
-
-#### Limitations
+The rAF method has the browser call a function (rAF) to update the animation before the screen refreshes. By counting how often rAF is called, you can determine the FPS. If the browser skips calling rAF, a potential frame rendering opportunity was missed. This method helps understand how well the browser handles animations and whether any frames are being dropped. 
 
 Using rAF to determine the FPS can be energy intensive and inaccurate. This approach can negatively impact battery life by preventing the skipping of unnecessary steps in the rendering pipeline. While this is not usually the case, using rAF inefficiently can lead to dropped or partially presented frames, making the animation less smooth. It’s not the best method for understanding animation smoothness because it does not take into account factors like compositor offload and offscreen canvas. While rAF can be useful, it isn’t the most accurate and relying on it too heavily can lead to energy waste and suboptimal performance. In addition to negative implications on measurement, rAF can also negatively impact scheduling. Every time rAF is called, the browser assumes there will be a rendering update so it reserves that opportunity even if rAF is only observing. When raF is being used to observe, it wastes the screen refresh and rendering opportunity. It may not hurt performance for animations that are already animating at 60fps, but it may cause concern for less performant animations.
 
 #### [Reference](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame)
+
+## Other Prior Art
 
 ### Long Animation Frames API
 
@@ -118,9 +80,50 @@ While FPS-emitter is a helpful way to measure events that slow down performance,
 
 #### [Reference](https://github.com/MicrosoftEdge/fps-emitter)
 
-## Proposed Approach
+## User Research
 
-There is no proposed approach yet identified by this explainer. Instead, there are a variety of alternatives that we would like to discuss with the broader community.
+### Use Cases
+
+### 1. Web Developers Understanding On-demand Animations
+
+Animation smoothness can be difficult to measure when relating to user interaction. An average metric isn't always effective because in certain apps, animation begins on a user click. There doesn't need to be a continuous measurement since without a user click, there is no animation. Some examples of this include scrolling a long grid or document, selecting or highlighting large areas of the screen, resizing images, dragging objects across the screen, or animations triggered by mouse movement or clicks.
+
+### 2. Gaming
+
+Higher frames per second (fps) lead to smoother animations and a more enjoyable gaming experience. Additionally, poor animation can significantly impact gameplay elements, like how quickly characters can move or decisions can be made, which affects the overall user experience. In continual tension with the desire for smooth animations, game developers are constantly striving to make their visuals higher quality and immersive. To guarantee smooth gameplay, developers need a way to understand how their game’s animations are performing.
+
+### 3. Testing animation performance on different hardware
+
+Testing the performance of animation on different hardware/browser combinations may expose performance issues that could not be seen with existing metrics.
+
+### 4. Improving animation libraries
+
+Animation libraries measure frame rate in different ways. For example, GSAP and PixiJS use tickers to measure FPS, but the developer must add custom logic to run each tick to measure frame rate. Three.js uses a second library, stats.js, to measure frame rate, and anime.js and Motion libraries use rAF calling. It would be beneficial for libraries to have a built-in way to measure FPS. A built-in method would be more convenient and allow for more seamless integration with each library's animation loop, leading to more accurate results. Immediate feedback would make debugging and resolving issues easier. Ideally, this would also standardize a way to measure FPS leading to consistency across libraries.
+
+## Scope
+
+Originally, we proposed an API that offers a comprehensive quantification of the user’s experience regarding animation smoothness, enabling developers to create better user experiences.  
+
+However, feedback from developers has led us to redefine the scope of the problem. There is strong interest in a main-thread-only native API that replaces `requestAnimationFrame()` polling. This scoped solution is a foundational step toward the broader and more complicated goal of comprehensively measuring animation smoothness.  
+
+In this explainer, the main-thread-only rAF replacement API is referred to as V0 and the API that measure smoothness comprehensively is referred to as V1. Our current efforts are focused on developing V0, as it addresses the most immediate needs and lays the groundwork for V1.  
+
+## V0 Goals & Non-goals 
+
+Goals 
+* A native API to replace rAF-based measurement on the main thread
+* Can be used in a prototype API to test the compositor 
+
+Non-goals 
+* Measuring the compositor
+* Standardization
+* Improving/controlling animation smoothness. This proposal is purely for an API to better understand existing behavior.
+* Evaluate an individual animation’s smoothness. The API is focused on the user’s overall experience for entire browser window’s content. 
+
+
+## Former Proposed Approaches
+
+Below are the options that were discussed with the broader community.
 
 ### Option 1: Direct Query
 
@@ -174,16 +177,99 @@ observer.observe({ entryTypes: ["frameSmoothness"] });
 For the event listener scenario, it was determined that using granularity would not give a useful measure of frame info due to lack of detail. The granularity was modeled after the compute pressure API.
 `window.addEventListener("frameratechange", (event) =>{doSomething();})`
 
+## Proposed Solution
+
+The best solution is the PerformanceObserver implementation because it is flexible and familiar. 
+
+It will work similarly to other performance APIs (i.e. LoAF and Paint Timing) that developers are familiar with. Developers will also be able to customize the type of data they want and can get multiple types of data from the same listener. V0 focuses on the metrics at the frame level, not per animation, but the design allows for per animation metrics in the future. 
+
+For an animation on the main thread to be considered smooth, each frame must be produced on time within a set window. To know if an animation is smooth, two questions must be answered: 
+1. When was the frame produced?
+2. What was the expected time window for the frame?
+
+Framerate, consistency, and framerate variations can work together to provide information to help answer these questions. Framerate gives an expected interval but does not explain why frames were late. Consistency measures deviation from the expected intervals. Framerate variations measure whether those deviations are noticeable.  
+
+Using these metrics and modeling after the LoAF and Paint Timing APIs which use the performance observer, the proposed solution is as follows.   
+
+The performance observer could emit an entry for every presented frame, not just long ones.   
+
+```javascript
+// Set up function to collect frame data 
+function setupFrameObserver() { 
+  // Store collected frame data 
+  const frames: FrameTiming[] = [];
+
+  // Create the observer 
+  const observer = new PerformanceObserver((list) => { 
+
+    for (const entry of list.getEntries()) { 
+      if (entry.entryType !== "animation-frame") continue; 
+      // frame info (actual vs expected timing) 
+      frames.push({ 
+        frameDuration: /* extract actual time from entry */, 
+        expectedDuration:  /* extract expected time from entry */, 
+      }); 
+    } 
+  });
+  // Start observing animation-frame entries 
+  observer.observe({ type: "animation-frame", buffered: true }); 
+  return frames; // Return collected frames for later analysis 
+} 
+
+ ```
+The observer collects frame data in FrameTiming.
+
+ 
+```javascript
+// Data per frame 
+interface FrameTiming { 
+  presentedTime: number; // When the frame was actually presented 
+  expectedTime:  number; // The expected time window for that frame 
+}  
+
+```
+Using all of that data, smoothness metrics can be computed and returned as one smoothness object. 
+
+```javascript
+// Compute smoothness metrics from collected frames
+function computeSmoothness(frames: FrameTiming[]): Smoothness { 
+  // Derive intervals from timestamps
+  const actualIntervals   = /* compute differences between presented times */; 
+  const expectedIntervals = /* compute differences between expected times */;
+
+  // Calculate metrics: 
+  // - Framerate: based on average actual interval 
+  // - Consistency: based on variation in actual intervals 
+  // - High Variation %: based on deviation from expected intervals 
+  return { 
+    framerate:    
+    consistencyMs:   
+    highVariationPct: 
+    sampleCount:      frames.length 
+  }; 
+} 
+// Define the metrics object 
+interface Smoothness { 
+  framerate: number; 
+  consistencyMs: number; 
+  highVariationPct: number; 
+  sampleCount: number; 
+} 
+```
+
+The metrics calculated here help answer the two questions: 
+
+1. When was the frame produced?
+2. What was the expected time window for the frame?  
+
+An animation can be considered smooth if frames are produced on time, regularly, and are stable. Ideally, all three metrics would be optimal, but an animation can still be smooth even if one metric is not optimal.
+
+
 ## Concerns/Open Questions
 
-1. The user-perceived smoothness is influenced by both the main thread and the compositor thread. Accurate measurement of frame rates must account for both. Since the compositor thread operates independently of the main thread, it can be difficult to get its frame rate data. However, an accurate frame rate measurements needs to take into account both measurements.
-1. Similar to the abandoned [Frame Timing interface](https://wicg.github.io/frame-timing/#introduction). We are currently gathering historical context on how this relates and why it is no longer being pursued.
+1. The API must consider concerns about fingerprinting. 
 1. Questions to Consider:
-   * Should content missing from the compositor frame due to delayed tile rasterization be tracked?
-   * Should the fps be something that a web page can query anytime? Or only reported out when the browser misses some target?
    * How will this API work with variable rate monitors or on screens with higher refresh rates?
-   * How will this API take into account situations where the compositor thread produces frames that are missing content from the main thread?
-   * How will this API measure both the compositor and the main thread when they may have differing frame rates. The compositor thread can usually run at a higher frame rate than the main thread due to its simpler tasks.
    * Should a developer be able to target a subset of time based on an interaction triggering an animation?
 
 ## Acknowledgements
