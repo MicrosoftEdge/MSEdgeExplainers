@@ -2,7 +2,7 @@
 name: PerformanceNavigationTiming Protocol Launch Timing Information
 about: Issues for PerformanceNavigationTimingProtocol Launch Timing Information
 title: ''
-labels: ''
+labels: 'PerformanceNavigationTimingProtocolLaunch'
 assignees: atulkatti
 
 ---
