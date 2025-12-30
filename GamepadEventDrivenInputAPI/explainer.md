@@ -37,7 +37,7 @@ This document is a starting point for engaging the community and standards bodie
 
 This explainer proposes an event-driven Gamepad Input API for the web, designed to complement the existing polling-based model. By enabling input events to be dispatched in response to changes in gamepad state, this API aims to support low-latency scenarios such as cloud gaming, where timely and reactive input delivery is critical.
 
-This proposal builds on earlier work by Chromium engineers, which explored event-driven gamepad input handling. (Note: The original proposal is documented in a [Google Doc.](https://docs.google.com/document/d/1rnQ1gU0iwPXbO7OvKS6KO9gyfpSdSQvKhK9_OkzUuKE/edit?pli=1&tab=t.0).
+This proposal builds on earlier work by Chromium engineers, which explored event-driven gamepad input handling. (Note: The original proposal is documented in a [Google Doc](https://docs.google.com/document/d/1rnQ1gU0iwPXbO7OvKS6KO9gyfpSdSQvKhK9_OkzUuKE/edit?pli=1&tab=t.0).)
 
 ## Definitions
 
@@ -81,7 +81,7 @@ window.addEventListener('gamepadconnected', () => {
 ```
 #### Key points:
 - navigator.getGamepads() returns a snapshot of all connected gamepads.
-- The polling loop is driven by requestAnimationFrame, typically around 60Hz (matching display refresh rate), which is much lower than the internal OS poll rate (eg., 250Hz). This mismatch can result in missed input updates, making the 60Hz rate insufficient for latency-critical applications like cloud gaming.
+- The polling loop is driven by `requestAnimationFrame`, typically around 60Hz (matching display refresh rate), which is much lower than the internal OS poll rate (eg., 250Hz). This mismatch can result in missed input updates, making the 60Hz rate insufficient for latency-critical applications like cloud gaming.
 
 ## Goals
 
@@ -112,9 +112,9 @@ Some modern controllers include capacitive or touch-sensitive surfaces (e.g., Du
 These properties, `axesChanged`, `buttonsPressed`, `buttonsReleased`, `buttonsValueChanged` and ` touchesChanged` properties are arrays of indices and follow the same indentification model as the [Gamepad.axes](https://w3c.github.io/gamepad/#dom-gamepad-axes) and [Gamepad.buttons](https://w3c.github.io/gamepad/#dom-gamepad-buttons) arrays.
 
 ### Event behavior
-Dispatched on the Window object: The `gamepadrawinputchange` event is dispatched on the Window object when the browser detects gamepad input changes during its polling cycle. The event inherits from GamepadEvent and carries the `.gamepad` attribute containing the current gamepad state.
+Dispatched on the Window object: The `gamepadrawinputchange` event is dispatched on the Window object that experienced the input change. The event inherits from GamepadEvent and carries the `.gamepad` attribute containing the current gamepad state.
 
-Event timing: A new `gamepadrawinputchange` event is dispatched each time the browser's gamepad polling mechanism detects state changes. The event includes delta information indicating which inputs changed since the last browser poll.
+Event timing: A new `gamepadrawinputchange` event is dispatched dispatched for every gamepad input state change, without delay or coalescing. This enables latency-sensitive applications, such as rhythm games, cloud gaming, or real-time multiplayer scenarios, to respond immediately and accurately to input
 
 ## Example `gamepadrawinputchange` event
 
