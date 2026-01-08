@@ -447,6 +447,8 @@ Many thanks for valuable feedback and advice from:
 
 - [Alex Russell](https://github.com/slightlyoff)
 - [Andy Luhrs](https://github.com/aluhrs13)
+- [Daniel Clark](https://github.com/dandclark)
+- [Hoch Hochkeppel](https://github.com/mhochk)
 - [Kevin Babbitt](https://github.com/kbabbitt)
 - [Kurt Catti-Schmidt](https://github.com/KurtCattiSchmidt)
 
