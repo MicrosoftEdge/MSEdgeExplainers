@@ -75,6 +75,14 @@ This proposal is informed by:
 
 This proposal introduces a `mixins` option to `attachInternals()` and a read-only `mixins` property on `ElementInternals` which allows custom elements to attach and inspect specific native behaviors. This approach enables composition while keeping the API simple, allowing elements to adopt behaviors during initialization.
 
+```javascript
+// Attach a mixin during initialization.
+this._internals = this.attachInternals({ mixins: [HTMLSubmitButtonMixin] });
+
+// Inspect attached mixins.
+console.log(this._internals.mixins);
+```
+
 ### Configuration via attachInternals
 
 - Behaviors are exposed as objects that can be passed to `attachInternals` in a `mixins` array.
@@ -95,8 +103,10 @@ The platform would expose the following behavior mixin, mirroring the submission
 
 Each platform behavior mixin must provide:
 
-- Event handling: Automatic wiring of platform events (click, keydown, etc.).
+- Event handling: Automatic wiring of platform events (click, keydown, etc.)
 - ARIA defaults: Implicit roles and properties for accessibility.
+
+Attaching a behavior mixin provides internal platform capabilities but does not automatically add the corresponding properties (like `disabled`, `value`, or `formAction`) or attributes to the custom element. The web component author is responsible for defining these properties and attributes to expose this state to users of the element.
 
 ### Composition via attachInternals
 
@@ -109,7 +119,7 @@ Passing behaviors to `attachInternals()` provides several advantages for web com
 
 ### Use case: Design system button
 
-A design system button that maps semantic variants to platform behaviors.
+A design system button that uses the `type` attribute to determine platform behaviors, similar to native elements.
 
 ```javascript
 class DesignSystemButton extends HTMLElement {
@@ -124,12 +134,10 @@ class DesignSystemButton extends HTMLElement {
             return;
         }
 
-        // Map design system variants to native behaviors.
-        const variant = this.getAttribute('variant') || 'neutral';
         const mixins = [];
 
-        // 'primary' and 'destructive' variants imply form submission.
-        if (['primary', 'destructive'].includes(variant)) {
+        // Check for 'type' attribute to determine behavior, similar to native <button>
+        if (this.getAttribute('type') === 'submit') {
             mixins.push(HTMLSubmitButtonMixin);
         }
 
@@ -165,11 +173,11 @@ customElements.define('ds-button', DesignSystemButton);
 <form action="/save" method="post">
     <input name="username" required>
 
-    <!-- Becomes a submit button based on variant. -->
-    <ds-button variant="primary">Save</ds-button>
+    <!-- Set it as a submit button. -->
+    <ds-button type="submit">Save</ds-button>
 
-    <!-- Remains a regular button. -->
-    <ds-button variant="neutral">Cancel</ds-button>
+    <!-- Regular button by default. -->
+    <ds-button>Cancel</ds-button>
 </form>
 ```
 
@@ -289,7 +297,7 @@ class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 
 Rejected in favor of the imperative API because it prevents the "single class, multiple behaviors" pattern that is common in HTML (e.g., `<input>`, `<button>`).
 
-### Alternative 2: ElementInternals.type (Proposed)
+### Alternative 2: ElementInternals.type ([Proposed](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ElementInternalsType/explainer.md))
 
 Set a single "type" string that grants a predefined bundle of behaviors.
 
@@ -315,7 +323,7 @@ class CustomButton extends HTMLElement {
 
 Too inflexible for the variety of use cases web developers need. While simpler, it doesn't solve the composability problem and it might be confusing for developers to use in practice.
 
-### Alternative 3: Custom Attributes (Proposed)
+### Alternative 3: Custom Attributes ([Proposed](https://github.com/WICG/webcomponents/issues/1029))
 
 Define custom attributes with lifecycle callbacks that add behavior to elements.
 
