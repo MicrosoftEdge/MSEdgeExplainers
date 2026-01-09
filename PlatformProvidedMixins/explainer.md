@@ -106,7 +106,45 @@ Each platform behavior mixin must provide:
 - Event handling: Automatic wiring of platform events (click, keydown, etc.)
 - ARIA defaults: Implicit roles and properties for accessibility.
 
-Attaching a behavior mixin provides internal platform capabilities but does not automatically add the corresponding properties (like `disabled`, `value`, or `formAction`) or attributes to the custom element. The web component author is responsible for defining these properties and attributes to expose this state to users of the element.
+### Accessing Mixin State
+
+Platform-provided mixins expose useful public properties and methods of their corresponding native elements. Authors can expose these capabilities on their custom element's public API by defining accessors that delegate to the mixin state.
+
+For `HTMLSubmitButtonMixin`, the state object exposes the following properties found on [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement):
+
+**Properties:**
+- `disabled`
+- `form` (read-only)
+- `formAction`
+- `formEnctype`
+- `formMethod`
+- `formNoValidate`
+- `formTarget`
+- `labels` (read-only)
+- `name`
+- `value`
+
+```javascript
+class DesignSystemButton extends HTMLElement {
+    get disabled() {
+        return this._internals.getMixinState(HTMLSubmitButtonMixin).disabled;
+    }
+
+    set disabled(val) {
+        this._internals.getMixinState(HTMLSubmitButtonMixin).disabled = val;
+    }
+
+    get formAction() {
+        return this._internals.getMixinState(HTMLSubmitButtonMixin).formAction;
+    }
+
+    set formAction(val) {
+        this._internals.getMixinState(HTMLSubmitButtonMixin).formAction = val;
+    }
+}
+```
+
+This ensures developers don't have to reimplement the state logic that the mixin is supposed to provide.
 
 ### Composition via attachInternals
 
@@ -204,26 +242,6 @@ While this proposal focuses on form submission, the mixin pattern can be extende
 - **Tables**: `HTMLTableMixin` for table layout semantics and accessibility.
 
 *Conflict Resolution: As the number of available mixins grows, we must address how to handle collisions when multiple mixins attempt to control the same attributes or properties. We propose that the order of mixins in the array passed to `attachInternals` should determine precedence (e.g., last one wins), but specific heuristics for complex clashes need to be defined.*
-
-### Accessing Mixin State
-
-As detailed in the Platform-Provided Behavior Mixins section, authors are responsible for defining public properties, attributes, and methods. However, for future mixins that manage complex internal state (like `HTMLInputMixin` or `HTMLButtonMixin`), developers will need a way to access the underlying platform state and methods to implement these public accessors efficiently.
-
-Since the `mixins` property on `ElementInternals` returns static mixin objects, we anticipate needing an API to retrieve the instance-specific state associated with a mixin.
-
-```javascript
-class MyCustomInput extends HTMLElement {
-    get value() {
-        return this._internals.getMixinState(HTMLInputMixin).value;
-    }
-
-    checkValidity() {
-        return this._internals.getMixinState(HTMLInputMixin).checkValidity();
-    }
-}
-```
-
-This ensures developers don't have to reimplement the state logic, like validation, that the mixin is supposed to provide.
 
 ### Future use case: Inheritance and composition
 
