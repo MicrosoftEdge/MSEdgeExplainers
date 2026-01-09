@@ -125,7 +125,12 @@ For `HTMLSubmitButtonMixin`, the state object exposes the following properties f
 - `value`
 
 ```javascript
-class DesignSystemButton extends HTMLElement {
+class CustomSubmitButton extends HTMLElement {
+    constructor() {
+        super();
+        this._internals = this.attachInternals({ mixins: [HTMLSubmitButtonMixin] });
+    }
+
     get disabled() {
         return this._internals.getMixinState(HTMLSubmitButtonMixin).disabled;
     }
@@ -174,7 +179,7 @@ class DesignSystemButton extends HTMLElement {
 
         const mixins = [];
 
-        // Check for 'type' attribute to determine behavior, similar to native <button>
+        // Check for 'type' attribute to determine behavior.
         if (this.getAttribute('type') === 'submit') {
             mixins.push(HTMLSubmitButtonMixin);
         } else {
