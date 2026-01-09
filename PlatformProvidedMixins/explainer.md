@@ -139,6 +139,8 @@ class DesignSystemButton extends HTMLElement {
         // Check for 'type' attribute to determine behavior, similar to native <button>
         if (this.getAttribute('type') === 'submit') {
             mixins.push(HTMLSubmitButtonMixin);
+        } else {
+            mixins.push(HTMLButtonMixin);
         }
 
         this._internals = this.attachInternals({ mixins });
@@ -202,6 +204,26 @@ While this proposal focuses on form submission, the mixin pattern can be extende
 - **Tables**: `HTMLTableMixin` for table layout semantics and accessibility.
 
 *Conflict Resolution: As the number of available mixins grows, we must address how to handle collisions when multiple mixins attempt to control the same attributes or properties. We propose that the order of mixins in the array passed to `attachInternals` should determine precedence (e.g., last one wins), but specific heuristics for complex clashes need to be defined.*
+
+### Accessing Mixin State
+
+As detailed in the Platform-Provided Behavior Mixins section, authors are responsible for defining public properties, attributes, and methods. However, for future mixins that manage complex internal state (like `HTMLInputMixin` or `HTMLButtonMixin`), developers will need a way to access the underlying platform state and methods to implement these public accessors efficiently.
+
+Since the `mixins` property on `ElementInternals` returns static mixin objects, we anticipate needing an API to retrieve the instance-specific state associated with a mixin.
+
+```javascript
+class MyCustomInput extends HTMLElement {
+    get value() {
+        return this._internals.getMixinState(HTMLInputMixin).value;
+    }
+
+    checkValidity() {
+        return this._internals.getMixinState(HTMLInputMixin).checkValidity();
+    }
+}
+```
+
+This ensures developers don't have to reimplement the state logic, like validation, that the mixin is supposed to provide.
 
 ### Future use case: Inheritance and composition
 
