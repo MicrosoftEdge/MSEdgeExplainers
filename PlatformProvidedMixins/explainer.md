@@ -110,6 +110,8 @@ Each platform behavior mixin must provide:
 
 Platform-provided mixins expose useful public properties and methods of their corresponding native elements. Authors can expose these capabilities on their custom element's public API by defining accessors that delegate to the mixin state.
 
+These APIs are accessed via specific properties on `ElementInternals` (e.g., `htmlSubmitButtonMixinState`). This property provides a direct interface to the underlying platform behavior managed by the mixin. It returns a non-null state object only if the corresponding mixin is passed to `attachInternals`.
+
 For `HTMLSubmitButtonMixin`, the state object exposes the following properties found on [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement):
 
 **Properties:**
@@ -132,19 +134,19 @@ class CustomSubmitButton extends HTMLElement {
     }
 
     get disabled() {
-        return this._internals.getMixinState(HTMLSubmitButtonMixin).disabled;
+        return this._internals.htmlSubmitButtonMixinState.disabled;
     }
 
     set disabled(val) {
-        this._internals.getMixinState(HTMLSubmitButtonMixin).disabled = val;
+        this._internals.htmlSubmitButtonMixinState.disabled = val;
     }
 
     get formAction() {
-        return this._internals.getMixinState(HTMLSubmitButtonMixin).formAction;
+        return this._internals.htmlSubmitButtonMixinState.formAction;
     }
 
     set formAction(val) {
-        this._internals.getMixinState(HTMLSubmitButtonMixin).formAction = val;
+        this._internals.htmlSubmitButtonMixinState.formAction = val;
     }
 }
 ```
