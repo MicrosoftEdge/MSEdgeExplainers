@@ -946,6 +946,12 @@
         return `${Math.round(n)}px`;
       }
 
+      function calcSmoothnessScore(entry) {
+        const expected = entry.framesExpected || 0;
+        const produced = entry.framesProduced || 0;
+        return expected > 0 ? produced / expected : 1;
+      }
+
       function fmtVelocity(n) {
         if (!Number.isFinite(n)) return '—';
         return `${Math.round(n)}px/s`;
@@ -1066,7 +1072,7 @@
         }
 
         const durations = entries.map(e => e.duration).filter(Number.isFinite);
-        const smoothness = entries.map(e => e.smoothnessScore).filter(Number.isFinite);
+        const smoothness = entries.map(e => calcSmoothnessScore(e)).filter(Number.isFinite);
         const dropped = entries.map(e => {
           const expected = e.framesExpected || 0;
           const produced = e.framesProduced || 0;
@@ -1110,9 +1116,10 @@
 
         const rows = entries.slice().reverse().map((e, i) => {
           const seq = entries.length - i;
-          const cls = scoreClass(e.smoothnessScore);
+          const smoothnessScore = calcSmoothnessScore(e);
+          const cls = scoreClass(smoothnessScore);
           const dotClass = cls === 'good' ? '' : (cls === 'warn' ? 'warn' : 'bad');
-          const scoreTxt = fmtPct01(e.smoothnessScore);
+          const scoreTxt = fmtPct01(smoothnessScore);
           const durTxt = fmtMs(e.duration);
           const dx = e.distanceX || 0;
           const dy = e.distanceY || 0;
@@ -1159,7 +1166,7 @@
               const scrollStartLatency = Number.isFinite(e.firstFrameTime) && Number.isFinite(e.startTime)
                 ? Math.max(0, e.firstFrameTime - e.startTime)
                 : 0;
-              const smoothnessScore = e.smoothnessScore;
+              const smoothnessScore = calcSmoothnessScore(e);
               const logData = e.toJSON ? e.toJSON() : e;
               console.log('PerformanceScrollTiming', logData);
               console.log('  → calculated scrollStartLatency:', scrollStartLatency.toFixed(2), 'ms');
@@ -1240,7 +1247,7 @@
               scrollStartLatency: Number.isFinite(e.firstFrameTime) && Number.isFinite(e.startTime)
                 ? Math.max(0, e.firstFrameTime - e.startTime)
                 : 0,
-              smoothnessScore: e.smoothnessScore,
+              smoothnessScore: calcSmoothnessScore(e),
               scrollVelocity: dur > 0 ? (dist / dur) * 1000 : 0,
             }
           };

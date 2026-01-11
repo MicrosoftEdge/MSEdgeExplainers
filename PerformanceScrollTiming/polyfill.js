@@ -556,11 +556,6 @@ class PerformanceScrollTimingPolyfill {
     // Derived metric: scroll start latency (polyfill convenience, not in proposed spec)
     this.scrollStartLatency = Math.max(0, this.firstFrameTime - this.startTime);
 
-    // Derived metric: smoothness score (polyfill convenience, not in proposed spec)
-    this.smoothnessScore = data.framesExpected > 0
-      ? data.framesProduced / data.framesExpected
-      : 1;
-
     this.checkerboardTime = data.checkerboardTime;
     this.scrollSource = data.scrollSource;
     this.target = data.target;
