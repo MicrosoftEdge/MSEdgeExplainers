@@ -37,7 +37,7 @@
 
 ## Introduction
 
-Scrolling is one of the most fundamental interactions on the web, yet developers lack a consistent, reliable way to measure its performance. The **Scroll Timing API** extends the Performance Observer pattern to expose critical scroll metrics — including responsiveness, smoothness, frame drops, checkerboarding, velocity, and scroll distance — enabling developers to monitor real-user scroll experiences, diagnose performance issues, and optimize for smooth, engaging interactions.
+Scrolling is one of the most fundamental interactions on the web, yet developers lack a consistent, reliable way to measure its performance. The **Scroll Timing API** extends the `PerformanceObserver` pattern to expose critical scroll metrics — including responsiveness, smoothness, frame drops, checkerboarding, velocity, and scroll distance — enabling developers to monitor real-user scroll experiences, diagnose performance issues, and optimize for smooth, engaging interactions.
 
 Try out the API (polyfill) in action: [Demo Page](https://nhelfman.github.io/scroll-timing-api/demo.html)
 
@@ -173,16 +173,7 @@ None
 
 ### Design Notes
 
-For detailed design rationale and implementation considerations, see [DESIGN_NOTES.md](DESIGN_NOTES.md).
-
-This document covers:
-- **Scroll Start Time**: Measuring input-to-frame latency and responsiveness
-- **Scroll End Time**: Detecting interaction completion and momentum scrolling
-- **Scroll Smoothness**: Frame production consistency and dropped frame detection
-- **Scroll Checkerboarding**: Unpainted content visibility and rasterization timing
-- **Scroll Velocity**: Distance and speed metrics for performance correlation
-- **Scroll Interruption and Cancellation**: Handling interrupted or switched input sources
-- **Edge Cases**: Boundary conditions, zero-distance scrolls, and overscroll behavior
+For detailed design rationale and implementation considerations covering scroll start time, scroll end time, smoothness, checkerboarding, velocity, interruption handling, and edge cases, see [DESIGN_NOTES.md](DESIGN_NOTES.md).
 
 ## Alternatives considered
 
@@ -197,7 +188,7 @@ Introduce a dedicated API (e.g., a `ScrollObserver` class) to track and report s
 This approach would result in substantial overlap with the existing PerformanceObserver API, which could reduce API consistency and increase maintenance complexity.
 
 ### Extending [Event Timing API](https://www.w3.org/TR/event-timing/)
-Extend the existing PerformanceEventTiming interface to include scroll-specific metrics for scroll events.
+Extend the existing `PerformanceEventTiming` interface to include scroll-specific metrics for scroll events.
 
 While this approach would leverage an existing API, scroll interactions have fundamentally different characteristics than discrete events. Scrolling is a continuous interaction that spans multiple frames and requires aggregate metrics (frame counts, smoothness, checkerboarding) that don't align well with the event-based model of Event Timing, which focuses on discrete input events and their processing latency.
 
@@ -288,4 +279,4 @@ See [polyfill.js](polyfill.js) for the full implementation.
 **Note:** This polyfill uses heuristics-based approximations due to the lack of relevant native APIs required for accurate scroll performance measurement. It is intended for demonstration and prototyping purposes only. Metrics like checkerboarding detection and precise frame timing cannot be accurately measured without browser-level instrumentation. A native implementation would have access to compositor data, rendering pipeline information, and other internal metrics not exposed to JavaScript.
 
 ### Acknowledgements
-Many thanks for valuable feedback and advice from: Alex Russel, Mike Jackson, Olga Gerchikov, Andy Luhr for guidance and contributions
+Many thanks for valuable feedback and advice from: Alex Russel, Mike Jackson, Olga Gerchikov, Andy Luhr for guidance and contributions.
