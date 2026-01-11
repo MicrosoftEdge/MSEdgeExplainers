@@ -279,4 +279,4 @@ See [polyfill.js](polyfill.js) for the full implementation.
 **Note:** This polyfill uses heuristics-based approximations due to the lack of relevant native APIs required for accurate scroll performance measurement. It is intended for demonstration and prototyping purposes only. Metrics like checkerboarding detection and precise frame timing cannot be accurately measured without browser-level instrumentation. A native implementation would have access to compositor data, rendering pipeline information, and other internal metrics not exposed to JavaScript.
 
 ### Acknowledgements
-Many thanks for valuable feedback and advice from: Alex Russel, Mike Jackson, Olga Gerchikov, Andy Luhr for guidance and contributions.
+Many thanks for valuable feedback and advice from: Alex Russel, Mike Jackson, Olga Gerchikov, Andy Luhr, Pninit Goldman, Roee Barnea for guidance and contributions.
