@@ -186,17 +186,33 @@ This document covers:
 
 ## Alternatives considered
 
-<!-- TODO: Document alternative approaches that were considered and why they were rejected -->
+### New scroll events
+Introduce new scroll-related events with relevant properties to report performance data (e.g., `scrollstart`, `scrollmovementend`, `scrollcheckerboarding`).
+
+This approach presents several drawbacks: it increases implementation complexity as developers must register multiple event listeners on relevant DOM elements, and processing event data on the main thread during active scrolling can negatively impact performance.
+
+### New ScrollObserver
+Introduce a dedicated API (e.g., a `ScrollObserver` class) to track and report scroll-related performance information.
+
+This approach would result in substantial overlap with the existing PerformanceObserver API, which could reduce API consistency and increase maintenance complexity.
+
+### Extending [Event Timing API](https://www.w3.org/TR/event-timing/)
+Extend the existing PerformanceEventTiming interface to include scroll-specific metrics for scroll events.
+
+While this approach would leverage an existing API, scroll interactions have fundamentally different characteristics than discrete events. Scrolling is a continuous interaction that spans multiple frames and requires aggregate metrics (frame counts, smoothness, checkerboarding) that don't align well with the event-based model of Event Timing, which focuses on discrete input events and their processing latency.
 
 ## Accessibility, Internationalization, Privacy, and Security Considerations
 
 ### Accessibility
 
-<!-- TODO: Add accessibility considerations -->
+This API does not introduce new accessibility concerns as it only exposes information to app developers and not users of the web page.
 
 ### Internationalization
 
-<!-- TODO: Add internationalization considerations -->
+1. Scroll Direction and Writing Modes: The `distanceX` and `distanceY` properties use a coordinate system where positive Y is down and positive X is right. This is independent of writing modes (RTL/LTR, vertical writing) and always reflects physical scroll distance in the viewport coordinate space. The API doesn't need to account for logical directions (inline/block) since it measures physical scrolling behavior.
+2. `scrollSource` Values: The API uses English string literals ("touch", "wheel", "keyboard", "programmatic", "other") as enumerated values. These are programming identifiers, not user-facing strings, so they don't require localization.
+3. No Text or Cultural Content: The API exposes only numerical performance data - timestamps, frame counts, distances, and durations. There are no date formats, number formats, or text strings that would require localization.
+4. Universal Performance Metrics: Performance measurements like smoothness, latency, and frame drops are culturally neutral metrics that apply universally across locales.
 
 ### Privacy and Security
 
@@ -222,9 +238,6 @@ Aggregated scroll metrics (velocity, distance, source) could theoretically be us
 **High-resolution timestamps:**
 The API uses `DOMHighResTimeStamp` for `startTime`, `firstFrameTime`, and `duration`. These are subject to the same timing mitigations applied to other Performance APIs (reduced precision, cross-origin isolation requirements).
 
-**Scroll start latency:**
-The `firstFrameTime - startTime` delta could potentially reveal main thread blocking time, which might leak information about JavaScript execution in certain contexts.
-
 #### Cross-Origin Considerations
 
 **Nested iframes:**
@@ -243,7 +256,7 @@ Implementations should consider:
 
 ## Stakeholder Feedback / Opposition
 
-<!-- TODO: Document implementor positions with evidence (links to public statements, bug trackers, etc.) -->
+None reported yet.
 
 ## References & acknowledgements
 
@@ -261,7 +274,6 @@ Should the API provide a pre-calculated `smoothnessScore`, or only raw frame met
 Should `"scrollbar"` be added as a distinct `scrollSource` value? This raises privacy concerns as no existing web API exposes scrollbar interaction.
 
 
-
 ### Polyfill
 
 A demonstration polyfill is provided to illustrate the API usage patterns and enable experimentation before native browser support is available.
@@ -277,5 +289,3 @@ See [polyfill.js](polyfill.js) for the full implementation.
 
 ### Acknowledgements
 Many thanks for valuable feedback and advice from: Alex Russel, Mike Jackson, Olga Gerchikov, Andy Luhr for guidance and contributions
-
-<!-- TODO: Add acknowledgements for contributors and reviewers -->
