@@ -627,8 +627,10 @@
   <script type="module">
     // Only load polyfill if native PerformanceScrollTiming is not available
     if (!('PerformanceScrollTiming' in window)) {
-      import('./polyfill.js');
+      await import('./polyfill.js');
     }
+    // Dispatch event to signal that the API is ready
+    window.dispatchEvent(new Event('scrollTimingAPIReady'));
   </script>
 </head>
 <body>
@@ -989,11 +991,20 @@
       addEventListener('scroll', updateScrollProgress, { passive: true });
       addEventListener('resize', updateScrollProgress, { passive: true });
 
-      // Identify implementation (native vs polyfill) heuristically.
-      const implName = (window.PerformanceScrollTiming && window.PerformanceScrollTiming.name) ? window.PerformanceScrollTiming.name : 'missing';
-      els.implText.textContent = implName === 'PerformanceScrollTimingPolyfill'
-        ? 'polyfill.js (demo)'
-        : (window.PerformanceScrollTiming ? `native (${implName || 'unknown'})` : 'not available');
+      // Function to update implementation text
+      function updateImplementationText() {
+        const implName = (window.PerformanceScrollTiming && window.PerformanceScrollTiming.name) ? window.PerformanceScrollTiming.name : 'missing';
+        els.implText.textContent = implName === 'PerformanceScrollTimingPolyfill'
+          ? 'polyfill.js (demo)'
+          : (window.PerformanceScrollTiming ? `native (${implName || 'unknown'})` : 'not available');
+      }
+
+      // Wait for the API to be ready before updating implementation text
+      addEventListener('scrollTimingAPIReady', updateImplementationText, { once: true });
+      // Also check immediately in case the event already fired
+      if (window.PerformanceScrollTiming) {
+        updateImplementationText();
+      }
 
       let observer = null;
       let entries = [];
