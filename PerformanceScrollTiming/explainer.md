@@ -2,14 +2,58 @@
 
 **A proposal to standardize scroll performance measurement on the web.**
 
+## Authors
+
+- TODO: Add author names and affiliations
+
+## Participate
+
+- TODO: Add link to issue tracker
+- TODO: Add link to discussion forum
+
+## Table of Contents
+
+<!-- TODO: Generate using a tool like doctoc -->
+
+## Introduction
+
 Scrolling is one of the most fundamental interactions on the web, yet developers lack a consistent, reliable way to measure its performance. The **Scroll Timing API** extends the Performance Observer pattern to expose critical scroll metrics — including responsiveness, smoothness, frame drops, checkerboarding, velocity, and scroll distance — enabling developers to monitor real-user scroll experiences, diagnose performance issues, and optimize for smooth, engaging interactions.
 
 Try out the API (polyfill) in action: [Demo Page](https://nhelfman.github.io/scroll-timing-api/demo.html)
 
-# API Shape
+## User-Facing Problem
+
+Scroll is a very common user interaction in many web apps used for navigating content outside the available viewport or container.
+
+Measuring scroll performance is critical because:
+
+1. **User Experience Impact**: Scroll jank and stuttering are immediately perceptible to users and significantly degrade the browsing experience. Smooth, responsive scrolling is associated with higher perceived quality and user engagement.
+
+2. **Lack of Standardized Metrics**: Currently, developers rely on ad-hoc solutions like `requestAnimationFrame` loops or `IntersectionObserver` hacks to approximate scroll performance, leading to inconsistent measurements across sites and tools.
+
+3. **Real User Monitoring (RUM)**: A standard API enables collecting scroll performance data from real users in production, allowing developers to identify performance issues that may not appear in lab testing.
+
+4. **Correlation with Business Metrics**: Poor scroll performance can correlate with reduced user engagement and lower time-on-page, and may impact conversion rates, especially on content-heavy sites (typically validated via RUM analysis and/or A/B tests).
+
+5. **Framework and Library Support**: A standardized API allows UI frameworks, virtual scrolling libraries, and performance monitoring tools to provide consistent scroll performance insights.
+
+### Goals
+
+<!-- TODO: List explicit goals as bullet points -->
+
+### Non-goals
+
+<!-- TODO: List explicit non-goals as bullet points -->
+
+### User research
+
+<!-- TODO: Add any user research conducted, or note if none has been done yet -->
+
+## Proposed Approach
+
 The Scroll Timing API extends the Performance Observer pattern, consistent with other performance APIs like Long Tasks, Layout Instability, and Event Timing.
 
-## `PerformanceScrollTiming` Interface
+### `PerformanceScrollTiming` Interface
 
 ```java
 interface PerformanceScrollTiming : PerformanceEntry {
@@ -54,7 +98,7 @@ interface PerformanceScrollTiming : PerformanceEntry {
 - **Total distance**: `√(distanceX² + distanceY²)` — Euclidean scroll distance
 - **Scroll velocity**: `totalDistance / duration * 1000` — scroll speed in pixels per second
 
-## Example Usage with PerformanceObserver
+### Example Usage with PerformanceObserver
 
 ```javascript
 // Create an observer to capture scroll timing entries
@@ -96,22 +140,11 @@ const observer = new PerformanceObserver((list) => {
 observer.observe({ type: 'scroll', buffered: true });
 ```
 
-# Motivation
-Scroll is a very common user interaction in many web apps used for navigating content outside the available viewport or container.
+### Dependencies on non-stable features
 
-Measuring scroll performance is critical because:
+<!-- TODO: List any dependencies on non-stable features, or note if there are none -->
 
-1. **User Experience Impact**: Scroll jank and stuttering are immediately perceptible to users and significantly degrade the browsing experience. Smooth, responsive scrolling is associated with higher perceived quality and user engagement.
-
-2. **Lack of Standardized Metrics**: Currently, developers rely on ad-hoc solutions like `requestAnimationFrame` loops or `IntersectionObserver` hacks to approximate scroll performance, leading to inconsistent measurements across sites and tools.
-
-3. **Real User Monitoring (RUM)**: A standard API enables collecting scroll performance data from real users in production, allowing developers to identify performance issues that may not appear in lab testing.
-
-4. **Correlation with Business Metrics**: Poor scroll performance can correlate with reduced user engagement and lower time-on-page, and may impact conversion rates, especially on content-heavy sites (typically validated via RUM analysis and/or A/B tests).
-
-5. **Framework and Library Support**: A standardized API allows UI frameworks, virtual scrolling libraries, and performance monitoring tools to provide consistent scroll performance insights.
-
-# Design Notes
+### Design Notes
 
 For detailed design rationale and implementation considerations, see [DESIGN_NOTES.md](DESIGN_NOTES.md).
 
@@ -124,23 +157,25 @@ This document covers:
 - **Scroll Interruption and Cancellation**: Handling interrupted or switched input sources
 - **Edge Cases**: Boundary conditions, zero-distance scrolls, and overscroll behavior
 
-# Polyfill
-A demonstration polyfill is provided to illustrate the API usage patterns and enable experimentation before native browser support is available.
+## Alternatives considered
 
-See [polyfill.js](polyfill.js) for the full implementation.
+<!-- TODO: Document alternative approaches that were considered and why they were rejected -->
 
-**Usage:**
-```html
-<script src="polyfill.js"></script>
-```
+## Accessibility, Internationalization, Privacy, and Security Considerations
 
-**Note:** This polyfill uses heuristics-based approximations due to the lack of relevant native APIs required for accurate scroll performance measurement. It is intended for demonstration and prototyping purposes only. Metrics like checkerboarding detection and precise frame timing cannot be accurately measured without browser-level instrumentation. A native implementation would have access to compositor data, rendering pipeline information, and other internal metrics not exposed to JavaScript.
+### Accessibility
 
-# Privacy and Security Considerations
+<!-- TODO: Add accessibility considerations -->
+
+### Internationalization
+
+<!-- TODO: Add internationalization considerations -->
+
+### Privacy and Security
 
 Performance APIs can expose information that may be used for fingerprinting or side-channel attacks. This section outlines the privacy and security implications of the Scroll Timing API.
 
-## Fingerprinting Concerns
+#### Fingerprinting Concerns
 
 **Display refresh rate inference:**
 The `framesExpected` metric, combined with `duration`, can reveal the device's display refresh rate. For example:
@@ -155,7 +190,7 @@ Frame production patterns (`framesProduced` relative to `framesExpected`) may re
 **Scroll behavior patterns:**
 Aggregated scroll metrics (velocity, distance, source) could theoretically be used to profile user behavior patterns, though this requires persistent observation across sessions.
 
-## Timing Attack Considerations
+#### Timing Attack Considerations
 
 **High-resolution timestamps:**
 The API uses `DOMHighResTimeStamp` for `startTime`, `firstFrameTime`, and `duration`. These are subject to the same timing mitigations applied to other Performance APIs (reduced precision, cross-origin isolation requirements).
@@ -163,7 +198,7 @@ The API uses `DOMHighResTimeStamp` for `startTime`, `firstFrameTime`, and `durat
 **Scroll start latency:**
 The `firstFrameTime - startTime` delta could potentially reveal main thread blocking time, which might leak information about JavaScript execution in certain contexts.
 
-## Cross-Origin Considerations
+#### Cross-Origin Considerations
 
 **Nested iframes:**
 When scrolling occurs in a cross-origin iframe, the parent document should not receive `PerformanceScrollTiming` entries for that scroll. Each origin observes only its own scroll interactions.
@@ -171,7 +206,7 @@ When scrolling occurs in a cross-origin iframe, the parent document should not r
 **`target` attribute:**
 The `target` attribute returns an `Element` reference. For cross-origin iframes, this would be `null` or restricted to prevent leaking DOM references across origins.
 
-## Mitigations
+#### Mitigations
 
 Implementations should consider:
 - Applying timestamp precision reduction consistent with other Performance APIs
@@ -179,20 +214,43 @@ Implementations should consider:
 - Potentially gating detailed metrics behind permissions or secure contexts
 - Following existing precedents from Event Timing, Long Tasks, and Layout Instability APIs
 
-# Open Questions
+## Stakeholder Feedback / Opposition
+
+<!-- TODO: Document implementor positions with evidence (links to public statements, bug trackers, etc.) -->
+
+## References & acknowledgements
+
+### Open Questions
 
 For detailed discussion of these design decisions, see [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
-## Refresh Rate Baseline for Frame Counting
+#### Refresh Rate Baseline for Frame Counting
 Should `framesExpected` use a standardized 60fps baseline (consistent across devices) or the device's actual refresh rate (accurate to user experience)? This also raises concerns about dynamic refresh rates (VRR displays, browser throttling).
 
-## Smoothness Scoring Options
+#### Smoothness Scoring Options
 Should the API provide a pre-calculated `smoothnessScore`, or only raw frame metrics for developers to calculate their own? Options include simple ratio, harmonic mean, or RMS-based calculations.
 
-## Scrollbar as a Distinct Scroll Source
+#### Scrollbar as a Distinct Scroll Source
 Should `"scrollbar"` be added as a distinct `scrollSource` value? This raises privacy concerns as no existing web API exposes scrollbar interaction.
 
-## References
+### Related Work
 
 - [Chrome Graphics Metrics Definitions](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/docs/speed/graphics_metrics_definitions.md)
 - [Towards an Animation Smoothness Metric (web.dev)](https://web.dev/articles/smoothness)
+
+### Polyfill
+
+A demonstration polyfill is provided to illustrate the API usage patterns and enable experimentation before native browser support is available.
+
+See [polyfill.js](polyfill.js) for the full implementation.
+
+**Usage:**
+```html
+<script src="polyfill.js"></script>
+```
+
+**Note:** This polyfill uses heuristics-based approximations due to the lack of relevant native APIs required for accurate scroll performance measurement. It is intended for demonstration and prototyping purposes only. Metrics like checkerboarding detection and precise frame timing cannot be accurately measured without browser-level instrumentation. A native implementation would have access to compositor data, rendering pipeline information, and other internal metrics not exposed to JavaScript.
+
+### Acknowledgements
+
+<!-- TODO: Add acknowledgements for contributors and reviewers -->
