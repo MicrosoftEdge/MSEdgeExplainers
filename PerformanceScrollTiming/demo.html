@@ -624,7 +624,12 @@
     a:hover { text-decoration: underline; }
   </style>
 
-  <script type="module" src="polyfill.js"></script>
+  <script type="module">
+    // Only load polyfill if native PerformanceScrollTiming is not available
+    if (!('PerformanceScrollTiming' in window)) {
+      import('./polyfill.js');
+    }
+  </script>
 </head>
 <body>
   <div class="topbar">
