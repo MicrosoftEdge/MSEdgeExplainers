@@ -38,6 +38,7 @@
     }
 
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     html, body { height: 100%; }
     body {
       margin: 0;
@@ -1276,8 +1277,30 @@
       els.smoothScrollBtn.addEventListener('click', () => {
         const doc = document.documentElement;
         const max = Math.max(1, doc.scrollHeight - doc.clientHeight);
-        const target = Math.min(max, (doc.scrollTop || document.body.scrollTop) + Math.round(doc.clientHeight * 1.2));
-        window.scrollTo({ top: target, behavior: 'smooth' });
+        const currentScroll = doc.scrollTop || document.body.scrollTop;
+        const target = Math.min(max, currentScroll + Math.round(doc.clientHeight * 1.2));
+
+        // Use a manual smooth scroll for consistent behavior across browsers
+        const startTime = performance.now();
+        const duration = 500; // ms
+        const startScroll = currentScroll;
+        const distance = target - startScroll;
+
+        function easeOutCubic(t) {
+          return 1 - Math.pow(1 - t, 3);
+        }
+
+        function step(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = easeOutCubic(progress);
+          window.scrollTo(0, startScroll + distance * eased);
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
       });
 
       // Jank simulation: busy-loop during scroll events.
