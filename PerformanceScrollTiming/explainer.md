@@ -4,16 +4,36 @@
 
 ## Authors
 
-- TODO: Add author names and affiliations
+- [Noam Helfman](https://github.com/nhelfman) (Microsoft)
 
 ## Participate
 
-- TODO: Add link to issue tracker
-- TODO: Add link to discussion forum
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1226)
 
 ## Table of Contents
 
-<!-- TODO: Generate using a tool like doctoc -->
+- [Introduction](#introduction)
+- [User-Facing Problem](#user-facing-problem)
+  - [Goals](#goals)
+  - [Non-goals](#non-goals)
+  - [User research](#user-research)
+- [Proposed Approach](#proposed-approach)
+  - [`PerformanceScrollTiming` Interface](#performancescrolltiming-interface)
+  - [Attribute Reference](#attribute-reference)
+  - [Example Usage with PerformanceObserver](#example-usage-with-performanceobserver)
+  - [Dependencies on non-stable features](#dependencies-on-non-stable-features)
+  - [Design Notes](#design-notes)
+- [Alternatives considered](#alternatives-considered)
+- [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+  - [Accessibility](#accessibility)
+  - [Internationalization](#internationalization)
+  - [Privacy and Security](#privacy-and-security)
+- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+- [References & acknowledgements](#references--acknowledgements)
+  - [Open Questions](#open-questions)
+  - [Related Work](#related-work)
+  - [Polyfill](#polyfill)
+  - [Acknowledgements](#acknowledgements)
 
 ## Introduction
 
@@ -39,11 +59,15 @@ Measuring scroll performance is critical because:
 
 ### Goals
 
-<!-- TODO: List explicit goals as bullet points -->
+- Provide an intuitive Web API for tracking and measuring scroll performance
+- Integrate seamlessly with the [PerformanceObserver API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceObserver)
+- Ensure cross-platform compatibility across operating systems and browsers
+- Expose foundational metrics that enable calculation of derived performance indicators
 
 ### Non-goals
 
-<!-- TODO: List explicit non-goals as bullet points -->
+- Address general [animation smoothness](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AnimationSmoothness/explainer.md) beyond scroll interactions
+- Prescribe explicit performance thresholds or targets (e.g., smoothness scores), as these are context-dependent and vary across use cases
 
 ### User research
 
@@ -252,5 +276,6 @@ See [polyfill.js](polyfill.js) for the full implementation.
 **Note:** This polyfill uses heuristics-based approximations due to the lack of relevant native APIs required for accurate scroll performance measurement. It is intended for demonstration and prototyping purposes only. Metrics like checkerboarding detection and precise frame timing cannot be accurately measured without browser-level instrumentation. A native implementation would have access to compositor data, rendering pipeline information, and other internal metrics not exposed to JavaScript.
 
 ### Acknowledgements
+Many thanks for valuable feedback and advice from: Alex Russel, Mike Jackson, Olga Gerchikov, Andy Luhr for guidance and contributions
 
 <!-- TODO: Add acknowledgements for contributors and reviewers -->
