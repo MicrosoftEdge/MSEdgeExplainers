@@ -71,7 +71,10 @@ Measuring scroll performance is critical because:
 
 ### User research
 
-<!-- TODO: Add any user research conducted, or note if none has been done yet -->
+- [Chrome Graphics Metrics Definitions](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/docs/speed/graphics_metrics_definitions.md)
+- [Towards an Animation Smoothness Metric (web.dev)](https://web.dev/articles/smoothness)
+- [How Much Faster is Fast Enough?](https://www.tactuallabs.com/papers/howMuchFasterIsFastEnoughCHI15.pdf)
+- [Scrolling and Attention](https://www.nngroup.com/articles/scrolling-and-attention/)
 
 ## Proposed Approach
 
@@ -166,7 +169,7 @@ observer.observe({ type: 'scroll', buffered: true });
 
 ### Dependencies on non-stable features
 
-<!-- TODO: List any dependencies on non-stable features, or note if there are none -->
+None
 
 ### Design Notes
 
@@ -257,10 +260,7 @@ Should the API provide a pre-calculated `smoothnessScore`, or only raw frame met
 #### Scrollbar as a Distinct Scroll Source
 Should `"scrollbar"` be added as a distinct `scrollSource` value? This raises privacy concerns as no existing web API exposes scrollbar interaction.
 
-### Related Work
 
-- [Chrome Graphics Metrics Definitions](https://chromium.googlesource.com/chromium/src/+/refs/heads/main/docs/speed/graphics_metrics_definitions.md)
-- [Towards an Animation Smoothness Metric (web.dev)](https://web.dev/articles/smoothness)
 
 ### Polyfill
 
