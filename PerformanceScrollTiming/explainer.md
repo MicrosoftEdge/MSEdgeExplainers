@@ -265,8 +265,7 @@ Should `framesExpected` use a standardized 60fps baseline (consistent across dev
 Should the API provide a pre-calculated `smoothnessScore`, or only raw frame metrics for developers to calculate their own? Options include simple ratio, harmonic mean, or RMS-based calculations.
 
 #### Scrollbar as a Distinct Scroll Source
-Should `"scrollbar"` be added as a distinct `scrollSource` value? This raises privacy concerns as no existing web API exposes scrollbar interaction.
-
+Should `"scrollbar"` be added as a distinct `scrollSource` value (and relatedly, do we ever want more specific sources like `"trackpad"`, `"autoscroll"`, etc.)? One motivation for explicit `"scrollbar"` is that scrollbar-driven scrolling can be a major contributor to checkerboarding in practice, and developers may want to segment/diagnose that path specifically. However, adding more granular source values may increase fingerprinting surface by exposing additional details about a user’s input/interaction modality beyond what is commonly available today; this is why the current proposal buckets it with less-common mechanisms into `"other"`. We should discuss whether the diagnostic value outweighs the privacy cost, and if so what mitigations would be acceptable (e.g., keeping coarse buckets, limiting to secure contexts, reducing precision/availability, or only exposing finer-grained sources under additional constraints).
 
 ### Polyfill
 
