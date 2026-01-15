@@ -93,7 +93,7 @@ interface PerformanceScrollTiming : PerformanceEntry {
   readonly attribute DOMHighResTimeStamp duration;
   readonly attribute unsigned long framesExpected;
   readonly attribute unsigned long framesProduced;
-  readonly attribute double checkerboardTime;
+  readonly attribute DOMHighResTimeStamp checkerboardTime;
   readonly attribute long distanceX;
   readonly attribute long distanceY;
   readonly attribute DOMString scrollSource;
@@ -112,7 +112,7 @@ interface PerformanceScrollTiming : PerformanceEntry {
 | `duration` | DOMHighResTimeStamp | Total scroll duration from `startTime` until scrolling stops (includes momentum/inertia) |
 | `framesExpected` | unsigned long | Number of frames that should have rendered at the target refresh rate |
 | `framesProduced` | unsigned long | Number of frames actually rendered during the scroll |
-| `checkerboardTime` | double | Total duration (ms) that unpainted areas were visible during scroll |
+| `checkerboardTime` | DOMHighResTimeStamp | Total duration (ms) that unpainted areas were visible during scroll |
 | `distanceX` | long | Horizontal scroll distance in pixels (positive = right, negative = left) |
 | `distanceY` | long | Vertical scroll distance in pixels (positive = down, negative = up) |
 | `scrollSource` | DOMString | Input method: `"touch"`, `"wheel"`, `"keyboard"`, `"other"`, or `"programmatic"` |
