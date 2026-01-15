@@ -132,6 +132,7 @@ Understanding scroll velocity is essential for performance optimization because 
 **Common velocity-related patterns:**
 - **Fling scrolls**: Touch flings on mobile often produce high initial velocity that decays over time (momentum scrolling)
 - **Keyboard/wheel scrolls**: Usually lower, more consistent velocity with discrete steps
+- **Scrollbar scrolls**: Dragging the scrollbar thumb can jump through large distances quickly and tends to produce the most checkerboarding, according to Chromium metrics
 - **Programmatic scrolls**: Smooth scroll behavior produces predictable, constant velocity
 - **Search navigation**: Users jumping to search results often produce short-duration, high-velocity scrolls
 
