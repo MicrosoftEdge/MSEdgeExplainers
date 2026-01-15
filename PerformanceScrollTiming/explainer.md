@@ -255,6 +255,9 @@ None reported yet.
 
 For detailed discussion of these design decisions, see [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
+#### scrollSource classification for fragment navigation and focus/activation-driven scrolling
+This still needs to be answered/spec’d: what `scrollSource` value should be reported when scrolling is triggered indirectly by navigation or activation patterns rather than “direct” scrolling input—e.g. scrolling to a header via a `#fragment` in the URL, clicking a table-of-contents link that scrolls the page, activating such a link via keyboard (e.g. Enter/Space), or tabbing through focusable elements where the UA scrolls to keep the focused element in view. Should link-click initiated scrolling map to `"mouse"` (or a new value) rather than `"other"`/`"programmatic"`? If activation is via keyboard, should it map to `"keyboard"` (and does that include Enter/Space)? Related: should focus-navigation scrolling (Tab/Shift+Tab) be reported as `"keyboard"`?
+
 #### Refresh Rate Baseline for Frame Counting
 Should `framesExpected` use a standardized 60fps baseline (consistent across devices) or the device's actual refresh rate (accurate to user experience)? This also raises concerns about dynamic refresh rates (VRR displays, browser throttling).
 
