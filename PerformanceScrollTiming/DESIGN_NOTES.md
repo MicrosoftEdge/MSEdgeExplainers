@@ -95,8 +95,8 @@ Checkerboarding breaks the illusion of scrolling through continuous content. It'
 Scroll velocity measures the speed at which a user navigates through content, calculated as the distance scrolled divided by the duration of the scroll interaction.
 
 **Key metrics:**
-- **Scroll distance components**: Horizontal and vertical scroll distances (`entry.distanceX`, `entry.distanceY`)
-- **Total scroll distance**: Euclidean distance combining both axes: `√(distanceX² + distanceY²)`
+- **Scroll distance components**: Horizontal and vertical scroll deltas (`entry.deltaX`, `entry.deltaY`)
+- **Total scroll distance**: Euclidean distance combining both axes: `√(deltaX² + deltaY²)`
 - **Scroll duration**: Time from scroll start to scroll end (`entry.duration`)
 - **Average velocity**: `totalDistance / duration` (pixels per millisecond, or multiply by 1000 for pixels per second)
 - **Directional velocity**: Calculate velocity separately for X and Y axes to understand scroll direction and bias
@@ -176,13 +176,13 @@ This section documents expected behavior for boundary conditions and unusual sce
 
 **Zero scroll distance:**
 - User attempts to scroll at a boundary (already at top/bottom)
-- `distanceX` and `distanceY` are both 0
+- `deltaX` and `deltaY` are both 0
 - Entry is still emitted (the interaction occurred, even if no visual change resulted)
 - Useful for detecting "frustrated scrolling" at boundaries
 
 **Overscroll and bounce effects:**
 - On platforms with overscroll (iOS rubber-banding, Android overscroll glow):
-  - `distanceX`/`distanceY` reflect the actual scroll position change, not the visual overscroll
+   - `deltaX`/`deltaY` reflect the actual scroll position change, not the visual overscroll
   - `duration` includes the bounce-back animation time
   - Overscroll does not count as checkerboarding
 

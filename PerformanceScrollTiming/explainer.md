@@ -94,8 +94,8 @@ interface PerformanceScrollTiming : PerformanceEntry {
   readonly attribute unsigned long framesExpected;
   readonly attribute unsigned long framesProduced;
   readonly attribute DOMHighResTimeStamp checkerboardTime;
-  readonly attribute long distanceX;
-  readonly attribute long distanceY;
+  readonly attribute long deltaX;
+  readonly attribute long deltaY;
   readonly attribute DOMString scrollSource;
   readonly attribute Node? target;
 };
@@ -113,8 +113,8 @@ interface PerformanceScrollTiming : PerformanceEntry {
 | `framesExpected` | unsigned long | Number of frames that should have rendered at the target refresh rate |
 | `framesProduced` | unsigned long | Number of frames actually rendered during the scroll |
 | `checkerboardTime` | DOMHighResTimeStamp | Total duration (ms) that unpainted areas were visible during scroll |
-| `distanceX` | long | Horizontal scroll distance in pixels (positive = right, negative = left) |
-| `distanceY` | long | Vertical scroll distance in pixels (positive = down, negative = up) |
+| `deltaX` | long | Horizontal scroll delta in pixels (positive = right, negative = left) |
+| `deltaY` | long | Vertical scroll delta in pixels (positive = down, negative = up) |
 | `scrollSource` | DOMString | Input method: `"touch"`, `"wheel"`, `"keyboard"`, `"other"`, or `"programmatic"` |
 | `target` | Node? | The scrolled node, or `null` if disconnected/in shadow DOM (consistent with Event Timing API) |
 
@@ -122,7 +122,7 @@ interface PerformanceScrollTiming : PerformanceEntry {
 - **Scroll start latency**: `firstFrameTime - startTime` — responsiveness of scroll initiation
 - **Smoothness score**: `framesProduced / framesExpected` — frame delivery consistency (1.0 = perfect)
 - **Frames dropped**: `framesExpected - framesProduced` — number of frames skipped or missed
-- **Total distance**: `√(distanceX² + distanceY²)` — Euclidean scroll distance
+- **Total distance**: `√(deltaX² + deltaY²)` — Euclidean scroll distance
 - **Scroll velocity**: `totalDistance / duration * 1000` — scroll speed in pixels per second
 
 ### Example Usage with PerformanceObserver
@@ -137,7 +137,7 @@ const observer = new PerformanceObserver((list) => {
       : 1;
 
     // Calculate total distance and velocity from X/Y components
-    const totalDistance = Math.sqrt(entry.distanceX ** 2 + entry.distanceY ** 2);
+    const totalDistance = Math.sqrt(entry.deltaX ** 2 + entry.deltaY ** 2);
     const scrollVelocity = entry.duration > 0 ? (totalDistance / entry.duration) * 1000 : 0;
 
     console.log('Scroll performance:', {
@@ -148,8 +148,8 @@ const observer = new PerformanceObserver((list) => {
       smoothnessScore,
       framesDropped: entry.framesExpected - entry.framesProduced,
       checkerboardTime: entry.checkerboardTime,
-      distanceX: entry.distanceX,
-      distanceY: entry.distanceY,
+      deltaX: entry.deltaX,
+      deltaY: entry.deltaY,
       totalDistance,
       scrollVelocity,
       source: entry.scrollSource,
@@ -200,7 +200,7 @@ This API does not introduce new accessibility concerns as it only exposes inform
 
 ### Internationalization
 
-1. Scroll Direction and Writing Modes: The `distanceX` and `distanceY` properties use a coordinate system where positive Y is down and positive X is right. This is independent of writing modes (RTL/LTR, vertical writing) and always reflects physical scroll distance in the viewport coordinate space. The API doesn't need to account for logical directions (inline/block) since it measures physical scrolling behavior.
+1. Scroll Direction and Writing Modes: The `deltaX` and `deltaY` properties use a coordinate system where positive Y is down and positive X is right. This is independent of writing modes (RTL/LTR, vertical writing) and always reflects physical scroll distance in the viewport coordinate space. The API doesn't need to account for logical directions (inline/block) since it measures physical scrolling behavior.
 2. `scrollSource` Values: The API uses English string literals ("touch", "wheel", "keyboard", "programmatic", "other") as enumerated values. These are programming identifiers, not user-facing strings, so they don't require localization.
 3. No Text or Cultural Content: The API exposes only numerical performance data - timestamps, frame counts, distances, and durations. There are no date formats, number formats, or text strings that would require localization.
 4. Universal Performance Metrics: Performance measurements like smoothness, latency, and frame drops are culturally neutral metrics that apply universally across locales.

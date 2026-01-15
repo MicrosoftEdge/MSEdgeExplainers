@@ -1096,13 +1096,13 @@
           return Math.max(0, expected - produced);
         }).filter(Number.isFinite);
         const distances = entries.map(e => {
-          const dx = e.distanceX || 0;
-          const dy = e.distanceY || 0;
+          const dx = e.deltaX || 0;
+          const dy = e.deltaY || 0;
           return Math.sqrt(dx * dx + dy * dy);
         }).filter(Number.isFinite);
         const velocities = entries.map(e => {
-          const dx = e.distanceX || 0;
-          const dy = e.distanceY || 0;
+          const dx = e.deltaX || 0;
+          const dy = e.deltaY || 0;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const dur = e.duration || 0;
           return dur > 0 ? (dist / dur) * 1000 : 0;
@@ -1138,8 +1138,8 @@
           const dotClass = cls === 'good' ? '' : (cls === 'warn' ? 'warn' : 'bad');
           const scoreTxt = fmtPct01(smoothnessScore);
           const durTxt = fmtMs(e.duration);
-          const dx = e.distanceX || 0;
-          const dy = e.distanceY || 0;
+          const dx = e.deltaX || 0;
+          const dy = e.deltaY || 0;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const dur = e.duration || 0;
           const velocity = dur > 0 ? (dist / dur) * 1000 : 0;
@@ -1175,8 +1175,8 @@
 
           if (els.consoleToggle.checked) {
             try {
-              const dx = e.distanceX || 0;
-              const dy = e.distanceY || 0;
+              const dx = e.deltaX || 0;
+              const dy = e.deltaY || 0;
               const dist = Math.sqrt(dx * dx + dy * dy);
               const dur = e.duration || 0;
               const velocity = dur > 0 ? (dist / dur) * 1000 : 0;
@@ -1248,13 +1248,13 @@
             framesProduced: e.framesProduced,
             checkerboardTime: e.checkerboardTime,
             scrollSource: e.scrollSource,
-            distanceX: e.distanceX,
-            distanceY: e.distanceY,
+            deltaX: e.deltaX,
+            deltaY: e.deltaY,
           };
 
           // Add calculated fields
-          const dx = e.distanceX || 0;
-          const dy = e.distanceY || 0;
+          const dx = e.deltaX || 0;
+          const dy = e.deltaY || 0;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const dur = e.duration || 0;
 

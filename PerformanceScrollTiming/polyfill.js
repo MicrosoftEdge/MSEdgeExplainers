@@ -275,7 +275,6 @@ function canElementScroll(element) {
   const overflowY = style.overflowY;
   const overflowX = style.overflowX;
 
-  // Simplify complex conditionals by breaking into logical components
   const hasScrollableOverflowY = ['auto', 'scroll', 'overlay'].includes(overflowY);
   const hasScrollableOverflowX = ['auto', 'scroll', 'overlay'].includes(overflowX);
   const hasVerticalOverflow = element.scrollHeight > element.clientHeight + 1;
@@ -349,8 +348,8 @@ class ActiveScrollState {
     this.ended = false;
     this.lastScrollTop = target.scrollTop || 0;
     this.lastScrollLeft = target.scrollLeft || 0;
-    this.cumulativeDistanceX = 0;
-    this.cumulativeDistanceY = 0;
+    this.cumulativeDeltaX = 0;
+    this.cumulativeDeltaY = 0;
   }
 
   start() {
@@ -412,8 +411,8 @@ class ActiveScrollState {
     const deltaY = currentScrollTop - this.lastScrollTop;
     const deltaX = currentScrollLeft - this.lastScrollLeft;
 
-    this.cumulativeDistanceX += deltaX;
-    this.cumulativeDistanceY += deltaY;
+    this.cumulativeDeltaX += deltaX;
+    this.cumulativeDeltaY += deltaY;
     this.lastScrollTop = currentScrollTop;
     this.lastScrollLeft = currentScrollLeft;
 
@@ -443,8 +442,8 @@ class ActiveScrollState {
       checkerboardTime: this.checkerboardTime,
       scrollSource: this.source,
       target: this.target,
-      distanceX: this.cumulativeDistanceX,
-      distanceY: this.cumulativeDistanceY
+      deltaX: this.cumulativeDeltaX,
+      deltaY: this.cumulativeDeltaY
     });
 
     scrollObservers.forEach(observer => {
@@ -511,8 +510,8 @@ class PerformanceScrollTimingPolyfill {
    * @param {number} data.checkerboardTime - Total duration (ms) unpainted areas were visible (always 0 in polyfill)
    * @param {string} data.scrollSource - Input method: 'touch', 'wheel', 'keyboard', 'other', 'programmatic'
    * @param {Element|null} data.target - The scrolled element
-   * @param {number} data.distanceX - Horizontal scroll distance in pixels (positive=right, negative=left)
-   * @param {number} data.distanceY - Vertical scroll distance in pixels (positive=down, negative=up)
+  * @param {number} data.deltaX - Horizontal scroll delta in pixels (positive=right, negative=left)
+  * @param {number} data.deltaY - Vertical scroll delta in pixels (positive=down, negative=up)
    */
   constructor(data) {
     // Validate required numeric fields
@@ -559,8 +558,8 @@ class PerformanceScrollTimingPolyfill {
     this.checkerboardTime = data.checkerboardTime;
     this.scrollSource = data.scrollSource;
     this.target = data.target;
-    this.distanceX = data.distanceX || 0;
-    this.distanceY = data.distanceY || 0;
+      this.deltaX = data.deltaX || 0;
+      this.deltaY = data.deltaY || 0;
   }
 
   /**
@@ -579,8 +578,8 @@ class PerformanceScrollTimingPolyfill {
       checkerboardTime: this.checkerboardTime,
       scrollSource: this.scrollSource,
       target: this.target,
-      distanceX: this.distanceX,
-      distanceY: this.distanceY
+        deltaX: this.deltaX,
+        deltaY: this.deltaY
     };
   }
 }
