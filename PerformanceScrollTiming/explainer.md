@@ -106,7 +106,7 @@ interface PerformanceScrollTiming : PerformanceEntry {
 | Attribute | Type | Description |
 |-----------|------|-------------|
 | `entryType` | DOMString | Always `"scroll"` (inherited from PerformanceEntry) |
-| `name` | DOMString | Empty string (inherited from PerformanceEntry) |
+| `name` | DOMString | Always `"scroll"` (inherited from PerformanceEntry) |
 | `startTime` | DOMHighResTimeStamp | Timestamp of the first input event that initiated the scroll or code invocation timestamp for programmatic scroll|
 | `firstFrameTime` | DOMHighResTimeStamp | Timestamp when the first visual frame reflecting the scroll was presented |
 | `duration` | DOMHighResTimeStamp | Total scroll duration from `startTime` until scrolling stops (includes momentum/inertia) |
