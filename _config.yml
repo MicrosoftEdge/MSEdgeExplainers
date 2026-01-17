@@ -1,0 +1,6 @@
+# This is the Jekyll config file, used by GitHub for generating the
+# GitHub Pages for this repo.
+
+# Use GitHub Flavored Markdown for the md > html conversion.
+# This is the same markdown format used for rendering on GitHub's code pages.
+markdown: GFM
