@@ -6,13 +6,9 @@ Authors: [Victor Huang](https://github.com/victorhuangwq)
 
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-This document status: Active  
-Expected venue: [WHAT WG](https://whatwg.org/)  
-Current version: this document
-
-## Participate
-
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=victorhuangwq&labels=BackToOpener&title=%5BBackToOpener%5D+%3CTITLE+HERE%3E)
+This document status: **Archived**  
+Expected venue: N/A  
+Current version: We are pursuing this feature as a [Chromium feature](https://issues.chromium.org/issues/448173940) instead of a web platform one.
 
 <!-- - [Discussion forum] -->
 

@@ -1,4 +1,4 @@
-# Explainer: Delayed Messages API
+# Explainer: Delayed Message Timing API
 
 Author: [Joone Hur](https://github.com/joone)
 
@@ -14,39 +14,42 @@ Author: [Joone Hur](https://github.com/joone)
 - [Goals](#goals)
 - [Non-goals](#non-goals)
 - [Problems](#problems)
-  - [Case 1: Thread Being Occupied](#case-1-thread-being-occupied)
+  - [Case 1: Thread Occupation](#case-1-thread-occupation)
     - [index.html](#indexhtml)
     - [main.js](#mainjs)
     - [worker.js](#workerjs)
-  - [Case 2: Message Queue Congestion](#case-2-message-queue-congestion)
+  - [Case 2: Task Queue Congestion](#case-2-message-queue-congestion)
     - [index.html](#indexhtml-1)
     - [main.js](#mainjs-1)
     - [worker.js](#workerjs-1)
-  - [Case 3: Serialization/Deserialization Time](#case-3-serializationdeserialization-time)
+  - [Case 3: Serialization/Deserialization Overhead](#case-3-serializationdeserialization-overhead)
     - [index.html](#indexhtml-2)
     - [main.js](#mainjs-2)
     - [worker.js](#workerjs-2)
     - [Console logs](#console-logs)
     - [Summary of Problems](#summary-of-problems)
-- [Proposal: Introducing the Delayed Messages API](#proposal-introducing-the-delayed-messages-api)
-  - [`PerformanceDelayMessageTiming` Interface](#performancedelaymessagetiming-interface)
+- [Proposal: Introducing the Delayed Message Timing API](#proposal-introducing-the-delayed-messages-api)
+  - [`PerformanceDelayedMessageTiming` Interface](#performancedelayedmessagetiming-interface)
     - [`postMessage` Timestamps and Durations:](#postmessage-timestamps-and-durations)
     - [Instance Properties](#instance-properties)
       - [`PerformanceEntry.entryType`](#performanceentryentrytype)
       - [`PerformanceEntry.name`](#performanceentryname)
       - [`PerformanceEntry.startTime`](#performanceentrystarttime)
       - [`PerformanceEntry.duration`](#performanceentryduration)
-      - [`PerformanceDelayMessageTiming.sentTime`](#performancedelaymessagetimingsenttime)
-      - [`PerformanceDelayMessageTiming.processingStart`](#performancedelaymessagetimingprocessingstart)
-      - [`PerformanceDelayMessageTiming.processingEnd`](#performancedelaymessagetimingprocessingend)
-      - [`PerformanceDelayMessageTiming.blockedDuration`](#performancedelaymessagetimingblockedduration)
-      - [`PerformanceDelayMessageTiming.serialization`](#performancedelaymessagetimingserialization)
-      - [`PerformanceDelayMessageTiming.deserialization`](#performancedelaymessagetimingdeserialization)
-      - [`PerformanceDelayMessageTiming.messageType`](#performancedelaymessagetimingmessagetype)
-      - [`PerformanceDelayMessageTiming.traceId`](#performancedelaymessagetimingtraceid)
-      - [`PerformanceDelayMessageTiming.invoker`](#performancedelaymessagetiminginvoker)
-      - [`PerformanceDelayMessageTiming.receiver`](#performancedelaymessagetimingreceiver)
-      - [`PerformanceDelayMessageTiming.scripts`](#performancedelaymessagetimingscripts)
+      - [`PerformanceDelayedMessageTiming.sentTime`](#performancedelayedmessagetimingsenttime)
+      - [`PerformanceDelayedMessageTiming.processingStart`](#performancedelayedmessagetimingprocessingstart)
+      - [`PerformanceDelayedMessageTiming.processingEnd`](#performancedelayedmessagetimingprocessingend)
+      - [`PerformanceDelayedMessageTiming.blockedDuration`](#performancedelayedmessagetimingblockedduration)
+      - [`PerformanceDelayedMessageTiming.serialization`](#performancedelayedmessagetimingserialization)
+      - [`PerformanceDelayedMessageTiming.deserialization`](#performancedelayedmessagetimingdeserialization)
+      - [`PerformanceDelayedMessageTiming.taskCount`](#performancedelayedmessagetimingtaskcount)
+      - [`PerformanceDelayedMessageTiming.scriptTaskCount`](#performancedelayedmessagetimingscripttaskcount)
+      - [`PerformanceDelayedMessageTiming.totalScriptDuration`](#performancedelayedmessagetimingtotalscriptduration)
+      - [`PerformanceDelayedMessageTiming.messageType`](#performancedelayedmessagetimingmessagetype)
+      - [`PerformanceDelayedMessageTiming.traceId`](#performancedelayedmessagetimingtraceid)
+      - [`PerformanceDelayedMessageTiming.invoker`](#performancedelayedmessagetiminginvoker)
+      - [`PerformanceDelayedMessageTiming.receiver`](#performancedelayedmessagetimingreceiver)
+      - [`PerformanceDelayedMessageTiming.scripts`](#performancedelayedmessagetimingscripts)
   - [`PerformanceMessageScriptInfo` Interface](#performancemessagescriptinfo-interface)
     - [Instance Properties](#instance-properties-1)
       - [`PerformanceMessageScriptInfo.name`](#performancemessagescriptinfoname)
@@ -78,17 +81,17 @@ Author: [Joone Hur](https://github.com/joone)
 
 # Overview
 
-Web applications frequently use `postMessage` to send messages across different execution contexts, such as between windows, iframes, and web workers. However, message delays happen when messages are queued but not processed promptly, often because the event loop in the receiving context is occupied with long-running tasks or the message queue itself becomes congested due to a high volume of messages.
+Web applications frequently use the `postMessage` API for communication across different execution contexts, such as between windows, iframes, and web workers. However, message delays often occur when messages are queued but not processed promptly.
 
-Such delays can degrade user experience by making applications feel unresponsive. Identifying the root cause of these delays—whether it's a busy thread, a congested message queue, or the overhead of preparing message data—is currently challenging for web developers.
+These delays can degrade the user experience by making applications feel unresponsive. While developers can detect that a delay happened, identifying the specific cause—whether it's a busy thread, a congested task queue, or serialization/deserialization overhead—is challenging with current tools.
 
-The Delayed Messages API allows web developers to identify congested browser contexts or workers and provide details on the end-to-end timing of `postMessage` events, as well as their related blocking tasks. These metrics help identify the causes of `postMessage` delays and improve application performance.
+The Delayed Message Timing API is a proposed Web Performance API that enables developers to diagnose delays in postMessage communication across windows, iframes, and web workers. By exposing end-to-end timing and attribution data including task queue wait time, serialization/deserialization cost, and blocking tasks, this API helps identify bottlenecks that degrade responsiveness in complex web applications.
 
 # Goals
 
-  * **Enable detection of congested contexts:** Allow websites to identify specific browser contexts (windows, tabs, iframes) or workers that are slow to process `MessageEvent`s. This covers [cross-document messaging](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage), [cross-worker/document messaging](https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage), [channel messaging](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API), and [broadcast channels](https://developer.mozilla.org/en-US/docs/Web/API/Broadcast_Channel_API).
-  * **Provide detailed end-to-end timing:** Offer comprehensive timing information for `postMessage` events, including message queue wait time, and the time taken for serialization and deserialization, to help pinpoint bottlenecks.
-  * **Identify blocking tasks:** Help developers find the specific scripts that prevent `postMessage` events from being handled promptly from the message queue.
+  * **Enable detection of congested contexts:** Allow websites to identify specific browser contexts (windows, tabs, iframes) or web workers that are slow to process `MessageEvent`s. This covers [cross-document messaging](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage), [cross-worker/document messaging](https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage), [channel messaging](https://developer.mozilla.org/en-US/docs/Web/API/Channel_Messaging_API), and [broadcast channels](https://developer.mozilla.org/en-US/docs/Web/API/Broadcast_Channel_API).
+  * **Provide detailed end-to-end timing:** Offer comprehensive timing information for `postMessage` events, including task queue wait time, and the time taken for serialization and deserialization, to help pinpoint bottlenecks.
+  * **Identify blocking tasks:** Help developers find the specific scripts that prevent `postMessage` events from being handled promptly from the task queue.
 
 # Non-goals
 
@@ -100,19 +103,19 @@ This API does not aim to monitor or provide diagnostics for the following types 
 
 # Problems
 
-While developers expect messages sent via `postMessage` to web workers or iframes to be processed promptly, these tasks typically receive default priority in the browser's task scheduler(e.g. Chromium). As a result, `postMessage` communication can experience noticeable delays due to lower prioritization compared to user-visible tasks, often compounded by synchronous JavaScript blocking the target thread, a flood of messages overwhelming the message queue, or significant time spent processing the data being transferred, making the root cause challenging to pinpoint.
+While developers expect messages sent via `postMessage` to web workers or iframes to be processed promptly, these tasks typically receive default priority in the browser's task scheduler(e.g. Chromium). As a result, `postMessage` communication can experience noticeable delays due to lower prioritization compared to user-visible tasks, often compounded by synchronous JavaScript blocking the target thread, a flood of messages overwhelming the task queue, or significant time spent processing the data being transferred, making the root cause challenging to pinpoint.
 
 These problems can be broadly categorized into three areas:
 
 1.  **Thread being occupied:** The receiving thread is busy executing long-running tasks.
-2.  **Message queue becoming congested:** Too many messages are enqueued faster than they can be processed.
+2.  **Task queue becoming congested:** Too many messages or tasks are enqueued faster than they can be processed.
 3.  **Serialization/deserialization processes taking significant time:** The data being sent is large or complex, leading to overhead.
 
 The following sections will analyze each area with examples. All examples involve web workers, but similar situations can also occur between the main window and iframes, or between different windows.
 
-## Case 1: Thread Being Occupied
+## Case 1: Thread Occupation
 
-The following example code demonstrates how a long-running task on a worker thread can block subsequent messages in its message queue.
+The following example code demonstrates how a long-running task on a worker thread can block subsequent messages in its task queue.
 
 [Link to live demo](https://joone.github.io/web/explainers/delayed_messages/long_task/)
 
@@ -149,7 +152,6 @@ function runWorker() {
   function sendMessage() {
     if (i < inputArray.length) {
       const input = inputArray[i];
-      console.log(`message #${i+1}: sending a message with input ${input}`);
       // Send a message to the worker
       worker.postMessage({
         no: i+1,
@@ -170,7 +172,7 @@ function runWorker() {
 
 ### worker.js
 
-The Web Worker receives messages and simulates a task that runs for the duration specified by `e.data.input`. If this duration is greater than the message sending interval (60ms), it can block subsequent messages.
+The web worker receives messages and simulates a task that runs for the duration specified by `e.data.input`. If this duration is greater than the message sending interval (60ms), it can block subsequent messages.
 
 ```javascript
 // Simulates a task that consumes CPU for a given duration
@@ -182,28 +184,15 @@ function runTask(duration) {
 }
 
 onmessage = function runLongTaskOnWorker(e) {
-  const processingStartOnWorker = e.timeStamp; // Time when onmessage handler starts
-  const taskSimulationStartTime = performance.now();
+  const processingStart = e.timeStamp; // Time when onmessage handler starts
+  const taskStartTime = performance.now();
   
   runTask(e.data.input); // Simulate the work
   
-  const taskSimulationDuration = performance.now() - taskSimulationStartTime;
-
+  const taskDuration = performance.now() - taskStartTime;
   // Calculate timings relative to worker's performance.timeOrigin
-  const startTimeFromMain = e.data.startTime - performance.timeOrigin;
-  const messageQueueWaitTime = processingStartOnWorker - startTimeFromMain;
-
-  console.log(`message #${e.data.no}: original postMessage call at ${startTimeFromMain.toFixed(2)} ms (relative to worker origin)`);
-  console.log(`message #${e.data.no}: started processing in worker at ${processingStartOnWorker.toFixed(2)} ms`);
-  console.log(
-    `message #${e.data.no}: ran a task for input (${e.data.input}ms), actual duration: ${taskSimulationDuration.toFixed(2)}ms`
-  );
-  console.log(
-    `message #${e.data.no}: total time from postMessage to task end: ` +
-    `task duration (${taskSimulationDuration.toFixed(2)}) + ` +
-    `message queue wait time etc. (${messageQueueWaitTime.toFixed(2)}) = ` +
-    `${(taskSimulationDuration + messageQueueWaitTime).toFixed(2)} ms (approx)`
-  );
+  const startTime = e.data.startTime - performance.timeOrigin;
+  const blockedDuration = processingStart - startTime;
 };
 ```
 
@@ -212,15 +201,16 @@ The following timeline illustrates message handling:
 
 In this timeline, messages \#1, \#2, and \#3 are handled promptly because their simulated tasks (50ms) complete within the 60ms interval at which messages are sent.
 
-However, message \#4's task is instructed to run for 120ms. While it's processing, message \#5 (sent 60ms after message \#4 was sent) arrives at the worker. Message \#5 must wait in the worker's message queue until message \#4 completes. This results in message \#5 experiencing a significant delay (approximately 60ms) before its handler can even begin.
+However, message \#4's task is instructed to run for 120ms. While it's processing, message \#5 (sent 60ms after message \#4 was sent) arrives at the worker. Message \#5 must wait in the worker's task queue until message \#4 completes. This results in message \#5 experiencing a significant delay (approximately 60ms) before its handler can even begin.
 
 Manually instrumenting code with `performance.now()` and `event.timeStamp` can help identify the root cause of delays as shown. However, in complex real-world applications, precisely identifying which long task caused a specific message delay, or distinguishing between delay caused by a preceding long task versus a message's own long handler, is very challenging without comprehensive, dedicated monitoring. This API aims to simplify such diagnoses.
 
-## Case 2: Message Queue Congestion
+## Case 2: Task Queue Congestion
 
-Even without individual long-running tasks, a high volume of messages sent in a short period can overwhelm the receiving context. The message queue can grow, leading to congestion and delays for all subsequent messages, including potentially urgent ones.
+Another challenge is when the target context's task queue becomes overloaded with many short tasks. On the main thread, this often happens when the queue is saturated with high-priority tasks like user interaction and network handling, alongside internal system overhead tasks for navigation, loading, and rendering. In web workers, congestion occurs when a large number of messages are posted in a short period. In both cases, tasks or messages arrive faster than they can be processed, creating a backlog that delays subsequent messages, including those that may be time-sensitive. Although each individual task is not a long task, their combined accumulation causes queue congestion that effectively acts like a single disruptive long task.
 
-The following example code demonstrates this situation, where multiple `deleteMail` tasks congest the message queue before an urgent `readMail` task.
+ This example demonstrates how task queues in web workers can become congested when tasks take longer to process than the rate at which
+ messages are sent. It sends delete tasks every 30ms, then a read task, measuring queue wait times to show the congestion effect.
 
 [Link to live example](https://joone.github.io/web/explainers/delayed_messages/congested/)
 
@@ -232,10 +222,10 @@ The following example code demonstrates this situation, where multiple `deleteMa
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>An example of a message queue experiencing congestion</title>
+    <title>An example of a task queue experiencing congestion</title>
   </head>
   <body>
-    <h1>Message Queue Congestion Example</h1>
+    <h1>Task Queue Congestion Example</h1>
     <button onclick="sendTasksToWorker()">Start</button>
     <script src="main.js"></script>
   </body>
@@ -247,98 +237,68 @@ The following example code demonstrates this situation, where multiple `deleteMa
 In main.js, the email application sends 10 deleteEmail tasks every 30 ms to clear junk emails, keeping the worker occupied with intensive processing. Shortly after, the user requests to check their emails, requiring an immediate response.
 
 ```js
-// Create a Web Worker
 const worker = new Worker("worker.js");
 
-// Open the mail storage
-worker.postMessage({
-  taskName: "openMailStorage",
-  startTime: performance.now() + performance.timeOrigin,
-});
-console.log(`[main] dispatching the openMailStorage task`);
-
-// Send a message every 30ms
+// Counter for generating unique email IDs for each delete task
 let emailID = 0;
+
 function sendTasksToWorker() {
   const interval = setInterval(() => {
-    // Delete an email by ID
+    // Send delete task with unique email ID and timestamp
     worker.postMessage({
       emailId: emailID,
       taskName: `deleteMail`,
-      startTime: performance.now() + performance.timeOrigin,
+      startTime: performance.now() + performance.timeOrigin, // Absolute timestamp for timing analysis
     });
-    console.log(`[main] dispatching the deleteMail task(id=#${emailID})`);
+    console.log(`[main] dispatching the deleteMail task(email ID: #${emailID})`);
     emailID++;
     if (emailID >= 10) {
       clearInterval(interval);
-      // Read emails
+      // Send final read task - this will experience the most queue delay
       worker.postMessage({
-        taskName: "readMails",
-        startTime: performance.now() + performance.timeOrigin,
+        taskName: "checkMails",
+        startTime: performance.now() + performance.timeOrigin, // Timestamp when task is queued
       });
-      console.log("[main] dispatching the readMail task");
+      console.log("[main] dispatching the checkMail task");
     }
-  }, 30);
+  }, 30); // 30ms interval creates congestion (faster than worker's 50ms task duration)
 }
 ```
 
 ### worker.js
 
-The Web Worker's `onmessage` handler processes `openMailStorage`, `deleteMail`, and `readMails` tasks received from the main thread. Each task requires 50ms to complete."
+The web worker's `onmessage` handler processes `deleteMail`, and `checkMails` tasks received from the main thread. Each task requires 50ms to complete.
 
 ```js
-// Listen for messages from the main thread
 onmessage = async (event) => {
-  const processingStart = event.timeStamp;
-  const startTimeFromMain = event.data.startTime - performance.timeOrigin;
+  const processingStart = event.timeStamp; // Time when worker starts processing this message
+  const startTimeFromMain = event.data.startTime - performance.timeOrigin; // Convert to worker timeline
+  // Calculate task queue wait time by comparing when the message
+  // was sent (from main thread) vs when it started processing (in worker)
   const blockedDuration = processingStart - startTimeFromMain;
   const message = event.data;
 
-  if (message.taskName === "openMailStorage") {
-    await openMailStorage(message, blockedDuration);
-  } else if (message.taskName === "readMails") {
-    await readMails(message, blockedDuration);
+  if (message.taskName === "checkMails") {
+    await checkMails(message, blockedDuration);
   } else if (message.taskName === "deleteMail") {
     await deleteMail(message, blockedDuration);
   }
 };
 
-// Open the mail storage.
-async function openMailStorage(message, blockedDuration) {
-  return new Promise((resolve) => {
-    const startOpenMailStorage = performance.now();
-    // Simulate the openMailStorage task.
-    const start = Date.now();
-    while (Date.now() - start < 50) {
-      /* Do nothing */
-    }
-    const endOpenMailStorage = performance.now();
-    console.log(
-      `[worker] ${message.taskName},`,
-      `message queue wait time + etc: ${blockedDuration.toFixed(2)} ms,`,
-      `task duration: ${(endOpenMailStorage - startOpenMailStorage).toFixed(2)} ms`,
-    );
-    resolve();
-  });
-}
-
-// Read emails from the mail storage
-async function readMails(message, blockedDuration) {
-  return new Promise((resolve) => {
-    const startRead = performance.now();
-    // Simulate the read task.
-    const start = Date.now();
-    while (Date.now() - start < 50) {
-      /* Do nothing */
-    }
-    const endRead = performance.now();
-    console.log(
-      `[worker] ${message.taskName},`,
-      `message queue wait time + etc: ${blockedDuration.toFixed(2)} ms,`,
-      `task duration: ${(endRead - startRead).toFixed(2)} ms`,
-    );
-    resolve();
-  });
+// Check emails from the mail storage
+function checkMails(message, blockedDuration) {
+  const startRead = performance.now();
+  // Simulate task
+  const start = Date.now();
+  while (Date.now() - start < 50) {
+    /* Do nothing */
+  }
+  const endRead = performance.now();
+  console.log(
+    `[worker] ${message.taskName},`,
+    `blockedDuration: ${blockedDuration.toFixed(2)} ms,`,
+    `duration: ${(endRead - startRead).toFixed(2)} ms`,
+  );
 }
 
 // Delete an email by ID.
@@ -352,9 +312,9 @@ async function deleteMail(message, blockedDuration) {
     }
     const endDelete = performance.now();
     console.log(
-      `[worker] ${message.taskName}(ID: ${message.emailId}),`,
-      `message queue waitTime + etc: ${blockedDuration.toFixed(2)} ms,`,
-      `task duration: ${(endDelete - startDelete).toFixed(2)} ms`,
+      `[worker] ${message.taskName}(email ID: ${message.emailId}),`,
+      `blockedDuration: ${blockedDuration.toFixed(2)} ms,`,
+      `duration: ${(endDelete - startDelete).toFixed(2)} ms`,
     );
     resolve();
   });
@@ -364,15 +324,15 @@ async function deleteMail(message, blockedDuration) {
 The following timeline illustrates this congestion:
 ![](timeline_congested.png)
 
-In this scenario, the worker processes 10 `deleteMail` tasks, each taking 50ms, while being sent every 30ms. This disparity causes tasks to accumulate in the message queue. Consequently, later tasks, like the 11th task `readMail`, spend a significant amount of time waiting in the queue (e.g., 245ms) even if their own processing time is short (e.g., 51.5ms).
+In this scenario, the worker processes 10 `deleteMail` tasks, each taking 50ms, while being sent every 30ms. This disparity causes tasks to accumulate in the task queue. Consequently, later tasks, like the 11th task `checkMails`, spend a significant amount of time waiting in the queue (e.g., 245ms) even if their own processing time is short (e.g., 51.5ms).
 
-While delays in background tasks like `deleteMail` might be acceptable, delays in user-initiated, high-priority tasks like `readMail` severely impact user experience. It's important for developers to identify if a browser context or worker is congested and which tasks contribute most to this congestion.
+While delays in background tasks like `deleteMail` might be acceptable, delays in user-initiated, high-priority tasks like `checkMails` severely impact user experience. It's important for developers to identify if a browser context or worker is congested and which tasks contribute most to this congestion.
 
-## Case 3: Serialization/Deserialization Time
+## Case 3: Serialization/Deserialization Overhead
 
-When data is sent using `postMessage`, it undergoes serialization by the sender and deserialization by the receiver. For large or complex JavaScript objects (e.g., a large JSON payload or a deeply nested object), these processes can consume considerable time, blocking the respective threads.
+When data is sent using `postMessage()`, it undergoes serialization by the sender and deserialization by the receiver. For large or complex JavaScript objects (e.g., a large JSON payload or a deeply nested object), these processes can consume considerable time, blocking the respective threads.
 
-The following example code demonstrate the delay introduced by serializing/deserializing a large JSON object during `postMessage`.
+The following example code demonstrate the delay introduced by serializing/deserializing a large JSON object during `postMessage()`.
 
 [Link to live demo](https://joone.github.io/web/explainers/delayed_messages/serialization/)
 
@@ -384,11 +344,10 @@ The following example code demonstrate the delay introduced by serializing/deser
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>postMessage Serialization/Deserialization Example</title>
+    <title>postMessage Serialization/Deserialization Performance Impact</title>
   </head>
   <body>
-    <h1>postMessage Serialization/Deserialization Example</h1>
-    <button id="sendJSON">Send Large JSON</button>
+    <button id="sendJSON">Send Large JSON (~7MB)</button>
     <script src="main.js"></script>
   </body>
 </html>
@@ -396,33 +355,40 @@ The following example code demonstrate the delay introduced by serializing/deser
 
 ### main.js
 
-In the main.js file, 7000 JSON objects are sent to the worker using `postMessage`. The duration of serialization can be measured by calling the `performance.now()` before and after executing `postMessage`.
+In the main.js file, 7000 JSON objects are sent to the worker using `postMessage()`. The duration of serialization can be measured by calling the `performance.now()` before and after executing `postMessage()`.
 
 ```js
 const worker = new Worker("worker.js");
 
-// Generate a large JSON object
+// Generate a large JSON object to demonstrate serialization overhead
 function generateLargeJSON(size) {
   const largeArray = [];
   for (let i = 0; i < size; i++) {
-    largeArray.push({ id: i, name: `Item ${i}`, data: Array(1000).fill("x") });
+    largeArray.push({ 
+      id: i, 
+      name: `Item ${i}`, 
+      data: Array(1000).fill("x") // Each item contains ~1KB of string data
+    });
   }
-  return { items: largeArray };
+  return { items: largeArray }; // Returns ~7MB object when size=7000
 }
 
-// Send a large JSON object to the worker
+// Send a large JSON object to the worker to demonstrate serialization overhead
 function sendLargeJSON() {
-  const largeJSON = generateLargeJSON(7000);
+  const largeJSON = generateLargeJSON(7000); // ~7MB of data
   console.log("[main] Dispatching a large JSON object to the worker.");
 
+  // Measure time for postMessage call (includes serialization)
   const startTime = performance.now();
   worker.postMessage({
     receivedData: largeJSON,
     startTime: startTime + performance.timeOrigin,
   });
   const endTime = performance.now();
+  
+  // Note: This timing includes serialization but may also include other overhead
   console.log(
-    `[main] Serialization(estimate): ${(endTime - startTime).toFixed(2)} ms`,
+    `[main] postMessage call duration (includes serialization): ${(endTime - startTime).toFixed(2)} ms`,
   );
 }
 
@@ -438,61 +404,56 @@ In worker.js, the duration of deserialization is estimated by calling `performan
 // Worker receives large data
 onmessage = (event) => {
   const processingStart = event.timeStamp;
-  // Deserialize the data
+  // Measure deserialization time by accessing the large data object
+  // Note: Deserialization typically occurs when data is first accessed (implementation-dependent)
   const deserializationStartTime = performance.now();
   const startTimeFromMain = event.data.startTime - performance.timeOrigin;
   const receivedData = event.data.receivedData;
   const deserializationEndTime = performance.now();
+  const blockedDuration = processingStart - startTimeFromMain;
 
+  console.log("[worker] Deserialized Data:", receivedData.items.length, "items.");
   console.log(
-    "[worker] Deserialized Data: ",
-    receivedData.items.length,
-    "items.",
-  );
-  console.log(
-    "[worker] Deserialization: ",
+    "[worker] Deserialization time:",
     (deserializationEndTime - deserializationStartTime).toFixed(2),
     "ms",
   );
 
-  const blockedDuration = processingStart - startTimeFromMain;
-  console.log(
-    "[worker] message queue wait time + etc:",
-    blockedDuration.toFixed(2),
-    "ms",
-  );
-};
+  const totalDataProcessingTime = (deserializationEndTime - startTimeFromMain); 
+  console.log("[worker] blockedDuration (including serialization):", blockedDuration.toFixed(2), "ms");
+  console.log("[worker] serialization + deserialization (estimate):", totalDataProcessingTime.toFixed(2), "ms");
 
 ```
 
 ### Console logs
 ```
 [main] Dispatching a large JSON object to the worker.
-[main] Serialization(estimate): 130.30 ms
-[worker] Deserialized Data:  7000 items.
-[worker] Deserialization:  114.30 ms
-[worker] message queue wait time + etc: 130.40 ms
+[main] postMessage call duration (~7MB object serialization): 111.20 ms
+[worker] Deserialized Data: 7000 items.
+[worker] Deserialization time: 454.40 ms
+[worker] blockedDuration (including serialization): 111.10 ms
+[worker] serialization + deserialization (estimate): 566.00 ms
 ```
-As shown, serialization on the main thread (approx. 130.30 ms) occurs synchronously during the `postMessage` call, blocking other main thread work. Similarly, deserialization on the worker thread (approx. 114.30 ms) is a significant operation that blocks the worker's event loop during message processing, delaying the execution of the `onmessage` handler and any subsequent tasks.
+As shown, serialization on the main thread (approx. 111.20 ms) occurs synchronously during the `postMessage()` call, blocking other main thread work. Similarly, deserialization on the worker thread (approx. 454.40 ms) is a significant operation that blocks the worker's event loop during message processing, delaying the execution of the `onmessage` handler and any subsequent tasks.
 
-In this example, the worker log `message queue wait time + etc: 130.40 ms` indicates the time elapsed from when the main thread initiated the `postMessage` (including its ~130.30 ms serialization block) to when the worker’s `onmessage` handler began execution. This suggests that the message queue wait time is nearly zero, and the delay is primarily caused by serialization on the sender side. However, the cost of data handling is difficult to estimate because the size of the message payload can vary depending on the scenario.
+In this example, the worker log `blockedDuration: 111.10 ms` indicates the time elapsed from when the main thread initiated the `postMessage()` (including its 111.20 ms serialization block) to when the worker's `onmessage` handler began execution. This suggests that the task queue wait time is nearly zero, and the delay is primarily caused by serialization on the sender side. However, the cost of data handling is difficult to estimate because the size of the message payload can vary depending on the scenario.
 
 Another issus is that the timing of deserialization, which the [specification](https://html.spec.whatwg.org/multipage/web-messaging.html#dom-window-postmessage-options-dev) suggests should occur before the message event, can vary across browsers. For example, browsers like Chromium may delay this process until the message data is actually accessed for the first time. This inconsistency, combined with a busy event loop that makes it difficult to distinguish serialization, actual queueing, deserialization, and task execution delays even with manual instrumentation, further underscores the need for an API to expose this timing information.
 
 ### Summary of Problems
 
-Message delays frequently occur and can degrade user experience. While existing tools can detect delays, pinpointing the exact cause is difficult. Delays often stem from the receiver's thread being busy with long tasks, message queue congestion, or serialization/deserialization overhead. Accurately measuring internal message queue wait time is especially challenging with manual instrumentation. A dedicated API is needed to precisely measure, attribute, and identify these specific sources of delay.
+Message delays frequently occur and can degrade user experience. While existing tools can detect delays, pinpointing the exact cause is difficult. Delays often stem from the receiver's thread being busy with long tasks, task queue congestion, or serialization/deserialization overhead. Accurately measuring internal task queue wait time is especially challenging with manual instrumentation. A dedicated API is needed to precisely measure, attribute, and identify these specific sources of delay.
 
-# Proposal: Introducing the Delayed Messages API
+# Proposal: Introducing the Delayed Message Timing API
 
-The Delayed Messages API introduces the `PerformanceDelayMessageTiming` interface, delivered via the PerformanceObserver API. This interface allows developers to identify browser contexts or workers where `postMessage` events are significantly delayed in the message queue. It also provides detailed breakdowns of the event's lifecycle, including information about the invoker, receiver, and blocking scripts.
+The Delayed Message Timing API introduces the `PerformanceDelayedMessageTiming` interface, delivered via the PerformanceObserver API. This interface allows developers to identify browser contexts or workers where `postMessage` events are significantly delayed in the task queue. It also provides detailed breakdowns of the event's lifecycle, including information about the invoker, receiver, and blocking scripts.
 
 This new interface relies on two supporting interfaces:
 
   * `PerformanceMessageScriptInfo`: Provides details about the script that sent or received the message.
   * `PerformanceExecutionContextInfo`: Describes the execution context (e.g., main thread, worker) of the sender or receiver.
 
-## `PerformanceDelayMessageTiming` Interface
+## `PerformanceDelayedMessageTiming` Interface
 
 This interface provides end-to-end timing for a `postMessage` event.
 The following diagram illustrates the key timestamps:
@@ -506,13 +467,13 @@ The following diagram illustrates the key timestamps:
   * **`processingStart`**: The timestamp when the receiving context begins processing the message (i.e., when its `onmessage` handler is about to be executed).
   * **`processingEnd`**: The timestamp when the message processing (i.e., the `onmessage` handler) is completed in the receiving context.
   * **`duration`**: The total time from `startTime` to `processingEnd`.
-  * **`blockedDuration`**: The time the message spent waiting in the receiver's message queue after `sentTime` but before `processingStart`.
+  * **`blockedDuration`**: The time the message spent waiting in the receiver's task queue after `sentTime` but before `processingStart`.
 
 This interface is available in both browser contexts and web workers, providing insights into `postMessage` timings. For round-trip timing analysis, developers would need to correlate entries from both the sender and receiver contexts (e.g., by sending performance entries back or using a unique identifier).
 
 ### Instance Properties
 
-This interface extends `PerformanceEntry`. The following properties are specific to or have special meaning for `PerformanceDelayMessageTiming` entries:
+This interface extends `PerformanceEntry`. The following properties are specific to or have special meaning for `PerformanceDelayedMessageTiming` entries:
 
 #### `PerformanceEntry.entryType`
 
@@ -531,38 +492,47 @@ worker.postMessage({ query: 'find a user' }, { name: 'userSearchQuery' });
 
 #### `PerformanceEntry.startTime`
 
-Returns a `DOMHighResTimeStamp` representing the time when the `postMessage` was executed in the sending context. The timestamp is relative to the `timeOrigin` of the context where the `PerformanceDelayMessageTiming` entry is observed.
+Returns a `DOMHighResTimeStamp` representing the time when the `postMessage` was executed in the sending context. The timestamp is relative to the `timeOrigin` of the context where the `PerformanceDelayedMessageTiming` entry is observed.
 *Note for developers:* When an entry is observed in a worker for a message sent from the main window (or vice-versa), `startTime` reflects the sender's clock, adjusted to the observer's `timeOrigin`. This means `startTime` can sometimes be a negative value if the sending context was initialized earlier than the observing context. The relative durations provided by the API remain accurate.
 
 #### `PerformanceEntry.duration`
 
 Returns a `DOMHighResTimeStamp` representing the total time from `startTime` to `processingEnd`.
 
-#### `PerformanceDelayMessageTiming.sentTime`
+#### `PerformanceDelayedMessageTiming.sentTime`
 
-Returns a `DOMHighResTimeStamp` representing the time when the message was added to the message queue of the receiving browser context or worker.
+Returns a `DOMHighResTimeStamp` representing the time when the message was added to the task queue of the receiving browser context or worker.
 
-#### `PerformanceDelayMessageTiming.processingStart`
+#### `PerformanceDelayedMessageTiming.processingStart`
 
 Returns a `DOMHighResTimeStamp` representing the time when the event dispatch started (i.e., the `onmessage` handler is about to be executed in the receiving execution context).
 
-#### `PerformanceDelayMessageTiming.processingEnd`
+#### `PerformanceDelayedMessageTiming.processingEnd`
 
 Returns a `DOMHighResTimeStamp` representing the time when the event dispatch ended (i.e., the `onmessage` handler completed in the receiving execution context).
 
-#### `PerformanceDelayMessageTiming.blockedDuration`
+#### `PerformanceDelayedMessageTiming.blockedDuration`
 
-Returns a `DOMHighResTimeStamp` representing the duration a dispatched `postMessage` waited in the message queue of the receiving context *after* `sentTime` and *before* `processingStart`. It is calculated as `processingStart - sentTime`.
+Returns a `DOMHighResTimeStamp` representing the duration a dispatched `postMessage` waited in the task queue of the receiving context *after* `sentTime` and *before* `processingStart`. It is calculated as `processingStart - sentTime`.
 
-#### `PerformanceDelayMessageTiming.serialization`
+#### `PerformanceDelayedMessageTiming.serialization`
 
 Returns a `DOMHighResTimeStamp` representing the duration taken by the sending context to serialize the data attached to the message.
 
-#### `PerformanceDelayMessageTiming.deserialization`
+#### `PerformanceDelayedMessageTiming.deserialization`
 
 Returns a `DOMHighResTimeStamp` representing the duration taken by the receiving context to deserialize the attached data from the message. This occurs before `processingStart`.
 
-#### `PerformanceDelayMessageTiming.messageType`
+#### `PerformanceDelayedMessageTiming.taskCount`
+Returns the total number of queued tasks blocking the postMessage event.
+
+#### `PerformanceDelayedMessageTiming.scriptTaskCount`
+Returns the total number of all entry-point JavaScript tasks, including those with a duration less than 5ms.
+
+#### `PerformanceDelayedMessageTiming.totalScriptDuration`
+Returns the cumulative duration (in milliseconds) of all scripts included in scriptTaskCount.
+
+#### `PerformanceDelayedMessageTiming.messageType`
 
 Returns a string indicating the type of `postMessage` communication. Possible values:
 
@@ -571,19 +541,19 @@ Returns a string indicating the type of `postMessage` communication. Possible va
   * `"cross-document"` (between windows/iframes using `window.postMessage`)
   * `"broadcast-channel"` (via a `BroadcastChannel`)
 
-#### `PerformanceDelayMessageTiming.traceId`
+#### `PerformanceDelayedMessageTiming.traceId`
 
 Returns a unique identifier (e.g., an incrementing number) for the message. This can help correlate logs or entries if necessary, especially if messages are sent back and forth.
 
-#### `PerformanceDelayMessageTiming.invoker`
+#### `PerformanceDelayedMessageTiming.invoker`
 
 Returns a `PerformanceMessageScriptInfo` instance providing details about the script that sent the message.
 
-#### `PerformanceDelayMessageTiming.receiver`
+#### `PerformanceDelayedMessageTiming.receiver`
 
 Returns a `PerformanceMessageScriptInfo` instance providing details about the script that handled (or is handling) the message.
 
-#### `PerformanceDelayMessageTiming.scripts`
+#### `PerformanceDelayedMessageTiming.scripts`
 
 Returns an array of `PerformanceScriptTiming` instances. These represent the long tasks that were executing on the receiver's thread between `sentTime` and `processingStart`, thus contributing to `blockedDuration`. This leverages the same mechanism as the [Long Animation Frames API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceLongAnimationFrameTiming/scripts).
 
@@ -621,7 +591,6 @@ Returns the line number in the source file where the function responsible for se
 
 Returns the column number in the source file where the function responsible for sending or handling the `postMessage` event begins. 
 
-
 ## `PerformanceExecutionContextInfo` Interface
 
 This interface provides information about the execution environment (context) where the sender or receiver script is running.
@@ -634,7 +603,7 @@ Returns a unique identifier for the execution context (e.g., a string or an inte
 
 #### `PerformanceExecutionContextInfo.name`
 
-Returns the name of the execution context. For workers, this is the name provided during instantiation (e.g., `new Worker("worker.js", { name: "MyWorker" })`). It might be empty, as the name is optional. For windows or iframes, it might be empty or derived from `window.name`.
+Returns the name of the execution context. For web workers, this is the name provided during instantiation (e.g., `new Worker("worker.js", { name: "MyWorker" })`). It might be empty, as the name is optional. For windows or iframes, it might be empty or derived from `window.name`.
 
 #### `PerformanceExecutionContextInfo.type`
 
@@ -677,7 +646,7 @@ The following JSON shows sample performance entries for the delayed messages ide
 
 By examining `blockedDuration` and the handler execution time (`processingEnd - processingStart`), developers can diagnose the cause:
 
-  * In the **first entry** (message \#4), `duration` is `121ms`, and the handler execution time (`processingEnd - processingStart`, which is `121.1ms`. `blockedDuration` is `0ms`. This indicates the message's *own handler* was long, causing the overall delay.
+  * In the **first entry** (message \#4), `duration` is `121ms`, and the handler execution time (`processingEnd - processingStart`), which is `121.1ms`. `blockedDuration` is `0ms`. This indicates the message's *own handler* was long, causing the overall delay.
   * In the **second entry** (message \#5), the handler time is `51.5ms`. However, `blockedDuration` is `60.0ms`. This shows that other tasks were occupying the worker's event loop, preventing this message from being handled promptly. The `scripts` property (shown for the second entry) would list these blocking tasks.
 
 ```json
@@ -695,6 +664,9 @@ By examining `blockedDuration` and the handler execution time (`processingEnd - 
       "blockedDuration": 0,
       "serializeDuration": 0,
       "deserializeDuration": 0,
+      "taskCount": 13,
+      "scriptTaskCount": 1,
+      "totalScriptDuration": 2,
       "scripts": [],
       "invoker": {
           "name": "invoker",
@@ -736,6 +708,9 @@ By examining `blockedDuration` and the handler execution time (`processingEnd - 
       "blockedDuration": 60,
       "serializeDuration": 0,
       "deserializeDuration": 0,
+      "taskCount": 27,
+      "scriptTaskCount": 2,
+      "totalScriptDuration": 123,
       "scripts": [
           {
               "name": "script",
@@ -795,7 +770,7 @@ The proposed API offers structured timing data suitable for production monitorin
 
 ## Manual Instrumentation / Polyfills
 
-Developers can attempt to wrap `postMessage` calls and `onmessage` handlers with their own timing logic (e.g., using `performance.now()`). However, this approach has several drawbacks:
+Developers can attempt to wrap `postMessage()` calls and `onmessage` handlers with their own timing logic (e.g., using `performance.now()`). However, this approach has several drawbacks:
 
   * It's challenging to intercept all messages, especially those from third-party libraries.
   * Accurately measuring internal browser operations like serialization, deserialization, and precise queue waiting time is not feasible from JavaScript.
@@ -806,7 +781,7 @@ A native API can provide more accurate and comprehensive data with lower overhea
 
 This API is designed to provide developers with insights into the performance of their own applications and does not introduce new cross-origin information leakage.
 
-  * **Same-Origin Data:** `PerformanceDelayMessageTiming` entries are only exposed to the same origin that initiated and received the messages. Information about message timings between `A.com` and an iframe from `B.com` would only be available to `A.com` if it can observe the receiver in `B.com` (which generally requires `B.com` to cooperate) or vice-versa, subject to standard cross-origin policies. The `scripts` property, which details blocking tasks, also only contains information about same-origin scripts.
+  * **Same-Origin Data:** `PerformanceDelayedMessageTiming` entries are only exposed to the same origin that initiated and received the messages. Information about message timings between `A.com` and an iframe from `B.com` would only be available to `A.com` if it can observe the receiver in `B.com` (which generally requires `B.com` to cooperate) or vice-versa, subject to standard cross-origin policies. The `scripts` property, which details blocking tasks, also only contains information about same-origin scripts.
   * **No New Cross-Origin Information:** The API does not expose any new information about cross-origin interactions that isn't already observable through other means (e.g., whether a message was sent or received). Details of cross-origin execution contexts or script contents are not revealed.
   * **Fingerprinting:** The risk of this API being used for user fingerprinting is considered low.
       * The information provided is about the performance characteristics of the web application itself, not the user's underlying system hardware beyond what influences JavaScript execution speed.
@@ -825,16 +800,16 @@ Further discussion is needed to determine the minimum allowed value for this thr
 
 # Related Discussion, Articles, and Browser Issues
 - **Chromium Issue:** [Support Long Tasks API in workers](https://issues.chromium.org/issues/41399667)  
-    Web developers are interested in extending the Long Tasks API to monitor delayed execution in Web Workers. However, unlike the Long Animation Frames (LoAF) API, the current Long Tasks API lacks script attribution, making it harder to trace the source of delays.
+    Web developers are interested in extending the Long Tasks API to monitor delayed execution in web workers. However, unlike the Long Animation Frames (LoAF) API, the current Long Tasks API lacks script attribution, making it harder to trace the source of delays.
     
 - **Chromium Issue:** [postMessage between Trello and iframes timing out more frequently](https://issues.chromium.org/issues/40723533)  
     This issue highlights increasing latency in `postMessage` communication between Trello and embedded iframes, suggesting a need for better diagnostics around message delivery delays.
     
 - **Article:** [Is postMessage slow?](https://surma.dev/things/is-postmessage-slow/)  
-    This article explains how serialization and deserialization are major sources of delay in `postMessage` usage. While `SharedArrayBuffer` can, in theory, eliminate copying overhead by enabling shared memory, its real-world usage is limited due to strict security constraints and the added complexity of manual memory management and thread synchronization.
+    This article explains how serialization and deserialization are major sources of delay in `postMessage()` usage. While `SharedArrayBuffer` can, in theory, eliminate copying overhead by enabling shared memory, its real-world usage is limited due to strict security constraints and the added complexity of manual memory management and thread synchronization.
 
 # Acknowledgements
-Thank you to Abhishek Shanthkumar, Alex Russell, Andy Luhrs, Dave Meyers, Ethan Bernstein, Evan Stade, Jared Mitchell, Luis Pardo, Noam Helfman, Sam Fortiner, Samuele Carpineti, Steve Becker, Yehor Lvivski for their valuable feedback and input.
+Thank you to Abhishek Shanthkumar, Alex Russell, Andy Luhrs, Dave Meyers, Ethan Bernstein, Evan Stade, Jared Mitchell, Luis Pardo, Michal Mocny, Noam Helfman, Noam Rosenthal, Sam Fortiner, Samuele Carpineti, Steve Becker, Yoav Weiss, Yehor Lvivski for their valuable feedback and advice.
 
 # References
 - [Event Timing API](https://w3c.github.io/event-timing/)
