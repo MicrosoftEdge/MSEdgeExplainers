@@ -55,10 +55,6 @@ There have been many scenarios described that call for feature detection of at-r
 
 Allow authors to feature-detect newly introduced at-rules.
 
-Allow authors to feature-detect new enhancements to existing at-rules, such as:
-- New media query features and other additions to at-rule preludes
-- New descriptors that may be introduced to rules such as `@font-face`
-
 At-rule feature detection should be available in all contexts where CSS allows conditioning based on support
 of a feature. This includes, but is not limited to,
 `@supports`, `CSS.supports()`, `@import ... supports()`, and `@when supports()`.
@@ -84,11 +80,11 @@ Accordingly, this explainer does not propose making `@charset` feature-detectabl
 
 ## Proposed Approach
 
-The `at-rule()` function can be used for feature detection in the following ways:
+The `at-rule()` function can be used for feature detection in the following way:
 
 ### Detect whether an at-rule name is recognized at all
 
-In its simplest form, the `at-rule()` function can be passed just an at-rule name.
+The `at-rule()` function can be passed just an at-rule name.
 The result is true if the implementation would recognize it as an at-rule in any context, false otherwise.
 This form is useful for detecting entire new features implemented as at-rules, including features such as
 [`@starting-style`](https://www.w3.org/TR/css-transitions-2/#defining-before-change-style)
