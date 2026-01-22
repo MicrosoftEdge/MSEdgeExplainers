@@ -89,8 +89,6 @@ console.log(this._internals.mixins);
 - `ElementInternals` instances expose a read-only `mixins` property returning the list of attached behaviors.
 - Supports composition as web authors can pass many behaviors.
 
-*Note: The API uses the term "mixins" instead of "behaviors" to avoid potential confusion with the spelling of "behavior" vs "behaviour".*
-
 ### Platform-Provided Behavior Mixins
 
 The platform would expose the following behavior mixin, mirroring the submission capability of `HTMLButtonElement`:
@@ -110,7 +108,7 @@ Each platform behavior mixin must provide:
 
 Platform-provided mixins expose useful public properties and methods of their corresponding native elements. Authors can expose these capabilities on their custom element's public API by defining accessors that delegate to the mixin state.
 
-These APIs are accessed via specific properties on `ElementInternals` (e.g., `htmlSubmitButtonMixinState`). This property provides a direct interface to the underlying platform behavior managed by the mixin. It returns a non-null state object only if the corresponding mixin is passed to `attachInternals`.
+These APIs are accessed via the `mixins` property on `ElementInternals`. This property provides access to their instance-specific state via properties named after the mixin.
 
 For `HTMLSubmitButtonMixin`, the state object exposes the following properties found on [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement):
 
@@ -134,24 +132,24 @@ class CustomSubmitButton extends HTMLElement {
     }
 
     get disabled() {
-        return this._internals.htmlSubmitButtonMixinState.disabled;
+        return this._internals.mixins.htmlSubmitButtonMixin.disabled;
     }
 
     set disabled(val) {
-        this._internals.htmlSubmitButtonMixinState.disabled = val;
+        this._internals.mixins.htmlSubmitButtonMixin.disabled = val;
     }
 
     get formAction() {
-        return this._internals.htmlSubmitButtonMixinState.formAction;
+        return this._internals.mixins.htmlSubmitButtonMixin.formAction;
     }
 
     set formAction(val) {
-        this._internals.htmlSubmitButtonMixinState.formAction = val;
+        this._internals.mixins.htmlSubmitButtonMixin.formAction = val;
     }
 }
 ```
 
-This ensures developers don't have to reimplement the state logic that the mixin is supposed to provide.
+This ensures web authors don't have to reimplement the state logic that the mixin is supposed to provide.
 
 ### Composition via attachInternals
 
@@ -159,8 +157,15 @@ Passing behaviors to `attachInternals()` provides several advantages for web com
 
 - Behaviors are defined once during initialization, avoiding the complexity of managing behavior lifecycle (adding/removing) and state synchronization.
 - Authors can define a single class that handles multiple modes (submit, reset, button) by checking attributes before attaching internals, without needing to define separate classes for each behavior.
-- While this proposal focuses on an imperative API, the underlying model of attaching mixins via `ElementInternals` is compatible with future declarative APIs.
 - A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active mixins, allowing for standard object-oriented extension patterns.
+- While this proposal uses an imperative API, the design supports future declarative custom elements. Once a declarative syntax for `ElementInternals` is established, attaching mixins could be modeled as an attribute, decoupling behavior from the JavaScript class definition. Platform-provided mixins could be referenced by string identifiers in markup. The following snippet shows a hypothetical example of declarative usage and how platform-provided mixins could be attached via an attribute.
+
+  ```html
+  <custom-button name="custom-submit-button">
+      <element-internals mixins="html-submit-button-mixin"></element-internals>
+      <template>Submit</template>
+  </custom-button>
+  ```
 
 ### Use case: Design system button
 
@@ -234,7 +239,29 @@ The element gains:
 - Form submission on activation.
 - `:default` pseudo-class matching.
 - Participation in implicit form submission.
-- Ability to inspect its own behaviors via `this._internals.mixins`.
+- Ability to inspect its own properties via `this._internals.mixins`.
+
+*Note: In this proposal, the set of mixins is fixed when `attachInternals` is called. If the `type` attribute changes later, the element cannot dynamically swap mixins on the existing instance. To support dynamic type changes, web developers create a fresh instance of the element (which hasn't called `attachInternals` yet) with the new attribute and replace the old instance.*
+
+```javascript
+    attributeChangedCallback(name, oldVal, newVal) {
+      // Only recreate if we've already initialized (mixins are locked).
+      if (name === 'type' && this._internals) {
+        // Create a fresh instance. It hasn't run connectedCallback yet, 
+        // so it hasn't called attachInternals.
+        const replacement = document.createElement(this.localName);
+
+        // Copy the new type to the new instance.
+        // The new instance will read this 'type' during its initialization.
+        replacement.setAttribute('type', newVal); 
+
+        // Swap the old element with the new one.
+        // This triggers connectedCallback() on the new instance, allowing it 
+        // to call attachInternals() with the new mixin set.
+        this.replaceWith(replacement);
+      }
+    }
+```
 
 ## Future Work
 
@@ -248,7 +275,13 @@ While this proposal focuses on form submission, the mixin pattern can be extende
 - **Radio Groups**: `HTMLRadioGroupMixin` for `name`-based mutual exclusion.
 - **Tables**: `HTMLTableMixin` for table layout semantics and accessibility.
 
-*Conflict Resolution: As the number of available mixins grows, we must address how to handle collisions when multiple mixins attempt to control the same attributes or properties. We propose that the order of mixins in the array passed to `attachInternals` should determine precedence (e.g., last one wins), but specific heuristics for complex clashes need to be defined.*
+### Conflict Resolution
+
+As the number of available mixins grows, we must address how to handle collisions when multiple mixins attempt to control the same attributes or properties. We should explore several strategies to make composition possible without getting unexpected or conflicting behaviors:
+
+1. **Order of Precedence (Default)**: The order of mixins in the array passed to `attachInternals` determines precedence (e.g., "last one wins"). This is simple to implement but may hide subtle incompatibilities.
+2. **Compatibility Allow-lists**: Each mixin could define a short list of "compatible" mixins that can be used in combination. Any combination not explicitly allowed would be rejected by `attachInternals`, preventing invalid states (like being both a button and a form).
+3. **Explicit Conflict Resolution**: If conflicts occur, the platform could require the author to explicitly alias or exclude specific properties.
 
 ### Future use case: Inheritance and composition
 
@@ -433,7 +466,7 @@ customElements.define('fancy-button', FancyButton, { extends: 'button' });
 
 While customized built-ins are useful where supported, the issues listed above makes them unsuitable as the primary solution.
 
-### Alternative 5: Expose certain behavioural attributes via ElementInternals (Proposed)
+### Alternative 5: Expose certain behavioral attributes via ElementInternals (Proposed)
 
 Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`) via `ElementInternals` so custom elements can adopt them without exposing the attribute to the user. See [issue #11752](https://github.com/whatwg/html/issues/11752).
 
@@ -484,7 +517,7 @@ While valuable, this can be a parallel effort. Even if all native elements were 
 
 ### Browser Vendors
 
-- Chromium: No signal
+- Chromium: Positive
 - Gecko: No signal
 - WebKit: No signal
 
@@ -498,6 +531,7 @@ Many thanks for valuable feedback and advice from:
 - [Hoch Hochkeppel](https://github.com/mhochk)
 - [Kevin Babbitt](https://github.com/kbabbitt)
 - [Kurt Catti-Schmidt](https://github.com/KurtCattiSchmidt)
+- [Mason Freed](https://github.com/mfreed7)
 
 Thanks to the following proposals, articles, frameworks, and languages for their work on similar problems that influenced this proposal.
 
