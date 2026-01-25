@@ -20,6 +20,7 @@
 - [Proposed Approach](#proposed-approach)
   - [`PerformanceScrollTiming` Interface](#performancescrolltiming-interface)
   - [Attribute Reference](#attribute-reference)
+  - [Entry Emission Rules](#entry-emission-rules)
   - [Example Usage with PerformanceObserver](#example-usage-with-performanceobserver)
   - [Dependencies on non-stable features](#dependencies-on-non-stable-features)
   - [Design Notes](#design-notes)
@@ -109,10 +110,10 @@ interface PerformanceScrollTiming : PerformanceEntry {
 | `name` | DOMString | Always `"scroll"` (inherited from PerformanceEntry) |
 | `startTime` | DOMHighResTimeStamp | Timestamp of the first input event that initiated the scroll or code invocation timestamp for programmatic scroll|
 | `firstFrameTime` | DOMHighResTimeStamp | Timestamp when the first visual frame reflecting the scroll was presented |
-| `duration` | DOMHighResTimeStamp | Total scroll duration from `startTime` until scrolling stops (includes momentum/inertia) |
-| `framesExpected` | unsigned long | Number of frames that should have rendered at the target refresh rate |
-| `framesProduced` | unsigned long | Number of frames actually rendered during the scroll |
-| `checkerboardTime` | DOMHighResTimeStamp | Total duration (ms) that unpainted areas were visible during scroll |
+| `duration` | DOMHighResTimeStamp | Total scroll duration from `startTime` until scrolling stops. A scroll interaction is considered complete when no scroll position changes have occurred for at least 150 milliseconds, or when a scroll end event is explicitly signaled (e.g., `touchend`, `scrollend`). Includes momentum/inertia phases. |
+| `framesExpected` | unsigned long | Number of frames that would be rendered at the display's refresh rate during the scroll duration. Implementations SHOULD use the actual display refresh rate when available, and MAY fall back to 60Hz as a default. Calculated as `ceil(duration / vsync_interval)`. |
+| `framesProduced` | unsigned long | Count of distinct visual updates presented to the display that reflected scroll position changes. A frame is considered "produced" when it is presented and contains a different scroll position than the previous frame. |
+| `checkerboardTime` | DOMHighResTimeStamp | Duration (ms) during which any visible area of the scrolled content was not fully painted. Implementations MAY return 0 if unpainted region visibility is not tracked. |
 | `deltaX` | long | Horizontal scroll delta in pixels (positive = right, negative = left) |
 | `deltaY` | long | Vertical scroll delta in pixels (positive = down, negative = up) |
 | `scrollSource` | DOMString | Input method: `"touch"`, `"wheel"`, `"keyboard"`, `"other"`, or `"programmatic"` |
@@ -124,6 +125,38 @@ interface PerformanceScrollTiming : PerformanceEntry {
 - **Frames dropped**: `framesExpected - framesProduced` — number of frames skipped or missed
 - **Total distance**: `√(deltaX² + deltaY²)` — Euclidean scroll distance
 - **Scroll velocity**: `totalDistance / duration * 1000` — scroll speed in pixels per second
+
+### Entry Emission Rules
+
+This section defines when `PerformanceScrollTiming` entries are emitted.
+
+#### Scroll End Detection
+
+A scroll interaction is considered **active** while the user is continuously interacting with a scroll gesture (e.g., finger on screen during touch scrolling, dragging a scrollbar thumb, holding a scroll key).
+
+A scroll interaction is considered **complete** when:
+1. The user is no longer actively interacting AND no scroll position changes have occurred for at least **150 milliseconds** (approximately 9 frames at 60Hz), OR
+2. A scroll end event is explicitly signaled (e.g., `touchend` for touch scrolling, `scrollend` event)
+
+This timeout allows momentum/inertia scrolling to be included in the same entry as the initiating gesture.
+
+#### Direction Change Segmentation
+
+A new scroll timing entry MUST be emitted when the scroll direction reverses (i.e., `deltaX` or `deltaY` changes sign during the scroll). This means a single scroll gesture can produce multiple entries if the user reverses direction mid-scroll.
+
+**Rationale**: Direction reversals represent distinct scroll interactions from a performance measurement perspective, as they may trigger different rendering paths and affect smoothness calculations.
+
+#### Entry Granularity by Scroll Source
+
+Entry emission rules vary by input type to match natural interaction boundaries:
+
+| Scroll Source | Entry Boundary |
+|--------------|----------------|
+| `"touch"` | One entry per continuous gesture (`touchstart` → `touchend`), split on direction changes |
+| `"wheel"` | One entry per scroll interaction; consecutive wheel events are combined into a single entry if they occur within 150ms of each other |
+| `"keyboard"` | One entry per key repeat sequence (from `keydown` until key release + 150ms inactivity) |
+| `"programmatic"` | One entry per programmatic scroll API call (e.g., `scrollTo()`, `scrollBy()`) |
+| `"other"` | One entry per scroll interaction, ending after 150ms of inactivity |
 
 ### Example Usage with PerformanceObserver
 
@@ -281,4 +314,4 @@ See [polyfill.js](polyfill.js) for the full implementation.
 **Note:** This polyfill uses heuristics-based approximations due to the lack of relevant native APIs required for accurate scroll performance measurement. It is intended for demonstration and prototyping purposes only. Metrics like checkerboarding detection and precise frame timing cannot be accurately measured without browser-level instrumentation. A native implementation would have access to compositor data, rendering pipeline information, and other internal metrics not exposed to JavaScript.
 
 ### Acknowledgements
-Many thanks for valuable feedback and advice from: Alex Russel, Mike Jackson, Olga Gerchikov, Andy Luhr, Pninit Goldman, Roee Barnea for guidance and contributions.
+Many thanks for valuable feedback and advice from: Alex Russel, Mike Jackson, Olga Gerchikov, Andy Luhr, Hoch Hochkeppel, Pninit Goldman, Roee Barnea for guidance and contributions.
