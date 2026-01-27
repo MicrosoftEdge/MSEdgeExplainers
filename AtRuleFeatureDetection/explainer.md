@@ -61,6 +61,12 @@ of a feature. This includes, but is not limited to,
 
 ### Non-goals
 
+- Allow authors to feature-detect new enhancements to existing at-rules, such as:
+  - New media query features and other additions to at-rule preludes
+  - New descriptors that may be introduced to rules such as `@font-face`
+- Detect non at-rules like `@charset`:
+
+#### CSS `@charset`
 The CSS `@charset` rule, despite its appearance, is
 [not an at-rule](https://drafts.csswg.org/css-syntax/#charset-rule).
 Rather, `@charset` is a marker that can appear only as the first few bytes of a stylesheet file. It signals to
@@ -143,6 +149,9 @@ context, which may result in a false positive. For example, one might write `@su
 intending to detect support for the `@top-left` rule nested within `@page`. But later, if a new feature comes 
 along that implements a nested `@top-left` at-rule for a different purpose, the feature query would return true
 on implementations that *do* support this new feature but *do not* support `@page`.
+
+### Context Aware feature detection
+As [mentioned before](#detect-whether-an-at-rule-name-is-recognized-at-all), the `at-rule()` feature returns true if the at-rule name is recognised in any context. This introduces the risk of false positives. As per CSSWG resolutions [#12622](https://github.com/w3c/csswg-drafts/issues/12622) and [#6966](https://github.com/w3c/csswg-drafts/issues/6966#issuecomment-3205037703) the new `@supports-condition` at-rule is introduced as a way to define and name complex support queries, including the ones that need to account for context. 
 
 ## Accessibility, Privacy, and Security Considerations
 
