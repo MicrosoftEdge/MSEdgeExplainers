@@ -126,6 +126,29 @@ interface PerformanceScrollTiming : PerformanceEntry {
 - **Total distance**: `√(deltaX² + deltaY²)` — Euclidean scroll distance
 - **Scroll velocity**: `totalDistance / duration * 1000` — scroll speed in pixels per second
 
+### Understanding Frame Counts and Smoothness
+
+**Frame counting during stationary periods:**
+
+The `framesExpected` metric counts all frame opportunities during the scroll `duration`, including periods where scroll velocity is zero (pauses, gaps between discrete events). The `framesProduced` metric only counts frames where the scroll position actually changed.
+
+This means:
+- **Very slow scrolls** (less than ~1 pixel per frame) will show lower smoothness scores even if rendering is perfect
+- **Pauses mid-gesture** (touch finger stationary, but not lifted) will reduce smoothness scores
+- **Discrete scrolls with gaps** (keyboard presses with temporal gaps, combined due to 150ms threshold) include gap frames in expected count
+
+**Why this design?**
+
+This approach provides raw, unfiltered measurements of rendering opportunities vs. actual updates. Developers can combine smoothness with velocity and duration to distinguish:
+- **Performance issues**: High velocity + low smoothness = dropped frames
+- **Intentional behavior**: Low velocity + low smoothness = slow/paused scroll
+
+Alternative designs that exclude "stationary" frames from `framesExpected` would require arbitrary velocity thresholds and obscure the distinction between "couldn't render" and "no motion."
+
+For advanced use cases, developers can implement custom logic to filter or segment scroll entries based on velocity characteristics before calculating aggregate smoothness metrics.
+
+For detailed discussion of frame counting behavior, see the "Frame Counting and Stationary Periods" section in [DESIGN_NOTES.md](DESIGN_NOTES.md#frame-counting-and-stationary-periods).
+
 ### Entry Emission Rules
 
 This section defines when `PerformanceScrollTiming` entries are emitted.
