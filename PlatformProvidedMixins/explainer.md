@@ -344,7 +344,7 @@ class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 
 Rejected in favor of the imperative API because it prevents the "single class, multiple behaviors" pattern that is common in HTML (e.g., `<input>`, `<button>`).
 
-### Alternative 2: ElementInternals.type ([Proposed](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ElementInternalsType/explainer.md))
+### Alternative 2: ElementInternals.type ([Proposed](../ElementInternalsType/explainer.md))
 
 Set a single "type" string that grants a predefined bundle of behaviors.
 

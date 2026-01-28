@@ -671,7 +671,7 @@ Looking forward, the `<link>` approach is directly compatible with the proposed 
 
 Only the contents of `my_cool_sheet` would be applied, due to the `sheet` attribute on the `<link>` tag specifying that named sheet.
 
-### [Local References For Link Rel](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md)
+### [Local References For Link Rel](../LocalReferenceLinkRel/explainer.md)
 
 This proposal extends the existing `<link>` tag to support local `<style>` tag references as follows:
 
@@ -694,13 +694,13 @@ to be accessed in any other Shadow Root. This limitation could be addressed with
 
 ### Key Differences Between This Proposal And Local References For Link Rel
 
-Both this proposal and [Local References For Link Rel](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md)
+Both this proposal and [Local References For Link Rel](../LocalReferenceLinkRel/explainer.md)
 allow authors to share inline CSS with Shadow Roots. There are some key differences in both syntax and
 behaviors, as illustrated in the following table:
 
 | | Local Reference Link Rel | Declarative CSS Modules | 
 | :---: | :---: | :---: |
-| Scope | ⚠️ [Standard DOM scoping](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md#Scoping) | Global scope |
+| Scope | ⚠️ [Standard DOM scoping](../LocalReferenceLinkRel/explainer.md#Scoping) | Global scope |
 | Identifier syntax | Standard HTML IDREF | Module identifier |
 | Attribute used | Standard HTML `href` | New attribute for `identifier` |
 | Uses existing HTML concepts | ✅ Yes | ❌ No |
@@ -842,7 +842,7 @@ Stylesheets defined via `@sheet` are not global - they are scoped per shadow roo
  ```
 Text within both shadow roots in the above example should be blue due to the `shadowrootadoptedstylesheets` at each Shadow DOM layer. Note that it is not currently possible to export stylesheets *out* of shadow roots, which is a deal-breaker for the [Streaming SSR](#streaming-ssr) example outlined above.
 
-An alternative to this entire proposal would be to make `@sheet` identifiers cross shadow boundaries, which would also allow for sharing styles across shadow roots. However, without a way to import inline `<style>` blocks into shadow roots, as proposed in [Local References in Link Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md#local-references-in-link-tags), this behavior would be limited to external .css files. Due to DOM scoping, [Local References in Link Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md#local-references-in-link-tags) would not work as required in a [Streaming SSR](#streaming-ssr) scenario.
+An alternative to this entire proposal would be to make `@sheet` identifiers cross shadow boundaries, which would also allow for sharing styles across shadow roots. However, without a way to import inline `<style>` blocks into shadow roots, as proposed in [Local References in Link Tags](../LocalReferenceLinkRel/explainer.md#local-references-in-link-tags), this behavior would be limited to external .css files. Due to DOM scoping, [Local References in Link Tags](../LocalReferenceLinkRel/explainer.md#local-references-in-link-tags) would not work as required in a [Streaming SSR](#streaming-ssr) scenario.
 
 ### [Id-based `shadowrootadoptedstylesheets` attribute on template](https://github.com/WICG/webcomponents/issues/939#issue-971914425)
 This proposal will add a new markup-based `shadowrootadoptedstylesheets` property that closely matches the existing JavaScript property. The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object.

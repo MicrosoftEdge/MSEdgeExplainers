@@ -149,7 +149,7 @@ Given this is an early brainstorming explainer, the API shape is very much open 
     - Pros: No newly introduced interface.
     - Cons: Exsiting API includes the pattern param which may be confusing to use and the explainer currently does not plan to support. Extending the API also hinders feature detection. Hypothetical, but if the API evolves to return meaningful value then it would require a new API.
 
-- A pointer-event based API as previously defined in [explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md)
+- A pointer-event based API as previously defined in [explainer](../HapticsDevice/explainer.md)
     - Pros: Closely tie haptics to input events.
     - Cons: Can be more cumbersome than a declarative method. 
 
@@ -202,4 +202,4 @@ We acknowledge that this design will change and improve through input from brows
 
 We only get here through the contributions of many—thank you to everyone who shares feedback and helps shape this work. Special thanks to: 
 - Ross Nichols – Contributions to Windows Haptics API design and integration guidance.
-- Previous Iteration – [HapticsDevice Explainer (Microsoft Edge)](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md), which served as the foundation for this proposal.
+- Previous Iteration – [HapticsDevice Explainer (Microsoft Edge)](../HapticsDevice/explainer.md), which served as the foundation for this proposal.

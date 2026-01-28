@@ -49,7 +49,7 @@ There have been many scenarios described that call for feature detection of at-r
 - In the [Blink intent-to-ship thread for `@property`](https://groups.google.com/a/chromium.org/g/blink-dev/c/3ygpsew53a0/m/Ar_OPlthAwAJ), it was pointed out that authors need a mechanism to detect support so that they can fall back to `CSS.registerProperty()` if needed.
 - A [StackOverflow question](https://stackoverflow.com/questions/44244221/is-it-possible-to-do-a-css-supports-check-on-a-media-rule) asks whether it is possible to detect support for `@media` features, for example to detect if the user agent can return a yes/no answer for `@media (pointer)`.
 - A [Mastodon post](https://mastodon.social/@xro/113106213499516093) asks whether it is possible to test for style query support.
-- At time of writing, several in-development CSS features propose to implement new at-rules. These include [`@sheet`](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AtSheet/explainer.md) as well as [CSS Functions and Mixins](https://css.oddbird.net/sasslike/mixins-functions/).
+- At time of writing, several in-development CSS features propose to implement new at-rules. These include [`@sheet`](../AtSheet/explainer.md) as well as [CSS Functions and Mixins](https://css.oddbird.net/sasslike/mixins-functions/).
 
 ### Goals
 

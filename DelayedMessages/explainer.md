@@ -820,7 +820,7 @@ Thank you to Abhishek Shanthkumar, Alex Russell, Andy Luhrs, Dave Meyers, Ethan 
 
 # References
 - [Event Timing API](https://w3c.github.io/event-timing/)
-- [Extending Long Tasks API to Web Workers](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LongTasks/explainer.md)
+- [Extending Long Tasks API to Web Workers](../LongTasks/explainer.md)
 - https://developer.mozilla.org/en-US/docs/Web/API/PerformanceLongTaskTiming
 - https://developer.mozilla.org/en-US/docs/Web/API/PerformanceScriptTiming
 - https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent

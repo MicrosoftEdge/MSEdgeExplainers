@@ -36,7 +36,7 @@ Note with this proposal that there is no mode enabling some manipulations with a
 ## Sample Code
 This sample renders one highlight for each range selected by a pen.  Panning and zooming is still possible using touch, but a separate property (pen-action) is used to disable all the manipulations that could be initiated by using the pen.
 
-To simplify the code that draws the highlight, the example leverages the proposed [Highlights API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/highlight/explainer.md).
+To simplify the code that draws the highlight, the example leverages the proposed [Highlights API](../highlight/explainer.md).
 ```html
 <style>
     :root::highlight(yellow-highlighter) {

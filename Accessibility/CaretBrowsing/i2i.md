@@ -6,7 +6,7 @@ Bruce.Long@microsoft.com, Amit.Jain@microsoft.com, Grisha.Lyukshin@microsoft.c
  
 ## Explainer
     
-[Native Caret Browsing Explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Accessibility/CaretBrowsing/explainer.md)
+[Native Caret Browsing Explainer](explainer.md)
 
 
 ## Design Doc
