@@ -70,6 +70,50 @@ Even if scroll starts quickly, dropped frames during scrolling create visible ja
 - Image decoding on the main thread
 - Garbage collection pauses
 
+### Frame Counting and Stationary Periods
+
+The frame counting mechanism (`framesExpected` vs `framesProduced`) is designed to measure **rendering performance during active scrolling**, not to penalize intentionally slow or paused scroll gestures.
+
+**Core principle:**
+During an active scroll gesture, the browser is expected to produce visual updates that reflect scroll position changes. `framesExpected` represents the number of opportunities (display refresh cycles) to update the display during the scroll duration, while `framesProduced` counts how many of those opportunities actually resulted in a position change being rendered.
+
+**Handling of stationary periods:**
+
+1. **Very slow scrolls**: For animated or smooth scrolls where scroll velocity results in sub-pixel movement per frame, implementations SHOULD still count a frame as "produced" if the browser attempted to update the scroll position, even if pixel-level rounding results in identical rendered positions across consecutive frames. The intent is to measure rendering pipeline performance, not scroll speed.
+
+2. **Mid-gesture pauses**: When a user pauses during a continuous touch gesture (finger down but not moving), the 150ms scroll-end detection threshold determines when the entry completes. Brief pauses under 150ms remain part of the same entry:
+   - Frames during the pause are included in `framesExpected` (the scroll is still "active")
+   - Frames during the pause typically won't increment `framesProduced` (no position change)
+   - This reflects that the rendering pipeline had opportunities to update but the input velocity was zero
+
+3. **Discrete scroll events with gaps**: For input sources like keyboard or wheel scrolling, multiple discrete events within 150ms are combined into a single entry:
+   - Example: Key held for 100ms, released, then pressed again after 40ms → combined into one entry
+   - Frames during the 40ms gap count toward `framesExpected`
+   - This reflects the continuous nature of the user's scrolling intent, even if input delivery is discrete
+
+**Interpreting smoothness scores:**
+
+The smoothness score (`framesProduced / framesExpected`) measures **motion continuity** during the scroll interaction. A low smoothness score can indicate:
+- **Dropped frames**: The browser couldn't render updates fast enough (performance issue)
+- **Very slow scroll velocity**: Intentionally slow scrolling where position changes less frequently than the refresh rate (not a performance issue)
+- **Pauses and gaps**: User paused mid-gesture or discrete input events had temporal gaps (not a performance issue)
+
+Developers should consider scroll velocity and duration when interpreting smoothness:
+- High velocity + low smoothness = likely rendering performance issue
+- Low velocity + low smoothness = may be intentional slow scroll
+- Short duration + low smoothness but high `framesProduced` = likely fine (few expected frames due to brief interaction)
+
+**Rationale for current design:**
+
+Alternative designs considered:
+1. **Only count "active motion" frames in `framesExpected`**: This would require detecting scroll velocity and excluding frames with zero velocity. However, this is complex to specify (what threshold defines "active"?), makes the metric harder to reason about, and obscures the difference between "couldn't render" and "no motion."
+
+2. **Separate `duration` into active vs. total time**: This adds API surface complexity and still requires defining "active" scrolling.
+
+The current design provides raw measurements that allow developers to calculate derived metrics based on their specific needs. The trade-off is that smoothness scores must be interpreted in context with velocity and duration.
+
+**Open question**: Should we provide additional metrics to help distinguish rendering performance issues from intentional low-velocity scrolling? See [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md#smoothness-scoring-options) for related discussion on smoothness calculation methods.
+
 ## Scroll Checkerboarding
 Scroll checkerboarding occurs when content is not ready to be displayed as it scrolls into the viewport, resulting in blank or placeholder areas.
 
