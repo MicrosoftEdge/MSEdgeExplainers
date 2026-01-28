@@ -153,9 +153,25 @@ For detailed discussion of frame counting behavior, see the "Frame Counting and 
 
 This section defines when `PerformanceScrollTiming` entries are emitted.
 
+#### Entry Granularity by Scroll Source
+
+Entry emission rules vary by input type to match natural interaction boundaries:
+
+| Scroll Source | Entry Boundary |
+|--------------|----------------|
+| `"touch"` | One entry per continuous gesture (`touchstart` → `touchend`), split on direction changes |
+| `"wheel"` | One entry per scroll interaction; consecutive wheel events are combined into a single entry if they occur within 150ms of each other |
+| `"keyboard"` | One entry per key repeat sequence (from `keydown` until key release + 150ms inactivity) |
+| `"programmatic"` | One entry per programmatic scroll API call (e.g., `scrollTo()`, `scrollBy()`) |
+| `"other"` | One entry per scroll interaction, ending after 150ms of inactivity |
+
 #### Scroll End Detection
 
-A scroll interaction is considered **active** while the user is continuously interacting with a scroll gesture (e.g., finger on screen during touch scrolling, dragging a scrollbar thumb, holding a scroll key).
+A scroll interaction is considered **active** while the user is continuously interacting with a scroll gesture. What constitutes "active interaction" depends on the input type (see table above):
+- **Touch**: Finger is touching and moving on the screen
+- **Wheel**: Mouse wheel events are being received
+- **Keyboard**: Scroll key is held down
+- **Other**: Scrollbar is being dragged, or other input method is engaged
 
 A scroll interaction is considered **complete** when:
 1. The user is no longer actively interacting AND no scroll position changes have occurred for at least **150 milliseconds** (approximately 9 frames at 60Hz), OR
@@ -168,18 +184,6 @@ This timeout allows momentum/inertia scrolling to be included in the same entry 
 A new scroll timing entry MUST be emitted when the scroll direction reverses (i.e., `deltaX` or `deltaY` changes sign during the scroll). This means a single scroll gesture can produce multiple entries if the user reverses direction mid-scroll.
 
 **Rationale**: Direction reversals represent distinct scroll interactions from a performance measurement perspective, as they may trigger different rendering paths and affect smoothness calculations.
-
-#### Entry Granularity by Scroll Source
-
-Entry emission rules vary by input type to match natural interaction boundaries:
-
-| Scroll Source | Entry Boundary |
-|--------------|----------------|
-| `"touch"` | One entry per continuous gesture (`touchstart` → `touchend`), split on direction changes |
-| `"wheel"` | One entry per scroll interaction; consecutive wheel events are combined into a single entry if they occur within 150ms of each other |
-| `"keyboard"` | One entry per key repeat sequence (from `keydown` until key release + 150ms inactivity) |
-| `"programmatic"` | One entry per programmatic scroll API call (e.g., `scrollTo()`, `scrollBy()`) |
-| `"other"` | One entry per scroll interaction, ending after 150ms of inactivity |
 
 ### Example Usage with PerformanceObserver
 
