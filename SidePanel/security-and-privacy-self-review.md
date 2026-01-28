@@ -1,6 +1,6 @@
 # Early Self-Review Questionnaire: Security and Privacy
 
-## Security and Privacy questionnaire for [`Side Panel`](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/SidePanel/explainer.md)
+## Security and Privacy questionnaire for [`Side Panel`](explainer.md)
 
 1. **What information might this feature expose to Web sites or other parties, and for what purposes is that exposure necessary?**
 

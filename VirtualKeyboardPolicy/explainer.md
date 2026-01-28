@@ -1,6 +1,6 @@
 # Virtual Keyboard Control
 
-**Note - this proposal extends the scope of [VirtualKeyboard Interface](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/VirtualKeyboardAPI/explainer.md)**
+**Note - this proposal extends the scope of [VirtualKeyboard Interface](../VirtualKeyboardAPI/explainer.md)**
 
 ## Status of this Document
 This document is intended as a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
@@ -81,7 +81,7 @@ Revisiting the earlier table:
 | editable, `inputmode="text", virtualkeyboardpolicy="auto"` | read-only, `virtualkeyboardpolicy="manual"`                | A VK was shown, but then is hidden (the `virtualkeyboardpolicy` is only applicable to editable elements) |
 
 
-Additionally, two new methods will be added to the VirtualKeyboard interface: ```show``` and ```hide``` (the ```VirtualKeyboard``` interface is introduced in this [separate explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/VirtualKeyboardAPI/explainer.md)). ```show``` will request that the OS show the VK, while ```hide``` requests that the VK be hidden.  Note that the OS has its own heuristics and may not honor the request.
+Additionally, two new methods will be added to the VirtualKeyboard interface: ```show``` and ```hide``` (the ```VirtualKeyboard``` interface is introduced in this [separate explainer](../VirtualKeyboardAPI/explainer.md)). ```show``` will request that the OS show the VK, while ```hide``` requests that the VK be hidden.  Note that the OS has its own heuristics and may not honor the request.
 
 ## Examples
 

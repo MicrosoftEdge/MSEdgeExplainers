@@ -104,7 +104,7 @@ Adding a new entry entry, e.g. "trigger-rumble" to GamepadHapticActuatorType mig
 A new `canPlay` method that takes a `GamepadHapticEffectType` string and returns a `boolean` could also be used to query a gamepad's haptics capabilities. However, this requires a new call to be made for every `GamepadHapticEffectType` we would like to check for support. Moreover, implementing a method like this could affect legacy engines, in case effect types need to be deprecated or renamed.
 
 ## Future Plans for this API
-The extension to the `GamepadHapticsActuator` is a short-term solution to unblock developers from being limited to 2-motor rumble on current generation hardware. In the long-term, we plan to invest in the [HapticsDevice API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/HapticsDevice/explainer.md), which will supercede this API, the [Vibration API](https://w3c.github.io/vibration/#dom-navigator-vibrate), and will generalize haptics behaviors across many devices and applications. This new `HapticsDevice` API will be applied to Gamepad to support rumble and haptic effects in previous and next generation hardware.
+The extension to the `GamepadHapticsActuator` is a short-term solution to unblock developers from being limited to 2-motor rumble on current generation hardware. In the long-term, we plan to invest in the [HapticsDevice API](../HapticsDevice/explainer.md), which will supercede this API, the [Vibration API](https://w3c.github.io/vibration/#dom-navigator-vibrate), and will generalize haptics behaviors across many devices and applications. This new `HapticsDevice` API will be applied to Gamepad to support rumble and haptic effects in previous and next generation hardware.
 
 ## References
 

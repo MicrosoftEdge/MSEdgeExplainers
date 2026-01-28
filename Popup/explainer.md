@@ -257,7 +257,7 @@ While some `popup`s may be entire components in and of themselves, other `popup`
 
 ![A select control displaying an open listbox with 3 options](select-popup.png)
 
-Per [“Enabling Custom Control UI”](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ControlUICustomization/explainer.md), authors should be able to customize parts of a native control, including the `select` `popup`. While we anticipate discussing the anatomy of a `select` in depth in the [Open UI venue](https://open-ui.org/components/select), any solution for providing arbitrary `popup`s will also be applied to the `select`’s Shadow DOM.
+Per [“Enabling Custom Control UI”](../ControlUICustomization/explainer.md), authors should be able to customize parts of a native control, including the `select` `popup`. While we anticipate discussing the anatomy of a `select` in depth in the [Open UI venue](https://open-ui.org/components/select), any solution for providing arbitrary `popup`s will also be applied to the `select`’s Shadow DOM.
 
 For example, `popup` may be used in the `select` Shadow DOM like so:
 

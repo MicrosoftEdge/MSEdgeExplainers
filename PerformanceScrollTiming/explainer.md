@@ -66,7 +66,7 @@ Measuring scroll performance is critical because:
 
 ### Non-goals
 
-- Address general [animation smoothness](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/AnimationSmoothness/explainer.md) beyond scroll interactions
+- Address general [animation smoothness](../AnimationSmoothness/explainer.md) beyond scroll interactions
 - Prescribe explicit performance thresholds or targets (e.g., smoothness scores), as these are context-dependent and vary across use cases
 
 ### User research
