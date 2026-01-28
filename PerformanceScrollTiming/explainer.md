@@ -179,6 +179,65 @@ A scroll interaction is considered **complete** when:
 
 This timeout allows momentum/inertia scrolling to be included in the same entry as the initiating gesture.
 
+**150ms timeout mechanics:**
+
+The 150ms inactivity timer starts from the **last scroll position change**, not from the initial input event. This determines when separate input events get combined into a single entry:
+
+**Example - Wheel scrolling:**
+- Wheel event at `0ms` - this event timestamp becomes `startTime` (`0ms`)
+- First visual scroll position change occurs shortly after (e.g., `8ms` = `firstFrameTime`, may be later if jank)
+- Scroll position continues changing until `80ms` (last position change)
+- Inactivity timer starts at `80ms`
+- If another wheel event arrives before `230ms` (`80ms + 150ms`):
+  - Events are combined into one entry
+  - Timer resets based on when position changes from the new event stop
+- If no event arrives by `230ms`: Entry completes with `duration = 230ms`
+
+**Example - Keyboard scrolling:**
+- Key press at `0ms` - this event timestamp becomes `startTime` (`0ms`)
+- First visual scroll position change occurs shortly after (e.g., `10ms` = `firstFrameTime`, may be later if jank)
+- Key held until `100ms`, position changes until `120ms`
+- Key released at `100ms`
+- Inactivity timer starts at `120ms` (last position change)
+- If another key press before `270ms` (`120ms + 150ms`): Combined into same entry
+- Otherwise entry completes at `270ms`
+
+**Example - Scrollbar dragging:**
+- User starts dragging scrollbar thumb at `0ms` - this event timestamp becomes `startTime` (`0ms`)
+- First visual scroll position change occurs shortly after (e.g., `8ms` = `firstFrameTime`, may be later if jank)
+- Continues dragging until `200ms`, scroll position changes continuously
+- User releases thumb at `200ms`
+- Inactivity timer starts at `200ms` (last position change when thumb released)
+- Entry completes at `350ms` (`200ms + 150ms`)
+
+**Example - Autoscroll (middle-click):**
+- User middle-clicks to enter autoscroll mode (no entry yet)
+- User moves cursor away from anchor point - cursor movement event timestamp becomes `startTime` (`0ms`)
+- First visual scroll position change occurs shortly after (e.g., `10ms` = `firstFrameTime`, may be later if jank)
+- Autoscroll continues based on cursor position, position changes continuously
+- User clicks again to stop autoscroll at `500ms`
+- Inactivity timer starts at `500ms` (last position change)
+- Entry completes at `650ms` (`500ms + 150ms`)
+- Note: If user middle-clicks but never moves cursor away (no cursor movement event), no entry is emitted
+
+**Example - Touch scrolling (with pause mid-gesture):**
+- User touches screen (`touchstart`) - no entry yet
+- User begins dragging finger at `0ms` - this touch gesture timestamp becomes `startTime` (`0ms`)
+- First visual scroll position change occurs at `16ms` (`firstFrameTime` - may be later if jank)
+- User continues dragging until `200ms`, then pauses (finger still on screen, but not moving)
+- Inactivity timer starts at `200ms` (last position change during the pause)
+- If user resumes dragging before `350ms` (`200ms + 150ms`): continues as same entry, timer resets
+- If no movement by `350ms`: entry completes at `350ms` even though finger is still on screen
+- Note: `startTime` is the touch gesture event timestamp, not when viewport visually moves (this allows measuring scroll start latency)
+
+**Example - Touch scrolling (lift with momentum):**
+- User touches screen and begins dragging - touch gesture timestamp at `0ms` becomes `startTime`
+- First visual scroll position change occurs shortly after (e.g., `16ms` = `firstFrameTime`)
+- User continues dragging until lifting finger at `300ms` (`touchend`)
+- **If no momentum:** Entry ends immediately at `300ms`
+- **If momentum occurs:** Momentum scrolling continues until naturally stopping at `800ms`, entry completes at `800ms` (no 150ms timer needed - momentum ends the scroll)
+- Note: If user touches screen but never moves finger (no scroll gesture occurs), no entry is emitted
+
 #### Direction Change Segmentation
 
 A new scroll timing entry MUST be emitted when the scroll direction reverses (i.e., `deltaX` or `deltaY` changes sign during the scroll). This means a single scroll gesture can produce multiple entries if the user reverses direction mid-scroll.
