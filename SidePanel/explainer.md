@@ -58,7 +58,7 @@ The side panel API is not intended to be used for:
 - Allowing a site to declare a side panel app of a different origin (e.g. contoso.com cannot declare a side panel app for fabrikam.com).
 - Installing a web application to side panel.
   - Browser should provide a way to allow users to install web applications to side panel.
-  - If a developer wants to install a web application to side panel, they may consider using [Web Install API](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/WebInstall/explainer.md).
+  - If a developer wants to install a web application to side panel, they may consider using [Web Install API](../WebInstall/explainer.md).
 - Granting additional capabilities to a web application.
   - If a developer wants to render in a side panel with additional capabilities, they may consider using an Extension. See [chrome.sidePanel](https://developer.chrome.com/docs/extensions/reference/sidePanel/) and [Extensions in the Microsoft Edge sidebar](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/developer-guide/sidebar).
 

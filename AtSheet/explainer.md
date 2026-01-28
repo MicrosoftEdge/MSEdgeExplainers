@@ -31,7 +31,7 @@ Additionally, bundling of stylesheets is difficult for developers who are distri
 
 We propose an enhancement to allow the declaration of new stylesheets via an `@sheet` CSS block and using existing mechanisims such as `@import`, `<link>`, and CSS module script `import` to apply those shared styles to DSDs without the use of JavaScript.
 
-We're currently investigating this and [Declarative CSS modules](/ShadowDOM/explainer.md) in parallel.
+We're currently investigating this and [Declarative CSS modules](../ShadowDOM/explainer.md) in parallel.
 
 ## Goals
 * Allow the reuse of styles in markup-based shadow DOM without requiring JavaScript.
@@ -86,7 +86,7 @@ This will also import only the rules for "foo" - in this case, the `div { color:
 
 Shadow DOM isolates styles, but fragment identifiers from the light DOM are global and referenceable from shadow DOM (but not vice versa).
 
-Combined with [Local References In <link> Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md), developers may define a set of styles for their components upfront,
+Combined with [Local References In <link> Tags](../LocalReferenceLinkRel/explainer.md), developers may define a set of styles for their components upfront,
 and then reference these styles declaratively from their component. By using inline styles instead of an external .css file, a Flash of Unstyled Content (FOUC) can be avoided in many cases.
 
 This example demonstates importing `@sheet` references from the light DOM into a Declarative Shadow DOM:
@@ -119,7 +119,7 @@ or imported from JavaScript:
 
 This proposal augments the HTML `<link>` tag by introducing the `sheet` attribute, which scopes the specified style reference to rules within an `@sheet` identifier.
 
-A separate proposal to support fragment identifiers to same-document `<style>` in the `href` attribute for `<link>` tags is described in [Local References In <link> Tags](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/LocalReferenceLinkRel/explainer.md).
+A separate proposal to support fragment identifiers to same-document `<style>` in the `href` attribute for `<link>` tags is described in [Local References In <link> Tags](../LocalReferenceLinkRel/explainer.md).
 
 This proposal augments the CSS `@import` syntax by adding the `from` keyword, with comma-separated list of `@sheet` identifiers ( `@import foo, bar from "sheet.css";`).
 
@@ -229,8 +229,8 @@ interface SheetNameList {
 
 ## Considered alternatives
 
-1. [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) are another mechanism for sharing styles between Declarative Shadow DOM and light DOM without the use of JavaScript.
-2. Some additional alternatives to parts of the problems discussed here are discussed in the [Alternate proposals](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md#alternate-proposals) section of that explainer.
+1. [Declarative CSS Modules](../ShadowDOM/explainer.md) are another mechanism for sharing styles between Declarative Shadow DOM and light DOM without the use of JavaScript.
+2. Some additional alternatives to parts of the problems discussed here are discussed in the [Alternate proposals](../ShadowDOM/explainer.md#alternate-proposals) section of that explainer.
 
 ## Open Issues
 

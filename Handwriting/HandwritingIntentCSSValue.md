@@ -128,7 +128,7 @@ There are no known security impacts of the features in this specification.
 The proposal is for this to be an CSS property.
 ## Why not an HTML+IDL attribute?
 
-The [first proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Handwriting/explainer.md) was to add the handwriting functionality as an HTML+IDL attribute which would allow authors to specify whether an element should permit handwriting by adding a new `handwriting(= true|= false|<blank>)` (`<blank>` implying `= true`) attribute to HTML elements. The main arguments to implement the handwriting HTML attribute **over** a css property are: 
+The [first proposal](explainer.md) was to add the handwriting functionality as an HTML+IDL attribute which would allow authors to specify whether an element should permit handwriting by adding a new `handwriting(= true|= false|<blank>)` (`<blank>` implying `= true`) attribute to HTML elements. The main arguments to implement the handwriting HTML attribute **over** a css property are: 
 * [Pro] If users or organizations disable CSS for their browsers there would need to be another mechanism to disable handwriting input.
 * [Pro] All websites that currently use `touch-action` won't have to update their rules if they want handwriting to be enabled (see **# Caveats / Cons**).
 * [Pro] Straightforward to use for the developers.

@@ -145,7 +145,7 @@ the shadow root where they are defined, as illustrated by the following examples
   Styles defined inside the sibling Shadow Root are not applied, so "Inside Sibling Shadow DOM" is not blue.
 </p>
 
-In contrast to this proposal, [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md) always have global scope. Shadow DOM scoping could be modified though other means, as discussed
+In contrast to this proposal, [Declarative CSS Modules](../ShadowDOM/explainer.md) always have global scope. Shadow DOM scoping could be modified though other means, as discussed
 in [this thread](https://github.com/whatwg/html/issues/11364). All of the suggestions in that thread would
 allow for this feature to work with any shadow root, regardless of scope.
 
@@ -172,7 +172,7 @@ of how scoping can be expanded for Shadow DOM elements.
 
 ### Key Differences Between This Proposal And Declarative CSS Modules
 
-Both this proposal and [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md)
+Both this proposal and [Declarative CSS Modules](../ShadowDOM/explainer.md)
 allow authors to share inline CSS with Shadow Roots. There are some key differences in both syntax and
 behaviors, as illustrated in the following table:
 
@@ -324,7 +324,7 @@ same-document `<style>` tags in the `href` attribute when the `rel` attribute is
 
 ## Considered alternatives
 
-1. [Declarative CSS Modules](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/ShadowDOM/explainer.md)
+1. [Declarative CSS Modules](../ShadowDOM/explainer.md)
    are another mechanism for sharing styles between Declarative Shadow DOM and
    Light DOM without the use of JavaScript.
 2. External CSS files in `<link>` tags - these are always asychronous (which may
