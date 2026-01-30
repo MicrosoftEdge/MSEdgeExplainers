@@ -172,7 +172,7 @@ The figure and markup below is a representation of a canvas-based spreadsheet th
 
 The figure below represents a map application that presents a map on one window segment and search results on another.  
 
-Using the proposal for [Window Segments](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Foldables/explainer.md) and media queries, the search box shown will increase its bottom margin to remain visible whenever the virtual keyboard appears on the left side of the foldable device.
+Using the proposal for [Window Segments](../Foldables/explainer.md) and media queries, the search box shown will increase its bottom margin to remain visible whenever the virtual keyboard appears on the left side of the foldable device.
 
 ![Foldable with the left segment of the window containing a map and the right segment containing list of search results](example.png)
 
@@ -240,7 +240,7 @@ The [Visual Viewport API](https://wicg.github.io/visual-viewport/) reports chang
 We briefly considered extending the Visual Viewport API to call out changes to the geometry of the virtual keyboard, but did not pursue that approach for the following reasons:
 
 1. This proposal opts out of visual viewport changes in response to the virtual keyboard being shown or hidden.  It seems inappropriate to dispatch visual viewport events in response to changes in something other than the visual viewport.
-2. A virtual keyboard interface provides a home for a cohesive set of APIs all related ot the virtual keyboard.  One example is this [complementary proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/VirtualKeyboardPolicy/explainer.md) offering authors the ability to control when the keyboard is shown or hidden.
+2. A virtual keyboard interface provides a home for a cohesive set of APIs all related ot the virtual keyboard.  One example is this [complementary proposal](../VirtualKeyboardPolicy/explainer.md) offering authors the ability to control when the keyboard is shown or hidden.
 
 
 ## Privacy Considerations
@@ -254,7 +254,7 @@ Two pieces of information that might help with fingerprinting:
 
 The first piece of information can already be inferred by authors today using the visual viewport API.  The second can be at least partially mitigated.
 
-If the virtual keyboard doesn't fully span the width of the viewport, it may not be key to the experience, for example if a virtual keyboard had some gaps to either side (centered at the bottom of the viewport) the user agent need not report the extra space and can instead describe the intersection as taking up the full width of the viewport.  If the intersection is key to the experience, as it is with [foldable devices](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Foldables/explainer.md), then the same information can likely be discovered by the author through other APIs, for example by checking the number of window segments, which are necessary so that optimized experiences can be developed for these devices.
+If the virtual keyboard doesn't fully span the width of the viewport, it may not be key to the experience, for example if a virtual keyboard had some gaps to either side (centered at the bottom of the viewport) the user agent need not report the extra space and can instead describe the intersection as taking up the full width of the viewport.  If the intersection is key to the experience, as it is with [foldable devices](../Foldables/explainer.md), then the same information can likely be discovered by the author through other APIs, for example by checking the number of window segments, which are necessary so that optimized experiences can be developed for these devices.
 
 In summary, with some user agent mitigations, authors won't gain any new information for use in fingerprinting.
 

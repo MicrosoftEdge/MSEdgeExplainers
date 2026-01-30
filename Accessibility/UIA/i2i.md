@@ -6,7 +6,7 @@ Rossen.Atanassov@microsoft.com, Melanie.Richards@microsoft.com
 
 ## Explainer
 
-[UI Automation Explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Accessibility/UIA/explainer.md)
+[UI Automation Explainer](explainer.md)
 
 ## Design doc/Spec
 
@@ -35,7 +35,7 @@ With UIA, ATs can enhance web browsing for their users in Chromium-based browser
 * Spend less time writing to different accessibility APIs, and more time on core capabilities.
 * Take advantage of a continually-evolving platform, and the performance gains and extended capabilities that come along with it.
 
-For extended background on motivations, please refer to the [explainer](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Accessibility/UIA/explainer.md).
+For extended background on motivations, please refer to the [explainer](explainer.md).
 
 ## Risks
 
