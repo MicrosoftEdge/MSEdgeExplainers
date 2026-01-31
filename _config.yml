@@ -4,3 +4,4 @@
 # Use GitHub Flavored Markdown for the md > html conversion.
 # This is the same markdown format used for rendering on GitHub's code pages.
 markdown: GFM
+favicon: /favicon.png
