@@ -1,6 +1,6 @@
 # Explainer: Drag Multiple Virtual Files Out of Browser
 
-Author: [Joone Hur](https://github.com/joone)
+Author: [Joone Hur](https://github.com/joone) (Microsoft)
 
 # Participate
 
@@ -19,37 +19,41 @@ Author: [Joone Hur](https://github.com/joone)
     - [Using an array](#using-an-array)
     - [Using newline-delimiters](#using-newline-delimiters)
   - [UX perspective](#ux-perspective)
-- [Proposed Solution: Extending the `DownloadURL` Data Format](#proposed-solution-extending-the-downloadurl-data-format)
-  - [New `DownloadURL` Data Format](#new-downloadurl-data-format)
+- [Proposed Solution: a new drag type `DownloadURL-list`](#proposed-solution-a-new-drag-type-downloadurl-list)
+  - [`DownloadURL-list` data format](#downloadurl-list-data-format)
   - [Why JSON?](#why-json)
-- [Backward Compatibility](#backward-compatibility)
 - [Future Considerations](#future-considerations)
 - [Security & UX Considerations](#security--ux-considerations)
   - [Drag Bomb](#drag-bomb)
   - [Limit Download Requests](#limit-download-requests)
   - [Single-click button to delete all downloaded files](#single-click-button-to-delete-all-downloaded-files)
 - [Acknowledgements](#acknowledgements)
-- [Referenecs](#referenecs)
+- [References](#references)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Introduction
 
-Chromium has supported a non-standard drag type (`DownloadURL`) that allows Windows users to drag a virtual file out of the browser. However, the `DownloadURL` drag type is limited to supporting only a single file per drag-and-drop operation. To support more robust workflows, we propose extending the DownloadURL drag type to allow multiple files to be dragged simultaneously.
+The `DownloadURL` drag type is a Chromium‑specific drag‑and‑drop mechanism historically used to enable dragging a resource from a web page into the operating system as a file. However, it is limited to supporting only a single file per drag-and-drop operation. To support more robust workflows, we propose a new `DownloadURL-list` drag type to allow multiple files to be dragged simultaneously.
 
 # Goals
 
-Enable users to drag multiple files from Chromium to a desktop folder on Windows using an extended `DownloadURL` drag type.
+Enable users to drag multiple files from Chromium to a desktop folder on Windows using the `DownloadURL-list` drag type.
 
 # Non-goals
-This proposal does not aim to:
-* Enable drag-and-drop of files into other browser contexts, whether between the same browser or different browsers.
-* Standardize this behavior across browsers via W3C. The proposal is specific to Chromium and Windows environments.
+
+Support drag‑and‑drop of files that require authentication or session validation to download; such flows are out of scope for this proposal.
 
 # Problem: The Single-File Limitation
-The current DownloadURL drag type in Chromium supports only a single file per drag-and-drop operation, which restricts more advanced workflows and user experiences.
+
+The existing DownloadURL drag type encodes only a single file as:
+```
+<mimeType>:<filename>:<url>
+```
+This prevents multi‑file workflows and forces users to drag each item individually.
 
 ## Example of Current Behavior
+
 Here's a typical example demonstrating the limitation:
 
 ```js
@@ -78,6 +82,7 @@ The `DownloadURL` format requires a string with three colon-separated components
 When [it was initially proposed](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2009-August/022121.html), it was designed for single-file use. Although multi-file support was requested, it has never been implemented.
 
 ## Developer Workarounds and Limitations
+
 Because `DownloadURL` is a Chromium-specific feature and not part of any web standard, documentation is limited. As a result, developers have attempted to pass multiple files using arrays or newline-delimited strings, but these formats are not supported by the current implementation:
 
 ### Using an array
@@ -107,72 +112,44 @@ This single-file constraint presents a significant inconvenience for users who f
 
 The current implementation forces users to perform multiple drag-and-drop operations for each file, which is inefficient and cumbersome.
 
-# Proposed Solution: Extending the `DownloadURL` Data Format
+# Proposed Solution: a new drag type `DownloadURL-list`
 
-To enable multi-file drag-and-drop, we propose extending the format of the `DownloadURL` drag type within the HTML Drag and Drop API to carry information for multiple files.
+To support multi-file drag-and-drop, we propose a new `DownloadURL` drag type within the HTML Drag and Drop API to carry information for multiple files.
 
-## New `DownloadURL` Data Format
-The `DownloadURL` data format will be extended to support an array of a file URL, serialized as a JSON string. Each object within this JSON array will represent a single file, containing its essential properties: `mimeType`, `filename`, and `url`.
+## `DownloadURL-list` data format
+The `DownloadURL-list` data format will support an array of a file URL, serialized as a JSON string. Each object within this JSON array will represent a single file, containing its essential properties: `mimeType`, `filename`, and `url`.
 
 **Example JavaScript Implementation:**
 ```js
 function dragstart(event) {
-  // JSON object for multiple files drag-and-drop.
-  const data = [
+  // JSON array for multiple files drag-and-drop.
+  const files = [
     {
-      'type': 'image/png',
-      'name': 'file2.png',
-      'url': 'http://example.com/file2.png'
+      mimeType: 'image/png',
+      filename: 'file2.png',
+      url: 'http://example.com/file2.png'
     },
     {
-      'type': 'image/jpeg',
-      'name': 'file1.jpg',
-      'url': 'http://example.com/file1.jpg'
+      mimeType: 'image/jpeg',
+      filename: 'file1.jpg',
+      url: 'http://example.com/file1.jpg'
     }
   ];
-  event.dataTransfer.setData('DownloadURL', JSON.stringify(data));
+  // Set the new drag type with JSON data
+  event.dataTransfer.setData('DownloadURL-list', JSON.stringify(files));
 }
 ```
 
-This new format allows a single `DownloadURL` data type to represent multiple files in a structured and extensible manner.
+This new format allows representing multiple files in a structured and extensible manner.
 
 ## Why JSON?
 
-As seen in the examples of developer attempts, we could use a simple format to represent multiple files. However, the existing format requires its own parsing code, and there's always a risk of parsing errors due to user mistakes or security attacks. Therefore, JSON will be used for the new format because it is structured, extensible, widely supported, and robust.
-
-# Backward Compatibility
-
-A crucial aspect of this proposal is to maintain backward compatibility with the existing `DownloadURL` single-file format. The `DownloadURL` drag type will continue to support the existing colon-delimited string format (e.g., `mime-type:file_name:URL`) alongside the new JSON array format.
+JSON is chosen for the new format because it is structured, extensible, widely supported, and robust. It reduces the risk of parsing errors and security issues compared to custom string formats. JSON also makes it easier to add future metadata (such as file size, description, or permissions) without breaking compatibility.
 
 # Future Considerations
 
-The `DownloadURL` drag type was originally implemented in WebKit([bug 31090](https://bugs.webkit.org/show_bug.cgi?id=31090)) and was later adopted by Chromium. However, it never standardized—primarily because it didn’t gain support in Gecko([bug 570164](https://bugzilla.mozilla.org/show_bug.cgi?id=570164)), where it was treated as a Chrome-specific mechanism
-
-We can find a standard way to support dragging virtual files or file URLs out of browsers. While we could use `DataTransferItemList` to set multiple URL items, and the browser could download them when dragged to the desktop, the `text/uri-list` format used for this is an older standard that only carries URL information. This is insufficient for our needs, as it doesn't support additional details like the MIME type or desired filename. Therefore, to provide this richer download information, we would need to define a new drag format for downloading, potentially using the `application/json` MIME type.
-
-```js
-function dragstart(event) {
-  // Define the list of files to be dragged.
-  const filesToDownload = [
-    {
-      "downloadUrl": "http://example.com/file1.jpg",
-      "name": "image_one.jpg",
-      "mimeType": "image/jpeg"
-    },
-    {
-      "downloadUrl": "http://example.com/file2.png",
-      "name": "image_two.png",
-      "mimeType": "image/png"
-    }
-  ];
-
-  // Add each file as a separate JSON item to the DataTransferItemList.
-  for (const file of filesToDownload) {
-    const jsonString = JSON.stringify(file);
-    event.dataTransfer.items.add(jsonString, "application/json");
-  }
-}
-```
+The `DownloadURL` drag type was originally introduced in WebKit ([bug 31090](https://bugs.webkit.org/show_bug.cgi?id=31090)) and later adopted by Chromium, but it was never standardized because Firefox chose not to implement it ([bug 570164](https://bugzilla.mozilla.org/show_bug.cgi?id=570164)), treating it as a Chrome‑specific feature. Despite the lack of standardization, it has been widely used in mail applications such as Outlook and GMail within Chromium‑based browsers, enabling users to drag mail attachments out of the browser for many years.
+Proposing a new `DownloadURL-list` drag type as a web standard provides a more extensible and interoperable solution. It also opens the door to additional scenarios, including drag‑and‑drop between browsers and native applications like WebView based applications, or file managers.
 
 # Security & UX Considerations
 
@@ -193,13 +170,19 @@ If the user does not consent to multiple downloads, the entire set of dragged fi
 A single-click option should be provided in the Chrome UI (download bubble and `chrome://downloads`) to allow users to easily remove all downloaded files from their device if they no longer want them or downloaded them by mistake.
 
 # Acknowledgements
-Thank you to Daniel Cheng, Lily Chen, Lingling Becker, Mike Jackson, Min Qin for their valuable feedback and input.
+Many thanks for valuable feedback and advice from:
+- Lingling Becker
+- Mike Jackson
+- Alex Russell
+- Daniel Cheng (Google)
+- Lily Chen (Google)
+- Min Qin (Google)
 
-# Referenecs
+# References
 * [Design: Enabling Multi‑File Drag‑and‑Drop in Chromium on Windows](https://docs.google.com/document/d/1nHPDuEE876RMKwYBVzWgPvsek-9X1NhZuFyY5Q5Z6YU/edit?usp=sharing)
 * [Chromium Issue](https://issues.chromium.org/issues/40736398)
 * [[whatwg] Proposal to drag virtual file out of browser](https://lists.whatwg.org/pipermail/whatwg-whatwg.org/2009-August/022121.html)
-* [HTML Drag and Drop API \- Web APIs | MDN](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
-* [Ryan Seddon | Drag out files like Gmail](https://ryanseddon.com/html5/gmail-dragout/)  
+* [HTML Drag and Drop API - Web APIs | MDN](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
+* [Ryan Seddon | Drag out files like Gmail](https://ryanseddon.com/html5/gmail-dragout/)
 * [HTML Standard: 6.11 Drag and drop](https://html.spec.whatwg.org/multipage/dnd.html)
-* [Case Study \- Drag and Drop Download in Chrome  |  web.dev](https://web.dev/case-studies/box-dnd-download)
+* [Case Study - Drag and Drop Download in Chrome | web.dev](https://web.dev/case-studies/box-dnd-download)
