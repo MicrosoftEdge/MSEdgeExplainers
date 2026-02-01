@@ -204,8 +204,8 @@ Scroll interactions can be interrupted or cancelled mid-stream. This section def
    - `duration` includes the snap animation time
 
 5. **Boundary collision**: Scroll reaches container bounds and cannot continue.
-   - Entry ends naturally when scrolling stops at the boundary
-   - Overscroll/bounce effects (on supported platforms) are included in `duration`
+   - Entry ends when scrolling reaches the boundary (last actual scroll position change)
+   - Overscroll/bounce effects (platform visual effects) are NOT included in measurements - they are not developer-controllable and don't reflect scroll performance
 
 **Entry emission timing:**
 Entries are emitted after the scroll interaction fully completes (including momentum, snap, and settle phases). Interrupted scrolls emit entries at the interruption point with metrics reflecting the partial interaction.
@@ -227,9 +227,10 @@ This section documents expected behavior for boundary conditions and unusual sce
 
 **Overscroll and bounce effects:**
 - On platforms with overscroll (iOS rubber-banding, Android overscroll glow):
-   - `deltaX`/`deltaY` reflect the actual scroll position change, not the visual overscroll
-  - `duration` includes the bounce-back animation time
-  - Overscroll does not count as checkerboarding
+   - The scroll entry ends when the scrollable boundary is reached
+   - `deltaX`/`deltaY` reflect the actual scroll distance to the boundary, not the visual overscroll effect
+   - `duration` ends when the scroll reaches the boundary, NOT including the bounce-back animation time
+   - Overscroll bounce-back is a platform visual effect that developers cannot control or optimize, so it is not measured
 
 **Scroll-linked animations:**
 - If the page uses `scroll-timeline` or JavaScript scroll-linked animations:
