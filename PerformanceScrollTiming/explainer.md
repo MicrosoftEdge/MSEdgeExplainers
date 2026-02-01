@@ -110,7 +110,7 @@ interface PerformanceScrollTiming : PerformanceEntry {
 | `name` | DOMString | Always `"scroll"` (inherited from PerformanceEntry) |
 | `startTime` | DOMHighResTimeStamp | Timestamp of the first input event that initiated the scroll or code invocation timestamp for programmatic scroll|
 | `firstFrameTime` | DOMHighResTimeStamp | Timestamp when the first visual frame reflecting the scroll was presented |
-| `duration` | DOMHighResTimeStamp | Total scroll duration from `startTime` until scrolling stops. A scroll interaction is considered complete when no scroll position changes have occurred for at least 150 milliseconds, or when a scroll end event is explicitly signaled (e.g., `touchend`, `scrollend`). Includes momentum/inertia phases. |
+| `duration` | DOMHighResTimeStamp | Total scroll duration from `startTime` to the last scroll position change. Entry emission is triggered when: (1) no scroll position changes have occurred for 150ms (inactivity detection), or (2) a scroll end event is explicitly signaled (e.g., `touchend`, `scrollend`). The 150ms timeout is for detecting when scrolling has stopped, but is not included in the duration. Includes momentum/inertia phases. |
 | `framesExpected` | unsigned long | Number of frames that would be rendered at the display's refresh rate during the scroll duration. Implementations SHOULD use the actual display refresh rate when available, and MAY fall back to 60Hz as a default. Calculated as `ceil(duration / vsync_interval)`. |
 | `framesProduced` | unsigned long | Count of distinct visual updates presented to the display that reflected scroll position changes. A frame is considered "produced" when it is presented and contains a different scroll position than the previous frame. |
 | `checkerboardTime` | DOMHighResTimeStamp | Duration (ms) during which any visible area of the scrolled content was not fully painted. Implementations MAY return 0 if unpainted region visibility is not tracked. |
@@ -181,7 +181,7 @@ This timeout allows momentum/inertia scrolling to be included in the same entry 
 
 **150ms timeout mechanics:**
 
-The 150ms inactivity timer starts from the **last scroll position change**, not from the initial input event. This determines when separate input events get combined into a single entry:
+The 150ms inactivity timer starts from the **last scroll position change**, not from the initial input event. This timer determines when to emit the entry, but the **`duration` always ends at the last position change**, not 150ms later. The 150ms is purely a detection mechanism - it's the waiting period to confirm scrolling has stopped, but doesn't represent actual scroll activity.
 
 **Example - Wheel scrolling:**
 - Wheel event at `0ms` - this event timestamp becomes `startTime` (`0ms`)
@@ -191,7 +191,7 @@ The 150ms inactivity timer starts from the **last scroll position change**, not 
 - If another wheel event arrives before `230ms` (`80ms + 150ms`):
   - Events are combined into one entry
   - Timer resets based on when position changes from the new event stop
-- If no event arrives by `230ms`: Entry completes with `duration = 230ms`
+- If no event arrives by `230ms`: Entry emits with `duration = 80ms` (time to last position change, not including the 150ms wait)
 
 **Example - Keyboard scrolling:**
 - Key press at `0ms` - this event timestamp becomes `startTime` (`0ms`)
@@ -200,24 +200,24 @@ The 150ms inactivity timer starts from the **last scroll position change**, not 
 - Key released at `100ms`
 - Inactivity timer starts at `120ms` (last position change)
 - If another key press before `270ms` (`120ms + 150ms`): Combined into same entry
-- Otherwise entry completes at `270ms`
+- Otherwise entry emits with `duration = 120ms` (time to last position change)
 
 **Example - Scrollbar dragging:**
 - User starts dragging scrollbar thumb at `0ms` - this event timestamp becomes `startTime` (`0ms`)
 - First visual scroll position change occurs shortly after (e.g., `8ms` = `firstFrameTime`, may be later if jank)
 - Continues dragging until `200ms`, scroll position changes continuously
-- User releases thumb at `200ms`
-- Inactivity timer starts at `200ms` (last position change when thumb released)
-- Entry completes at `350ms` (`200ms + 150ms`)
+- User releases thumb at `200ms` (last position change)
+- Inactivity timer starts at `200ms`
+- Entry emits at `350ms` with `duration = 200ms` (time to last position change)
 
 **Example - Autoscroll (middle-click):**
 - User middle-clicks to enter autoscroll mode (no entry yet)
 - User moves cursor away from anchor point - cursor movement event timestamp becomes `startTime` (`0ms`)
 - First visual scroll position change occurs shortly after (e.g., `10ms` = `firstFrameTime`, may be later if jank)
 - Autoscroll continues based on cursor position, position changes continuously
-- User clicks again to stop autoscroll at `500ms`
-- Inactivity timer starts at `500ms` (last position change)
-- Entry completes at `650ms` (`500ms + 150ms`)
+- User clicks again to stop autoscroll at `500ms` (last position change)
+- Inactivity timer starts at `500ms`
+- Entry emits at `650ms` with `duration = 500ms` (time to last position change)
 - Note: If user middle-clicks but never moves cursor away (no cursor movement event), no entry is emitted
 
 **Example - Touch scrolling (with pause mid-gesture):**
@@ -227,15 +227,15 @@ The 150ms inactivity timer starts from the **last scroll position change**, not 
 - User continues dragging until `200ms`, then pauses (finger still on screen, but not moving)
 - Inactivity timer starts at `200ms` (last position change during the pause)
 - If user resumes dragging before `350ms` (`200ms + 150ms`): continues as same entry, timer resets
-- If no movement by `350ms`: entry completes at `350ms` even though finger is still on screen
+- If no movement by `350ms`: entry emits with `duration = 200ms` (time to last position change), even though finger is still on screen
 - Note: `startTime` is the touch gesture event timestamp, not when viewport visually moves (this allows measuring scroll start latency)
 
 **Example - Touch scrolling (lift with momentum):**
 - User touches screen and begins dragging - touch gesture timestamp at `0ms` becomes `startTime`
 - First visual scroll position change occurs shortly after (e.g., `16ms` = `firstFrameTime`)
 - User continues dragging until lifting finger at `300ms` (`touchend`)
-- **If no momentum:** Entry ends immediately at `300ms`
-- **If momentum occurs:** Momentum scrolling continues until naturally stopping at `800ms`, entry completes at `800ms` (no 150ms timer needed - momentum ends the scroll)
+- **If no momentum:** Entry emits immediately with `duration = 300ms` (or whenever last position change occurred)
+- **If momentum occurs:** Momentum scrolling continues until naturally stopping at `800ms` (last position change), entry emits with `duration = 800ms` (no 150ms timer needed - `touchend` or momentum stopping signals the end)
 - Note: If user touches screen but never moves finger (no scroll gesture occurs), no entry is emitted
 
 #### Direction Change Segmentation
