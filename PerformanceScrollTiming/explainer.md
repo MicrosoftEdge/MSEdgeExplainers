@@ -162,7 +162,7 @@ Entry emission rules vary by input type to match natural interaction boundaries:
 | `"touch"` | One entry per continuous gesture (`touchstart` → `touchend`), split on direction changes |
 | `"wheel"` | One entry per scroll interaction; consecutive wheel events are combined into a single entry if they occur within 150ms of each other |
 | `"keyboard"` | One entry per key repeat sequence (from `keydown` until key release + 150ms inactivity) |
-| `"programmatic"` | One entry per programmatic scroll API call (e.g., `scrollTo()`, `scrollBy()`) |
+| `"programmatic"` | One entry per scroll interaction; consecutive programmatic scroll calls (e.g., `scrollTo()`, `scrollBy()`) on the same scrollable element are combined into a single entry if they occur within 150ms of each other |
 | `"other"` | One entry per scroll interaction, ending after 150ms of inactivity |
 
 #### Scroll End Detection
@@ -237,6 +237,17 @@ The 150ms inactivity timer starts from the **last scroll position change**, not 
 - **If no momentum:** Entry emits immediately with `duration = 300ms` (or whenever last position change occurred)
 - **If momentum occurs:** Momentum scrolling continues until naturally stopping at `800ms` (last position change), entry emits with `duration = 800ms` (no 150ms timer needed - `touchend` or momentum stopping signals the end)
 - Note: If user touches screen but never moves finger (no scroll gesture occurs), no entry is emitted
+
+**Example - Programmatic scrolling (gamepad joystick mapped to scrollBy):**
+- User tilts gamepad joystick down, triggering `scrollBy(0, 50)` at `0ms` - this API call timestamp becomes `startTime` (`0ms`)
+- First visual scroll position change occurs shortly after (e.g., `10ms` = `firstFrameTime`, may be later if jank)
+- Joystick remains tilted, triggering additional `scrollBy(0, 50)` calls every 100ms at `100ms`, `200ms`, `300ms`
+- Each call causes position changes, last position change at `350ms`
+- User releases joystick at `300ms`
+- Inactivity timer starts at `350ms` (last position change)
+- If another `scrollBy()` call on the same element before `500ms` (`350ms + 150ms`): Combined into same entry
+- Otherwise entry emits at `500ms` with `duration = 350ms` (time to last position change)
+- Note: Consecutive programmatic scrolls are only grouped if they target the same scrollable element
 
 #### Direction Change Segmentation
 
