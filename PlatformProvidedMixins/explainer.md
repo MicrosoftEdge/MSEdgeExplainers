@@ -132,19 +132,19 @@ class CustomSubmitButton extends HTMLElement {
     }
 
     get disabled() {
-        return this._internals.mixins.htmlSubmitButtonMixin.disabled;
+        return this._internals.mixins.htmlSubmitButton.disabled;
     }
 
     set disabled(val) {
-        this._internals.mixins.htmlSubmitButtonMixin.disabled = val;
+        this._internals.mixins.htmlSubmitButton.disabled = val;
     }
 
     get formAction() {
-        return this._internals.mixins.htmlSubmitButtonMixin.formAction;
+        return this._internals.mixins.htmlSubmitButton.formAction;
     }
 
     set formAction(val) {
-        this._internals.mixins.htmlSubmitButtonMixin.formAction = val;
+        this._internals.mixins.htmlSubmitButton.formAction = val;
     }
 }
 ```
@@ -247,21 +247,32 @@ The element gains:
     attributeChangedCallback(name, oldVal, newVal) {
       // Only recreate if we've already initialized (mixins are locked).
       if (name === 'type' && this._internals) {
-        // Create a fresh instance. It hasn't run connectedCallback yet, 
-        // so it hasn't called attachInternals.
+        // Create a fresh instance. It hasn't run connectedCallback yet.
         const replacement = document.createElement(this.localName);
-
-        // Copy the new type to the new instance.
-        // The new instance will read this 'type' during its initialization.
         replacement.setAttribute('type', newVal); 
+
+        // Move all children to the new instance.
+        while (this.firstChild) {
+            replacement.appendChild(this.firstChild);
+        }
+
+        // Check if the current element has focus before swapping.
+        const hasFocus = this === document.activeElement;
 
         // Swap the old element with the new one.
         // This triggers connectedCallback() on the new instance, allowing it 
         // to call attachInternals() with the new mixin set.
         this.replaceWith(replacement);
+
+        // Restore focus if needed.
+        if (hasFocus) {
+            replacement.focus();
+        }
       }
     }
 ```
+
+This workaround has trade-offs, such as loss of focus, selection, scroll position, etc. and the overhead of moving children. However, since `type` rarely changes dynamically, this optimization allows for a simpler implementation model with immutable mixins.
 
 ## Future Work
 
