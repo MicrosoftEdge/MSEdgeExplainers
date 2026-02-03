@@ -121,38 +121,6 @@ that do not appear at top-level stylesheet context.
 }
 ```
 
-It may also be useful as a shorter alternative to the second form for feature-detecting at-rules that are only 
-valid when nested inside another at-rule, such as
-[`@swash`](https://www.w3.org/TR/css-fonts/#font-feature-values-syntax)
-and other font feature value types within `@font-feature-values`.
-
-```css
-@supports at-rule(@swash) {
-    @font-feature-values Foo {
-        @swash { pretty: 1; cool: 2; }
-    }
-    p {
-        font-family: Foo;
-        font-variant-alternates: swash(cool);
-    }
-}
-@supports not(at-rule(@swash)) {
-    /* Fall back to something else. */
-    @font-face FooButNotAsCool {
-        /* ... */
-    }
-    p {
-        font-family: FooButNotAsCool;
-    }
-}
-```
-
-However, authors should consider the possibility of such an at-rule later becoming valid in a new and different
-context, which may result in a false positive. For example, one might write `@supports at-rule(@top-left)` 
-intending to detect support for the `@top-left` rule nested within `@page`. But later, if a new feature comes 
-along that implements a nested `@top-left` at-rule for a different purpose, the feature query would return true
-on implementations that *do* support this new feature but *do not* support `@page`.
-
 ## Accessibility, Privacy, and Security Considerations
 
 No accessibility, privacy, or security considerations have been identified for this feature.
