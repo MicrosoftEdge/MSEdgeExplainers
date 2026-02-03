@@ -13,6 +13,29 @@ This allows applications to become aware of inefficient network behavior which i
 
 ## Table of Contents
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Network Efficiency Guardrails API](#network-efficiency-guardrails-api)
+  - [Participate](#participate)
+  - [Motivation](#motivation)
+  - [Goals](#goals)
+  - [Non-goals](#non-goals)
+  - [Proposed API: `network-efficiency-guardrails`](#proposed-api-network-efficiency-guardrails)
+    - [Example](#example)
+    - [Threshold design considerations](#threshold-design-considerations)
+    - [Violation reporting](#violation-reporting)
+    - [Policy enforcement](#policy-enforcement)
+  - [Alternatives considered](#alternatives-considered)
+    - [Relying on existing performance measurement APIs](#relying-on-existing-performance-measurement-apis)
+    - [Custom attributes and headers](#custom-attributes-and-headers)
+    - [One policy per criterion](#one-policy-per-criterion)
+  - [Security and Privacy Considerations](#security-and-privacy-considerations)
+    - [Document and frame boundaries](#document-and-frame-boundaries)
+    - [Cross-origin resource exposure](#cross-origin-resource-exposure)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Motivation
 
 Inefficient network resource usage --such as loading large, uncompressed assets-- can have a direct and measurable impact on page performance, data usage, and user experience. While existing platform APIs expose detailed network activity for these loads, they largely operate at a measurement level. For example, APIs such as Resource Timing provide granular information about individual requests, but they do not identify whether a resource load represents inefficient network usage with meaningful performance impact. These issues are often difficult for developers to detect and diagnose, as the performance cost of individual resource loads may not be obvious during development or code review. As a result, developers must infer inefficiency post‑hoc through analysis, heuristics, or manual inspection. Attribution and remediation are therefore difficult, especially as inefficient behavior may only surface under specific device, network, or content conditions.
@@ -48,9 +71,9 @@ Non‑text resources are expected to use compressed formats when such formats ar
 3. **Resources with excesive total size**
 To limit disproportionate network cost, the following size thresholds apply to resources that are not HTTP‑compressed:
 
-  * data: URLs larger than 100 kB
-  * Image files larger than 200 kB
-  * Web fonts larger than 96 kB
+    * data: URLs larger than 100 kB
+    * Image files larger than 200 kB
+    * Web fonts larger than 96 kB
 
 The policy is intentionally scoped to runtime observability of network behavior, rather than fine‑grained resource control. Violations are reported through Document Policy’s integration with the Reporting API. When enforcement is enabled, resources triggering violations are blocked by the user agent and the corresponding assets are not rendered.
 
@@ -126,7 +149,7 @@ This approach places the burden on developers to determine which criteria to ena
 
 ## Security and Privacy Considerations
 
-## Document and frame boundaries
+### Document and frame boundaries
 
 Network Efficiency Guardrails is a document‑scoped policy. Monitoring, classification, and reporting are limited to documents that explicitly opt into the policy. Violation reports are delivered only to the document in which the violating resource is loaded, and its registered reporting endpoints.
 
@@ -134,7 +157,7 @@ This proposal does not introduce cross‑document propagation mechanisms. Visibi
 
 Embedding scenarios follow the Document Policy model, where requested constraints cannot be unilaterally imposed across frames. When applied to embedded content, policy adoption requires acknowledgment by the embedded document, preserving existing boundaries and preventing silent enforcement on third‑party content.
 
-## Cross-origin resource exposure
+### Cross-origin resource exposure
 
 When enabled, Network Efficiency Guardrails applies to all network resources loaded by the document, including cross‑origin subresources. As a result, the policy may surface information about cross‑origin resources that was not previously available in structured form to the embedding document. This exposure is a deliberate trade‑off to enable diagnosability of network inefficiencies with real performance impact.
 
