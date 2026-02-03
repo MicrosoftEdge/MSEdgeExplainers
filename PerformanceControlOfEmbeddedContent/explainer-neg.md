@@ -1,8 +1,17 @@
 # Network Efficiency Guardrails API
 
+**Authors:** [Luis Flores](https://github.com/lflores-ms), [Victor Huang](https://github.com/victorhuangwq)
+
 Network Efficiency Guardrails defines a Document Policy configuration that allows documents to adopt user agent‑defined constraints on network resource usage, such as large uncompressed resources. When the policy is active, the user agent monitors resource requests initiated by that document and triggers violations when inefficient network usage occurs. Violations are reported via the Reporting API and handled according to the policy's enforcement rules.
 
 This allows applications to become aware of inefficient network behavior which impacts performance, surfacing issues and opportunities to improve the user experience.
+
+## Participate
+<a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Performance%20Control%20of%20Embedded%20Content">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Performance%20Control%20of%20Embedded%20Content?label=issues)</a>
+
+[Open an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=performance-control-of-embedded-content.md)
+
+## Table of Contents
 
 ## Motivation
 
