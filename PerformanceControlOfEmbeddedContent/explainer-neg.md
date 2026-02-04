@@ -2,7 +2,7 @@
 
 **Authors:** [Luis Flores](https://github.com/lflores-ms), [Victor Huang](https://github.com/victorhuangwq)
 
-Network Efficiency Guardrails defines a Document Policy configuration that allows documents to adopt User Agent‑defined constraints on network resource usage, such as large uncompressed resources.
+Network Efficiency Guardrails defines a [Document Policy](https://wicg.github.io/document-policy/) configuration that allows documents to adopt User Agent‑defined constraints on network resource usage, such as large uncompressed resources.
 
 ```
 Document-Policy: network-efficiency-guardrails
@@ -54,11 +54,11 @@ This allows applications to become aware of inefficient network behavior which i
 
 ## Motivation
 
-Inefficient network resource usage --such as loading large, uncompressed assets-- can have a direct and measurable impact on page performance, data usage, and user experience. While existing platform APIs expose detailed network activity for these loads, they largely operate at a measurement level. For example, APIs such as Resource Timing provide granular information about individual requests, but they do not identify whether a resource load represents inefficient network usage with meaningful performance impact. These issues are often difficult for developers to detect and diagnose, as the performance cost of individual resource loads may not be obvious during development or code review. As a result, developers must infer inefficiency post‑hoc through analysis, heuristics, or manual inspection. Attribution and remediation are therefore difficult, especially as inefficient behavior may only surface under specific device, network, or content conditions.
+Inefficient network resource usage --such as loading large, uncompressed assets-- can have a direct and measurable impact on page performance, data usage, and user experience. While existing platform APIs expose detailed network activity for these loads, they largely operate at a measurement level. For example, APIs such as [Resource Timing](https://www.w3.org/TR/resource-timing/) provide granular information about individual requests, but they do not identify whether a resource load represents inefficient network usage with meaningful performance impact. These issues are often difficult for developers to detect and diagnose, as the performance cost of individual resource loads may not be obvious during development or code review. As a result, developers must infer inefficiency post‑hoc through analysis, heuristics, or manual inspection. Attribution and remediation are therefore difficult, especially as inefficient behavior may only surface under specific device, network, or content conditions.
 
-Network Efficiency Guardrails addresses this gap by defining a policy that makes inefficient network behavior observable to the User Agent as it occurs. The policy serves as a mechanism for the User Agent to identify and surface conditions with real performance impact as a well‑defined signal. By integrating with the Reporting API, it enables documents to become aware of these conditions and supports tooling and reporting workflows--present and future--to respond in a consistent and extensible way.
+Network Efficiency Guardrails addresses this gap by defining a policy that makes inefficient network behavior observable to the User Agent as it occurs. The policy serves as a mechanism for the User Agent to identify and surface conditions with real performance impact as a well‑defined signal. By integrating with the [Reporting API](https://www.w3.org/TR/reporting-1/), it enables documents to become aware of these conditions and supports tooling and reporting workflows --present and future-- to respond in a consistent and extensible way.
 
-Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. Expanding the visibility of reports created by this policy across document boundaries would further amplify the value of this signal in the direction established in <proposal> and remains a future goal. However, such reporting mechanisms are out of scope for this proposal.
+Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. Expanding the visibility of reports created by this policy across document boundaries would further amplify the value of this signal in the direction established in [Performance Control of Embedded Content](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceControlOfEmbeddedContent/explainer.md) and remains a future goal. However, such reporting mechanisms are out of scope for this proposal.
 
 ## Goals
 
@@ -72,7 +72,7 @@ Embedding scenarios are a primary motivation for this work, as inefficient netwo
 
 ## Proposed API: `network-efficiency-guardrails`
 
-This proposal introduces a configuration point in Document Policy `network-efficiency-guardrails`, that allows a document to opt into User Agent monitoring of network resource usage patterns with real performance impact.
+This proposal introduces a [configuration point](https://wicg.github.io/document-policy#configuration-point) in [Document Policy](https://wicg.github.io/document-policy/) `network-efficiency-guardrails`, that allows a document to opt into User Agent monitoring of network resource usage patterns with real performance impact.
 
 When the policy is active, the User Agent monitors network resource requests initiated by the document that result in actual network transfer, and identifies inefficient usage according to a set of scenario‑agnostic criteria. These criteria are intended to be hardware‑agnostic, independent of transient network conditions, and stable enough to support consistent interpretation across implementations.
 
@@ -91,7 +91,7 @@ To limit disproportionate network cost, the following size thresholds apply to r
     * Image files larger than 200 kB
     * Web fonts larger than 96 kB
 
-The policy is intentionally scoped to runtime observability of network behavior, rather than fine‑grained resource control. Violations are reported through Document Policy’s integration with the Reporting API. When enforcement is enabled, resources triggering violations are blocked by the User Agent and the corresponding assets are not rendered.
+The policy is intentionally scoped to runtime observability of network behavior, rather than fine‑grained resource control. Violations are reported through [Document Policy](https://wicg.github.io/document-policy/)’s integration with the [Reporting API](https://www.w3.org/TR/reporting-1/). When enforcement is enabled, resources triggering violations are blocked by the User Agent and the corresponding assets are not rendered.
 
 ### Example
 
@@ -115,7 +115,7 @@ This proposal operates as an opt‑in policy, intended for performance‑conscio
 The criteria and limit values are informed by field experience and evaluation across a large number of real‑world sites, drawing on available aggregate data and established industry best practices. Where empirical distributions are available, reference percentiles have been used to guide the choice of limits. Where they are not, limits reflect observed usage patterns that are known to have disproportionate performance impact. All thresholds are designed to be platform‑agnostic, avoiding dependence on device class or transient network conditions.
 
 ### Violation reporting
-Network Efficiency Guardrails integrates with Document Policy’s reporting mechanism to surface violations of the policy’s criteria. When a violation is detected, the User Agent generates a report that can be observed through established Reporting API mechanisms.
+Network Efficiency Guardrails integrates with [Document Policy](https://wicg.github.io/document-policy/)’s reporting mechanism to surface violations of the policy’s criteria. When a violation is detected, the User Agent generates a report that can be observed through established [Reporting API](https://www.w3.org/TR/reporting-1/) mechanisms.
 
 Violation reports generated by this policy expose limited, policy‑level information, sufficient to identify and diagnose inefficient network usage without revealing fine‑grained resource metrics, using the following format:
 
@@ -142,7 +142,7 @@ Enforcement builds on the same violation detection and reporting model described
 
 ### Relying on existing performance measurement APIs
 
-Existing platform APIs such as Resource Timing expose detailed request‑level metrics, including timing and transfer size. However, these APIs operate at a measurement level and require developers to derive their own heuristics to identify inefficient behavior. In practice, this often involves ad‑hoc thresholds, device‑specific assumptions, or post‑hoc analysis.
+Existing platform APIs such as [Resource Timing](https://www.w3.org/TR/resource-timing/) expose detailed request‑level metrics, including timing and transfer size. However, these APIs operate at a measurement level and require developers to derive their own heuristics to identify inefficient behavior. In practice, this often involves ad‑hoc thresholds, device‑specific assumptions, or post‑hoc analysis.
 
 ### Custom attributes and headers
 
@@ -156,7 +156,7 @@ Performance-Control: basic
 <iframe performance-control="basic">
 ```
 
-This approach was primarily motivated by embedding scenarios and proposed a separate signaling mechanism between embedders and embedded documents. While an embedding-agnostic variant could also be designed using document‑scoped mechanisms such as a `<meta>` tag, neither approach would provide functionality beyond what is already in the scope of Document Policy. As a result, introducing a parallel, embedding‑specific or policy‑specific mechanism would replicate parts of Document Policy and add complexity without materially improving the design.
+This approach was primarily motivated by embedding scenarios and proposed a separate signaling mechanism between embedders and embedded documents. While an embedding-agnostic variant could also be designed using document‑scoped mechanisms such as a `<meta>` tag, neither approach would provide functionality beyond what is already in the scope of [Document Policy](https://wicg.github.io/document-policy/). As a result, introducing a parallel, embedding‑specific or policy‑specific mechanism would replicate parts of Document Policy and add complexity without materially improving the design.
 
 ### One policy per criterion
 Another alternative was to expose separate policies for each individual criterion (for example, one policy for compression, one for image size limits, and so on).
@@ -171,7 +171,7 @@ Network Efficiency Guardrails is a document‑scoped policy. Monitoring, classif
 
 This proposal does not introduce cross‑document propagation mechanisms. Visibility across document boundaries --such as forwarding reports from embedded documents to an embedding document-- requires explicit cooperation and is out of scope for this proposal.
 
-Embedding scenarios follow the Document Policy model, where requested constraints cannot be unilaterally imposed across frames. When applied to embedded content, policy adoption requires acknowledgment by the embedded document, preserving existing boundaries and preventing silent enforcement on third‑party content.
+Embedding scenarios follow the [Document Policy](https://wicg.github.io/document-policy/) model, where requested constraints cannot be unilaterally imposed across frames. When applied to embedded content, policy adoption requires acknowledgment by the embedded document, preserving existing boundaries and preventing silent enforcement on third‑party content.
 
 ### Cross-origin resource exposure
 
