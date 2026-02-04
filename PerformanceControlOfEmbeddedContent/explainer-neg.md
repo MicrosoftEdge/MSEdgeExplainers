@@ -22,7 +22,7 @@ DocumentPolicyViolationReportBody {
 This allows applications to become aware of inefficient network behavior which impacts performance, surfacing issues and opportunities to improve the user experience.
 
 ## Participate
-<a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Performance%20Control%20of%20Embedded%20Content">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Performance%20Control%20of%20Embedded%20Content?label=issues)</a>
+<a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Network%20Efficiency%20Guardrails">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Network%20Efficiency%20Guardrails?label=issues)</a>
 
 [Open an issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=performance-control-of-embedded-content.md)
 
