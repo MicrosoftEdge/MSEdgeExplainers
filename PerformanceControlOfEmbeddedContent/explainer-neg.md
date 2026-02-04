@@ -2,7 +2,7 @@
 
 **Authors:** [Luis Flores](https://github.com/lflores-ms), [Victor Huang](https://github.com/victorhuangwq)
 
-Network Efficiency Guardrails defines a Document Policy configuration that allows documents to adopt user agent‑defined constraints on network resource usage, such as large uncompressed resources. When the policy is active, the user agent monitors resource requests initiated by that document and triggers violations when inefficient network usage occurs. Violations are reported via the Reporting API and handled according to the policy's enforcement rules.
+Network Efficiency Guardrails defines a Document Policy configuration that allows documents to adopt user agent‑defined constraints on network resource usage, such as large uncompressed resources. When the policy is active, the user agent monitors resource requests initiated by the document and triggers violations when inefficient network usage occurs. Violations are reported via the Reporting API and handled according to the policy's enforcement rules.
 
 This allows applications to become aware of inefficient network behavior which impacts performance, surfacing issues and opportunities to improve the user experience.
 
@@ -90,7 +90,7 @@ Reporting-Endpoints: endpoint="https://example.com/reports"
 ...
 ```
 
-A large 2MB image is served in the document. When the size limit violation is detected, the user agent generates a report . The report is delivered via the Reporting API, allowing the document to observe the inefficient network usage and attribute it to the corresponding resource.
+A large 2MB image is served in the document. When the size limit violation is detected, the user agent generates a report. The report is delivered via the Reporting API, allowing the document to observe the inefficient network usage and attribute it to the corresponding resource.
 
 ### Threshold design considerations
 
@@ -118,7 +118,7 @@ Where `resource-url` represents the URL of the network resource that triggered t
 
 ### Policy enforcement
 
-When enforcement is enabled for network-efficiency-guardrails, resource requests that violate the policy criteria are blocked by the user agent, and the corresponding assets are not rendered.
+When enforcement is enabled for `network-efficiency-guardrails`, resource requests that violate the policy criteria are blocked by the user agent, and the corresponding assets are not rendered.
 
 Enforcement builds on the same violation detection and reporting model described above. For this reason, it is expected that enforcement would be deployed only after evaluation using reporting‑only mode, to avoid unintended impact on document behavior.
 
@@ -175,4 +175,4 @@ The following factors constrain the privacy impact of this exposure:
 - The classification is threshold‑based and does not allow parameterized probing.
 - No persistence, cross‑document correlation, or direct user‑specific state is exposed.
 
-Further mitigation strategies may be considered, such as gating certain classifications on explicit resource opt‑in (for example, via `Timing-Allow-Origin` or an equivalent mechanism), but such approaches are not currently required by the proposal and remain an area for future exploration.
+Further mitigation strategies may be considered, such as gating reports on explicit resource opt‑in (for example, via `Timing-Allow-Origin` or an equivalent mechanism), but such approaches are not currently required by the proposal and remain an area for future exploration.
