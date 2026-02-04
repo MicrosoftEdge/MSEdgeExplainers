@@ -36,4 +36,3 @@ For example: Windows 11, version 24H2, x64
 ### GPU information
 
 Tell us the GPU information of your device. Go to `edge://gpu` and search for GL_RENDERER.
----
