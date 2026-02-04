@@ -32,4 +32,3 @@ For example: Edge Dev 142.0.3553.0.
 
 Please provide the following information about your device: Operating system, version, and architecture.
 For example: Windows 11, version 24H2, x64
----
