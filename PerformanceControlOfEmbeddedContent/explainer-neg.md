@@ -48,6 +48,7 @@ This allows applications to become aware of inefficient network behavior which i
   - [Security and Privacy Considerations](#security-and-privacy-considerations)
     - [Document and frame boundaries](#document-and-frame-boundaries)
     - [Cross-origin resource exposure](#cross-origin-resource-exposure)
+  - [References & acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -191,3 +192,24 @@ The following factors constrain the privacy impact of this exposure:
 - No persistence, cross‑document correlation, or direct user‑specific state is exposed.
 
 Further mitigation strategies may be considered, such as gating reports on explicit resource opt‑in (for example, via `Timing-Allow-Origin` or an equivalent mechanism), but such approaches are not currently required by the proposal and remain an area for future exploration.
+
+## References & acknowledgements
+
+This proposal builds on [Performance Control of Embedded Content](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceControlOfEmbeddedContent/explainer.md), which explored performance constraints and observability for web content. Its evolution has been informed by discussion in the W3C Web Performance Working Group, as well as prior work including:
+
+* [Never-Slow Mode](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file)
+* [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md)
+* [Heavy Ad Interventions](https://developer.chrome.com/blog/heavy-ad-interventions)
+
+Many thanks for the valuable feedback and guidance offered during earlier iterations of this work, including:
+
+* [Limin Zhu](https://github.com/liminzhu)
+* [Sam Fortiner](https://github.com/sfortiner)
+* [Alison Maher](https://github.com/alisonmaher)
+* [Mike Jackson](https://github.com/mwjacksonmsft)
+* [Erik Anderson](https://github.com/erik-anderson)
+
+And to the contributors and reviewers who helped shape the `network-efficiency-guardrails` proposal in its current form:
+
+* [Yoav Weiss](https://github.com/yoavweiss)
+* [Fabio Rocha](https://github.com/fabiorocha)
