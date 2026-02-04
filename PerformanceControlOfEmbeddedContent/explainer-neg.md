@@ -2,13 +2,13 @@
 
 **Authors:** [Luis Flores](https://github.com/lflores-ms), [Victor Huang](https://github.com/victorhuangwq)
 
-Network Efficiency Guardrails defines a Document Policy configuration that allows documents to adopt user agent‑defined constraints on network resource usage, such as large uncompressed resources.
+Network Efficiency Guardrails defines a Document Policy configuration that allows documents to adopt User Agent‑defined constraints on network resource usage, such as large uncompressed resources.
 
 ```
 Document-Policy: network-efficiency-guardrails
 ```
 
-When the policy is active, the user agent monitors resource requests initiated by the document and triggers violations when inefficient network usage occurs. Violations are reported via the Reporting API and handled according to the policy's enforcement rules.
+When the policy is active, the User Agent monitors resource requests initiated by the document and triggers violations when inefficient network usage occurs. Violations are reported via the Reporting API and handled according to the policy's enforcement rules.
 
 ```
 DocumentPolicyViolationReportBody {
@@ -56,7 +56,7 @@ This allows applications to become aware of inefficient network behavior which i
 
 Inefficient network resource usage --such as loading large, uncompressed assets-- can have a direct and measurable impact on page performance, data usage, and user experience. While existing platform APIs expose detailed network activity for these loads, they largely operate at a measurement level. For example, APIs such as Resource Timing provide granular information about individual requests, but they do not identify whether a resource load represents inefficient network usage with meaningful performance impact. These issues are often difficult for developers to detect and diagnose, as the performance cost of individual resource loads may not be obvious during development or code review. As a result, developers must infer inefficiency post‑hoc through analysis, heuristics, or manual inspection. Attribution and remediation are therefore difficult, especially as inefficient behavior may only surface under specific device, network, or content conditions.
 
-Network Efficiency Guardrails addresses this gap by defining a policy that makes inefficient network behavior observable to the user agent as it occurs. The policy serves as a mechanism for the user agent to identify and surface conditions with real performance impact as a well‑defined signal. By integrating with the Reporting API, it enables documents to become aware of these conditions and supports tooling and reporting workflows--present and future--to respond in a consistent and extensible way.
+Network Efficiency Guardrails addresses this gap by defining a policy that makes inefficient network behavior observable to the User Agent as it occurs. The policy serves as a mechanism for the User Agent to identify and surface conditions with real performance impact as a well‑defined signal. By integrating with the Reporting API, it enables documents to become aware of these conditions and supports tooling and reporting workflows--present and future--to respond in a consistent and extensible way.
 
 Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. Expanding the visibility of reports created by this policy across document boundaries would further amplify the value of this signal in the direction established in <proposal> and remains a future goal. However, such reporting mechanisms are out of scope for this proposal.
 
@@ -72,11 +72,11 @@ Embedding scenarios are a primary motivation for this work, as inefficient netwo
 
 ## Proposed API: `network-efficiency-guardrails`
 
-This proposal introduces a configuration point in Document Policy `network-efficiency-guardrails`, that allows a document to opt into user agent monitoring of network resource usage patterns with real performance impact.
+This proposal introduces a configuration point in Document Policy `network-efficiency-guardrails`, that allows a document to opt into User Agent monitoring of network resource usage patterns with real performance impact.
 
-When the policy is active, the user agent monitors network resource requests initiated by the document that result in actual network transfer, and identifies inefficient usage according to a set of scenario‑agnostic criteria. These criteria are intended to be hardware‑agnostic, independent of transient network conditions, and stable enough to support consistent interpretation across implementations.
+When the policy is active, the User Agent monitors network resource requests initiated by the document that result in actual network transfer, and identifies inefficient usage according to a set of scenario‑agnostic criteria. These criteria are intended to be hardware‑agnostic, independent of transient network conditions, and stable enough to support consistent interpretation across implementations.
 
-Specifically, the user agent flags the following conditions as policy violations:
+Specifically, the User Agent flags the following conditions as policy violations:
 
 1. **Text-based resources served without HTTP compression**
 Text‑based resources such as HTML, CSS, JavaScript, and JSON are expected to be delivered using HTTP‑based compression.
@@ -91,7 +91,7 @@ To limit disproportionate network cost, the following size thresholds apply to r
     * Image files larger than 200 kB
     * Web fonts larger than 96 kB
 
-The policy is intentionally scoped to runtime observability of network behavior, rather than fine‑grained resource control. Violations are reported through Document Policy’s integration with the Reporting API. When enforcement is enabled, resources triggering violations are blocked by the user agent and the corresponding assets are not rendered.
+The policy is intentionally scoped to runtime observability of network behavior, rather than fine‑grained resource control. Violations are reported through Document Policy’s integration with the Reporting API. When enforcement is enabled, resources triggering violations are blocked by the User Agent and the corresponding assets are not rendered.
 
 ### Example
 
@@ -106,16 +106,16 @@ Reporting-Endpoints: endpoint="https://example.com/reports"
 ...
 ```
 
-A large 2MB image is served in the document. When the size limit violation is detected, the user agent generates a report. The report is delivered via the Reporting API, allowing the document to observe the inefficient network usage and attribute it to the corresponding resource.
+A large 2MB image is served in the document. When the size limit violation is detected, the User Agent generates a report. The report is delivered via the Reporting API, allowing the document to observe the inefficient network usage and attribute it to the corresponding resource.
 
 ### Threshold design considerations
 
-This proposal operates as an opt‑in policy, intended for performance‑conscious deployments. Because adoption is explicit, the policy can apply more stringent limits than mechanisms that intervene unilaterally. Thresholds are defined by the API, rather than being left to individual user agent discretion. This is to ensure consistent behavior across implementations and allows developers and tooling to rely on stable, predictable signals.
+This proposal operates as an opt‑in policy, intended for performance‑conscious deployments. Because adoption is explicit, the policy can apply more stringent limits than mechanisms that intervene unilaterally. Thresholds are defined by the API, rather than being left to individual User Agent discretion. This is to ensure consistent behavior across implementations and allows developers and tooling to rely on stable, predictable signals.
 
 The criteria and limit values are informed by field experience and evaluation across a large number of real‑world sites, drawing on available aggregate data and established industry best practices. Where empirical distributions are available, reference percentiles have been used to guide the choice of limits. Where they are not, limits reflect observed usage patterns that are known to have disproportionate performance impact. All thresholds are designed to be platform‑agnostic, avoiding dependence on device class or transient network conditions.
 
 ### Violation reporting
-Network Efficiency Guardrails integrates with Document Policy’s reporting mechanism to surface violations of the policy’s criteria. When a violation is detected, the user agent generates a report that can be observed through established Reporting API mechanisms.
+Network Efficiency Guardrails integrates with Document Policy’s reporting mechanism to surface violations of the policy’s criteria. When a violation is detected, the User Agent generates a report that can be observed through established Reporting API mechanisms.
 
 Violation reports generated by this policy expose limited, policy‑level information, sufficient to identify and diagnose inefficient network usage without revealing fine‑grained resource metrics, using the following format:
 
@@ -134,7 +134,7 @@ Where `resource-url` represents the URL of the network resource that triggered t
 
 ### Policy enforcement
 
-When enforcement is enabled for `network-efficiency-guardrails`, resource requests that violate the policy criteria are blocked by the user agent, and the corresponding assets are not rendered.
+When enforcement is enabled for `network-efficiency-guardrails`, resource requests that violate the policy criteria are blocked by the User Agent, and the corresponding assets are not rendered.
 
 Enforcement builds on the same violation detection and reporting model described above. For this reason, it is expected that enforcement would be deployed only after evaluation using reporting‑only mode, to avoid unintended impact on document behavior.
 
