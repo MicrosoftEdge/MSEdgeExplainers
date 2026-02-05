@@ -110,9 +110,13 @@ A large 2MB image is served in the document. When the size limit violation is de
 
 ### Threshold design considerations
 
-This proposal operates as an opt‑in policy, intended for performance‑conscious deployments. Because adoption is explicit, the policy can apply more stringent limits than mechanisms that intervene unilaterally. Thresholds are defined by the API, rather than being left to individual User Agent discretion. This is to ensure consistent behavior across implementations and allows developers and tooling to rely on stable, predictable signals.
+This proposal operates as an opt‑in policy, intended for performance‑conscious deployments. Because adoption is explicit, the policy leans towards more stringent limits. To ensure consistent behavior across implementations, thresholds are defined by the API, rather than the User Agent. This allows developers and tooling to rely on stable, predictable signals.
 
-The criteria and limit values are informed by field experience and evaluation across a large number of real‑world sites, drawing on available aggregate data and established industry best practices. Where empirical distributions are available, reference percentiles have been used to guide the choice of limits. Where they are not, limits reflect observed usage patterns that are known to have disproportionate performance impact. All thresholds are designed to be platform‑agnostic, avoiding dependence on device class or transient network conditions.
+Criteria and threshold values are informed by available aggregate datasets and established industry best practices. Where comparable data is not available, limits reflect observed usage patterns across real‑world sites that are known to have disproportionate performance impact.
+
+For example, image and font size thresholds are based on [Web Almanac data](https://almanac.httparchive.org/en/2024/media#byte-sizes), using p90 distributions to identify resource sizes that are atypical for well‑performing sites. For `data:` URLs, where web‑wide datasets are less readily available, informal industry guidance and performance best practices have been adopted to set an initial threshold of 100 kB as a deliberately generous upper bound compared to the industry recommendation of only a few kilobytes. Thresholds can be refined as additional data and deployment experience become available.
+
+All thresholds are designed to be platform‑agnostic and stable over time, avoiding dependence on device class or transient network conditions.
 
 ### Violation reporting
 Network Efficiency Guardrails integrates with [Document Policy](https://wicg.github.io/document-policy/)’s reporting mechanism to surface violations of the policy’s criteria. When a violation is detected, the User Agent generates a report that can be observed through established [Reporting API](https://www.w3.org/TR/reporting-1/) mechanisms.
