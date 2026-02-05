@@ -140,7 +140,7 @@ Where `resource-url` represents the URL of the network resource that triggered t
 
 When enforcement is enabled for `network-efficiency-guardrails`, resource requests that violate the policy criteria are blocked by the User Agent, and the corresponding assets are not rendered.
 
-Enforcement builds on the same violation detection and reporting model described above. For this reason, it is expected that enforcement would be deployed only after evaluation using reporting‑only mode, to avoid unintended impact on document behavior.
+Enforcement builds on the same violation detection and reporting model described above. For this reason, it is expected that sites would deploy the policy in reporting‑only mode first, using the resulting reports to evaluate impact before enabling enforcement.
 
 ## Alternatives considered
 
