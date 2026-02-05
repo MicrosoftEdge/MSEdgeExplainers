@@ -80,8 +80,8 @@ This proposal introduces a `mixins` option to `attachInternals()` and a `mixinLi
 // Attach a mixin during initialization.
 this._internals = this.attachInternals({ mixins: [HTMLSubmitButtonMixin] });
 
-// Inspect attached mixins (read-only, for state access).
-console.log(this._internals.mixins.htmlSubmitButton.formAction);
+// Access and modify mixin state.
+this._internals.mixins.htmlSubmitButton.formAction = '/custom';
 
 // Dynamically update the mixin list.
 this._internals.mixinList = [HTMLResetButtonMixin];
