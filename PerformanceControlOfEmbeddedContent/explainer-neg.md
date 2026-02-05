@@ -136,6 +136,8 @@ DocumentPolicyViolationReportBody {
 
 Where `resource-url` represents the URL of the network resource that triggered the violation, and `description` is a human-redable description of the violated criterion.
 
+As with other Document Policy features, `network-efficiency-guardrails` may be deployed in reporting‑only mode, allowing sites to observe violations and evaluate the policy's impact before opting into enforcement.
+
 ### Policy enforcement
 
 When enforcement is enabled for `network-efficiency-guardrails`, resource requests that violate the policy criteria are blocked by the User Agent, and the corresponding assets are not rendered.
