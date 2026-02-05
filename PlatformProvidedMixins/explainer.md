@@ -317,11 +317,14 @@ customElements.define('ds-button', DesignSystemButton);
 ```
 
 The element gains:
-- **Platform event handling**: Click and keyboard activation (Space/Enter).
-- **Accessibility**: Implicit ARIA `role="button"` (overridable by the author).
-- **Form integration**: Form submission/reset on activation, `:default` pseudo-class matching, and implicit submission participation.
-- **Dynamic behavior**: The `type` attribute can be changed at runtime to switch between behaviors.
-- **State access**: Mixin properties like `disabled` and `formAction` are accessible and can be exposed.
+- Click and keyboard activation (Space/Enter).
+- Implicit ARIA `role="button"` that can be overriden by the web author.
+- Form submission on activation.
+- `:default` pseudo-class matching.
+- Participation in implicit form submission.
+- Ability to inspect its own properties via `this._internals.mixins`.
+- The `type` attribute can be changed at runtime to switch between behaviors.
+- Mixin properties like `disabled` and `formAction` are accessible and can be exposed.
 
 ## Future Work
 
