@@ -214,7 +214,7 @@ This proposal supports common web component patterns:
   </custom-button>
   ```
 
-### Use Case: Design System Button
+### Use case: Design system button
 
 While this proposal only introduces `HTMLSubmitButtonMixin`, the example below references `HTMLResetButtonMixin` and `HTMLButtonMixin` to illustrate how switching would work once additional mixins become available in the future.
 
