@@ -110,7 +110,9 @@ A large 2MB image is served in the document. When the size limit violation is de
 
 ### Threshold design considerations
 
-This proposal operates as an opt‑in policy, intended for performance‑conscious deployments. Because adoption is explicit, the policy leans towards more stringent limits. To ensure consistent behavior across implementations, thresholds are defined by the API, rather than the User Agent. This allows developers and tooling to rely on stable, predictable signals.
+This proposal operates as an opt‑in policy, intended for performance‑conscious deployments. Because adoption is explicit, the policy leans towards more stringent limits.
+
+To ensure consistent behavior across implementations, thresholds are defined by the API, rather than the User Agent, and are chosen to identify resource usage patterns that are broadly atypical of well‑performing sites, rather than to express device‑specific capacity constraints or optimal values for all contexts. This allows developers and tooling to rely on stable, predictable signals, particularly in configurations where resources may be blocked as a result of policy violations. A similar approach has been taken by [Heavy Ad Interventions](https://developer.chrome.com/docs/web-platform/heavy-ads-intervention), where fixed thresholds are used to ensure consistent behavior, even though that mechanism is not exposed as a Web Platform API.
 
 Criteria and threshold values are informed by available aggregate datasets and established industry best practices. Where comparable data is not available, limits reflect observed usage patterns across real‑world sites that are known to have disproportionate performance impact.
 
