@@ -259,9 +259,10 @@ class DesignSystemButton extends HTMLElement {
         // Sync HTML attributes to mixin state.
         const submitMixin = this._internals.mixins.htmlSubmitButton;
         if (submitMixin) {
-            submitMixin.disabled = this.hasAttribute('disabled');
             submitMixin.formAction = this.getAttribute('formaction') || '';
         }
+        // Other attributes like `disabled`, `value`, etc. would be set on
+        // the proper mixin interface.
     }
 
     // Expose element state.
