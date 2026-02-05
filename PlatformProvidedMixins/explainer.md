@@ -74,18 +74,17 @@ This proposal is informed by:
 
 ## Proposed Approach
 
-This proposal introduces a `mixins` option to `attachInternals()` and a read-only `mixins` property on `ElementInternals` which allows custom elements to attach and inspect specific native behaviors. Additionally, `addMixin()` and `removeMixin()` methods enable dynamic behavior changes at runtime. This approach enables composition while keeping the API simple, supporting both initialization-time configuration and runtime updates.
+This proposal introduces a `mixins` option to `attachInternals()` and a `mixinList` property on `ElementInternals` which allows custom elements to attach, inspect, and dynamically update native behaviors. This approach enables composition while keeping the API simple, supporting both initialization-time configuration and runtime updates.
 
 ```javascript
 // Attach a mixin during initialization.
 this._internals = this.attachInternals({ mixins: [HTMLSubmitButtonMixin] });
 
-// Inspect attached mixins.
-console.log(this._internals.mixins);
+// Inspect attached mixins (read-only, for state access).
+console.log(this._internals.mixins.htmlSubmitButton.formAction);
 
-// Add or remove mixins.
-this._internals.addMixin(HTMLSubmitButtonMixin);
-this._internals.removeMixin(HTMLSubmitButtonMixin);
+// Dynamically update the mixin list.
+this._internals.mixinList = [HTMLResetButtonMixin];
 ```
 
 ### Configuration via attachInternals
@@ -156,49 +155,55 @@ class CustomSubmitButton extends HTMLElement {
 
 This ensures web authors don't have to reimplement the state logic that the mixin is supposed to provide.
 
-### Adding and removing mixins dynamically
+### Updating mixins dynamically
 
-To support dynamic behavior changes (e.g., when the `type` attribute changes), `ElementInternals` provides methods to add and remove mixins after initialization:
+To support dynamic behavior changes (e.g., when the `type` attribute changes), `ElementInternals` exposes a settable `mixinList` property that allows developers to replace the entire mixin list at once:
 
-- `addMixin(mixin)`: The mixin's behavior becomes active.
-- `removeMixin(mixin)`: The mixin's behavior is deactivated and its state is cleared.
+```javascript
+// Get the current mixin list.
+console.log(this._internals.mixinList); // [HTMLButtonMixin]
+
+// Replace with a different mixin.
+this._internals.mixinList = [HTMLSubmitButtonMixin];
+```
 
 #### Mixin lifecycle
 
-When a mixin is added or removed, the following lifecycle behaviors apply:
+When the `mixinList` is updated, the implementation compares the old and new lists:
 
-| Event | Behavior |
-|-------|----------|
-| `addMixin(mixin)` | The mixin is added to the `mixins` array. Its event handlers become active. Default ARIA role is applied unless overridden by `ElementInternals.role`. |
-| `removeMixin(mixin)` | The mixin is removed from the `mixins` array. Its event handlers are deactivated. Mixin-specific state (e.g., `formAction`, `disabled`) is cleared to default values. |
-| Adding a duplicate | No-op. The mixin remains attached with its current state intact. |
-| Removing a non-existent mixin | No-op. No error is thrown. |
+| Scenario | Behavior |
+|----------|----------|
+| Mixin added | The mixin is attached. Its event handlers become active. Default ARIA role is applied unless overridden by `ElementInternals.role`. |
+| Mixin removed | The mixin is detached. Its event handlers are deactivated. Mixin-specific state (e.g., `formAction`, `disabled`) is cleared to default values. |
+| Mixin retained (in both lists) | The mixin's state is preserved. Its position in the list may change. |
+
+*Note:* Mixin state is preserved when the custom element is disconnected and reconnected to the DOM (e.g., moved within the document). State is only cleared when a mixin is explicitly removed from `mixinList`.
 
 #### Mixin state
 
-When a mixin is removed via `removeMixin()`, its state is cleared. If the mixin is added again later, it starts with the default state:
+When a mixin is removed from the list, its state is cleared. If the same mixin is added back later, it starts with default state:
 
 ```javascript
 // Set `formAction` on the submit mixin.
 this._internals.mixins.htmlSubmitButton.formAction = '/custom-action';
 
-// When removing the mixin, the state is cleared.
-this._internals.removeMixin(HTMLSubmitButtonMixin);
+// Replace with a different mixin — submit mixin state is cleared.
+this._internals.mixinList = [HTMLResetButtonMixin];
 
-// When re-adding the mixin, it starts with default state.
-this._internals.addMixin(HTMLSubmitButtonMixin);
+// Re-add the submit mixin — it starts with default state.
+this._internals.mixinList = [HTMLSubmitButtonMixin];
 
 // formAction is now back to default (empty string).
 console.log(this._internals.mixins.htmlSubmitButton.formAction); // ''
 ```
 
-Calling `addMixin()` on a mixin that is already attached does nothing. State is only cleared when a mixin is explicitly removed. If web authors need to preserve the state when removing the mixin, they should save and restore state explicitly.
+If web authors need to preserve state when swapping mixins, they should save and restore it explicitly.
 
 ### Other considerations
 
 This proposal supports common web component patterns:
 
-- Authors can define a single class that handles multiple modes (submit, reset, button) by responding to attributes at runtime using `addMixin()` and `removeMixin()`, without needing to define separate classes for each behavior.
+- Authors can define a single class that handles multiple modes (submit, reset, button) by updating `mixinList` at runtime in response to attribute changes, without needing to define separate classes for each behavior.
 - A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active mixins.
 - While this proposal uses an imperative API, the design supports future declarative custom elements. Once a declarative syntax for `ElementInternals` is established, attaching mixins could be modeled as an attribute, decoupling behavior from the JavaScript class definition. The following snippet shows a hypothetical example:
 
@@ -208,21 +213,6 @@ This proposal supports common web component patterns:
       <template>Submit</template>
   </custom-button>
   ```
-
-  Mixin updates could also be expressed declaratively by binding mixins to attribute values. A `mixin-map` attribute could define which mixin to apply based on the value of another attribute:
-
-  ```html
-  <custom-button name="ds-button">
-      <element-internals 
-          mixin-map="type: submit=html-submit-button-mixin, 
-                           reset=html-reset-button-mixin, 
-                           *=html-button-mixin">
-      </element-internals>
-      <template><slot></slot></template>
-  </custom-button>
-  ```
-
-  In this example, when the `type` attribute equals `"submit"`, the `html-submit-button-mixin` should be applied; when it equals `"reset"`, the `html-reset-button-mixin` is used; and `*` provides a fallback. The browser would handle adding and removing mixins automatically as the `type` changes.
 
 ### Use Case: Design System Button
 
@@ -255,19 +245,13 @@ class DesignSystemButton extends HTMLElement {
 
     _updateMixins() {
         const type = this.getAttribute('type');
-
-        // Remove any existing button-type mixins.
-        this._internals.removeMixin(HTMLSubmitButtonMixin);
-        this._internals.removeMixin(HTMLResetButtonMixin);
-        this._internals.removeMixin(HTMLButtonMixin);
-
-        // Add the appropriate mixin based on type.
+        // Set the appropriate mixin based on type.
         if (type === 'submit') {
-            this._internals.addMixin(HTMLSubmitButtonMixin);
+            this._internals.mixinList = [HTMLSubmitButtonMixin];
         } else if (type === 'reset') {
-            this._internals.addMixin(HTMLResetButtonMixin);
+            this._internals.mixinList = [HTMLResetButtonMixin];
         } else {
-            this._internals.addMixin(HTMLButtonMixin);
+            this._internals.mixinList = [HTMLButtonMixin];
         }
     }
 
@@ -280,14 +264,12 @@ class DesignSystemButton extends HTMLElement {
         }
     }
 
-    // Expose mixin state.
-    get disabled() {
-        return this._internals.mixins.htmlSubmitButton?.disabled ?? false;
+    // Expose element state.
+    get type() {
+        return this.getAttribute('type') || 'button';
     }
-    set disabled(val) {
-        if (this._internals.mixins.htmlSubmitButton) {
-            this._internals.mixins.htmlSubmitButton.disabled = val;
-        }
+    set type(val) {
+        this.setAttribute('type', val);
     }
 
     get formAction() {
@@ -299,9 +281,13 @@ class DesignSystemButton extends HTMLElement {
         }
     }
 
+    // Additional getters/setters for `disabled`, `formMethod`, `formEnctype`,
+    // `formNoValidate`, `formTarget`, `name`, and `value` would follow the
+    // same pattern.
+
     _render() {
-        const isSubmit = this._internals.mixins.includes(HTMLSubmitButtonMixin);
-        const isReset = this._internals.mixins.includes(HTMLResetButtonMixin);
+        const isSubmit = this._internals.mixinList.includes(HTMLSubmitButtonMixin);
+        const isReset = this._internals.mixinList.includes(HTMLResetButtonMixin);
 
         this.shadowRoot.innerHTML = `
             <style>...</style>
@@ -423,7 +409,7 @@ class ResetButton extends CustomButton {
 
         // Inspect the mixins to determine the "winning" behavior.
         // This assumes the platform rule is "last mixin wins" for conflicts (order matters).
-        const mixins = this._internals.mixins;
+        const mixins = this._internals.mixinList;
         const effectiveBehavior = mixins[mixins.length - 1];
 
         if (effectiveBehavior === HTMLResetButtonMixin) {
