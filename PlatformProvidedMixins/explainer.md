@@ -83,8 +83,9 @@ this._internals = this.attachInternals({ mixins: [HTMLSubmitButtonMixin] });
 // Access and modify mixin state.
 this._internals.mixins.htmlSubmitButton.formAction = '/custom';
 
-// Dynamically update the mixin list.
-this._internals.mixinList = [HTMLResetButtonMixin];
+// Dynamically update the mixin list (ObservableArray).
+this._internals.mixinList.push(HTMLResetButtonMixin);
+this._internals.mixinList[0] = HTMLButtonMixin; // Replace at index
 ```
 
 ### Configuration via attachInternals
@@ -157,19 +158,28 @@ This ensures web authors don't have to reimplement the state logic that the mixi
 
 ### Updating mixins dynamically
 
-To support dynamic behavior changes (e.g., when the `type` attribute changes), `ElementInternals` exposes a settable `mixinList` property that allows developers to replace the entire mixin list at once:
+To support dynamic behavior changes (e.g., when the `type` attribute changes), `ElementInternals` exposes a `mixinList` property as an [`ObservableArray`](https://webidl.spec.whatwg.org/#idl-observable-array) which supports in-place mutations:
 
 ```javascript
-// Get the current mixin list.
-console.log(this._internals.mixinList); // [HTMLButtonMixin]
-
-// Replace with a different mixin.
+// Replace the entire list.
 this._internals.mixinList = [HTMLSubmitButtonMixin];
+
+// Append a mixin.
+this._internals.mixinList.push(HTMLResetButtonMixin);
+
+// Remove the first mixin.
+this._internals.mixinList.splice(0, 1);
+
+// Replace a mixin at a specific index.
+this._internals.mixinList[0] = HTMLButtonMixin;
+
+// Remove the last mixin.
+this._internals.mixinList.pop();
 ```
 
 #### Mixin lifecycle
 
-When the `mixinList` is updated, the implementation compares the old and new lists:
+When the `mixinList` is modified (via assignment, `push()`, `splice()`, indexed assignment, etc.), the implementation observes the changes:
 
 | Scenario | Behavior |
 |----------|----------|
@@ -188,10 +198,10 @@ When a mixin is removed from the list, its state is cleared. If the same mixin i
 this._internals.mixins.htmlSubmitButton.formAction = '/custom-action';
 
 // Replace with a different mixin — submit mixin state is cleared.
-this._internals.mixinList = [HTMLResetButtonMixin];
+this._internals.mixinList[0] = HTMLResetButtonMixin;
 
 // Re-add the submit mixin — it starts with default state.
-this._internals.mixinList = [HTMLSubmitButtonMixin];
+this._internals.mixinList.push(HTMLSubmitButtonMixin);
 
 // formAction is now back to default (empty string).
 console.log(this._internals.mixins.htmlSubmitButton.formAction); // ''
