@@ -1,4 +1,4 @@
-# Platform-Provided Behavior Mixins for Custom Elements
+# Platform-Provided Behaviors for Custom Elements
 
 ## Authors:
 
@@ -7,11 +7,11 @@
 ## Participate
 
 - No issue filed yet.
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PlatformProvidedMixins)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PlatformProvidedBehaviors)
 
 ## Introduction
 
-Custom element authors frequently need their elements to leverage platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided mixins as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement native behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes native capabilities as composable mixins.
+Custom element authors frequently need their elements to leverage platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided behaviors as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement native behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes native capabilities as composable behaviors.
 
 ## User-Facing Problem
 
@@ -74,48 +74,48 @@ This proposal is informed by:
 
 ## Proposed Approach
 
-This proposal introduces a `mixins` option to `attachInternals()` and a `mixinList` property on `ElementInternals` which allows custom elements to attach, inspect, and dynamically update native behaviors. This approach enables composition while keeping the API simple, supporting both initialization-time configuration and runtime updates.
+This proposal introduces a `behaviors` option to `attachInternals()` and a `behaviorList` property on `ElementInternals` which allows custom elements to attach, inspect, and dynamically update native behaviors. This approach enables composition while keeping the API simple, supporting both initialization-time configuration and runtime updates.
 
 ```javascript
-// Attach a mixin during initialization.
-this._internals = this.attachInternals({ mixins: [HTMLSubmitButtonMixin] });
+// Attach a behavior during initialization.
+this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
 
-// Access and modify mixin state.
-this._internals.mixins.htmlSubmitButton.formAction = '/custom';
+// Access and modify behavior state.
+this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 
-// Dynamically update the mixin list (ObservableArray).
-this._internals.mixinList.push(HTMLResetButtonMixin);
-this._internals.mixinList[0] = HTMLButtonMixin; // Replace at index
+// Dynamically update the behavior list (ObservableArray).
+this._internals.behaviorList.push(HTMLResetButtonBehavior);
+this._internals.behaviorList[0] = HTMLButtonBehavior; // Replace at index
 ```
 
 ### Configuration via attachInternals
 
-- Behaviors are exposed as objects that can be passed to `attachInternals` in a `mixins` array.
-- `ElementInternals` instances expose a read-only `mixins` property returning the list of attached behaviors.
+- Behaviors are exposed as objects that can be passed to `attachInternals` in a `behaviors` array.
+- `ElementInternals` instances expose a read-only `behaviors` property returning the list of attached behaviors.
 - Supports composition as web authors can pass many behaviors.
 
-### Platform-Provided Behavior Mixins
+### Platform-Provided Behaviors
 
-The platform would expose the following behavior mixin, mirroring the submission capability of `HTMLButtonElement`:
+The platform would expose the following behavior, mirroring the submission capability of `HTMLButtonElement`:
 
-| Behavior Mixin | Provides |
+| Behavior | Provides |
 |----------------|----------|
-| `HTMLSubmitButtonMixin` | Click/keyboard activation, form submission triggering, `:default` pseudo-class, implicit submission participation, implicit ARIA `role="button"`. |
+| `HTMLSubmitButtonBehavior` | Click/keyboard activation, form submission triggering, `:default` pseudo-class, implicit submission participation, implicit ARIA `role="button"`. |
 
 *Note: While `HTMLButtonElement` also supports generic button behavior (type="button") and reset behavior (type="reset"), this proposal focuses exclusively on the submit behavior.*
 
-Each platform behavior mixin must provide:
+Each platform behavior must provide:
 
 - Event handling: Automatic wiring of platform events (click, keydown, etc.)
 - ARIA defaults: Implicit roles and properties for accessibility.
 
-### Accessing mixin state
+### Accessing behavior state
 
-Platform-provided mixins expose useful public properties and methods of their corresponding native elements. Authors can expose these capabilities on their custom element's public API by defining accessors that delegate to the mixin state.
+Platform-provided behaviors expose useful public properties and methods of their corresponding native elements. Authors can expose these capabilities on their custom element's public API by defining accessors that delegate to the behavior state.
 
-These APIs are accessed via the `mixins` property on `ElementInternals`. This property provides access to their instance-specific state via properties named after the mixin.
+These APIs are accessed via the `behaviors` property on `ElementInternals`. This property provides access to their instance-specific state via properties named after the behavior.
 
-For `HTMLSubmitButtonMixin`, the state object exposes the following properties found on [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement):
+For `HTMLSubmitButtonBehavior`, the state object exposes the following properties found on [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement):
 
 **Properties:**
 - `disabled`
@@ -133,100 +133,100 @@ For `HTMLSubmitButtonMixin`, the state object exposes the following properties f
 class CustomSubmitButton extends HTMLElement {
     constructor() {
         super();
-        this._internals = this.attachInternals({ mixins: [HTMLSubmitButtonMixin] });
+        this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
     }
 
     get disabled() {
-        return this._internals.mixins.htmlSubmitButton.disabled;
+        return this._internals.behaviors.htmlSubmitButton.disabled;
     }
 
     set disabled(val) {
-        this._internals.mixins.htmlSubmitButton.disabled = val;
+        this._internals.behaviors.htmlSubmitButton.disabled = val;
     }
 
     get formAction() {
-        return this._internals.mixins.htmlSubmitButton.formAction;
+        return this._internals.behaviors.htmlSubmitButton.formAction;
     }
 
     set formAction(val) {
-        this._internals.mixins.htmlSubmitButton.formAction = val;
+        this._internals.behaviors.htmlSubmitButton.formAction = val;
     }
 }
 ```
 
-This ensures web authors don't have to reimplement the state logic that the mixin is supposed to provide.
+This ensures web authors don't have to reimplement the state logic that the behavior is supposed to provide.
 
-### Updating mixins dynamically
+### Updating behaviors dynamically
 
-To support dynamic behavior changes (e.g., when the `type` attribute changes), `ElementInternals` exposes a `mixinList` property as an [`ObservableArray`](https://webidl.spec.whatwg.org/#idl-observable-array) which supports in-place mutations:
+To support dynamic behavior changes (e.g., when the `type` attribute changes), `ElementInternals` exposes a `behaviorList` property as an [`ObservableArray`](https://webidl.spec.whatwg.org/#idl-observable-array) which supports in-place mutations:
 
 ```javascript
 // Replace the entire list.
-this._internals.mixinList = [HTMLSubmitButtonMixin];
+this._internals.behaviorList = [HTMLSubmitButtonBehavior];
 
-// Append a mixin.
-this._internals.mixinList.push(HTMLResetButtonMixin);
+// Append a behavior.
+this._internals.behaviorList.push(HTMLResetButtonBehavior);
 
-// Remove the first mixin.
-this._internals.mixinList.splice(0, 1);
+// Remove the first behavior.
+this._internals.behaviorList.splice(0, 1);
 
-// Replace a mixin at a specific index.
-this._internals.mixinList[0] = HTMLButtonMixin;
+// Replace a behavior at a specific index.
+this._internals.behaviorList[0] = HTMLButtonBehavior;
 
-// Remove the last mixin.
-this._internals.mixinList.pop();
+// Remove the last behavior.
+this._internals.behaviorList.pop();
 ```
 
-#### Mixin lifecycle
+#### Behavior lifecycle
 
-When the `mixinList` is modified (via assignment, `push()`, `splice()`, indexed assignment, etc.), the implementation observes the changes:
+When the `behaviorList` is modified (via assignment, `push()`, `splice()`, indexed assignment, etc.), the implementation observes the changes:
 
 | Scenario | Behavior |
 |----------|----------|
-| Mixin added | The mixin is attached. Its event handlers become active. Default ARIA role is applied unless overridden by `ElementInternals.role`. |
-| Mixin removed | The mixin is detached. Its event handlers are deactivated. Mixin-specific state (e.g., `formAction`, `disabled`) is cleared to default values. |
-| Mixin retained (in both lists) | The mixin's state is preserved. Its position in the list may change. |
+| Behavior added | The behavior is attached. Its event handlers become active. Default ARIA role is applied unless overridden by `ElementInternals.role`. |
+| Behavior removed | The behavior is detached. Its event handlers are deactivated. Behavior-specific state (e.g., `formAction`, `disabled`) is cleared to default values. |
+| Behavior retained (in both lists) | The behavior's state is preserved. Its position in the list may change. |
 
-*Note:* Mixin state is preserved when the custom element is disconnected and reconnected to the DOM (e.g., moved within the document). State is only cleared when a mixin is explicitly removed from `mixinList`.
+*Note:* Behavior state is preserved when the custom element is disconnected and reconnected to the DOM (e.g., moved within the document). State is only cleared when a behavior is explicitly removed from `behaviorList`.
 
-#### Mixin state
+#### Behavior state
 
-When a mixin is removed from the list, its state is cleared. If the same mixin is added back later, it starts with default state:
+When a behavior is removed from the list, its state is cleared. If the same behavior is added back later, it starts with default state:
 
 ```javascript
-// Set `formAction` on the submit mixin.
-this._internals.mixins.htmlSubmitButton.formAction = '/custom-action';
+// Set `formAction` on the submit behavior.
+this._internals.behaviors.htmlSubmitButton.formAction = '/custom-action';
 
-// Replace with a different mixin — submit mixin state is cleared.
-this._internals.mixinList[0] = HTMLResetButtonMixin;
+// Replace with a different behavior — submit behavior state is cleared.
+this._internals.behaviorList[0] = HTMLResetButtonBehavior;
 
-// Re-add the submit mixin — it starts with default state.
-this._internals.mixinList.push(HTMLSubmitButtonMixin);
+// Re-add the submit behavior — it starts with default state.
+this._internals.behaviorList.push(HTMLSubmitButtonBehavior);
 
 // formAction is now back to default (empty string).
-console.log(this._internals.mixins.htmlSubmitButton.formAction); // ''
+console.log(this._internals.behaviors.htmlSubmitButton.formAction); // ''
 ```
 
-If web authors need to preserve state when swapping mixins, they should save and restore it explicitly.
+If web authors need to preserve state when swapping behaviors, they should save and restore it explicitly.
 
 ### Other considerations
 
 This proposal supports common web component patterns:
 
-- Authors can define a single class that handles multiple modes (submit, reset, button) by updating `mixinList` at runtime in response to attribute changes, without needing to define separate classes for each behavior.
-- A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active mixins.
-- While this proposal uses an imperative API, the design supports future declarative custom elements. Once a declarative syntax for `ElementInternals` is established, attaching mixins could be modeled as an attribute, decoupling behavior from the JavaScript class definition. The following snippet shows a hypothetical example:
+- Authors can define a single class that handles multiple modes (submit, reset, button) by updating `behaviorList` at runtime in response to attribute changes, without needing to define separate classes for each behavior.
+- A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active behaviors.
+- While this proposal uses an imperative API, the design supports future declarative custom elements. Once a declarative syntax for `ElementInternals` is established, attaching behaviors could be modeled as an attribute, decoupling behavior from the JavaScript class definition. The following snippet shows a hypothetical example:
 
   ```html
   <custom-button name="custom-submit-button">
-      <element-internals mixins="html-submit-button-mixin"></element-internals>
+      <element-internals behaviors="html-submit-button-behavior"></element-internals>
       <template>Submit</template>
   </custom-button>
   ```
 
 ### Use case: Design system button
 
-While this proposal only introduces `HTMLSubmitButtonMixin`, the example below references `HTMLResetButtonMixin` and `HTMLButtonMixin` to illustrate how switching would work once additional mixins become available in the future.
+While this proposal only introduces `HTMLSubmitButtonBehavior`, the example below references `HTMLResetButtonBehavior` and `HTMLButtonBehavior` to illustrate how switching would work once additional behaviors become available in the future.
 
 ```javascript
 class DesignSystemButton extends HTMLElement {
@@ -240,39 +240,39 @@ class DesignSystemButton extends HTMLElement {
     }
 
     connectedCallback() {
-        this._updateMixins();
+        this._updateBehaviors();
         this._syncAttributes();
         this._render();
     }
 
     attributeChangedCallback(name, oldVal, newVal) {
         if (name === 'type') {
-            this._updateMixins();
+            this._updateBehaviors();
         }
         this._syncAttributes();
         this._render();
     }
 
-    _updateMixins() {
+    _updateBehaviors() {
         const type = this.getAttribute('type');
-        // Set the appropriate mixin based on type.
+        // Set the appropriate behavior based on type.
         if (type === 'submit') {
-            this._internals.mixinList = [HTMLSubmitButtonMixin];
+            this._internals.behaviorList = [HTMLSubmitButtonBehavior];
         } else if (type === 'reset') {
-            this._internals.mixinList = [HTMLResetButtonMixin];
+            this._internals.behaviorList = [HTMLResetButtonBehavior];
         } else {
-            this._internals.mixinList = [HTMLButtonMixin];
+            this._internals.behaviorList = [HTMLButtonBehavior];
         }
     }
 
     _syncAttributes() {
-        // Sync HTML attributes to mixin state.
-        const submitMixin = this._internals.mixins.htmlSubmitButton;
-        if (submitMixin) {
-            submitMixin.formAction = this.getAttribute('formaction') || '';
+        // Sync HTML attributes to behavior state.
+        const submitBehavior = this._internals.behaviors.htmlSubmitButton;
+        if (submitBehavior) {
+            submitBehavior.formAction = this.getAttribute('formaction') || '';
         }
         // Other attributes like `disabled`, `value`, etc. would be set on
-        // the proper mixin interface.
+        // the proper behavior interface.
     }
 
     // Expose element state.
@@ -284,11 +284,11 @@ class DesignSystemButton extends HTMLElement {
     }
 
     get formAction() {
-        return this._internals.mixins.htmlSubmitButton?.formAction ?? '';
+        return this._internals.behaviors.htmlSubmitButton?.formAction ?? '';
     }
     set formAction(val) {
-        if (this._internals.mixins.htmlSubmitButton) {
-            this._internals.mixins.htmlSubmitButton.formAction = val;
+        if (this._internals.behaviors.htmlSubmitButton) {
+            this._internals.behaviors.htmlSubmitButton.formAction = val;
         }
     }
 
@@ -297,8 +297,8 @@ class DesignSystemButton extends HTMLElement {
     // same pattern.
 
     _render() {
-        const isSubmit = this._internals.mixinList.includes(HTMLSubmitButtonMixin);
-        const isReset = this._internals.mixinList.includes(HTMLResetButtonMixin);
+        const isSubmit = this._internals.behaviorList.includes(HTMLSubmitButtonBehavior);
+        const isReset = this._internals.behaviorList.includes(HTMLResetButtonBehavior);
 
         this.shadowRoot.innerHTML = `
             <style>...</style>
@@ -333,49 +333,49 @@ The element gains:
 - Form submission on activation.
 - `:default` pseudo-class matching.
 - Participation in implicit form submission.
-- Ability to inspect its own properties via `this._internals.mixins`.
+- Ability to inspect its own properties via `this._internals.behaviors`.
 - The `type` attribute can be changed at runtime to switch between behaviors.
-- Mixin properties like `disabled` and `formAction` are accessible and can be exposed.
+- Behavior properties like `disabled` and `formAction` are accessible and can be exposed.
 
 ## Future Work
 
-The mixin pattern can be extended to other behaviors in the future:
+The behavior pattern can be extended to other behaviors in the future:
 
-- **Generic Buttons**: `HTMLButtonMixin` for non-submitting buttons (popover invocation, commands).
-- **Reset Buttons**: `HTMLResetButtonMixin` for form resetting.
-- **Inputs**: `HTMLInputMixin` for text entry, validation, and selection APIs.
-- **Labels**: `HTMLLabelMixin` for `for` attribute association and focus delegation.
-- **Forms**: `HTMLFormMixin` for custom elements acting as form containers.
-- **Radio Groups**: `HTMLRadioGroupMixin` for `name`-based mutual exclusion.
-- **Tables**: `HTMLTableMixin` for table layout semantics and accessibility.
+- **Generic Buttons**: `HTMLButtonBehavior` for non-submitting buttons (popover invocation, commands).
+- **Reset Buttons**: `HTMLResetButtonBehavior` for form resetting.
+- **Inputs**: `HTMLInputBehavior` for text entry, validation, and selection APIs.
+- **Labels**: `HTMLLabelBehavior` for `for` attribute association and focus delegation.
+- **Forms**: `HTMLFormBehavior` for custom elements acting as form containers.
+- **Radio Groups**: `HTMLRadioGroupBehavior` for `name`-based mutual exclusion.
+- **Tables**: `HTMLTableBehavior` for table layout semantics and accessibility.
 
-### User-defined mixins
+### User-defined behaviors
 
-An extension of this proposal would be to allow web developers to define their own reusable mixins. Considerations for user-defined mixins:
+An extension of this proposal would be to allow web developers to define their own reusable behaviors. Considerations for user-defined behaviors:
 
-- How would custom mixins be defined and registered? Extend `PlatformMixin` or a dedicated registry?
-- Custom mixins would need access to lifecycle hooks (connected, disconnected, attribute changes) similar to custom elements.
-- The same conflict resolution strategies that apply to platform mixins would need to work with user-defined mixins.
+- How would custom behaviors be defined and registered? Extend `PlatformBehavior` or a dedicated registry?
+- Custom behaviors would need access to lifecycle hooks (connected, disconnected, attribute changes) similar to custom elements.
+- The same conflict resolution strategies that apply to platform behaviors would need to work with user-defined behaviors.
 
-### Mixins in native HTML elements
+### Behaviors in native HTML elements
 
-This proposal currently focuses on custom elements, but the mixin pattern could potentially be generalized to all HTML elements (e.g., a `<div>` element gains button behavior via mixins). Extending mixins to native HTML elements would also raise questions about correctness and accessibility.
+This proposal currently focuses on custom elements, but the behavior pattern could potentially be generalized to all HTML elements (e.g., a `<div>` element gains button behavior via behaviors). Extending behaviors to native HTML elements would also raise questions about correctness and accessibility.
 
 ### Conflict Resolution
 
-As the number of available mixins grows, we must address how to handle collisions when multiple mixins attempt to control the same attributes or properties. We should explore several strategies to make composition possible without getting unexpected or conflicting behaviors:
+As the number of available behaviors grows, we must address how to handle collisions when multiple behaviors attempt to control the same attributes or properties. We should explore several strategies to make composition possible without getting unexpected or conflicting behaviors:
 
-1. **Order of Precedence (Default)**: The order of mixins in the array passed to `attachInternals` determines precedence (e.g., "last one wins"). This is simple to implement but may hide subtle incompatibilities.
-2. **Compatibility Allow-lists**: Each mixin could define a short list of "compatible" mixins that can be used in combination. Any combination not explicitly allowed would be rejected by `attachInternals`, preventing invalid states (like being both a button and a form).
+1. **Order of Precedence (Default)**: The order of behaviors in the array passed to `attachInternals` determines precedence (e.g., "last one wins"). This is simple to implement but may hide subtle incompatibilities.
+2. **Compatibility Allow-lists**: Each behavior could define a short list of "compatible" behaviors that can be used in combination. Any combination not explicitly allowed would be rejected by `attachInternals`, preventing invalid states (like being both a button and a form).
 3. **Explicit Conflict Resolution**: If conflicts occur, the platform could require the author to explicitly exclude specific properties.
 
 ### Future use case: Inheritance and composition
 
-The following example demonstrates how the API supports future scenarios with multiple mixins and inheritance, assuming additional mixins like `HTMLResetButtonMixin` become available.
+The following example demonstrates how the API supports future scenarios with multiple behaviors and inheritance, assuming additional behaviors like `HTMLResetButtonBehavior` become available.
 
 This example illustrates:
-1. How a parent and subclass cooperate to define the `mixins` array before calling `attachInternals`.
-2. How a class determines which mixin "wins" when multiple mixins provide conflicting behaviors.
+1. How a parent and subclass cooperate to define the `behaviors` array before calling `attachInternals`.
+2. How a class determines which behavior "wins" when multiple behaviors provide conflicting behaviors.
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -385,10 +385,10 @@ class CustomButton extends HTMLElement {
         super();
     }
 
-    // Protected method to extend the mixin list.
-    _getInitialMixins() {
+    // Protected method to extend the behavior list.
+    _getInitialBehaviors() {
         // Default to submit behavior.
-        return [HTMLSubmitButtonMixin];
+        return [HTMLSubmitButtonBehavior];
     }
 
     connectedCallback() {
@@ -396,10 +396,10 @@ class CustomButton extends HTMLElement {
             return;
         }
 
-        // Gather mixins.
-        const mixins = this._getInitialMixins();
+        // Gather behaviors.
+        const behaviors = this._getInitialBehaviors();
         // Initialize internals with the composed list.
-        this._internals = this.attachInternals({ mixins });
+        this._internals = this.attachInternals({ behaviors });
         this.render();
     }
 
@@ -413,20 +413,20 @@ class CustomButton extends HTMLElement {
 }
 
 class ResetButton extends CustomButton {
-    _getInitialMixins() {
-        // Append HTMLResetButtonMixin.
-        return [...super._getInitialMixins(), HTMLResetButtonMixin];
+    _getInitialBehaviors() {
+        // Append HTMLResetButtonBehavior.
+        return [...super._getInitialBehaviors(), HTMLResetButtonBehavior];
     }
 
     render() {
         super.render();
 
-        // Inspect the mixins to determine the "winning" behavior.
-        // This assumes the platform rule is "last mixin wins" for conflicts (order matters).
-        const mixins = this._internals.mixinList;
-        const effectiveBehavior = mixins[mixins.length - 1];
+        // Inspect the behaviors to determine the "winning" behavior.
+        // This assumes the platform rule is "last behavior wins" for conflicts (order matters).
+        const behaviors = this._internals.behaviorList;
+        const effectiveBehavior = behaviors[behaviors.length - 1];
 
-        if (effectiveBehavior === HTMLResetButtonMixin) {
+        if (effectiveBehavior === HTMLResetButtonBehavior) {
             // Visual indication of reset behavior
             const style = document.createElement('style');
             style.textContent = ':host { border: 1px dashed red; }';
@@ -438,12 +438,12 @@ class ResetButton extends CustomButton {
 
 ## Alternatives considered
 
-### Alternative 1: Static Class Mixins
+### Alternative 1: Static Class Behaviors
 
 Behaviors are exposed as functions that take a superclass and return a subclass.
 
 ```javascript
-class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
+class CustomSubmitButton extends HTMLSubmitButtonBehavior(HTMLElement) { ... }
 ```
 
 **Pros:**
@@ -577,19 +577,19 @@ While valuable, this can be a parallel effort. Even if all native elements were 
 
 ### Accessibility
 
-- Platform behaviors must provide appropriate default ARIA roles and states (e.g., `role="button"` for `HTMLSubmitButtonMixin`).
-- Custom elements using a platform-provided mixin must gain the same keyboard handling and focus management as their native counterparts (e.g., Space/Enter activation).
+- Platform behaviors must provide appropriate default ARIA roles and states (e.g., `role="button"` for `HTMLSubmitButtonBehavior`).
+- Custom elements using a platform-provided behavior must gain the same keyboard handling and focus management as their native counterparts (e.g., Space/Enter activation).
 - Authors must be able to override default semantics using `ElementInternals.role` and `ElementInternals.aria*` properties if the default behavior does not match their specific use case.
 
 ### Security
 
 - This proposal exposes existing platform capabilities to custom elements, rather than introducing new capabilities.
-- Form submission triggered by mixins must respect the same security policies as native form submission.
-- All security checks that apply to native elements (e.g., form validation, submission restrictions) apply to custom elements using these mixins.
+- Form submission triggered by behaviors must respect the same security policies as native form submission.
+- All security checks that apply to native elements (e.g., form validation, submission restrictions) apply to custom elements using these behaviors.
 
 ### Privacy
 
-- The presence of specific mixins in the API surface can be used for fingerprinting or browser version detection. This is consistent with the introduction of any new Web Platform feature.
+- The presence of specific behaviors in the API surface can be used for fingerprinting or browser version detection. This is consistent with the introduction of any new Web Platform feature.
 - This proposal does not introduce new mechanisms for collecting or transmitting user data beyond what is already possible with native HTML elements.
 
 ## Stakeholder Feedback / Opposition
@@ -608,6 +608,7 @@ Many thanks for valuable feedback and advice from:
 - [Andy Luhrs](https://github.com/aluhrs13)
 - [Daniel Clark](https://github.com/dandclark)
 - [Hoch Hochkeppel](https://github.com/mhochk)
+- [Justin Fagnani](https://github.com/justinfagnani)
 - [Kevin Babbitt](https://github.com/kbabbitt)
 - [Kurt Catti-Schmidt](https://github.com/KurtCattiSchmidt)
 - [Mason Freed](https://github.com/mfreed7)
@@ -618,7 +619,7 @@ Thanks to the following proposals, articles, frameworks, and languages for their
 - [Real Mixins with JavaScript Classes](https://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/) by [Justin Fagnani](https://github.com/justinfagnani).
 - [ElementInternals.type proposal](https://github.com/whatwg/html/issues/11061).
 - [Custom Attributes proposal](https://github.com/WICG/webcomponents/issues/1029).
-- [TC39 Maximally Minimal Mixins proposal](https://github.com/tc39/proposal-mixins).
+- [TC39 Maximally Minimal Mixins proposal](https://github.com/tc39/proposal-behaviors).
 - Lit framework's [reactive controllers pattern](https://lit.dev/docs/composition/controllers/).
 - [Expose certain behavioural attributes via ElementInternals proposal](https://github.com/whatwg/html/issues/11752).
 
