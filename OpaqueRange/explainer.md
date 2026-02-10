@@ -245,31 +245,6 @@ Unlike `StaticRange`, `OpaqueRange` is **live** — it tracks changes to the und
 
 ### Properties and Methods
 
-#### IDL
-```webidl
-[Exposed=Window]
-interface AbstractRange {
-  readonly attribute Node? startContainer;
-  readonly attribute unsigned long startOffset;
-  readonly attribute Node? endContainer;
-  readonly attribute unsigned long endOffset;
-  readonly attribute boolean collapsed;
-};
-
-[Exposed=Window]
-interface OpaqueRange : AbstractRange {
-  DOMRectList getClientRects();
-  DOMRect getBoundingClientRect();
-};
-```
-
-Note that `AbstractRange`'s `startContainer` and `endContainer` are changed from `Node` to `Node?` to accommodate `OpaqueRange`. A new **is opaque** flag (initially `false`) is added to all ranges; only `OpaqueRange` objects have it set to `true`.
-
-```webidl
-// On HTMLInputElement and HTMLTextAreaElement:
-[NewObject] OpaqueRange getValueRange(unsigned long start, unsigned long end);
-```
-
 #### Properties
 `OpaqueRange` objects cannot be constructed directly; they are created by specifications defining elements that support opaque ranges. In HTML, they are obtained via `getValueRange()`.
 
@@ -578,7 +553,7 @@ The resulting `AbstractRange` inheritance structure would look like this:
 ![abstractrange-family](abstractrange-family.jpg)
 
 ### Extending to Custom Elements
-As [discussed at TPAC 2025](https://www.w3.org/2025/11/11-whatwg-minutes.html) and in the [WHATWG tracking issue](https://github.com/whatwg/html/issues/11478#issuecomment-2472789362), the `OpaqueRange` design is intentionally host-extensible so that custom elements and other host specifications could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure. The DOM spec's `supports opaque ranges` concept is defined generically, allowing future specifications to designate additional element types.
+It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment-3113360213) (see also [TPAC 2025 minutes](https://www.w3.org/2025/11/11-whatwg-minutes.html)) that custom elements and other host specifications could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure.
 
 ### Relationship to CSS Anchor Positioning
 As noted in the [W3C TAG early design review](https://github.com/w3ctag/design-reviews/issues/1142), some of the positioning use cases addressed by `OpaqueRange` (such as anchoring popups or highlights to caret positions) could also be explored declaratively through future extensions to [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position/).
