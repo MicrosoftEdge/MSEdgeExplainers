@@ -88,34 +88,34 @@ this._internals.behaviorList.push(HTMLResetButtonBehavior);
 this._internals.behaviorList[0] = HTMLButtonBehavior; // Replace at index
 ```
 
-### Configuration via attachInternals
-
 - Behaviors are exposed as objects that can be passed to `attachInternals` in a `behaviors` array.
 - `ElementInternals` instances expose a read-only `behaviors` property returning the list of attached behaviors.
 - Supports composition as web authors can pass many behaviors.
 
 ### Platform-Provided Behaviors
 
-The platform would expose the following behavior, mirroring the submission capability of `HTMLButtonElement`:
+Platform behaviors give custom elements capabilities that would otherwise require reimplementation or workarounds. Each behavior automatically provides:
 
-| Behavior | Provides |
-|----------------|----------|
-| `HTMLSubmitButtonBehavior` | Click/keyboard activation, form submission triggering, `:default` pseudo-class, implicit submission participation, implicit ARIA `role="button"`. |
+- Event handling: Platform events (click, keydown, etc.) are wired up automatically.
+- ARIA defaults: Implicit roles and properties for accessibility.
+- Focusability: The element participates in the tab order as appropriate for the behavior.
+- CSS pseudo-classes: Behavior-specific pseudo-classes are managed by the platform.
+
+This proposal introduces `HTMLSubmitButtonBehavior`, which mirrors the submission capability of `<button type="submit">`:
+
+| Capability | Details |
+|------------|---------|
+| Activation | Click and keyboard (Space/Enter) trigger form submission. |
+| Implicit submission | The element participates in "Enter to submit" within forms. |
+| ARIA | Implicit `role="button"`. |
+| Focusability | Participates in tab order; removed when `disabled` is `true`. |
+| CSS pseudo-classes | `:default`, `:disabled`/`:enabled`, `:focus`, `:focus-visible`, `:hover`, `:active`. |
 
 *Note: While `HTMLButtonElement` also supports generic button behavior (type="button") and reset behavior (type="reset"), this proposal focuses exclusively on the submit behavior.*
 
-Each platform behavior must provide:
-
-- Event handling: Automatic wiring of platform events (click, keydown, etc.)
-- ARIA defaults: Implicit roles and properties for accessibility.
-
 ### Accessing behavior state
 
-Platform-provided behaviors expose useful public properties and methods of their corresponding native elements. Authors can expose these capabilities on their custom element's public API by defining accessors that delegate to the behavior state.
-
-These APIs are accessed via the `behaviors` property on `ElementInternals`. This property provides access to their instance-specific state via properties named after the behavior.
-
-For `HTMLSubmitButtonBehavior`, the state object exposes the following properties found on [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement):
+Each behavior exposes properties and methods from its corresponding native element. These are accessed via `this._internals.behaviors.<behaviorName>`. For `HTMLSubmitButtonBehavior`, the following properties are available (mirroring [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement)):
 
 **Properties:**
 - `disabled`
@@ -154,7 +154,7 @@ class CustomSubmitButton extends HTMLElement {
 }
 ```
 
-This ensures web authors don't have to reimplement the state logic that the behavior is supposed to provide.
+Behavior state is only accessible through `ElementInternals`, which is private to the element. To expose properties like `disabled` or `formAction` to external code, authors must define getters and setters. Authors are also responsible for attribute reflection (observing HTML attributes and mapping them to the corresponding properties). This gives authors full control over their element's public API.
 
 ### Updating behaviors dynamically
 
@@ -188,8 +188,6 @@ When the `behaviorList` is modified (via assignment, `push()`, `splice()`, index
 | Behavior retained (in both lists) | The behavior's state is preserved. Its position in the list may change. |
 
 *Note:* Behavior state is preserved when the custom element is disconnected and reconnected to the DOM (e.g., moved within the document). State is only cleared when a behavior is explicitly removed from `behaviorList`.
-
-#### Behavior state
 
 When a behavior is removed from the list, its state is cleared. If the same behavior is added back later, it starts with default state:
 
@@ -329,13 +327,13 @@ customElements.define('ds-button', DesignSystemButton);
 
 The element gains:
 - Click and keyboard activation (Space/Enter).
+- Focusability (participates in tab order; removed when disabled).
 - Implicit ARIA `role="button"` that can be overriden by the web author.
 - Form submission on activation.
-- `:default` pseudo-class matching.
+- CSS pseudo-class matching: `:default`, `:disabled`/`:enabled`, `:focus`, etc.
 - Participation in implicit form submission.
-- Ability to inspect its own properties via `this._internals.behaviors`.
-- The `type` attribute can be changed at runtime to switch between behaviors.
-- Behavior properties like `disabled` and `formAction` are accessible and can be exposed.
+- Attributes can be changed at runtime to switch between behaviors.
+- Behavior properties like `disabled` and `formAction` are accessible via `this._internals.behaviors` and can be exposed.
 
 ## Future Work
 
@@ -348,6 +346,15 @@ The behavior pattern can be extended to other behaviors in the future:
 - **Forms**: `HTMLFormBehavior` for custom elements acting as form containers.
 - **Radio Groups**: `HTMLRadioGroupBehavior` for `name`-based mutual exclusion.
 - **Tables**: `HTMLTableBehavior` for table layout semantics and accessibility.
+
+Future behaviors would also manage their own relevant pseudo-classes:
+
+| Behavior | CSS Pseudo-classes |
+|----------|--------------------|
+| `HTMLCheckboxBehavior` | `:checked`, `:indeterminate` |
+| `HTMLInputBehavior` | `:valid`, `:invalid`, `:required`, `:optional`, `:placeholder-shown` |
+| `HTMLRadioGroupBehavior` | `:checked` |
+| `HTMLResetButtonBehavior` | `:default` (if only reset button in form) |
 
 ### User-defined behaviors
 
@@ -435,6 +442,88 @@ class ResetButton extends CustomButton {
     }
 }
 ```
+
+## Open Questions
+
+### Should behavior properties be automatically exposed on the element?
+
+The current proposal requires developers to manually create getters/setters that delegate to `this._internals.behaviors.htmlSubmitButton.*`. There are alternative approaches worth considering:
+
+#### Option A: Manual property delegation (current proposal)
+
+**Pros:**
+- Authors have full control over their element's public API.
+- No naming conflicts.
+- Authors can add validation, transformation, or side effects in setters.
+- Familiar pattern.
+
+**Cons:**
+- Significant boilerplate for each property.
+- For future behaviors like `HTMLInputBehavior`, not exposing `value` means external code can't read or set the input's data without the developer writing boilerplate getters and setters.
+
+#### Option B: Automatic property exposure
+
+The platform automatically adds behavior properties to the custom element:
+
+```javascript
+class CustomSubmitButton extends HTMLElement {
+    constructor() {
+        super();
+        this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+    }
+}
+
+const btn = document.createElement('custom-submit');
+// Works without any getter/setter.
+btn.disabled = true;
+btn.formAction = '/save';
+```
+
+**Pros:**
+- Zero boilerplate code to get and set properties.
+- Matches how native elements work (a `<button>` just has `disabled`).
+- For future behaviors like `HTMLCheckboxBehavior` external code can read/write `checked` without the developer writing any delegation code.
+
+**Cons:**
+- Naming conflicts if the element already defines a property with the same name.
+- Less control over the public API surface.
+- Authors can't easily add validation or side effects to setters.
+- May feel "magical" compared to explicit delegation.
+
+#### Option C: Opt-in automatic exposure
+
+A middle ground where authors can choose:
+
+```javascript
+// Explicit delegation (default)
+this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+
+// Opt-in to automatic exposure
+this.attachInternals({ 
+    behaviors: [HTMLSubmitButtonBehavior],
+    exposeProperties: true  // or list specific properties
+});
+```
+
+**Pros:**
+- Flexibility: authors choose the right approach for their use case.
+- Backwards compatible with explicit delegation.
+
+**Cons:**
+- More complex API.
+- Still needs to handle naming conflicts when `exposeProperties` is enabled.
+
+#### Why this matters
+
+Future behaviors would likely require developers to expose certain properties for the element to be useful to consumers. Without developer-written delegation, external code (including forms and scripts) can't access these properties:
+
+| Behavior | Key property | Impact if not exposed |
+|----------|------------------|------|
+| `HTMLCheckboxBehavior` | `checked` | The behavior toggles internal state on click, but external code can't read or set it. |
+| `HTMLInputBehavior` | `value` | Forms can't read the input's data, and scripts can't populate it. |
+| `HTMLRadioGroupBehavior` | `checked` | Mutual exclusion happens internally, but external code can't query which radio is selected. |
+
+If `HTMLSubmitButtonBehavior` uses manual delegation but `HTMLCheckboxBehavior` uses automatic exposure, we'd have an inconsistent API surface. This argues for deciding on a consistent approach across all behaviors from the start.
 
 ## Alternatives considered
 
