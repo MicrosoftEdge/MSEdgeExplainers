@@ -527,12 +527,12 @@ If `HTMLSubmitButtonBehavior` uses manual delegation but `HTMLCheckboxBehavior` 
 
 ## Alternatives considered
 
-### Alternative 1: Static Class Behaviors
+### Alternative 1: Static Class Mixins
 
 Behaviors are exposed as functions that take a superclass and return a subclass.
 
 ```javascript
-class CustomSubmitButton extends HTMLSubmitButtonBehavior(HTMLElement) { ... }
+class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 ```
 
 **Pros:**
@@ -702,13 +702,14 @@ Many thanks for valuable feedback and advice from:
 - [Kurt Catti-Schmidt](https://github.com/KurtCattiSchmidt)
 - [Mason Freed](https://github.com/mfreed7)
 - [Rob Eisenberg](https://github.com/EisenbergEffect)
+- [Steve Orvell](https://github.com/sorvell)
 
 Thanks to the following proposals, articles, frameworks, and languages for their work on similar problems that influenced this proposal.
 
 - [Real Mixins with JavaScript Classes](https://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/) by [Justin Fagnani](https://github.com/justinfagnani).
 - [ElementInternals.type proposal](https://github.com/whatwg/html/issues/11061).
 - [Custom Attributes proposal](https://github.com/WICG/webcomponents/issues/1029).
-- [TC39 Maximally Minimal Mixins proposal](https://github.com/tc39/proposal-behaviors).
+- [TC39 Maximally Minimal Mixins proposal](https://github.com/tc39/proposal-mixins).
 - Lit framework's [reactive controllers pattern](https://lit.dev/docs/composition/controllers/).
 - [Expose certain behavioural attributes via ElementInternals proposal](https://github.com/whatwg/html/issues/11752).
 
