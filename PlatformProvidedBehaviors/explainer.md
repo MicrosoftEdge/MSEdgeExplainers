@@ -6,7 +6,7 @@
 
 ## Participate
 
-- No issue filed yet.
+- [WHATWG tracking issue](https://github.com/whatwg/html/issues/12150)
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PlatformProvidedBehaviors)
 
 ## Introduction
@@ -74,7 +74,7 @@ This proposal is informed by:
 
 ## Proposed Approach
 
-This proposal introduces a `behaviors` option to `attachInternals()` and a `behaviorList` property on `ElementInternals` which allows custom elements to attach, inspect, and dynamically update native behaviors. This approach enables composition while keeping the API simple, supporting both initialization-time configuration and runtime updates.
+This proposal introduces a `behaviors` option to `attachInternals()` and two properties on `ElementInternals`: a read-only `behaviors` property for accessing behavior state, and a `behaviorList` property for dynamically updating attached behaviors. This enables composition while keeping the API simple.
 
 ```javascript
 // Attach a behavior during initialization.
@@ -87,10 +87,6 @@ this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 this._internals.behaviorList.push(HTMLResetButtonBehavior);
 this._internals.behaviorList[0] = HTMLButtonBehavior; // Replace at index
 ```
-
-- Behaviors are exposed as objects that can be passed to `attachInternals` in a `behaviors` array.
-- `ElementInternals` instances expose a read-only `behaviors` property returning the list of attached behaviors.
-- Supports composition as web authors can pass many behaviors.
 
 ### Platform-Provided Behaviors
 
