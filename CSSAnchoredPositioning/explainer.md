@@ -20,7 +20,7 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-When building interactive components or applications, authors frequently want to leverage UI elements that can render in a "top-layer". Examples of such UI elements include content pickers, teaching UI, tooltips, and menus. ["Enabling Popups"](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Popup/explainer.md) introduced a new `popup` element to make many of these top-layer elements easier to author.
+When building interactive components or applications, authors frequently want to leverage UI elements that can render in a "top-layer". Examples of such UI elements include content pickers, teaching UI, tooltips, and menus. ["Enabling Popups"](../Popup/explainer.md) introduced a new `popup` element to make many of these top-layer elements easier to author.
 
 Authors frequently wish to "pin" or "anchor" such top-layer UI to a point on another element, referred to here as an "anchor element". How the top-layer UI is positioned with respect to its anchor element is further influenced or constrained by the edges of the layout viewport.
 
@@ -57,7 +57,7 @@ Example use cases include:
 
 ### Declaring an anchor element
 
-First, the author must provide an anchor element, using the `anchor` HTML attribute proposed in ["Enabling Popups"](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Popup/explainer.md):
+First, the author must provide an anchor element, using the `anchor` HTML attribute proposed in ["Enabling Popups"](../Popup/explainer.md):
 
 ```HTML
 <button id="myButton" popup="myPopup">Anchor</button>
@@ -602,7 +602,7 @@ A previous (internal) version of this CSS anchored positioning scheme used the `
 
 One of the goals for this proposal states: "Maintain a logical content order that matches the visual order, if the visual order has been impacted by anchored positioning."
 
-Most likely, the `anchor` attribute should be the hook that hoists an anchored element somewhere else in the logical order. There are some interesting [interactions with the `popup` attribute](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Popup/explainer.md#open-questions) to consider, as well as where exactly the anchored element gets hoisted to. Open questions under this umbrella:
+Most likely, the `anchor` attribute should be the hook that hoists an anchored element somewhere else in the logical order. There are some interesting [interactions with the `popup` attribute](../Popup/explainer.md#open-questions) to consider, as well as where exactly the anchored element gets hoisted to. Open questions under this umbrella:
 
 * Should the anchored element be treated as a sibling of the anchor element, immediately succeeding it in tab cycles / accessibility tree structures?
 * What happens if the context to which the anchored element is hoisted has a restrictive content model where said anchored element is not valid?

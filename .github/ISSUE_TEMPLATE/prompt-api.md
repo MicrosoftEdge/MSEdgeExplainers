@@ -21,11 +21,11 @@ In Edge, go to `edge://on-device-internals/` and find the Device performance cla
 
 ### Is device capable?
 
-In Edge, go to edge://on-device-internals/ and find the Device capable value under Model Status.
+In Edge, go to `edge://on-device-internals/` and find the Device capable value under Model Status.
 
 ### Edge channel and version
 
-The Microsoft Edge channel and version you are using. Go to edge://version for details.
+The Microsoft Edge channel and version you are using. Go to `edge://version` for details.
 For example: Edge Dev 138.0.3309.2.
 
 ### Device information
@@ -35,5 +35,4 @@ For example: Windows 11, version 24H2, x64
 
 ### GPU information
 
-Tell us the GPU information of your device. Go to edge://gpu and search for GL_RENDERER.
----
+Tell us the GPU information of your device. Go to `edge://gpu` and search for GL_RENDERER.

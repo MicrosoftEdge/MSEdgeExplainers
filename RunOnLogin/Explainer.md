@@ -124,7 +124,7 @@ promise.then(function(status) {
 The `navigator.runOnOsLogin.get()` API will not prompt the permission but rather resolve with the status as `"none"` if the permission has not been granted yet or is denied. 
 
 ### Enabling it During Install
-We propose an additional way to enable the capability during the installation process of an installable web app. This option is designed based on a separate work called the [Install Time Permissions Prompt](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/InstallTimePermissionsPrompt/Explainer.md) which uses the Web App Manifest to declare a set of permissions to ask for user consent during the installation of an installable web app.
+We propose an additional way to enable the capability during the installation process of an installable web app. This option is designed based on a separate work called the [Install Time Permissions Prompt](../InstallTimePermissionsPrompt/Explainer.md) which uses the Web App Manifest to declare a set of permissions to ask for user consent during the installation of an installable web app.
 
 The *Install Time Permissions Prompt* defines a new member of the Web App Manifest, `request_on_install`. Developers can request a user permission with the following directive in the Web App Manifest:
 
