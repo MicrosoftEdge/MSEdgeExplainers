@@ -220,52 +220,52 @@ The "zero point" is the edge of the intersection, with positive values extending
 into the intersection and negative values receding from it.
 
 ```css
-.outset-0px {
-  column-rule-outset: 0px;
+.inset-0px {
+  column-rule-inset: 0px;
 }
 ```
-<image src="images/example-column-outset-0px.png">
+<image src="images/example-column-inset-0px.png">
 
 ```css
-.outset-5px {
-  column-rule-outset: 5px;
+.inset-5px {
+  column-rule-inset: 5px;
 }
 ```
-<image src="images/example-column-outset-5px.png">
+<image src="images/example-column-inset-5px.png">
 
 ```css
-.outset-negative-5px {
-  column-rule-outset: -5px;
+.inset-negative-5px {
+  column-rule-inset: -5px;
 }
 ```
-<image src="images/example-column-outset-minus-5px.png">
+<image src="images/example-column-inset-minus-5px.png">
 
 Authors may also adjust endpoints more granularly, making a distinction between "edge"
 endpoints (which fall on the edge of the container),
 and "interior" endpoints (any endpoint that is not an "edge").
 
 ```css
-.edge-interior-outsets {
-  column-rule-edge-outset: 0px;
-  column-rule-interior-outset: 5px;
+.edge-interior-insets {
+  column-rule-edge-inset: 0px;
+  column-rule-interior-inset: 5px;
 }
 ```
 
-<image src="images/example-column-interior-outset-5px.png">
+<image src="images/example-column-interior-inset-5px.png">
 
 Similarly, authors can have even more granular control to adjust the positions of endpoints,
 making a distinction between "start" and "end" endpoints, in addition to the "edge" and "interior" distinction.
 
 ```css
-.start-end-edge-interior-outsets {
-  column-rule-start-edge-outset: 0px;
-  column-rule-end-edge-outset: 8px;
-  column-rule-start-interior-outset: 0px;
-  column-rule-end-interior-outset: 8px;
+.start-end-edge-interior-insets {
+  column-rule-start-edge-inset: 0px;
+  column-rule-end-edge-inset: 8px;
+  column-rule-start-interior-inset: 0px;
+  column-rule-end-interior-inset: 8px;
 }
 ```
 
-<image src="images/example-column-start-end-edge-interior-outsets.png">
+<image src="images/example-column-start-end-edge-interior-insets.png">
 
 ### Interaction with spanning items
 
@@ -276,7 +276,7 @@ In the latter case, gap decorations paint "behind" items in the container.
 ```css
 .t-intersections {
   gap-rule-break: spanning-item;
-  gap-rule-outset: 0px;
+  gap-rule-inset: 0px;
 }
 ```
 <image src="images/example-break-spanning-item.png">
@@ -284,7 +284,7 @@ In the latter case, gap decorations paint "behind" items in the container.
 ```css
 .all-intersections {
   gap-rule-break: intersection;
-  gap-rule-outset: 0px;
+  gap-rule-inset: 0px;
 }
 ```
 <image src="images/example-break-intersection.png">
@@ -364,7 +364,7 @@ example
 ```css
 .container {
   rule: 1px solid black;
-  column-rule-outset: 0px;
+  column-rule-inset: 0px;
 }
 ```
 
@@ -498,7 +498,7 @@ https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1099
     ". . content social";
   rule-areas: --left 1 / 1 / 2 / -1;
   rule: 1px solid gray [--left] none;
-  rule-outset: 3px;
+  rule-inset: 3px;
   border-top: 1px solid gray;
 }
 ```
