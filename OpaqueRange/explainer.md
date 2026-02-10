@@ -565,7 +565,9 @@ However, this design had two limitations:
 
 The `OpaqueRange` interface is currently compatible with any API that utilizes `AbstractRange` objects, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API). However, this means that `OpaqueRange` is not compatible with methods and APIs that expect a regular `Range`.
 
-To address this limitation, one proposed solution is to introduce a new interface called `DynamicRange`. This interface would serve as the counterpart to `StaticRange` and would also extend `AbstractRange`.
+## Potential Future Work
+### DynamicRange
+To address the compatibility limition above, one proposed solution is to introduce a new interface called `DynamicRange`. This interface would serve as the counterpart to `StaticRange` and would also extend `AbstractRange`.
 
 A `DynamicRange` object would not have a direct use in JavaScript beyond serving as a parent class for `Range` and `OpaqueRange`. However, common methods such as `getBoundingClientRect()` and `getClientRects()`—which are implemented in both `Range` and `OpaqueRange`—could be moved into `DynamicRange` to reduce redundancy.
 
@@ -575,7 +577,6 @@ The resulting `AbstractRange` inheritance structure would look like this:
 
 ![abstractrange-family](abstractrange-family.jpg)
 
-## Potential Future Work
 ### Extending to Custom Elements
 As [discussed at TPAC 2025](https://www.w3.org/2025/11/11-whatwg-minutes.html) and in the [WHATWG tracking issue](https://github.com/whatwg/html/issues/11478#issuecomment-2472789362), the `OpaqueRange` design is intentionally host-extensible so that custom elements and other host specifications could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure. The DOM spec's `supports opaque ranges` concept is defined generically, allowing future specifications to designate additional element types.
 
