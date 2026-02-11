@@ -58,7 +58,9 @@ Inefficient network resource usage --such as loading large, uncompressed assets-
 
 Network Efficiency Guardrails addresses this gap by defining a policy that makes inefficient network behavior observable to the User Agent as it occurs. The policy serves as a mechanism for the User Agent to identify and surface conditions with real performance impact as a well‑defined signal. By integrating with the [Reporting API](https://www.w3.org/TR/reporting-1/), it enables documents to become aware of these conditions and supports tooling and reporting workflows --present and future-- to respond in a consistent and extensible way.
 
-Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. Expanding the visibility of reports created by this policy across document boundaries would further amplify the value of this signal in the direction established in [Performance Control of Embedded Content](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceControlOfEmbeddedContent/explainer.md) and remains a future goal. However, such reporting mechanisms are out of scope for this proposal.
+Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. Expanding the visibility of reports created by this policy across document boundaries would further amplify the value of this signal in the direction established in [Performance Control of Embedded Content](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceControlOfEmbeddedContent/explainer.md).
+
+However, such cross‑document reporting mechanisms are out of scope for this proposal. Network Efficiency Guardrails relies on Document Policy's integration with the Reporting API, which currently defines reporting at the document level and does not provide a standardized mechanism for propagating reports across document boundaries. Proposing or standardizing cross‑document reporting would therefore require changes within the Reporting API itself and is more appropriately addressed in that context, which remains a future goal.
 
 ## Goals
 
@@ -69,6 +71,7 @@ Embedding scenarios are a primary motivation for this work, as inefficient netwo
 ## Non-goals
 * Provide fine‑grained control over network resource loading.
 * Expose detailed timing or low‑level performance metrics.
+* Introduce cross-document reporting mechanisms.
 
 ## Proposed API: `network-efficiency-guardrails`
 
