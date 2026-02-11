@@ -94,7 +94,9 @@ Specifically, the User Agent flags the following conditions as policy violations
     * Image files larger than 200 kB
     * Web fonts larger than 96 kB
 
-The policy is intentionally scoped to runtime observability of network behavior, rather than fine‑grained resource control. Violations are reported through [Document Policy](https://wicg.github.io/document-policy/)’s integration with the [Reporting API](https://www.w3.org/TR/reporting-1/). When enforcement is enabled, resources triggering violations are blocked by the User Agent and the corresponding assets are not rendered.
+The policy is intentionally scoped to runtime observability of network behavior, rather than fine‑grained resource control. As a result, only resource fetches that result in network activity are evaluated; resources satisfied entirely from local caches (for example, memory cache or HTTP cache hits that do not revalidate) do not trigger evaluation or reporting.
+
+Violations are reported through [Document Policy](https://wicg.github.io/document-policy/)’s integration with the [Reporting API](https://www.w3.org/TR/reporting-1/). When enforcement is enabled, resources triggering violations are blocked by the User Agent and the corresponding assets are not rendered.
 
 ### Example
 
