@@ -7,7 +7,6 @@
 ## Participate
 
 - [WHATWG tracking issue](https://github.com/whatwg/html/issues/12150)
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/PlatformProvidedBehaviors)
 
 ## Introduction
 
