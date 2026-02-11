@@ -84,7 +84,6 @@ this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] }
 this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 
 // Dynamically update the behavior list (ObservableArray).
-this._internals.behaviorList.push(HTMLResetButtonBehavior);
 this._internals.behaviorList[0] = HTMLButtonBehavior;  // Replace at index
 ```
 
@@ -181,9 +180,6 @@ When a behavior is removed from the list, its state is cleared. If the same beha
 ```javascript
 // Set `formAction` on the submit behavior.
 this._internals.behaviors.htmlSubmitButton.formAction = '/custom-action';
-
-// Replace with a different behavior — submit behavior state is cleared.
-this._internals.behaviorList[0] = HTMLResetButtonBehavior;
 
 // Re-add the submit behavior — it starts with default state.
 this._internals.behaviorList.push(HTMLSubmitButtonBehavior);
