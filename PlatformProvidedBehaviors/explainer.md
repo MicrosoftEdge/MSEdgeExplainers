@@ -85,7 +85,7 @@ this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 
 // Dynamically update the behavior list (ObservableArray).
 this._internals.behaviorList.push(HTMLResetButtonBehavior);
-this._internals.behaviorList[0] = HTMLButtonBehavior; // Replace at index
+this._internals.behaviorList[0] = HTMLButtonBehavior;  // Replace at index
 ```
 
 ### Platform-Provided Behaviors
@@ -160,22 +160,13 @@ To support dynamic behavior changes (e.g., when the `type` attribute changes), `
 // Replace the entire list.
 this._internals.behaviorList = [HTMLSubmitButtonBehavior];
 
-// Append a behavior.
-this._internals.behaviorList.push(HTMLResetButtonBehavior);
-
-// Remove the first behavior.
-this._internals.behaviorList.splice(0, 1);
-
 // Replace a behavior at a specific index.
 this._internals.behaviorList[0] = HTMLButtonBehavior;
-
-// Remove the last behavior.
-this._internals.behaviorList.pop();
 ```
 
 #### Behavior lifecycle
 
-When the `behaviorList` is modified (via assignment, `push()`, `splice()`, indexed assignment, etc.), the implementation observes the changes:
+When the `behaviorList` is modified (via assignment or indexed assignment), the implementation observes the changes:
 
 | Scenario | Behavior |
 |----------|----------|
@@ -198,7 +189,7 @@ this._internals.behaviorList[0] = HTMLResetButtonBehavior;
 this._internals.behaviorList.push(HTMLSubmitButtonBehavior);
 
 // formAction is now back to default (empty string).
-console.log(this._internals.behaviors.htmlSubmitButton.formAction); // ''
+console.log(this._internals.behaviors.htmlSubmitButton.formAction);  // ''
 ```
 
 If web authors need to preserve state when swapping behaviors, they should save and restore it explicitly.
@@ -326,7 +317,7 @@ The element gains:
 - Focusability (participates in tab order; removed when disabled).
 - Implicit ARIA `role="button"` that can be overriden by the web author.
 - Form submission on activation.
-- CSS pseudo-class matching: `:default`, `:disabled`/`:enabled`, `:focus`, etc.
+- CSS pseudo-class matching: `:default`, `:disabled`/`:enabled`.
 - Participation in implicit form submission.
 - Attributes can be changed at runtime to switch between behaviors.
 - Behavior properties like `disabled` and `formAction` are accessible via `this._internals.behaviors` and can be exposed.
@@ -454,7 +445,7 @@ The current proposal requires developers to manually create getters/setters that
 - Familiar pattern.
 
 **Cons:**
-- Significant boilerplate for each property.
+- Boilerplate for each property the author wants to expose.
 - For future behaviors like `HTMLInputBehavior`, not exposing `value` means external code can't read or set the input's data without the developer writing boilerplate getters and setters.
 
 #### Option B: Automatic property exposure
@@ -485,6 +476,14 @@ btn.formAction = '/save';
 - Less control over the public API surface.
 - Authors can't easily add validation or side effects to setters.
 - May feel "magical" compared to explicit delegation.
+- Unclear behavior when a behavior is removed. If `formAction` was automatically exposed when `HTMLSubmitButtonBehavior` was attached, what happens to that property after the behavior is removed? Does it remain on the element with a stale value, or is it removed?
+
+```javascript
+const btn = document.createElement('custom-submit');
+btn.formAction = '/save';
+btn.removeBehavior();
+btn.formAction;  // Is it still there?
+```
 
 #### Option C: Opt-in automatic exposure
 
@@ -511,13 +510,13 @@ this.attachInternals({
 
 #### Why this matters
 
-Future behaviors would likely require developers to expose certain properties for the element to be useful to consumers. Without developer-written delegation, external code (including forms and scripts) can't access these properties:
+Future behaviors would likely require developers to expose certain properties for the element to be useful to consumers. Without developer-written delegation, external JavaScript code can't access these properties:
 
 | Behavior | Key property | Impact if not exposed |
 |----------|------------------|------|
-| `HTMLCheckboxBehavior` | `checked` | The behavior toggles internal state on click, but external code can't read or set it. |
-| `HTMLInputBehavior` | `value` | Forms can't read the input's data, and scripts can't populate it. |
-| `HTMLRadioGroupBehavior` | `checked` | Mutual exclusion happens internally, but external code can't query which radio is selected. |
+| `HTMLCheckboxBehavior` | `checked` | The behavior toggles internal state on click, but external scripts can't read or set it. |
+| `HTMLInputBehavior` | `value` | External scripts can't programmatically read the input's data or populate it. (Form submission would still work via `setFormValue()`.) |
+| `HTMLRadioGroupBehavior` | `checked` | Mutual exclusion happens internally, but external scripts can't query which radio is selected. |
 
 If `HTMLSubmitButtonBehavior` uses manual delegation but `HTMLCheckboxBehavior` uses automatic exposure, we'd have an inconsistent API surface. This argues for deciding on a consistent approach across all behaviors from the start.
 
