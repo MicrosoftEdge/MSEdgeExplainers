@@ -186,13 +186,15 @@ Embedding scenarios follow the [Document Policy](https://wicg.github.io/document
 
 ### Cross-origin resource exposure
 
-When enabled, Network Efficiency Guardrails applies to all network resources loaded by the document, including cross‑origin subresources. As a result, the policy may surface information about cross‑origin resources that was not previously available in structured form to the embedding document. This exposure is a deliberate trade‑off to enable diagnosability of network inefficiencies with real performance impact.
+When enabled, Network Efficiency Guardrails applies to all network resources loaded by the document, including cross‑origin subresources. As a result, the policy may surface information about cross‑origin resources in a structured form. This exposure is a deliberate trade‑off to enable diagnosability of network inefficiencies with real performance impact.
 
-Specifically, violation reports may expose the URL of a violating resource together with a categorical classification derived from qualitative or quantitative resource properties, such as:
+Specifically, violation reports may expose the **full URL** of a violating resource together with a categorical classification derived from qualitative or quantitative resource properties, such as:
 
 - Use of HTTP compression
 - Use of compressed file formats
 - Size-based thresholds (including images and fonts)
+
+The full URL may include user‑provided components (for example, path segments or query parameters) supplied by the embedding document or the resource initiator. However, this information is not fundamentally new: documents can already observe resource URLs through existing mechanisms such as script‑level instrumentation (for example, monkey‑patching fetch or element constructors) and Service Workers, which are able to intercept and inspect requests initiated by controlled documents, including cross‑origin subresource requests.
 
 The exposed signal is intentionally coarse and non‑parametric. Reports identify that a browser‑defined threshold has been exceeded, but do not disclose exact resource sizes or other fine‑grained measurements. Threshold values are defined by the policy and are not attacker‑controlled, limiting the usefulness of the signal for probing or fingerprinting.
 
