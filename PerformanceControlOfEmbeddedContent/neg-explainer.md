@@ -74,7 +74,7 @@ Embedding scenarios are a primary motivation for this work, as inefficient netwo
 
 ## Proposed API: `network-efficiency-guardrails`
 
-This proposal introduces a [configuration point](https://wicg.github.io/document-policy#configuration-point) in [Document Policy](https://wicg.github.io/document-policy/) `network-efficiency-guardrails`, that allows a document to opt into User Agent monitoring of network resource usage patterns with real performance impact.
+This proposal introduces a [Document Policy](https://wicg.github.io/document-policy/) [configuration point](https://wicg.github.io/document-policy#configuration-point) of boolean type (default value `false`) with the name `network-efficiency-guardrails`, which allows a document to opt into User Agent monitoring of network resource usage patterns with real performance impact.
 
 When the policy is active, the User Agent monitors network resource requests initiated by the document that result in actual network transfer, and identifies inefficient usage according to a set of scenario‑agnostic criteria. These criteria are intended to be hardware‑agnostic, independent of transient network conditions, and stable enough to support consistent interpretation across implementations.
 
