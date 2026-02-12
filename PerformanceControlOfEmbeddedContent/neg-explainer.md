@@ -140,7 +140,7 @@ DocumentPolicyViolationReportBody {
 }
 ```
 
-Where `resource-url` represents the URL of the network resource that triggered the violation, and `description` is a human-redable description of the violated criterion.
+Where `resource-url` represents the URL of the network resource that triggered the violation (or the containing resource for `data:` URLs), and `description` is a human-redable description of the violated criterion. The structure of this report type is [defined by Document Policy](https://wicg.github.io/document-policy/#is-value-compatible-or-report) ([related issue](https://github.com/w3c/reporting/issues/216)), with `disposition` being "enforce" or "report", according to Document Policy definitions.
 
 As with other Document Policy features, `network-efficiency-guardrails` may be deployed in reporting‑only mode, allowing sites to observe violations and evaluate the policy's impact before opting into enforcement.
 
