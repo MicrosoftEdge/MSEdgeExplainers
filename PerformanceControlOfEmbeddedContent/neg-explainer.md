@@ -41,6 +41,7 @@ This allows applications to become aware of inefficient network behavior which i
     - [Threshold design considerations](#threshold-design-considerations)
     - [Violation reporting](#violation-reporting)
     - [Policy enforcement](#policy-enforcement)
+    - [Future considerations: cross-document reporting](#future-considerations-cross-document-reporting)
   - [Alternatives considered](#alternatives-considered)
     - [Relying on existing performance measurement APIs](#relying-on-existing-performance-measurement-apis)
     - [Custom attributes and headers](#custom-attributes-and-headers)
@@ -58,9 +59,7 @@ Inefficient network resource usage --such as loading large, uncompressed assets-
 
 Network Efficiency Guardrails addresses this gap by defining a policy that makes inefficient network behavior observable to the User Agent as it occurs. The policy serves as a mechanism for the User Agent to identify and surface conditions with real performance impact as a well‑defined signal. By integrating with the [Reporting API](https://www.w3.org/TR/reporting-1/), it enables documents to become aware of these conditions and supports tooling and reporting workflows --present and future-- to respond in a consistent and extensible way.
 
-Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. Expanding the visibility of reports created by this policy across document boundaries would further amplify the value of this signal in the direction established in [Performance Control of Embedded Content](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceControlOfEmbeddedContent/explainer.md).
-
-However, such cross‑document reporting mechanisms are out of scope for this proposal. Network Efficiency Guardrails relies on Document Policy's integration with the Reporting API, which currently defines reporting at the document level and does not provide a standardized mechanism for propagating reports across document boundaries. Proposing or standardizing cross‑document reporting would therefore require changes within the Reporting API itself and is more appropriately addressed in that context, which remains a future goal.
+Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. While expanding the visibility of reports across document boundaries would further amplify the value of this signal in the direction established by [Performance Control of Embedded Content](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceControlOfEmbeddedContent/explainer.md), cross‑document reporting mechanisms are out of scope for this proposal since reporting is defined by the Document Policy mechanism itself. This topic is discussed in [Future considerations: cross‑document reporting](#future-considerations-cross-document-reporting).
 
 ## Goals
 
@@ -150,6 +149,14 @@ As with other Document Policy features, `network-efficiency-guardrails` may be d
 When enforcement is enabled for `network-efficiency-guardrails`, resource requests that violate the policy criteria are blocked by the User Agent, and the corresponding assets are not rendered.
 
 Enforcement builds on the same violation detection and reporting model described above. For this reason, it is expected that sites would deploy the policy in reporting‑only mode first, using the resulting reports to evaluate impact before enabling enforcement.
+
+### Future considerations: cross-document reporting
+
+While we believe the proposed policy is useful and complete as defined in this document, enabling controlled reporting across document boundaries would further amplify the value of this signal in embedded scenarios. In many real‑world cases, inefficient resource usage originates in a nested document, while the resulting performance impact is primarily experienced by the embedding document. Allowing embedders to receive policy violation information would enable more effective diagnosis and remediation of such issues.
+
+One possible approach is to introduce cross‑document reporting negotiation as part of Document Policy itself. Under such a model, an embedding document could request cross‑document reporting via an explicit opt‑in signal (for example, a `Require-Document-Policy-Reporting` header), with embedded documents allowed to agree and provide full reports or decline and instead expose a reduced signal, similar to opaque responses or restricted timing properties in ResourceTiming API.
+
+This negotiation would need to be generically defined by Document Policy as an infrastructure capability, rather than by individual policies. Cross‑document reporting is therefore not specified as part of this proposal, but remains a future goal.
 
 ## Alternatives considered
 
