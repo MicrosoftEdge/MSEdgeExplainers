@@ -18,7 +18,7 @@
 
 The current `Range` interface methods do not support retrieving or creating ranges that represent the `value` (rather than the element itself) of `<textarea>` and `<input>` elements. As a result, if web developers want to use the `getBoundingClientRect()` method in a `<textarea>` or `<input>` element to position a popup beneath the user's current caret for delivering contextual autocomplete suggestions or marking syntax errors as users type using the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API), they must find workarounds. These workarounds often involve cloning these elements and their styles into `<div>`s, which is both difficult to maintain and may impact the web application's performance.
 
-This proposal aims to address these issues by introducing `OpaqueRange`, a new `AbstractRange` subclass that references spans of encapsulated content within host-defined elements (such as `<textarea>` and `<input>` in HTML). `OpaqueRange` has real start and end containers internally, but the `startContainer` and `endContainer` getters return `null` (via an "is opaque" flag on `AbstractRange`), ensuring that the internal DOM structure is never exposed. Authors interact with the range only through offsets into the element's value.
+This proposal aims to address these issues by introducing `OpaqueRange`, a new `AbstractRange` subclass that references spans of encapsulated content within elements whose internal structures are not exposed to authors, like `<textarea>` and `<input>`. `OpaqueRange` has real start and end containers internally, but the `startContainer` and `endContainer` getters return `null`, ensuring that the internal DOM structure is never exposed. Authors interact with the range only through offsets into the element's value.
 
 ## User-Facing Problem
 
@@ -227,7 +227,7 @@ nameField.addEventListener('input', (e) => {
 
 ### Goal
 
-Provide a way for web developers to obtain ranges over the value of `<textarea>` and `<input>` elements, enabling operations like `getBoundingClientRect()` and custom highlights, without exposing the elements' internal DOM structure.
+Provide a way for web developers to obtain ranges over the value of `<textarea>` and `<input>` elements, enabling operations like `getBoundingClientRect()` and setting custom highlights, without exposing the elements' internal DOM structure.
 
 ### Non-goals
 
@@ -237,21 +237,21 @@ Provide a way for web developers to obtain ranges over the value of `<textarea>`
 
 ## Proposed Approach
 
-The `OpaqueRange` interface extends `AbstractRange` and provides a controlled way for host specifications to reference encapsulated content within elements they define (such as the text value of `<textarea>`, text supporting `<input>`, or content within custom elements in the future). Host specifications are responsible for creating and updating `OpaqueRange` instances — web authors obtain them through host APIs such as `getValueRange()` on text controls.
+The `OpaqueRange` interface extends `AbstractRange` and provides a controlled way to reference encapsulated content within elements whose internal structures are not exposed to authors (such as the text value of `<textarea>`, text supporting `<input>`, or [content within custom elements in the future](#extending-to-custom-elements)). `OpaqueRange` instances are created and updated internally — web authors obtain them through APIs such as `getValueRange()` on text controls.
 
-Unlike `StaticRange`, `OpaqueRange` is **live** — it tracks changes to the underlying content and automatically updates its start and end offsets, similar to how a regular `Range` tracks DOM mutations. This ensures that operations like `getBoundingClientRect()` or `getClientRects()` always reflect the current content, even after edits. See the [Supports Opaque Ranges](#supports-opaque-ranges) section for how host specifications define the update behavior.
+Unlike `StaticRange`, `OpaqueRange` is **live** — it tracks changes to the underlying content and automatically updates its start and end offsets, similar to how a regular `Range` tracks DOM mutations. This ensures that operations like `getBoundingClientRect()` or `getClientRects()` always reflect the current content, even after edits. See the [Supports Opaque Ranges](#supports-opaque-ranges) section for how the update behavior is defined.
 
-`OpaqueRange` aligns conceptually with the `InputRange()` from [Keith Cirkel's Richer Text Fields proposal](https://open-ui.org/components/richer-text-fields.explainer/), which also proposed adding a new range subclass for `<input>` and `<textarea>` elements. `OpaqueRange` differs in that it extends `AbstractRange` (not `Range`) and is designed as a general-purpose, host-extensible API not limited to form controls.
+`OpaqueRange` aligns conceptually with the `InputRange()` from [Keith Cirkel's Richer Text Fields proposal](https://open-ui.org/components/richer-text-fields.explainer/), which also proposed adding a new range subclass for `<input>` and `<textarea>` elements. `OpaqueRange` differs in that it extends `AbstractRange` (not `Range`) and is designed as a general-purpose, extensible API not limited to form controls.
 
 ### Properties and Methods
 
 #### Properties
-`OpaqueRange` objects cannot be constructed directly; they are created by specifications defining elements that support opaque ranges. In HTML, they are obtained via `getValueRange()`.
+`OpaqueRange` objects cannot be constructed directly; they are created internally by elements that [support opaque ranges](#supports-opaque-ranges). In HTML, they are obtained via `getValueRange()`.
 
 `OpaqueRange` exposes useful endpoint information while maintaining encapsulation:
 - `startOffset` and `endOffset`: Non negative integers that index into the element's relevant value (for example, the value of a `<textarea>` in HTML), using the same UTF-16 code unit indices as `selectionStart`/`selectionEnd`. These offsets are updated automatically as the content changes.
 - `collapsed`: Returns whether `startOffset` equals `endOffset`.
-- `startContainer` and `endContainer`: Return `null`. Internally, `OpaqueRange` does store real start and end container nodes — set to the element's **opaque range internal container** when created — but these are hidden from authors because the `startContainer`/`endContainer` getters return null when the range's `is opaque` flag is true. This design ensures the internal DOM tree is never exposed while still enabling the browser to compute geometry.
+- `startContainer` and `endContainer`: Return `null`, ensuring the element's internal structure is never exposed to authors.
 
 #### Available Methods
 - `getClientRects()`: Returns a list of rectangles for the rendered portion of the range.
@@ -269,9 +269,9 @@ The following methods are not available on `OpaqueRange` in order to avoid expos
 - `cloneContents()`
 - `cloneRange()`
 
-`OpaqueRange` does not expose the underlying text directly (e.g. it does not provide a `toString()` method). Access to the text is only available through host APIs (e.g. `element.value`).
+`OpaqueRange` does not expose the underlying text directly (e.g. it does not provide a `toString()` method). Access to the text is only available through existing APIs (e.g. `element.value`).
 
-Additional methods can be later introduced progressively based on developer feedback and how host specifications use `OpaqueRange`.
+Additional methods can be later introduced progressively based on developer feedback and how `OpaqueRange` is used.
 
 `OpaqueRange` is a separate type from `Range`, but it extends `AbstractRange` and can therefore be passed to any API that accepts `AbstractRange`, such as the [Custom Highlight API](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Custom_Highlight_API).
 
@@ -293,7 +293,7 @@ textarea.addEventListener('input', (e) => {
     const text = textarea.value;
     // Check if the last character typed was @ for Use Case 1
     if (text[selectionStart - 1] === '@') {
-        // Obtain an OpaqueRange from the host API (e.g. getValueRange())
+        // Obtain an OpaqueRange (e.g. via getValueRange())
         const range = textarea.getValueRange(selectionStart, selectionStart);
         // Use the range to obtain the bounding client rect
         const rect = range.getBoundingClientRect();
@@ -308,7 +308,7 @@ textarea.addEventListener('input', (e) => {
     // Check if the last character typed was " " for Use Case 2
     if (text[selectionStart - 1] === ' ') {
         if(!dictionary.has(previousWord)){
-            // Obtain an OpaqueRange from the host API (e.g. getValueRange())
+            // Obtain an OpaqueRange (e.g. via getValueRange())
             const range = textarea.getValueRange(selectionStart-previousWord.length, selectionStart);
             // Add highlight
             highlight.add(range);
@@ -353,7 +353,7 @@ input.addEventListener('input', (e) => {
     
     // Show emoji picker when user types ':' for Use Case 1
     if (text[selectionStart - 1] === ':') {
-        // Obtain an OpaqueRange from the host API (e.g. getValueRange())
+        // Obtain an OpaqueRange (e.g. via getValueRange())
         const range = input.getValueRange(selectionStart, selectionStart);
         // Use the range to obtain the bounding client rect
         const rect = range.getBoundingClientRect();
@@ -368,7 +368,7 @@ input.addEventListener('input', (e) => {
     // Check if the last character typed was " " for Use Case 2
     if (text[selectionStart - 1] === ' ') {
         if(!dictionary.has(previousWord)){
-            // Obtain an OpaqueRange from the host API (e.g. getValueRange())
+            // Obtain an OpaqueRange (e.g. via getValueRange())
             const range = input.getValueRange(selectionStart-previousWord.length, selectionStart);
             // Add highlight
             highlight.add(range);
@@ -385,15 +385,15 @@ input.addEventListener('input', (e) => {
 
 ### Supports Opaque Ranges
 
-An `Element` supports opaque ranges if its specification defines that it does. The following HTML elements currently support opaque ranges:
+An `Element` supports opaque ranges if the standard defining it specifies that it does. The following HTML elements currently support opaque ranges:
 - `<textarea>`
 - `<input>` with type: `text`, `search`, `tel`, `url`, or `password`
 
 Each element that supports opaque ranges has:
-- An **opaque range internal container** — the internal node representing the element's relevant value text.
+- An **opaque range internal container** — an implementation-defined representation of the element's relevant value text.
 - A **set of associated OpaqueRanges** — a set of `OpaqueRange` objects, initially empty.
 
-When an element is removed from the document, its set of associated OpaqueRanges is cleared. When an `<input>` element's type changes from a selectable type to a non-selectable type, all associated OpaqueRanges have their `startOffset` and `endOffset` set to 0.
+When an element is removed from the document or an `<input>` element's type changes from a selectable type to a non-selectable type, all associated OpaqueRanges have their `startOffset` and `endOffset` set to 0 and the element's set of associated OpaqueRanges is cleared.
 
 When the underlying content changes, the browser automatically adjusts the offsets of all associated OpaqueRanges. For incremental edits (such as user typing or `setRangeText()`), offsets shift to reflect inserted or deleted characters. For wholesale value changes (such as setting the `value` property or changing the `type` attribute), offsets are reset.
 
@@ -524,7 +524,7 @@ However, this design had two limitations:
 2. **Limited extensibility**  
    Because the design encoded form-control-specific concepts into the API surface, extending it to additional environments would have required redefining or duplicating similar ideas elsewhere.
 
-`OpaqueRange` resolves these issues by providing a host-extensible abstraction. Host specifications (such as HTML) define which elements [support opaque ranges](#supports-opaque-ranges), create or update `OpaqueRange` instances accordingly, and specify the internal container nodes used — without the interface being tied to form controls or their internal mechanisms.
+`OpaqueRange` resolves these issues by providing an extensible abstraction. The HTML standard defines which elements [support opaque ranges](#supports-opaque-ranges), creates or updates `OpaqueRange` instances accordingly, and specifies the internal container nodes used — without the interface being tied to form controls or their internal mechanisms.
 
 ## Other Considerations
 
@@ -553,7 +553,7 @@ The resulting `AbstractRange` inheritance structure would look like this:
 ![abstractrange-family](abstractrange-family.jpg)
 
 ### Extending to Custom Elements
-It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment-3113360213) (see also [TPAC 2025 minutes](https://www.w3.org/2025/11/11-whatwg-minutes.html)) that custom elements and other host specifications could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure.
+It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment-3113360213) (see also [TPAC 2025 minutes](https://www.w3.org/2025/11/11-whatwg-minutes.html)) that custom elements and other standards could also use this API to expose encapsulated ranges, enabling richer editing or selection behaviors while maintaining internal structure.
 
 ### Relationship to CSS Anchor Positioning
 As noted in the [W3C TAG early design review](https://github.com/w3ctag/design-reviews/issues/1142), some of the positioning use cases addressed by `OpaqueRange` (such as anchoring popups or highlights to caret positions) could also be explored declaratively through future extensions to [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position/).
