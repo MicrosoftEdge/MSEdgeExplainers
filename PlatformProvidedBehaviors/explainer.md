@@ -856,15 +856,13 @@ const HTMLDialogBehavior =
 
 Although the polyfill above can't fully replicate a native `<dialog>` element (no true top layer, no `::backdrop`, no `:modal`), it provides a reasonable approximation.
 
-#### Considerations for User-Defined Behaviors
+#### Considerations for user-defined behaviors
 
-- **Lifecycle hooks**: `onAttached(internals)`, `onDetached()`, `onAttributeChanged(name, oldVal, newVal)`
-- **Base class**: `Behavior` provides utilities like `setDefaultRole()`, `setFocusable()`, `invalidatePseudoClass()`, and access to `this.element`
-- **Conflict resolution**: User-defined behaviors follow the same order-based resolution as platform behaviors
-- **Interop**: User behaviors can compose with platform behaviors
-- **Registration**: `Behavior.define(name, BehaviorClass)` registers for named access via `internals.behaviors.<name>`
-
-The initial ship does not need to include user-defined behaviors, but the design should accommodate them. This ensures the API shape is correct and developers can reason about platform behaviors as "behaviors they could have written."
+- Lifecycle hooks: `onAttached(internals)`, `onDetached()`, `onAttributeChanged(name, oldVal, newVal)`
+- `PlatformBehavior` would need to provide utilities like `setDefaultRole()`, `setFocusable()`, `invalidatePseudoClass()`, and access to `this.element`.
+- User behaviors can compose with platform-provided behaviors
+- The same conflict resolution strategies that apply to platform behaviors would need to work with user-defined behaviors.
+- How would custom behaviors be defined and registered? `Behavior.define(name, BehaviorClass)` registers for named access via `internals.behaviors.<name>`?
 
 ### Behaviors in Native HTML Elements
 
