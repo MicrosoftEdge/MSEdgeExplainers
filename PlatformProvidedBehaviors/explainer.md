@@ -747,7 +747,9 @@ class TooltipBehavior extends PlatformBehavior {
   }
 
   #show = () => {
-    if (!this.#content) return;
+    if (!this.#content) {
+      return;
+    }
     this.#tooltipElement = document.createElement('div');
     this.#tooltipElement.className = 'tooltip';
     this.#tooltipElement.textContent = this.#content;
@@ -761,8 +763,12 @@ class TooltipBehavior extends PlatformBehavior {
     this.#tooltipElement = null;
   };
 
-  get content() { return this.#content; }
-  set content(val) { this.#content = val; }
+  get content() {
+    return this.#content;
+  }
+  set content(val) {
+    this.#content = val;
+  }
 }
 // Registration
 PlatformBehavior.define('tooltip', TooltipBehavior);
@@ -825,8 +831,12 @@ class HTMLDialogBehaviorPolyfill extends PlatformBehavior {
   }
 
   close(returnValue) {
-    if (!this.#open) return;
-    if (returnValue !== undefined) this.#returnValue = returnValue;
+    if (!this.#open) {
+      return;
+    }
+    if (returnValue !== undefined) {
+      this.#returnValue = returnValue;
+    }
     this.#open = false;
     this.element.removeAttribute('open');
     this.#previouslyFocused?.focus();
@@ -837,15 +847,23 @@ class HTMLDialogBehaviorPolyfill extends PlatformBehavior {
     if (e.key === 'Escape' && this.#open) {
       const cancelEvent = new Event('cancel', { cancelable: true });
       this.element.dispatchEvent(cancelEvent);
-      if (!cancelEvent.defaultPrevented) this.close();
+      if (!cancelEvent.defaultPrevented) {
+        this.close();
+      }
     }
   };
 
   // Implementation of focus trapping, backdrop click handling, etc.
 
-  get open() { return this.#open; }
-  get returnValue() { return this.#returnValue; }
-  set returnValue(val) { this.#returnValue = val; }
+  get open() {
+    return this.#open;
+  }
+  get returnValue() {
+    return this.#returnValue;
+  }
+  set returnValue(val) {
+    this.#returnValue = val;
+  }
 }
 PlatformBehavior.define('dialog', HTMLDialogBehaviorPolyfill);
 
