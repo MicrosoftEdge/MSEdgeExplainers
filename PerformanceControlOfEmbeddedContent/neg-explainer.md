@@ -59,7 +59,7 @@ Inefficient network resource usage (such as loading large, uncompressed assets) 
 
 Network Efficiency Guardrails addresses this gap by defining a policy that makes inefficient network behavior observable to the User Agent as it occurs. The policy serves as a mechanism for the User Agent to identify and surface conditions with real performance impact as a well‑defined signal. By integrating with the [Reporting API](https://www.w3.org/TR/reporting-1/), it enables documents to become aware of these conditions and supports tooling and reporting workflows (present and future) to respond in a consistent and extensible way.
 
-Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. While expanding the visibility of reports across document boundaries would further amplify the value of this signal in the direction established by [Performance Control of Embedded Content](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceControlOfEmbeddedContent/explainer.md), cross‑document reporting mechanisms are out of scope for this proposal since reporting is defined by the Document Policy mechanism itself. This topic is discussed in [Future considerations: cross‑document reporting](#future-considerations-cross-document-reporting).
+Embedding scenarios are a primary motivation for this work, as inefficient network usage within cross‑origin embedded content is especially difficult for hosting documents to observe or attribute. While expanding the visibility of reports across document boundaries would further amplify the value of this signal in the direction established by [Performance Control of Embedded Content](PerformanceControlOfEmbeddedContent/explainer.md), cross‑document reporting mechanisms are out of scope for this proposal since reporting is defined by the Document Policy mechanism itself. This topic is discussed in [Future considerations: cross‑document reporting](#future-considerations-cross-document-reporting).
 
 ## Goals
 
@@ -217,7 +217,7 @@ Further mitigation strategies may be considered, such as gating reports on expli
 
 ## References & acknowledgements
 
-This proposal builds on [Performance Control of Embedded Content](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PerformanceControlOfEmbeddedContent/explainer.md), which explored performance constraints and observability for web content. Its evolution has been informed by discussion in the W3C Web Performance Working Group, as well as prior work including:
+This proposal builds on [Performance Control of Embedded Content](PerformanceControlOfEmbeddedContent/explainer.md), which explored performance constraints and observability for web content. Its evolution has been informed by discussion in the W3C Web Performance Working Group, as well as prior work including:
 
 * [Never-Slow Mode](https://github.com/slightlyoff/never_slow_mode?tab=readme-ov-file)
 * [Document Policy](https://github.com/WICG/document-policy/blob/main/document-policy-explainer.md)
