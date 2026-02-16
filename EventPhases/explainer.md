@@ -187,7 +187,7 @@ foo.addEventListener(
 Syntax of the scheduling integration is TBD (e.g., should there be explicit `scheduler.postForRead()` and `scheduler.postForWrite()` API instead?). We could also imagine the event carrying scheduling methods for brevity:
 
 ```js
-foo.when("click", 
+foo.addEventListener("click", 
   (evt) => {
     // ...
     evt.on("write", () => { /* ... */ });
