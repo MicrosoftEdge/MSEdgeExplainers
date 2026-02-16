@@ -26,7 +26,7 @@
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
 - [Testing](#testing)
 - [Appendix](#appendix)
-  - [Appendix 1: ClickFix and Clipboard-Based Attacks](#appendix-2-clickfix-and-clipboard-based-attacks)
+  - [Appendix 1: ClickFix and Clipboard-Based Attacks](#appendix-1-clickfix-and-clipboard-based-attacks)
 
 ## Introduction
 
@@ -176,7 +176,7 @@ An enterprise DLP system monitors the clipboard to prevent sensitive data from b
 
 While web developers cannot read `text/source-url` directly, native companion applications (e.g., a desktop note-taking app) could use it to automatically attribute pasted content to its source page — improving content provenance and citation workflows.
 
-## Alternative Considered
+## Alternatives Considered
 
 ### Do Nothing (Status Quo)
 
