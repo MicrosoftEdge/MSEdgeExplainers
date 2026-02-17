@@ -37,7 +37,7 @@
 
 ## Introduction
 
-This proposal introduces selective clipboard format reading, an enhancement to the [Asynchronous Clipboard Read](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that enables web applications to read only the clipboard formats they need, making reads more efficient by avoiding retrieval of unnecessary data.
+This proposal introduces selective clipboard format reading, an enhancement to the [Asynchronous Clipboard Read](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that enables web applications to read only the clipboard formats they need, making reads more efficient by avoiding retrieval of unnecessary data, resulting in performance gains and reduced memory footprint.
 
 The current implementation of [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) copies all available clipboard formats from the operating system's clipboard into the browser's memory, regardless of what the web application needs.
 
@@ -183,7 +183,7 @@ const html = await item.getType('text/html');
 
 This approach defers clipboard data retrieval from the OS until the web app explicitly calls [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype). In this model, [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) returns [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) objects listing available MIME types, but without the data. The browser fetches the requested data only when [getType(mimeType)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) is called, and caches it to avoid repeated clipboard accesses for the same type. 
 
-If the clipboard contents change between the call to [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and a subsequent call to [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype), the promise will be rejected.
+If the clipboard contents change between the call to [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and a subsequent call to [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype), the promise will be rejected with an appropriate DOMException (e.g., `NotSupportedError`).
 
 **Example: Reading formats selectively**
 ```js
