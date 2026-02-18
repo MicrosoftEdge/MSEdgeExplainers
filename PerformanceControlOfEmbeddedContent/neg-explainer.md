@@ -80,13 +80,13 @@ When the policy is active, the User Agent monitors network resource requests ini
 
 Specifically, the User Agent flags the following conditions as policy violations:
 
-1. **Text-based resources served without HTTP compression**
+1. **Text-based resources served without HTTP compression.**
   Text‑based resources such as HTML, CSS, JavaScript, and JSON are expected to be delivered using HTTP‑based compression.
 
-2. **Uncompressed file formats when compressed alternatives are available**
+2. **Uncompressed file formats when compressed alternatives are available.**
   Non‑text resources are expected to use compressed formats when such formats are supported and available. For example, using `.ttf` fonts instead of `.woff`.
 
-3. **Resources with excesive total size**
+3. **Resources with excesive total size.**
   To limit disproportionate network cost, size thresholds apply to the following resources and non‑network resource embeddings:
 
     * data: URLs larger than 100 kB
