@@ -41,6 +41,7 @@ This allows applications to become aware of inefficient network behavior which i
     - [Threshold design considerations](#threshold-design-considerations)
     - [Violation reporting](#violation-reporting)
     - [Policy enforcement](#policy-enforcement)
+    - [Open questions](#open-questions)
     - [Future considerations: cross-document reporting](#future-considerations-cross-document-reporting)
   - [Alternatives considered](#alternatives-considered)
     - [Relying on existing performance measurement APIs](#relying-on-existing-performance-measurement-apis)
