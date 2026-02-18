@@ -53,8 +53,6 @@ This proposal explores two approaches to enable selective clipboard reading:
   const text = await items[0].getType('text/plain'); // Only 'text/plain' data fetched here
   ```
 
-Both approaches aim to help browsers avoid copying unnecessary data from the OS clipboard, saving CPU cycles, improving perceived responsiveness, and optimizing power usage.
-
 ## User Problem
 
 Web applications that support rich content editing, such as document editors, email clients, and data grids, routinely deal with multiple types of clipboard payloads, including large HTML fragments, images, and custom MIME types. These apps often implement features like “Paste as plain text” or “Paste with formatting,” where only a subset of the clipboard data is needed.
@@ -75,15 +73,13 @@ The impact is especially pronounced in large-scale web applications, such as onl
 
 ## Approach 1: API signature change with `types` parameter
 
-This approach proposes API signature changes to the [clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that allow web authors to specify the MIME types they intend to read. The browser will selectively read only the requested formats, instead of reading all available data formats as is currently done.
-
-This approach proposes to rename the optional argument [`ClipboardUnsanitizedFormats`](https://www.w3.org/TR/clipboard-apis/#dictdef-clipboardunsanitizedformats) of [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API to `ClipboardReadOptions` and extend this object to include a new `types` property which is a list of MIME types to be retrieved.
+This approach proposes API signature changes to the [clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that allow web authors to specify the MIME types they intend to read, and to rename the optional argument [`ClipboardUnsanitizedFormats`](https://www.w3.org/TR/clipboard-apis/#dictdef-clipboardunsanitizedformats) to `ClipboardReadOptions` and extend it with a new `types` property—a list of MIME types to retrieve. The browser will selectively read only the requested formats.
 
 Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) will continue to behave as before when `types` is `undefined`, receiving all available clipboard formats.
 
 If a MIME type is provided in [`unsanitized`](https://www.w3.org/TR/clipboard-apis/#dom-clipboardunsanitizedformats-unsanitized) but not requested in `types`, the clipboard content for the provided type will not be read from the OS clipboard and hence will be unavailable in the clipboard read response.
 
-**Example: Selective reading of requested MIME types**
+**Example:**
 ```js
 // Scenario: OS clipboard contains 'text/plain' and 'text/html' data
 const items = await navigator.clipboard.read({
@@ -91,41 +87,10 @@ const items = await navigator.clipboard.read({
 });
 
 const item = items[0];
-const availableTypes = item.types; // ['text/plain']. Note: Only available requested types are present.
+const availableTypes = item.types; // ['text/plain']. Only requested types that are available.
 
 const plainTextBlob = await item.getType('text/plain');
 const text = await plainTextBlob.text();
-```
-
-**Example: Reading unsanitized HTML**
-```js
-// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
-const items = await navigator.clipboard.read({
-  types: ['text/html'],
-  unsanitized: ['text/html']
-});
-
-const item = items[0];
-const availableTypes = item.types; // ['text/html']
-
-const unsanitizedHtml = await item.getType('text/html');
-```
-
-**Example: When types is undefined or empty**
-```js
-// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
-
-// Example 1: Default behavior with no types
-const items1 = await navigator.clipboard.read(); // or navigator.clipboard.read({types: undefined});
-const item1 = items1[0];
-const availableTypes1 = item1.types; // ['text/plain', 'text/html']
-
-// Example 2: Behavior with empty types
-const items2 = await navigator.clipboard.read({
-  types: []
-});
-const item2 = items2[0];
-const availableTypes2 = item2.types; // []
 ```
 
 ### Proposed IDL
@@ -143,32 +108,9 @@ dictionary ClipboardReadOptions {
 
 ### Boundary Scenarios
 
-- The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-types) property of ClipboardItem will return only the intersection of the requested types and the types available in the system clipboard. If a particular type is requested in the input but not present in the platform clipboard or is invalid, then the [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-types) value won’t include that format, and any call to [getType(type)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) for that format will result in a rejected promise with error message "The type was not found". This way, a web author can verify if a requested type is present in the platform clipboard.
+- The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-types) property of ClipboardItem returns only the intersection of requested types and types available in the system clipboard. If a requested type is not present or invalid, [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) will reject with "The type was not found".
 - If multiple instances of the same format are provided in the request, the duplicates will be ignored and only one instance will be considered during processing.
-
-```js
-// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
-const items = await navigator.clipboard.read({
-  types: ['text/plain', 'text/javascript', 'text/plain'],
-  unsanitized: ['text/html']
-});
-
-const item = items[0];
-
-// Only returns types that were both requested AND available on clipboard
-const availableTypes = item.types; // ['text/plain']
-
-// ✅ Resolves successfully
-const plainText = await item.getType('text/plain');
-
-// ❌ Throws error: The type was not found
-//  Type is requested in the types filter but it is invalid  
-const jsText = await item.getType('text/javascript');
-
-// ❌ Throws error: The type was not found
-// Type is valid and available in OS clipboard but not requested in the types filter
-const html = await item.getType('text/html');
-```
+- If `types` is `undefined`, all available formats are returned (current behavior). If `types` is an empty array, no formats are returned.
 
 ### Pros
 - This approach is backward compatible.
