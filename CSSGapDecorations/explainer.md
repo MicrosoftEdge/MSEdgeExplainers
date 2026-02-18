@@ -218,8 +218,8 @@ default; changing this behavior is covered in a later section of this document.
 
 Authors may adjust the positions of endpoints relative to gap intersections,
 either as a fixed distance or as a percentage of the width of the intersection.
-The "zero point" is the edge of the intersection, with positive values extending
-into the intersection and negative values receding from it.
+The "zero point" is the edge of the intersection, with negative values extending
+into the intersection and positive values receding from it.
 
 ```css
 .inset-0px {
@@ -230,14 +230,14 @@ into the intersection and negative values receding from it.
 
 ```css
 .inset-5px {
-  column-rule-inset: 5px;
+  column-rule-inset: -5px;
 }
 ```
 <image src="images/example-column-inset-5px.png">
 
 ```css
 .inset-negative-5px {
-  column-rule-inset: -5px;
+  column-rule-inset: 5px;
 }
 ```
 <image src="images/example-column-inset-minus-5px.png">
