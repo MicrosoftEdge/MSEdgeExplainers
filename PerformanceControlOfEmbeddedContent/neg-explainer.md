@@ -158,7 +158,7 @@ As the proposal evolves through incubation, there are several related areas that
 **Compression eligibility for additional resource types**
 The current criteria distinguish between text‑based resources, which are required to be served with HTTP compression, and non‑text resources, which are subject to size‑based limits but are not required to be compressed. Some binary formats, such as WebAssembly modules, are commonly served in compressed form and can incur significant network cost when uncompressed.
 
-Whether additional compressible binary resource types should be subject to compression requirements, size‑based limits, or a combination of both is an open question for further discussion. Because the policy may block resources when enforcement is enabled, any such criteria would need to be defined explicitly: either as part of the existing policy configuration, under a separate configuration point, or through parameters on Document Policy.
+Whether additional compressible binary resource types should be subject to compression requirements, size‑based limits, or a combination of both is an open question for further discussion. Because the policy may block resources when enforcement is enabled, any such criteria would need to be defined explicitly: either as part of the existing policy configuration, under a separate configuration point, or through [parameters on Document Policy](https://wicg.github.io/document-policy/#issue-91264ad1).
 
 
 **Handling of very small text resources**
