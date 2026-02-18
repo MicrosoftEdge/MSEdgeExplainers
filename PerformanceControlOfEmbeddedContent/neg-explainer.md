@@ -156,10 +156,13 @@ Enforcement builds on the same violation detection and reporting model described
 As the proposal evolves through incubation, there are several related areas that may warrant further discussion and refinement.
 
 **Compression eligibility for additional resource types**
-The current criteria distinguish between text‑based resources, which are required to be served with HTTP compression, and non‑text resources, which are subject to size‑based limits but are not required to be compressed. Some binary formats, such as WebAssembly modules, are commonly served in compressed form and can incur significant network cost when uncompressed. Whether additional compressible binary resource types should be subject to compression requirements, size‑based limits, or a combination of both is an open question for further discussion.
+The current criteria distinguish between text‑based resources, which are required to be served with HTTP compression, and non‑text resources, which are subject to size‑based limits but are not required to be compressed. Some binary formats, such as WebAssembly modules, are commonly served in compressed form and can incur significant network cost when uncompressed.
+
+Whether additional compressible binary resource types should be subject to compression requirements, size‑based limits, or a combination of both is an open question for further discussion. Because the policy may block resources when enforcement is enabled, any such criteria would need to be defined explicitly: either as part of the existing policy configuration, under a separate configuration point, or through parameters on Document Policy.
+
 
 **Handling of very small text resources**
-For sufficiently small payloads, the overhead of applying HTTP compression may outweigh its benefits, depending on the compression algorithm and transport. Allowing exceptions or lower bounds for compression requirements on very small resources is a potential refinement. However, introducing such exceptions raises questions around threshold selection, consistency across implementations, and interoperability, which would need to be considered during incubation.
+For sufficiently small payloads, the overhead of applying HTTP compression may outweigh its benefits, depending on the compression algorithm and transport. Allowing exceptions or lower bounds for compression requirements on very small resources is a potential refinement. However, introducing such exceptions raises questions around threshold selection, which would need to be considered during incubation. For example, whether a single common threshold should apply across compression algorithms, or whether algorithm‑specific thresholds would be appropriate.
 
 ### Future considerations: cross-document reporting
 
