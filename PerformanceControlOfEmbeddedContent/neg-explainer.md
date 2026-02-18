@@ -150,6 +150,16 @@ When enforcement is enabled for `network-efficiency-guardrails`, resource reques
 
 Enforcement builds on the same violation detection and reporting model described above. For this reason, it is expected that sites would deploy the policy in reporting‑only mode first, using the resulting reports to evaluate impact before enabling enforcement.
 
+### Open questions
+
+As the proposal evolves through incubation, there are several related areas that may warrant further discussion and refinement.
+
+**Compression eligibility for additional resource types**
+The current criteria distinguish between text‑based resources, which are required to be served with HTTP compression, and non‑text resources, which are subject to size‑based limits but are not required to be compressed. Some binary formats, such as WebAssembly modules, are commonly served in compressed form and can incur significant network cost when uncompressed. Whether additional compressible binary resource types should be subject to compression requirements, size‑based limits, or a combination of both is an open question for further discussion.
+
+**Handling of very small text resources**
+For sufficiently small payloads, the overhead of applying HTTP compression may outweigh its benefits, depending on the compression algorithm and transport. Allowing exceptions or lower bounds for compression requirements on very small resources is a potential refinement. However, introducing such exceptions raises questions around threshold selection, consistency across implementations, and interoperability, which would need to be considered during incubation.
+
 ### Future considerations: cross-document reporting
 
 While we believe the proposed policy is useful and complete as defined in this document, enabling controlled reporting across document boundaries would further amplify the value of this signal in embedded scenarios. In many real‑world cases, inefficient resource usage originates in a nested document, while the resulting performance impact is primarily experienced by the embedding document. Allowing embedders to receive policy violation information would enable more effective diagnosis and remediation of such issues.
