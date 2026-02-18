@@ -42,10 +42,13 @@ content location of future work and discussions.
     - [Extending or shortening gap decoration segments](#extending-or-shortening-gap-decoration-segments)
     - [Interaction with spanning items](#interaction-with-spanning-items)
     - [Paint order](#paint-order)
+    - [Decorations next to empty areas](#decorations-next-to-empty-areas)
   - [Key scenarios](#key-scenarios)
     - [Scenario 1: Horizontal lines between CSS grid rows](#scenario-1-horizontal-lines-between-css-grid-rows)
     - [Scenario 2: Lines dividing items in both directions of a grid](#scenario-2-lines-dividing-items-in-both-directions-of-a-grid)
     - [Scenario 3: Segmented gap decorations](#scenario-3-segmented-gap-decorations)
+    - [Scenario 4: Grid layout with white space in leading columns](#scenario-4-grid-layout-with-white-space-in-leading-columns)
+    - [Scenario 5: Column decorations only between items](#scenario-5-column-decorations-only-between-items)
   - [Future ideas](#future-ideas)
     - [Images](#images)
     - [Corner joins](#corner-joins)
@@ -53,8 +56,6 @@ content location of future work and discussions.
     - [Placement of gap decorations](#placement-of-gap-decorations)
       - [Scenario: Calendar grid with header column](#scenario-calendar-grid-with-header-column)
       - [Scenario: Different lines for different gaps, applied to a sub-area of a grid](#scenario-different-lines-for-different-gaps-applied-to-a-sub-area-of-a-grid)
-      - [Scenario: Grid layout with white space in leading columns](#scenario-grid-layout-with-white-space-in-leading-columns)
-      - [Scenario: Column decorations only in specific gaps](#scenario-column-decorations-only-in-specific-gaps)
       - [Scenario: Periodic Table omitting decorations from certain areas](#scenario-periodic-table-omitting-decorations-from-certain-areas)
   - [Dropped ideas](#dropped-ideas)
     - [Logical properties for flex and masonry containers](#logical-properties-for-flex-and-masonry-containers)
@@ -296,6 +297,113 @@ rule-overlap: [ row-over-column | column-over-row ]
 ```
 <image src="images/example-column-over-row.png">
 
+### Decorations next to empty areas
+
+By default, gap decoration segments appear throughout a container.
+In some cases, authors may not want to paint segments next to empty areas.
+The `*-rule-visibility-items` properties allow control over this.
+
+```css
+.container {
+  display: grid;
+  grid-template: repeat(3, 100px) / repeat(3, 100px);
+  gap: 10px;
+  rule: 1px solid black;
+  rule-break: intersection;
+  rule-visibility-items: all; /* initial value */
+}
+.item {
+  background: lightgray;
+}
+```
+```html
+<div class="container">
+  <div class="item" style="grid-area: 1 / 1">Item 1</div>
+  <div class="item" style="grid-area: 2 / 1">Item 2</div>
+  <div class="item" style="grid-area: 2 / 2">Item 3</div>
+  <div class="item" style="grid-area: 3 / 1">Item 4</div>
+</div>
+```
+
+<image src="images/example-rule-visibility-items-all.png">
+
+```css
+.container {
+  display: grid;
+  grid-template: repeat(3, 100px) / repeat(3, 100px);
+  gap: 10px;
+  rule: 1px solid black;
+  rule-break: intersection;
+  rule-visibility-items: around;
+}
+.item {
+  background: lightgray;
+}
+```
+```html
+<div class="container">
+  <div class="item" style="grid-area: 1 / 1">Item 1</div>
+  <div class="item" style="grid-area: 2 / 1">Item 2</div>
+  <div class="item" style="grid-area: 2 / 2">Item 3</div>
+  <div class="item" style="grid-area: 3 / 1">Item 4</div>
+</div>
+```
+
+<image src="images/example-rule-visibility-items-around.png">
+
+```css
+.container {
+  display: grid;
+  grid-template: repeat(3, 100px) / repeat(3, 100px);
+  gap: 10px;
+  rule: 1px solid black;
+  rule-break: intersection;
+  rule-visibility-items: between;
+}
+.item {
+  background: lightgray;
+}
+```
+```html
+<div class="container">
+  <div class="item" style="grid-area: 1 / 1">Item 1</div>
+  <div class="item" style="grid-area: 2 / 1">Item 2</div>
+  <div class="item" style="grid-area: 2 / 2">Item 3</div>
+  <div class="item" style="grid-area: 3 / 1">Item 4</div>
+</div>
+```
+
+<image src="images/example-rule-visibility-items-between.png">
+
+Note that `rule-visibility-items` in the examples above is a shorthand
+for `column-rule-visibility-items` and `row-rule-visibility-items`,
+which can also be set independently:
+
+```css
+.container {
+  display: grid;
+  grid-template: repeat(3, 100px) / repeat(3, 100px);
+  gap: 10px;
+  rule: 1px solid black;
+  rule-break: intersection;
+  column-rule-visibility-items: around;
+  row-rule-visibility-items: between;
+}
+.item {
+  background: lightgray;
+}
+```
+```html
+<div class="container">
+  <div class="item" style="grid-area: 1 / 1">Item 1</div>
+  <div class="item" style="grid-area: 2 / 1">Item 2</div>
+  <div class="item" style="grid-area: 2 / 2">Item 3</div>
+  <div class="item" style="grid-area: 3 / 1">Item 4</div>
+</div>
+```
+
+<image src="images/example-rule-visibility-items-independent.png">
+
 ## Key scenarios
 
 ### Scenario 1: Horizontal lines between CSS grid rows
@@ -343,6 +451,42 @@ example
 
 <image
 src="images/csswg-drafts-issues-2748-issuecomment-446781218-last-example.png">
+
+### Scenario 4: Grid layout with white space in leading columns
+
+https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1099
+
+```css
+.layout {
+  display: grid;
+  grid-template-areas:
+    ". . content author"
+    ". . content social";
+  gap: 5px;
+  rule: 1px solid gray;
+  rule-visibility-items: around;
+  border-top: 1px solid gray;
+}
+```
+
+<image src="images/explainer-issue-1099.png">
+
+### Scenario 5: Column decorations only between items
+
+https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1100
+
+```css
+.layout {
+  display: grid;
+  grid-template-columns: 400px 1000px;
+  column-gap: 90px;
+  row-gap: 50px;
+  column-rule: 1px solid white;
+  column-rule-visibility-items: between;
+}
+```
+
+<image src="images/explainer-issue-1100.png">
 
 ## Future ideas
 
@@ -459,42 +603,6 @@ https://github.com/w3c/csswg-drafts/issues/2748#issuecomment-595889781
 
 <image src="images/csswg-drafts-issues-2748-issuecomment-595889781.png">
 
-#### Scenario: Grid layout with white space in leading columns
-
-https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1099
-
-```css
-.layout {
-  display: grid;
-  grid-template-areas:
-    ". . content author"
-    ". . content social";
-  rule-areas: --left 1 / 1 / 2 / -1;
-  rule: 1px solid gray [--left] none;
-  rule-outset: 3px;
-  border-top: 1px solid gray;
-}
-```
-
-<image src="images/explainer-issue-1099.png">
-
-#### Scenario: Column decorations only in specific gaps
-
-https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1100
-
-```css
-.layout {
-  display: grid;
-  grid-template-columns: 400px 1000px;
-  column-gap: 90px;
-  row-gap: 50px;
-  rule-areas: --main 2 / 2 / 2 / -1;
-  column-rule: [--main] 1px solid white;
-}
-```
-
-<image src="images/explainer-issue-1100.png">
-
 #### Scenario: Periodic Table omitting decorations from certain areas
 
 https://github.com/w3c/csswg-drafts/issues/12024#issuecomment-3086244002
@@ -596,6 +704,7 @@ Many thanks for valuable feedback and advice from:
 - Ahmad Shadeed
 - Alison Maher
 - Benoît Rouleau
+- Elika Etemad
 - Ian Kilpatrick
 - Josh Tumath
 - Kurt Catti-Schmidt
