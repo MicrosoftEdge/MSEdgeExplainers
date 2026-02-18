@@ -87,7 +87,7 @@ Specifically, the User Agent flags the following conditions as policy violations
   Non‑text resources are expected to use compressed formats when such formats are supported and available. For example, using `.ttf` fonts instead of `.woff`.
 
 3. **Resources with excesive total size**
-  To limit disproportionate network cost, size thresholds apply to following resources and non‑network resource embeddings:
+  To limit disproportionate network cost, size thresholds apply to the following resources and non‑network resource embeddings:
 
     * data: URLs larger than 100 kB
     * Image files larger than 200 kB
