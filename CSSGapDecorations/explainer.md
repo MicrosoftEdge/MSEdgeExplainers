@@ -53,6 +53,7 @@ content location of future work and discussions.
     - [Images](#images)
     - [Corner joins](#corner-joins)
     - [Propagation of gap decorations into subgrids](#propagation-of-gap-decorations-into-subgrids)
+    - [Extensions to decoration visibility controls](#extensions-to-decoration-visibility-controls)
     - [Placement of gap decorations](#placement-of-gap-decorations)
       - [Scenario: Calendar grid with header column](#scenario-calendar-grid-with-header-column)
       - [Scenario: Different lines for different gaps, applied to a sub-area of a grid](#scenario-different-lines-for-different-gaps-applied-to-a-sub-area-of-a-grid)
@@ -531,6 +532,19 @@ grid into corresponding gaps in the subgrid; we could perhaps do this with a
 special keyword on the `*-rule-width`, `*-rule-style`, and `*-rule-color`
 properties. See [CSSWG Issue
 12326](https://github.com/w3c/csswg-drafts/issues/12326) for further discussion.
+
+### Extensions to decoration visibility controls
+
+Design discussions for `*-rule-visibility-items` also considered companion
+`*-rule-visibility-self` properties which would allow the container-wide value to
+be overridden on specific items. For example, an author who wants to draw 
+decorations only around a specific item in the container might set
+`rule-visibility-items: none` on the container, and
+`rule-visibility-self: around` on the specific item that they want to draw around.
+
+`start-side` and `end-side` have also been suggested as additional values for both
+`*-rule-visibility-items` and `*-rule-visibility-self`, to draw decorations only 
+on one side or the other of items.
 
 ### Placement of gap decorations
 
