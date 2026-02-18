@@ -249,3 +249,4 @@ And to the contributors and reviewers who helped shape the `network-efficiency-g
 
 * [Yoav Weiss](https://github.com/yoavweiss)
 * [Fabio Rocha](https://github.com/fabiorocha)
+* [Adam Rice](https://github.com/ricea)
