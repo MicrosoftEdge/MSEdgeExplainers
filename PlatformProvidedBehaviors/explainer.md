@@ -224,45 +224,53 @@ The current API uses:
 - Authors must remember which property to use: `behaviors` for state access, `behaviorList` for mutations.
 - The name `behaviorList` is less intuitive than simply `behaviors`.
 
-#### Alternative 1: Use `behaviors` everywhere
+#### Alternative 1: Use `behaviors` everywhere (instantiated behaviors)
 
-- `attachInternals({ behaviors: [...] })` for the initial attachment.
-- `internals.behaviors` returns the mutable `ObservableArray`.
-- Remove the separate named-access object (`this._internals.behaviors`).
+Behaviors are instantiated with `new` rather than passed as global class references, that way the author can access the behavior instance on a property (no lookup, no extra getter).
 
-Attach behaviors:
 ```javascript
-this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+// Instantiate the behavior and attach it.
+this._submitBehavior = new HTMLSubmitButtonBehavior();
+this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
+
+// Access behavior state directly via the stored reference.
+this._submitBehavior.formAction = '/custom';
+
+// To swap behaviors, instantiate and replace.
+this._buttonBehavior = new HTMLButtonBehavior();
+this._internals.behaviors[0] = this._buttonBehavior;
 ```
 
-Mutate the array directly:
-```javascript
-this._internals.behaviors[0] = HTMLButtonBehavior;
-```
+*For future developer-defined behaviors:*
 
-To access a behavior state, iteration or `find()` is required:
 ```javascript
-for (const behavior of this._internals.behaviors) {
-  if (behavior instanceof HTMLSubmitButtonBehavior) {
-    behavior.formAction = '/custom';
-  }
+class TooltipBehavior {
+  #content = '';
+
+  onAttached(internals) { /* ... */ }
+  onDetached() { /* ... */ }
+
+  get content() { return this.#content; }
+  set content(val) { this.#content = val; }
 }
 
-// Or using find():
-this._internals.behaviors.find(
-  (behavior) => behavior instanceof HTMLSubmitButtonBehavior
-).formAction = '/custom';
+// In custom element constructor:
+this._tooltipBehavior = new TooltipBehavior();
+this._internals = this.attachInternals({ behaviors: [this._tooltipBehavior] });
+
+// Access state directly.
+this._tooltipBehavior.content = 'Helpful tooltip text';
 ```
 
 **Pros:**
-- Simpler API with a single property name.
-- Consistent naming throughout.
-- Fewer concepts to learn.
+- Simpler API with a single property name (no `behaviors` vs `behaviorList` split).
+- No array lookup or `instanceof` checks needed as developers hold direct references.
+- *Future* developer-defined behaviors are simpler: just instantiate and attach.
+- Consistent mental model: behaviors are objects you create and manage.
 
 **Cons:**
-- Loses the convenience of named access (`behaviors.htmlSubmitButton`).
-- Authors must iterate and/or use `instanceof` checks to access a specific behavior's state.
-- Mixing state access and array mutation on the same property could be confusing.
+- Requires developers to manage behavior instances themselves.
+- More setup code compared to passing class references directly.
 
 #### Alternative 2: Add a getter for named access
 
@@ -672,9 +680,9 @@ Call-to-action elements like "Sign Up" or "Download Now" often need to look like
 <Button as="a" href="/signup">Sign Up</Button>
 ```
 
-In all cases, the rendered element is an `<a>`, so it loses button keyboard semantics (Space doesn't activate). Alternatively, rendering a link as a button loses anchor features (no right-click "Open in new tab", no `download` attribute). The polymorphic pattern changes the element type but cannot combine the behaviors of both.
+In all cases, the rendered element is an `<a>`, so it loses button keyboard semantics (Space doesn't activate). Alternatively, rendering a link as a button loses anchor features (no right-click "Open in new tab", no `download` attribute).
 
-Combining `HTMLButtonBehavior` (from `<button type=button>`) with `HTMLAnchorBehavior` (from `<a>`) solves this by giving the element:
+Combining `HTMLButtonBehavior` (from `<button type=button>`) with `HTMLAnchorBehavior` (from `<a>`) could solve this by giving the element:
 
 - Button keyboard activation (Space and Enter both work).
 - Right-click context menu offers navigation-related options.
@@ -688,6 +696,8 @@ class NavButton extends HTMLElement {
     this._internals = this.attachInternals({ 
       behaviors: [HTMLButtonBehavior, HTMLAnchorBehavior]
     });
+    // Explicitly set the role.
+    this._internals.role = 'link';
   }
 
   connectedCallback() {
@@ -703,15 +713,21 @@ customElements.define('nav-button', NavButton);
 <nav-button href="/dashboard">Sign Up</nav-button>
 ```
 
-These behaviors are compatible because:
+These behaviors are *technically* compatible because:
 
 - Button provides keyboard activation (Space/Enter) and anchor provides navigation on the same `click` event.
 - They have complementary properties: button has `disabled`, anchor has `href`, `target`, `download`.
 - Both are focusable elements.
 
-**Role conflict:** `HTMLButtonBehavior` provides `role="button"` while `HTMLAnchorBehavior` provides `role="link"`. Under the last-in-wins rule, the element would have `role="link"`. If the author wants `role="button"`, they can either reorder the behaviors or set `internals.role = 'button'` explicitly. The conflict resolution strategy matters as even compatible behaviors may overlap in specific capabilities.
+**Role conflict and accessibility implications:** `HTMLButtonBehavior` provides `role="button"` while `HTMLAnchorBehavior` provides `role="link"`. Under the last-in-wins rule, the element would have `role="link"` (or `role="button"` if the order is reversed). However, authors should:
 
-#### Conflicting Behaviors
+1. Explicitly set `internals.role` to the appropriate value based on the element's primary purpose.
+2. Consider user expectations of screen reader users. They might expect buttons to perform actions and links to navigate.
+3. Test with assistive technologies to ensure the element behaves as users expect based on its announced role.
+
+Even with an explicit role, this pattern may confuse users who expect consistent behavior from elements announced as buttons or links. Authors should evaluate whether their use case requires both behaviors or if a single semantic (button or link) would better serve users.
+
+#### Conflicting behaviors
 
 Some behaviors are inherently mutually exclusive.
 
