@@ -39,8 +39,8 @@ content location of future work and discussions.
   - [User research](#user-research)
   - [Properties](#properties)
     - [Width, style, and color](#width-style-and-color)
+    - [Interaction with intersection types](#interaction-with-intersection-types)
     - [Extending or shortening gap decoration segments](#extending-or-shortening-gap-decoration-segments)
-    - [Interaction with spanning items](#interaction-with-spanning-items)
     - [Paint order](#paint-order)
     - [Decorations next to empty areas](#decorations-next-to-empty-areas)
   - [Key scenarios](#key-scenarios)
@@ -59,7 +59,7 @@ content location of future work and discussions.
       - [Scenario: Different lines for different gaps, applied to a sub-area of a grid](#scenario-different-lines-for-different-gaps-applied-to-a-sub-area-of-a-grid)
       - [Scenario: Periodic Table omitting decorations from certain areas](#scenario-periodic-table-omitting-decorations-from-certain-areas)
   - [Dropped ideas](#dropped-ideas)
-    - [Logical properties for flex and masonry containers](#logical-properties-for-flex-and-masonry-containers)
+    - [Logical properties](#logical-properties)
   - [Considered alternatives](#considered-alternatives)
     - [Alternative 1: 2021 draft specification](#alternative-1-2021-draft-specification)
     - [Alternative 2: Using pseudo-elements](#alternative-2-using-pseudo-elements)
@@ -89,7 +89,7 @@ non-ergonomic workarounds such as these examples:
 
 * Extend CSS [column rule
   properties](https://drafts.csswg.org/css-multicol-1/#column-gaps-and-rules) to
-  apply to other container layouts such as grid, flex, and masonry.
+  apply to other container layouts such as grid, flex, and grid-lanes.
 * Introduce row-direction gap decorations on CSS container layouts.
 * Allow gap decorations to vary over a given container to handle cases such as
   alternating row separators.
@@ -106,17 +106,24 @@ non-ergonomic workarounds such as these examples:
 
 ## User research
 
-Use cases in this explainer were collected from the discussion in issue
+Use cases in this explainer were collected from the discussion in CSSWG issue
 [2748](https://github.com/w3c/csswg-drafts/issues/2748). Additional inspiration
-was drawn from discussions in issues
+was drawn from discussions in CSSWG issues
 [5080](https://github.com/w3c/csswg-drafts/issues/5080),
 [6748](https://github.com/w3c/csswg-drafts/issues/6748), and
 [9482](https://github.com/w3c/csswg-drafts/issues/9482).
 
+Comments received on the feature in MSEdgeExplainers issues
+[996](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/996),
+[1099](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1099),
+[1100](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1100), and
+[1111](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1111)
+have also been incorporated into the design.
+
 ## Properties
 
 Unless otherwise noted, corresponding `row-` and `column-` properties should be
-assumed to have identical syntax. All such pairs of properties also have `gap-`
+assumed to have identical syntax. All such pairs of properties also have
 shorthands that apply the same values in both directions.
 
 For property grammar details, please see the
@@ -132,17 +139,18 @@ the list is cycled through from the beginning as needed.
 Authors may also use familiar syntax from CSS Grid such as `repeat()`
 and `auto` to create patterns of line definitions. Note that while `repeat()` and `auto`
 are inspired by CSS Grid, they may also be used to create patterns of decorations
-in flex, multi-column, and masonry containers.
+in flex, multi-column, and grid-lanes containers.
 
 Shorthands are also available to combine the width, style, and color properties.
 
 ```css
 .alternate-red-blue {
   display: grid;
-  grid-template: repeat(auto-fill, 30px) / repeat(3, 100px);
-  grid-gap: 10px;
+  grid-template-columns: repeat(3, 100px);
+  grid-auto-rows: 30px;
+  gap: 10px;
   row-rule: 1px solid;
-  row-rule-color: red blue;
+  row-rule-color: red, blue;
 }
 ```
 <image src="images/example-red-blue.png">
@@ -150,8 +158,9 @@ Shorthands are also available to combine the width, style, and color properties.
 ```css
 .alternate-heavy-light {
   display: grid;
-  grid-template: repeat(auto-fill, 30px) / repeat(3, 100px);
-  grid-gap: 10px;
+  grid-template-columns: repeat(3, 100px);
+  grid-auto-rows: 30px;
+  gap: 10px;
   row-rule: 2px solid black, 1px solid lightgray;
 }
 ```
@@ -163,14 +172,15 @@ container. Conceptually, gap decorations are considered after layout has
 completed, and in particular after we already know the full extent of the
 [implicit grid](https://drafts.csswg.org/css-grid-2/#implicit-grid) in grid
 layout, or the number of lines in flex layout, or the number of columns in
-multi-column layout, or the number of tracks in masonry layout. Thus, the
+multi-column layout, or the number of tracks in grid-lanes layout. Thus, the
 `repeat()` grammar, while modeled after the `grid-template` properties, is
 simpler for gap decorations as there are fewer unknowns to consider.
 
 ```css
 .varying-widths {
   dispay: grid;
-  grid-template: repeat(auto-fill, 30px) / repeat(3, 100px);
+  grid-template-columns: repeat(3, 100px);
+  grid-auto-rows: 30px;
   row-gap: 9px;
   row-rule: 5px solid black, repeat(auto, 1px solid black), 3px solid black;
 }
@@ -183,14 +193,40 @@ simpler for gap decorations as there are fewer unknowns to consider.
 
 <image src="images/example-width-style-color.png">
 
+### Interaction with intersection types
+
+Authors may change the set of intersections where gap decorations break,
+from the default behavior to either "all intersections" or "no intersections."
+Where gap decorations overlap items in the container, the decoration is painted
+behind the item.
+
+```css
+.normal {
+  rule-break: normal;
+}
+```
+<image src="images/example-break-normal.png">
+
+```css
+.all-intersections {
+  rule-break: intersection;
+}
+```
+<image src="images/example-break-intersection.png">
+
+```css
+.no-intersections {
+  rule-break: none;
+}
+```
+<image src="images/example-break-none.png">
+
 ### Extending or shortening gap decoration segments
 
 By default, gap decorations are painted as continuous segments that extend as
-far as possible along the centerline of a given gap. The decoration is painted
-from one gap T intersection to another, with both endpoints at the centers of
-the T crossings and the decoration proceeding along the stems of both Ts. In
-grid layout, row decorations are painted on top of column decorations by
-default; changing this behavior is covered in a later section of this document.
+far as possible along the centerline of a given visible gap.
+The decoration is painted from visible intersection to another,
+with each endpoint at the innermost edge of the intersection.
 
 ```css
 .grid-with-spans {
@@ -223,6 +259,7 @@ into the intersection and positive values receding from it.
 
 ```css
 .inset-0px {
+  column-rule-break: intersection;
   column-rule-inset: 0px;
 }
 ```
@@ -230,14 +267,16 @@ into the intersection and positive values receding from it.
 
 ```css
 .inset-5px {
-  column-rule-inset: -5px;
+  column-rule-break: intersection;
+  column-rule-inset: 5px;
 }
 ```
 <image src="images/example-column-inset-5px.png">
 
 ```css
 .inset-negative-5px {
-  column-rule-inset: 5px;
+  column-rule-break: intersection;
+  column-rule-inset: -5px;
 }
 ```
 <image src="images/example-column-inset-minus-5px.png">
@@ -248,8 +287,9 @@ and "interior" endpoints (any endpoint that is not an "edge").
 
 ```css
 .edge-interior-insets {
+  column-rule-break: intersection;
   column-rule-edge-inset: 0px;
-  column-rule-interior-inset: 5px;
+  column-rule-interior-inset: -5px;
 }
 ```
 
@@ -260,48 +300,21 @@ making a distinction between "start" and "end" endpoints, in addition to the "ed
 
 ```css
 .start-end-edge-interior-insets {
-  column-rule-start-edge-inset: 0px;
-  column-rule-end-edge-inset: 8px;
-  column-rule-start-interior-inset: 0px;
-  column-rule-end-interior-inset: 8px;
+  column-rule-break: intersection;
+
+  column-rule-edge-inset-start: 8px;
+  column-rule-interior-inset-start: 8px;
+  /* or shorthand: */
+  column-rule-inset-start: 8px;
 }
 ```
 
 <image src="images/example-column-start-end-edge-interior-insets.png">
 
-### Interaction with spanning items
-
-Authors may also change the set of intersections where gap decorations break,
-from the default "T intersections" behavior to either "all intersections" or "no intersections."
-In the latter case, gap decorations paint "behind" items in the container.
-
-```css
-.t-intersections {
-  gap-rule-break: spanning-item;
-  gap-rule-inset: 0px;
-}
-```
-<image src="images/example-break-spanning-item.png">
-
-```css
-.all-intersections {
-  gap-rule-break: intersection;
-  gap-rule-inset: 0px;
-}
-```
-<image src="images/example-break-intersection.png">
-
-```css
-.no-intersections {
-  gap-rule-break: none;
-}
-```
-<image src="images/example-break-none.png">
-
 ### Paint order
 
-When row and column gap decorations overlap, authors can control their painting
-order.
+When row and column gap decorations overlap, authors can control their painting order.
+By default, row-direction decorations are painted on top of column-direction decorations.
 
 ```css
 rule-overlap: [ row-over-column | column-over-row ]
@@ -662,13 +675,12 @@ https://github.com/w3c/csswg-drafts/issues/12024#issuecomment-3086244002
 
 ## Dropped ideas
 
-### Logical properties for flex and masonry containers
+### Logical properties
 
 *This idea was dropped based on feedback raised in the [initial proposal discussion](https://github.com/w3c/csswg-drafts/issues/10393).*
 
-These are designed to enable scenarios where authors wish to switch
-`flex-direction` or `masonry-direction` based on space constraints or other
-factors.
+These are designed to enable scenarios where authors wish to switch, for example,
+`flex-direction` based on space constraints or other factors.
 
 | Property         | row or row-reverse direction | column or column-reverse direction |
 |------------------|------------------------------|------------------------------------|
@@ -683,8 +695,8 @@ factors.
 
 And so on for other properties.
 
-For flex and masonry containers, the logical properties map based on
-`flex-direction` or `masonry-direction` following the convention above.
+For flex containers, the logical properties map based on
+`flex-direction` following the convention above.
 
 For grid containers, `main` maps to `row`, and `cross` maps to `column`.
 
