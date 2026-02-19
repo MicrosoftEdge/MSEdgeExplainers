@@ -18,16 +18,12 @@
 - [User Problem](#user-problem)
 - [Goals](#goals)
 - [Non-Goals](#non-goals)
-- [Approach 1: API signature change with `types` parameter](#approach-1-api-signature-change-with-types-parameter)
-  - [Proposed IDL](#proposed-idl)
+- [Proposal: Defer actual data read until ClipboardItem.getType()](#proposal-defer-actual-data-read-until-clipboarditemgettype)
   - [Boundary Scenarios](#boundary-scenarios)
   - [Pros](#pros)
   - [Cons](#cons)
-- [Approach 2: Defer actual data read until ClipboardItem.getType()](#approach-2-defer-actual-data-read-until-clipboarditemgettype)
-  - [Boundary Scenarios](#boundary-scenarios-1)
-  - [Pros](#pros-1)
-  - [Cons](#cons-1)
-- [Preferred Approach](#preferred-approach)
+- [Alternatives Considered](#alternatives-considered)
+  - [API signature change with `types` parameter](#api-signature-change-with-types-parameter)
 - [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
 - [Appendix](#appendix)
   - [Read Time Analysis and Takeaways](#read-time-analysis-and-takeaways)
@@ -37,21 +33,15 @@
 
 ## Introduction
 
-This proposal introduces selective clipboard format reading, an enhancement to the [Asynchronous Clipboard Read](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that enables web applications to read only the clipboard formats they need, making reads more efficient by avoiding retrieval of unnecessary data, resulting in performance gains and reduced memory footprint.
+This proposal introduces selective clipboard format reading, an enhancement to the [Asynchronous Clipboard Read](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that enables web applications to read only the clipboard formats they need by deferring actual data retrieval until `getType()` is called, resulting in performance gains and reduced memory footprint:
+```js
+// Example Javascript code
+const items = await navigator.clipboard.read(); // No data fetched yet
+
+const text = await items[0].getType('text/plain'); // Only 'text/plain' data fetched here
+```
 
 The current implementation of [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) copies all available clipboard formats from the operating system's clipboard into the browser's memory, regardless of what the web application needs.
-
-This proposal explores two approaches to enable selective clipboard reading:
-- **Approach 1**: Modifying the `read()` API signature to accept a `types` parameter specifying which MIME types to fetch.
-  ```js
-  const items = await navigator.clipboard.read({ types: ['text/plain'] });
-  ```
-- **Approach 2**: Deferring actual data retrieval until `getType()` is called, making the read operation lazy.
-  ```js
-  const items = await navigator.clipboard.read(); // No data fetched yet
-
-  const text = await items[0].getType('text/plain'); // Only 'text/plain' data fetched here
-  ```
 
 ## User Problem
 
@@ -71,59 +61,9 @@ The impact is especially pronounced in large-scale web applications, such as onl
 - Modifying clipboard writing or other clipboard APIs such as [readText()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-readtext).
 - This proposal does not define any rules for how the browser should prioritize or rank different clipboard formats internally.
 
-## Approach 1: API signature change with `types` parameter
+## Proposal: Defer actual data read until `ClipboardItem.getType()`
 
-This approach proposes API signature changes to the [clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API that allow web authors to specify the MIME types they intend to read, and to rename the optional argument [`ClipboardUnsanitizedFormats`](https://www.w3.org/TR/clipboard-apis/#dictdef-clipboardunsanitizedformats) to `ClipboardReadOptions` and extend it with a new `types` property—a list of MIME types to retrieve. The browser will selectively read only the requested formats.
-
-Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) will continue to behave as before when `types` is `undefined`, receiving all available clipboard formats.
-
-If a MIME type is provided in [`unsanitized`](https://www.w3.org/TR/clipboard-apis/#dom-clipboardunsanitizedformats-unsanitized) but not requested in `types`, the clipboard content for the provided type will not be read from the OS clipboard and hence will be unavailable in the clipboard read response.
-
-**Example:**
-```js
-// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
-const items = await navigator.clipboard.read({
-  types: ['text/plain']
-});
-
-const item = items[0];
-const availableTypes = item.types; // ['text/plain']. Only requested types that are available.
-
-const plainTextBlob = await item.getType('text/plain');
-const text = await plainTextBlob.text();
-```
-
-### Proposed IDL
-```webidl
-[Exposed=Window]
-interface Clipboard {
-    Promise<sequence<ClipboardItem>> read(optional ClipboardReadOptions options = {});
-};
-
-dictionary ClipboardReadOptions {
-    sequence<DOMString> types;        // Optional: Filter returned clipboard items by MIME types
-    sequence<DOMString> unsanitized;  // Optional: Request unsanitized data for specific MIME types
-};
-```
-
-### Boundary Scenarios
-
-- The [types](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-types) property of ClipboardItem returns only the intersection of requested types and types available in the system clipboard. If a requested type is not present or invalid, [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) will reject with "The type was not found".
-- If multiple instances of the same format are provided in the request, the duplicates will be ignored and only one instance will be considered during processing.
-- If `types` is `undefined`, all available formats are returned (current behavior). If `types` is an empty array, no formats are returned.
-
-### Pros
-- This approach is backward compatible.
-- Web developers have explicit control over which formats to read.
-
-### Cons
-
-- Adding both `types` and `unsanitized` to `ClipboardReadOptions` may cause confusion about how they interact.
-- Requires web developers to explicitly opt-in by modifying their code to pass the `types` parameter. Websites without dedicated teams or proper incentives may not adopt this optimization, limiting the benefits.
-
-## Approach 2: Defer actual data read until `ClipboardItem.getType()`
-
-This approach defers clipboard data retrieval from the OS until the web app explicitly calls [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype). In this model, [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) returns [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) objects listing available MIME types, but without the data. The browser fetches the requested data only when [getType(mimeType)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) is called, and caches it to avoid repeated clipboard accesses for the same type. 
+This proposal defers clipboard data retrieval from the OS until the web app explicitly calls [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype). In this model, [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) returns [ClipboardItem](https://www.w3.org/TR/clipboard-apis/#clipboarditem) objects listing available MIME types, but without the data. The browser fetches the requested data only when [getType(mimeType)](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) is called, and caches it to avoid repeated clipboard accesses for the same type. 
 
 If the clipboard contents change between the call to [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and a subsequent call to [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype), the promise will be rejected with an appropriate DOMException (e.g., `NotSupportedError`). This applies even if a previous `getType()` call succeeded and data was cached—once the clipboard changes, all subsequent `getType()` calls on the same `ClipboardItem` will fail.
 
@@ -189,17 +129,18 @@ const text = await plainTextBlob.text();
 // User or another app performs a copy/write operation, changing clipboard contents
 await navigator.clipboard.writeText('new content');
 
-// ❌ Subsequent getType() on same ClipboardItem is rejected
+// ❌ Throws error: Subsequent getType() on same ClipboardItem is rejected
 // Clipboard data has changed since read() was called
-const htmlBlob = await item.getType('text/html'); // Throws NotSupportedError
+const htmlBlob = await item.getType('text/html');
 ```
 
 ### Pros
 
 - Preserves the existing [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API shape (no API changes required).
 - Automatic optimization for all web applications without requiring code changes or opt-in from developers.
-- Already implemented in Safari, demonstrating real-world viability and cross-browser alignment potential.
-- Only websites that explicitly need to hold clipboard data in memory pay the memory cost; others benefit automatically.
+- Already implemented in Safari, demonstrating real-world viability and cross-browser alignment potential. Firefox has indicated willingness to adopt this approach.
+- Only websites that explicitly need to hold clipboard data in memory pay the memory cost; others benefit automatically from reduced memory usage.
+- Complementary event support: The [clipboardchange event](https://www.w3.org/TR/clipboard-apis/#clipboard-event-clipboardchange) enables web applications to be notified when the clipboard has changed, helping them handle scenarios where clipboard data changes after a `read()` call.
 
 ### Cons
 
@@ -207,27 +148,42 @@ const htmlBlob = await item.getType('text/html'); // Throws NotSupportedError
 - Developers must anticipate potential latency when calling [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) which contrasts with today’s expectation of immediate access.
 - Clipboard state may change between [read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) and [getType()](https://www.w3.org/TR/clipboard-apis/#dom-clipboarditem-gettype) calls, leading to a rejected promise due to stale data.
 
-## Preferred Approach
+Based on discussions in the [W3C Clipboard APIs Working Group](https://github.com/w3c/clipboard-apis/issues/240), this approach is the preferred solution. While it does change the semantic behavior of `ClipboardItem`, the working group consensus is that this trade-off is acceptable given the benefits for end users across the web platform.
 
-Based on discussions in the [W3C Clipboard APIs Working Group](https://github.com/w3c/clipboard-apis/issues/240), [Lazy getType approach](#approach-2-defer-actual-data-read-until-clipboarditemgettype) is the preferred solution for the following reasons:
+## Alternatives Considered
 
-1. **Automatic benefits for all users**: Unlike [Approach 1](#approach-1-api-signature-change-with-types-parameter), which requires web developers to explicitly adopt the `types` parameter, [Approach 2](#approach-2-defer-actual-data-read-until-clipboarditemgettype) provides performance benefits automatically to all web applications. As noted in the working group discussions, developers "will likely not bother opting in unless they have large teams and the proper incentives."
+### API signature change with `types` parameter
 
-2. **No API surface changes**: [Approach 2](#approach-2-defer-actual-data-read-until-clipboarditemgettype) preserves the existing `read()` API signature, avoiding the complexity of introducing new parameters and their interactions (e.g., how `types` and `unsanitized` interact).
+An alternative approach considered was to modify the [clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) API signature to allow web authors to specify the MIME types they intend to read. This would rename the optional argument [`ClipboardUnsanitizedFormats`](https://www.w3.org/TR/clipboard-apis/#dictdef-clipboardunsanitizedformats) to `ClipboardReadOptions` and extend it with a new `types` property—a list of MIME types to retrieve. The browser would selectively read only the requested formats.
 
-3. **Cross-browser alignment**: Safari has already implemented lazy `getType()` behavior, where data is fetched only when `getType()` is called. Firefox has indicated willingness to adopt this approach if the specification changes. This creates an opportunity for browser convergence without API changes.
+**Example:**
+```js
+// Scenario: OS clipboard contains 'text/plain' and 'text/html' data
+const items = await navigator.clipboard.read({
+  types: ['text/plain']
+});
 
-4. **Memory efficiency by default**: Snapshotting the entire clipboard entry for each call to `read()` is wasteful. With [Approach 2](#approach-2-defer-actual-data-read-until-clipboarditemgettype), only websites that explicitly need to hold clipboard data in memory pay for it, while others benefit from reduced memory usage automatically.
+const item = items[0];
+const availableTypes = item.types; // ['text/plain']. Only requested types that are available.
 
-5. **Complementary event support**: The [clipboardchange event](https://www.w3.org/TR/clipboard-apis/#clipboard-event-clipboardchange) enables web applications to be notified when the clipboard has changed, helping them handle scenarios where clipboard data changes after a `read()` call.
+const plainTextBlob = await item.getType('text/plain');
+const text = await plainTextBlob.text();
+```
 
-While [Approach 2](#approach-2-defer-actual-data-read-until-clipboarditemgettype) does change the semantic behavior of `ClipboardItem`, the working group consensus is that this trade-off is acceptable given the benefits for end users across the web platform.
+**Pros:**
+- This approach is backward compatible. Existing implementations and web applications that use [navigator.clipboard.read()](https://www.w3.org/TR/clipboard-apis/#dom-clipboard-read) would continue to behave as before when `types` is `undefined`, receiving all available clipboard formats.
+- Web developers have explicit control over which formats to read.
+
+**Cons:**
+- Requires web developers to explicitly opt-in by modifying their code to pass the `types` parameter. Websites without dedicated teams or proper incentives may not adopt this optimization, limiting the benefits.
+- Adding both `types` and `unsanitized` to `ClipboardReadOptions` may cause confusion about how they interact.
+
 
 ## Accessibility, Privacy, and Security Considerations
 
 This proposal has no known impact on accessibility or privacy and does not alter the permission or security model of the Async Clipboard API ([navigator.clipboard](https://www.w3.org/TR/clipboard-apis/#clipboard)). A user gesture requirement (transient user activation) and existing async clipboard API security measures (focus document, permission prompts) will remain as they are.
 
-With the [lazy getType() approach](#approach-2-defer-actual-data-read-until-clipboarditemgettype), security checks (transient user activation, document focus, and clipboard-read permission) are performed when `read()` is called. Once `read()` resolves successfully, subsequent `getType()` calls on the returned `ClipboardItem` objects do not re-validate these conditions. This is acceptable because `getType()` already checks whether the clipboard contents have changed since `read()` was called, and rejects the promise if they have. Since clipboard data cannot be accessed if it has been modified, the security guarantee is preserved—any attempt to access stale or externally modified clipboard data will fail, regardless of the current permission or focus state.
+With the deferred data retrieval approach, security checks (transient user activation, document focus, and clipboard-read permission) are performed when `read()` is called. Once `read()` resolves successfully, subsequent `getType()` calls on the returned `ClipboardItem` objects do not re-validate these conditions. This is acceptable because `getType()` already checks whether the clipboard contents have changed since `read()` was called, and rejects the promise if they have. Since clipboard data cannot be accessed if it has been modified, the security guarantee is preserved—any attempt to access stale or externally modified clipboard data will fail, regardless of the current permission or focus state.
 
 ## Appendix
 
