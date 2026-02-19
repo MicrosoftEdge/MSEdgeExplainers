@@ -41,6 +41,7 @@ This allows applications to become aware of inefficient network behavior which i
     - [Threshold design considerations](#threshold-design-considerations)
     - [Violation reporting](#violation-reporting)
     - [Policy enforcement](#policy-enforcement)
+    - [Open questions](#open-questions)
     - [Future considerations: cross-document reporting](#future-considerations-cross-document-reporting)
   - [Alternatives considered](#alternatives-considered)
     - [Relying on existing performance measurement APIs](#relying-on-existing-performance-measurement-apis)
@@ -80,14 +81,14 @@ When the policy is active, the User Agent monitors network resource requests ini
 
 Specifically, the User Agent flags the following conditions as policy violations:
 
-1. **Text-based resources served without HTTP compression**
+1. **Text-based resources served without HTTP compression.**
   Text‑based resources such as HTML, CSS, JavaScript, and JSON are expected to be delivered using HTTP‑based compression.
 
-2. **Uncompressed file formats when compressed alternatives are available**
+2. **Uncompressed file formats when compressed alternatives are available.**
   Non‑text resources are expected to use compressed formats when such formats are supported and available. For example, using `.ttf` fonts instead of `.woff`.
 
-3. **Resources with excesive total size**
-  To limit disproportionate network cost, size thresholds apply to following resources and non‑network resource embeddings:
+3. **Resources with excesive total size.**
+  To limit disproportionate network cost, size thresholds apply to the following resources and non‑network resource embeddings:
 
     * data: URLs larger than 100 kB
     * Image files larger than 200 kB
@@ -149,6 +150,19 @@ As with other Document Policy features, `network-efficiency-guardrails` may be d
 When enforcement is enabled for `network-efficiency-guardrails`, resource requests that violate the policy criteria are blocked by the User Agent, and the corresponding assets are not rendered.
 
 Enforcement builds on the same violation detection and reporting model described above. For this reason, it is expected that sites would deploy the policy in reporting‑only mode first, using the resulting reports to evaluate impact before enabling enforcement.
+
+### Open questions
+
+As the proposal evolves through incubation, there are several related areas that may warrant further discussion and refinement.
+
+**Compression eligibility for additional resource types**
+The current criteria distinguish between text‑based resources, which are required to be served with HTTP compression, and non‑text resources, which are subject to size‑based limits but are not required to be compressed. Some binary formats, such as WebAssembly modules, are commonly served in compressed form and can incur significant network cost when uncompressed.
+
+Whether additional compressible binary resource types should be subject to compression requirements, size‑based limits, or a combination of both is an open question for further discussion. Because the policy may block resources when enforcement is enabled, any such criteria would need to be defined explicitly: either as part of the existing policy configuration, under a separate configuration point, or through [parameters on Document Policy](https://wicg.github.io/document-policy/#issue-91264ad1).
+
+
+**Handling of very small text resources**
+For sufficiently small payloads, the overhead of applying HTTP compression may outweigh its benefits, depending on the compression algorithm and transport. Allowing exceptions or lower bounds for compression requirements on very small resources is a potential refinement. However, introducing such exceptions raises questions around threshold selection, which would need to be considered during incubation. For example, whether a single common threshold should apply across compression algorithms, or whether algorithm‑specific thresholds would be appropriate.
 
 ### Future considerations: cross-document reporting
 
@@ -235,3 +249,4 @@ And to the contributors and reviewers who helped shape the `network-efficiency-g
 
 * [Yoav Weiss](https://github.com/yoavweiss)
 * [Fabio Rocha](https://github.com/fabiorocha)
+* [Adam Rice](https://github.com/ricea)
