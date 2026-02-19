@@ -240,7 +240,7 @@ Mutate the array directly:
 this._internals.behaviors[0] = HTMLButtonBehavior;
 ```
 
-To access a behavior state, iteration or find() is required:
+To access a behavior state, iteration or `find()` is required:
 ```javascript
 for (const behavior of this._internals.behaviors) {
   if (behavior instanceof HTMLSubmitButtonBehavior) {
