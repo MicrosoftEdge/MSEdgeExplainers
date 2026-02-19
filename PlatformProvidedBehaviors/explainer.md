@@ -191,15 +191,19 @@ If web authors need to preserve state when swapping behaviors, they should save 
 
 ### Duplicate behaviors
 
-If the same behavior is specified multiple times, it appears only once in `behaviorList`. This prevents confusion about which instance of a behavior is active.
+Specifying the same behavior multiple times throws a `TypeError`. This applies to both the initial `attachInternals()` call and later modifications to `behaviorList`.
 
+Throws `TypeError` due to duplicate behavior in behaviors list:
 ```javascript
 this._internals = this.attachInternals({
   behaviors: [HTMLSubmitButtonBehavior, HTMLSubmitButtonBehavior]
 });
+```
 
-console.log(this._internals.behaviorList.length);  // 1
-console.log(this._internals.behaviorList[0] === HTMLSubmitButtonBehavior);  // true
+Also throws if duplicates are added later:
+```javascript
+this._internals.behaviorList = [HTMLSubmitButtonBehavior];
+this._internals.behaviorList.push(HTMLSubmitButtonBehavior);  // Throws `TypeError`.
 ```
 
 ### Naming Consistency
@@ -226,19 +230,28 @@ The current API uses:
 - `internals.behaviors` returns the mutable `ObservableArray`.
 - Remove the separate named-access object (`this._internals.behaviors`).
 
+Attach behaviors:
 ```javascript
-// Attach behaviors.
 this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+```
 
-// Mutate the array directly.
+Mutate the array directly:
+```javascript
 this._internals.behaviors[0] = HTMLButtonBehavior;
+```
 
-// To access a behavior state, iteration is required.
+To access a behavior state, iteration or find() is required:
+```javascript
 for (const behavior of this._internals.behaviors) {
   if (behavior instanceof HTMLSubmitButtonBehavior) {
     behavior.formAction = '/custom';
   }
 }
+
+// Or using find():
+this._internals.behaviors.find(
+  (behavior) => behavior instanceof HTMLSubmitButtonBehavior
+).formAction = '/custom';
 ```
 
 **Pros:**
@@ -275,7 +288,11 @@ if (submitBehavior) {
 
 ### Behavior composition and conflict resolution
 
-When multiple behaviors are attached to an element, they may provide overlapping capabilities. The conflict resolution strategy should:
+When multiple behaviors are attached to an element, they may provide overlapping capabilities. This section discusses strategies for resolving such conflicts.
+
+For the built-in behaviors currently under consideration and mentioned in this document (`HTMLSubmitButtonBehavior`, `HTMLButtonBehavior`, `HTMLResetButtonBehavior`, etc.), no two are expected to be compatible. However, this framework allows for composability if use cases emerge, at which point a conflict resolution strategy would need to be followed.
+
+The conflict resolution strategy should:
 
 - Allow the platform to add new low-level behaviors to existing bundled behaviors without creating compatibility issues.
 - Enable authors to reason about which behavior "wins" for any given capability.
@@ -356,6 +373,8 @@ this.addEventListener('click', () => {
 
 Properties are inherently exclusive (an element can only have one `role`, one `disabled` state, one `formAction` value), but events are additive in the DOM (multiple listeners can respond to the same event). Behaviors following this pattern align with how authors already think about event handling.
 
+Event handlers run in reverse array order (last-to-first), so the last behavior in the array has priority for both properties and events. For events, "priority" means running first. For example:
+
 ```javascript
 class LabeledSubmitButton extends HTMLElement {
   static formAssociated = true;
@@ -370,16 +389,15 @@ class LabeledSubmitButton extends HTMLElement {
 ```
 
 When clicked:
-- HTMLLabelBehavior's click handler runs → delegates focus to associated control.
-- HTMLSubmitButtonBehavior's click handler runs → form submits.
-Result: Delegates focus and form submits.
+- HTMLSubmitButtonBehavior's click handler runs first → form submits.
+- HTMLLabelBehavior's click handler runs second → delegates focus to associated control.
+Result: Form submits and delegates focus.
 
 **Pros:**
 - Matches DOM event semantics (multiple listeners can coexist).
 - Enables composition where behaviors handle different aspects of the same event.
 
 **Cons:**
-- Split rules may confuse authors ("why does `role` use last-in-wins but `click` doesn't?").
 - Risk of unexpected double-actions if authors don't realize both handlers run.
 
 **Shared considerations for both options:**
@@ -396,27 +414,27 @@ Result: Delegates focus and form submits.
 
 #### Alternative 2: Compatibility allow-list
 
-Each behavior defines a list of compatible behaviors that can be used in combination. Any combination not explicitly allowed is rejected by `attachInternals()`, preventing invalid states (like being both a button and a form):
+Compatibility between behaviors are defined in the specification. This follows the pattern used by [`attachShadow`](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow), where the [list of valid shadow host names](https://dom.spec.whatwg.org/#valid-shadow-host-name) is spec-defined and enforced at runtime. Web authors can reference documentation or DevTools errors to determine which combinations are valid.
+
+Any combination not explicitly allowed would be rejected by `attachInternals()`, preventing invalid states (like being both a button and a form):
 
 ```javascript
-// Platform-defined allow-lists.
-HTMLButtonBehavior.compatibleWith = [HTMLAnchorBehavior, HTMLLabelBehavior];
-HTMLSubmitButtonBehavior.compatibleWith = [HTMLLabelBehavior];
-```
-
-```javascript
-// In userland.
-// This works: anchor is in the button's allow-list (nav-button pattern).
+// This would work if anchor were made compatible with button (nav-button pattern).
 this.attachInternals({ 
   behaviors: [HTMLButtonBehavior, HTMLAnchorBehavior]
 });
 
-// This throws: checkbox is not in submit button's allow-list.
+// Throws: checkbox is not compatible with submit button.
 this.attachInternals({ 
   behaviors: [HTMLSubmitButtonBehavior, HTMLCheckboxBehavior]
 });
 // Error message: "HTMLSubmitButtonBehavior is not compatible with HTMLCheckboxBehavior".
 ```
+
+There can be two interpretations of what "compatible behaviors" means:
+
+1. Compatible behaviors have completely disjoint capabilities (e.g., one provides `disabled`, the other provides `href`). No conflict resolution is needed because they never touch the same property or event.
+2. Compatible behaviors may share some capabilities (e.g., both provide a role or handle click). In this case, a conflict resolution strategy (Alternative 1 or 3) is still required for overlapping capabilities.
 
 **Pros:**
 - Prevents nonsensical combinations at attachment time.
@@ -427,6 +445,7 @@ this.attachInternals({
 - More restrictive as authors can't experiment with novel combinations.
 - Requires the platform to update compatibility lists.
 - May block legitimate use cases that weren't anticipated.
+- Must still be combined with Alternative 1 or 3 when compatible behaviors have overlapping capabilities.
 
 #### Alternative 3: Explicit conflict resolution
 
@@ -466,7 +485,7 @@ This proposal supports common web component patterns:
 
 - Authors can define a single class that handles multiple modes (submit, reset, button) by updating `behaviorList` at runtime in response to attribute changes, without needing to define separate classes for each behavior.
 - A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active behaviors.
-- `HTMLSubmitButtonBehavior` and subsequent platform-provided behaviors should be understood as bundles of state, event handlers, and accessibility defaults and not opaque tokens. Web authors can reason about what a behavior provides (e.g., click/Enter triggers form submission, implicit `role="button"`, focusability, `:disabled` pseudo-class) and anticipate how it composes with other behaviors. This framework would also enable polyfilling: because behaviors have well-defined capabilities, authors can to approximate new behaviors in *userland* before native support ships (see [User-defined behaviors](#user-defined-behaviors) in [Future Work](#future-work)).
+- `HTMLSubmitButtonBehavior` and subsequent platform-provided behaviors should be understood as bundles of state, event handlers, and accessibility defaults and not opaque tokens. Web authors can reason about what a behavior provides (e.g., click/Enter triggers form submission, implicit `role="button"`, focusability, `:disabled` pseudo-class) and anticipate how it composes with other behaviors. This framework would also enable polyfilling: because behaviors have well-defined capabilities, authors can approximate new behaviors in *userland* before native support ships (see [Developer-defined behaviors](#developer-defined-behaviors) in [Future Work](#future-work)).
 - While this proposal uses an imperative API, the design supports future declarative custom elements. Once a declarative syntax for `ElementInternals` is established, attaching behaviors could be modeled as an attribute, decoupling behavior from the JavaScript class definition. The following snippet shows a hypothetical example:
 
   ```html
@@ -640,7 +659,20 @@ Call-to-action elements like "Sign Up" or "Download Now" often need to look like
 </script>
 ```
 
-3. Design systems may create separate `<Button>` and `<LinkButton>` components with duplicated styling and logic. React Router's `<Link as={Button}>` pattern attempts to merge these, but the underlying element can only be one or the other.
+3. Some frameworks use polymorphic component patterns, where a component can change the underlying HTML element it renders via a prop, to render a button as a link or vice versa (e.g., [MUI's `component` prop](https://mui.com/material-ui/guides/composition/#component-prop), [styled-components' `as` prop](https://styled-components.com/docs/api#as-polymorphic-prop), [Chakra UI's `as` prop](https://chakra-ui.com/docs/components/button#button-as-a-link)). However, the underlying element can only be one or the other.
+
+```jsx
+// MUI: Button rendered as an anchor
+<Button component="a" href="/signup">Sign Up</Button>
+
+// styled-components: Button rendered as an anchor
+<StyledButton as="a" href="/signup">Sign Up</StyledButton>
+
+// Chakra UI: Button rendered as an anchor
+<Button as="a" href="/signup">Sign Up</Button>
+```
+
+In all cases, the rendered element is an `<a>`, so it loses button keyboard semantics (Space doesn't activate). Alternatively, rendering a link as a button loses anchor features (no right-click "Open in new tab", no `download` attribute). The polymorphic pattern changes the element type but cannot combine the behaviors of both.
 
 Combining `HTMLButtonBehavior` (from `<button type=button>`) with `HTMLAnchorBehavior` (from `<a>`) solves this by giving the element:
 
@@ -719,7 +751,7 @@ Future behaviors would also manage their own relevant pseudo-classes:
 | `HTMLRadioGroupBehavior` | `:checked` |
 | `HTMLResetButtonBehavior` | `:default` (if only reset button in form) |
 
-### User-defined behaviors
+### Developer-defined behaviors
 
 A future extension of this proposal could allow developers to define their own reusable behaviors:
 
@@ -766,12 +798,13 @@ class TooltipBehavior extends PlatformBehavior {
   set content(val) {
     this.#content = val;
   }
+
+  // Name used for `internals.behaviors.<name>` access.
+  static behaviorName = 'tooltip';
 }
-// Registration
-PlatformBehavior.define('tooltip', TooltipBehavior);
 ```
 
-`TooltipBehavior` could be combined with platform-provided behaviors. Here, `CustomButton` gains both tooltip functionality (show on hover/focus) and submit button semantics (click/Enter submits forms, implicit submission, `role="button"`):
+Behaviors are classes with the appropriate methods (`onAttached`, `onDetached`) and an optional static `behaviorName` property for named access. The behavior class is passed directly to `behaviors`:
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -784,10 +817,13 @@ class CustomButton extends HTMLElement {
   }
 
   connectedCallback() {
+    // Named access uses the static behaviorName property.
     this._internals.behaviors.tooltip.content = this.getAttribute('tooltip');
   }
 }
 ```
+
+`TooltipBehavior` could be combined with platform-provided behaviors. Here, `CustomButton` gains both tooltip functionality (show on hover/focus) and submit button semantics (click/Enter submits forms, implicit submission, `role="button"`).
 
 #### Polyfilling behaviors
 
@@ -861,8 +897,9 @@ class HTMLDialogBehaviorPolyfill extends PlatformBehavior {
   set returnValue(val) {
     this.#returnValue = val;
   }
+
+  static behaviorName = 'htmlDialog';
 }
-PlatformBehavior.define('dialog', HTMLDialogBehaviorPolyfill);
 
 // Use polyfill until native support arrives.
 const HTMLDialogBehavior = globalThis.HTMLDialogBehavior ?? HTMLDialogBehaviorPolyfill;
@@ -870,11 +907,11 @@ const HTMLDialogBehavior = globalThis.HTMLDialogBehavior ?? HTMLDialogBehaviorPo
 
 Although the polyfill above can't fully replicate a native `<dialog>` element (no true top layer, no `::backdrop`, no `:modal`), it provides a reasonable approximation.
 
-#### Considerations for user-defined behaviors
+#### Considerations for developer-defined behaviors
 
-- User behaviors can compose with platform-provided behaviors
-- The same conflict resolution strategies that apply to platform behaviors would need to work with user-defined behaviors.
-- How would custom behaviors be defined and registered? `Behavior.define(name, BehaviorClass)` registers for named access via `internals.behaviors.<name>`?
+- They can compose with platform-provided behaviors.
+- The same conflict resolution strategies that apply to platform behaviors would need to work with developer-defined behaviors.
+- Named access via `internals.behaviors.<name>` uses the static `behaviorName` property on the class. If omitted, the behavior would only be accessible via array iteration or `find()`.
 
 ### Behaviors in Native HTML Elements
 
@@ -1047,7 +1084,7 @@ HTMLElement.attributeRegistry.define('submit-button', SubmitButtonAttribute);
 - Doesn't solve the platform integration problem.
 - Still a proposal without implementation commitment.
 
-Custom attributes are complementary but don't provide access to native behaviors. They're useful for userland behavior composition but can't trigger form submission, invoke popovers through platform code, etc.
+Custom attributes are complementary but don't provide access to native behaviors. They're useful for *userland* behavior composition but can't trigger form submission, invoke popovers through platform code, etc.
 
 ### Alternative 4: Customized Built-ins
 
