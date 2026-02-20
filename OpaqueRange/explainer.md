@@ -237,7 +237,7 @@ Provide a way for web developers to obtain ranges over the value of `<textarea>`
 
 ## Proposed Approach
 
-The `OpaqueRange` interface extends `AbstractRange` and provides a controlled way to reference encapsulated content within elements whose internal structures are not exposed to authors (such as the text value of `<textarea>`, text supporting `<input>`, or [content within custom elements in the future](#extending-to-custom-elements)). `OpaqueRange` instances are created and updated internally — web authors obtain them through APIs such as `getValueRange()` on text controls.
+The `OpaqueRange` interface extends `AbstractRange` and provides a controlled way to reference encapsulated content within elements whose internal structures are not exposed to authors (such as the text value of `<textarea>`, text supporting `<input>`, or [content within custom elements in the future](#extending-to-custom-elements)). `OpaqueRange` instances are created and updated internally — web authors obtain them through APIs such as `createValueRange()` on text controls.
 
 Unlike `StaticRange`, `OpaqueRange` is **live** — it tracks changes to the underlying content and automatically updates its start and end offsets, similar to how a regular `Range` tracks DOM mutations. This ensures that operations like `getBoundingClientRect()` or `getClientRects()` always reflect the current content, even after edits. See the [Supports Opaque Ranges](#supports-opaque-ranges) section for how the update behavior is defined.
 
@@ -246,7 +246,7 @@ Unlike `StaticRange`, `OpaqueRange` is **live** — it tracks changes to the und
 ### Properties and Methods
 
 #### Properties
-`OpaqueRange` objects cannot be constructed directly; they are created internally by elements that [support opaque ranges](#supports-opaque-ranges). In HTML, they are obtained via `getValueRange()`.
+`OpaqueRange` objects cannot be constructed directly; they are created internally by elements that [support opaque ranges](#supports-opaque-ranges). In HTML, they are obtained via `createValueRange()`.
 
 `OpaqueRange` exposes useful endpoint information while maintaining encapsulation:
 - `startOffset` and `endOffset`: Non negative integers that index into the element's relevant value (for example, the value of a `<textarea>` in HTML), using the same UTF-16 code unit indices as `selectionStart`/`selectionEnd`. These offsets are updated automatically as the content changes.
@@ -293,8 +293,8 @@ textarea.addEventListener('input', (e) => {
     const text = textarea.value;
     // Check if the last character typed was @ for Use Case 1
     if (text[selectionStart - 1] === '@') {
-        // Obtain an OpaqueRange (e.g. via getValueRange())
-        const range = textarea.getValueRange(selectionStart, selectionStart);
+        // Obtain an OpaqueRange (e.g. via createValueRange())
+        const range = textarea.createValueRange(selectionStart, selectionStart);
         // Use the range to obtain the bounding client rect
         const rect = range.getBoundingClientRect();
         // Position and show the user list
@@ -308,8 +308,8 @@ textarea.addEventListener('input', (e) => {
     // Check if the last character typed was " " for Use Case 2
     if (text[selectionStart - 1] === ' ') {
         if(!dictionary.has(previousWord)){
-            // Obtain an OpaqueRange (e.g. via getValueRange())
-            const range = textarea.getValueRange(selectionStart-previousWord.length, selectionStart);
+            // Obtain an OpaqueRange (e.g. via createValueRange())
+            const range = textarea.createValueRange(selectionStart-previousWord.length, selectionStart);
             // Add highlight
             highlight.add(range);
             // Apply highlight
@@ -325,10 +325,10 @@ textarea.addEventListener('input', (e) => {
 
 This implementation simplifies obtaining the caret's position inside `<input>` and `<textarea>` elements. It also allows web developers to use the Highlight API directly on those elements. The `OpaqueRange` interface eliminates the need for cloning elements and copying styles, improving performance while maintaining the benefits of using native form controls, such as accessibility, built-in form validation, and consistent behavior across browsers.
 
-The `getValueRange(start, end)` method is defined on elements that [support opaque ranges](#supports-opaque-ranges). It uses the same UTF-16 code unit offset units as `selectionStart`/`selectionEnd`.
+The `createValueRange(start, end)` method is defined on elements that [support opaque ranges](#supports-opaque-ranges). It uses the same UTF-16 code unit offset units as `selectionStart`/`selectionEnd`.
 
-`getValueRange()` has the following behavior:
-1. If the element is an `<input>` and `getValueRange()` does not apply to it (per the input type applicability table), throw a `"NotSupportedError"` `DOMException`.
+`createValueRange()` has the following behavior:
+1. If the element is an `<input>` and `createValueRange()` does not apply to it (per the input type applicability table), throw a `"NotSupportedError"` `DOMException`.
 2. Let _length_ be the length of the element's relevant value.
 3. If _start_ is greater than _length_, throw an `"IndexSizeError"` `DOMException`.
 4. If _end_ is greater than _length_, throw an `"IndexSizeError"` `DOMException`.
@@ -353,8 +353,8 @@ input.addEventListener('input', (e) => {
     
     // Show emoji picker when user types ':' for Use Case 1
     if (text[selectionStart - 1] === ':') {
-        // Obtain an OpaqueRange (e.g. via getValueRange())
-        const range = input.getValueRange(selectionStart, selectionStart);
+        // Obtain an OpaqueRange (e.g. via createValueRange())
+        const range = input.createValueRange(selectionStart, selectionStart);
         // Use the range to obtain the bounding client rect
         const rect = range.getBoundingClientRect();
         // Position the emoji picker under the caret
@@ -368,8 +368,8 @@ input.addEventListener('input', (e) => {
     // Check if the last character typed was " " for Use Case 2
     if (text[selectionStart - 1] === ' ') {
         if(!dictionary.has(previousWord)){
-            // Obtain an OpaqueRange (e.g. via getValueRange())
-            const range = input.getValueRange(selectionStart-previousWord.length, selectionStart);
+            // Obtain an OpaqueRange (e.g. via createValueRange())
+            const range = input.createValueRange(selectionStart-previousWord.length, selectionStart);
             // Add highlight
             highlight.add(range);
             // Apply highlight
@@ -407,7 +407,7 @@ The example below demonstrates how `OpaqueRange` updates in real time as the tex
 const textarea = document.querySelector("#messageArea");
 
 // Create a live range covering "hello".
-const range = textarea.getValueRange(0, 5);
+const range = textarea.createValueRange(0, 5);
 
 // Bind a highlight to that live range.
 const highlight = new Highlight(range);
