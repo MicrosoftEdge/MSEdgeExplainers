@@ -66,6 +66,15 @@ The parameters for `navigator.playHaptics`:
 
 The API always returns `undefined`. No haptics is played if the last input device is not haptics-capable.
 
+The table below illustrates example mappings of the pre-defined effects (Hover, Edge, Tick, Align) to representative platform-native feedback patterns across Windows, macOS, iOS, and Android. These mappings are illustrative examples only. User agents may choose different mappings, including synthesizing custom effects from lower-level primitives and parameters. The API standardizes the developer-facing intent, while the underlying realization remains platform-defined.
+
+| Web Haptics | Windows | MacOS | iOS | Android |
+|:-----------:|:-------:|:-----:|:---:|:-------:|
+| Hover | hover | generic | light impact | gesture_threshold_deactivate |
+| Edge | collide | generic | soft impact | long_press |
+| Tick | step | generic | selection | segment_frequent_tick |
+| Align | align | alignment | rigid impact | segment_tick |
+
 ## Sample code
 ```html
 <html>
