@@ -385,7 +385,7 @@ input.addEventListener('input', (e) => {
 
 ### Supports Opaque Ranges
 
-An `Element` supports opaque ranges if the standard defining it specifies that it does. The following HTML elements currently support opaque ranges:
+Initially, the following HTML elements would support opaque ranges:
 - `<textarea>`
 - `<input>` with type: `text`, `search`, `tel`, `url`, or `password`
 
@@ -393,7 +393,7 @@ Each element that supports opaque ranges has:
 - An **opaque range internal container** — an implementation-defined representation of the element's relevant value text.
 - A **set of associated OpaqueRanges** — a set of `OpaqueRange` objects, initially empty.
 
-When an element is removed from the document or an `<input>` element's type changes from a selectable type to a non-selectable type, all associated OpaqueRanges have their `startOffset` and `endOffset` set to 0 and the element's set of associated OpaqueRanges is cleared.
+When an element is removed from the document or an `<input>` element's type changes from a type that supports OpaqueRange to a type that doesn't, all associated OpaqueRanges have their `startOffset` and `endOffset` set to 0 and the element's set of associated OpaqueRanges is cleared.
 
 When the underlying content changes, the browser automatically adjusts the offsets of all associated OpaqueRanges. For incremental edits (such as user typing or `setRangeText()`), offsets shift to reflect inserted or deleted characters. For wholesale value changes (such as setting the `value` property or changing the `type` attribute), offsets are reset.
 
@@ -559,15 +559,6 @@ It has been [discussed](https://github.com/whatwg/html/issues/11478#issuecomment
 As noted in the [W3C TAG early design review](https://github.com/w3ctag/design-reviews/issues/1142), some of the positioning use cases addressed by `OpaqueRange` (such as anchoring popups or highlights to caret positions) could also be explored declaratively through future extensions to [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position/).
 
 While `OpaqueRange` focuses on providing a programmatic mechanism aligned with existing Range APIs, a complementary declarative model in CSS could offer improved performance, reduced scripting overhead, and more consistent accessibility behavior.
-
-## Open Questions
-#### How should `OpaqueRange` behave when callers provide reversed offsets (i.e. `startOffset > endOffset`)? 
-
-The current spec text collapses the range to `startOffset` (i.e. sets `endOffset` to `startOffset`), as specified in step 5 of the `getValueRange()` algorithm. We are open to feedback on this choice. All options considered:
-- Throw `IndexSizeError`.
-- Collapse to `max(startOffset, endOffset)` (matches DOM `Range` behavior).
-- Collapse to `min(startOffset, endOffset)`.
-- Preserve a backwards range (allow `startOffset > endOffset`).
 
 ## References & acknowledgements
 
