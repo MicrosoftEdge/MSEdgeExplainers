@@ -71,16 +71,11 @@ This proposal is informed by:
    </ds-button>
    ```
 
-Some platform behaviors are impossible or impractical to implement in JavaScript:
-
-- There's no API to make a custom element participate in implicit form submission as `form.requestSubmit()` only handles explicit activation.
-- Platform-provided keyboard and click handling integrates with the UA's event dispatch at the correct phase, ensuring proper interaction with `preventDefault()`, focus management, and accessibility APIs.
-- While [`ElementInternals.states`](https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/states) enables custom states, native pseudo-classes like `:disabled` have semantic meaning (affects the tab order, prevents activation, and excludes from form submission). This can be implemented in JavaScript, but it's error-prone and hard to maintain because all the interdependencies must be wired up manually.
-
 ### Why start with form submission?
 
 1. There's a clear gap with implicit form submission.
-3. Form submission has clear semantics, making it useful for validating the overall pattern (lifecycle, conflict resolution, accessibility integration) before expanding to more complex behaviors.
+2. Form submission has clear semantics, making it useful for validating the overall pattern (lifecycle, conflict resolution, accessibility integration) before expanding to more complex behaviors.
+3. There's no API to make a custom element participate in implicit form submission as `form.requestSubmit()` only handles explicit activation.
 4. The value also lies in establishing a composable pattern for exposing platform behaviors that can extend to inputs, labels, popovers, and more.
 
 ## Proposed approach
@@ -319,27 +314,18 @@ if (submitBehavior) {
 Use a `Set<PlatformBehavior>` instead of an array for `behaviorList`:
 
 ```javascript
-// Add behaviors
-this._internals.behaviorList.add(HTMLSubmitButtonBehavior);
-
-// Remove behaviors
-this._internals.behaviorList.delete(HTMLSubmitButtonBehavior);
-
 // Check for behavior
 if (this._internals.behaviorList.has(HTMLSubmitButtonBehavior)) { ... }
-
-// Clear all
-this._internals.behaviorList.clear();
 ```
 
 **Pros:**
-- Natural fit for the "no duplicates" constraint—Sets enforce uniqueness.
-- Clear add/delete semantics familiar to JavaScript developers.
-- No need for indexed access, which was unintuitive anyway.
+- Fit for the "no duplicates" constraint.
+- Clear add/delete semantics familiar to web authors.
+- No need for indexed access.
 
 **Cons:**
-- Sets are unordered in concept (though JS Sets maintain insertion order), which could complicate conflict resolution if order matters.
-- WebIDL `ObservableArray` has established patterns; a "set-like" interface would need specification work.
+- Sets are unordered in concept, which could complicate conflict resolution if order matters.
+- `ObservableArray` already has established patterns.
 
 ### Behavior composition and conflict resolution
 
@@ -1212,33 +1198,16 @@ While valuable, this can be a parallel effort. Even if all native elements were 
 
 ### Alternative 7: Low-level primitives on ElementInternals
 
-Expose individual primitives (focusability, disabled, keyboard activation) directly on `ElementInternals`:
-
-```javascript
-interface ElementInternals extends ARIAMixin {
-    disabled: boolean;        // Controls :disabled/:enabled
-    focusable: boolean;       // Equivalent to tabindex="-1"
-    tabable: boolean;         // Equivalent to tabindex="0"
-    checked: boolean;         // Controls :checked
-    indeterminate: boolean;   // Controls :indeterminate
-    inRange: boolean | null;  // Controls :in-range/:out-of-range
-    required: boolean | null; // Controls :required/:optional
-    userInteracted: boolean;  // Indirectly controls :user-valid/:user-invalid
-    // etc.
-}
-```
+Expose individual primitives (focusability, disabled, keyboard activation) directly on `ElementInternals`.
 
 **Pros:**
 - Maximum flexibility—authors compose exactly what they need.
 - Each primitive is independently useful.
-- Mirrors how CSS pseudo-classes work conceptually.
 
 **Cons:**
-- **Semantic interdependencies**: As discussed in ["Why bundled behaviors"](#why-bundled-behaviors-not-just-primitives), primitives like `disabled` and `focusable` interact with each other, with accessibility, and with event handling. Setting `internals.disabled = true` without the associated behavior means the element *looks* disabled but still receives clicks, remains in the tab order, and submits with the form.
-- **Accessibility complexity**: Even seemingly simple primitives like focusability have [significant complexity](https://github.com/nicoritschel/webcomponents/issues/762) around accessibility integration. This is why `popovertarget` is limited to buttons—it was originally intended for any element, but the accessibility requirements around focusability and activation made buttons the practical choice.
-- **Doesn't solve the core problem**: Form submission participation is actually a primitive itself (it can't be broken down further), and there's no API for it today. Exposing `disabled` or `focusable` individually wouldn't give custom elements the ability to participate in implicit form submission.
-
-**Path forward**: Behaviors should come first to establish the pattern and validate semantics. Primitives could be exposed later if use cases emerge where behaviors are too coarse, and future primitives could "explain" behaviors without requiring primitives to ship first.
+- Primitives like `disabled` and `focusable` interact with each other, with accessibility, and with event handling. Setting `internals.disabled = true` without the associated behavior might result in the element *looking* disabled but still receiving clicks, remaining in the tab order, and submitting with a form.
+- Even seemingly simple primitives like focusability could have significant complexity around accessibility integration. This is why `popovertarget` is limited to buttons(it was originally intended for any element, but the accessibility requirements around focusability and activation made buttons the practical choice).
+- Doesn't solve the core problem: Form submission participation is actually a primitive itself (it can't be broken down further).
 
 ## Accessibility, security, and privacy considerations
 
