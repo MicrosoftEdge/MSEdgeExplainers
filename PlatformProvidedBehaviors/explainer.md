@@ -31,7 +31,6 @@ This creates a gap between what's possible with native elements and custom eleme
 
 - Recreating all native element behaviors in this initial proposal.
 - Making updates to customized built-ins.
-- Replacing native elements—this proposal targets autonomous custom elements that need platform behavior, not developers who should use native `<button>` or `<input>` directly.
 
 ## User research
 
@@ -74,9 +73,9 @@ This proposal is informed by:
 
 Some platform behaviors are impossible or impractical to implement in JavaScript:
 
-- Implicit form submission: When a user presses Enter in a text field, the browser submits the form via its first submit button. There's no API to make a custom element participate in this as `form.requestSubmit()` only handles explicit activation.
-- Native event timing: Platform-provided keyboard and click handling integrates with the UA's event dispatch at the correct phase, ensuring proper interaction with `preventDefault()`, focus management, and accessibility APIs.
-- CSS pseudo-class: While [`ElementInternals.states`](https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/states) enables custom states, native pseudo-classes like `:disabled` have semantic meaning (affect the tab order, preventing activation, and excluding from form submission). This can be implemented in JS, but it's error-prone and hard to maintain because all the interdependencies must be wired up manually.
+- There's no API to make a custom element participate in implicit form submission as `form.requestSubmit()` only handles explicit activation.
+- Platform-provided keyboard and click handling integrates with the UA's event dispatch at the correct phase, ensuring proper interaction with `preventDefault()`, focus management, and accessibility APIs.
+- While [`ElementInternals.states`](https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/states) enables custom states, native pseudo-classes like `:disabled` have semantic meaning (affects the tab order, prevents activation, and excludes from form submission). This can be implemented in JavaScript, but it's error-prone and hard to maintain because all the interdependencies must be wired up manually.
 
 ### Why start with form submission?
 
@@ -133,65 +132,16 @@ This proposal introduces `HTMLSubmitButtonBehavior`, which mirrors the submissio
 Each behavior exposes properties and methods from its corresponding native element. These are accessed via `this._internals.behaviors.<behaviorName>`. For `HTMLSubmitButtonBehavior`, the following properties are available (mirroring [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement)):
 
 **Properties:**
-- `disabled`
-- `form` (read-only)
+- `disabled` - The element is effectively disabled if either `behavior.disabled` is `true` or the element is disabled via attribute or is a descendant of `<fieldset disabled>` ([spec](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-disabled)).
+- `form` - read-only, delegates to `ElementInternals.form`.
 - `formAction`
 - `formEnctype`
 - `formMethod`
 - `formNoValidate`
 - `formTarget`
-- `labels` (read-only)
+- `labels` - read-only, delegates to `ElementInternals.labels`
 - `name`
 - `value`
-
-### Property synchronization
-
-`HTMLSubmitButtonBehavior` properties fall into three categories:
-
-| Property | Sync behavior |
-|----------|--------------|
-| `disabled` | **Combined** with element's disabled state (see below). |
-| `form` | **Read-only**, delegates to `ElementInternals.form`. |
-| `labels` | **Read-only**, delegates to `ElementInternals.labels`. |
-| `name`, `value` | **Independent** (behavior-specific, submitted with form). |
-| `formAction`, `formEnctype`, `formMethod`, `formNoValidate`, `formTarget` | **Independent** (behavior-specific, override form attributes). |
-
-##### Disabled state combination
-
-The element is effectively disabled if either:
-- `behavior.disabled` is `true`, or
-- The element is disabled via attribute or ancestor `<fieldset disabled>`.
-
-This allows:
-- Element-level disabling (via `disabled` attribute or ancestor `<fieldset disabled>`) to automatically disable submission.
-- Behavior-specific disabling without affecting other element functionality.
-
-```javascript
-class CustomSubmitButton extends HTMLElement {
-    static formAssociated = true;
-
-    constructor() {
-        super();
-        this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
-    }
-}
-
-const btn = document.createElement('custom-submit-button');
-
-// Disable via the behavior.
-btn._internals.behaviors.htmlSubmitButton.disabled = true;
-// Element is effectively disabled — clicking won't submit.
-
-// Or disable via the element attribute.
-btn.setAttribute('disabled', '');
-// Also effectively disabled.
-
-// Or disable via ancestor fieldset.
-const fieldset = document.createElement('fieldset');
-fieldset.disabled = true;
-fieldset.appendChild(btn);
-// Also effectively disabled.
-```
 
 ```javascript
 class CustomSubmitButton extends HTMLElement {
