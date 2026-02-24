@@ -164,6 +164,13 @@ Whether additional compressible binary resource types should be subject to compr
 **Handling of very small text resources**
 For sufficiently small payloads, the overhead of applying HTTP compression may outweigh its benefits, depending on the compression algorithm and transport. Allowing exceptions or lower bounds for compression requirements on very small resources is a potential refinement. However, introducing such exceptions raises questions around threshold selection, which would need to be considered during incubation. For example, whether a single common threshold should apply across compression algorithms, or whether algorithm‑specific thresholds would be appropriate.
 
+**Aggregate network behavior and per-resource criteria**
+The current policy focuses on per-resource heuristics as proxies for inefficient network usage. While these criteria are simple to reason about and enforce, they do not capture all cases where network behavior may have disproportionate performance impact.
+
+In particular, a large number of individually small resources can collectively incur significant network cost (due to overhead and related effects). Whether and how aggregate network behavior (like transferred bytes, request counts, or rate‑based metrics) should be surfaced as part of this policy remains an open question.
+
+Introducing aggregate criteria raises additional design considerations, including how such behavior should be measured, what thresholds would be appropriate across devices and network conditions, and how policy violations should be attributed and reported. Given these uncertainties, aggregate network behavior is treated as an area for further exploration rather than part of the initial policy definition.
+
 ### Future considerations: cross-document reporting
 
 While we believe the proposed policy is useful and complete as defined in this document, enabling controlled reporting across document boundaries would further amplify the value of this signal in embedded scenarios. In many real‑world cases, inefficient resource usage originates in a nested document, while the resulting performance impact is primarily experienced by the embedding document. Allowing embedders to receive policy violation information would enable more effective diagnosis and remediation of such issues.
