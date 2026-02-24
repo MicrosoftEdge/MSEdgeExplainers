@@ -24,13 +24,11 @@ We’d like to propose a new API to set the default audio output device for the 
 
 - Developers can modify the default audio output for the top-level frame page.
 - Developers can modify the default audio output for the sub frame pages.
-- Developers can modify the default audio output for the top-level frame and all other sub frames from any same-origin sub frame.
 - Any media element or audio context can continue to override this default setting using the existing setSinkId API (cross-origin iframes continue to need 'speaker_selection' permission to call setSinkId).
 
 ## Non Goals
 - A change notification for default audio output is not in scope of this project.
 - Requiring a permission policy for calling the API. Since permission is gated on the speaker_selection permission, access to the API is already reasonably constrained.
-- A change of the sinkId property for the default device ID. It will continue to return the existing default device ID (an empty string).
 
 ## Use Cases
 
@@ -73,7 +71,7 @@ Return:
 
 Exceptions:
   NotAllowedError DOMException
-    Returned if a cross-origin sub frame tries to call the API.
+    Returned if a sub frame tries to call the API.
 
   NotFoundError DOMException
     Returned if the deviceId does not match any audio output device.
@@ -82,9 +80,9 @@ Exceptions:
     Returned if switching the audio output device to the new audio device failed.
 ```
 
-This API is accessible from the top-level frame and the same-origin sub frames and allows modification of the default audio output for both
-the top-level frame and all sub frames, regardless of their origins. However, it’s important to note that this change does not affect custom
-audio outputs specified using the setSinkId method in media element or audio context.
+This API is accessible from the top-level frame and allows modification of the default audio output for both the top-level frame and all sub frames, 
+regardless of their origins. However, it’s important to note that this change does not affect custom audio outputs specified using the setSinkId 
+method in media element or audio context.
 
 Remember to call this API within a secure context (using HTTPS).
 
@@ -178,6 +176,3 @@ Here are the key points of this approach:
 * Drawback: The frame itself must explicitly call setSinkId for any specific audio outputs it requires in the current frame.
 
 In summary, the pros of this alternative include muting capabilities while maintaining the responsibility for individual frame audio settings.
-
-## Open Questions
-* Do we have to provide permission policy (e.g. speaker-selection) for the top-level frame to allow cross-origin sub frame to be able to call the API?
