@@ -939,6 +939,7 @@ The following table compares pros and cons of the various proposals:
 * What happens in scenarios that cross document boundaries, such as `Document.parseHTMLUnsafe`?
 * How can developers check for and polyfill `shadowrootadoptedstylesheets`, given that the template element disappears from the DOM?
 * Is it possible to define an intentional race between an async preload of an external stylesheet and a just-in-time definition of a declarative module and only apply the one that wins? This might not be possible due to the fact that specifiers are unique.
+* Can this proposal work with non-constructable stylesheets? See https://github.com/w3c/csswg-drafts/issues/10013.
 
 ## References and acknowledgements
 Many thanks for valuable feedback and advice from other contributors:
