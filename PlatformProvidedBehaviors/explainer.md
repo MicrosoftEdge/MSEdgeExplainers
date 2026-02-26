@@ -180,7 +180,7 @@ When `attachInternals()` is called with behaviors, each behavior is attached to 
 | Element disconnected from DOM | Behavior state is preserved. Event handlers remain conceptually attached but inactive. |
 | Element reconnected to DOM | Event handlers become active again. Behavior state (e.g., `formAction`, `disabled`) is preserved. |
 
-*Note: Behaviors are immutable after `attachInternals()`. See the [open question on dynamic behaviors](#should-we-support-dynamic-behavior-updates-in-the-future).*
+*Note: Behaviors are immutable after `attachInternals()`. See the [open question on dynamic behaviors](#should-we-support-dynamic-behavior-updates).*
 
 ### Duplicate behaviors
 
