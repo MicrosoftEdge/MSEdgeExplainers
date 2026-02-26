@@ -1018,7 +1018,7 @@ If `HTMLSubmitButtonBehavior` uses manual delegation but `HTMLCheckboxBehavior` 
 
 ### Should we support dynamic behavior updates?
 
-This proposal uses static behaviors: once attached via `attachInternals()`, behaviors cannot be added, removed, or replaced. One argument to support dynamic behavior updates is to mirror native `<input>` element flexibility, where changing the `type` attribute switches between radically different behaviors (text field → checkbox → date picker). However, feedback suggests that `<input>`'s design is widely considered a mistake that shouldn't be emulated:
+This proposal uses static behaviors: once attached via `attachInternals()`, behaviors cannot be added, removed, or replaced. One argument to support dynamic behavior updates is to mirror native `<input>` element flexibility, where changing the `type` attribute switches between radically different behaviors (text field → checkbox → date picker). However, feedback suggests that `<input>`'s design shouldn't be emulated:
 
 - The `type` attribute fundamentally changes what the element is.
 - Different input types have incompatible properties (`checked` vs `value` vs `files`).
@@ -1179,7 +1179,7 @@ Expose individual primitives (focusability, disabled, keyboard activation) direc
 **Cons:**
 - Primitives like `disabled` and `focusable` interact with each other, with accessibility, and with event handling. Setting `internals.disabled = true` without the associated behavior might result in the element *looking* disabled but still receiving clicks, remaining in the tab order, and submitting with a form.
 - Even seemingly simple primitives like focusability could have significant complexity around accessibility integration. This is why `popovertarget` is limited to buttons(it was originally intended for any element, but the accessibility requirements around focusability and activation made buttons the practical choice).
-- Form submission participation is can actually be seen as a primitive itself (it can't be broken down further due to accessibility concerns).
+- Form submission participation can be seen as a primitive itself (it can't be broken down further due to accessibility concerns).
 
 ## Accessibility, security, and privacy considerations
 
