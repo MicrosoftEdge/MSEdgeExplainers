@@ -80,17 +80,18 @@ This proposal is informed by:
 
 ## Proposed approach
 
-This proposal introduces a `behaviors` option to `attachInternals()` and two properties on `ElementInternals`: a read-only `behaviors` property for accessing behavior state, and a `behaviorList` property for dynamically updating attached behaviors. This enables composition while keeping the API simple.
+This proposal introduces a `behaviors` option to `attachInternals()`. Behaviors are instantiated with `new` and attached via the options object. Once attached, behaviors can't be added, removed, or replaced. The `behaviors` property on `ElementInternals` provides read-only access to the attached behaviors.
 
 ```javascript
-// Attach a behavior during initialization.
-this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+// Instantiate the behavior and attach it.
+this._submitBehavior = new HTMLSubmitButtonBehavior();
+this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
 
-// Access and modify behavior state.
-this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
+// Access behavior state directly via the stored reference.
+this._submitBehavior.formAction = '/custom';
 
-// Dynamically update the behavior list (ObservableArray).
-this._internals.behaviorList[0] = HTMLButtonBehavior;  // Replace at index.
+// Access attached behaviors (read-only).
+console.log(this._internals.behaviors);
 ```
 
 ### Platform-provided behaviors
@@ -124,7 +125,7 @@ This proposal introduces `HTMLSubmitButtonBehavior`, which mirrors the submissio
 
 ### Accessing behavior state
 
-Each behavior exposes properties and methods from its corresponding native element. These are accessed via `this._internals.behaviors.<behaviorName>`. For `HTMLSubmitButtonBehavior`, the following properties are available (mirroring [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement)):
+Each behavior exposes properties and methods from its corresponding native element. Behaviors can be accessed directly via the stored reference. For `HTMLSubmitButtonBehavior`, the following properties are available (mirroring [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement)):
 
 **Properties:**
 - `disabled` - The element is effectively disabled if either `behavior.disabled` is `true` or the element is disabled via attribute or is a descendant of `<fieldset disabled>` ([spec](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-disabled)).
@@ -142,119 +143,89 @@ Each behavior exposes properties and methods from its corresponding native eleme
 class CustomSubmitButton extends HTMLElement {
     constructor() {
         super();
-        this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+        this._submitBehavior = new HTMLSubmitButtonBehavior();
+        this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
     }
 
     get disabled() {
-        return this._internals.behaviors.htmlSubmitButton.disabled;
+        return this._submitBehavior.disabled;
     }
 
     set disabled(val) {
-        this._internals.behaviors.htmlSubmitButton.disabled = val;
+        this._submitBehavior.disabled = val;
     }
 
     get formAction() {
-        return this._internals.behaviors.htmlSubmitButton.formAction;
+        return this._submitBehavior.formAction;
     }
 
     set formAction(val) {
-        this._internals.behaviors.htmlSubmitButton.formAction = val;
+        this._submitBehavior.formAction = val;
     }
 }
 ```
 
-Behavior state is only accessible through `ElementInternals`, which is private to the element. To expose properties like `disabled` or `formAction` to external code, authors must define getters and setters. Authors are also responsible for attribute reflection (observing HTML attributes and mapping them to the corresponding properties). This gives authors full control over their element's public API.
-
-### Updating behaviors dynamically
-
-To support dynamic behavior changes (e.g., when the `type` attribute changes), `ElementInternals` exposes a `behaviorList` property as an [`ObservableArray`](https://webidl.spec.whatwg.org/#idl-observable-array) which supports in-place mutations:
-
-```javascript
-// Replace the entire list.
-this._internals.behaviorList = [HTMLSubmitButtonBehavior];
-
-// Replace a behavior at a specific index.
-this._internals.behaviorList[0] = HTMLButtonBehavior;
-```
+To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. Authors are also responsible for attribute reflection (observing HTML attributes and mapping them to the corresponding properties). This gives authors full control over their element's public API.
 
 ### Behavior lifecycle
 
-When the `behaviorList` is modified (via assignment or indexed assignment), the implementation observes the changes:
+When `attachInternals()` is called with behaviors, each behavior is attached to the element:
 
-| Scenario | Behavior |
-|----------|----------|
-| Behavior added | The behavior is attached. Its event handlers become active. Default ARIA role is applied unless overridden by `ElementInternals.role`. |
-| Behavior removed | The behavior is detached. Its event handlers are deactivated. Behavior-specific state (e.g., `formAction`, `disabled`) is cleared to default values. |
-| Behavior retained (in both lists) | The behavior's state is preserved. Its position in the list may change. |
+| Event | Effect |
+|-------|--------|
+| `attachInternals()` called with behaviors | Each behavior is attached. Event handlers become active. Default ARIA role is applied unless overridden by `ElementInternals.role`. |
+| Element disconnected from DOM | Behavior state is preserved. Event handlers remain conceptually attached but inactive. |
+| Element reconnected to DOM | Event handlers become active again. Behavior state (e.g., `formAction`, `disabled`) is preserved. |
 
-*Note: Behavior state is preserved when the custom element is disconnected and reconnected to the DOM (e.g., moved within the document).*
-
-When a behavior is removed from the list, its state is cleared. If the same behavior is added back later, it starts with default state:
-
-```javascript
-// Set `formAction` on the submit behavior.
-this._internals.behaviors.htmlSubmitButton.formAction = '/custom-action';
-
-// Re-add the submit behavior — it starts with default state.
-this._internals.behaviorList.push(HTMLSubmitButtonBehavior);
-
-// formAction is now back to default (empty string).
-console.log(this._internals.behaviors.htmlSubmitButton.formAction);  // ''
-```
-
-If web authors need to preserve state when swapping behaviors, they should save and restore it explicitly.
+*Note: Behaviors are immutable after `attachInternals()`. See the [open question on dynamic behaviors](#should-we-support-dynamic-behavior-updates-in-the-future).*
 
 ### Duplicate behaviors
 
-Specifying the same behavior multiple times throws a `TypeError`. This applies to both the initial `attachInternals()` call and later modifications to `behaviorList`.
+Attaching the same behavior instance to multiple elements, or including duplicates in the behaviors array, throws a `TypeError`.
 
-Throws `TypeError` due to duplicate behavior in behaviors list:
+Throws `TypeError` due to duplicate behavior instance:
 ```javascript
+const sharedBehavior = new HTMLSubmitButtonBehavior();
 this._internals = this.attachInternals({
-  behaviors: [HTMLSubmitButtonBehavior, HTMLSubmitButtonBehavior]
+  behaviors: [sharedBehavior, sharedBehavior]
 });
 ```
 
-Also throws if duplicates are added later:
+Throws `TypeError` if a behavior instance is already attached to another element:
 ```javascript
-this._internals.behaviorList = [HTMLSubmitButtonBehavior];
-this._internals.behaviorList.push(HTMLSubmitButtonBehavior);  // Throws `TypeError`.
+const sharedBehavior = new HTMLSubmitButtonBehavior();
+element1._internals = element1.attachInternals({ behaviors: [sharedBehavior] });
+element2._internals = element2.attachInternals({ behaviors: [sharedBehavior] });  // Throws `TypeError`.
 ```
 
-### Naming Consistency
+Throws if multiple instances of the same behavior type are attached, even if they are separate objects:
+```javascript
+const behavior1 = new HTMLSubmitButtonBehavior();
+const behavior2 = new HTMLSubmitButtonBehavior();
+this._internals = this.attachInternals({
+  behaviors: [behavior1, behavior2]  // Throws `TypeError`.
+});
+```
+This restriction exists because having two instances of the same behavior type on one element creates ambiguity.
 
-The current API uses:
+### API design
 
-- `behaviors` option in `attachInternals({ behaviors: [...] })`.
-- `behaviors` property for read-only named access (e.g., `internals.behaviors.htmlSubmitButton`).
-- `behaviorList` property for mutable array access.
+The current API uses instantiated behaviors with a single `behaviors` property:
+
+- `behaviors` option in `attachInternals({ behaviors: [...] })` accepts behavior instances.
+- `behaviors` property on `ElementInternals` is a read-only `FrozenArray<PlatformBehavior>`.
+- Developers hold direct references to their behavior instances.
 
 **Pros:**
-- Mirrors platform patterns where a concept has both a read-only view and a mutable collection (e.g., `classList` and `class` attribute, `relList` and `rel` attribute).
-- Named access via `this._internals.behaviors.<behaviorName>` is convenient (no iteration needed) way to access a specific behavior's state.
-- Clear separation of concerns: `behaviors` for reading/modifying behavior state, `behaviorList` for adding/removing behaviors.
+- Single property name.
+- No array lookup or `instanceof` checks needed as developers hold direct references.
+- *Future* developer-defined behaviors are simpler: just instantiate and attach.
+- Consistent mental model: behaviors are objects you create and manage.
+- Static behaviors simplify implementation (no lifecycle callbacks needed).
 
 **Cons:**
-- Two property names (`behaviors` vs `behaviorList`) for related concepts may be confusing.
-- Authors must remember which property to use: `behaviors` for state access, `behaviorList` for mutations.
-- The name `behaviorList` is less intuitive than simply `behaviors`.
-
-#### Alternative 1: Use `behaviors` everywhere (instantiated behaviors)
-
-Behaviors are instantiated with `new` rather than passed as global class references, that way the author can access the behavior instance on a property (no lookup, no extra getter).
-
-```javascript
-// Instantiate the behavior and attach it.
-this._submitBehavior = new HTMLSubmitButtonBehavior();
-this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
-
-// Access behavior state directly via the stored reference.
-this._submitBehavior.formAction = '/custom';
-
-// To swap behaviors, instantiate and replace.
-this._buttonBehavior = new HTMLButtonBehavior();
-this._internals.behaviors[0] = this._buttonBehavior;
-```
+- Requires developers to manage behavior instances themselves.
+- More setup code compared to passing class references directly.
 
 *For future developer-defined behaviors:*
 
@@ -277,21 +248,30 @@ this._internals = this.attachInternals({ behaviors: [this._tooltipBehavior] });
 this._tooltipBehavior.content = 'Helpful tooltip text';
 ```
 
+#### Alternative 1: Class references
+
+Pass behavior classes (not instances) to `attachInternals()`:
+
+```javascript
+// Attach a behavior during initialization (class reference).
+this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+
+// Access behavior state via named accessor.
+this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
+```
+
 **Pros:**
-- Simpler API with a single property name (no `behaviors` vs `behaviorList` split).
-- No array lookup or `instanceof` checks needed as developers hold direct references.
-- *Future* developer-defined behaviors are simpler: just instantiate and attach.
-- Consistent mental model: behaviors are objects you create and manage.
+- Named access via `this._internals.behaviors.<behaviorName>` requires no iteration.
+- Less setup code as developers don't manage behavior instances.
 
 **Cons:**
-- Requires developers to manage behavior instances themselves.
-- More setup code compared to passing class references directly.
+- Less flexible: can't configure behavior before attachment.
+- Requires a `behaviors` interface for named access.
+- *Future* developer-defined behaviors would need a naming convention.
 
 #### Alternative 2: Add a getter for named access
 
-- `attachInternals({ behaviors: [...] })` for the initial attachment.
-- `internals.behaviors` returns the mutable `ObservableArray`.
-- Add a `getBehavior(name)` method for named access and remove the separate named-access object (`this._internals.behaviors`).
+Add a `getBehavior(name)` method for named access to the behaviors array:
 
 ```javascript
 // Named access via method.
@@ -302,30 +282,13 @@ if (submitBehavior) {
 ```
 
 **Pros:**
-- Simpler API with a single property name.
-- Named access is still available via a method.
+- Named access is available via a method.
+- Works alongside direct references.
 
 **Cons:**
-- `getBehavior()` is more verbose than `behaviors.htmlSubmitButton`.
-- Still two ways to access behaviors (array vs method), which could cause confusion.
-
-#### Alternative 3: Set instead of ObservableArray
-
-Use a `Set<PlatformBehavior>` instead of an array for `behaviorList`:
-
-```javascript
-// Check for behavior
-if (this._internals.behaviorList.has(HTMLSubmitButtonBehavior)) { ... }
-```
-
-**Pros:**
-- Fit for the "no duplicates" constraint.
-- Clear add/delete semantics familiar to web authors.
-- No need for indexed access.
-
-**Cons:**
-- Sets are unordered in concept, which could complicate conflict resolution if order matters.
-- `ObservableArray` already has established patterns.
+- `getBehavior()` is verbose.
+- Two ways to access behaviors (stored reference vs method) could cause confusion.
+- Developers already hold direct references, so this adds little value.
 
 ### Behavior composition and conflict resolution
 
@@ -354,8 +317,10 @@ The order of behaviors in the array determines precedence. The last behavior in 
 
 ```javascript
 // Last behavior's role wins.
+this._labelBehavior = new HTMLLabelBehavior();
+this._submitBehavior = new HTMLSubmitButtonBehavior();
 this._internals = this.attachInternals({
-  behaviors: [HTMLLabelBehavior, HTMLSubmitButtonBehavior]
+  behaviors: [this._labelBehavior, this._submitBehavior]
 });
 
 // The element's implicit role is "button" (from HTMLSubmitButtonBehavior, last in list).
@@ -378,8 +343,10 @@ class LabeledSubmitButton extends HTMLElement {
 
   constructor() {
     super();
+    this._labelBehavior = new HTMLLabelBehavior();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
     this._internals = this.attachInternals({
-      behaviors: [HTMLLabelBehavior, HTMLSubmitButtonBehavior]
+      behaviors: [this._labelBehavior, this._submitBehavior]
     });
   }
 }
@@ -395,7 +362,7 @@ If the author wants both behaviors' handlers to run, they must manually invoke t
 ```javascript
 this.addEventListener('click', () => {
   // Manually trigger label behavior's focus delegation.
-  const labelTarget = this._internals.behaviors.htmlLabel?.control;
+  const labelTarget = this._labelBehavior?.control;
   if (labelTarget) {
     labelTarget.focus();
   }
@@ -422,8 +389,10 @@ class LabeledSubmitButton extends HTMLElement {
 
   constructor() {
     super();
+    this._labelBehavior = new HTMLLabelBehavior();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
     this._internals = this.attachInternals({
-      behaviors: [HTMLLabelBehavior, HTMLSubmitButtonBehavior]
+      behaviors: [this._labelBehavior, this._submitBehavior]
     });
   }
 }
@@ -461,13 +430,17 @@ Any combination not explicitly allowed would be rejected by `attachInternals()`,
 
 ```javascript
 // This would work if anchor were made compatible with button (nav-button pattern).
-this.attachInternals({ 
-  behaviors: [HTMLButtonBehavior, HTMLAnchorBehavior]
+this._buttonBehavior = new HTMLButtonBehavior();
+this._anchorBehavior = new HTMLAnchorBehavior();
+this.attachInternals({
+  behaviors: [this._buttonBehavior, this._anchorBehavior]
 });
 
 // Throws: checkbox is not compatible with submit button.
-this.attachInternals({ 
-  behaviors: [HTMLSubmitButtonBehavior, HTMLCheckboxBehavior]
+this._submitBehavior = new HTMLSubmitButtonBehavior();
+this._checkboxBehavior = new HTMLCheckboxBehavior();
+this.attachInternals({
+  behaviors: [this._submitBehavior, this._checkboxBehavior]
 });
 // Error message: "HTMLSubmitButtonBehavior is not compatible with HTMLCheckboxBehavior".
 ```
@@ -498,8 +471,10 @@ class LabeledSubmitButton extends HTMLElement {
 
   constructor() {
     super();
+    this._labelBehavior = new HTMLLabelBehavior();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
     this._internals = this.attachInternals({ 
-      behaviors: [HTMLLabelBehavior, HTMLSubmitButtonBehavior],
+      behaviors: [this._labelBehavior, this._submitBehavior],
       resolve: {
         role: 'button',  // Use button role.
         click: 'all',  // Both handlers run. Also could be 'first', 'last'.
@@ -524,7 +499,6 @@ class LabeledSubmitButton extends HTMLElement {
 
 This proposal supports common web component patterns:
 
-- Authors can define a single class that handles multiple modes (submit, reset, button) by updating `behaviorList` at runtime in response to attribute changes, without needing to define separate classes for each behavior.
 - A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active behaviors.
 - `HTMLSubmitButtonBehavior` and subsequent platform-provided behaviors should be understood as bundles of state, event handlers, and accessibility defaults and not opaque tokens. Web authors can reason about what a behavior provides (e.g., click/Enter triggers form submission, implicit `role="button"`, focusability, `:disabled` pseudo-class) and anticipate how it composes with other behaviors. This framework would also enable polyfilling: because behaviors have well-defined capabilities, authors can approximate new behaviors in *userland* before native support ships (see [Developer-defined behaviors](#developer-defined-behaviors) in [Future Work](#future-work)).
 - This proposal targets autonomous custom elements that need platform behavior (e.g., when needing Shadow DOM and custom APIs or building a design system component that is an autonomous custom element). Making native elements more flexible (Customizable Select, open-stylable controls) is valuable and complementary, but doesn't completely eliminate the need for autonomous custom elements.
@@ -541,87 +515,66 @@ This proposal supports common web component patterns:
 
 ### Use case: Design system button
 
-While this proposal only introduces `HTMLSubmitButtonBehavior`, the example below references `HTMLResetButtonBehavior` and `HTMLButtonBehavior` to illustrate how switching would work once additional behaviors become available in the future.
+With static behaviors, a design system can use delayed `attachInternals()` to determine the behavior based on the initial `type` attribute. This approach uses a single class while keeping behaviors immutable after attachment.
 
 ```javascript
-class DesignSystemButton extends HTMLElement {
+class DSButton extends HTMLElement {
     static formAssociated = true;
-    static observedAttributes = ['type', 'disabled', 'formaction'];
+
+    // Behavior reference (set once in connectedCallback).
+    #behavior = null;
+    #internals = null;
 
     constructor() {
         super();
-        this._internals = this.attachInternals();
         this.attachShadow({ mode: "open" });
     }
 
     connectedCallback() {
-        this._updateBehaviors();
-        this._syncAttributes();
-        this._render();
-    }
-
-    attributeChangedCallback(name, oldVal, newVal) {
-        if (name === 'type') {
-            this._updateBehaviors();
+        // Attach behaviors once, based on initial type attribute.
+        if (!this.#internals) {
+            const type = this.getAttribute('type') || 'button';
+            this.#behavior = this.#createBehaviorForType(type);
+            this.#internals = this.attachInternals({ behaviors: [this.#behavior] });
         }
-        this._syncAttributes();
-        this._render();
+        this.#render();
     }
 
-    _updateBehaviors() {
-        const type = this.getAttribute('type');
-        // Set the appropriate behavior based on type.
-        if (type === 'submit') {
-            this._internals.behaviorList = [HTMLSubmitButtonBehavior];
-        } else if (type === 'reset') {
-            this._internals.behaviorList = [HTMLResetButtonBehavior];
-        } else {
-            this._internals.behaviorList = [HTMLButtonBehavior];
+    #createBehaviorForType(type) {
+        switch (type) {
+            case 'submit': return new HTMLSubmitButtonBehavior();
+            case 'reset': return new HTMLResetButtonBehavior();
+            default: return new HTMLButtonBehavior();
         }
     }
 
-    _syncAttributes() {
-        // Sync HTML attributes to behavior state.
-        const submitBehavior = this._internals.behaviors.htmlSubmitButton;
-        if (submitBehavior) {
-            submitBehavior.formAction = this.getAttribute('formaction') || '';
-        }
-        // Other attributes like `disabled`, `value`, etc. would be set on
-        // the proper behavior interface.
-    }
+    // Expose behavior properties.
+    get disabled() { return this.#behavior.disabled; }
+    set disabled(val) { this.#behavior.disabled = val; }
 
-    // Expose element state.
-    get type() {
-        return this.getAttribute('type') || 'button';
+    get formAction() { 
+        // Only submit buttons have formAction.
+        return this.#behavior.formAction ?? ''; 
     }
-    set type(val) {
-        this.setAttribute('type', val);
-    }
-
-    get formAction() {
-        return this._internals.behaviors.htmlSubmitButton?.formAction ?? '';
-    }
-    set formAction(val) {
-        if (this._internals.behaviors.htmlSubmitButton) {
-            this._internals.behaviors.htmlSubmitButton.formAction = val;
+    set formAction(val) { 
+        if ('formAction' in this.#behavior) {
+            this.#behavior.formAction = val; 
         }
     }
 
-    // Additional getters/setters for `disabled`, `formMethod`, `formEnctype`,
-    // `formNoValidate`, `formTarget`, `name`, and `value` would follow the
-    // same pattern.
+    // Additional properties: formMethod, formEnctype, formNoValidate, formTarget, name, value
 
-    _render() {
-        const isSubmit = this._internals.behaviorList.includes(HTMLSubmitButtonBehavior);
-        const isReset = this._internals.behaviorList.includes(HTMLResetButtonBehavior);
-
+    #render() {
         this.shadowRoot.innerHTML = `
-            <style>...</style>
-            ${isSubmit ? '💾' : isReset ? '🔄' : ''} <slot></slot>
+            <style>
+                :host { display: inline-block; padding: 8px 16px; cursor: pointer; }
+                :host(:disabled) { opacity: 0.5; cursor: not-allowed; }
+            </style>
+            <slot></slot>
         `;
     }
 }
-customElements.define('ds-button', DesignSystemButton);
+customElements.define('ds-button', DSButton);
 ```
 
 ```html
@@ -637,7 +590,7 @@ customElements.define('ds-button', DesignSystemButton);
     <!-- Reset button. -->
     <ds-button type="reset">Reset</ds-button>
 
-    <!-- Regular button. -->
+    <!-- Regular button (default when no type specified). -->
     <ds-button>Cancel</ds-button>
 </form>
 ```
@@ -646,12 +599,13 @@ The element gains:
 
 - Click and keyboard activation (Space/Enter).
 - Focusability (participates in tab order; removed when disabled).
-- Implicit ARIA `role="button"` that can be overriden by the web author.
-- Form submission on activation.
+- Implicit ARIA `role="button"` that can be overridden by the web author.
+- Behavior-specific capabilities (form submission, reset, etc.) based on initial `type`.
 - CSS pseudo-class matching: `:default`, `:disabled`/`:enabled`.
-- Participation in implicit form submission.
-- Attributes can be changed at runtime to switch between behaviors.
-- Behavior properties like `disabled` and `formAction` are accessible via `this._internals.behaviors` and can be exposed.
+- Participation in implicit form submission (for submit buttons).
+- Behavior properties like `disabled` and `formAction` are accessible via the stored behavior reference.
+
+*Note: Since behaviors are static, changing the `type` attribute after the element connects has no effect on behavior. The type is determined once at connection time. This mirrors the recommendation to avoid `<input>`-style dynamic type switching.*
 
 ### Framework use cases
 
@@ -729,8 +683,10 @@ Combining `HTMLButtonBehavior` (from `<button type=button>`) with `HTMLAnchorBeh
 class NavButton extends HTMLElement {
   constructor() {
     super();
+    this._buttonBehavior = new HTMLButtonBehavior();
+    this._anchorBehavior = new HTMLAnchorBehavior();
     this._internals = this.attachInternals({ 
-      behaviors: [HTMLButtonBehavior, HTMLAnchorBehavior]
+      behaviors: [this._buttonBehavior, this._anchorBehavior]
     });
     // Explicitly set the role.
     this._internals.role = 'link';
@@ -738,7 +694,7 @@ class NavButton extends HTMLElement {
 
   connectedCallback() {
     // Set navigation target.
-    this._internals.behaviors.htmlAnchor.href = this.getAttribute('href');
+    this._anchorBehavior.href = this.getAttribute('href');
   }
 }
 customElements.define('nav-button', NavButton);
@@ -768,8 +724,10 @@ Even with an explicit role, this pattern may confuse users who expect consistent
 Some behaviors are inherently mutually exclusive.
 
 ```javascript
+this._checkboxBehavior = new HTMLCheckboxBehavior();
+this._radioBehavior = new HTMLRadioGroupBehavior();
 this.attachInternals({ 
-  behaviors: [HTMLCheckboxBehavior, HTMLRadioGroupBehavior]
+  behaviors: [this._checkboxBehavior, this._radioBehavior]
 });
 ```
 
@@ -850,27 +808,26 @@ class TooltipBehavior extends PlatformBehavior {
   set content(val) {
     this.#content = val;
   }
-
-  // Name used for `internals.behaviors.<name>` access.
-  static behaviorName = 'tooltip';
 }
 ```
 
-Behaviors are classes with the appropriate methods (`behaviorAttachedCallback`, `behaviorDetachedCallback`) and an optional static `behaviorName` property for named access. The behavior class is passed directly to `behaviors`:
+Behaviors are classes with the appropriate methods (`behaviorAttachedCallback`, `behaviorDetachedCallback`). The behavior is instantiated and passed to `behaviors`:
 
 ```javascript
 class CustomButton extends HTMLElement {
   constructor() {
     super();
 
-    this._internals = this.attachInternals({ 
-      behaviors: [TooltipBehavior, HTMLSubmitButtonBehavior] 
+    this._tooltipBehavior = new TooltipBehavior();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
+    this._internals = this.attachInternals({
+      behaviors: [this._tooltipBehavior, this._submitBehavior]
     });
   }
 
   connectedCallback() {
-    // Named access uses the static behaviorName property.
-    this._internals.behaviors.tooltip.content = this.getAttribute('tooltip');
+    // Access state directly via the stored reference.
+    this._tooltipBehavior.content = this.getAttribute('tooltip');
   }
 }
 ```
@@ -963,7 +920,6 @@ Although the polyfill above can't fully replicate a native `<dialog>` element (n
 
 - They can compose with platform-provided behaviors.
 - The same conflict resolution strategies that apply to platform behaviors would need to work with developer-defined behaviors.
-- Named access via `internals.behaviors.<name>` uses the static `behaviorName` property on the class. If omitted, the behavior would only be accessible via array iteration or `find()`.
 
 ### Behaviors in native HTML elements
 
@@ -973,7 +929,7 @@ Although this proposal currently focuses on custom elements, the behavior patter
 
 ### Should behavior properties be automatically exposed on the element?
 
-The current proposal requires developers to manually create getters/setters that delegate to `this._internals.behaviors.htmlSubmitButton.*`. There are alternative approaches worth considering:
+The current proposal requires developers to manually create getters/setters that delegate to the stored behavior instance (e.g., `this._submitBehavior.*`). There are alternative approaches worth considering:
 
 #### Option A: Manual property delegation (current proposal)
 
@@ -995,7 +951,8 @@ The platform automatically adds behavior properties to the custom element:
 class CustomSubmitButton extends HTMLElement {
     constructor() {
         super();
-        this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+        this._submitBehavior = new HTMLSubmitButtonBehavior();
+        this.attachInternals({ behaviors: [this._submitBehavior] });
     }
 }
 
@@ -1030,11 +987,13 @@ A middle ground where authors can choose:
 
 ```javascript
 // Explicit delegation (default).
-this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+this._submitBehavior = new HTMLSubmitButtonBehavior();
+this.attachInternals({ behaviors: [this._submitBehavior] });
 
 // Opt-in to automatic exposure.
+this._submitBehavior = new HTMLSubmitButtonBehavior();
 this.attachInternals({ 
-    behaviors: [HTMLSubmitButtonBehavior],
+    behaviors: [this._submitBehavior],
     exposeProperties: true  // or list specific properties.
 });
 ```
@@ -1059,6 +1018,81 @@ Future behaviors would likely require developers to expose certain properties fo
 
 If `HTMLSubmitButtonBehavior` uses manual delegation but `HTMLCheckboxBehavior` uses automatic exposure, we'd have an inconsistent API surface. This argues for deciding on a consistent approach across all behaviors from the start.
 
+### Should we support dynamic behavior updates in the future?
+
+This proposal uses static behaviors: once attached via `attachInternals()`, behaviors cannot be added, removed, or replaced. The `behaviors` property returns a read-only `FrozenArray<PlatformBehavior>`.
+
+```webidl
+partial interface ElementInternals {
+    // Set once, read-only after attachment
+    readonly attribute FrozenArray<PlatformBehavior> behaviors;
+};
+```
+
+#### Why static behaviors?
+
+The primary argument for dynamic behavior updates was to mirror native `<input>` element flexibility, where changing the `type` attribute switches between radically different behaviors (text field → checkbox → date picker). However, community feedback strongly suggests that `<input>`'s design is widely considered a mistake that shouldn't be emulated:
+
+> "...and we all agree that input's design is bad and shouldn't be emulated"
+
+[Monica Dinculescu's 2015 analysis](https://meowni.ca/posts/a-story-about-input/) ([video](https://www.youtube.com/watch?v=CG8hbhiSSbc)) documented the problems with `<input>`:
+
+- The `type` attribute fundamentally changes what the element *is*, not just how it behaves.
+- Different input types have incompatible properties (`checked` vs `value` vs `files`).
+- Legacy browser quirks required creating elements with the correct type upfront (e.g., `document.createElement("<INPUT type=RADIO name=radiogroup>")`).
+- The design makes `<input>` difficult to polyfill, style, and reason about.
+
+For behaviors, the same problems would apply: if behaviors could be swapped dynamically, authors would need to handle state migration, event handler cleanup, and property compatibility—complexity that benefits few real-world use cases.
+
+#### Real-world usage patterns
+
+The most commonly cited use case for dynamic type switching is password visibility toggles (`type="password"` ↔ `type="text"`). However, this specific use case:
+
+1. Doesn't involve the platform behaviors this proposal addresses (keyboard handling, form submission, accessibility semantics remain the same).
+2. Can be handled by a single behavior with a `masked` property rather than swapping behaviors.
+
+For button-like elements, the `type` attribute is typically set once at creation time. We've added UseCounters to Chromium (`kHTMLButtonElementTypeChangedAfterCreation`, `kHTMLInputElementTypeChangedAfterCreation`) to gather telemetry on how often native elements have their type changed after being connected to the document. Early indications suggest this pattern is rare.
+
+#### Design patterns for static behaviors
+
+Authors who need different behaviors for different element states have clear alternatives:
+
+**1. Separate element classes (recommended):**
+```javascript
+// Define separate custom elements for each behavior.
+customElements.define('ds-submit-button', DSSubmitButton);
+customElements.define('ds-reset-button', DSResetButton);
+customElements.define('ds-button', DSButton);
+```
+
+**2. Delayed `attachInternals()` based on initial attribute:**
+```javascript
+class MyButton extends HTMLElement {
+  static observedAttributes = ['type'];
+  #internals = null;
+  
+  attributeChangedCallback(name, old, value) {
+    if (name === 'type' && !this.#internals) {
+      // Attach with the correct behavior based on initial type.
+      this.#internals = this.attachInternals({ 
+        behaviors: [this.#getBehaviorForType(value)] 
+      });
+    }
+  }
+}
+```
+
+**3. Single behavior with mode property (if future behaviors support it):**
+```javascript
+// Hypothetical future API where a behavior supports multiple modes.
+this._buttonBehavior = new HTMLButtonBehavior();
+this._buttonBehavior.mode = 'submit';  // Later: 'reset' or 'button'
+```
+
+#### Future considerations
+
+If compelling use cases emerge that genuinely require dynamic behavior composition, the API could be extended to use `ObservableArray` with lifecycle callbacks. This would be a backwards-compatible change (making the array mutable doesn't break code that treats it as read-only). However, we believe static behaviors will cover the vast majority of real-world needs while keeping the API simple and the implementation straightforward.
+
 ## Alternatives considered
 
 ### Alternative 1: Static Class Mixins
@@ -1077,7 +1111,7 @@ class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 - Behavior is fixed at class definition time and authors might need to generate many class variations for different behavior combinations.
 - It strictly binds behavior to the JavaScript class hierarchy, making a future declarative syntax hard to implement without creating new classes.
 
-Rejected in favor of the imperative API because it prevents the "single class, multiple behaviors" pattern that is common in HTML (e.g., `<input>`, `<button>`).
+Rejected in favor of the imperative API because it doesn't allow behavior composition (attaching multiple complementary behaviors to a single element) and doesn't support configuring behavior state before attachment.
 
 ### Alternative 2: ElementInternals.type ([Proposed](../ElementInternalsType/explainer.md))
 
@@ -1254,6 +1288,7 @@ Many thanks for valuable feedback and advice from:
 
 Thanks to the following proposals, articles, frameworks, and languages for their work on similar problems that influenced this proposal.
 
+- [A "story" about `<input>`](https://meowni.ca/posts/a-story-about-input/) by [Monica Dinculescu](https://meowni.ca) — analysis of `<input>` element design problems that informed our decision to use static behaviors.
 - [Real Mixins with JavaScript Classes](https://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/) by [Justin Fagnani](https://github.com/justinfagnani).
 - [ElementInternals.type proposal](https://github.com/whatwg/html/issues/11061).
 - [Custom Attributes proposal](https://github.com/WICG/webcomponents/issues/1029).
