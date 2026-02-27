@@ -1181,6 +1181,30 @@ Expose individual primitives (focusability, disabled, keyboard activation) direc
 - Even seemingly simple primitives like focusability could have significant complexity around accessibility integration. This is why `popovertarget` is limited to buttons(it was originally intended for any element, but the accessibility requirements around focusability and activation made buttons the practical choice).
 - Form submission participation can be seen as a primitive itself (it can't be broken down further due to accessibility concerns).
 
+### Alternative 8: TC39 Decorators
+
+Use [TC39 decorators](https://github.com/tc39/proposal-decorators) to attach behaviors to custom element classes.
+
+```javascript
+@HTMLSubmitButtonBehavior
+class CustomButton extends HTMLElement {
+  // Decorator applies submit button behavior to the class.
+}
+customElements.define('custom-button', CustomButton);
+```
+
+**Pros:**
+- Clean, declarative syntax at the class level.
+- Familiar pattern for developers coming from other languages (Python, Java annotations) or TypeScript.
+- Allows composition.
+
+**Cons:**
+- Decorators operate at class definition time, not instance creation time. This creates the same limitation as static class mixins: behavior is fixed when the class is defined, not when instances are created (e.g., a design system couldn't offer a single `<ds-button>` class that adapts behavior based on the `type` attribute).
+- Instance-specific behavior configuration (e.g., setting `formAction` before attachment) isn't supported.
+- Decorators are inherently JavaScript syntax and don't support a future declarative, JavaScript-less approach to custom elements. This proposal's design decouples behaviors from the class definition, enabling future declarative syntax (see [Other considerations](#other-considerations)).
+
+`HTMLSubmitButtonBehavior` could itself be designed as a decorator, but decorators can't easily access `ElementInternals` or instance state during application. Decorators would need to coordinate with `attachInternals()` timing. Additionally, getting a reference to the behavior instance for property access (e.g., `behavior.formAction`) would require additional wiring.
+
 ## Accessibility, security, and privacy considerations
 
 ### Accessibility
@@ -1231,6 +1255,7 @@ Thanks to the following proposals, articles, frameworks, and languages for their
 - [ElementInternals.type proposal](https://github.com/whatwg/html/issues/11061).
 - [Custom Attributes proposal](https://github.com/WICG/webcomponents/issues/1029).
 - [TC39 Maximally Minimal Mixins proposal](https://github.com/tc39/proposal-mixins).
+- [TC39 Decorators proposal](https://github.com/tc39/proposal-decorators).
 - Lit framework's [reactive controllers pattern](https://lit.dev/docs/composition/controllers/).
 - [Expose certain behavioural attributes via ElementInternals proposal](https://github.com/whatwg/html/issues/11752).
 
