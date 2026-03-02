@@ -1024,7 +1024,7 @@ This proposal uses static behaviors: once attached via `attachInternals()`, beha
 - Different input types have incompatible properties (`checked` vs `value` vs `files`).
 - The design makes `<input>` difficult to style and reason about.
 
-*See [Monica Dinculescu's analysis](https://meowni.ca/posts/a-story-about-input/) documented the problems with `<input>`.*
+*See [Monica Dinculescu's analysis](https://meowni.ca/posts/a-story-about-input/) documenting the problems with `<input>`.*
 
 For behaviors, the same problems would apply: if behaviors could be swapped dynamically, authors would need to handle state migration, event handler cleanup, and property compatibility.
 
