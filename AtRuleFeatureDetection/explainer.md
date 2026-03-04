@@ -1,8 +1,9 @@
 # At-Rule Feature Detection
 
-## Authors:
+## Authors
 
 - [Kevin Babbitt](https://github.com/kbabbitt) (Microsoft)
+- [Diego Gonzalez](https://github.com/diekus) (Microsoft)
 
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/AtRuleFeatureDetection)
@@ -14,18 +15,17 @@
 
 
 - [At-Rule Feature Detection](#at-rule-feature-detection)
-  - [Authors:](#authors)
+  - [Authors](#authors)
   - [Participate](#participate)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
   - [User-Facing Problem](#user-facing-problem)
     - [Goals](#goals)
     - [Non-goals](#non-goals)
+      - [CSS `@charset`](#css-charset)
+      - [Context Aware feature detection](#context-aware-feature-detection)
   - [Proposed Approach](#proposed-approach)
     - [Detect whether an at-rule name is recognized at all](#detect-whether-an-at-rule-name-is-recognized-at-all)
-    - [Detect whether an at-rule, with optional prelude and/or block, is supported](#detect-whether-an-at-rule-with-optional-prelude-andor-block-is-supported)
-      - [Special case: The forgiving grammar of media queries](#special-case-the-forgiving-grammar-of-media-queries)
-    - [Detect whether a given declaration is supported within an at-rule block](#detect-whether-a-given-declaration-is-supported-within-an-at-rule-block)
   - [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
   - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
   - [References \& acknowledgements](#references--acknowledgements)
