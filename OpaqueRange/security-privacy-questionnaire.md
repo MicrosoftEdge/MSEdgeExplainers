@@ -57,7 +57,7 @@ No.
 `OpaqueRange` objects are tied to the document and are preserved along with it in BFCache, consistent with how DOM `Range` and `StaticRange` behave.
 
 ## 2.19. What happens when a document that uses your feature gets disconnected?
-All associated `OpaqueRange` objects have their offsets reset to 0 and are cleared from the element's set of associated OpaqueRanges.
+`OpaqueRange` objects remain valid and retain their offsets, consistent with how DOM `Range` behaves when a document is disconnected.
 
 ## 2.20. Does your spec define when and how new kinds of errors should be raised?
 Yes. `createValueRange()` throws `"NotSupportedError"` for unsupported `<input>` types and `"IndexSizeError"` for out-of-bounds offsets. These follow existing DOM error patterns (e.g. for Range) and do not expose new information.
