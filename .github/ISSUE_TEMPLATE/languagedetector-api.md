@@ -14,27 +14,3 @@ Before reporting your bug, check the [LanguageDetector API documentation](https:
 ### Bug description
 
 Enter a description of the issue you encountered, and state what you expected to happen instead.
-
-### Device performance class
-
-Enter the performance class of your device.
-
-To find the device performance class:
-1. In Microsoft Edge, go to `edge://on-device-internals`.
-2. Select the **Tools** tab, on the left.
-3. Note the **Device performance class** value, such as **Very High**.
-
-### Edge channel and version
-
-Enter the channel and version of Microsoft Edge you are using.
-
-To find the Edge channel and version:
-1. In Microsoft Edge, go to `edge://version`.
-2. Note the **Microsoft Edge** value, such as **147.0.3897.0 (Official build) canary (arm64)**.
-
-### Device information
-
-Provide the following information about your device:
-* The operating system, for example Windows 11.
-* The version of the operating system, for example 24H2.
-* The architecture of the operating system, for example x64.
