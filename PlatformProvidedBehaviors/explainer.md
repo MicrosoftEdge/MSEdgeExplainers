@@ -570,13 +570,13 @@ class DesignSystemButton extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (!this.#behavior) return;
+        if (!this.#behavior) {
+          return;
+        }
 
         switch (name) {
             case 'type':
-                // Type changes after connection are intentionally ignored.
-                // The behavior was determined at first connection and is immutable.
-                // This diverges from native <button> where type= can change at any time.
+              // Type changes after connection are intentionally ignored.
                 console.warn('ds-button: type attribute changes after connection have no effect.');
                 break;
             case 'disabled':
@@ -592,20 +592,28 @@ class DesignSystemButton extends HTMLElement {
 
     #createBehaviorForType(type) {
         switch (type) {
-            case 'submit': return new HTMLSubmitButtonBehavior();
-            case 'reset': return new HTMLResetButtonBehavior();
-            default: return new HTMLButtonBehavior();
+            case 'submit':
+                return new HTMLSubmitButtonBehavior();
+            case 'reset':
+                return new HTMLResetButtonBehavior();
+            default:
+                return new HTMLButtonBehavior();
         }
     }
 
     // Expose behavior properties.
-    get disabled() { return this.#behavior?.disabled ?? false; }
+    get disabled() {
+        return this.#behavior?.disabled ?? false;
+    }
     set disabled(val) {
-        if (this.#behavior) this.#behavior.disabled = val;
+        if (this.#behavior) {
+            this.#behavior.disabled = val;
+        }
         this.toggleAttribute('disabled', val);
     }
-
-    get formAction() { return this.#behavior?.formAction ?? ''; }
+    get formAction() {
+        return this.#behavior?.formAction ?? '';
+    }
     set formAction(val) {
         if (this.#behavior && 'formAction' in this.#behavior) {
             this.#behavior.formAction = val;
@@ -622,8 +630,7 @@ class DesignSystemButton extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
             <style>
-                :host { display: inline-block; padding: 8px 16px; cursor: pointer; }
-                :host(:disabled) { opacity: 0.5; cursor: not-allowed; }
+                ...
             </style>
             ${isSubmit ? '💾' : isReset ? '🔄' : ''} <slot></slot>
         `;
@@ -633,20 +640,6 @@ customElements.define('ds-button', DesignSystemButton);
 ```
 
 *Note: Changing the `type` attribute after the element connects has no effect on behavior, as the behavior is determined once at first connection time.*
-
-#### Why not load all three behaviors?
-
-An alternative approach — loading all three button behaviors at once and toggling which one is "active" via the `disabled` property — initially seems appealing because it would allow `type=` to change at any time, matching native `<button>`. However, this approach has fundamental problems due to how `disabled` and conflict resolution interact.
-
-Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to "disable" non-active behaviors:
-
-**`disabled` is user-facing, not behavior-scoping.** Setting `behavior.disabled = true` makes the *element* disabled — greyed out, removed from tab order, unable to accept clicks. It doesn't mean "this behavior is inactive while others remain active." There is no per-behavior activation toggle; `disabled` is a property of the element's interaction state. Under last-in-wins, `buttonBehavior.disabled` (the last in the array) determines whether the element is disabled, regardless of what the other behaviors' `disabled` values are set to.
-
-**Property collisions under last-in-wins.** Properties like `name` and `value` are provided by all three behaviors, so the last behavior's values win. This means `submitBehavior.name` and `submitBehavior.value` — the ones that should participate in form data — are shadowed by `buttonBehavior.name` and `buttonBehavior.value`.
-
-**Event handler collisions.** All three behaviors register click handlers with different effects (submit form, reset form, do nothing). Under strict last-in-wins (Option A), only `buttonBehavior`'s handler runs — the element can never submit or reset. Under additive events (Option B), all handlers run simultaneously — the element would submit *and* reset the form on every click. Under the event-handled flag (Alternative 3), the first behavior to handle the click wins, making it impossible to switch the effective behavior without reordering the array.
-
-Because `disabled` cannot selectively silence individual behaviors and conflict resolution applies uniformly to all attached behaviors, loading all three simultaneously and switching between them is not viable. Determining the behavior once at connection time — as shown above — is the recommended pattern.
 
 ```html
 <form action="/save" method="post">
@@ -675,6 +668,16 @@ The element gains:
 - CSS pseudo-class matching: `:default`, `:disabled`/`:enabled`.
 - Participation in implicit form submission (for submit buttons).
 - Behavior properties like `disabled` and `formAction` are accessible via the stored behavior reference.
+
+#### Dynamically changing the `type` attribute
+
+Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to "disable" non-active behaviors:
+
+- Setting `behavior.disabled = true` makes the element disabled (it matches `:disabled`, is removed from the tab order, and stops receiving activation events entirely as no click or keyboard handler from any behavior runs while the element is disabled). Under last-in-wins, only `buttonBehavior.disabled` (the last in the array) determines whether the element is disabled, so setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect on the element's disabled state.
+- Properties like `name` and `value` are provided by all three behaviors, so the last behavior's values win under a last-in-wins strategy. This means `submitBehavior.name` and `submitBehavior.value` (the ones that should participate in form data) are shadowed by `buttonBehavior.name` and `buttonBehavior.value`.
+- All three behaviors register click handlers with different effects. Under strict last-in-wins (Option A), only `buttonBehavior`'s handler runs. Under additive events (Option B), all handlers run (the element would submit and reset the form on every click).
+
+Because `disabled` cannot selectively silence individual behaviors and conflict resolution applies uniformly to all attached behaviors, loading all three simultaneously and switching between them is not viable. Determining the behavior once at connection time is the recommended pattern.
 
 ### Framework use cases
 
