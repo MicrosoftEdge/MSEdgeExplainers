@@ -168,7 +168,24 @@ class CustomSubmitButton extends HTMLElement {
 }
 ```
 
-To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. Authors are also responsible for attribute reflection (observing HTML attributes and mapping them to the corresponding properties). This gives authors full control over their element's public API.
+To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. This gives authors full control over their element's public API.
+
+Authors are also responsible for attribute reflection. If the author wants HTML attributes on their custom element (e.g., `<my-button formaction="/save">`) to affect the behavior, they need to observe and forward those attributes using the standard `attributeChangedCallback`:
+
+```javascript
+class CustomButton extends HTMLElement {
+    static observedAttributes = ['disabled', 'formaction'];
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'disabled') {
+            this._submitBehavior.disabled = newValue !== null;
+        } else if (name === 'formaction') {
+            this._submitBehavior.formAction = newValue ?? '';
+        }
+    }
+}
+```
+*Note: platform-provided behaviors handle their internal attribute observation. For example, when the platform triggers form submission, `HTMLSubmitButtonBehavior` uses the current `formAction` value without any author intervention. The forwarding step above is only needed to connect HTML attributes on the custom element to the behavior's properties.*
 
 ### Behavior lifecycle
 
@@ -239,7 +256,6 @@ class TooltipBehavior {
   #content = '';
 
   behaviorAttachedCallback(internals) { /* ... */ }
-  behaviorDetachedCallback() { /* ... */ }
 
   get content() { return this.#content; }
   set content(val) { this.#content = val; }
@@ -527,8 +543,6 @@ This proposal supports common web component patterns:
 
 While this proposal only introduces `HTMLSubmitButtonBehavior`, the example below references `HTMLResetButtonBehavior` and `HTMLButtonBehavior` to illustrate how switching would work once additional behaviors become available in the future.
 
-#### Approach A: Single behavior, determined at connection time
-
 A design system can use delayed `attachInternals()` to determine the behavior based on the initial `type` attribute. This approach uses a single class while keeping behaviors immutable after attachment.
 
 ```javascript
@@ -618,94 +632,21 @@ class DesignSystemButton extends HTMLElement {
 customElements.define('ds-button', DesignSystemButton);
 ```
 
-*Note: Changing the `type` attribute after the element connects has no effect on behavior. The behavior is determined once at first connection time. This is a deliberate trade-off: it simplifies the mental model at the cost of diverging from native `<button>`, where `type=` can change at any time.*
+*Note: Changing the `type` attribute after the element connects has no effect on behavior, as the behavior is determined once at first connection time.*
 
-#### Approach B: All behaviors loaded, activation determined by type
+#### Why not load all three behaviors?
 
-An alternative approach loads all three button behaviors at once and uses a `type` property to control which one is active. This mirrors native `<button>` more closely since `type=` can change at any time:
+An alternative approach — loading all three button behaviors at once and toggling which one is "active" via the `disabled` property — initially seems appealing because it would allow `type=` to change at any time, matching native `<button>`. However, this approach has fundamental problems due to how `disabled` and conflict resolution interact.
 
-```javascript
-class DesignSystemButton extends HTMLElement {
-    static formAssociated = true;
-    static observedAttributes = ['type', 'disabled', 'formaction'];
+Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to "disable" non-active behaviors:
 
-    #submitBehavior = new HTMLSubmitButtonBehavior();
-    #resetBehavior = new HTMLResetButtonBehavior();
-    #buttonBehavior = new HTMLButtonBehavior();
-    #internals = null;
-    #type = 'button';
+**`disabled` is user-facing, not behavior-scoping.** Setting `behavior.disabled = true` makes the *element* disabled — greyed out, removed from tab order, unable to accept clicks. It doesn't mean "this behavior is inactive while others remain active." There is no per-behavior activation toggle; `disabled` is a property of the element's interaction state. Under last-in-wins, `buttonBehavior.disabled` (the last in the array) determines whether the element is disabled, regardless of what the other behaviors' `disabled` values are set to.
 
-    constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
-        this.#internals = this.attachInternals({
-            behaviors: [this.#submitBehavior, this.#resetBehavior, this.#buttonBehavior]
-        });
-    }
+**Property collisions under last-in-wins.** Properties like `name` and `value` are provided by all three behaviors, so the last behavior's values win. This means `submitBehavior.name` and `submitBehavior.value` — the ones that should participate in form data — are shadowed by `buttonBehavior.name` and `buttonBehavior.value`.
 
-    connectedCallback() {
-        this.#type = this.getAttribute('type') || 'button';
-        this.#syncDisabledState();
-        this.#render();
-    }
+**Event handler collisions.** All three behaviors register click handlers with different effects (submit form, reset form, do nothing). Under strict last-in-wins (Option A), only `buttonBehavior`'s handler runs — the element can never submit or reset. Under additive events (Option B), all handlers run simultaneously — the element would submit *and* reset the form on every click. Under the event-handled flag (Alternative 3), the first behavior to handle the click wins, making it impossible to switch the effective behavior without reordering the array.
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        switch (name) {
-            case 'type':
-                this.#type = newValue || 'button';
-                this.#syncDisabledState();
-                this.#render();
-                break;
-            case 'disabled':
-                this.#syncDisabledState();
-                break;
-            case 'formaction':
-                this.#submitBehavior.formAction = newValue ?? '';
-                break;
-        }
-    }
-
-    #syncDisabledState() {
-        const isDisabled = this.hasAttribute('disabled');
-        // Disable all non-active behaviors so they don't respond to activation.
-        this.#submitBehavior.disabled = isDisabled || this.#type !== 'submit';
-        this.#resetBehavior.disabled = isDisabled || this.#type !== 'reset';
-        this.#buttonBehavior.disabled = isDisabled || this.#type !== 'button';
-    }
-
-    get type() { return this.#type; }
-    set type(val) { this.setAttribute('type', val); }
-
-    get disabled() { return this.hasAttribute('disabled'); }
-    set disabled(val) { this.toggleAttribute('disabled', val); }
-
-    #render() {
-        const isSubmit = this.#type === 'submit';
-        const isReset = this.#type === 'reset';
-
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host { display: inline-block; padding: 8px 16px; cursor: pointer; }
-                :host(:disabled) { opacity: 0.5; cursor: not-allowed; }
-            </style>
-            ${isSubmit ? '💾' : isReset ? '🔄' : ''} <slot></slot>
-        `;
-    }
-}
-customElements.define('ds-button', DesignSystemButton);
-```
-
-This approach uses `disabled` on non-active behaviors to prevent them from responding to events. Changing `type=` at any time switches which behavior is active, matching native `<button>` semantics.
-
-**Trade-offs:**
-
-| | Approach A (single behavior) | Approach B (all behaviors) |
-|--|--|--|
-| `type=` changes | Ignored after connection | Supported at any time |
-| Memory | One behavior instance | Three behavior instances |
-| Complexity | Simpler | Must manage disabled state across behaviors |
-| Native `<button>` parity | Diverges (type is fixed) | Closer match |
-| Conflict resolution | Not needed (single behavior) | Needs care: all behaviors attached, only one active |
+Because `disabled` cannot selectively silence individual behaviors and conflict resolution applies uniformly to all attached behaviors, loading all three simultaneously and switching between them is not viable. Determining the behavior once at connection time — as shown above — is the recommended pattern.
 
 ```html
 <form action="/save" method="post">
@@ -899,8 +840,6 @@ The `PlatformBehavior` base class provides the following capabilities to both pl
 | `setDefaultRole(role)` | Method | Sets the element's implicit ARIA role (reflected by `ElementInternals.role`). Multiple behaviors can call this; conflict resolution determines which role wins. |
 | `setDefaultTabIndex(index)` | Method | Sets the element's implicit tab index, making it focusable without an explicit `tabindex` attribute. |
 | `behaviorAttachedCallback(internals)` | Lifecycle | Called when the behavior is attached to an element via `attachInternals()`. Receives the `ElementInternals` object. |
-| `behaviorDetachedCallback()` | Lifecycle | Called when the behavior is detached or the element is disconnected. |
-| `behaviorAttributeChangedCallback(name, oldValue, newValue)` | Lifecycle | *(Under consideration)* Called when an observed attribute changes. See [Attribute change monitoring](#attribute-change-monitoring). |
 | `disabled` | Property | Gets/sets whether the behavior is disabled. When `true`, the behavior does not respond to activation events and the element matches `:disabled`. |
 
 > **Note:** The exact surface of `PlatformBehavior` is still being refined. The table above represents the current thinking and is subject to change based on feedback and implementation experience.
@@ -928,13 +867,6 @@ class HTMLButtonBehaviorSketch extends PlatformBehavior {
     this.element.addEventListener('click', this.#handleClick);
     this.element.addEventListener('keydown', this.#handleKeydown);
     this.element.addEventListener('keyup', this.#handleKeyup);
-  }
-
-  behaviorDetachedCallback() {
-    this.element.removeEventListener('click', this.#handleClick);
-    this.element.removeEventListener('keydown', this.#handleKeydown);
-    this.element.removeEventListener('keyup', this.#handleKeyup);
-    this.#internals = null;
   }
 
   // Activation behavior: for type="button" there is no default action,
@@ -1001,14 +933,6 @@ class TooltipBehavior extends PlatformBehavior {
     this.element.addEventListener('blur', this.#hide);
   }
 
-  behaviorDetachedCallback() {
-    this.element.removeEventListener('mouseenter', this.#show);
-    this.element.removeEventListener('mouseleave', this.#hide);
-    this.element.removeEventListener('focus', this.#show);
-    this.element.removeEventListener('blur', this.#hide);
-    this.#hide();
-  }
-
   #show = () => {
     if (!this.#content) {
       return;
@@ -1035,7 +959,7 @@ class TooltipBehavior extends PlatformBehavior {
 }
 ```
 
-Behaviors are classes with the appropriate methods (`behaviorAttachedCallback`, `behaviorDetachedCallback`). The behavior is instantiated and passed to `behaviors`:
+Behaviors are classes with a `behaviorAttachedCallback` method. The behavior is instantiated and passed to `behaviors`:
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -1074,12 +998,6 @@ class HTMLDialogBehaviorPolyfill extends PlatformBehavior {
     this.setDefaultRole('dialog');
     this.element.addEventListener('keydown', this.#handleKeydown);
     this.element.addEventListener('click', this.#handleBackdropClick);
-  }
-
-  behaviorDetachedCallback() {
-    this.element.removeEventListener('keydown', this.#handleKeydown);
-    this.element.removeEventListener('click', this.#handleBackdropClick);
-    this.close();
   }
 
   show() {
@@ -1256,130 +1174,22 @@ For behaviors, the same problems would apply: if behaviors could be swapped dyna
 
 If compelling use cases emerge that genuinely require dynamic behavior composition, the API could be extended to use `ObservableArray` with lifecycle callbacks. This would be a backwards-compatible change (making the array mutable doesn't break code that treats it as read-only). However, we believe static behaviors will cover the vast majority of real-world needs.
 
-### Attribute change monitoring
+### Is there a better name than "behavior" for this concept?
 
-<a id="attribute-change-monitoring"></a>
+The word "behavior" has some drawbacks:
 
-Behaviors often need to respond to attribute changes on their host element. For example, a submit button behavior needs to react when `formaction` changes; a checkbox behavior needs to react when `checked` changes. Currently, this requires one of two approaches, each with drawbacks:
+- "behaviour" vs "behavior" may cause some friction for contributors.
+- Shorter names would improve ergonomics.
+- "Behavior" is used in other contexts (such as CSS scroll-behavior), which could cause confusion.
 
-#### Current approach: Manual forwarding from `attributeChangedCallback`
-
-The custom element author explicitly forwards attribute changes to the behavior:
-
-```javascript
-class DesignSystemButton extends HTMLElement {
-    static observedAttributes = ['disabled', 'formaction'];
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'disabled') {
-            this._submitBehavior.disabled = newValue !== null;
-        } else if (name === 'formaction') {
-            this._submitBehavior.formAction = newValue ?? '';
-        }
-    }
-}
-```
-
-**Pros:**
-- Authors have full control over which attributes map to which behavior properties.
-- No new API needed.
-
-**Cons:**
-- Boilerplate: Every attribute the behavior cares about must be manually forwarded.
-- Error-prone: Authors can forget to forward an attribute, leading to subtle bugs.
-- Coupling: The custom element must know which attributes each behavior needs.
-
-#### Alternative: MutationObserver inside the behavior
-
-A behavior could observe its own element's attributes:
-
-```javascript
-class SubmitBehavior extends PlatformBehavior {
-    #observer = null;
-
-    behaviorAttachedCallback(internals) {
-        this.#observer = new MutationObserver(mutations => {
-            for (const m of mutations) {
-                if (m.attributeName === 'formaction') {
-                    this.formAction = this.element.getAttribute('formaction') ?? '';
-                }
-            }
-        });
-        this.#observer.observe(this.element, { attributes: true });
-    }
-
-    behaviorDetachedCallback() {
-        this.#observer?.disconnect();
-    }
-}
-```
-
-**Pros:**
-- The behavior is self-contained—no manual forwarding needed.
-
-**Cons:**
-- `MutationObserver` is asynchronous (microtask-based), which means attribute changes are not observed synchronously. This can cause flickering or missed intermediate states.
-- Performance overhead: creating an observer per behavior per element is wasteful.
-- Ergonomic mismatch: `MutationObserver` was designed for DOM observation, not for component-internal attribute routing.
-
-#### Potential solution: `behaviorAttributeChangedCallback`
-
-A dedicated callback, analogous to the custom element's `attributeChangedCallback`, could allow behaviors to declare which attributes they observe:
-
-```javascript
-class SubmitBehaviorSketch extends PlatformBehavior {
-    static observedAttributes = ['formaction', 'formmethod', 'formenctype',
-                                 'formnovalidate', 'formtarget', 'disabled'];
-
-    behaviorAttributeChangedCallback(name, oldValue, newValue) {
-        switch (name) {
-            case 'disabled':
-                this.disabled = newValue !== null;
-                break;
-            case 'formaction':
-                this.formAction = newValue ?? '';
-                break;
-            // ... other attribute mappings.
-        }
-    }
-}
-```
-
-**Pros:**
-- Synchronous, like `attributeChangedCallback`.
-- Behaviors are self-contained: they declare what they need and react to it.
-- No MutationObserver overhead.
-- Mirrors the familiar `observedAttributes` / `attributeChangedCallback` pattern.
-
-**Cons:**
-- New lifecycle callback to implement and specify.
-- Potential ordering question: does the element's `attributeChangedCallback` fire before or after the behavior's `behaviorAttributeChangedCallback`?
-- If both the element and the behavior respond to the same attribute, there may be redundant processing.
-
-> **Open question:** Should `behaviorAttributeChangedCallback` be part of the initial proposal, or deferred to a later iteration? Platform-provided behaviors like `HTMLSubmitButtonBehavior` already embed their attribute observation in native code, so this callback is primarily needed for developer-defined behaviors and polyfills.
-
-### Naming: "behavior" vs alternatives
-
-The word "behavior" has been used throughout this proposal, but it has some drawbacks:
-
-- **Spelling:** "behaviour" (British) vs "behavior" (American) is a common source of confusion in codebases with international contributors. APIs with regional spelling variants (e.g., `colour` vs `color` in CSS) are a known pain point.
-- **Length:** `HTMLSubmitButtonBehavior` is 25 characters. Shorter names would improve ergonomics, especially given how frequently these names appear in code.
-- **Overloaded:** "Behavior" is used in many other contexts (CSS scroll-behavior, HTC behaviors in legacy IE, BehaviorSubject in RxJS), which could cause confusion.
-
-Alternative names under consideration:
+Alternatives:
 
 | Name | Example class | Example API | Notes |
 |------|--------------|-------------|-------|
-| **behavior** (current) | `HTMLSubmitButtonBehavior` | `attachInternals({ behaviors: [...] })` | Clear meaning; spelling/length concerns |
-| **trait** | `HTMLSubmitButtonTrait` | `attachInternals({ traits: [...] })` | Short; Rust/Scala precedent for composable units; may confuse Rust developers (traits are interfaces, not instances in Rust) |
-| **facet** | `HTMLSubmitButtonFacet` | `attachInternals({ facets: [...] })` | Short; implies "one aspect of a larger whole"; less common in programming |
-| **mixin** | `HTMLSubmitButtonMixin` | `attachInternals({ mixins: [...] })` | Familiar concept; but "mixin" implies class-level composition (inheritance), not instance-level |
-| **cap** (capability) | `HTMLSubmitButtonCap` | `attachInternals({ caps: [...] })` | Very short; "capability" is well-understood; but "cap" is ambiguous on its own |
-| **feature** | `HTMLSubmitButtonFeature` | `attachInternals({ features: [...] })` | Intuitive; but "feature" is very generic and overloaded in web specs (Feature Policy, `@supports`) |
-| **aspect** | `HTMLSubmitButtonAspect` | `attachInternals({ aspects: [...] })` | AOP precedent; implies cross-cutting concern; but AOP connotations may mislead |
-| **role** | `HTMLSubmitButtonRole` | `attachInternals({ roles: [...] })` | Intuitive for "what the element does"; **conflicts with ARIA `role`** |
-
-> **Open question:** Is there a better name than "behavior" for this concept? The ideal name should be short, unambiguous, easy to spell, and convey "a composable unit of element functionality." Feedback on naming preferences is welcome.
+| **mixin** | `HTMLSubmitButtonMixin` | `attachInternals({ mixins: [...] })` | Related term, familiar concept but implies class-level composition |
+| **conduct** | `HTMLSubmitButtonConduct` | `attachInternals({ conducts: [...] })` | Short |
+| **action** | `HTMLSubmitButtonAction` | `attachInternals({ actions: [...] })` | Intuitive but overloaded (form `action` attribute) |
+| **trait** | `HTMLSubmitButtonTrait` | `attachInternals({ traits: [...] })` | Related term and short |
 
 ## Alternatives considered
 
