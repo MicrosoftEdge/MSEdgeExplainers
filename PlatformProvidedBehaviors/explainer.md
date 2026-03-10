@@ -812,7 +812,7 @@ Future behaviors would also manage their own relevant pseudo-classes:
 A future extension of this proposal could allow developers to define their own reusable behaviors:
 
 ```javascript
-class TooltipBehavior extends PlatformBehavior {
+class TooltipBehavior extends ElementBehavior {
   #content = '';
   #tooltipElement = null;
 
@@ -872,9 +872,9 @@ class CustomButton extends HTMLElement {
 
 `TooltipBehavior` could be combined with platform-provided behaviors. Here, `CustomButton` gains both tooltip functionality (show on hover/focus) and submit button semantics (click/Enter submits forms, implicit submission, `role="button"`).
 
-#### PlatformBehavior API
+#### ElementBehavior API
 
-For developer-defined behaviors to work, `PlatformBehavior` would need to expose an API that lets web developers set accessibility defaults, receive lifecycle notifications, and reference the host element:
+For developer-defined behaviors to work, `ElementBehavior` would need to expose an API that lets web developers set accessibility defaults, receive lifecycle notifications, and reference the host element:
 
 | Member | Kind | Description |
 |--------|------|-------------|
@@ -886,7 +886,7 @@ For developer-defined behaviors to work, `PlatformBehavior` would need to expose
 The following example shows how `HTMLButtonBehavior` (`type="button"`) would be implemented in userland:
 
 ```javascript
-class HTMLButtonBehaviorExample extends PlatformBehavior {
+class HTMLButtonBehaviorExample extends ElementBehavior {
   #disabled = false;
   #internals = null;
   #name = '';
@@ -1001,7 +1001,7 @@ class MyButton extends HTMLElement {
 
 - The subclass overrides `behaviorAttachedCallback(internals)` to receive the `ElementInternals` object; set defaults with `setDefaultRole(role)` and `setDefaultTabIndex(index)`; and register event listeners.
 - The platform would set `this.element` before calling `behaviorAttachedCallback`, so it is already available inside the callback. The example uses `this.element` to register event listeners and to trigger clicks during keyboard activation.
-- `PlatformBehavior` needs to provide a way to affect the `:disabled` pseudo-class. The `setDisabled()` method (called in the `disabled` setter) would need to integrate with `ElementInternals` states.
+- `ElementBehavior` needs to provide a way to affect the `:disabled` pseudo-class. The `setDisabled()` method (called in the `disabled` setter) would need to integrate with `ElementInternals` states.
 
 #### Polyfilling behaviors
 
@@ -1009,7 +1009,7 @@ This design also would enable **polyfilling** new platform behaviors before they
 
 ```javascript
 // Polyfill for HTMLDialogBehavior.
-class HTMLDialogBehaviorPolyfill extends PlatformBehavior {
+class HTMLDialogBehaviorPolyfill extends ElementBehavior {
   #open = false;
   #returnValue = '';
   #modal = false;
