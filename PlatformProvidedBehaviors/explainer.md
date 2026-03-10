@@ -144,27 +144,27 @@ Each behavior exposes properties and methods from its corresponding native eleme
 
 ```javascript
 class CustomSubmitButton extends HTMLElement {
-    constructor() {
-        super();
-        this._submitBehavior = new HTMLSubmitButtonBehavior();
-        this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
-    }
+  constructor() {
+    super();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
+    this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
+  }
 
-    get disabled() {
-        return this._submitBehavior.disabled;
-    }
+  get disabled() {
+    return this._submitBehavior.disabled;
+  }
 
-    set disabled(val) {
-        this._submitBehavior.disabled = val;
-    }
+  set disabled(val) {
+    this._submitBehavior.disabled = val;
+  }
 
-    get formAction() {
-        return this._submitBehavior.formAction;
-    }
+  get formAction() {
+    return this._submitBehavior.formAction;
+  }
 
-    set formAction(val) {
-        this._submitBehavior.formAction = val;
-    }
+  set formAction(val) {
+    this._submitBehavior.formAction = val;
+  }
 }
 ```
 
@@ -174,18 +174,17 @@ Authors are also responsible for attribute reflection. If the author wants HTML 
 
 ```javascript
 class CustomButton extends HTMLElement {
-    static observedAttributes = ['disabled', 'formaction'];
+  static observedAttributes = ['disabled', 'formaction'];
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'disabled') {
-            this._submitBehavior.disabled = newValue !== null;
-        } else if (name === 'formaction') {
-            this._submitBehavior.formAction = newValue ?? '';
-        }
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'disabled') {
+      this._submitBehavior.disabled = newValue !== null;
+    } else if (name === 'formaction') {
+      this._submitBehavior.formAction = newValue ?? '';
     }
+  }
 }
 ```
-*Note: platform-provided behaviors handle their internal attribute observation. For example, when the platform triggers form submission, `HTMLSubmitButtonBehavior` uses the current `formAction` value without any author intervention. The forwarding step above is only needed to connect HTML attributes on the custom element to the behavior's properties.*
 
 ### Behavior lifecycle
 
@@ -448,7 +447,7 @@ this.attachInternals({
 There can be two interpretations of what "compatible behaviors" means:
 
 1. Compatible behaviors have completely disjoint capabilities (e.g., one provides `disabled`, the other provides `href`). No conflict resolution is needed because they never touch the same property or event.
-2. Compatible behaviors may share some capabilities (e.g., both provide a role or handle click). In this case, a conflict resolution strategy (Alternative 1) is still required for overlapping capabilities.
+2. Compatible behaviors may share some capabilities (e.g., both provide a role or handle click). In this case, a conflict resolution strategy (Alternative 1 or 3) is still required for overlapping capabilities.
 
 **Pros:**
 - Prevents nonsensical combinations at attachment time.
@@ -459,7 +458,7 @@ There can be two interpretations of what "compatible behaviors" means:
 - More restrictive as authors can't experiment with novel combinations.
 - Requires the platform to update compatibility lists.
 - May block legitimate use cases that weren't anticipated.
-- Must still be combined with Alternative 1 when compatible behaviors have overlapping capabilities.
+- Must still be combined with Alternative 1 or 3 when compatible behaviors have overlapping capabilities.
 
 #### Alternative 3: Explicit conflict resolution
 
@@ -508,8 +507,8 @@ This proposal supports common web component patterns:
 
   ```html
   <custom-button name="custom-submit-button">
-      <element-internals behaviors="html-submit-button-behavior"></element-internals>
-      <template>Submit</template>
+    <element-internals behaviors="html-submit-button-behavior"></element-internals>
+    <template>Submit</template>
   </custom-button>
   ```
 
@@ -521,118 +520,117 @@ A design system can use delayed `attachInternals()` to determine the behavior ba
 
 ```javascript
 class DesignSystemButton extends HTMLElement {
-    static formAssociated = true;
-    static observedAttributes = ['type', 'disabled', 'formaction'];
+  static formAssociated = true;
+  static observedAttributes = ['type', 'disabled', 'formaction'];
 
-    // Behavior reference (set once in connectedCallback).
-    #behavior = null;
-    #internals = null;
+  // Behavior reference (set once in connectedCallback).
+  #behavior = null;
+  #internals = null;
 
-    constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  connectedCallback() {
+    // Attach behaviors once based on initial type attribute.
+    if (!this.#internals) {
+      const type = this.getAttribute('type') || 'button';
+      this.#behavior = this.#createBehaviorForType(type);
+      this.#internals = this.attachInternals({ behaviors: [this.#behavior] });
+    }
+    this.#render();
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (!this.#behavior) {
+      return;
     }
 
-    connectedCallback() {
-        // Attach behaviors once based on initial type attribute.
-        if (!this.#internals) {
-            const type = this.getAttribute('type') || 'button';
-            this.#behavior = this.#createBehaviorForType(type);
-            this.#internals = this.attachInternals({ behaviors: [this.#behavior] });
+    switch (name) {
+      case 'type': {
+        // Type changes after connection are intentionally ignored.
+        console.warn('ds-button: type attribute changes after connection have no effect.');
+        break;
+      }
+      case 'disabled': {
+        this.#behavior.disabled = newValue !== null;
+        break;
+      }
+      case 'formaction': {
+        if ('formAction' in this.#behavior) {
+          this.#behavior.formAction = newValue ?? '';
         }
-        this.#render();
+        break;
+      }
     }
+  }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (!this.#behavior) {
-          return;
-        }
+  #createBehaviorForType(type) {
+    switch (type) {
+      case 'submit': {
+        return new HTMLSubmitButtonBehavior();
+      }
+      case 'reset': {
+        return new HTMLResetButtonBehavior();
+      }
+      default: {
+        return new HTMLButtonBehavior();
+      }
+    }
+  }
 
-        switch (name) {
-            case 'type':
-              // Type changes after connection are intentionally ignored.
-                console.warn('ds-button: type attribute changes after connection have no effect.');
-                break;
-            case 'disabled':
-                this.#behavior.disabled = newValue !== null;
-                break;
-            case 'formaction':
-                if ('formAction' in this.#behavior) {
-                    this.#behavior.formAction = newValue ?? '';
-                }
-                break;
-        }
+  // Expose behavior properties.
+  get disabled() {
+    return this.#behavior?.disabled ?? false;
+  }
+  set disabled(val) {
+    this.toggleAttribute('disabled', val);
+  }
+  get formAction() {
+    return this.#behavior?.formAction ?? '';
+  }
+  set formAction(val) {
+    if (this.#behavior && 'formAction' in this.#behavior) {
+      this.#behavior.formAction = val;
     }
+  }
 
-    #createBehaviorForType(type) {
-        switch (type) {
-            case 'submit': {
-                return new HTMLSubmitButtonBehavior();
-            }
-            case 'reset': {
-                return new HTMLResetButtonBehavior();
-            }
-            default: {
-                return new HTMLButtonBehavior();
-            }
-        }
-    }
+  // Additional getters/setters for formMethod, formEnctype,
+  // formNoValidate, formTarget, name, and value would follow
+  // the same pattern.
 
-    // Expose behavior properties.
-    get disabled() {
-        return this.#behavior?.disabled ?? false;
-    }
-    set disabled(val) {
-        if (this.#behavior) {
-            this.#behavior.disabled = val;
-        }
-        this.toggleAttribute('disabled', val);
-    }
-    get formAction() {
-        return this.#behavior?.formAction ?? '';
-    }
-    set formAction(val) {
-        if (this.#behavior && 'formAction' in this.#behavior) {
-            this.#behavior.formAction = val;
-        }
-    }
+  #render() {
+    const isSubmit = this.#behavior instanceof HTMLSubmitButtonBehavior;
+    const isReset = this.#behavior instanceof HTMLResetButtonBehavior;
 
-    // Additional getters/setters for formMethod, formEnctype,
-    // formNoValidate, formTarget, name, and value would follow
-    // the same pattern.
-
-    #render() {
-        const isSubmit = this.#behavior instanceof HTMLSubmitButtonBehavior;
-        const isReset = this.#behavior instanceof HTMLResetButtonBehavior;
-
-        this.shadowRoot.innerHTML = `
-            <style>
-                ...
-            </style>
-            ${isSubmit ? '💾' : isReset ? '🔄' : ''} <slot></slot>
-        `;
-    }
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host { display: inline-block; padding: 8px 16px; cursor: pointer; }
+        :host(:disabled) { opacity: 0.5; cursor: not-allowed; }
+      </style>
+      ${isSubmit ? '💾' : isReset ? '🔄' : ''} <slot></slot>
+    `;
+  }
 }
 customElements.define('ds-button', DesignSystemButton);
 ```
 
-*Note: Changing the `type` attribute after the element connects has no effect on behavior, as the behavior is determined once at first connection time.*
-
 ```html
 <form action="/save" method="post">
-    <input name="username" required>
+  <input name="username" required>
 
-    <!-- Submit button with custom form action. -->
-    <ds-button type="submit" formaction="/draft">Save Draft</ds-button>
+  <!-- Submit button with custom form action. -->
+  <ds-button type="submit" formaction="/draft">Save Draft</ds-button>
 
-    <!-- Default submit button (matches :default). -->
-    <ds-button type="submit">Save</ds-button>
+  <!-- Default submit button (matches :default). -->
+  <ds-button type="submit">Save</ds-button>
 
-    <!-- Reset button. -->
-    <ds-button type="reset">Reset</ds-button>
+  <!-- Reset button. -->
+  <ds-button type="reset">Reset</ds-button>
 
-    <!-- Regular button (default when no type specified). -->
-    <ds-button>Cancel</ds-button>
+  <!-- Regular button (default when no type specified). -->
+  <ds-button>Cancel</ds-button>
 </form>
 ```
 
@@ -648,10 +646,9 @@ The element gains:
 
 #### Dynamically changing the `type` attribute
 
-Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to "disable" non-active behaviors:
+Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to toggle behaviors:
 
-- Setting `behavior.disabled = true` makes the element disabled (it matches `:disabled`, is removed from the tab order, and stops receiving activation events entirely as no click or keyboard handler from any behavior runs while the element is disabled). Under last-in-wins, only `buttonBehavior.disabled` (the last in the array) determines whether the element is disabled, so setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect on the element's disabled state.
-- Properties like `name` and `value` are provided by all three behaviors, so the last behavior's values win under a last-in-wins strategy. This means `submitBehavior.name` and `submitBehavior.value` (the ones that should participate in form data) are shadowed by `buttonBehavior.name` and `buttonBehavior.value`.
+- Under last-in-wins, only `buttonBehavior`'s property values (the last in the array) determine the element's effective state. For `disabled`, this means setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect — only `buttonBehavior.disabled` controls whether the element matches `:disabled`, is removed from the tab order, and stops receiving activation events (no click or keyboard handler from any behavior runs while disabled).
 - All three behaviors register click handlers with different effects. Under strict last-in-wins (Option A), only `buttonBehavior`'s handler runs. Under additive events (Option B), all handlers run (the element would submit and reset the form on every click).
 
 Because `disabled` cannot selectively silence individual behaviors and conflict resolution applies uniformly to all attached behaviors, loading all three simultaneously and switching between them is not viable. Determining the behavior once at connection time is the recommended pattern.
@@ -810,93 +807,6 @@ Future behaviors would also manage their own relevant pseudo-classes:
 | `HTMLRadioGroupBehavior` | `:checked` |
 | `HTMLResetButtonBehavior` | `:default` (if only reset button in form) |
 
-### PlatformBehavior API surface
-
-The `PlatformBehavior` base class provides the following capabilities to both platform-provided and (future) developer-defined behaviors:
-
-| Member | Kind | Description |
-|--------|------|-------------|
-| `element` | Property (read-only) | Reference to the host element. Set automatically when the behavior is attached. |
-| `setDefaultRole(role)` | Method | Sets the element's implicit ARIA role (reflected by `ElementInternals.role`). Multiple behaviors can call this; conflict resolution determines which role wins. |
-| `setDefaultTabIndex(index)` | Method | Sets the element's implicit tab index, making it focusable without an explicit `tabindex` attribute. |
-| `behaviorAttachedCallback(internals)` | Lifecycle | Called when the behavior is attached to an element via `attachInternals()`. Receives the `ElementInternals` object. |
-| `disabled` | Property | Gets/sets whether the behavior is disabled. When `true`, the behavior does not respond to activation events and the element matches `:disabled`. |
-
-> **Note:** The exact surface of `PlatformBehavior` is still being refined. The table above represents the current thinking and is subject to change based on feedback and implementation experience.
-
-#### Userland HTMLButtonBehavior sketch
-
-To validate that the API surface is sufficient, here is a sketch of how `HTMLButtonBehavior` (the plain `type="button"` behavior) might be implemented in userland. This exercise helps identify gaps in the base class:
-
-```javascript
-class HTMLButtonBehaviorSketch extends PlatformBehavior {
-  // Internal state.
-  #disabled = false;
-  #internals = null;
-  #name = '';
-  #value = '';
-
-  behaviorAttachedCallback(internals) {
-    this.#internals = internals;
-
-    // Set defaults: focusable and role="button".
-    this.setDefaultRole('button');
-    this.setDefaultTabIndex(0);
-
-    // Handle activation (click + keyboard).
-    this.element.addEventListener('click', this.#handleClick);
-    this.element.addEventListener('keydown', this.#handleKeydown);
-    this.element.addEventListener('keyup', this.#handleKeyup);
-  }
-
-  // Activation behavior: for type="button" there is no default action,
-  // but the element should still be activatable and fire click events.
-  #handleClick = (e) => {
-    if (this.#disabled) {
-      e.stopImmediatePropagation();
-      e.preventDefault();
-    }
-  };
-
-  #handleKeydown = (e) => {
-    if (this.#disabled) return;
-    // Space and Enter activate buttons.
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      if (e.key === 'Enter') {
-        this.element.click();
-      }
-    }
-  };
-
-  #handleKeyup = (e) => {
-    if (this.#disabled) return;
-    if (e.key === ' ') {
-      this.element.click();
-    }
-  };
-
-  get disabled() { return this.#disabled; }
-  set disabled(val) {
-    this.#disabled = Boolean(val);
-    // Reflects to :disabled pseudo-class via internals.
-    this.#internals?.setDisabled?.(this.#disabled);
-  }
-
-  get name() { return this.#name; }
-  set name(val) { this.#name = val; }
-
-  get value() { return this.#value; }
-  set value(val) { this.#value = val; }
-}
-```
-
-**Observations from this exercise:**
-- The sketch reveals that `PlatformBehavior` needs to provide a way to affect the `:disabled` pseudo-class. The `setDisabled()` method (or a `disabled` property on the base class) would need to integrate with `ElementInternals` states.
-- Keyboard activation follows the [ARIA button pattern](https://www.w3.org/WAI/ARIA/apg/patterns/button/): Enter fires immediately on keydown, Space fires on keyup. A native behavior wouldn't need to add event listeners—it would hook into the browser's activation algorithm directly.
-- A userland behavior must manage its own event listeners, whereas a native behavior hooks into the UA's event dispatch. This means userland behaviors may not perfectly replicate native timing (e.g., a native button's click fires during the activation behavior step, not during normal event dispatch).
-- The `type="button"` behavior is deliberately simple: it provides focusability, role, and keyboard activation but has no form submission or reset semantics.
-
 ### Developer-defined behaviors
 
 A future extension of this proposal could allow developers to define their own reusable behaviors:
@@ -961,6 +871,137 @@ class CustomButton extends HTMLElement {
 ```
 
 `TooltipBehavior` could be combined with platform-provided behaviors. Here, `CustomButton` gains both tooltip functionality (show on hover/focus) and submit button semantics (click/Enter submits forms, implicit submission, `role="button"`).
+
+#### PlatformBehavior API
+
+For developer-defined behaviors to work, `PlatformBehavior` would need to expose an API that lets web developers set accessibility defaults, receive lifecycle notifications, and reference the host element. The table below describes what the base class would need to provide for developer-defined subclasses:
+
+| Member | Kind | Description |
+|--------|------|-------------|
+| `element` | Property (read-only) | Reference to the host element. |
+| `setDefaultRole(role)` | Method | Sets the element's implicit ARIA role. |
+| `setDefaultTabIndex(index)` | Method | Sets the element's implicit tab index, making it focusable without an explicit `tabindex` attribute. |
+| `behaviorAttachedCallback(internals)` | Lifecycle | Called when the behavior is attached to an element via `attachInternals()`. Receives the `ElementInternals` object. |
+
+The following example shows how `HTMLButtonBehavior` (the plain `type="button"` behavior) would be implemented in userland:
+
+```javascript
+class HTMLButtonBehaviorExample extends PlatformBehavior {
+  #disabled = false;
+  #internals = null;
+  #name = '';
+  #value = '';
+
+  #popoverTargetElement = null;
+  #popoverTargetAction = 'toggle';
+  #commandForElement = null;
+  #command = '';
+
+  behaviorAttachedCallback(internals) {
+    this.#internals = internals;
+
+    this.setDefaultRole('button');
+    this.setDefaultTabIndex(0);
+
+    this.element.addEventListener('click', this.#handleClick);
+    this.element.addEventListener('keydown', this.#handleKeydown);
+    this.element.addEventListener('keyup', this.#handleKeyup);
+  }
+
+  #handleClick = (e) => {
+    if (this.#disabled) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return;
+    }
+
+    if (this.#popoverTargetElement) {
+      switch (this.#popoverTargetAction) {
+        case 'show': {
+          this.#popoverTargetElement.showPopover();
+          break;
+        }
+        case 'hide': {
+          this.#popoverTargetElement.hidePopover();
+          break;
+        }
+        default: {
+          this.#popoverTargetElement.togglePopover();
+          break;
+        }
+      }
+      return;
+    }
+
+    if (this.#commandForElement && this.#command) {
+      const commandEvent = new CommandEvent('command', {
+        source: this.element,
+        command: this.#command,
+      });
+      this.#commandForElement.dispatchEvent(commandEvent);
+    }
+  };
+
+  #handleKeydown = (e) => {
+    if (this.#disabled) {
+      return;
+    }
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      if (e.key === 'Enter') {
+        this.element.click();
+      }
+    }
+  };
+
+  #handleKeyup = (e) => {
+    if (this.#disabled) {
+      return;
+    }
+    if (e.key === ' ') {
+      this.element.click();
+    }
+  };
+
+  // Properties
+  get disabled() { return this.#disabled; }
+  set disabled(val) {
+    this.#disabled = val;
+    this.#internals?.setDisabled?.(this.#disabled);
+  }
+
+  get name() { return this.#name; }
+  set name(val) { this.#name = val; }
+
+  get value() { return this.#value; }
+  set value(val) { this.#value = val; }
+
+  // Popover target API.
+  get popoverTargetElement() { return this.#popoverTargetElement; }
+  set popoverTargetElement(val) { this.#popoverTargetElement = val; }
+  get popoverTargetAction() { return this.#popoverTargetAction; }
+  set popoverTargetAction(val) { this.#popoverTargetAction = val; }
+
+  // Invoker commands API.
+  get commandForElement() { return this.#commandForElement; }
+  set commandForElement(val) { this.#commandForElement = val; }
+  get command() { return this.#command; }
+  set command(val) { this.#command = val; }
+}
+
+// Attaching the behavior to a custom element:
+class MyButton extends HTMLElement {
+  constructor() {
+    super();
+    this._buttonBehavior = new HTMLButtonBehaviorExample();
+    this._internals = this.attachInternals({ behaviors: [this._buttonBehavior] });
+  }
+}
+```
+
+- The subclass overrides `behaviorAttachedCallback(internals)` to receive the `ElementInternals` object; set defaults with `setDefaultRole(role)` and `setDefaultTabIndex(index)`; and register event listeners.
+- The platform would set `this.element` before calling `behaviorAttachedCallback`, so it is already available inside the callback. The example uses `this.element` to register event listeners and to trigger clicks during keyboard activation.
+- `PlatformBehavior` needs to provide a way to affect the `:disabled` pseudo-class. The `setDisabled()` method (called in the `disabled` setter) would need to integrate with `ElementInternals` states.
 
 #### Polyfilling behaviors
 
@@ -1071,11 +1112,11 @@ The platform automatically adds behavior properties to the custom element:
 
 ```javascript
 class CustomSubmitButton extends HTMLElement {
-    constructor() {
-        super();
-        this._submitBehavior = new HTMLSubmitButtonBehavior();
-        this.attachInternals({ behaviors: [this._submitBehavior] });
-    }
+  constructor() {
+    super();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
+    this.attachInternals({ behaviors: [this._submitBehavior] });
+  }
 }
 
 const btn = document.createElement('custom-submit');
@@ -1115,8 +1156,8 @@ this.attachInternals({ behaviors: [this._submitBehavior] });
 // Opt-in to automatic exposure.
 this._submitBehavior = new HTMLSubmitButtonBehavior();
 this.attachInternals({ 
-    behaviors: [this._submitBehavior],
-    exposeProperties: true  // or list specific properties.
+  behaviors: [this._submitBehavior],
+  exposeProperties: true  // or list specific properties.
 });
 ```
 
@@ -1156,7 +1197,7 @@ If compelling use cases emerge that genuinely require dynamic behavior compositi
 
 ### Is there a better name than "behavior" for this concept?
 
-The word "behavior" has some drawbacks:
+The American English spelling of behavior throughout this proposal follows the [WHATWG spec style guidelines](https://wiki.whatwg.org/wiki/Specs/style#:~:text=Use%20standard%20American%20English%20spelling). However, the word "behavior" has some drawbacks:
 
 - "behaviour" vs "behavior" may cause some friction for contributors.
 - Shorter names would improve ergonomics.
@@ -1198,12 +1239,12 @@ Set a single "type" string that grants a predefined bundle of behaviors.
 
 ```javascript
 class CustomButton extends HTMLElement {
-    static formAssociated = true;
+  static formAssociated = true;
 
-    constructor() {
-        super();
-        this.attachInternals().type = 'button';
-    }
+  constructor() {
+    super();
+    this.attachInternals().type = 'button';
+  }
 }
 ```
 
@@ -1224,11 +1265,11 @@ Define custom attributes with lifecycle callbacks that add behavior to elements.
 
 ```javascript
 class SubmitButtonAttribute extends Attribute {
-    connectedCallback() {
-        this.ownerElement.addEventListener('click', () => {
-            // Submit form logic.
-        });
-    }
+  connectedCallback() {
+    this.ownerElement.addEventListener('click', () => {
+      // Submit form logic.
+    });
+  }
 }
 HTMLElement.attributeRegistry.define('submit-button', SubmitButtonAttribute);
 ```
@@ -1257,9 +1298,9 @@ Extend native element classes directly.
 
 ```javascript
 class FancyButton extends HTMLButtonElement {
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 }
 customElements.define('fancy-button', FancyButton, { extends: 'button' });
 ```
