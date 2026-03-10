@@ -170,7 +170,7 @@ class CustomSubmitButton extends HTMLElement {
 
 To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. This gives authors full control over their element's public API.
 
-Authors are also responsible for attribute reflection. If the author wants HTML attributes on their custom element (e.g., `<my-button formaction="/save">`) to affect the behavior, they need to observe and forward those attributes using the standard `attributeChangedCallback`:
+Authors are also responsible for attribute reflection. If the author wants HTML attributes on their custom element (e.g., `<my-button formaction="/save">`) to affect the behavior, they need to observe and forward those attributes using `attributeChangedCallback`:
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -648,10 +648,10 @@ The element gains:
 
 Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to toggle behaviors:
 
-- Under last-in-wins, only `buttonBehavior`'s property values (the last in the array) determine the element's effective state. For `disabled`, this means setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect — only `buttonBehavior.disabled` controls whether the element matches `:disabled`, is removed from the tab order, and stops receiving activation events (no click or keyboard handler from any behavior runs while disabled).
+- Under last-in-wins, only `buttonBehavior`'s property values (the last in the array) determine the element's effective state. For `disabled`, this means setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect as only `buttonBehavior.disabled` controls whether the element matches `:disabled`, is removed from the tab order, and stops receiving activation events (no click or keyboard handler from any behavior runs while disabled).
 - All three behaviors register click handlers with different effects. Under strict last-in-wins (Option A), only `buttonBehavior`'s handler runs. Under additive events (Option B), all handlers run (the element would submit and reset the form on every click).
 
-Because `disabled` cannot selectively silence individual behaviors and conflict resolution applies uniformly to all attached behaviors, loading all three simultaneously and switching between them is not viable. Determining the behavior once at connection time is the recommended pattern.
+Because `disabled` cannot selectively silence individual behaviors and conflict resolution applies uniformly to all attached behaviors, loading all three simultaneously and switching between them is not viable.
 
 ### Framework use cases
 
@@ -874,7 +874,7 @@ class CustomButton extends HTMLElement {
 
 #### PlatformBehavior API
 
-For developer-defined behaviors to work, `PlatformBehavior` would need to expose an API that lets web developers set accessibility defaults, receive lifecycle notifications, and reference the host element. The table below describes what the base class would need to provide for developer-defined subclasses:
+For developer-defined behaviors to work, `PlatformBehavior` would need to expose an API that lets web developers set accessibility defaults, receive lifecycle notifications, and reference the host element:
 
 | Member | Kind | Description |
 |--------|------|-------------|
@@ -883,7 +883,7 @@ For developer-defined behaviors to work, `PlatformBehavior` would need to expose
 | `setDefaultTabIndex(index)` | Method | Sets the element's implicit tab index, making it focusable without an explicit `tabindex` attribute. |
 | `behaviorAttachedCallback(internals)` | Lifecycle | Called when the behavior is attached to an element via `attachInternals()`. Receives the `ElementInternals` object. |
 
-The following example shows how `HTMLButtonBehavior` (the plain `type="button"` behavior) would be implemented in userland:
+The following example shows how `HTMLButtonBehavior` (`type="button"`) would be implemented in userland:
 
 ```javascript
 class HTMLButtonBehaviorExample extends PlatformBehavior {
