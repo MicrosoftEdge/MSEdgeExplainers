@@ -448,7 +448,7 @@ this.attachInternals({
 There can be two interpretations of what "compatible behaviors" means:
 
 1. Compatible behaviors have completely disjoint capabilities (e.g., one provides `disabled`, the other provides `href`). No conflict resolution is needed because they never touch the same property or event.
-2. Compatible behaviors may share some capabilities (e.g., both provide a role or handle click). In this case, a conflict resolution strategy (Alternative 1 or 3) is still required for overlapping capabilities.
+2. Compatible behaviors may share some capabilities (e.g., both provide a role or handle click). In this case, a conflict resolution strategy (Alternative 1) is still required for overlapping capabilities.
 
 **Pros:**
 - Prevents nonsensical combinations at attachment time.
@@ -459,35 +459,9 @@ There can be two interpretations of what "compatible behaviors" means:
 - More restrictive as authors can't experiment with novel combinations.
 - Requires the platform to update compatibility lists.
 - May block legitimate use cases that weren't anticipated.
-- Must still be combined with Alternative 1 or 3 when compatible behaviors have overlapping capabilities.
+- Must still be combined with Alternative 1 when compatible behaviors have overlapping capabilities.
 
-#### Alternative 3: Event-handled flag (first-to-handle wins)
-
-Rather than enforcing a fixed precedence order, all behaviors' event handlers run, but each handler checks whether the event has already been "handled" by a previous behavior. The first behavior to handle the event marks it as handled; subsequent behaviors see this flag and skip their logic. This is similar to how Gecko internally manages default actions using a "handled" flag separate from `defaultPrevented`.
-
-```javascript
-// Conceptual model (platform-internal, not author-facing):
-for (const behavior of element.behaviors) {
-  if (!event._handled) {
-    behavior.handleActivation(event);
-  }
-}
-```
-
-This approach decouples the resolution from array ordering. The order in which behaviors execute may be arbitrary (or spec-defined), but only the first behavior to claim the event "wins." For properties like ARIA role, a separate resolution mechanism (e.g., last-in-wins or explicit author override) is still needed.
-
-**Pros:**
-- All behaviors get a chance to inspect the event; none are silently skipped.
-- More flexible than strict ordering: a behavior can conditionally choose not to handle an event, allowing a later behavior to take over.
-- Aligns with Gecko's existing internal model.
-- Doesn't preclude novel interplay between behaviors (e.g., a behavior could modify event state before passing it along).
-
-**Cons:**
-- The "handled" flag is a new concept that authors and spec editors must reason about—it's distinct from `defaultPrevented` and `stopPropagation`.
-- For properties (role, disabled), this pattern doesn't naturally apply; a separate resolution strategy is still needed.
-- Arbitrary execution order may make behavior harder to reason about unless the spec defines a deterministic order.
-
-#### Alternative 4: Explicit conflict resolution
+#### Alternative 3: Explicit conflict resolution
 
 If conflicts occur, the platform requires the author to explicitly resolve them. This applies to properties, methods, and event handlers:
 
@@ -592,12 +566,15 @@ class DesignSystemButton extends HTMLElement {
 
     #createBehaviorForType(type) {
         switch (type) {
-            case 'submit':
+            case 'submit': {
                 return new HTMLSubmitButtonBehavior();
-            case 'reset':
+            }
+            case 'reset': {
                 return new HTMLResetButtonBehavior();
-            default:
+            }
+            default: {
                 return new HTMLButtonBehavior();
+            }
         }
     }
 
