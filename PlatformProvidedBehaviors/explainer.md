@@ -144,31 +144,47 @@ Each behavior exposes properties and methods from its corresponding native eleme
 
 ```javascript
 class CustomSubmitButton extends HTMLElement {
-    constructor() {
-        super();
-        this._submitBehavior = new HTMLSubmitButtonBehavior();
-        this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
-    }
+  constructor() {
+    super();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
+    this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
+  }
 
-    get disabled() {
-        return this._submitBehavior.disabled;
-    }
+  get disabled() {
+    return this._submitBehavior.disabled;
+  }
 
-    set disabled(val) {
-        this._submitBehavior.disabled = val;
-    }
+  set disabled(val) {
+    this._submitBehavior.disabled = val;
+  }
 
-    get formAction() {
-        return this._submitBehavior.formAction;
-    }
+  get formAction() {
+    return this._submitBehavior.formAction;
+  }
 
-    set formAction(val) {
-        this._submitBehavior.formAction = val;
-    }
+  set formAction(val) {
+    this._submitBehavior.formAction = val;
+  }
 }
 ```
 
-To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. Authors are also responsible for attribute reflection (observing HTML attributes and mapping them to the corresponding properties). This gives authors full control over their element's public API.
+To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. This gives authors full control over their element's public API.
+
+Authors are also responsible for attribute reflection. If the author wants HTML attributes on their custom element (e.g., `<my-button formaction="/save">`) to affect the behavior, they need to observe and forward those attributes using `attributeChangedCallback`:
+
+```javascript
+class CustomButton extends HTMLElement {
+  static observedAttributes = ['disabled', 'formaction'];
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'disabled') {
+      this._submitBehavior.disabled = newValue !== null;
+    } else if (name === 'formaction') {
+      this._submitBehavior.formAction = newValue ?? '';
+    }
+  }
+}
+```
 
 ### Behavior lifecycle
 
@@ -239,7 +255,6 @@ class TooltipBehavior {
   #content = '';
 
   behaviorAttachedCallback(internals) { /* ... */ }
-  behaviorDetachedCallback() { /* ... */ }
 
   get content() { return this.#content; }
   set content(val) { this.#content = val; }
@@ -270,7 +285,7 @@ this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 - Less setup code as developers don't manage behavior instances.
 
 **Cons:**
-- Less flexible: can't configure behavior before attachment.
+- Platform instantiates the behavior, so constructor parameters aren't available.
 - Requires a `behaviors` interface for named access.
 - *Future* developer-defined behaviors would need a way to name their behaviors.
 
@@ -492,106 +507,130 @@ This proposal supports common web component patterns:
 
   ```html
   <custom-button name="custom-submit-button">
-      <element-internals behaviors="html-submit-button-behavior"></element-internals>
-      <template>Submit</template>
+    <element-internals behaviors="html-submit-button-behavior"></element-internals>
+    <template>Submit</template>
   </custom-button>
   ```
 
 ### Use case: Design system button
 
 While this proposal only introduces `HTMLSubmitButtonBehavior`, the example below references `HTMLResetButtonBehavior` and `HTMLButtonBehavior` to illustrate how switching would work once additional behaviors become available in the future.
+
 A design system can use delayed `attachInternals()` to determine the behavior based on the initial `type` attribute. This approach uses a single class while keeping behaviors immutable after attachment.
 
 ```javascript
 class DesignSystemButton extends HTMLElement {
-    static formAssociated = true;
+  static formAssociated = true;
+  static observedAttributes = ['type', 'disabled', 'formaction'];
 
-    // Behavior reference (set once in connectedCallback).
-    #behavior = null;
-    #internals = null;
+  // Behavior reference (set once in connectedCallback).
+  #behavior = null;
+  #internals = null;
 
-    constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  connectedCallback() {
+    // Attach behaviors once based on initial type attribute.
+    if (!this.#internals) {
+      const type = this.getAttribute('type') || 'button';
+      this.#behavior = this.#createBehaviorForType(type);
+      this.#internals = this.attachInternals({ behaviors: [this.#behavior] });
+    }
+    this.#render();
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (!this.#behavior) {
+      return;
     }
 
-    connectedCallback() {
-        // Attach behaviors once based on initial type attribute.
-        if (!this.#internals) {
-            const type = this.getAttribute('type') || 'button';
-            this.#behavior = this.#createBehaviorForType(type);
-            this.#internals = this.attachInternals({ behaviors: [this.#behavior] });
-        }
-        this.#render();
-    }
-
-    #createBehaviorForType(type) {
-        switch (type) {
-            case 'submit': {
-                return new HTMLSubmitButtonBehavior();
-            }
-            case 'reset': {
-                return new HTMLResetButtonBehavior();
-            }
-            default: {
-                return new HTMLButtonBehavior();
-            }
-        }
-    }
-
-    // Expose behavior properties.
-    get disabled() {
-      return this.#behavior.disabled;
-    }
-    set disabled(val) {
-      this.#behavior.disabled = val;
-    }
-
-    get formAction() { 
-        // Only submit buttons have `formAction`.
-        return this.#behavior.formAction ?? ''; 
-    }
-    set formAction(val) { 
+    switch (name) {
+      case 'type': {
+        // Type changes after connection are intentionally ignored.
+        console.warn('ds-button: type attribute changes after connection have no effect.');
+        break;
+      }
+      case 'disabled': {
+        this.#behavior.disabled = newValue !== null;
+        break;
+      }
+      case 'formaction': {
         if ('formAction' in this.#behavior) {
-            this.#behavior.formAction = val; 
+          this.#behavior.formAction = newValue ?? '';
         }
+        break;
+      }
     }
+  }
 
-    // Additional getters/setters for `disabled`, `formMethod`, `formEnctype`,
-    // `formNoValidate`, `formTarget`, `name`, and `value` would follow the
-    // same pattern.
-
-    #render() {
-        const isSubmit = this.#behavior instanceof HTMLSubmitButtonBehavior;
-        const isReset = this.#behavior instanceof HTMLResetButtonBehavior;
-
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host { display: inline-block; padding: 8px 16px; cursor: pointer; }
-                :host(:disabled) { opacity: 0.5; cursor: not-allowed; }
-            </style>
-            ${isSubmit ? '💾' : isReset ? '🔄' : ''} <slot></slot>
-        `;
+  #createBehaviorForType(type) {
+    switch (type) {
+      case 'submit': {
+        return new HTMLSubmitButtonBehavior();
+      }
+      case 'reset': {
+        return new HTMLResetButtonBehavior();
+      }
+      default: {
+        return new HTMLButtonBehavior();
+      }
     }
+  }
+
+  // Expose behavior properties.
+  get disabled() {
+    return this.#behavior?.disabled ?? false;
+  }
+  set disabled(val) {
+    this.toggleAttribute('disabled', val);
+  }
+  get formAction() {
+    return this.#behavior?.formAction ?? '';
+  }
+  set formAction(val) {
+    if (this.#behavior && 'formAction' in this.#behavior) {
+      this.#behavior.formAction = val;
+    }
+  }
+
+  // Additional getters/setters for formMethod, formEnctype,
+  // formNoValidate, formTarget, name, and value would follow
+  // the same pattern.
+
+  #render() {
+    const isSubmit = this.#behavior instanceof HTMLSubmitButtonBehavior;
+    const isReset = this.#behavior instanceof HTMLResetButtonBehavior;
+
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host { display: inline-block; padding: 8px 16px; cursor: pointer; }
+        :host(:disabled) { opacity: 0.5; cursor: not-allowed; }
+      </style>
+      ${isSubmit ? '💾' : isReset ? '🔄' : ''} <slot></slot>
+    `;
+  }
 }
 customElements.define('ds-button', DesignSystemButton);
 ```
-*Note: Changing the `type` attribute after the element connects has no effect on behavior. The type is determined once at connection time.*
+
 ```html
 <form action="/save" method="post">
-    <input name="username" required>
+  <input name="username" required>
 
-    <!-- Submit button with custom form action. -->
-    <ds-button type="submit" formaction="/draft">Save Draft</ds-button>
+  <!-- Submit button with custom form action. -->
+  <ds-button type="submit" formaction="/draft">Save Draft</ds-button>
 
-    <!-- Default submit button (matches :default). -->
-    <ds-button type="submit">Save</ds-button>
+  <!-- Default submit button (matches :default). -->
+  <ds-button type="submit">Save</ds-button>
 
-    <!-- Reset button. -->
-    <ds-button type="reset">Reset</ds-button>
+  <!-- Reset button. -->
+  <ds-button type="reset">Reset</ds-button>
 
-    <!-- Regular button (default when no type specified). -->
-    <ds-button>Cancel</ds-button>
+  <!-- Regular button (default when no type specified). -->
+  <ds-button>Cancel</ds-button>
 </form>
 ```
 
@@ -604,6 +643,15 @@ The element gains:
 - CSS pseudo-class matching: `:default`, `:disabled`/`:enabled`.
 - Participation in implicit form submission (for submit buttons).
 - Behavior properties like `disabled` and `formAction` are accessible via the stored behavior reference.
+
+#### Dynamically changing the `type` attribute
+
+Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to toggle behaviors:
+
+- Under last-in-wins, only `buttonBehavior`'s property values (the last in the array) determine the element's effective state. For `disabled`, this means setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect as only `buttonBehavior.disabled` controls whether the element matches `:disabled`, is removed from the tab order, and stops receiving activation events (no click or keyboard handler from any behavior runs while disabled).
+- All three behaviors register click handlers with different effects. Under strict last-in-wins (Option A), only `buttonBehavior`'s handler runs. Under additive events (Option B), all handlers run (the element would submit and reset the form on every click).
+
+Because `disabled` cannot selectively silence individual behaviors and conflict resolution applies uniformly to all attached behaviors, loading all three simultaneously and switching between them is not viable.
 
 ### Framework use cases
 
@@ -764,7 +812,7 @@ Future behaviors would also manage their own relevant pseudo-classes:
 A future extension of this proposal could allow developers to define their own reusable behaviors:
 
 ```javascript
-class TooltipBehavior extends PlatformBehavior {
+class TooltipBehavior extends ElementBehavior {
   #content = '';
   #tooltipElement = null;
 
@@ -773,14 +821,6 @@ class TooltipBehavior extends PlatformBehavior {
     this.element.addEventListener('mouseleave', this.#hide);
     this.element.addEventListener('focus', this.#show);
     this.element.addEventListener('blur', this.#hide);
-  }
-
-  behaviorDetachedCallback() {
-    this.element.removeEventListener('mouseenter', this.#show);
-    this.element.removeEventListener('mouseleave', this.#hide);
-    this.element.removeEventListener('focus', this.#show);
-    this.element.removeEventListener('blur', this.#hide);
-    this.#hide();
   }
 
   #show = () => {
@@ -809,7 +849,7 @@ class TooltipBehavior extends PlatformBehavior {
 }
 ```
 
-Behaviors are classes with the appropriate methods (`behaviorAttachedCallback`, `behaviorDetachedCallback`). The behavior is instantiated and passed to `behaviors`:
+Behaviors are classes with a `behaviorAttachedCallback` method. The behavior is instantiated and passed to `behaviors`:
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -832,13 +872,144 @@ class CustomButton extends HTMLElement {
 
 `TooltipBehavior` could be combined with platform-provided behaviors. Here, `CustomButton` gains both tooltip functionality (show on hover/focus) and submit button semantics (click/Enter submits forms, implicit submission, `role="button"`).
 
+#### ElementBehavior API
+
+For developer-defined behaviors to work, `ElementBehavior` would need to expose an API that lets web developers set accessibility defaults, receive lifecycle notifications, and reference the host element:
+
+| Member | Kind | Description |
+|--------|------|-------------|
+| `element` | Property (read-only) | Reference to the host element. |
+| `setDefaultRole(role)` | Method | Sets the element's implicit ARIA role. |
+| `setDefaultTabIndex(index)` | Method | Sets the element's implicit tab index, making it focusable without an explicit `tabindex` attribute. |
+| `behaviorAttachedCallback(internals)` | Lifecycle | Called when the behavior is attached to an element via `attachInternals()`. Receives the `ElementInternals` object. |
+
+The following example shows how `HTMLButtonBehavior` (`type="button"`) would be implemented in userland:
+
+```javascript
+class HTMLButtonBehaviorExample extends ElementBehavior {
+  #disabled = false;
+  #internals = null;
+  #name = '';
+  #value = '';
+
+  #popoverTargetElement = null;
+  #popoverTargetAction = 'toggle';
+  #commandForElement = null;
+  #command = '';
+
+  behaviorAttachedCallback(internals) {
+    this.#internals = internals;
+
+    this.setDefaultRole('button');
+    this.setDefaultTabIndex(0);
+
+    this.element.addEventListener('click', this.#handleClick);
+    this.element.addEventListener('keydown', this.#handleKeydown);
+    this.element.addEventListener('keyup', this.#handleKeyup);
+  }
+
+  #handleClick = (e) => {
+    if (this.#disabled) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return;
+    }
+
+    if (this.#popoverTargetElement) {
+      switch (this.#popoverTargetAction) {
+        case 'show': {
+          this.#popoverTargetElement.showPopover();
+          break;
+        }
+        case 'hide': {
+          this.#popoverTargetElement.hidePopover();
+          break;
+        }
+        default: {
+          this.#popoverTargetElement.togglePopover();
+          break;
+        }
+      }
+      return;
+    }
+
+    if (this.#commandForElement && this.#command) {
+      const commandEvent = new CommandEvent('command', {
+        source: this.element,
+        command: this.#command,
+      });
+      this.#commandForElement.dispatchEvent(commandEvent);
+    }
+  };
+
+  #handleKeydown = (e) => {
+    if (this.#disabled) {
+      return;
+    }
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      if (e.key === 'Enter') {
+        this.element.click();
+      }
+    }
+  };
+
+  #handleKeyup = (e) => {
+    if (this.#disabled) {
+      return;
+    }
+    if (e.key === ' ') {
+      this.element.click();
+    }
+  };
+
+  // Properties
+  get disabled() { return this.#disabled; }
+  set disabled(val) {
+    this.#disabled = val;
+    this.#internals?.setDisabled?.(this.#disabled);
+  }
+
+  get name() { return this.#name; }
+  set name(val) { this.#name = val; }
+
+  get value() { return this.#value; }
+  set value(val) { this.#value = val; }
+
+  // Popover target API.
+  get popoverTargetElement() { return this.#popoverTargetElement; }
+  set popoverTargetElement(val) { this.#popoverTargetElement = val; }
+  get popoverTargetAction() { return this.#popoverTargetAction; }
+  set popoverTargetAction(val) { this.#popoverTargetAction = val; }
+
+  // Invoker commands API.
+  get commandForElement() { return this.#commandForElement; }
+  set commandForElement(val) { this.#commandForElement = val; }
+  get command() { return this.#command; }
+  set command(val) { this.#command = val; }
+}
+
+// Attaching the behavior to a custom element:
+class MyButton extends HTMLElement {
+  constructor() {
+    super();
+    this._buttonBehavior = new HTMLButtonBehaviorExample();
+    this._internals = this.attachInternals({ behaviors: [this._buttonBehavior] });
+  }
+}
+```
+
+- The subclass overrides `behaviorAttachedCallback(internals)` to receive the `ElementInternals` object; set defaults with `setDefaultRole(role)` and `setDefaultTabIndex(index)`; and register event listeners.
+- The platform would set `this.element` before calling `behaviorAttachedCallback`, so it is already available inside the callback. The example uses `this.element` to register event listeners and to trigger clicks during keyboard activation.
+- `ElementBehavior` needs to provide a way to affect the `:disabled` pseudo-class. The `setDisabled()` method (called in the `disabled` setter) would need to integrate with `ElementInternals` states.
+
 #### Polyfilling behaviors
 
 This design also would enable **polyfilling** new platform behaviors before they ship natively. Consider `HTMLDialogBehavior` (from `<dialog>`):
 
 ```javascript
 // Polyfill for HTMLDialogBehavior.
-class HTMLDialogBehaviorPolyfill extends PlatformBehavior {
+class HTMLDialogBehaviorPolyfill extends ElementBehavior {
   #open = false;
   #returnValue = '';
   #modal = false;
@@ -848,12 +1019,6 @@ class HTMLDialogBehaviorPolyfill extends PlatformBehavior {
     this.setDefaultRole('dialog');
     this.element.addEventListener('keydown', this.#handleKeydown);
     this.element.addEventListener('click', this.#handleBackdropClick);
-  }
-
-  behaviorDetachedCallback() {
-    this.element.removeEventListener('keydown', this.#handleKeydown);
-    this.element.removeEventListener('click', this.#handleBackdropClick);
-    this.close();
   }
 
   show() {
@@ -947,11 +1112,11 @@ The platform automatically adds behavior properties to the custom element:
 
 ```javascript
 class CustomSubmitButton extends HTMLElement {
-    constructor() {
-        super();
-        this._submitBehavior = new HTMLSubmitButtonBehavior();
-        this.attachInternals({ behaviors: [this._submitBehavior] });
-    }
+  constructor() {
+    super();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
+    this.attachInternals({ behaviors: [this._submitBehavior] });
+  }
 }
 
 const btn = document.createElement('custom-submit');
@@ -991,8 +1156,8 @@ this.attachInternals({ behaviors: [this._submitBehavior] });
 // Opt-in to automatic exposure.
 this._submitBehavior = new HTMLSubmitButtonBehavior();
 this.attachInternals({ 
-    behaviors: [this._submitBehavior],
-    exposeProperties: true  // or list specific properties.
+  behaviors: [this._submitBehavior],
+  exposeProperties: true  // or list specific properties.
 });
 ```
 
@@ -1030,6 +1195,23 @@ For behaviors, the same problems would apply: if behaviors could be swapped dyna
 
 If compelling use cases emerge that genuinely require dynamic behavior composition, the API could be extended to use `ObservableArray` with lifecycle callbacks. This would be a backwards-compatible change (making the array mutable doesn't break code that treats it as read-only). However, we believe static behaviors will cover the vast majority of real-world needs.
 
+### Is there a better name than "behavior" for this concept?
+
+The American English spelling of behavior throughout this proposal follows the [WHATWG spec style guidelines](https://wiki.whatwg.org/wiki/Specs/style#:~:text=Use%20standard%20American%20English%20spelling). However, the word "behavior" has some drawbacks:
+
+- "behaviour" vs "behavior" may cause some friction for contributors.
+- Shorter names would improve ergonomics.
+- "Behavior" is used in other contexts (such as CSS scroll-behavior), which could cause confusion.
+
+Alternatives:
+
+| Name | Example class | Example API | Notes |
+|------|--------------|-------------|-------|
+| **mixin** | `HTMLSubmitButtonMixin` | `attachInternals({ mixins: [...] })` | Related term, familiar concept but implies class-level composition |
+| **conduct** | `HTMLSubmitButtonConduct` | `attachInternals({ conducts: [...] })` | Short |
+| **action** | `HTMLSubmitButtonAction` | `attachInternals({ actions: [...] })` | Intuitive but overloaded (form `action` attribute) |
+| **trait** | `HTMLSubmitButtonTrait` | `attachInternals({ traits: [...] })` | Related term and short |
+
 ## Alternatives considered
 
 ### Alternative 1: Static Class Mixins
@@ -1057,12 +1239,12 @@ Set a single "type" string that grants a predefined bundle of behaviors.
 
 ```javascript
 class CustomButton extends HTMLElement {
-    static formAssociated = true;
+  static formAssociated = true;
 
-    constructor() {
-        super();
-        this.attachInternals().type = 'button';
-    }
+  constructor() {
+    super();
+    this.attachInternals().type = 'button';
+  }
 }
 ```
 
@@ -1083,11 +1265,11 @@ Define custom attributes with lifecycle callbacks that add behavior to elements.
 
 ```javascript
 class SubmitButtonAttribute extends Attribute {
-    connectedCallback() {
-        this.ownerElement.addEventListener('click', () => {
-            // Submit form logic.
-        });
-    }
+  connectedCallback() {
+    this.ownerElement.addEventListener('click', () => {
+      // Submit form logic.
+    });
+  }
 }
 HTMLElement.attributeRegistry.define('submit-button', SubmitButtonAttribute);
 ```
@@ -1116,9 +1298,9 @@ Extend native element classes directly.
 
 ```javascript
 class FancyButton extends HTMLButtonElement {
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 }
 customElements.define('fancy-button', FancyButton, { extends: 'button' });
 ```
