@@ -23,6 +23,7 @@
     - [Goals](#goals)
   - [Proposed Approach](#proposed-approach)
     - [Scenario 1: Flowing in text](#scenario-1-flowing-in-text)
+    - [Scenario 2: Rainbow wave animation](#scenario-2-rainbow-wave-animation)
   - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -92,6 +93,25 @@ animation-text-interval: <time [0s,∞]>#
 animation-text-unit: [ none | character | word | line ]#
 ```
 
+**`*-text-unit`** specifies the unit of text that the transition or animation is
+applied to progressively. When set to a value other than `none`, each successive
+unit within the element starts its transition or animation after a staggered
+delay.
+
+- `none` (initial value): The transition or animation applies to the element as
+  a whole, as in current behavior.
+- `character`: Each character is treated as a unit.
+- `word`: Each word (as determined by the UA's word breaking algorithm) is treated as a
+  unit.
+- `line`: Each line box is treated as a unit.
+
+**`*-text-interval`** specifies the time offset between successive text units
+beginning their transition or animation. For example, if the interval is `6ms`
+and the unit is `word`, the first word starts immediately, the second word starts
+at 6 ms, the third at 12 ms, and so on.
+
+- Initial value: `0s`
+
 These properties take lists of values to integrate with existing support for
 animating multiple properties in CSS Transitions and Animations. They follow the
 same list behaviors as `transition-duration`, `transition-delay`,
@@ -116,6 +136,7 @@ Authors could achieve a flow-in animation as follows:
   .fade-in-text {
     opacity: 1;
     transition: opacity 600ms;
+    transition-text-unit: word;
     transition-text-interval: 6ms;
   }
   @starting-style {
@@ -135,13 +156,32 @@ Authors could achieve a flow-in animation as follows:
 </p>
 ```
 
-<!--
-### Solving [goal 2] with this approach
+### Scenario 2: Rainbow wave animation
 
-[If some goals require a suite of interacting APIs, show how they work together to achieve the goals.]
+Authors could apply a looping color wave that ripples across characters:
 
-[etc.]
--->
+```html
+<style>
+  @keyframes rainbow-wave {
+    0%, 100% { color: red; }
+    14.29%   { color: orange; }
+    28.57%   { color: yellow; }
+    42.86%   { color: green; }
+    57.14%   { color: blue; }
+    71.43%   { color: indigo; }
+    85.71%   { color: violet; }
+  }
+  .rainbow-text {
+    animation: rainbow-wave 2s linear infinite;
+    animation-text-unit: character;
+    animation-text-interval: 80ms;
+  }
+</style>
+<!-- ... -->
+<p class="rainbow-text">
+  This text ripples through the colors of the rainbow!
+</p>
+```
 
 <!--
 ## Alternatives considered
@@ -173,7 +213,7 @@ Describe them as open questions here, and adjust the description once you make a
 
 Accessibility: On some platforms, users may express preferences for reduced
 animation effects. In CSS, this preference may be exposed via the
-`prefers-reduced-motion` media feature. Authors may use this media feature to
+`prefers-reduced-motion` media feature. Authors can use this media feature to
 adjust their animation effects accordingly.
 
 No internationalization, privacy, or security implications have been reported
