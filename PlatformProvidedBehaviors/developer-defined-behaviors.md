@@ -82,8 +82,6 @@ For developer-defined behaviors to work, `ElementBehavior` would need to expose 
 | Member | Kind | Description |
 |--------|------|-------------|
 | `element` | Property (read-only) | Reference to the host element. |
-| `setDefaultRole(role)` | Method | Sets the element's implicit ARIA role. |
-| `setDefaultTabIndex(index)` | Method | Sets the element's implicit tab index, making it focusable without an explicit `tabindex` attribute. |
 | `behaviorAttachedCallback(internals)` | Lifecycle | Called when the behavior is attached to an element via `attachInternals()`. Receives the `ElementInternals` object. |
 
 The following example shows how `HTMLButtonBehavior` (`type="button"`) would be implemented in userland:
@@ -102,9 +100,8 @@ class HTMLButtonBehaviorExample extends ElementBehavior {
 
   behaviorAttachedCallback(internals) {
     this.#internals = internals;
-
-    this.setDefaultRole('button');
-    this.setDefaultTabIndex(0);
+    this.#internals.role = 'button';
+    this.element.setAttribute('tabindex', '0');
 
     this.element.addEventListener('click', this.#handleClick);
     this.element.addEventListener('keydown', this.#handleKeydown);
@@ -202,7 +199,7 @@ class MyButton extends HTMLElement {
 }
 ```
 
-- The subclass overrides `behaviorAttachedCallback(internals)` to receive the `ElementInternals` object; set defaults with `setDefaultRole(role)` and `setDefaultTabIndex(index)`; and register event listeners.
+- The subclass overrides `behaviorAttachedCallback(internals)` to receive the `ElementInternals` object; sets defaults such as `internals.role`; and register event listeners.
 - The platform would set `this.element` before calling `behaviorAttachedCallback`, so it is already available inside the callback. The example uses `this.element` to register event listeners and to trigger clicks during keyboard activation.
 - `ElementBehavior` needs to provide a way to affect the `:disabled` pseudo-class. The `setDisabled()` method (called in the `disabled` setter) would need to integrate with `ElementInternals` states.
 
@@ -219,7 +216,7 @@ class HTMLDialogBehaviorPolyfill extends ElementBehavior {
   #previouslyFocused = null;
 
   behaviorAttachedCallback(internals) {
-    this.setDefaultRole('dialog');
+    internals.role = 'dialog';
     this.element.addEventListener('keydown', this.#handleKeydown);
     this.element.addEventListener('click', this.#handleBackdropClick);
   }
