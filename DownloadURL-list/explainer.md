@@ -4,7 +4,7 @@ Author: [Joone Hur](https://github.com/joone) (Microsoft)
 
 # Participate
 
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DownloadURL)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DownloadURL-list)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
