@@ -14,8 +14,6 @@ The [Platform-Provided Behaviors](explainer.md) proposal introduces a set of bro
 - Polyfilling upcoming platform behaviors before they ship natively.
 - Composing developer-defined behaviors with platform-provided ones on the same element.
 
-A future extension of this proposal could allow developers to define their own reusable behaviors:
-
 ```javascript
 class TooltipBehavior extends ElementBehavior {
   #content = '';
