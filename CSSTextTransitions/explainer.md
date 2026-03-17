@@ -177,7 +177,7 @@ Authors could achieve a flow-in animation as follows:
 </style>
 ```
 
-<img src="images/text-stream.gif">
+![Flowing in text animation](images/text-stream.gif)
 
 ### Scenario 2: Typing indicator
 
@@ -205,7 +205,7 @@ Authors could animate "..." dots bouncing up and down in sequence:
 <div class="typing-dots">...</div>
 ```
 
-<img src="images/dot-bounce.gif">
+![Typing indicator animation](images/dot-bounce.gif)
 
 ### Scenario 3: Loading shimmer
 
@@ -232,7 +232,7 @@ Authors could apply a looping shimmer effect that fades across characters:
 <p class="loading-text">Loading...</p>
 ```
 
-<img src="images/loading-shimmer.gif">
+![Loading shimmer animation](images/loading-shimmer.gif)
 
 ### Details and open questions
 
