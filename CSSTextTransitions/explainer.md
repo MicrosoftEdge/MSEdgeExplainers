@@ -6,8 +6,8 @@
 
 ## Participate
 
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues)
-- [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSSTextTransitions)
+- [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=CSSTextTransitions&title=%5BCSSTextTransitions%5D+)
 
 ## Table of Contents
 
