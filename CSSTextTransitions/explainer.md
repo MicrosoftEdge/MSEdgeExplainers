@@ -23,8 +23,19 @@
     - [Goals](#goals)
   - [Proposed Approach](#proposed-approach)
     - [Scenario 1: Flowing in text](#scenario-1-flowing-in-text)
-    - [Scenario 2: Rainbow wave animation](#scenario-2-rainbow-wave-animation)
+    - [Scenario 2: Typing indicator](#scenario-2-typing-indicator)
+    - [Scenario 3: Loading shimmer](#scenario-3-loading-shimmer)
+    - [Details and open questions](#details-and-open-questions)
+      - [Animation application](#animation-application)
+      - [Nested elements](#nested-elements)
+      - [Adding text content to an element](#adding-text-content-to-an-element)
+      - [Generated content](#generated-content)
+  - [Prior Art](#prior-art)
   - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+    - [Accessibility](#accessibility)
+    - [Internationalization](#internationalization)
+    - [Privacy and Security](#privacy-and-security)
+  - [References \& acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -36,18 +47,27 @@ given element.
 
 ## User-Facing Problem
 
-AI Chat interfaces have adopted animation effects to introduce response text. An
-example is to apply staggered fade-ins to each successive word, so that the text
-flows in smoothly at a steady rate.
+Many Web experiences animate text at sub-element granularity. Examples include:
 
-<img src="images/text-stream.gif">
+- AI chat interfaces that apply staggered fade-ins to each successive word, so
+  that response text flows in smoothly at a steady rate.
+- Typing indicators that display "..." with each dot animating in sequence.
+- Loading or placeholder text that shimmers across words or characters to
+  indicate progress.
 
-One challenge with such an approach is that the unit of currency for animations
-on the Web is the element. Effects such as the one depicted above require
-authors to split each word into its own element, such as a `<span>`, and apply
-effects individually to each such element. Doing so introduces considerable
-overhead into the DOM, style calculation, and layout, compared to having simple
-paragraphs of text.
+One challenge with such effects is that the unit of currency for animations on
+the Web is the element. Effects such as those depicted above require authors to
+split each word (or character) into its own element, such as a `<span>`, and
+apply effects individually to each such element. Doing so introduces several
+problems:
+
+- **Performance**: Each additional element adds cost to the DOM, style
+  calculation, and layout, compared to having simple paragraphs of text.
+- **Accessibility**: Screen readers may not correctly announce text that has
+  been fragmented into many `<span>` elements, potentially reading individual
+  fragments rather than flowing sentences.
+- **Editing interaction**: Text selection and copy-and-paste behavior can be
+  adversely affected.
 
 Additionally, it puts the requirement on Web authors to perform the text
 splitting. JavaScript `string.split()` can work when the desired unit is the
@@ -84,7 +104,7 @@ though we understand this is not always feasible.]
 
 ## Proposed Approach
 
-We introduce 4 new CSS properties:
+We introduce four new CSS properties:
 
 ```
 transition-text-interval: <time [0s,∞]>#
@@ -98,17 +118,20 @@ applied to progressively. When set to a value other than `none`, each successive
 unit within the element starts its transition or animation after a staggered
 delay.
 
-- `none` (initial value): The transition or animation applies to the element as
-  a whole, as in current behavior.
+- `none`: The transition or animation applies to the element as a whole, as in
+  current behavior. (This value is provided so that, when an element has
+  multiple properties listed in `transition-property`, the author can choose to
+  have some of them act as text transitions and others act as whole-element
+  transitions.)
 - `character`: Each character is treated as a unit.
-- `word`: Each word (as determined by the UA's word breaking algorithm) is treated as a
-  unit.
+- `word` (initial value): Each word (as determined by the UA's word breaking
+  algorithm) is treated as a unit.
 - `line`: Each line box is treated as a unit.
 
 **`*-text-interval`** specifies the time offset between successive text units
 beginning their transition or animation. For example, if the interval is `6ms`
-and the unit is `word`, the first word starts immediately, the second word starts
-at 6 ms, the third at 12 ms, and so on.
+and the unit is `word`, the first word starts immediately, the second word
+starts at 6 ms, the third at 12 ms, and so on.
 
 - Initial value: `0s`
 
@@ -116,6 +139,13 @@ These properties take lists of values to integrate with existing support for
 animating multiple properties in CSS Transitions and Animations. They follow the
 same list behaviors as `transition-duration`, `transition-delay`,
 `transition-timing-function`, etc.
+
+Shorthands are also provided to set each pair of properties together:
+
+```css
+transition-text: word 60ms;
+animation-text: character 150ms;
+```
 
 <!--
 ### Dependencies on non-stable features
@@ -145,43 +175,148 @@ Authors could achieve a flow-in animation as follows:
     }
   }
 </style>
-<!-- ... -->
-<p class="fade-in-text">
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-  incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-  nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
-  eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
-  in culpa qui officia deserunt mollit anim id est laborum.
-</p>
 ```
 
-### Scenario 2: Rainbow wave animation
+<img src="images/text-stream.gif">
 
-Authors could apply a looping color wave that ripples across characters:
+### Scenario 2: Typing indicator
+
+Authors could animate "..." dots bouncing up and down in sequence:
 
 ```html
 <style>
-  @keyframes rainbow-wave {
-    0%, 100% { color: red; }
-    14.29%   { color: orange; }
-    28.57%   { color: yellow; }
-    42.86%   { color: green; }
-    57.14%   { color: blue; }
-    71.43%   { color: indigo; }
-    85.71%   { color: violet; }
+  @keyframes dot-bounce {
+    0%,
+    50%,
+    100% {
+      transform: translateY(0);
+    }
+    25% {
+      transform: translateY(-0.3em);
+    }
   }
-  .rainbow-text {
-    animation: rainbow-wave 2s linear infinite;
+  .typing-dots {
+    animation: dot-bounce 1s ease-in-out infinite;
     animation-text-unit: character;
-    animation-text-interval: 80ms;
+    animation-text-interval: 150ms;
   }
 </style>
 <!-- ... -->
-<p class="rainbow-text">
-  This text ripples through the colors of the rainbow!
-</p>
+<div class="typing-dots">...</div>
 ```
+
+<img src="images/dot-bounce.gif">
+
+### Scenario 3: Loading shimmer
+
+Authors could apply a looping shimmer effect that fades across characters:
+
+```html
+<style>
+  @keyframes shimmer {
+    0%,
+    100% {
+      color: #999;
+    }
+    50% {
+      color: #333;
+    }
+  }
+  .loading-text {
+    animation: shimmer 1.5s ease-in-out infinite;
+    animation-text-unit: character;
+    animation-text-interval: 100ms;
+  }
+</style>
+<!-- ... -->
+<p class="loading-text">Loading...</p>
+```
+
+<img src="images/loading-shimmer.gif">
+
+### Details and open questions
+
+#### Animation application
+
+The end state of any text transition or animation should be the same as if the
+changed property were applied to the element as a whole. In many cases, but not
+all, the overall effect will be equivalent to what would result if the author
+had enclosed each text unit in its own `<span>` and applied the transition or
+animation to each of them individually, with appropriate delays to each unit.
+(Details to be fleshed out in the specification.)
+
+#### Nested elements
+
+When `*-text-unit` is set on an element, the animation sequences through all
+text content within that element, including text in descendant elements. For
+example:
+
+```html
+<div class="fade-in-text">
+  <p>First piece of text</p>
+  <p>Second piece of text</p>
+</div>
+```
+
+Here, the words in the first `<p>` animate in sequence, followed by the words in
+the second `<p>`, as a single continuous timeline owned by the `<div>`.
+
+However, if a text-interval animation also cascades to a descendant element,
+that element establishes its own independent timeline:
+
+```html
+<div class="fade-in-text">
+  <p>First piece of text</p>
+  <p class="fade-in-text">Second piece of text</p>
+</div>
+```
+
+In this case, the second `<p>` would animate its text on its own timeline rather
+than waiting for the `<div>` to sequence through the first `<p>`'s text.
+
+#### Adding text content to an element
+
+When text content is appended to an element that has already animated (e.g., in
+a streaming response scenario), the newly added text picks up where the previous
+text would leave off.
+
+```js
+// Animates 'Hello'
+element.appendChild(document.createTextNode("Hello"));
+
+// Appends ' world' to the tail end of any running animation, or starts a new
+// animation for just ' world' if the previous animation has already finished
+element.appendChild(document.createTextNode(" world"));
+```
+
+When text is fully replaced (not an append), the animation restarts for all
+content:
+
+```js
+// Animates 'Hello'
+element.innerText = "Hello";
+
+// Full replacement; restarts animation from the beginning
+element.innerText = "Abcde fghij hijkl";
+```
+
+This includes operations that are semantically a replacement even if a leading
+substring is shared:
+
+```js
+// Animates 'Hello'
+element.innerText = "Hello";
+
+// Restarts and animates 'Hello world'
+element.innerText = "Hello world";
+```
+
+#### Generated content
+
+How these properties interact with CSS generated content (via `::before`,
+`::after`, and the `content` property) is an open question. Generated text
+content could potentially participate in the same animation sequence as the
+element's other text content.
 
 <!--
 ## Alternatives considered
@@ -209,15 +344,41 @@ Describe them as open questions here, and adjust the description once you make a
 [[TBD.]]
 -->
 
+## Prior Art
+
+SVG has long supported rich text animation capabilities, including the ability
+to animate individual characters along paths and apply per-glyph transformations
+(see [SVG 2 Text](https://svgwg.org/svg2-draft/text.html)). Notably, SVG can
+rotate individual characters but cannot fade them independently. While SVG's
+text capabilities serve as useful precedent, they do not directly address the
+needs of HTML/CSS content. Extending support to SVG text elements could be
+explored in the future but is out of scope for this initial proposal.
+
 ## Accessibility, Internationalization, Privacy, and Security Considerations
 
-Accessibility: On some platforms, users may express preferences for reduced
-animation effects. In CSS, this preference may be exposed via the
-`prefers-reduced-motion` media feature. Authors can use this media feature to
-adjust their animation effects accordingly.
+### Accessibility
 
-No internationalization, privacy, or security implications have been reported
-against this feature.
+This feature can improve accessibility over current practice. Today, authors who
+want to animate text at sub-element granularity must split text into many
+`<span>` elements, which can interfere with screen reader announcement and
+copy-paste behavior. By allowing the browser to handle per-unit animation
+natively, the DOM remains clean and semantically meaningful.
+
+On some platforms, users may express preferences for reduced animation effects.
+In CSS, this preference may be exposed via the `prefers-reduced-motion` media
+feature. Authors can use this media feature to adjust their animation effects
+accordingly.
+
+### Internationalization
+
+The order in which text units animate should follow the writing mode. In a
+left-to-right context, units animate left-to-right; in a right-to-left context,
+they animate right-to-left. For vertical writing modes, the order follows the
+block and inline flow direction accordingly.
+
+### Privacy and Security
+
+No privacy or security implications have been reported against this feature.
 
 <!--
 ## Stakeholder Feedback / Opposition
@@ -233,26 +394,18 @@ against this feature.
 [[TBD.]]
 -->
 
-<!--
 ## References & acknowledgements
-
-[Your design will change and be informed by many people; acknowledge them in an ongoing way! It helps build community and, as we only get by through the contributions of many, is only fair.]
-
-[Unless you have a specific reason not to, these should be in alphabetical order.]
 
 Many thanks for valuable feedback and advice from:
 
-- [Person 1]
-- [Person 2]
-- [etc.]
+- Daniel Clark
+- Hoch Hochkeppel
+- Kurt Catti-Schmidt
+- Mike Jackson
+- Sushanth Rajasankar
 
-Thanks to the following proposals, projects, libraries, frameworks, and languages
-for their work on similar problems that influenced this proposal.
+Thanks to the following proposals, projects, libraries, frameworks, and
+languages for their work on similar problems that influenced this proposal.
 
-- [Framework 1]
-- [Project 2]
-- [Proposal 3]
-- [etc.]
-
-[[TBD.]]
--->
+- [GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/)
+- [SVG 2 Text](https://svgwg.org/svg2-draft/text.html)
