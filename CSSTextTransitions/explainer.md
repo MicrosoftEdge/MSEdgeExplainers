@@ -14,28 +14,25 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [CSS Text Transitions \& Animations](#css-text-transitions--animations)
-  - [Author](#author)
-  - [Participate](#participate)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [User-Facing Problem](#user-facing-problem)
-    - [Goals](#goals)
-  - [Proposed Approach](#proposed-approach)
-    - [Scenario 1: Flowing in text](#scenario-1-flowing-in-text)
-    - [Scenario 2: Typing indicator](#scenario-2-typing-indicator)
-    - [Scenario 3: Loading shimmer](#scenario-3-loading-shimmer)
-    - [Details and open questions](#details-and-open-questions)
-      - [Animation application](#animation-application)
-      - [Nested elements](#nested-elements)
-      - [Adding text content to an element](#adding-text-content-to-an-element)
-      - [Generated content](#generated-content)
-  - [Prior Art](#prior-art)
-  - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
-    - [Accessibility](#accessibility)
-    - [Internationalization](#internationalization)
-    - [Privacy and Security](#privacy-and-security)
-  - [References \& acknowledgements](#references--acknowledgements)
+- [Introduction](#introduction)
+- [User-Facing Problem](#user-facing-problem)
+  - [Goals](#goals)
+- [Proposed Approach](#proposed-approach)
+  - [Scenario 1: Flowing in text](#scenario-1-flowing-in-text)
+  - [Scenario 2: Typing indicator](#scenario-2-typing-indicator)
+  - [Scenario 3: Loading shimmer](#scenario-3-loading-shimmer)
+  - [Details and open questions](#details-and-open-questions)
+    - [Animation application](#animation-application)
+    - [Nested elements](#nested-elements)
+    - [Adding text content to an element](#adding-text-content-to-an-element)
+    - [Generated content](#generated-content)
+    - [Animation and transition events](#animation-and-transition-events)
+- [Prior Art](#prior-art)
+- [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+  - [Accessibility](#accessibility)
+  - [Internationalization](#internationalization)
+  - [Privacy and Security](#privacy-and-security)
+- [References & acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -56,7 +53,7 @@ Many Web experiences animate text at sub-element granularity. Examples include:
   indicate progress.
 
 One challenge with such effects is that the unit of currency for animations on
-the Web is the element. Effects such as those depicted above require authors to
+the Web is the element. Effects such as those described above require authors to
 split each word (or character) into its own element, such as a `<span>`, and
 apply effects individually to each such element. Doing so introduces several
 problems:
@@ -128,10 +125,12 @@ delay.
   algorithm) is treated as a unit.
 - `line`: Each line box is treated as a unit.
 
-**`*-text-interval`** specifies the time offset between successive text units
-beginning their transition or animation. For example, if the interval is `6ms`
-and the unit is `word`, the first word starts immediately, the second word
-starts at 6 ms, the third at 12 ms, and so on.
+**`*-text-interval`** specifies the delay between successive text units
+beginning their transition or animation. For example, if
+`transition-text-interval` is `6ms`, `transition-text-unit` is `word`, and
+`transition-duration` is `100ms`, the first word starts immediately, the second
+word starts at 6 ms, the third at 12 ms, and so on. The first word subsequently
+finishes at 100 ms, the second at 106 ms, and so on.
 
 - Initial value: `0s`
 
@@ -143,8 +142,8 @@ same list behaviors as `transition-duration`, `transition-delay`,
 Shorthands are also provided to set each pair of properties together:
 
 ```css
-transition-text: word 60ms;
-animation-text: character 150ms;
+transition-text: 60ms word;
+animation-text: 150ms character;
 ```
 
 <!--
@@ -245,6 +244,16 @@ had enclosed each text unit in its own `<span>` and applied the transition or
 animation to each of them individually, with appropriate delays to each unit.
 (Details to be fleshed out in the specification.)
 
+This does create complications for properties that affect size and position of
+elements. For example, scale transforms applied to individual words produce a
+very different effect from a single scale transform applied to a group of words:
+
+![Example scale transform applied to sentences versus words](images/scale-transform.gif)
+
+Implementations will need to adjust the individual transforms so that the
+word-by-word animations produce the same final results as the whole-element
+animations.
+
 #### Nested elements
 
 When `*-text-unit` is set on an element, the animation sequences through all
@@ -274,11 +283,25 @@ that element establishes its own independent timeline:
 In this case, the second `<p>` would animate its text on its own timeline rather
 than waiting for the `<div>` to sequence through the first `<p>`'s text.
 
+Inline non-text child elements should also participate in the text animation
+flow. For example, given the following:
+
+```html
+<div class="fade-in-text">
+  <span>some preceding content</span>
+  <img src="icon.jpg" />
+  <span>trailing</span>
+</div>
+```
+
+The descendant image should participate in the animation as if it were a word
+between "content" and "trailing".
+
 #### Adding text content to an element
 
-When text content is appended to an element that has already animated (e.g., in
-a streaming response scenario), the newly added text picks up where the previous
-text would leave off.
+When text content is appended to an element that has already started animating
+(e.g., in a streaming response scenario), the newly added text picks up where
+the previous text would leave off.
 
 ```js
 // Animates 'Hello'
@@ -317,6 +340,15 @@ How these properties interact with CSS generated content (via `::before`,
 `::after`, and the `content` property) is an open question. Generated text
 content could potentially participate in the same animation sequence as the
 element's other text content.
+
+#### Animation and transition events
+
+The `animationend` or `transitionend` event fires on the element once the last
+text unit completes its animation. This means the event fires later than it
+would without text intervals. For example, if `transition-duration` is `600ms`,
+`transition-text-unit` is `word`, and `transition-text-interval` is `6ms`, a
+paragraph containing three words would fire `transitionend` at 612 ms (the last
+word starts at 12 ms and finishes 600 ms later) rather than at 600 ms.
 
 <!--
 ## Alternatives considered
