@@ -105,7 +105,7 @@ haptic-feedback: <effect-name> <intensity>?
 ```
 
 - `<effect-name>` — one of `hint`, `edge`, `tick`, `align`, `none`. Initial value: `none`.
-- `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0. Defaults to 1.0.
+- `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0, or a `<percentage>` between 0% and 100%. Defaults to 1.0 (or 100%).
 - **Not inherited.** Not animatable.
 
 **Pseudo-class scoping rule:** Unlike traditional CSS properties that describe continuous visual state, `haptic-feedback` produces a one-shot effect at the moment of state entry. This follows how CSS behavioral properties like `touch-action` and `scroll-snap-type` configure browser behavior rather than appearance — but extends the model to a non-visual output channel triggered by pseudo-class transitions, similar in spirit to how CSS Transitions produce side effects when property values change during style resolution.
@@ -134,7 +134,7 @@ This design avoids an allowlist that requires spec updates for each new pseudo-c
 ```css
 /* Hint haptic at half intensity when pointer enters the button */
 button:hover {
-  haptic-feedback: hint 0.5;
+  haptic-feedback: hint 50%; /* equivalent to: hint 0.5 */
 }
 
 /* Tick haptic at full intensity when the button is pressed */
@@ -156,7 +156,7 @@ scroll-snap-haptic: <effect-name> <intensity>?
 ```
 
 - `<effect-name>` — one of `hint`, `edge`, `tick`, `align`, `none`. Initial value: `none`.
-- `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0. Defaults to 1.0.
+- `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0, or a `<percentage>` between 0% and 100%. Defaults to 1.0 (or 100%).
 - **Not inherited.** Not animatable.
 
 The property applies to the scroll container, not individual snap children:
@@ -164,7 +164,7 @@ The property applies to the scroll container, not individual snap children:
 ```css
 .carousel {
   scroll-snap-type: x mandatory;
-  scroll-snap-haptic: tick 0.6;
+  scroll-snap-haptic: tick 60%; /* equivalent to: tick 0.6 */
 }
 
 .carousel > .slide {
@@ -185,7 +185,7 @@ A horizontal story carousel with a tactile tick on each swipe — one line of CS
 ```css
 .story-carousel {
   scroll-snap-type: x mandatory;
-  scroll-snap-haptic: tick 0.5;
+  scroll-snap-haptic: tick 50%; /* equivalent to: tick 0.5 */
 }
 ```
 
@@ -196,7 +196,7 @@ The user feels a light tick each time a story avatar snaps into the center posit
 A firm confirmation haptic on the most important button on the page:
 
 ```css
-.add-to-cart:hover  { haptic-feedback: hint 0.3; }
+.add-to-cart:hover  { haptic-feedback: hint 30%; } /* equivalent to: hint 0.3 */
 .add-to-cart:active { haptic-feedback: align; }
 ```
 
