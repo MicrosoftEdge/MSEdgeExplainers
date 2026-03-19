@@ -11,10 +11,19 @@ This document is a starting point for engaging the community and standards bodie
 * Current version: **This document**
 
 ## Table of Contents
-- [Introduction](#introduction) · [User-Facing Problem](#user-facing-problem) · [Goals](#goals) · [Non-goals](#non-goals)
-- [Proposed Approach](#proposed-approach) · [Real-World Scenarios](#real-world-scenarios) · [Coverage Gaps](#coverage-gaps-and-the-imperative-escape-hatch)
-- [Alternatives Considered](#alternatives-considered) · [Accessibility, Privacy, and Security](#accessibility-privacy-and-security-considerations) · [Open Questions](#open-questions)
-- [Reference for Relevant Haptics APIs](#reference-for-relevant-haptics-apis) · [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition) · [References & Acknowledgements](#references--acknowledgements)
+- [Introduction](#introduction)
+- [User-Facing Problem](#user-facing-problem)
+- [Goals](#goals)
+- [Non-goals](#non-goals)
+- [Proposed Approach](#proposed-approach)
+- [Real-World Scenarios](#real-world-scenarios)
+- [Coverage Gaps](#coverage-gaps-and-the-imperative-escape-hatch)
+- [Alternatives Considered](#alternatives-considered)
+- [Accessibility, Privacy, and Security](#accessibility-privacy-and-security-considerations)
+- [Open Questions](#open-questions)
+- [Reference for Relevant Haptics APIs](#reference-for-relevant-haptics-apis)
+- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+- [References & Acknowledgements](#references--acknowledgements)
 
 ## Introduction
 
@@ -114,12 +123,12 @@ This design avoids an allowlist that requires spec updates for each new pseudo-c
 
 1. **Per element**, only the declaration from the highest-specificity matching rule fires. If specificities are equal, normal cascade order applies — last wins.
 2. **Across elements**, at most one element fires per user action. The target element is considered first:
-  - If the target element **transitions into** a matching pseudo-class in this user action and its resolved `haptic-feedback` is not `none`, fire that value.
-  - If the target element resolves to `none`, fire nothing (do not bubble).
-  - Otherwise, walk up ancestors and select the first ancestor that **also transitions into** a matching pseudo-class in this same user action and whose resolved value is not `none`; fire that value.
-  - If no such ancestor exists, fire nothing.
+   - If the target element **transitions into** a matching pseudo-class in this user action and its resolved `haptic-feedback` is not `none`, fire that value.
+   - If the target element resolves to `none`, fire nothing (do not bubble).
+   - Otherwise, walk up ancestors and select the first ancestor that **also transitions into** a matching pseudo-class in this same user action and whose resolved value is not `none`; fire that value.
+   - If no such ancestor exists, fire nothing.
 
-  Ancestor fallback is only eligible on ancestor pseudo-class **entry transitions** caused by the same user action. Resolution is evaluated for the same pseudo-class transition under consideration.
+   Ancestor fallback is only eligible on ancestor pseudo-class **entry transitions** caused by the same user action. Resolution is evaluated for the same pseudo-class transition under consideration.
 3. Per-element throttling (at most one haptic per element per 50 ms) still applies as a backstop.
 
 ```css
@@ -134,20 +143,7 @@ button:active {
 }
 ```
 
-**Cascade and override:** The `none` value suppresses haptics set by a more general rule:
 
-```css
-.btn:hover  { haptic-feedback: hint 0.5; }
-.btn.quiet:hover { haptic-feedback: none; }   /* higher specificity wins */
-```
-
-**Feature detection via `@supports`:**
-
-```css
-@supports (haptic-feedback: tick) {
-  button:active { haptic-feedback: tick; }
-}
-```
 
 #### `scroll-snap-haptic` property
 
@@ -178,7 +174,7 @@ The property applies to the scroll container, not individual snap children:
 
 Each time a scroll gesture causes the container to settle on a new snap point, the user agent fires the haptic. The haptic does not fire for programmatic scrolls (e.g. `element.scrollTo()`). It fires only for scrolls the user agent recognizes as user-initiated — that is, scrolls originating from touch, wheel, keyboard, or scrollbar interaction. A programmatic scroll that follows a user gesture but runs asynchronously (e.g. in a `requestAnimationFrame` callback) is still considered programmatic and does **not** trigger the haptic.
 
-**When to use each:** Use declarative CSS for interactions that map to pseudo-class state changes (button press, checkbox toggle, scroll snap, form validation, focus). Use the imperative API when the trigger, intensity, or conditions require runtime logic (chart scrubbers, drag-to-snap with distance thresholds, gesture velocity, non-CSS events).
+**When to use each:** Use declarative CSS for interactions that map to pseudo-class state changes (button press, checkbox toggle, form validation, focus) or built-in browser behaviors (scroll snap). Use the imperative API when the trigger, intensity, or conditions require runtime logic (chart scrubbers, drag-to-snap with distance thresholds, gesture velocity, non-CSS events).
 
 ## Real-World Examples
 
