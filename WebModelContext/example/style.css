@@ -1,0 +1,73 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: #f3f4f7;
+}
+
+#app {
+    max-width: 1000px;
+    text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    color: #333;
+}
+
+#content {
+    display: flex;
+    gap: 20px; /* Add space between sections */
+    justify-content: space-between;
+}
+
+#stampSection {
+    flex: 1;
+    text-align: left;
+}
+
+#addStampSection {
+    flex: 0.6; /* Set smaller size for the form */
+    text-align: left;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#stampCollection, #confirmationMessage {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+form input, form textarea, form button {
+    margin: 10px 0;
+    padding: 10px;
+    width: 100%;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#stampCollection img {
+    max-width: 100px;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}

@@ -1,0 +1,1353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scroll Timing API — Demo</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b0d12;
+      --panel: #121725;
+      --panel2: #0f1320;
+      --text: #e7e9ee;
+      --muted: #a7afc3;
+      --border: rgba(255,255,255,.10);
+      --border2: rgba(255,255,255,.14);
+      --accent: #6ea8ff;
+      --good: #5fe1b6;
+      --warn: #ffd36e;
+      --bad: #ff7d7d;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f7fb;
+        --panel: #ffffff;
+        --panel2: #fbfcff;
+        --text: #121524;
+        --muted: #495166;
+        --border: rgba(0,0,0,.10);
+        --border2: rgba(0,0,0,.14);
+        --shadow: 0 12px 28px rgba(16,24,40,.12);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      padding-top: var(--topbar-h, 76px);
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(110,168,255,.25), transparent 60%),
+                  radial-gradient(900px 500px at 80% 0%, rgba(95,225,182,.18), transparent 55%),
+                  var(--bg);
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+      background: color-mix(in oklab, var(--bg) 82%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 16px 12px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+
+    .brand {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: .2px;
+      font-weight: 650;
+    }
+
+    .brand .subtitle {
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.2;
+    }
+
+    .github-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--panel) 72%, transparent);
+      color: var(--text);
+      transition: background .12s ease, transform .06s ease;
+    }
+
+    .github-link:hover {
+      background: color-mix(in oklab, var(--panel) 82%, transparent);
+      text-decoration: none;
+    }
+
+    .github-link:active {
+      transform: translateY(1px);
+    }
+
+    .github-link svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .progress {
+      height: 8px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--panel) 65%, transparent);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+
+    .progress > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), color-mix(in oklab, var(--accent) 35%, var(--good)));
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px 16px 64px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 980px) {
+      .wrap {
+        grid-template-columns: 520px 1fr;
+        align-items: start;
+      }
+    }
+
+    .panel {
+      background: linear-gradient(180deg, color-mix(in oklab, var(--panel) 92%, transparent), var(--panel2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+
+    .panel-header {
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: .2px;
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .kvs {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .kv {
+      padding: 10px;
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--panel) 70%, transparent);
+      border: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .kv .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .kv .value {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    .nested-scroller {
+      height: 240px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: color-mix(in oklab, var(--panel) 78%, transparent);
+    }
+
+    .nested-scroller .row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--panel) 86%, transparent);
+      margin: 0 0 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 520px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .row > * { flex: 0 0 auto; }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border2);
+      background: color-mix(in oklab, var(--panel) 72%, transparent);
+      color: var(--text);
+      padding: 9px 10px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .06s ease, background .12s ease;
+    }
+
+    .btn:hover { background: color-mix(in oklab, var(--panel) 82%, transparent); }
+    .btn:active { transform: translateY(1px); }
+
+    .btn:disabled,
+    .btn[disabled] {
+      cursor: not-allowed;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .btn:disabled:hover,
+    .btn[disabled]:hover {
+      background: color-mix(in oklab, var(--panel) 72%, transparent);
+    }
+
+    .btn:disabled:active,
+    .btn[disabled]:active {
+      transform: none;
+    }
+
+    .btn.primary {
+      border-color: color-mix(in oklab, var(--accent) 55%, var(--border2));
+      background: color-mix(in oklab, var(--accent) 18%, var(--panel));
+    }
+
+    @keyframes start-observing-attn {
+      0% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 30%, transparent);
+        background: color-mix(in oklab, var(--accent) 18%, var(--panel));
+      }
+      35% {
+        transform: translateY(-1px) scale(1.02);
+        box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 18%, transparent);
+        background: color-mix(in oklab, var(--accent) 28%, var(--panel));
+      }
+      70% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 0%, transparent);
+        background: color-mix(in oklab, var(--accent) 18%, var(--panel));
+      }
+      100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 0%, transparent);
+        background: color-mix(in oklab, var(--accent) 18%, var(--panel));
+      }
+    }
+
+    .btn.attn {
+      animation: start-observing-attn 1.15s ease-in-out 0.15s 2;
+      will-change: transform;
+      outline: 2px solid color-mix(in oklab, var(--accent) 35%, transparent);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn.attn {
+        animation: none;
+        box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 16%, transparent);
+        background: color-mix(in oklab, var(--accent) 24%, var(--panel));
+      }
+    }
+
+    .btn.danger {
+      border-color: color-mix(in oklab, var(--bad) 55%, var(--border2));
+      background: color-mix(in oklab, var(--bad) 14%, var(--panel));
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .toggle input {
+      width: 44px;
+      height: 26px;
+      appearance: none;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      background: color-mix(in oklab, var(--panel) 80%, transparent);
+      position: relative;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .toggle input::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: color-mix(in oklab, var(--text) 82%, transparent);
+      transition: left .12s ease, background .12s ease;
+    }
+
+    .toggle input:checked {
+      border-color: color-mix(in oklab, var(--accent) 55%, var(--border2));
+      background: color-mix(in oklab, var(--accent) 18%, var(--panel));
+    }
+
+    .toggle input:checked::after {
+      left: 21px;
+      background: color-mix(in oklab, var(--accent) 70%, white);
+    }
+
+    .range {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    input[type="range"] { width: 100%; }
+
+    .pill {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--panel) 70%, transparent);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-family: var(--mono);
+    }
+
+    .pill.good {
+      border-color: color-mix(in oklab, var(--good) 55%, var(--border2));
+      background: color-mix(in oklab, var(--good) 16%, var(--panel));
+      color: color-mix(in oklab, var(--text) 92%, var(--good));
+    }
+
+    .pill.warn {
+      border-color: color-mix(in oklab, var(--warn) 55%, var(--border2));
+      background: color-mix(in oklab, var(--warn) 14%, var(--panel));
+      color: color-mix(in oklab, var(--text) 92%, var(--warn));
+    }
+
+    .pill.bad {
+      border-color: color-mix(in oklab, var(--bad) 55%, var(--border2));
+      background: color-mix(in oklab, var(--bad) 14%, var(--panel));
+      color: color-mix(in oklab, var(--text) 92%, var(--bad));
+    }
+
+    .pill strong { color: var(--text); font-weight: 650; }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      font-family: var(--mono);
+    }
+
+    th {
+      font-family: var(--sans);
+      font-size: 12px;
+      letter-spacing: .15px;
+      color: var(--muted);
+      font-weight: 650;
+      position: sticky;
+      top: 0;
+      background: color-mix(in oklab, var(--panel) 88%, transparent);
+      backdrop-filter: blur(10px);
+      z-index: 5;
+    }
+
+    .score {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--good);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--good) 18%, transparent);
+    }
+
+    .dot.warn {
+      background: var(--warn);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--warn) 22%, transparent);
+    }
+
+    .dot.bad {
+      background: var(--bad);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--bad) 22%, transparent);
+    }
+
+    .log {
+      max-height: 420px;
+      overflow: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .content {
+      padding: 18px;
+    }
+
+    .hero {
+      padding: 22px 18px 10px;
+      border-bottom: 1px solid var(--border);
+      background:
+        radial-gradient(900px 400px at 10% 0%, rgba(110,168,255,.18), transparent 55%),
+        radial-gradient(700px 420px at 90% 0%, rgba(95,225,182,.12), transparent 58%),
+        color-mix(in oklab, var(--panel) 80%, transparent);
+    }
+
+    .hero h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13.5px;
+      max-width: 70ch;
+    }
+
+    .cards {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr;
+      margin-top: 14px;
+    }
+
+    @media (min-width: 700px) {
+      .cards { grid-template-columns: 1fr 1fr; }
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: color-mix(in oklab, var(--panel) 85%, transparent);
+      padding: 14px;
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: .15px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .spacer {
+      height: 16px;
+    }
+
+    .section {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: color-mix(in oklab, var(--panel) 82%, transparent);
+      overflow: clip;
+      margin-top: 14px;
+    }
+
+    .section .head {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .section .head .title {
+      font-weight: 650;
+      font-size: 13px;
+    }
+
+    .section .head .meta {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .section .body {
+      padding: 14px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .sticky {
+      position: sticky;
+      top: calc(var(--topbar-h, 76px) + 12px);
+    }
+
+    @media (max-width: 979px) {
+      .sticky { position: static; }
+    }
+
+    /* Make the telemetry panel visually distinct from content */
+    .panel.sticky {
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--accent) 8%, var(--panel)) 0%,
+        color-mix(in oklab, var(--panel) 95%, transparent) 100%);
+      border: 2px solid color-mix(in oklab, var(--accent) 35%, var(--border2));
+      box-shadow:
+        0 0 0 1px color-mix(in oklab, var(--accent) 12%, transparent),
+        0 16px 40px rgba(0,0,0,.4),
+        inset 0 1px 0 color-mix(in oklab, white 8%, transparent);
+    }
+
+    @media (prefers-color-scheme: light) {
+      .panel.sticky {
+        box-shadow:
+          0 0 0 1px color-mix(in oklab, var(--accent) 16%, transparent),
+          0 18px 40px rgba(16,24,40,.18),
+          inset 0 1px 0 color-mix(in oklab, white 35%, transparent);
+      }
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+
+  <script type="module">
+    // Only load polyfill if native PerformanceScrollTiming is not available
+    if (!('PerformanceScrollTiming' in window)) {
+      await import('./polyfill.js');
+    }
+    // Dispatch event to signal that the API is ready
+    window.dispatchEvent(new Event('scrollTimingAPIReady'));
+  </script>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div>
+          <h1>Scroll Timing API — Demo</h1>
+          <div class="subtitle">Measure scroll smoothness & dropped frames via <span style="font-family: var(--mono)">PerformanceObserver</span>.</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="pill" id="implPill" aria-live="polite">
+            <strong>API</strong>
+            <span id="implText">Loading…</span>
+          </div>
+          <a href="https://github.com/nhelfman/scroll-timing-api" class="github-link" target="_blank" rel="noopener noreferrer" aria-label="View on GitHub">
+            <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="progress" aria-label="Scroll progress"><div id="scrollProgress"></div></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <aside class="panel sticky" aria-label="Controls and metrics">
+      <div class="panel-header">
+        <h2>Live Metrics</h2>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
+          <span class="pill" id="observePill" aria-live="polite"><strong>Status</strong> <span id="observeStatus">Not observing</span></span>
+          <span class="pill"><strong>Entries</strong> <span id="entryCount">0</span></span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="kvs grid-2" style="margin-bottom: 10px;">
+          <div class="kv">
+            <div class="label">Avg duration</div>
+            <div class="value" id="avgDuration">—</div>
+          </div>
+          <div class="kv">
+            <div class="label">Avg smoothness</div>
+            <div class="value" id="avgSmoothness">—</div>
+          </div>
+          <div class="kv">
+            <div class="label">P75 smoothness</div>
+            <div class="value" id="p75Smoothness">—</div>
+          </div>
+          <div class="kv">
+            <div class="label">Dropped frames (sum)</div>
+            <div class="value" id="sumDropped">—</div>
+          </div>
+          <div class="kv">
+            <div class="label">Avg velocity</div>
+            <div class="value" id="avgVelocity">—</div>
+          </div>
+          <div class="kv">
+            <div class="label">Avg distance</div>
+            <div class="value" id="avgDistance">—</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="row">
+            <button class="btn primary" id="startBtn" type="button">Start observing</button>
+            <button class="btn" id="stopBtn" type="button" disabled>Stop observing</button>
+            <button class="btn danger" id="clearBtn" type="button" disabled>Clear</button>
+          </div>
+
+          <div class="row">
+            <button class="btn" id="scrollTopBtn" type="button">Scroll to top</button>
+            <button class="btn" id="smoothScrollBtn" type="button">Smooth scroll ↓</button>
+            <button class="btn" id="exportBtn" type="button" disabled>Export JSON</button>
+          </div>
+
+          <label class="toggle">
+            <input id="consoleToggle" type="checkbox" />
+            Log entries to console
+          </label>
+
+          <label class="toggle">
+            <input id="jankToggle" type="checkbox" />
+            Simulate jank on scroll
+          </label>
+
+          <div class="range" aria-label="Jank intensity">
+            <input id="jankMs" type="range" min="0" max="100" value="12" />
+            <span class="pill"><strong>Busy</strong> <span id="jankMsLabel">12</span>ms</span>
+          </div>
+
+          <div class="hint">
+            Tip: enable “Simulate jank”, then scroll quickly. The polyfill estimates <span style="font-family: var(--mono)">framesExpected</span> vs <span style="font-family: var(--mono)">framesProduced</span> using rAF timing.
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="panel" style="box-shadow:none;">
+          <div class="panel-header">
+            <h2>Latest Entries</h2>
+            <span class="pill"><strong>Max</strong> 50</span>
+          </div>
+          <div class="panel-body" style="padding: 12px;">
+            <div class="log" role="region" aria-label="Scroll entries log">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">#</th>
+                    <th style="width: 110px;">smooth</th>
+                    <th style="width: 88px;">duration</th>
+                    <th style="width: 88px;">velocity</th>
+                    <th style="width: 84px;">dropped</th>
+                    <th style="width: 90px;">source</th>
+                    <th>details</th>
+                  </tr>
+                </thead>
+                <tbody id="logBody">
+                  <tr><td colspan="7" style="color: var(--muted); font-family: var(--sans);">Start observing, then scroll this page.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="footer-note">
+              Entries are produced after scrolling stops (≈150ms idle in the polyfill).
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="panel" aria-label="Scrollable content">
+      <div class="hero">
+        <h2>Scroll like a user; measure like a tool</h2>
+        <p>
+          This page is intentionally tall. While you scroll, the polyfill emits <span style="font-family: var(--mono)">PerformanceScrollTiming</span>
+          entries. The left panel summarizes smoothness and frame drops.
+        </p>
+        <div class="cards">
+          <div class="card">
+            <h3>What you’re seeing</h3>
+            <p>
+              Each entry tracks a scroll interaction: <span style="font-family: var(--mono)">startTime</span>, <span style="font-family: var(--mono)">duration</span>,
+              expected frames (at 60Hz), produced frames (rAF callbacks), and a smoothness score.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Try this</h3>
+            <p>
+              Turn on “Simulate jank”, then do a fast wheel scroll. You should see smoothness drop and dropped frames increase.
+              Disable it to compare.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="content" id="content">
+        <div class="section">
+          <div class="head">
+            <div class="title">Section 1 — Warm-up</div>
+            <div class="meta">Short scroll, quick entry</div>
+          </div>
+          <div class="body">
+            Scroll a bit to generate a baseline entry. Then enable jank and repeat.
+            This demo is designed to exercise the repo’s polyfill API shape rather than perfectly emulate browser internals.
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="head">
+            <div class="title">Section 1.5 — Nested scroller</div>
+            <div class="meta">Scroll inside this box</div>
+          </div>
+          <div class="body">
+            <div id="nestedScroller" class="nested-scroller" tabindex="0" aria-label="Nested scrollable container"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="head">
+            <div class="title">Section 2 — Content blocks</div>
+            <div class="meta">Layout + paint work</div>
+          </div>
+          <div class="body" id="blockContainer"></div>
+        </div>
+
+        <div class="section">
+          <div class="head">
+            <div class="title">Section 3 — Mixed text</div>
+            <div class="meta">A little more reading</div>
+          </div>
+          <div class="body">
+            <p style="margin: 0 0 10px;">
+              A good scroll metric needs to be comparable across pages. This demo keeps the content simple so you can focus on
+              how timing entries are emitted and aggregated.
+            </p>
+            <p style="margin: 0;">
+              If you’re building RUM, you’d typically observe entries and send summaries (p50/p75/p95 smoothness) along with context.
+            </p>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="head">
+            <div class="title">Section 4 — The bottom</div>
+            <div class="meta">Done</div>
+          </div>
+          <div class="body">
+            You made it. Hit “Scroll to top” and repeat a few runs.
+            If you want to compare sources, use mouse wheel vs touchpad vs keyboard.
+          </div>
+        </div>
+
+        <div class="footer-note">
+          Demo is fully self-contained and loads <a href="polyfill.js">polyfill.js</a>.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function() {
+      const MAX_ENTRIES = 50;
+
+      const els = {
+        implText: document.getElementById('implText'),
+        progress: document.getElementById('scrollProgress'),
+        entryCount: document.getElementById('entryCount'),
+        observePill: document.getElementById('observePill'),
+        observeStatus: document.getElementById('observeStatus'),
+        avgDuration: document.getElementById('avgDuration'),
+        avgSmoothness: document.getElementById('avgSmoothness'),
+        p75Smoothness: document.getElementById('p75Smoothness'),
+        sumDropped: document.getElementById('sumDropped'),
+        avgVelocity: document.getElementById('avgVelocity'),
+        avgDistance: document.getElementById('avgDistance'),
+        logBody: document.getElementById('logBody'),
+
+        startBtn: document.getElementById('startBtn'),
+        stopBtn: document.getElementById('stopBtn'),
+        clearBtn: document.getElementById('clearBtn'),
+        exportBtn: document.getElementById('exportBtn'),
+        scrollTopBtn: document.getElementById('scrollTopBtn'),
+        smoothScrollBtn: document.getElementById('smoothScrollBtn'),
+
+        consoleToggle: document.getElementById('consoleToggle'),
+        jankToggle: document.getElementById('jankToggle'),
+        jankMs: document.getElementById('jankMs'),
+        jankMsLabel: document.getElementById('jankMsLabel'),
+
+        blockContainer: document.getElementById('blockContainer'),
+        nestedScroller: document.getElementById('nestedScroller'),
+      };
+
+      function syncTopbarHeightVar() {
+        const topbar = document.querySelector('.topbar');
+        if (!topbar) return;
+        const height = Math.max(0, Math.round(topbar.getBoundingClientRect().height));
+        document.documentElement.style.setProperty('--topbar-h', `${height}px`);
+      }
+
+      syncTopbarHeightVar();
+      addEventListener('resize', syncTopbarHeightVar, { passive: true });
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+      }
+
+      // Populate content blocks to make the page scrollable.
+      const blocks = [];
+      for (let i = 1; i <= 32; i++) {
+        blocks.push({
+          title: `Block ${i}`,
+          body: i % 3 === 0
+            ? 'A longer paragraph to vary paint and layout. Scroll performance issues are often caused by main-thread work (JS, layout, paint) competing with scrolling.'
+            : 'Shorter text block. Keep scrolling.'
+        });
+      }
+      els.blockContainer.innerHTML = blocks.map((b) => {
+        return `
+          <div style="border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin: 0 0 10px; background: color-mix(in oklab, var(--panel) 78%, transparent);">
+            <div style="display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+              <div style="font-weight:650; color: var(--text);">${escapeHtml(b.title)}</div>
+              <div style="font-family: var(--mono); font-size: 12px; color: var(--muted);">#${String(b.title).split(' ')[1]}</div>
+            </div>
+            <div style="margin-top: 6px;">${escapeHtml(b.body)}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Populate a nested scrollable box to test element-level scroll targeting.
+      if (els.nestedScroller) {
+        const items = [];
+        for (let i = 1; i <= 30; i++) {
+          items.push(`
+            <div class="row">
+              <div><strong>Item</strong> ${i}</div>
+              <div style="font-family: var(--mono); font-size: 12px; color: var(--muted);">scroll me</div>
+            </div>
+          `);
+        }
+        els.nestedScroller.innerHTML = items.join('');
+      }
+
+      function fmtMs(n) {
+        if (!Number.isFinite(n)) return '—';
+        return `${n.toFixed(1)}ms`;
+      }
+
+      function fmtPct01(n) {
+        if (!Number.isFinite(n)) return '—';
+        return `${(n * 100).toFixed(1)}%`;
+      }
+
+      function fmtPx(n) {
+        if (!Number.isFinite(n)) return '—';
+        return `${Math.round(n)}px`;
+      }
+
+      function calcSmoothnessScore(entry) {
+        const expected = entry.framesExpected || 0;
+        const produced = entry.framesProduced || 0;
+        return expected > 0 ? produced / expected : 1;
+      }
+
+      function fmtVelocity(n) {
+        if (!Number.isFinite(n)) return '—';
+        return `${Math.round(n)}px/s`;
+      }
+
+      function percentile(values, p) {
+        if (!values.length) return NaN;
+        const sorted = values.slice().sort((a, b) => a - b);
+        const idx = Math.max(0, Math.ceil((p / 100) * sorted.length) - 1);
+        return sorted[idx];
+      }
+
+      function scoreClass(score) {
+        if (!Number.isFinite(score)) return 'bad';
+        if (score >= 0.9) return 'good';
+        if (score >= 0.75) return 'warn';
+        return 'bad';
+      }
+
+      function updateScrollProgress() {
+        const doc = document.documentElement;
+        const scrollTop = doc.scrollTop || document.body.scrollTop;
+        const max = Math.max(1, doc.scrollHeight - doc.clientHeight);
+        const pct = Math.min(1, Math.max(0, scrollTop / max));
+        els.progress.style.width = `${(pct * 100).toFixed(2)}%`;
+      }
+
+      updateScrollProgress();
+      addEventListener('scroll', updateScrollProgress, { passive: true });
+      addEventListener('resize', updateScrollProgress, { passive: true });
+
+      // Function to update implementation text
+      function updateImplementationText() {
+        const implName = (window.PerformanceScrollTiming && window.PerformanceScrollTiming.name) ? window.PerformanceScrollTiming.name : 'missing';
+        els.implText.textContent = implName === 'PerformanceScrollTimingPolyfill'
+          ? 'polyfill.js (demo)'
+          : (window.PerformanceScrollTiming ? `native (${implName || 'unknown'})` : 'not available');
+      }
+
+      // Wait for the API to be ready before updating implementation text
+      addEventListener('scrollTimingAPIReady', updateImplementationText, { once: true });
+      // Also check immediately in case the event already fired
+      if (window.PerformanceScrollTiming) {
+        updateImplementationText();
+      }
+
+      let observer = null;
+      let entries = [];
+      let observeState = 'idle'; // 'idle' | 'observing' | 'error'
+
+      let startBtnAttnTimeout = null;
+
+      function stopStartBtnAttention() {
+        if (!els.startBtn) return;
+        els.startBtn.classList.remove('attn');
+        if (startBtnAttnTimeout) {
+          clearTimeout(startBtnAttnTimeout);
+          startBtnAttnTimeout = null;
+        }
+      }
+
+      function maybeBlinkStartButtonOnLoad() {
+        if (!els.startBtn) return;
+        // Only draw attention when user can actually start observing.
+        if (observeState !== 'idle') return;
+        if (els.startBtn.disabled) return;
+
+        // Ensure the first paint happens before animating.
+        requestAnimationFrame(() => {
+          // Force-restart if something reuses the same DOM.
+          els.startBtn.classList.remove('attn');
+          // Force style recalculation so re-adding retriggers the animation.
+          void els.startBtn.offsetWidth;
+          els.startBtn.classList.add('attn');
+          // Remove the class so re-adding later would re-trigger if needed.
+          startBtnAttnTimeout = setTimeout(stopStartBtnAttention, 1000);
+        });
+      }
+
+      function setObserveStatus(kind) {
+        if (!els.observeStatus || !els.observePill) return;
+
+        const pill = els.observePill;
+        pill.classList.remove('good', 'warn', 'bad');
+
+        if (kind === 'observing') {
+          els.observeStatus.textContent = 'Observing';
+          pill.classList.add('good');
+          return;
+        }
+
+        if (kind === 'error') {
+          els.observeStatus.textContent = 'Error';
+          pill.classList.add('bad');
+          return;
+        }
+
+        // Default: not observing.
+        els.observeStatus.textContent = 'Not observing';
+        pill.classList.add('warn');
+      }
+
+      function setControlsState() {
+        const observing = observeState === 'observing' && !!observer;
+        els.startBtn.disabled = observing;
+        els.stopBtn.disabled = !observing;
+        els.clearBtn.disabled = entries.length === 0;
+        els.exportBtn.disabled = entries.length === 0;
+
+        // Make state visible even at a glance.
+        els.startBtn.textContent = observing ? 'Observing…' : 'Start observing';
+        if (observeState === 'error') setObserveStatus('error');
+        else setObserveStatus(observing ? 'observing' : 'idle');
+      }
+
+      function updateStats() {
+        els.entryCount.textContent = String(entries.length);
+        if (!entries.length) {
+          els.avgDuration.textContent = '—';
+          els.avgSmoothness.textContent = '—';
+          els.p75Smoothness.textContent = '—';
+          els.sumDropped.textContent = '—';
+          els.avgVelocity.textContent = '—';
+          els.avgDistance.textContent = '—';
+          setControlsState();
+          return;
+        }
+
+        const durations = entries.map(e => e.duration).filter(Number.isFinite);
+        const smoothness = entries.map(e => calcSmoothnessScore(e)).filter(Number.isFinite);
+        const dropped = entries.map(e => {
+          const expected = e.framesExpected || 0;
+          const produced = e.framesProduced || 0;
+          return Math.max(0, expected - produced);
+        }).filter(Number.isFinite);
+        const distances = entries.map(e => {
+          const dx = e.deltaX || 0;
+          const dy = e.deltaY || 0;
+          return Math.sqrt(dx * dx + dy * dy);
+        }).filter(Number.isFinite);
+        const velocities = entries.map(e => {
+          const dx = e.deltaX || 0;
+          const dy = e.deltaY || 0;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const dur = e.duration || 0;
+          return dur > 0 ? (dist / dur) * 1000 : 0;
+        }).filter(Number.isFinite);
+
+        const avgDur = durations.reduce((a, b) => a + b, 0) / Math.max(1, durations.length);
+        const avgSm = smoothness.reduce((a, b) => a + b, 0) / Math.max(1, smoothness.length);
+        const p75Sm = percentile(smoothness, 75);
+        const sumDr = dropped.reduce((a, b) => a + b, 0);
+        const avgDist = distances.reduce((a, b) => a + b, 0) / Math.max(1, distances.length);
+        const avgVel = velocities.reduce((a, b) => a + b, 0) / Math.max(1, velocities.length);
+
+        els.avgDuration.textContent = fmtMs(avgDur);
+        els.avgSmoothness.textContent = fmtPct01(avgSm);
+        els.p75Smoothness.textContent = fmtPct01(p75Sm);
+        els.sumDropped.textContent = String(sumDr);
+        els.avgVelocity.textContent = fmtVelocity(avgVel);
+        els.avgDistance.textContent = fmtPx(avgDist);
+
+        setControlsState();
+      }
+
+      function renderLog() {
+        if (!entries.length) {
+          els.logBody.innerHTML = '<tr><td colspan="7" style="color: var(--muted); font-family: var(--sans);">No entries yet. Start observing, then scroll.</td></tr>';
+          return;
+        }
+
+        const rows = entries.slice().reverse().map((e, i) => {
+          const seq = entries.length - i;
+          const smoothnessScore = calcSmoothnessScore(e);
+          const cls = scoreClass(smoothnessScore);
+          const dotClass = cls === 'good' ? '' : (cls === 'warn' ? 'warn' : 'bad');
+          const scoreTxt = fmtPct01(smoothnessScore);
+          const durTxt = fmtMs(e.duration);
+          const dx = e.deltaX || 0;
+          const dy = e.deltaY || 0;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const dur = e.duration || 0;
+          const velocity = dur > 0 ? (dist / dur) * 1000 : 0;
+          const velTxt = fmtVelocity(velocity);
+          const expected = e.framesExpected || 0;
+          const produced = e.framesProduced || 0;
+          const droppedFrames = Math.max(0, expected - produced);
+          const droppedTxt = String(droppedFrames);
+          const src = e.scrollSource || 'unknown';
+          const detail = `${Number.isFinite(e.framesProduced) ? e.framesProduced : '—'}/${Number.isFinite(e.framesExpected) ? e.framesExpected : '—'} frames`;
+
+          return `
+            <tr>
+              <td style="color: var(--muted);">${seq}</td>
+              <td><span class="score"><span class="dot ${dotClass}"></span>${scoreTxt}</span></td>
+              <td>${durTxt}</td>
+              <td>${velTxt}</td>
+              <td>${droppedTxt}</td>
+              <td>${escapeHtml(src)}</td>
+              <td style="color: var(--muted); font-family: var(--sans);">${escapeHtml(detail)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        els.logBody.innerHTML = rows;
+      }
+
+      function onEntries(list) {
+        const got = list.getEntries();
+        for (const e of got) {
+          entries.push(e);
+          if (entries.length > MAX_ENTRIES) entries = entries.slice(entries.length - MAX_ENTRIES);
+
+          if (els.consoleToggle.checked) {
+            try {
+              const dx = e.deltaX || 0;
+              const dy = e.deltaY || 0;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              const dur = e.duration || 0;
+              const velocity = dur > 0 ? (dist / dur) * 1000 : 0;
+              const scrollStartLatency = Number.isFinite(e.firstFrameTime) && Number.isFinite(e.startTime)
+                ? Math.max(0, e.firstFrameTime - e.startTime)
+                : 0;
+              const smoothnessScore = calcSmoothnessScore(e);
+              const logData = e.toJSON ? e.toJSON() : e;
+              console.log('PerformanceScrollTiming', logData);
+              console.log('  → calculated scrollStartLatency:', scrollStartLatency.toFixed(2), 'ms');
+              console.log('  → calculated smoothnessScore:', smoothnessScore);
+              console.log('  → calculated scrollVelocity:', velocity.toFixed(2), 'px/s');
+            } catch {
+              console.log('PerformanceScrollTiming', e);
+            }
+          }
+        }
+        renderLog();
+        updateStats();
+      }
+
+      function startObserving() {
+        if (observer) return;
+
+        stopStartBtnAttention();
+
+        try {
+          observer = new PerformanceObserver(onEntries);
+          observer.observe({ type: 'scroll', buffered: true });
+          observeState = 'observing';
+        } catch (err) {
+          observer = null;
+          observeState = 'error';
+          setControlsState();
+          alert('Could not start observing scroll entries in this browser. Open the console for details.');
+          console.error(err);
+          return;
+        }
+
+        setControlsState();
+      }
+
+      function stopObserving() {
+        if (!observer) return;
+        try {
+          observer.disconnect();
+        } finally {
+          observer = null;
+          observeState = 'idle';
+          setControlsState();
+        }
+      }
+
+      function clearEntries() {
+        entries = [];
+        renderLog();
+        updateStats();
+      }
+
+      function exportJson() {
+        const payload = entries.map((e) => {
+          const entry = e && typeof e.toJSON === 'function' ? e.toJSON() : {
+            entryType: e.entryType,
+            name: e.name,
+            startTime: e.startTime,
+            firstFrameTime: e.firstFrameTime,
+            duration: e.duration,
+            framesExpected: e.framesExpected,
+            framesProduced: e.framesProduced,
+            checkerboardTime: e.checkerboardTime,
+            scrollSource: e.scrollSource,
+            deltaX: e.deltaX,
+            deltaY: e.deltaY,
+          };
+
+          // Add calculated fields
+          const dx = e.deltaX || 0;
+          const dy = e.deltaY || 0;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const dur = e.duration || 0;
+
+          return {
+            ...entry,
+            calculated: {
+              scrollStartLatency: Number.isFinite(e.firstFrameTime) && Number.isFinite(e.startTime)
+                ? Math.max(0, e.firstFrameTime - e.startTime)
+                : 0,
+              smoothnessScore: calcSmoothnessScore(e),
+              scrollVelocity: dur > 0 ? (dist / dur) * 1000 : 0,
+            }
+          };
+        });
+
+        const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), entries: payload }, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'scroll-timing-entries.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      els.startBtn.addEventListener('click', startObserving);
+      els.stopBtn.addEventListener('click', stopObserving);
+      els.clearBtn.addEventListener('click', clearEntries);
+      els.exportBtn.addEventListener('click', exportJson);
+
+      els.scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      els.smoothScrollBtn.addEventListener('click', () => {
+        const doc = document.documentElement;
+        const max = Math.max(1, doc.scrollHeight - doc.clientHeight);
+        const currentScroll = doc.scrollTop || document.body.scrollTop;
+        const target = Math.min(max, currentScroll + Math.round(doc.clientHeight * 1.2));
+
+        // Use a manual smooth scroll for consistent behavior across browsers
+        const startTime = performance.now();
+        const duration = 500; // ms
+        const startScroll = currentScroll;
+        const distance = target - startScroll;
+
+        function easeOutCubic(t) {
+          return 1 - Math.pow(1 - t, 3);
+        }
+
+        function step(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = easeOutCubic(progress);
+          window.scrollTo(0, startScroll + distance * eased);
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      });
+
+      // Jank simulation: busy-loop during scroll events.
+      function setJankLabel() {
+        els.jankMsLabel.textContent = String(els.jankMs.value);
+      }
+      setJankLabel();
+      els.jankMs.addEventListener('input', setJankLabel);
+
+      function busyLoop(ms) {
+        const start = performance.now();
+        while (performance.now() - start < ms) {
+          // Intentionally empty.
+        }
+      }
+
+      function onScrollJank() {
+        if (!els.jankToggle.checked) return;
+        const ms = Number(els.jankMs.value) || 0;
+        if (ms > 0) busyLoop(ms);
+      }
+      // Use capture: true to catch scroll events from nested scrollers too
+      addEventListener('scroll', onScrollJank, { passive: true, capture: true });
+
+      updateStats();
+      renderLog();
+      setControlsState();
+
+      // Draw attention to “Start observing” for first-time users.
+      maybeBlinkStartButtonOnLoad();
+    })();
+  </script>
+</body>
+</html>

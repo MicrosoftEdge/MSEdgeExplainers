@@ -2,7 +2,7 @@
 name: Document Subtitle
 about: new issue
 title: "[Document Subtitle] <TITLE HERE>"
-labels: ''
+labels: 'DocumentSubtitle'
 assignees: diekus
 
 ---

@@ -6,7 +6,7 @@ Bruce.Long@microsoft.com, pcupp@microsoft.com, Grisha.Lyukshin@microsoft.com
 
 ## Introduction
 
-This document provides an overview of the proposed changes in Chromium to support native caret browsing. For a high-level description of native caret browsing and the motivation for introducing the feature, see the associated [explainer doc](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/Accessibility/CaretBrowsing/explainer.md).
+This document provides an overview of the proposed changes in Chromium to support native caret browsing. For a high-level description of native caret browsing and the motivation for introducing the feature, see the associated [explainer doc](explainer.md).
 
 
 ## Changes in the Renderer Process
