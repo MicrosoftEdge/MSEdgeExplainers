@@ -106,9 +106,7 @@ Platform behaviors give custom elements capabilities that would otherwise requir
 - Focusability: The element participates in the tab order as appropriate for the behavior.
 - CSS pseudo-classes: Behavior-specific pseudo-classes are managed by the platform.
 
-By bundling these capabilities as high-level units, the platform can ensure accessible defaults, correct event wiring, and proper pseudo-class management in ways that low-level building blocks alone couldn't guarantee. This follows the [W3C design principle](https://www.w3.org/TR/design-principles/#high-level-low-level) that high-level APIs allow user agents to better intervene on behalf of users for accessibility and usability.
-
-*Note: Behaviors only set ARIA defaults equivalent to what native elements provide. They do not expose any information about whether assistive technologies are in use, consistent with the [design principle on AT non-exposure](https://www.w3.org/TR/design-principles/#do-not-expose-use-of-assistive-tech).*
+By bundling these capabilities as high-level units, the platform can ensure accessible defaults, correct event wiring, and proper pseudo-class management in ways that low-level building blocks alone couldn't guarantee.
 
 This proposal introduces `HTMLSubmitButtonBehavior`, which mirrors the submission capability of `<button type="submit">`:
 
@@ -204,7 +202,7 @@ When `attachInternals()` is called with behaviors, each behavior is attached to 
 
 ### Duplicate behaviors
 
-Including the same behavior instance twice in the behaviors array, or attaching multiple instances of the same behavior type to a single element, throws a `TypeError`. Error messages should be specific and actionable (e.g., `"HTMLSubmitButtonBehavior is not compatible with HTMLCheckboxBehavior"` or `"Cannot attach the same behavior instance to multiple elements"`), following the [design principle on developer friendliness](https://www.w3.org/TR/design-principles/#debuggability).
+Including the same behavior instance twice in the behaviors array, or attaching multiple instances of the same behavior type to a single element, throws a `TypeError`.
 
 Throws `TypeError` due to duplicate behavior instance in the array:
 ```javascript
@@ -240,9 +238,7 @@ The current API uses instantiated behaviors with a single `behaviors` property:
 - `behaviors` property on `ElementInternals` is a read-only `FrozenArray`. The same array object is returned on every access (i.e., `internals.behaviors === internals.behaviors` is always `true`), following the [design principle that getters should behave like data properties](https://www.w3.org/TR/design-principles/#attributes-like-data).
 - Developers hold direct references to their behavior instances.
 
-*Note: An array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). A set provides no ordering guarantees, which would make conflict resolution unpredictable.*
-
-*Note: The [design principles recommend `ObservableArray<T>`](https://www.w3.org/TR/design-principles/#optional-parameters) for attributes that represent lists. `behaviors` intentionally uses a `FrozenArray` instead, because behaviors are immutable after attachment. If dynamic behavior updates are supported in the future (see [open question](#should-we-support-dynamic-behavior-updates)), the API could evolve to use `ObservableArray` with lifecycle callbacks in a backwards-compatible way.*
+*Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment. If dynamic behavior updates are supported in the future (see [open question](#should-we-support-dynamic-behavior-updates)), the API could evolve to use `ObservableArray` with lifecycle callbacks.*
 
 **Pros:**
 - Single property name.
@@ -496,17 +492,17 @@ class LabeledSubmitButton extends HTMLElement {
 - Authors can mix strategies (e.g., last-in-wins for role, additive for events).
 
 **Cons:**
-- More verbose API, conflicting with the [design principle to prefer simple solutions](https://www.w3.org/TR/design-principles/#simplicity) where common cases should be easy to accomplish.
+- More verbose API.
 - Adds complexity for simple cases where order-based resolution would suffice.
 - Authors must understand all potential conflicts to resolve them correctly.
 
 ### Feature detection
 
-Authors can detect whether behaviors are supported by checking for the existence of behavior classes on the global scope, following the [design principle that new features should be detectable](https://www.w3.org/TR/design-principles/#feature-detect):
+Web authors can detect whether behaviors are supported by checking for the existence of behavior classes on the global scope:
 
 ```javascript
 if (typeof HTMLSubmitButtonBehavior !== 'undefined') {
-  // Behaviors are supported — use them.
+  // Behaviors are supported.
   this._submitBehavior = new HTMLSubmitButtonBehavior();
   this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
 } else {
@@ -518,14 +514,12 @@ if (typeof HTMLSubmitButtonBehavior !== 'undefined') {
 }
 ```
 
-This also enables polyfilling: because `HTMLSubmitButtonBehavior` is a constructible class with well-defined capabilities, library authors can approximate it in userland before native support ships (see [Developer-defined behaviors](#developer-defined-behaviors) in [Future Work](#future-work)).
-
 ### Other considerations
 
 This proposal supports common web component patterns:
 
 - A child class extends the parent's functionality and retains access to the `ElementInternals` object and its active behaviors.
-- `HTMLSubmitButtonBehavior` and subsequent platform-provided behaviors should be understood as bundles of state, event handlers, and accessibility defaults and not opaque tokens. Web authors can reason about what a behavior provides (e.g., click/Enter triggers form submission, implicit `role="button"`, focusability, `:disabled` pseudo-class) and anticipate how it composes with other behaviors.
+- `HTMLSubmitButtonBehavior` and subsequent platform-provided behaviors should be understood as bundles of state, event handlers, and accessibility defaults and not opaque tokens. Web authors can reason about what a behavior provides (e.g., click/Enter triggers form submission, implicit `role="button"`, focusability, `:disabled` pseudo-class) and anticipate how it composes with other behaviors. This framework would also enable polyfilling: because behaviors have well-defined capabilities, authors can approximate new behaviors in *userland* before native support ships (see [Developer-defined behaviors](#developer-defined-behaviors) in [Future Work](#future-work)).
 - This proposal targets autonomous custom elements that need platform behaviors (e.g., when needing Shadow DOM and custom APIs or building a design system component that is an autonomous custom element). Making native elements more flexible (Customizable Select, open-stylable controls) is valuable and complementary, but doesn't completely eliminate the need for autonomous custom elements.
 - Platform-provided behaviors are JavaScript-dependent, as is any autonomous custom element. If script fails to load, the element receives no behavior—this is true with or without this proposal.
 - Custom elements using behaviors can still follow progressive enhancement patterns: use `<slot>` to render fallback content, provide `<noscript>` alternatives, and design markup to be readable without JavaScript.
@@ -983,7 +977,7 @@ class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 
 **Cons:**
 - Behavior is fixed at class definition time (e.g. A design system couldn't offer a single `<ds-button>` that changes behavior based on the `type` attribute as it would need separate classes like `<ds-submit-button>`, `<ds-reset-button>`, `<ds-button>`, increasing bundle sizes and API surface).
-- Authors might need to generate many class variations for different behavior combinations. This conflicts with the [design principle to build complex types by composing simpler types](https://www.w3.org/TR/design-principles/#prefer-composition), which favors composition over inheritance.
+- Authors might need to generate many class variations for different behavior combinations.
 - It strictly binds behavior to the JavaScript class hierarchy, making a future declarative syntax hard to implement without creating new classes.
 
 Rejected in favor of the imperative API because it doesn't allow behavior composition (attaching multiple complementary behaviors to a single element), requires multiple classes instead of a single element that adapts to initial configuration, and doesn't support configuring behavior state before attachment.
@@ -1008,9 +1002,9 @@ class CustomButton extends HTMLElement {
 - Easy to understand for common cases.
 
 **Cons:**
-- No composability as one custom element can only have one type. This goes against the [design principle to build complex types by composing simpler types](https://www.w3.org/TR/design-principles/#prefer-composition).
-- Bundling behavior can get confusing as it isn't obvious what behaviors and attributes are added. The `<input>` element's `type` attribute — which fundamentally changes the element — is [cited as an antipattern](https://www.w3.org/TR/design-principles/#html-overloading) in the design principles for violating the principle that each element should have a single purpose. Replicating this pattern would conflict with the principle to [leave the web better](https://www.w3.org/TR/design-principles/#leave-the-web-better) by not propagating known design defects.
-- String APIs are error-prone and hard to debug, undermining [developer friendliness](https://www.w3.org/TR/design-principles/#debuggability).
+- No composability as one custom element can only have one type.
+- Bundling behavior can get confusing as it isn't obvious what behaviors and attributes are added.
+- String APIs are error-prone and hard to debug.
 
 Too inflexible for the variety of use cases web developers need. While simpler, it doesn't solve the composability problem and it might be confusing for developers to use in practice.
 
@@ -1039,7 +1033,7 @@ HTMLElement.attributeRegistry.define('submit-button', SubmitButtonAttribute);
 - Would provide composability (multiple attributes).
 
 **Cons:**
-- Would require authors to implement all behavior in JavaScript (no access to platform internals). This forfeits the [benefits of high-level APIs](https://www.w3.org/TR/design-principles/#high-level-low-level), where the platform can intervene on behalf of the user to ensure accessibility and usability.
+- Would require authors to implement all behavior in JavaScript (no access to platform internals).
 - There are performance concerns with `Attr` node creation.
 - Namespace conflicts need resolution.
 - Doesn't solve the platform integration problem.
@@ -1073,7 +1067,7 @@ customElements.define('fancy-button', FancyButton, { extends: 'button' });
 - [Limited Shadow DOM support](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#elements_you_can_attach_a_shadow_to) - only certain elements can be shadow hosts
 - Can't use `ElementInternals` API.
 - The `is=` syntax isn't considered developer-friendly to some.
-- Doesn't support composing behaviors from different base elements. Single inheritance means you can only extend one base element, conflicting with the [design principle to build complex types by composing simpler types](https://www.w3.org/TR/design-principles/#prefer-composition).
+- Doesn't support composing behaviors from different base elements.
 
 While customized built-ins are useful where supported, the issues listed above makes them unsuitable as the primary solution.
 
@@ -1114,8 +1108,8 @@ Expose individual primitives (focusability, disabled, keyboard activation) direc
 - Each primitive is independently useful.
 
 **Cons:**
-- Primitives like `disabled` and `focusable` interact with each other, with accessibility, and with event handling. Setting `internals.disabled = true` without the associated behavior might result in the element *looking* disabled but still receiving clicks, remaining in the tab order, and submitting with a form. This illustrates the [design-principles tradeoff between high-level and low-level APIs](https://www.w3.org/TR/design-principles/#high-level-low-level): high-level APIs allow the user agent to intervene on behalf of the user to ensure accessibility, while raw primitives push that burden entirely onto authors.
-- Even seemingly simple primitives like focusability could have significant complexity around accessibility integration. This is why `popovertarget` is limited to buttons(it was originally intended for any element, but the accessibility requirements around focusability and activation made buttons the practical choice).
+- Primitives like `disabled` and `focusable` interact with each other, with accessibility, and with event handling. Setting `internals.disabled = true` without the associated behavior might result in the element *looking* disabled but still receiving clicks, remaining in the tab order, and submitting with a form.
+- Even seemingly simple primitives like focusability could have significant complexity around accessibility integration. This is why `popovertarget` is limited to buttons(it was originally intended for any element, but the accessibility requirements around focusability and activation made buttons the practical choice). See [design-principles tradeoff between high-level and low-level APIs](https://www.w3.org/TR/design-principles/#high-level-low-level).
 - Form submission participation can be seen as a primitive itself (it can't be broken down further due to accessibility concerns).
 
 ### Alternative 8: TC39 Decorators
@@ -1136,7 +1130,7 @@ customElements.define('custom-button', CustomButton);
 - Allows composition.
 
 **Cons:**
-- Decorators operate at class definition time, not instance creation time. This creates the same limitation as static class mixins: behavior is fixed when the class is defined, not when instances are created (e.g., a design system couldn't offer a single `<ds-button>` class that adapts behavior based on the `type` attribute). As with mixins, this conflicts with the [design principle to prefer composition over inheritance](https://www.w3.org/TR/design-principles/#prefer-composition).
+- Decorators operate at class definition time, not instance creation time. This creates the same limitation as static class mixins: behavior is fixed when the class is defined, not when instances are created (e.g., a design system couldn't offer a single `<ds-button>` class that adapts behavior based on the `type` attribute).
 - Instance-specific behavior configuration (e.g., setting `formAction` before attachment) isn't supported.
 - Decorators are inherently JavaScript syntax and don't support a future declarative, JavaScript-less approach to custom elements. This proposal's design decouples behaviors from the class definition, enabling future declarative syntax (see [Other considerations](#other-considerations)).
 
