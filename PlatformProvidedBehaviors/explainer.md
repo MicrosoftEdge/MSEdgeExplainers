@@ -106,7 +106,7 @@ Platform behaviors give custom elements capabilities that would otherwise requir
 - Focusability: The element participates in the tab order as appropriate for the behavior.
 - CSS pseudo-classes: Behavior-specific pseudo-classes are managed by the platform.
 
-By bundling these capabilities as high-level units, the platform can ensure accessible defaults, correct event wiring, and proper pseudo-class management in ways that low-level building blocks alone couldn't guarantee.
+By bundling these capabilities as high-level units, the platform can ensure accessible defaults, correct event wiring, and proper pseudo-class management.
 
 This proposal introduces `HTMLSubmitButtonBehavior`, which mirrors the submission capability of `<button type="submit">`:
 
@@ -235,7 +235,7 @@ This ensures that element-specific properties like `behavior.form` and `behavior
 The current API uses instantiated behaviors with a single `behaviors` property:
 
 - `behaviors` option in `attachInternals({ behaviors: [...] })` accepts behavior instances.
-- `behaviors` property on `ElementInternals` is a read-only `FrozenArray`. The same array object is returned on every access (i.e., `internals.behaviors === internals.behaviors` is always `true`), following the [design principle that getters should behave like data properties](https://www.w3.org/TR/design-principles/#attributes-like-data).
+- `behaviors` property on `ElementInternals` is a read-only `FrozenArray`.
 - Developers hold direct references to their behavior instances.
 
 *Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment. If dynamic behavior updates are supported in the future (see [open question](#should-we-support-dynamic-behavior-updates)), the API could evolve to use `ObservableArray` with lifecycle callbacks.*
