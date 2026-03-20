@@ -101,10 +101,12 @@ submitBehavior?.disabled = true;
 
 Platform behaviors give custom elements capabilities that would otherwise require reimplementation or workarounds. Each behavior automatically provides:
 
-- Event handling: Platform events (click, keydown, etc.) are wired up automatically.
+- Event handling: Platform events (click, keydown, etc.) are wired up automatically using the standard DOM event infrastructure (respecting `stopPropagation`, `preventDefault`, etc.)
 - ARIA defaults: Implicit roles and properties for accessibility.
 - Focusability: The element participates in the tab order as appropriate for the behavior.
 - CSS pseudo-classes: Behavior-specific pseudo-classes are managed by the platform.
+
+By bundling these capabilities as high-level units, the platform can ensure accessible defaults, correct event wiring, and proper pseudo-class management.
 
 This proposal introduces `HTMLSubmitButtonBehavior`, which mirrors the submission capability of `<button type="submit">`:
 
@@ -233,10 +235,10 @@ This ensures that element-specific properties like `behavior.form` and `behavior
 The current API uses instantiated behaviors with a single `behaviors` property:
 
 - `behaviors` option in `attachInternals({ behaviors: [...] })` accepts behavior instances.
-- `behaviors` property on `ElementInternals` is a read-only array.
+- `behaviors` property on `ElementInternals` is a read-only `FrozenArray`.
 - Developers hold direct references to their behavior instances.
 
-*Note: An array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). A set provides no ordering guarantees, which would make conflict resolution unpredictable.*
+*Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment. If dynamic behavior updates are supported in the future (see [open question](#should-we-support-dynamic-behavior-updates)), the API could evolve to use `ObservableArray` with lifecycle callbacks.*
 
 **Pros:**
 - Single property name.
@@ -285,7 +287,7 @@ this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 - Less setup code as developers don't manage behavior instances.
 
 **Cons:**
-- Platform instantiates the behavior, so constructor parameters aren't available.
+- Platform instantiates the behavior, so constructor parameters aren't available. This conflicts with the [design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances.
 - Requires a `behaviors` interface for named access.
 - *Future* developer-defined behaviors would need a way to name their behaviors.
 
@@ -493,6 +495,24 @@ class LabeledSubmitButton extends HTMLElement {
 - More verbose API.
 - Adds complexity for simple cases where order-based resolution would suffice.
 - Authors must understand all potential conflicts to resolve them correctly.
+
+### Feature detection
+
+Web authors can detect whether behaviors are supported by checking for the existence of behavior classes on the global scope:
+
+```javascript
+if (typeof HTMLSubmitButtonBehavior !== 'undefined') {
+  // Behaviors are supported.
+  this._submitBehavior = new HTMLSubmitButtonBehavior();
+  this._internals = this.attachInternals({ behaviors: [this._submitBehavior] });
+} else {
+  // Fall back to manual event handling.
+  this._internals = this.attachInternals();
+  this.addEventListener('click', () => {
+    this._internals.form?.requestSubmit(this);
+  });
+}
+```
 
 ### Other considerations
 
@@ -1089,7 +1109,7 @@ Expose individual primitives (focusability, disabled, keyboard activation) direc
 
 **Cons:**
 - Primitives like `disabled` and `focusable` interact with each other, with accessibility, and with event handling. Setting `internals.disabled = true` without the associated behavior might result in the element *looking* disabled but still receiving clicks, remaining in the tab order, and submitting with a form.
-- Even seemingly simple primitives like focusability could have significant complexity around accessibility integration. This is why `popovertarget` is limited to buttons(it was originally intended for any element, but the accessibility requirements around focusability and activation made buttons the practical choice).
+- Even seemingly simple primitives like focusability could have significant complexity around accessibility integration. This is why `popovertarget` is limited to buttons(it was originally intended for any element, but the accessibility requirements around focusability and activation made buttons the practical choice). See [design-principles tradeoff between high-level and low-level APIs](https://www.w3.org/TR/design-principles/#high-level-low-level).
 - Form submission participation can be seen as a primitive itself (it can't be broken down further due to accessibility concerns).
 
 ### Alternative 8: TC39 Decorators
