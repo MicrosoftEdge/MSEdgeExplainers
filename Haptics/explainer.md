@@ -72,7 +72,16 @@ Both the imperative and declarative paths share the same effect vocabulary.
 | `align` | A crisp confirmation when an object locks into place or aligns with guides or edges. | Drag-to-snap, window snapping to screen edges, zoom snapping to 100%. |
 | `none`  | Explicitly disables haptic feedback. | Suppressing haptics on a "quiet" variant of a component. |
 
-Intensity is always a normalized value between 0.0 and 1.0. If the platform exposes a system-level intensity setting, the effective intensity is `system intensity × developer-specified intensity`. Intensity defaults to 1.0 if left unspecified.
+The table below illustrates example mappings of the pre-defined effects (hover, edge, tick, align) to representative platform-native feedback patterns across Windows, macOS, iOS, and Android. These mappings are illustrative examples only. User agents may choose different mappings, including synthesizing custom effects from lower-level primitives and parameters. The API standardizes the developer-facing intent, while the underlying realization remains platform-defined.
+
+| Web Haptics | Windows | MacOS | iOS | Android |
+|:-----------:|:-------:|:-----:|:---:|:-------:|
+| hover | hover | generic | light impact | gesture_threshold_deactivate |
+| edge | collide | generic | soft impact | long_press |
+| tick | step | generic | selection | segment_frequent_tick |
+| align | align | alignment | rigid impact | segment_tick |
+
+**Intensity** is always a normalized value between 0.0 and 1.0. If the platform exposes a system-level intensity setting, the effective intensity is `system intensity × developer-specified intensity`. Intensity defaults to 1.0 if left unspecified.
 
 ### Imperative API (JS)
 
