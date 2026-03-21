@@ -265,9 +265,7 @@ The current proposal fires on `transitionend` only. Firing on `transitionstart` 
 
 ### Haptic descriptors in `@keyframes`
 
-The `animation-haptic-*` longhands fire a single haptic per animation. For multi-step choreography — e.g. a `hint` when a modal begins moving, a `tick` at the midpoint, and an `align` when it settles — `haptic-effect` and `haptic-intensity` could be used as descriptors inside `@keyframes` blocks, embedding haptic cues at specific keyframe offsets alongside visual properties.
-
-This extension introduces novel CSS semantics (discrete, non-visual, non-interpolated descriptors in `@keyframes`) and raises open questions around iteration behavior, `prefers-reduced-motion` interaction, competing haptic events, and visibility suppression. Once the core API is established, these questions can be resolved with implementation experience.
+The `animation-haptic-*` longhands fire a single haptic per animation. For multi-step choreography, `haptic-effect` and `haptic-intensity` descriptors inside `@keyframes` blocks could embed haptic cues at specific keyframe offsets. This introduces novel CSS semantics (discrete, non-interpolated descriptors) with open questions around iteration behavior, `prefers-reduced-motion`, and competing events that are best resolved with implementation experience from the core API.
 
 ### Pseudo-class triggered haptics (`haptic-feedback`)
 
@@ -279,7 +277,7 @@ The current set of four effects is intentionally small. If the effect vocabulary
 
 ## Alternatives Considered
 
-- **Extending `navigator.vibrate`** — Lacks semantic intent, requires method overloading, makes feature detection less straightforward, and includes confusing pattern parameters.
+- **Extending `navigator.vibrate`** — The existing `vibrate()` API accepts raw duration/pattern arrays (e.g. `navigator.vibrate([100, 50, 200])`) with no way to express semantic intent like "tick" or "align." Adding named effects would require method overloading or a new options-bag signature, complicating an already-shipped interface. Feature detection becomes awkward — `typeof navigator.vibrate` tells you the method exists but not whether it supports named effects. The pattern-based model also encourages developers to hand-tune durations per device, which is the opposite of the platform-adaptive approach this proposal targets. Finally, `vibrate()` lacks broad engine support (absent in Safari/WebKit) and carries existing abuse stigma that could slow adoption of legitimate haptic use cases.
 - **Pseudo-class-triggered `haptic-feedback` property as the primary declarative surface**. While more concise for state-only interactions, this approach introduces a novel CSS concept — a property that produces a discrete non-visual side effect on pseudo-class entry — with no existing precedent in CSS. It requires new triggering semantics (distinguishing user-caused vs. script-caused state changes), a new conflict resolution model (per-element specificity + cross-element "one fires per action" + ancestor fallback). The transition/animation-primary approach reuses established CSS lifecycle events and avoids these concerns. Pseudo-class haptics remain a viable future extension once the core API is established (see [Future Extensions](#future-extensions)).
 - **Pointer-event based API** ([previous explainer](../HapticsDevice/explainer.md)) — Purely imperative; tightly couples haptics to specific input events, so common interactions like checkbox toggles and scroll-snap landings always require JavaScript. No declarative path, no cascade composition.
 - **HTML attributes** (e.g. `<button haptic-on-activate="tick">`) — No precedent for `haptic-on-*` pattern; resembles discouraged `on*` handlers. Cannot compose with cascade, media queries, or pseudo-classes.
@@ -302,12 +300,11 @@ The API does not expose means to query haptics-capable devices, available effect
 
 ## Open Questions
 
-- Feedback on the predefined effect vocabulary and cross-platform implementability.
-- Should the API return whether haptics was successfully played?
-- Developer interest in haptics device enumeration with acceptable fingerprinting trade-offs.
-- **Should interactions with no visual transition have a declarative path?** Native checkboxes, form validation, and minimal buttons have no CSS transition. The imperative API covers these today; a future `haptic-feedback` pseudo-class property (see [Future Extensions](#future-extensions)) could extend declarative coverage to these cases.
-- **Should haptics be suppressed when the animated element is not visible?** Elements with `display: none`, off-screen positioning, or `content-visibility: auto` may not warrant haptic output. User agents could suppress haptics for elements that are not rendered or not within the viewport.
-- **How should competing haptic events be resolved?** If multiple transitions or animations fire haptic cues simultaneously, which one wins? Options include: last-started wins, highest-intensity wins, or the element closest to the user's interaction target wins.
+- **Should pseudo-class triggered haptics be the primary v1 declarative surface instead?** A `haptic-feedback` property on pseudo-classes (e.g. `button:active { haptic-feedback: tick; }`) would be more concise and natively cover state-only interactions without visual transitions. However, it requires novel CSS triggering semantics with no existing precedent, while the transition/animation model reuses established lifecycle events. We welcome feedback on which tradeoff better serves developers (see [Alternatives Considered](#alternatives-considered)).
+- **Feedback on the predefined effect vocabulary?** The current set (`hint`, `edge`, `tick`, `align`) is intentionally small. Feedback is needed on whether these four effects cover the most common interaction patterns and map well to native haptic primitives across platforms.
+- **Should the API return whether haptics was successfully played?** Currently, `playHaptics` always returns `undefined` to avoid exposing device capabilities. Returning a boolean or promise could help developers debug, but risks leaking hardware information.
+- **Should any [future extension](#future-extensions) be promoted to v1?** Several features are deferred — `haptic-transition` start events, `@keyframes` haptic descriptors, pseudo-class triggered haptics, and custom effects. If any of these are critical for initial adoption, we would like to hear which ones and why.
+- **Is there developer interest in haptics device enumeration?** Though out of scope, we would like to understand interest. Exposing available devices or capabilities would enable richer experiences but introduces fingerprinting trade-offs that need careful evaluation.
 
 ## Reference for Relevant Haptics APIs
 
