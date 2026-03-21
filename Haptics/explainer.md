@@ -76,7 +76,7 @@ The table below illustrates example mappings of the pre-defined effects (hover, 
 
 | Web Haptics | Windows | MacOS | iOS | Android |
 |:-----------:|:-------:|:-----:|:---:|:-------:|
-| hover | hover | generic | light impact | gesture_threshold_deactivate |
+| hint | hover | generic | light impact | gesture_threshold_deactivate |
 | edge | collide | generic | soft impact | long_press |
 | tick | step | generic | selection | segment_frequent_tick |
 | align | align | alignment | rigid impact | segment_tick |
