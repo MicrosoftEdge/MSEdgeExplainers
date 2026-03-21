@@ -121,12 +121,8 @@ haptic-transition: transform align 0.7, opacity hint 0.3;
 
 ```css
 button {
-  background-color: var(--btn-bg);
   transition: background-color 80ms ease;
   haptic-transition: background-color tick;
-}
-button:active {
-  background-color: var(--btn-bg-active);
 }
 ```
 
@@ -192,8 +188,6 @@ A horizontal story carousel with a tactile tick on each swipe — one line of CS
 }
 ```
 
-The user feels a light `tick` each time a story avatar snaps into the center position.
-
 ### E-Commerce "Add to Cart" Button
 
 Modern button styles typically transition `background-color` or `transform` on `:active`. The haptic hooks into that existing visual feedback:
@@ -253,8 +247,6 @@ divider.addEventListener('pointermove', (e) => {
 });
 ```
 
-The user feels a crisp `align` when the divider locks into position.
-
 ## Future Extensions
 
 The following extensions are out of scope for this initial proposal but represent natural next steps that could broaden the declarative surface.
@@ -281,14 +273,13 @@ The current set of four effects is intentionally small. If the effect vocabulary
 - **Pseudo-class-triggered `haptic-feedback` property as the primary declarative surface**. While more concise for state-only interactions, this approach introduces a novel CSS concept — a property that produces a discrete non-visual side effect on pseudo-class entry — with no existing precedent in CSS. It requires new triggering semantics (distinguishing user-caused vs. script-caused state changes), a new conflict resolution model (per-element specificity + cross-element "one fires per action" + ancestor fallback). The transition/animation-primary approach reuses established CSS lifecycle events and avoids these concerns. Pseudo-class haptics remain a viable future extension once the core API is established (see [Future Extensions](#future-extensions)).
 - **Pointer-event based API** ([previous explainer](../HapticsDevice/explainer.md)) — Purely imperative; tightly couples haptics to specific input events, so common interactions like checkbox toggles and scroll-snap landings always require JavaScript. No declarative path, no cascade composition.
 - **HTML attributes** (e.g. `<button haptic-on-activate="tick">`) — No precedent for `haptic-on-*` pattern; resembles discouraged `on*` handlers. Cannot compose with cascade, media queries, or pseudo-classes.
-- **Extending `scroll-snap-type` or adding a `:snap` pseudo-class** instead of a separate `scroll-snap-haptic` property — Extending the shorthand grammar creates backward-compatibility risk; a `:snap` pseudo-class doesn't exist and would be a larger spec addition. A sibling property follows the existing `scroll-snap-type` / `scroll-snap-align` pattern.
-- **`@media (haptic-feedback)`** — A capability-style haptic media feature would imply device capability detection, creating a new fingerprinting vector. `@supports (haptic-transition: transform tick)` tests UA syntax support without revealing hardware information.
+- **Extending `scroll-snap-type` or adding a `:snap` pseudo-class** instead of a separate `scroll-snap-haptic` property — Extending shorthands has precedent (`background`, `font`), so backward-compatibility is manageable. A `:snap` pseudo-class could unify scroll-snap haptics with a future pseudo-class-based haptic model, but introduces design questions beyond haptics: does `:snap` apply to the child or the container? Is it instantaneous or stateful? A dedicated sibling property like `scroll-snap-haptic` follows the `scroll-snap-type` / `scroll-snap-align` / `scroll-snap-stop` pattern and can ship without resolving those questions.
 
 ## Accessibility, Privacy, and Security Considerations
 
 ### Privacy
 
-The API does not expose means to query haptics-capable devices, available effects, or whether a haptic was successfully played. No new media features are introduced — `@supports` detects property support, which is equivalent to detecting any other CSS property and reveals no hardware information.
+The API does not expose means to query haptics-capable devices, available effects, or whether a haptic was successfully played. No new media features are introduced. Feature detection uses `@supports` (e.g. `@supports (haptic-transition: transform tick)`), which tests whether the browser engine recognizes the syntax — equivalent to detecting any other CSS property and revealing no hardware information. Device-capability detection (e.g. whether the hardware can produce haptic output) is intentionally omitted to avoid creating a new fingerprinting vector; absent hardware is treated as a graceful no-op.
 
 ### Security
 
@@ -300,11 +291,11 @@ The API does not expose means to query haptics-capable devices, available effect
 
 ## Open Questions
 
-- **Should pseudo-class triggered haptics be the primary v1 declarative surface instead?** A `haptic-feedback` property on pseudo-classes (e.g. `button:active { haptic-feedback: tick; }`) would be more concise and natively cover state-only interactions without visual transitions. However, it requires novel CSS triggering semantics with no existing precedent, while the transition/animation model reuses established lifecycle events. We welcome feedback on which tradeoff better serves developers (see [Alternatives Considered](#alternatives-considered)).
 - **Feedback on the predefined effect vocabulary?** The current set (`hint`, `edge`, `tick`, `align`) is intentionally small. Feedback is needed on whether these four effects cover the most common interaction patterns and map well to native haptic primitives across platforms.
 - **Should the API return whether haptics was successfully played?** Currently, `playHaptics` always returns `undefined` to avoid exposing device capabilities. Returning a boolean or promise could help developers debug, but risks leaking hardware information.
-- **Should any [future extension](#future-extensions) be promoted to v1?** Several features are deferred — `haptic-transition` start events, `@keyframes` haptic descriptors, pseudo-class triggered haptics, and custom effects. If any of these are critical for initial adoption, we would like to hear which ones and why.
 - **Is there developer interest in haptics device enumeration?** Though out of scope, we would like to understand interest. Exposing available devices or capabilities would enable richer experiences but introduces fingerprinting trade-offs that need careful evaluation.
+- **Should any [future extension](#future-extensions) be promoted to v1?** Several features are deferred — `haptic-transition` start events, `@keyframes` haptic descriptors, pseudo-class triggered haptics, and custom effects. If any of these are critical for initial adoption, we would like to hear which ones and why.
+- **Should pseudo-class triggered haptics be the primary v1 declarative surface instead?** A `haptic-feedback` property on pseudo-classes (e.g. `button:active { haptic-feedback: tick; }`) would be more concise and natively cover state-only interactions without visual transitions. However, it requires novel CSS triggering semantics with no existing precedent, while the transition/animation model reuses established lifecycle events. We welcome feedback on which tradeoff better serves developers (see [Alternatives Considered](#alternatives-considered)).
 
 ## Reference for Relevant Haptics APIs
 
