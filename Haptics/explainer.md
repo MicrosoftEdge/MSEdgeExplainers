@@ -17,7 +17,7 @@ This document is a starting point for engaging the community and standards bodie
 - [Non-goals](#non-goals)
 - [Proposed Approach](#proposed-approach)
 - [Real-World Scenarios](#real-world-scenarios)
-- [Coverage Gaps](#coverage-gaps-and-the-imperative-escape-hatch)
+- [Future Extensions](#future-extensions)
 - [Alternatives Considered](#alternatives-considered)
 - [Accessibility, Privacy, and Security](#accessibility-privacy-and-security-considerations)
 - [Open Questions](#open-questions)
@@ -31,16 +31,14 @@ Modern operating systems have embraced haptics as a core part of user experience
 
 This proposal offers two complementary mechanisms:
 
-1. **Declarative API (CSS)** — new CSS properties (`haptic-feedback`, `scroll-snap-haptic`) that configure haptic behavior on elements, requiring no JavaScript. These are behavioral properties — like `touch-action`, `pointer-events`, or `scroll-snap-type` — that tell the browser how to handle interaction feedback for a given element state.
-2. **Imperative API** — `navigator.playHaptics(effect, intensity)` — for JavaScript-driven, programmatic haptics triggered by application logic.
-
-The declarative path handles routine UI interactions with zero scripting overhead. The imperative path covers complex, conditional, or computed haptic scenarios that CSS can't express.
+1. **Declarative API (CSS)** — haptic effects tied to CSS transitions, animations, and scroll-snap events, piggybacking on lifecycle events the browser already manages.
+2. **Imperative API (JS)** — `navigator.playHaptics(effect, intensity)` for interactions that have no visual transition or require runtime logic.
 
 ## User-Facing Problem
 
 The [navigator.vibrate()](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate) API exists today for basic haptics. However, it is mobile-centric, lacks broad engine and device support, and requires developers to manually program duration/pattern sequences — a low-level interface that doesn't map to the way designers think about haptic intent.
 
-Beyond the limitations of the existing API, there is no way for developers to add haptic feedback to common UI interactions — scroll-snap carousels, checkbox toggles, form validation — without JavaScript in the critical path.
+Beyond the limitations of the existing API, there is no declarative way for developers to add haptic feedback to common UI interactions — scroll-snap carousels, checkbox toggles, button presses, form validation — without JavaScript in the critical path.
 
 ## Goals
 
@@ -72,7 +70,7 @@ Both the imperative and declarative paths share the same effect vocabulary.
 | `edge`  | A heavy boundary signal that indicates reaching the end of a range or hitting a limit. | Validation failure, pull-to-refresh threshold, scroll hitting a boundary. |
 | `tick`  | A firm pulse that marks discrete changes, like moving through a list or toggling a switch. | Scroll-snap landing, checkbox toggle, stepping through picker values. |
 | `align` | A crisp confirmation when an object locks into place or aligns with guides or edges. | Drag-to-snap, window snapping to screen edges, zoom snapping to 100%. |
-| `none`  | Explicitly disables haptic feedback. | Suppressing haptics on a "quiet" variant of a component via the cascade. |
+| `none`  | Explicitly disables haptic feedback. | Suppressing haptics on a "quiet" variant of a component. |
 
 Intensity is always a normalized value between 0.0 and 1.0. If the platform exposes a system-level intensity setting, the effective intensity is `system intensity × developer-specified intensity`. Intensity defaults to 1.0 if left unspecified.
 
@@ -92,58 +90,63 @@ The API always returns `undefined`. No haptic is played if the last input device
 
 ### Declarative API (CSS)
 
-The declarative API introduces two new CSS behavioral properties. Because the browser controls when and how the haptic fires, the activation model is simpler than the imperative path — direct user interaction (the event that causes the pseudo-class change) is sufficient; no separate sticky activation is required. User agents may apply throttling to prevent excessive haptic output (e.g. at most one haptic per element per 50ms).
+The declarative API extends existing CSS constructs — transitions, animations, and scroll snap — with haptic capabilities. All haptics attach to lifecycle events the browser already manages, requiring no new triggering model. The API surface consists of:
 
-#### `haptic-feedback` property
+- **`haptic-transition`** — fires a haptic when a CSS transition completes.
+- **`animation-haptic-effect` / `animation-haptic-intensity` longhands** — assigns a single haptic to an entire animation.
+- **`scroll-snap-haptic`** — fires a haptic each time the scroll position snaps to a snap point.
 
-The `haptic-feedback` property configures what haptic behavior the browser should produce when an element is in a given pseudo-class state. When the element **transitions into** a matching pseudo-class state due to direct user interaction, the user agent consults the resolved `haptic-feedback` value and produces the specified effect once — not continuously while the state is active.
+#### `haptic-transition` property
+
+The `haptic-transition` property fires a single haptic effect when a CSS transition on a specified property completes (`transitionend`). It hooks into the existing [CSS Transitions](https://drafts.csswg.org/css-transitions-1/) lifecycle.
 
 **Syntax:**
 
 ```
-haptic-feedback: <effect-name> <intensity>?
+haptic-transition: <property> <effect-name> <intensity>?
 ```
 
+- `<property>` — the CSS property being transitioned (e.g. `transform`, `background-color`, `opacity`).
 - `<effect-name>` — one of `hint`, `edge`, `tick`, `align`, `none`. Initial value: `none`.
 - `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0, or a `<percentage>` between 0% and 100%. Defaults to 1.0 (or 100%).
 - **Not inherited.** Not animatable.
 
-**Pseudo-class scoping rule:** Unlike traditional CSS properties that describe continuous visual state, `haptic-feedback` produces a one-shot effect at the moment of state entry. This follows how CSS behavioral properties like `touch-action` and `scroll-snap-type` configure browser behavior rather than appearance — but extends the model to a non-visual output channel triggered by pseudo-class transitions, similar in spirit to how CSS Transitions produce side effects when property values change during style resolution.
-
-The property is valid in any pseudo-class selector. The browser fires the specified haptic when the element transitions into that pseudo-class state, **provided the transition was caused by direct user interaction**. Pseudo-class changes from script, DOM mutations, or initial page render do **not** trigger haptics. For example:
-
-- `:hover`, `:active`, `:focus`, `:checked` from user interaction — fires.
-- `:not(:checked)` when the user unchecks a checkbox — fires (negated pseudo-classes are covered by the same rule).
-- `:invalid` on initial page render (empty required field) — does **not** fire.
-- `:disabled`, `:first-child`, `:visited` — structural/script-driven states, do **not** fire.
-
-This design avoids an allowlist that requires spec updates for each new pseudo-class. Instead, the rule is universal: **if the user caused the state change, fire the haptic; if the system caused it, do not.**
-
-**Conflict resolution:** A single user action (e.g. a click) may transition multiple pseudo-class states on the same element (`:hover` and `:active`) or on different elements (a checkbox and its ancestor `form:focus-within`). When multiple `haptic-feedback` declarations match within a single user action:
-
-1. **Per element**, only the declaration from the highest-specificity matching rule fires. If specificities are equal, normal cascade order applies — last wins.
-2. **Across elements**, at most one element fires per user action. The target element is considered first:
-   - If the target element **transitions into** a matching pseudo-class in this user action and its resolved `haptic-feedback` is not `none`, fire that value.
-   - If the target element resolves to `none`, fire nothing (do not bubble).
-   - Otherwise, walk up ancestors and select the first ancestor that **also transitions into** a matching pseudo-class in this same user action and whose resolved value is not `none`; fire that value.
-   - If no such ancestor exists, fire nothing.
-
-   Ancestor fallback is only eligible on ancestor pseudo-class **entry transitions** caused by the same user action. Resolution is evaluated for the same pseudo-class transition under consideration.
-3. Per-element throttling (at most one haptic per element per 50 ms) still applies as a backstop.
+Multiple property haptics can be listed comma-separated:
 
 ```css
-/* Hint haptic at half intensity when pointer enters the button */
-button:hover {
-  haptic-feedback: hint 50%; /* equivalent to: hint 0.5 */
-}
+haptic-transition: transform align 0.7, opacity hint 0.3;
+```
 
-/* Tick haptic at full intensity when the button is pressed */
+**Example — button press:**
+
+```css
+button {
+  background-color: var(--btn-bg);
+  transition: background-color 80ms ease;
+  haptic-transition: background-color tick;
+}
 button:active {
-  haptic-feedback: tick;
+  background-color: var(--btn-bg-active);
 }
 ```
 
+#### `animation-haptic-effect` / `animation-haptic-intensity` longhands
 
+Two longhands follow the established `animation-*` convention to assign a single haptic effect to an entire animation:
+
+- `animation-haptic-effect: <effect-name>` — one of `hint`, `edge`, `tick`, `align`, `none`. Initial value: `none`.
+- `animation-haptic-intensity: <number> | <percentage>` — a value between 0.0 and 1.0 (or 0% and 100%). Initial value: `1.0`.
+- **Not inherited.** Not animatable.
+
+The haptic fires once when the animation starts. If the animation is cancelled before starting, no haptic fires. For looping animations (`animation-iteration-count` > 1), the haptic fires on the first iteration only.
+
+```css
+.modal.open {
+  animation: slide-in 350ms ease-out forwards;
+  animation-haptic-effect: align;
+  animation-haptic-intensity: 0.8;
+}
+```
 
 #### `scroll-snap-haptic` property
 
@@ -159,12 +162,12 @@ scroll-snap-haptic: <effect-name> <intensity>?
 - `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0, or a `<percentage>` between 0% and 100%. Defaults to 1.0 (or 100%).
 - **Not inherited.** Not animatable.
 
-The property applies to the scroll container, not individual snap children:
+The property applies to the scroll container, not individual snap children. The haptic does not fire for programmatic scrolls (e.g. `element.scrollTo()`). It fires only for scrolls the user agent recognizes as user-initiated — that is, scrolls originating from touch, wheel, keyboard, or scrollbar interaction.
 
 ```css
 .carousel {
   scroll-snap-type: x mandatory;
-  scroll-snap-haptic: tick 60%; /* equivalent to: tick 0.6 */
+  scroll-snap-haptic: tick 0.6;
 }
 
 .carousel > .slide {
@@ -172,33 +175,66 @@ The property applies to the scroll container, not individual snap children:
 }
 ```
 
-Each time a scroll gesture causes the container to settle on a new snap point, the user agent fires the haptic. The haptic does not fire for programmatic scrolls (e.g. `element.scrollTo()`). It fires only for scrolls the user agent recognizes as user-initiated — that is, scrolls originating from touch, wheel, keyboard, or scrollbar interaction. A programmatic scroll that follows a user gesture but runs asynchronously (e.g. in a `requestAnimationFrame` callback) is still considered programmatic and does **not** trigger the haptic.
+Feature detection works via `@supports` (e.g. `@supports (haptic-transition: transform tick)`).
 
-**When to use each:** Use declarative CSS for interactions that map to pseudo-class state changes (button press, checkbox toggle, form validation, focus) or built-in browser behaviors (scroll snap). Use the imperative API when the trigger, intensity, or conditions require runtime logic (chart scrubbers, drag-to-snap with distance thresholds, gesture velocity, non-CSS events).
+## Real-World Scenarios
 
-## Real-World Examples
+The following examples demonstrate how the transition/animation model and the imperative API together cover common haptic use cases.
 
-### Social Media stories scrolling
+### Social Media Stories Scrolling
 
 A horizontal story carousel with a tactile tick on each swipe — one line of CSS:
 
 ```css
 .story-carousel {
   scroll-snap-type: x mandatory;
-  scroll-snap-haptic: tick 50%; /* equivalent to: tick 0.5 */
+  scroll-snap-haptic: tick 0.5;
 }
 ```
 
-The user feels a light tick each time a story avatar snaps into the center position.
+The user feels a light `tick` each time a story avatar snaps into the center position.
 
 ### E-Commerce "Add to Cart" Button
 
-A firm confirmation haptic on the most important button on the page:
+Modern button styles typically transition `background-color` or `transform` on `:active`. The haptic hooks into that existing visual feedback:
 
 ```css
-.add-to-cart:hover  { haptic-feedback: hint 30%; } /* equivalent to: hint 0.3 */
-.add-to-cart:active { haptic-feedback: align; }
+.add-to-cart {
+  background-color: var(--btn-bg);
+  transform: scale(1);
+  transition: background-color 100ms ease, transform 100ms ease;
+  haptic-transition: background-color align;
+}
+.add-to-cart:hover {
+  background-color: var(--btn-bg-hover);
+}
+.add-to-cart:active {
+  background-color: var(--btn-bg-active);
+  transform: scale(0.97);
+}
 ```
+
+The `align` fires when the `background-color` transition completes after the user clicks. The tactile cue is correlated with the visual press, reinforcing the "confirmed" feeling.
+
+For minimal buttons or text links that have no visual transition, the imperative API is a one-liner:
+
+```js
+link.addEventListener('click', () => navigator.playHaptics?.('align'));
+```
+
+### Modal Slide-In
+
+A modal slides in from the bottom with a crisp haptic cue when the animation begins:
+
+```css
+.modal.open {
+  animation: slide-in 350ms ease-out forwards;
+  animation-haptic-effect: align;
+  animation-haptic-intensity: 0.8;
+}
+```
+
+The user feels an `align` as the modal starts its entrance — reinforcing the visual motion with tactile feedback.
 
 ### Drag-to-Snap Divider
 
@@ -219,24 +255,36 @@ divider.addEventListener('pointermove', (e) => {
 
 The user feels a crisp `align` when the divider locks into position.
 
-## Coverage Gaps and the Imperative Escape Hatch
+## Future Extensions
 
-Some interactions have no CSS pseudo-class equivalent: `<select>` option changes, `<input type="range">` value steps, custom `<div>`-based toggles, transition/animation completion, and gesture-computed thresholds (drag distance, velocity). For these, the imperative API provides a consistent one-line pattern:
+The following extensions are out of scope for this initial proposal but represent natural next steps that could broaden the declarative surface.
 
-```js
-// Per-step haptic on a range slider (use 'input', not 'change', for continuous feedback)
-range.addEventListener('input', () => navigator.playHaptics?.('tick', 0.4));
-```
+### `haptic-transition` start events
 
-Future work may address transition-end haptics (`haptic-transition`), multi-step haptic sequences (`@haptic` at-rule).
+The current proposal fires on `transitionend` only. Firing on `transitionstart` as well could enable anticipatory cues — e.g. a `hint` when a panel begins expanding, followed by a `tick` when it settles.
+
+### Haptic descriptors in `@keyframes`
+
+The `animation-haptic-*` longhands fire a single haptic per animation. For multi-step choreography — e.g. a `hint` when a modal begins moving, a `tick` at the midpoint, and an `align` when it settles — `haptic-effect` and `haptic-intensity` could be used as descriptors inside `@keyframes` blocks, embedding haptic cues at specific keyframe offsets alongside visual properties.
+
+This extension introduces novel CSS semantics (discrete, non-visual, non-interpolated descriptors in `@keyframes`) and raises open questions around iteration behavior, `prefers-reduced-motion` interaction, competing haptic events, and visibility suppression. Once the core API is established, these questions can be resolved with implementation experience.
+
+### Pseudo-class triggered haptics (`haptic-feedback`)
+
+A CSS property that fires a haptic when an element transitions into a pseudo-class state due to direct user interaction — e.g. `button:active { haptic-feedback: tick; }` or `input:checked { haptic-feedback: tick; }`. This would cover state-change-only interactions that have no visual transition to hook into, eliminating the need for imperative fallbacks in those cases. See [Alternatives Considered](#alternatives-considered) for why this is not the primary declarative surface in this proposal.
+
+### Custom haptic effects
+
+The current set of four effects is intentionally small. If the effect vocabulary grows (e.g. platform-specific effects or developer-defined waveforms), both the `animation-haptic-*` longhands and a future `@keyframes` haptic descriptor model should accommodate them without syntax changes.
 
 ## Alternatives Considered
 
 - **Extending `navigator.vibrate`** — Lacks semantic intent, requires method overloading, makes feature detection less straightforward, and includes confusing pattern parameters.
+- **Pseudo-class-triggered `haptic-feedback` property as the primary declarative surface**. While more concise for state-only interactions, this approach introduces a novel CSS concept — a property that produces a discrete non-visual side effect on pseudo-class entry — with no existing precedent in CSS. It requires new triggering semantics (distinguishing user-caused vs. script-caused state changes), a new conflict resolution model (per-element specificity + cross-element "one fires per action" + ancestor fallback). The transition/animation-primary approach reuses established CSS lifecycle events and avoids these concerns. Pseudo-class haptics remain a viable future extension once the core API is established (see [Future Extensions](#future-extensions)).
 - **Pointer-event based API** ([previous explainer](../HapticsDevice/explainer.md)) — Purely imperative; tightly couples haptics to specific input events, so common interactions like checkbox toggles and scroll-snap landings always require JavaScript. No declarative path, no cascade composition.
-- **HTML attributes** (e.g. `<button haptic-on-activate="tick">`) — No precedent for `haptic-on-*` pattern; resembles discouraged `on*` handlers. Cannot compose with cascade, media queries, or pseudo-classes. Each new trigger requires a new attribute (6+), whereas CSS reuses pseudo-classes.
+- **HTML attributes** (e.g. `<button haptic-on-activate="tick">`) — No precedent for `haptic-on-*` pattern; resembles discouraged `on*` handlers. Cannot compose with cascade, media queries, or pseudo-classes.
 - **Extending `scroll-snap-type` or adding a `:snap` pseudo-class** instead of a separate `scroll-snap-haptic` property — Extending the shorthand grammar creates backward-compatibility risk; a `:snap` pseudo-class doesn't exist and would be a larger spec addition. A sibling property follows the existing `scroll-snap-type` / `scroll-snap-align` pattern.
-- **`@media (haptic-feedback)`** — A capability-style haptic media feature would imply device capability detection, creating a new fingerprinting vector. `@supports (haptic-feedback: tick)` tests UA syntax support without revealing hardware information.
+- **`@media (haptic-feedback)`** — A capability-style haptic media feature would imply device capability detection, creating a new fingerprinting vector. `@supports (haptic-transition: transform tick)` tests UA syntax support without revealing hardware information.
 
 ## Accessibility, Privacy, and Security Considerations
 
@@ -248,9 +296,18 @@ The API does not expose means to query haptics-capable devices, available effect
 
 **Imperative API:** Requires sticky user activation. No permission gate.
 
-**Declarative API:** Narrower attack surface — the browser controls all trigger conditions (pseudo-class transitions, scroll-snap events). A malicious page cannot fire haptics at arbitrary times.
+**Declarative API:** Transitions and animations can be programmatically triggered, so the declarative API inherits the same sticky user activation requirement. The browser verifies that the style change that initiated the transition occurred within an activation context. Unlike a purely imperative API, the declarative path limits the *shape* of haptics to declared effects at declared intensities — a malicious script cannot vary haptic effects dynamically through the declarative channel.
 
 **Anti-abuse:** User agents may enforce throttling on both APIs. Haptics produce no lasting effect — the user can navigate away at any time. If abuse patterns emerge, user agents may suppress haptics entirely for the offending origin.
+
+## Open Questions
+
+- Feedback on the predefined effect vocabulary and cross-platform implementability.
+- Should the API return whether haptics was successfully played?
+- Developer interest in haptics device enumeration with acceptable fingerprinting trade-offs.
+- **Should interactions with no visual transition have a declarative path?** Native checkboxes, form validation, and minimal buttons have no CSS transition. The imperative API covers these today; a future `haptic-feedback` pseudo-class property (see [Future Extensions](#future-extensions)) could extend declarative coverage to these cases.
+- **Should haptics be suppressed when the animated element is not visible?** Elements with `display: none`, off-screen positioning, or `content-visibility: auto` may not warrant haptic output. User agents could suppress haptics for elements that are not rendered or not within the viewport.
+- **How should competing haptic events be resolved?** If multiple transitions or animations fire haptic cues simultaneously, which one wins? Options include: last-started wins, highest-intensity wins, or the element closest to the user's interaction target wins.
 
 ## Reference for Relevant Haptics APIs
 
@@ -267,14 +324,9 @@ Relevant web APIs:
 - [navigator.vibrate](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate)
 
 Relevant CSS specifications:
+- [CSS Transitions](https://drafts.csswg.org/css-transitions-1/)
+- [CSS Animations](https://drafts.csswg.org/css-animations-1/)
 - [CSS Scroll Snap](https://drafts.csswg.org/css-scroll-snap-1/)
-- [CSS Pseudo-Classes (Selectors Level 4)](https://drafts.csswg.org/selectors-4/#pseudo-classes)
-
-## Open Questions
-
-- Feedback on the predefined effect vocabulary and cross-platform implementability.
-- Should the API return whether haptics was successfully played?
-- Developer interest in haptics device enumeration with acceptable fingerprinting trade-offs.
 
 ## Stakeholder Feedback / Opposition
 
@@ -285,7 +337,7 @@ We intend to seek feedback via:
 - Incubation in WICG.
 - Discuss within Device & Sensors Working Group.
 - Cross‑share with Haptic Industry Forum (non‑standards venue) to align on primitives vocabulary and invite suppliers/OEMs to comment publicly in WICG issues.
-- Engage CSS Working Group for review of the declarative property definitions and pseudo-class scoping rule.
+- Engage CSS Working Group for review of transition and animation haptic integration.
 
 ## References & Acknowledgements
 
