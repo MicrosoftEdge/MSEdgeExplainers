@@ -111,10 +111,10 @@ The `shadowrootadoptedstylesheets` attribute accepts a space-separated list, all
 When the `<template>` element is parsed, the `shadowrootadoptedstylesheets` attribute is evaluated. Each space-separated identifier is resolved using the following rules:
 
 1. **Specifier is already in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map):** The associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script)'s default export of type [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets).
-2. **Specifier resolves to a URL but is not in the module map:** A fetch is initiated and an empty placeholder is inserted into the `adoptedStyleSheets` list at the corresponding position. Once the fetch completes, the placeholder is replaced with the fetched stylesheet. See [Fetch Behavior For External Specifiers](#fetch-behavior-for-external-specifiers).
-3. **Specifier does not resolve to a URL (e.g. a bare specifier with no import map entry):** The fetch attempt fails. An empty placeholder entry remains in the `adoptedStyleSheets` list and no styles are applied for that specifier. Developer tools should warn in this scenario.
+2. **Specifier resolves to a URL but is not in the module map:** A fetch is initiated and an empty placeholder stylesheet is inserted into the `adoptedStyleSheets` list at the corresponding position. Once the fetch completes, the placeholder stylesheet is replaced with the fetched stylesheet. See [Fetch Behavior For External Specifiers](#fetch-behavior-for-external-specifiers).
+3. **Specifier does not resolve to a URL (e.g. a bare specifier with no import map entry):** The fetch attempt fails. An empty placeholder stylesheet entry remains in the `adoptedStyleSheets` list and no styles are applied for that specifier. Developer tools should warn in this scenario.
 
-Stylesheets are added in specified order, and applied as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). The attribute does **not** retroactively pick up inline modules that are added to the module map after parsing `shadowrootadoptedstylesheets` (see [Declarative modules are not applied retroactively](#declarative-modules-are-not-applied-retroactively) for examples and details). However, external URL specifiers **may be** eventually applied — they trigger a fetch when not present in the module map, so styles will arrive once the fetch completes (with an associated FOUC).
+Stylesheets are added in specified order, and applied as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). The attribute does **not** retroactively pick up declarative modules that are added to the module map after parsing `shadowrootadoptedstylesheets` (see [Declarative modules are not applied retroactively](#declarative-modules-are-not-applied-retroactively) for examples and details). However, external URL specifiers **may be** eventually applied — they trigger a fetch when not present in the module map, so styles will arrive once the fetch completes (with an associated FOUC).
 
 This design allows for adopting both declarative and imperative CSS Modules via the `shadowrootadoptedstylesheets` attribute.
 
@@ -140,7 +140,7 @@ In the following example, no styles are applied because the inline CSS module is
 </style>
 ```
 
-When the `<template>` element is parsed, a fetch for the specifier "foo" with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css" is attempted. Because "foo" is a [bare specifier](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier), it does not resolve to a URL unless an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) provides a mapping for it. Without such a mapping, the fetch fails and the placeholder entry remains empty. The later `<style>` element populates the module map, but since the attribute is not revisited after parsing, the `adoptedStyleSheets` list remains empty. Developer tools should warn in this scenario.
+When the `<template>` element is parsed, a fetch for the specifier "foo" with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css" is attempted. Because "foo" is a [bare specifier](https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier), it does not resolve to a URL unless an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) provides a mapping for it. Without such a mapping, the fetch fails and the placeholder stylesheet entry remains empty. The later `<style>` element populates the module map, but since the attribute is not revisited after parsing, the `adoptedStyleSheets` list remains empty. Developer tools should warn in this scenario.
 
 Similarly, when the `<style>` element is a child of the `<template>` that adopts it, the styles will not be applied to the shadow root:
 
@@ -163,7 +163,7 @@ For more details on the parsing workflow, including how `<style type="module">` 
 
 ### Fetch Behavior For External Specifiers
 
-When a specifier in `shadowrootadoptedstylesheets` is not present in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) at parse time and the specifier resolves to a URL, the attribute initiates a fetch for that URL. An empty placeholder [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) entry is inserted into the `adoptedStyleSheets` array at the position corresponding to the specifier in `shadowrootadoptedstylesheets`. Once the fetch completes successfully, the placeholder is replaced with the fetched [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface), and the shadow root's styles are updated accordingly.
+When a specifier in `shadowrootadoptedstylesheets` is not present in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) at parse time and the specifier resolves to a URL, the attribute initiates a fetch for that URL. An empty placeholder [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) entry is inserted into the `adoptedStyleSheets` array at the position corresponding to the specifier in `shadowrootadoptedstylesheets`. Once the fetch completes successfully, the placeholder stylesheet is replaced with the fetched [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface), and the shadow root's styles are updated accordingly.
 
 This means the following example will work, even without a preceding `<link rel="modulepreload">`:
 
@@ -200,7 +200,7 @@ Note that the second `<template>` tag doesn't need a corresponding `<link rel="m
 
 #### Limitations
 
-The fetch fallback has an important limitation: **there is no way to catch fetch errors or provide a fallback**. If the fetch fails (e.g. a 404 response or network error), the placeholder entry remains empty and no styles are applied for that specifier. There is no mechanism for the developer to detect this failure or substitute alternative styles declaratively.
+The fetch fallback has an important limitation: **there is no way to catch fetch errors or provide a fallback**. If the fetch fails (e.g. a 404 response or network error), the placeholder stylesheet entry remains empty and no styles are applied for that specifier. There is no mechanism for the developer to detect this failure or substitute alternative styles declaratively.
 
 For this reason, developer tools should surface a warning when `shadowrootadoptedstylesheets` triggers a fetch, recommending that developers either:
 1. Define the styles inline using `<style type="module" specifier="...">` (a [Declarative CSS Module](../ShadowDOM/explainer.md#proposal-inline-declarative-css-module-scripts)) so the styles are available synchronously, or
