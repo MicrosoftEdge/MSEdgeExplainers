@@ -36,13 +36,11 @@ content location of future work and discussions.
     - [Basic usage](#basic-usage)
     - [Multiple specifiers](#multiple-specifiers)
     - [How the attribute is evaluated](#how-the-attribute-is-evaluated)
-    - [Inline declarative modules are not applied retroactively](#inline-declarative-modules-are-not-applied-retroactively)
-    - [Use with External CSS Files](#use-with-external-css-files)
+    - [Declarative modules are not applied retroactively](#declarative-modules-are-not-applied-retroactively)
     - [Fetch Behavior For External Specifiers](#fetch-behavior-for-external-specifiers)
     - [Template element reflection](#template-element-reflection)
   - [Alternate proposals](#alternate-proposals)
     - [Using A Link Tag To Adopt Stylesheets](#using-a-link-tag-to-adopt-stylesheets)
-    - [Id-based `adoptedstylesheet` attribute on template](#id-based-adoptedstylesheet-attribute-on-template)
   - [Polyfills](#polyfills)
   - [Open issues](#open-issues)
   - [References and acknowledgements](#references-and-acknowledgements)
@@ -116,15 +114,15 @@ When the `<template>` element is parsed, the `shadowrootadoptedstylesheets` attr
 2. **Specifier resolves to a URL but is not in the module map:** A fetch is initiated and an empty placeholder is inserted into the `adoptedStyleSheets` list at the corresponding position. Once the fetch completes, the placeholder is replaced with the fetched stylesheet. See [Fetch Behavior For External Specifiers](#fetch-behavior-for-external-specifiers).
 3. **Specifier does not resolve to a URL (e.g. a bare specifier with no import map entry):** The fetch attempt fails. An empty placeholder entry remains in the `adoptedStyleSheets` list and no styles are applied for that specifier. Developer tools should warn in this scenario.
 
-Stylesheets are added in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). The attribute does **not** retroactively pick up inline modules that are added to the module map after parsing (see [Inline declarative modules are not applied retroactively](#inline-declarative-modules-are-not-applied-retroactively) for examples and details). However, external URL specifiers **may be** eventually applied — they trigger a fetch when not present in the module map, so styles will arrive once the fetch completes (with an associated FOUC).
+Stylesheets are added in specified order, and applied as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). The attribute does **not** retroactively pick up inline modules that are added to the module map after parsing `shadowrootadoptedstylesheets` (see [Declarative modules are not applied retroactively](#declarative-modules-are-not-applied-retroactively) for examples and details). However, external URL specifiers **may be** eventually applied — they trigger a fetch when not present in the module map, so styles will arrive once the fetch completes (with an associated FOUC).
 
-This allows adopting both Declarative CSS Modules and imperative CSS Modules via the `shadowrootadoptedstylesheets` attribute, regardless of whether they have been previously fetched.
+This design allows for adopting both declarative and imperative CSS Modules via the `shadowrootadoptedstylesheets` attribute.
 
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
-### Inline declarative modules are not applied retroactively
+### Declarative modules are not applied retroactively
 
-Inline declarative modules (defined via `<style type="module">`) must be present in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) at the time the `<template>` element is parsed — they are **not** applied retroactively. Note that this behavior differs for external file specifiers, which trigger a fetch if not already in the module map (see [Fetch Behavior For External Specifiers](#fetch-behavior-for-external-specifiers)).
+Declarative modules (defined via `<style type="module">`) must be present in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) at the time the `<template>` element is parsed — they are **not** applied retroactively.
 
 In the following example, no styles are applied because the inline CSS module is defined after the `<template>`:
 
@@ -134,7 +132,7 @@ In the following example, no styles are applied because the inline CSS module is
     ...
   </template>
 </my-element>
-<!-- This module definition comes too late — the template has already been parsed. -->
+<!-- This module definition comes too late — `shadowrootadoptedstylesheets` has already been processed. -->
 <style type="module" specifier="foo">
   #content {
     color: red;
@@ -159,25 +157,27 @@ Similarly, when the `<style>` element is a child of the `<template>` that adopts
 </my-element>
 ```
 
-The `<template>` element is parsed first and attempts to fetch "foo", which fails because the module map does not yet contain it. The child `<style>` element is parsed afterwards and populates the module map, but the attribute is not revisited. Subsequent `<template>` elements could adopt "foo" now that it has been defined.
+The `<template>` element is parsed first and attempts to fetch "foo", which fails because the module map does not yet contain it. The child `<style>` element is parsed afterwards and populates the module map, but the attribute is not revisited. Subsequent `<template>` elements could adopt "foo", because after this point, it has been defined and is available in the module map.
 
 For more details on the parsing workflow, including how `<style type="module">` populates the module map via import map entries, see the [Detailed Parsing Workflow](../ShadowDOM/explainer.md#detailed-parsing-workflow) section in the parent explainer.
 
-### Use with External CSS Files
+### Fetch Behavior For External Specifiers
 
-The `shadowrootadoptedstylesheets` attribute does not differentiate between specifiers created declaratively (via `<style type="module">`) or external CSS files. This means that the following example is valid:
+When a specifier in `shadowrootadoptedstylesheets` is not present in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) at parse time and the specifier resolves to a URL, the attribute initiates a fetch for that URL. An empty placeholder [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) entry is inserted into the `adoptedStyleSheets` array at the position corresponding to the specifier in `shadowrootadoptedstylesheets`. Once the fetch completes successfully, the placeholder is replaced with the fetched [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface), and the shadow root's styles are updated accordingly.
+
+This means the following example will work, even without a preceding `<link rel="modulepreload">`:
 
 ```html
 <my-element>
   <template shadowrootmode="open" shadowrootadoptedstylesheets="./foo.css">
-    ...
+    <div id="content">styled text</div>
   </template>
 </my-element>
 ```
 
-...where "foo.css" is an external CSS file. If the specifier is not present in the module map at parse time, a fetch is initiated for the URL and styles are applied once it completes. See [Fetch Behavior For External Specifiers](#fetch-behavior-for-external-specifiers) for details on the placeholder mechanism, limitations, and FOUC implications.
+The shadow root is initially rendered without the styles from "foo.css". Once the fetch completes, the styles are applied. This will cause a FOUC (Flash of Unstyled Content) — the element is first painted without the external styles and then repainted once the fetch completes.
 
-Developers should pre-fetch external CSS using `<link rel="modulepreload">` to ensure it's in the module map before the `<template>` is parsed, avoiding FOUC and providing error handling:
+Developers should pre-fetch external CSS using [`<link rel="modulepreload">`](https://html.spec.whatwg.org/multipage/links.html#link-type-modulepreload) to ensure it's in the module map before the `<template>` is parsed, avoiding FOUC and providing error handling:
 
 ```html
 <head>
@@ -198,37 +198,21 @@ Developers should pre-fetch external CSS using `<link rel="modulepreload">` to e
 
 Note that the second `<template>` tag doesn't need a corresponding `<link rel="modulepreload">` — this only needs to happen once per external module, per document, to attempt to pre-populate the module map before `shadowrootadoptedstylesheets` is parsed.
 
-### Fetch Behavior For External Specifiers
-
-When a specifier in `shadowrootadoptedstylesheets` is not present in the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) at parse time and the specifier resolves to a URL, the attribute initiates a fetch for that URL. An empty placeholder entry is inserted into the `adoptedStyleSheets` array at the position corresponding to the specifier. Once the fetch completes successfully, the placeholder is replaced with the fetched [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface), and the shadow root's styles are updated accordingly.
-
-This means the following example will work, even without a preceding `<link rel="modulepreload">`:
-
-```html
-<my-element>
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="./foo.css">
-    <div id="content">styled text</div>
-  </template>
-</my-element>
-```
-
-The shadow root is initially rendered without the styles from "foo.css". Once the fetch completes, the styles are applied. This will cause a FOUC (Flash of Unstyled Content) — the element is first painted without the external styles and then repainted once they arrive.
-
 #### Limitations
 
 The fetch fallback has an important limitation: **there is no way to catch fetch errors or provide a fallback**. If the fetch fails (e.g. a 404 response or network error), the placeholder entry remains empty and no styles are applied for that specifier. There is no mechanism for the developer to detect this failure or substitute alternative styles declaratively.
 
 For this reason, developer tools should surface a warning when `shadowrootadoptedstylesheets` triggers a fetch, recommending that developers either:
 1. Define the styles inline using `<style type="module" specifier="...">` (a [Declarative CSS Module](../ShadowDOM/explainer.md#proposal-inline-declarative-css-module-scripts)) so the styles are available synchronously, or
-2. Use `<link rel="modulepreload">` to pre-fetch the module, which supports error handling via the `onerror` event and can be combined with `blocking="render"` to avoid FOUC.
+2. Use `<link rel="modulepreload">` to pre-fetch the module, which supports error handling via the `onerror` event and can be combined with [`blocking="render"`](https://html.spec.whatwg.org/multipage/urls-and-fetching.html#blocking-attributes) to avoid FOUC.
 
 The order of `shadowrootadoptedstylesheets` reflects the order in the underlying `adoptedStyleSheets` array, which may impact the final application of CSS rules, as they are applied [in array order](https://drafts.csswg.org/cssom/#css-style-sheet-collections). Since fetch completion order may not match the specified order, each fetch completion could trigger a separate FOUC.
 
 ### Template element reflection
 
-The `<template>` element that declares a Declarative Shadow DOM is consumed by the HTML parser — the parser creates the shadow root directly and the `<template>` element does not appear in the resulting DOM tree. This means that the `shadowrootadoptedstylesheets` attribute is no longer accessible via standard DOM APIs after parsing. To support reflection, a new `shadowRootAdoptedStyleSheets` DOM property should be added to the `HTMLTemplateElement` interface.
+The `<template>` element that declares a Declarative Shadow DOM is consumed by the HTML parser — the parser creates the shadow root directly and the `<template>` element does not appear in the resulting DOM tree. This means that the `shadowrootadoptedstylesheets` attribute is no longer accessible via standard DOM APIs after parsing. To support reflection, a new `shadowRootAdoptedStyleSheets` DOM property should be added to the [`HTMLTemplateElement`](https://html.spec.whatwg.org/multipage/scripting.html#htmltemplateelement) interface.
 
-This property would reflect the initial value of the `shadowrootadoptedstylesheets` attribute as it was specified at parse time. It would return the space-separated string of specifiers that were originally provided, regardless of whether those specifiers resolved successfully. This is consistent with how other `shadowroot*` attributes on `<template>` are reflected (e.g. `shadowRootMode`).
+This property would reflect the initial value of the `shadowrootadoptedstylesheets` attribute as it was specified at parse time. It would return the space-separated string of specifiers that were originally provided, regardless of whether those specifiers resolved successfully. This is consistent with how other `shadowroot*` attributes on `<template>` are reflected (e.g. [`shadowRootMode`](https://html.spec.whatwg.org/multipage/scripting.html#dom-template-shadowrootmode)).
 
 ```js
 const template = document.createElement('template');
@@ -239,7 +223,7 @@ console.log(template.shadowRootAdoptedStyleSheets); // "foo bar"
 This reflection is important for several reasons:
 * **Polyfills** need to inspect the attribute value to apply fallback behavior in user agents that do not natively support `shadowrootadoptedstylesheets`.
 * **Developer tools** can use the reflected value to display diagnostic information about which specifiers were requested.
-* **Serialization** scenarios (e.g. `getInnerHTML()`) need the attribute value to produce correct markup when serializing a shadow root back to HTML.
+* **Serialization** scenarios (e.g. [`getHTML()`](https://html.spec.whatwg.org/multipage/dynamic-markup-insertion.html#dom-element-gethtml)) need the attribute value to produce correct markup when serializing a shadow root back to HTML.
 
 ## Alternate proposals
 
@@ -265,36 +249,15 @@ Another option is to instead use existing HTML concepts for applying stylesheets
 </my-element>
 ```
 
-While this approach doesn't map as closely to the existing `adoptedStyleSheets` API, it more closely follows existing HTML semantics. It also allows for a rich set of [features](https://html.spec.whatwg.org/#the-link-element) offered by the `<link>` element, such as media queries. However, a small disadvantage is that the `<link>` element has many additional properties that would not apply in this scenario, such as `crossorigin`, `fetchpriority`, `referrerpolicy`.
+While this approach doesn't map as closely to the existing `adoptedStyleSheets` DOM API, it more closely follows existing HTML semantics. It also allows for a rich set of [features](https://html.spec.whatwg.org/#the-link-element) offered by the `<link>` element, such as error handling and media queries. However, there are several downsides to this approach.
 
-The `shadowrootadoptedstylesheets` attribute as specified accepts a list of stylesheets. Multiple stylesheets can be added to a shadow root's adopted stylesheet list with the `<link>` proposal by including multiple `<link>` tags. One challenge of this approach is in ordering. Since the `shadowrootadoptedstylesheets` attribute is applied at parse time, there are no such limitations, but `<link>` tags can be moved around in the DOM, which would imply that the order of `adoptedStyleSheets` would be updated accordingly. This could be complicated to keep in order if the underlying `adoptedStyleSheets` array is also modified externally.
+One challenge of this approach is in ordering. Multiple stylesheets can be added to a shadow root's adopted stylesheet list with this proposal by including multiple `<link>` tags. `<link>` tags can be moved around in the DOM, which would imply that the order of `adoptedStyleSheets` would be updated accordingly. This could be complicated to keep in order if the underlying `adoptedStyleSheets` array is also modified externally. Alternatively, the `adoptedStyleSheets` array could not be re-ordered in response to these types of DOM changes, but that could be seen as confusing, because stylesheets applied by the existing `<link rel="stylesheet">` tag are applied in DOM order. The `shadowrootadoptedstylesheets` attribute as specified accepts a fixed list of stylesheets, and thus is not subject to re-ordering complexity due to DOM mutations.
 
-### [Id-based `adoptedstylesheet` attribute on template](https://github.com/WICG/webcomponents/issues/939#issue-971914425)
+Another tradeoff with this approach is DOM bloat. Each adopted stylesheet would introduce another `<link>` tag in the DOM. With many stylesheets and many shadow roots, this could result in hundreds of extra DOM nodes, which the `shadowrootadoptedstylesheets` approach avoids entirely.
 
-This proposal would add a new markup-based `shadowrootadoptedstylesheets` attribute that closely matches the existing JavaScript `adoptedStyleSheets` property, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object.
-```html
-<style type="css" id="shared_shadow_styles">
-    :host {
-      color: red
-    }
-</style>
-```
+This approach could also introduce confusion for developers. There are already `<link>` tags used for styling via `<link rel="stylesheet">`, and stylesheet modules can already be preloaded via `<link rel="modulepreload" as="style">`. Adding a third variation on top of these existing patterns could add to this complexity.
 
-or
-
-```html
-<link rel="stylesheet" href="styles.css" id="external_shared_shadow_styles">
-```
-Web authors can use the `shadowrootadoptedstylesheets` attribute on the `<template>` element to associate the stylesheets with a declarative shadow root.
-```html
-<template shadowrootmode="open" shadowrootadoptedstylesheets="shared_shadow_styles external_shared_shadow_styles">
-      <!-- -->
-</template>
-```
-
-One requirement of this approach is that the current `adoptedStyleSheets` JavaScript property would need to lift the "constructable" requirement. This was recently agreed upon by the CSSWG but has not been implemented yet: [Can we lift the restriction on constructed flag for adoptedStyleSheets?](https://github.com/w3c/csswg-drafts/issues/10013#issuecomment-2165396092)
-
-A challenge with this approach is dealing with scopes and idrefs. If a declarative stylesheet can only be used within a single scope, it ends up being as limited as a regular `<style>` tag since it would need to be duplicated for every scope. See the [parent explainer](../ShadowDOM/explainer.md#id-based-adoptedstylesheet-attribute-on-template) for more details.
+For the Id-based alternate proposal (using HTML id attributes instead of module specifiers), see [Id-based `shadowrootadoptedstylesheets` attribute on template](../ShadowDOM/explainer.md#id-based-shadowrootadoptedstylesheets-attribute-on-template) in the parent explainer.
 
 ## Polyfills
 
