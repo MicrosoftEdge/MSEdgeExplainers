@@ -198,7 +198,7 @@ When `attachInternals()` is called with behaviors, each behavior is attached to 
 | Element disconnected from DOM | Behavior state is preserved. Event handlers remain conceptually attached but inactive. |
 | Element reconnected to DOM | Event handlers become active again. Behavior state (e.g., `formAction`, `disabled`) is preserved. |
 
-*Note: Behaviors are immutable after `attachInternals()`. See the [open question on dynamic behaviors](#should-we-support-dynamic-behavior-updates).*
+*Note: Behaviors are immutable after `attachInternals()`. Dynamic behavior updates (adding, removing, or replacing behaviors after attachment) are not supported, as developer feedback indicated that the problems with `<input>`'s mutable `type` attribute (state migration, event handler cleanup, property compatibility) should not be replicated.*
 
 ### Duplicate behaviors
 
@@ -238,7 +238,7 @@ The current API uses instantiated behaviors with a single `behaviors` property:
 - `behaviors` property on `ElementInternals` is a read-only `FrozenArray`.
 - Developers hold direct references to their behavior instances.
 
-*Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment. If dynamic behavior updates are supported in the future (see [open question](#should-we-support-dynamic-behavior-updates)), the API could evolve to use `ObservableArray` with lifecycle callbacks.*
+*Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment.*
 
 **Pros:**
 - Single property name.
@@ -841,108 +841,14 @@ Although this proposal currently focuses on custom elements, the behavior patter
 
 ### Should behavior properties be automatically exposed on the element?
 
-The current proposal requires developers to manually create getters/setters that delegate to the stored behavior instance (e.g., `this._submitBehavior.*`). There are alternative approaches worth considering:
+The current proposal uses manual property delegation: developers create getters/setters that delegate to the stored behavior instance. This gives authors full control over their public API, avoids naming conflicts, and allows validation or side effects in setters. The tradeoff is boilerplate for each exposed property.
 
-#### Option A: Manual property delegation (current proposal)
+Two alternatives have been considered:
 
-**Pros:**
-- Authors have full control over their element's public API.
-- No naming conflicts.
-- Authors can add validation, transformation, or side effects in setters.
-- Familiar pattern.
+- **Automatic property exposure:** The platform adds behavior properties directly to the custom element (e.g., `btn.disabled = true` works without any getter/setter). This matches how native elements work but introduces naming conflicts, reduces API control, and feels "magical."
+- **Opt-in automatic exposure:** Authors choose per-element whether properties are auto-exposed via an option like `exposeProperties: true`. This offers flexibility but adds API complexity.
 
-**Cons:**
-- Boilerplate for each property the author wants to expose.
-- For future behaviors like `HTMLInputBehavior`, not exposing `value` means external code can't read or set the input's data without the developer writing boilerplate getters and setters.
-
-#### Option B: Automatic property exposure
-
-The platform automatically adds behavior properties to the custom element:
-
-```javascript
-class CustomSubmitButton extends HTMLElement {
-  constructor() {
-    super();
-    this._submitBehavior = new HTMLSubmitButtonBehavior();
-    this.attachInternals({ behaviors: [this._submitBehavior] });
-  }
-}
-
-const btn = document.createElement('custom-submit');
-// Works without any getter/setter.
-btn.disabled = true;
-btn.formAction = '/save';
-```
-
-**Pros:**
-- Zero boilerplate code to get and set properties.
-- Matches how native elements work (a `<button>` just has `disabled`).
-- For future behaviors like `HTMLCheckboxBehavior` external code can read/write `checked` without the developer writing any delegation code.
-
-**Cons:**
-- Naming conflicts if the element already defines a property with the same name.
-- Less control over the public API surface.
-- Authors can't easily add validation or side effects to setters.
-- May feel "magical" compared to explicit delegation.
-- Unclear behavior when a behavior is removed. If `formAction` was automatically exposed when `HTMLSubmitButtonBehavior` was attached, what happens to that property after the behavior is removed? Does it remain on the element with a stale value, or is it removed?
-
-```javascript
-const btn = document.createElement('custom-submit');
-btn.formAction = '/save';
-btn.removeBehavior();
-btn.formAction;  // Is it still there?
-```
-
-#### Option C: Opt-in automatic exposure
-
-A middle ground where authors can choose:
-
-```javascript
-// Explicit delegation (default).
-this._submitBehavior = new HTMLSubmitButtonBehavior();
-this.attachInternals({ behaviors: [this._submitBehavior] });
-
-// Opt-in to automatic exposure.
-this._submitBehavior = new HTMLSubmitButtonBehavior();
-this.attachInternals({ 
-  behaviors: [this._submitBehavior],
-  exposeProperties: true  // or list specific properties.
-});
-```
-
-**Pros:**
-- Flexibility: authors choose the right approach for their use case.
-- Backwards compatible with explicit delegation.
-
-**Cons:**
-- More complex API.
-- Still needs to handle naming conflicts when `exposeProperties` is enabled.
-
-#### Why this matters
-
-Future behaviors would likely require developers to expose certain properties for the element to be useful to consumers. Without developer-written delegation, external JavaScript code can't access these properties:
-
-| Behavior | Key property | Impact if not exposed |
-|----------|------------------|------|
-| `HTMLCheckboxBehavior` | `checked` | The behavior toggles internal state on click, but external scripts can't read or set it. |
-| `HTMLInputBehavior` | `value` | External scripts can't programmatically read the input's data or populate it. (Form submission would still work via `setFormValue()`.) |
-| `HTMLRadioGroupBehavior` | `checked` | Mutual exclusion happens internally, but external scripts can't query which radio is selected. |
-
-If `HTMLSubmitButtonBehavior` uses manual delegation but `HTMLCheckboxBehavior` uses automatic exposure, we'd have an inconsistent API surface. This argues for deciding on a consistent approach across all behaviors from the start.
-
-### Should we support dynamic behavior updates?
-
-This proposal uses static behaviors: once attached via `attachInternals()`, behaviors cannot be added, removed, or replaced. One argument to support dynamic behavior updates is to mirror native `<input>` element flexibility, where changing the `type` attribute switches between radically different behaviors (text field → checkbox → date picker). However, feedback suggests that `<input>`'s design shouldn't be emulated:
-
-- The `type` attribute fundamentally changes what the element is.
-- Different input types have incompatible properties (`checked` vs `value` vs `files`).
-- The design makes `<input>` difficult to style and reason about.
-
-*See [Monica Dinculescu's analysis](https://meowni.ca/posts/a-story-about-input/) documenting the problems with `<input>`.*
-
-For behaviors, the same problems would apply: if behaviors could be swapped dynamically, authors would need to handle state migration, event handler cleanup, and property compatibility.
-
-If compelling use cases emerge that genuinely require dynamic behavior composition, the API could be extended to use `ObservableArray` with lifecycle callbacks. This would be a backwards-compatible change (making the array mutable doesn't break code that treats it as read-only). However, we believe static behaviors will cover the vast majority of real-world needs.
+Future behaviors like `HTMLCheckboxBehavior` or `HTMLInputBehavior` would require developers to write boilerplate for key properties (`checked`, `value`) that external code needs to access. A consistent approach across all behaviors should be decided before additional behaviors ship.
 
 ### Is there a better name than "behavior" for this concept?
 
