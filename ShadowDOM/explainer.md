@@ -759,5 +759,7 @@ For open issues specific to the `shadowrootadoptedstylesheets` attribute (polyfi
 Many thanks for valuable feedback and advice from other contributors:
 - Alison Maher
 - Alex Russell
+- Anne van Kesteren
+- Jeffrey Yasskin
 - Justin Fagnani
 - Steve Orvell

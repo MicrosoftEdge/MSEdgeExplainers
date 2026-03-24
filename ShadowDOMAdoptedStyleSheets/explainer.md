@@ -290,10 +290,8 @@ This suggestion looks like the following:
 This would behave similarly to `shadowrootadoptedstylesheets`, but without support for declarative modules.
 
 ## Open issues
-* ~~How can developers check for and polyfill `shadowrootadoptedstylesheets`, given that the template element disappears from the DOM?~~ **Resolved:** The proposed `shadowRootAdoptedStyleSheets` reflection property on `HTMLTemplateElement` (see [Template element reflection](#template-element-reflection)) enables feature detection by creating a fresh `<template>` element and checking for the property.
 * How should this proposal work if non-constructable stylesheets are adopted for `adoptedstylesheets`? See https://github.com/w3c/csswg-drafts/issues/10013.
 * Is it possible to define an intentional race between an async preload of an external stylesheet and a just-in-time definition of a declarative module and only apply the one that wins? This might not be possible due to the fact that specifiers are unique.
-* ~~What should the behavior be when a fetch initiated by `shadowrootadoptedstylesheets` races with a `<link rel="modulepreload">` for the same specifier? Should both fetches be deduplicated, or should the first to complete win?~~ **Resolved:** The [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) already deduplicates fetches for the same specifier, so concurrent fetches for the same URL are coalesced by the existing spec infrastructure.
 * Should there be a mechanism (e.g. a new event or attribute) for developers to detect when a fetch initiated by `shadowrootadoptedstylesheets` fails?
 
 For additional open issues related to `<style type="module">` and the broader declarative style sharing proposal, see the [Open issues](../ShadowDOM/explainer.md#open-issues) section of the parent explainer.
@@ -302,5 +300,6 @@ For additional open issues related to `<style type="module">` and the broader de
 Many thanks for valuable feedback and advice from other contributors:
 - Alison Maher
 - Alex Russell
+- Jeffrey Yasskin
 - Justin Fagnani
 - Steve Orvell
