@@ -220,10 +220,6 @@ Descriptors `haptic-effect` and `haptic-intensity` inside `@keyframes` blocks wo
 
 An `edge` fires at 40% when the element hits the baseline, and a softer `align` at 100% when it settles.
 
-### Transition start haptics
-
-A future revision could fire haptics on `transitionstart` in addition to `transitionend`, enabling anticipatory cues — e.g. a `hint` when a panel begins expanding, followed by a `tick` when it settles.
-
 ### Custom haptic effects
 
 The current set of four effects is intentionally small. If the effect vocabulary grows (e.g. platform-specific effects or developer-defined waveforms), the API should accommodate them without syntax changes.
