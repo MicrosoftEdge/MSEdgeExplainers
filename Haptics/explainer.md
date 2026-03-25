@@ -209,7 +209,7 @@ The following extensions are out of scope for this initial proposal but represen
 
 ### Animation haptics (`@keyframes` descriptors)
 
-Descriptors `haptic-effect` and `haptic-intensity` inside `@keyframes` blocks would embed haptic cues at specific keyframe offsets, hooking into the existing [CSS Animations](https://drafts.csswg.org/css-animations-1/) lifecycle. This enables **multi-step haptic choreography** — a capability that cannot be expressed with pseudo-class or scroll-snap haptics.
+Properties `haptic-effect` and `haptic-intensity` inside `@keyframes` blocks would embed haptic cues at specific keyframe offsets, hooking into the existing [CSS Animations](https://drafts.csswg.org/css-animations-1/) lifecycle. This enables **multi-step haptic choreography** — a capability that cannot be expressed with pseudo-class or scroll-snap haptics.
 
 ```css
 @keyframes bounce-settle {
