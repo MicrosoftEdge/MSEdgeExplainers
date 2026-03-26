@@ -177,7 +177,7 @@ This means the following example will work, even without a preceding `<link rel=
 
 The shadow root is initially rendered without the styles from "foo.css". Once the fetch completes, the styles are applied. This will cause a FOUC (Flash of Unstyled Content) — the element is first painted without the external styles and then repainted once the fetch completes.
 
-Developers should pre-fetch external CSS using [`<link rel="modulepreload">`](https://html.spec.whatwg.org/multipage/links.html#link-type-modulepreload) to initiate the fetch before the `<template>` is parsed. If the fetch completes before the `<template>` tag is parsed, the styles will be immediately populated. The optional `blocking="render"` attribute will block rendering until the fetch completes, avoiding FOUC if desired. The `onerror` may also provide error handling:
+Developers should pre-fetch external CSS using [`<link rel="modulepreload">`](https://html.spec.whatwg.org/multipage/links.html#link-type-modulepreload) to initiate the fetch before the `<template>` is parsed. If the fetch completes before the `<template>` tag is parsed, the styles will be immediately populated. The optional `blocking="render"` attribute will block rendering until the fetch completes, avoiding FOUC if desired. The `onerror` attribute may also provide error handling:
 
 ```html
 <head>
