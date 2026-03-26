@@ -27,6 +27,8 @@ Author: [Joone Hur](https://github.com/joone) (Microsoft)
   - [Drag Bomb](#drag-bomb)
   - [Limit Download Requests](#limit-download-requests)
   - [Single-click button to delete all downloaded files](#single-click-button-to-delete-all-downloaded-files)
+- [Alternatives Considered](#alternatives-considered)
+  - [Using dataTransfer.items with File objects](#using-datatransferitems-with-file-objects)
 - [Acknowledgements](#acknowledgements)
 - [References](#references)
 
@@ -38,7 +40,7 @@ The `DownloadURL` drag type is a Chromium‑specific drag‑and‑drop mechanism
 
 # Goals
 
-Enable users to drag multiple files from Chromium to a desktop folder on Windows using the `DownloadURL-list` drag type.
+Enable users to drag multiple files from Chromium to a desktop folder using the `DownloadURL-list` drag type.
 
 # Non-goals
 
@@ -224,11 +226,27 @@ If the user does not consent to multiple downloads, the entire set of dragged fi
 
 A single-click option should be provided in the Chrome UI (download bubble and `chrome://downloads`) to allow users to easily remove all downloaded files from their device if they no longer want them or downloaded them by mistake.
 
+# Alternatives Considered
+
+## Using `dataTransfer.items` with `File` objects
+
+The `DownloadURL` drag type follows a file download model: the dragged URL is materialized as a local file during the drop operation, but the exact behavior differs across operating systems.
+
+For example:
+* Windows: Chromium uses delayed rendering: it registers a placeholder at drag-start with no actual file path. When the user drops onto the file manager, it requests the file data which triggers Chromium to start downloading the URL. The file manager waits asynchronously until the download completes, then retrieves the real file path and copies the file to the target folder.
+* Linux: A similar approach can be used by materializing the file and exposing it via text/uri-list with file:// URIs, but it works synchronously, so the drop target can freeze during the drop operation.
+* macOS: macOS uses a promised file model, where the drop target determines the destination path. After the drop, the drag source materializes the file directly at that location. Unlike Windows and Linux, this avoids creating a temporary file and eliminates the need for an additional copy step.
+
+If we instead used `dataTransfer.items` with `File` objects, the entire file content would need to be loaded into memory before the drag starts. The drop target would then need to materialize the `File` object into an actual file on disk, which is synchronous work that blocks the drop operation. This is impractical for large files or multiple files.
+
+The `DownloadURL` model avoids this by deferring file materialization to disk and transferring a file path to the operating system. This keeps memory usage bounded and avoids requiring the renderer to hold the entire file content in memory during the drag operation.
+
 # Acknowledgements
 Many thanks for valuable feedback and advice from:
+- Alex Russell
 - Lingling Becker
 - Mike Jackson
-- Alex Russell
+- Avi Drissman (Google)
 - Daniel Cheng (Google)
 - Lily Chen (Google)
 - Min Qin (Google)
