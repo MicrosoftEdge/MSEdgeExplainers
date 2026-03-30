@@ -4,69 +4,29 @@
 
 ## Background
 
-### What is VisiblePosition and why does it exist?
+`VisiblePosition` is Blink's canonicalized cursor position type — it answers *where the caret visually appears given current layout*. It belongs at exactly two points in the editing pipeline:
 
-`VisiblePosition` is Blink's canonicalized cursor position type. It answers the
-question: *where does the caret visually appear on screen, given the current layout?*
-This is intentional
-and correct at two points in the editing pipeline:
+- **Entry** — renderer hands a `VisibleSelection` to the command system.
+- **Exit** — command hands its result back to update the caret on screen.
 
-- **Entry** — when a user gesture (keypress, mouse click, IME commit) is translated
-  into a command and the renderer hands a `VisibleSelection` to the command system.
-- **Exit** — when a command finishes and hands its result back to the renderer to
-  update the caret on screen.
+Inside `DoApply()`, commands work on DOM structure. Those are raw `Position` questions — no layout needed. The problem: VP is used **throughout** command bodies as a type adapter because `IsEndOfParagraph`, `MoveParagraph`, etc. had no `Position` overloads when written. Every such call silently forces a full layout update, interleaved with DOM mutations.
 
-Between those two points — inside `DoApply()` — commands operate on DOM structure.
-They ask questions like: *is this position at the end of its paragraph? what node
-delimits the current block? where does the next paragraph start?* These are
-DOM-structural questions with answers expressible as raw `Position` values. They do
-not require knowing where the caret *looks* on a rendered line.
+---
 
-The problem is that `VisiblePosition` is used **throughout** command bodies, not just
-at the two boundaries. `IsEndOfParagraph`, `StartOfParagraph`, `MoveParagraph`, and
-similar functions did not have `Position` overloads when the commands were written,
-so VP was used as a type adapter. Every call to these functions from inside a command
-silently triggers a full layout update — often multiple times per command, interleaved
-with DOM mutations.
+## Problem Statement
 
-### What web authors and users experience
+### User-visible symptoms
+- **Typing lag** — each keystroke triggers multiple full style+layout passes against a partially-mutated tree.
+- **Paste jank** — `ReplaceSelectionCommand` triggers dozens of layout passes for a single Ctrl+V on complex content.
+- **Slow indent/outdent** — `IndentOutdentCommand` loops per-paragraph; VP construction multiplies layout cost by paragraph count.
+- **Wrong-caret bugs** — stale VPs are silently used after DOM mutations (`IsValid()` is `DCHECK`-only in release). Caret lands in wrong position after paste, list insertion, or indent.
+- **Blocks future work** — every VP inside `DoApply()` is an implicit main-thread layout dependency, blocking batched undo, speculative editing, and off-thread IME.
 
-The forced layout mid-command has direct, observable consequences for web authors
-building `contenteditable`-based editors and for users of those editors:
+### Known bugs blocked on this work
+- [Hotlist 7675360](https://issues.chromium.org/hotlists/7675360) — 25–30 open issues: wrong caret after paste, bad selection after list insertion, undo/redo producing wrong selection, indent leaving caret in detached subtree.
+- Several WPT failures in `editing/` and `contenteditable/` where stale VP after mutation is the root cause and can't be cleanly fixed without removing VP from command internals.
 
-- **Typing lag in large documents.** Each keystroke in a `contenteditable` document
-  triggers one or more editing commands. Each command constructs multiple
-  `VisiblePosition` values, each forcing a full style+layout pass against a
-  partially-mutated tree. In a document with tables, complex CSS, or a large node
-  count, this adds up to perceptible latency on every keypress.
-
-- **Jank during paste of rich content.** `ReplaceSelectionCommand` — which handles
-  Ctrl+V — constructs VPs at every structural decision point during the paste
-  operation. Pasting a table into a complex document can trigger dozens of layout
-  passes within a single user action.
-
-- **Slow indent and outdent on multi-paragraph selections.** `IndentOutdentCommand`
-  processes one paragraph at a time in a loop. Each iteration constructs several VPs,
-  triggering layout on every iteration. For a 20-paragraph selection, this multiplies
-  into 20× the expected cost.
-
-- **Silent wrong-caret bugs.** `VisiblePosition` records the document version at
-  construction. After a DOM mutation the version changes and the VP is technically
-  invalid — but `IsValid()` is a `DCHECK`-only check in release builds, so stale VPs
-  are silently used without any indication that they may point into a restructured
-  subtree. The result is the caret landing in the wrong position after paste, list
-  insertion, or indent — bugs that are difficult to reproduce consistently and difficult
-  to attribute to the VP staleness.
-
-- **Structural blocker for future improvements.** `VisiblePosition` requires a live,
-  up-to-date `LayoutObject` graph on the main thread. Every VP construction inside
-  `DoApply()` is an implicit main-thread layout dependency. This is a structural
-  blocker for any work that aims to reduce synchronous layout during editing — such
-  as batched undo, speculative editing, or off-thread IME handling.
-
-### Scale of the problem
-
-In `editing/commands/*.cc` (source files, excluding tests):
+### Scale
 
 | Metric | Count |
 |--------|-------|
@@ -74,45 +34,17 @@ In `editing/commands/*.cc` (source files, excluding tests):
 | `CreateVisiblePosition()` calls | ~126 across 16 files |
 | `.DeepEquivalent()` calls (VP unwrapping) | ~288 across 18 files |
 
-Top offenders: `composite_edit_command.cc` (112), `replace_selection_command.cc` (98),
-`insert_list_command.cc` (91), `delete_selection_command.cc` (64),
-`indent_outdent_command.cc` (61).
+Top offenders: `composite_edit_command.cc` (112), `replace_selection_command.cc` (98), `insert_list_command.cc` (91), `delete_selection_command.cc` (64), `indent_outdent_command.cc` (61).
 
-Of the 126 `CreateVisiblePosition` calls, approximately **110 (~87%) are unnecessary**
-— the VP is used only as a type adapter (to pass a position to a function that has no
-`Position` overload) or for a caret-equivalence check (which does not require
-`UpdateStyleAndLayout`). Only ~16 sites (~13%) are genuinely load-bearing: the two
-boundary points and two affinity-sensitive navigation sites.
+~110 of 126 `CreateVisiblePosition` calls (~87%) are unnecessary type adapters. Only ~16 sites are genuinely load-bearing.
 
 ### After this work
 
 | Metric | Before | After |
 |--------|--------|-------|
 | `CreateVisiblePosition` calls in `commands/` | 126 | ~16 |
-| `VisiblePosition` type references in `commands/` | ~391 | ~66 (legitimate boundary + open questions) |
-| Unnecessary `UpdateStyleAndLayout` triggers per editing operation | multiple per command | 0 for all common operations |
-
-The ~66 remaining VP references are the two boundary sites, the confirmed
-affinity-sensitive navigation, and a small number of sites pending owner review on
-canonicality (see Open Questions).
-
-### Known bugs and test failures blocked on this work
-
-**Open Chromium bugs:** The hotlist
-[issues.chromium.org/hotlists/7675360](https://issues.chromium.org/hotlists/7675360)
-tracks bugs that are directly caused by or made significantly harder to fix by the
-forced `UpdateStyleAndLayout` calls and stale-VP usage inside editing commands.
-As of the time of writing there are **25–30 open issues** in the hotlist — covering
-wrong caret placement after paste, incorrect selection after list insertion, undo/redo
-producing the wrong selection, and indent/outdent leaving the caret in a detached
-subtree.
-
-**Web Platform Tests:** Several WPT failures in `editing/` and `contenteditable/` are
-attributable to commands reading a stale or incorrectly-canonicalized position after
-a DOM mutation. These failures are not straightforwardly fixable today because the
-root cause — VP construction interleaved with mutations — makes it difficult to reason
-about which position is current at any given point. Removing VP from command internals
-is a prerequisite for a clean fix.
+| `VisiblePosition` type references in `commands/` | ~391 | ~66 |
+| Unnecessary `UpdateStyleAndLayout` per editing op | multiple | 0 |
 
 ---
 
