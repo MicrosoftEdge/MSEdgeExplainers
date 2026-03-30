@@ -47,11 +47,11 @@ The API is specified in the [SVG Paths](https://svgwg.org/specs/paths/#DOMInterf
 
 SVG `<path>` elements define their shape through a `d` attribute string. Today in Chrome, the only way to inspect or modify individual path segments is to parse this raw string manually or include a polyfill. This can result in slower interactions, larger page loads, and degraded UX - especially on low-end devices.
 
-Chromium removed the old `SVGPathSegList` API in **Chrome 48** (2015) because it was overly complex and poorly specified. The SVG WG specified a cleaner replacement, but it has not yet been implemented in Chrome - a gap that has persisted for over 10 years.
+Chromium removed the old `SVGPathSegList` API in **Chrome 48** (Jan 2016) because it was overly complex and poorly specified. The SVG WG specified a cleaner replacement, but it has not yet been implemented in Chrome - a gap that has persisted for over 10 years.
 
 | Engine | Old API (`SVGPathSegList`) | New API (`getPathData`/`setPathData`) |
 |--------|---------------------------|---------------------------------------|
-| Chrome | ❌ Removed 2015 | ❌ Not yet |
+| Chrome | ❌ Removed Jan 2016 | ❌ Not yet |
 | Firefox | ❌ Removed 2018 | ✅ Shipped Jan 2025 |
 | Safari | ✅ Still supported | ❌ Not yet |
 
@@ -102,6 +102,9 @@ const segments = path.getPathData();
 
 // Normalize: all segments converted to absolute M, L, C, Z
 const normalized = path.getPathData({normalize: true});
+
+// Empty or missing d attribute returns an empty array
+emptyPath.getPathData();  // → []
 ```
 
 #### `setPathData(pathData)` - write segments (accepts POJOs)
@@ -113,6 +116,9 @@ path.setPathData([
   {type: "L", values: [50, 100]},
   {type: "Z", values: []}
 ]);
+
+// Passing an empty array clears the path (equivalent to setAttribute('d', ''))
+path.setPathData([]);
 ```
 
 #### `getPathSegmentAtLength(distance)` - segment at distance
@@ -120,11 +126,22 @@ path.setPathData([
 ```js
 path.getPathSegmentAtLength(50);
 // → {type: "C", values: [40, 10, 65, 10, 95, 80]}
+
+// Returns null if the path is empty or has no length
+emptyPath.getPathSegmentAtLength(10);  // → null
+
+// Negative distances clamp to 0 (returns the first segment), matching getPointAtLength() behavior
+path.getPathSegmentAtLength(-10);  // → {type: "M", values: [10, 80]}
+
+// NaN returns null
+path.getPathSegmentAtLength(NaN);  // → null
 ```
 
 All 20 SVG path commands (M, m, L, l, H, h, V, v, C, c, S, s, Q, q, T, t, A, a, Z, z) are supported. See the [spec](https://svgwg.org/specs/paths/#DOMInterfaces) for the full type/values mapping.
 
 **Normalization** (`{normalize: true}`) converts all segments to absolute **M, L, C, Z** only - relative to absolute, H/V to L, Q/T to C, S to C, A to C. Consumers need only handle 4 command types.
+
+> **Note:** Arc-to-cubic conversion (A → C) is an approximation using midpoint subdivision and is inherently lossy. The precision matches the existing `getTotalLength()`/`getPointAtLength()` code path in Blink. For most use cases the approximation error is sub-pixel.
 
 ### Before and after
 
@@ -134,7 +151,9 @@ const d = path.getAttribute('d');
 const segments = myCustomParser(d);  // or load ~4KB polyfill
 segments[1].values[0] = 50;
 path.setAttribute('d', myCustomSerializer(segments));
+```
 
+```js
 // AFTER: native, zero dependencies
 const segments = path.getPathData();
 segments[1].values[0] = 50;
@@ -186,7 +205,7 @@ The formal WebIDL is in the [Appendix](#appendix-webidl).
 - **Accessibility:** No impact. Programmatic API only - no new visual content, interaction patterns, or ARIA roles. Indirectly benefits a11y by making it easier to build well-structured SVG.
 - **Internationalization:** No impact. Path data uses single-character Latin commands and numbers only.
 - **Privacy:** No new concerns. Returns the same data available via `getAttribute('d')` - purely a convenience API over existing capabilities. No fingerprinting surface, no network requests.
-- **Security:** No new concerns. Operates entirely within the renderer, no IPC, no untrusted data. `setPathData()` goes through the existing hardened `setAttribute("d")` code path. Gated behind a feature flag.
+- **Security:** No new concerns. Operates entirely within the renderer on already-structured data. No string parsing is needed (segments are pre-typed), reducing attack surface compared to `setAttribute('d')`. No IPC. Gated behind a feature flag.
 
 ---
 
@@ -235,4 +254,4 @@ partial interface SVGPathElement {
 };
 ```
 
-**Spec text updates (PR pending):** `dictionary` instead of `[NoInterfaceObject] interface` (accepts POJOs natively); `unrestricted float` instead of `float` (matches SVG error model); `required` keywords added (prevents `setPathData([{}])`).
+**Spec text updates (spec PR to be filed):** `dictionary` instead of `[NoInterfaceObject] interface` (accepts POJOs natively); `unrestricted float` instead of `float` (matches SVG error model); `required` keywords added (prevents `setPathData([{}])`).
