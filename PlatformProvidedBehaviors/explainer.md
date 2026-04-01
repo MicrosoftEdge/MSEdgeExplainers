@@ -172,8 +172,6 @@ class CustomSubmitButton extends HTMLElement {
 
 To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. This gives authors full control over their element's public API.
 
-*Why not expose behavior properties automatically on the element?* Automatic exposure would require adding behavior properties (e.g., `formAction`, `name`, `value`) to `HTMLElement`'s IDL statically, since IDL attributes can't be added dynamically at runtime. This would bloat every `HTMLElement` instance's prototype — including `<div>`, `<span>`, etc. — with properties that only make sense for elements with specific behaviors. It would also introduce naming conflicts with author-defined properties and remove API control. An opt-in variant (e.g., `exposeProperties: true`) was also considered but adds API complexity without sufficient benefit. Manual delegation is more boilerplate but avoids these problems.
-
 Authors are also responsible for attribute reflection. If the author wants HTML attributes on their custom element (e.g., `<my-button formaction="/save">`) to affect the behavior, they need to observe and forward those attributes using `attributeChangedCallback`:
 
 ```javascript
@@ -189,6 +187,8 @@ class CustomButton extends HTMLElement {
   }
 }
 ```
+
+*Note: Automatic exposure would require adding behavior properties (e.g., `formAction`, `name`, `value`) to `HTMLElement`. This would bloat every `HTMLElement` instance's prototype with properties that only make sense for elements with specific behaviors. An opt-in alternative was considered but adds API complexity without benefit.*
 
 ### Behavior lifecycle
 
