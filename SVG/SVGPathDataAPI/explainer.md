@@ -1,6 +1,6 @@
 # SVG Path Data API
 
-**Written:** 2026-03-30, **Updated:** 2026-03-30
+**Written:** 2026-03-30, **Updated:** 2026-04-01
 
 ## Authors
 
@@ -31,15 +31,17 @@ This document is an **in-progress** explainer.
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & Acknowledgements](#references--acknowledgements)
+- [Testing](#testing)
+- [Implementation Notes](#implementation-notes)
 - [Appendix: WebIDL](#appendix-webidl)
 
 ---
 
 ## Introduction
 
-Chrome has had **no native way** to read or write individual SVG path segments since 2015. This explainer proposes adding `getPathData()`, `setPathData()`, and `getPathSegmentAtLength()` to `SVGPathElement`, giving developers structured access to path segments as simple `{type, values}` objects.
+Chrome has had **no native way** to read or write individual SVG path segments since Chrome 48 (early 2016). This explainer proposes adding `getPathData()`, `setPathData()`, and `getPathSegmentAtLength()` to `SVGPathElement`, giving developers structured access to path segments as simple `{type, values}` objects.
 
-The API is specified in the [SVG Paths](https://svgwg.org/specs/paths/#DOMInterfaces) W3C Editor's Draft and has shipped in **Firefox 137+** (Jan 2025). This implements an existing consensus standard - no new web platform concepts are introduced.
+The API is specified in the [SVG Paths](https://svgwg.org/specs/paths/#DOMInterfaces) W3C Editor's Draft and shipped in **Firefox 137+** (Apr 2025). This explainer proposes implementing an existing consensus standard - no new web platform concepts are introduced.
 
 ---
 
@@ -51,9 +53,9 @@ Chromium removed the old `SVGPathSegList` API in **Chrome 48** (Jan 2016) becaus
 
 | Engine | Old API (`SVGPathSegList`) | New API (`getPathData`/`setPathData`) |
 |--------|---------------------------|---------------------------------------|
-| Chrome | ❌ Removed Jan 2016 | ❌ Not yet |
-| Firefox | ❌ Removed 2018 | ✅ Shipped Jan 2025 |
-| Safari | ✅ Still supported | ❌ Not yet |
+| Chrome | ❌ Removed Jan 2016 | ❌ Not implemented |
+| Firefox | ❌ Removed 2018 | ✅ Shipped Apr 2025 |
+| Safari | ✅ Still supported | ❌ Not implemented |
 
 **Who is affected:** End users of SVG-heavy web apps (slower load times due to polyfills); data visualization developers (D3.js path morphing); SVG editor developers (Boxy SVG, SVG-Edit); animation developers (path interpolation).
 
@@ -90,9 +92,7 @@ No formal study was conducted, but 10 years of organic feedback on [crbug.com/40
 
 ## Proposed Approach
 
-**Dependencies on non-stable features:** None.
-
-Three methods are added to `SVGPathElement`, using simple `{type, values}` plain objects:
+Three methods are added to `SVGPathElement`, using simple `{type, values}` plain objects (no dependencies on non-stable features):
 
 #### `getPathData(settings)` - read segments
 
@@ -117,8 +117,11 @@ path.setPathData([
   {type: "Z", values: []}
 ]);
 
-// Passing an empty array clears the path (equivalent to setAttribute('d', ''))
+// Passing an empty array clears the path: sets d="" (equivalent to setAttribute('d', ''),
+// NOT removeAttribute('d') - the attribute remains present but empty). Matches Firefox.
 path.setPathData([]);
+// getPathData() on an empty/cleared path returns []
+emptyPath.getPathData();  // → []
 ```
 
 #### `getPathSegmentAtLength(distance)` - segment at distance
@@ -135,13 +138,17 @@ path.getPathSegmentAtLength(-10);  // → {type: "M", values: [10, 80]}
 
 // NaN returns null
 path.getPathSegmentAtLength(NaN);  // → null
+
+// Distances exceeding getTotalLength() clamp to the path's total length (returns last segment),
+// matching getPointAtLength() clamping behavior per the SVG spec.
+path.getPathSegmentAtLength(99999);  // → last segment (e.g. {type: "Z", values: []})
 ```
 
 All 20 SVG path commands (M, m, L, l, H, h, V, v, C, c, S, s, Q, q, T, t, A, a, Z, z) are supported. See the [spec](https://svgwg.org/specs/paths/#DOMInterfaces) for the full type/values mapping.
 
 **Normalization** (`{normalize: true}`) converts all segments to absolute **M, L, C, Z** only - relative to absolute, H/V to L, Q/T to C, S to C, A to C. Consumers need only handle 4 command types.
 
-> **Note:** Arc-to-cubic conversion (A → C) is an approximation using midpoint subdivision and is inherently lossy. The precision matches the existing `getTotalLength()`/`getPointAtLength()` code path in Blink. For most use cases the approximation error is sub-pixel.
+> **Note:** Arc-to-cubic conversion (A → C) is an approximation using midpoint subdivision and is inherently lossy (see [W3C SVG Implementation Notes](https://www.w3.org/TR/SVG/implnote.html#ArcConversionEndpointToCenter)). The precision matches the existing `getTotalLength()`/`getPointAtLength()` code path in Blink. For most use cases the approximation error is sub-pixel. Quadratic-to-cubic conversion (Q → C) is mathematically exact - every quadratic Bézier can be exactly represented as a cubic Bézier.
 
 ### Before and after
 
@@ -163,6 +170,9 @@ path.setPathData(segments);
 ### Example: path morphing
 
 ```js
+// Prerequisite: both paths must have the same number and type of segments
+// after normalization. This is a fundamental limitation of simple interpolation,
+// not specific to this API.
 const segA = pathA.getPathData({normalize: true});
 const segB = pathB.getPathData({normalize: true});
 const interpolate = (t) => segA.map((s, i) => ({
@@ -178,11 +188,11 @@ The formal WebIDL is in the [Appendix](#appendix-webidl).
 
 ## Key Design Decisions
 
-1. **Plain objects, not class instances.** We use a WebIDL `dictionary`, so `setPathData()` accepts plain `{type, values}` POJOs natively. Firefox initially required interface instances (Firefox 137), which caused polyfill compatibility issues, and later [updated](https://bugzilla.mozilla.org/show_bug.cgi?id=1954044) to accept plain objects in Firefox 138. Using a dictionary from the start avoids this.
+1. **Plain objects, not class instances.** We use a WebIDL `dictionary`, so `setPathData()` accepts plain `{type, values}` POJOs natively. The SVG WG confirmed this approach in [w3c/svgwg#1082](https://github.com/w3c/svgwg/issues/1082). Firefox initially required interface instances (Firefox 137), which caused polyfill compatibility issues, and later [updated](https://bugzilla.mozilla.org/show_bug.cgi?id=1954044) to accept plain objects in Firefox 138. Using a dictionary from the start avoids this.
 
 2. **`unrestricted float` for values.** NaN/Infinity are accepted without throwing, matching SVG's graceful error model and Firefox's behavior.
 
-3. **Invalid segments silently skipped.** Unrecognized types or wrong value counts in `setPathData()` are skipped (not thrown), matching SVG's "render what you can" model, Firefox, and the polyfill.
+3. **Two-level validation in `setPathData()`.** WebIDL enforces structural validity: both `type` and `values` must be present, or a `TypeError` is thrown (e.g., `setPathData([{}])` or `setPathData([{type: "L"}])` throws). Semantic validation is lenient: unrecognized type strings or incorrect `values` array lengths cause the segment to be silently skipped - not thrown - matching SVG's "render what you can" model, Firefox, and the polyfill.
 
 4. **Returns base value, not animated value.** `getPathData()` returns the `d` attribute's base value, consistent with `getAttribute('d')` and Firefox.
 
@@ -205,7 +215,7 @@ The formal WebIDL is in the [Appendix](#appendix-webidl).
 - **Accessibility:** No impact. Programmatic API only - no new visual content, interaction patterns, or ARIA roles. Indirectly benefits a11y by making it easier to build well-structured SVG.
 - **Internationalization:** No impact. Path data uses single-character Latin commands and numbers only.
 - **Privacy:** No new concerns. Returns the same data available via `getAttribute('d')` - purely a convenience API over existing capabilities. No fingerprinting surface, no network requests.
-- **Security:** No new concerns. Operates entirely within the renderer on already-structured data. No string parsing is needed (segments are pre-typed), reducing attack surface compared to `setAttribute('d')`. No IPC. Gated behind a feature flag.
+- **Security:** No new concerns. Operates entirely within the renderer on already-structured data. `setPathData()` operates on structured `{type, values}` dictionaries - no string parsing is needed (segments are pre-typed), reducing attack surface compared to `setAttribute('d')`. No additional IPC beyond existing DOM access. Gated behind a Blink `RuntimeEnabledFeature` (`SVGPathDataAPI`).
 
 ---
 
@@ -213,11 +223,10 @@ The formal WebIDL is in the [Appendix](#appendix-webidl).
 
 | Stakeholder | Signal | Evidence |
 |---|---|---|
-| **Firefox** | ✅ Positive | Shipped [Firefox 137](https://bugzilla.mozilla.org/show_bug.cgi?id=1934525) (Jan 2025); [POJO fix](https://bugzilla.mozilla.org/show_bug.cgi?id=1954044) in 138 |
-| **Safari/WebKit** | No signal | Still ships old API; [removal bug](https://bugs.webkit.org/show_bug.cgi?id=260894) open |
+| **Firefox** | ✅ Positive | Shipped [Firefox 137](https://bugzilla.mozilla.org/show_bug.cgi?id=1934525) (Apr 2025); [POJO fix](https://bugzilla.mozilla.org/show_bug.cgi?id=1954044) in 138 |
+| **Safari/WebKit** | No signal | Still ships old API; [removal bug](https://bugs.webkit.org/show_bug.cgi?id=260894) open (TODO: file WebKit standards position request) |
 | **Web developers** | ✅ Strongly positive | 45 upvotes, 31 comments, enterprise breakage reports, 129+ polyfill stars |
-| **SVG WG** | ✅ Positive | API in [consensus spec](https://svgwg.org/specs/paths/#DOMInterfaces) |
-| **fs@opera.com** | ✅ Positive | Filed original bug; confirmed dictionary approach |
+| **SVG WG** | ✅ Positive | API in [consensus spec](https://svgwg.org/specs/paths/#DOMInterfaces); dictionary approach confirmed in [w3c/svgwg#1082](https://github.com/w3c/svgwg/issues/1082) |
 
 ---
 
@@ -227,11 +236,32 @@ The formal WebIDL is in the [Appendix](#appendix-webidl).
 
 **Bugs:** [Chromium 40441025](https://issues.chromium.org/issues/40441025) · [Firefox 1934525](https://bugzilla.mozilla.org/show_bug.cgi?id=1934525) · [Firefox 1954044](https://bugzilla.mozilla.org/show_bug.cgi?id=1954044) · [WebKit 260894](https://bugs.webkit.org/show_bug.cgi?id=260894)
 
-**Discussions:** [w3c/editing#483](https://github.com/w3c/editing/issues/483) · [w3c/svgwg#974](https://github.com/w3c/svgwg/issues/974)
+**Discussions:** [w3c/editing#483](https://github.com/w3c/editing/issues/483) · [w3c/svgwg#974](https://github.com/w3c/svgwg/issues/974) · [w3c/svgwg#1082](https://github.com/w3c/svgwg/issues/1082) (dictionary resolution)
 
-**Prior art:** [path-data-polyfill](https://github.com/jarek-foksa/path-data-polyfill) (129+ stars) · [pathseg polyfill](https://github.com/progers/pathseg) · [Interop hotlist](https://issues.chromium.org/hotlists/5575920)
+**Prior art:** [path-data-polyfill](https://github.com/jarek-foksa/path-data-polyfill) (129+ stars) · [pathseg polyfill](https://github.com/progers/pathseg) · [Interop hotlist](https://issues.chromium.org/hotlists/5575920) (Chromium cross-browser interop tracking; includes [crbug.com/40441025](https://issues.chromium.org/issues/40441025))
 
 **Acknowledgements:** Fredrik Söderquist (fs@opera.com, original API sketch author, SVG OWNERS), Philip Rogers (pdr@chromium.org, drove SVGPathSegList removal, pathseg polyfill), Robert Longson (Mozilla SVG lead, Firefox implementation), Jarek Foksa (path-data-polyfill author), Cameron McCormack (spec editor).
+
+---
+
+## Testing
+
+**Existing WPTs:** Firefox landed web-platform-tests alongside their implementation in [svg/path/interfaces/](https://wpt.fyi/results/svg/path/interfaces?label=experimental&label=master&aligned), including `SVGPathSegment.svg` which covers `getPathData()`, `setPathData()`, `getPathSegmentAtLength()`, normalization, and basic command coverage.
+
+**Planned additional tests:**
+- Edge cases: empty paths, NaN/Infinity values, distance > totalLength clamping, negative distance clamping
+- Normalization accuracy: arc-to-cubic precision, quadratic-to-cubic exactness
+- POJO acceptance: plain `{type, values}` objects work without constructors
+- Two-level validation: TypeError for missing required fields vs silent skip for semantic errors
+- Blink layout tests for rendering integration
+
+---
+
+## Implementation Notes
+
+**Feature flag:** This API will be gated behind a Blink `RuntimeEnabledFeature` named `SVGPathDataAPI`. It will not have a separate `chrome://flags` entry - it follows the standard Blink shipping process (flag → origin trial → ship).
+
+**UseCounters:** The implementation will include UseCounters for each method (`getPathData`, `setPathData`, `getPathSegmentAtLength`) to track adoption and inform the ship decision. No existing UseCounter data is available since the API does not yet exist in Blink.
 
 ---
 
@@ -254,4 +284,4 @@ partial interface SVGPathElement {
 };
 ```
 
-**Spec text updates (spec PR to be filed):** `dictionary` instead of `[NoInterfaceObject] interface` (accepts POJOs natively); `unrestricted float` instead of `float` (matches SVG error model); `required` keywords added (prevents `setPathData([{}])`).
+**Spec text updates (spec PR to be filed):** `dictionary` instead of `[NoInterfaceObject] interface` (accepts POJOs natively; WG resolution: [w3c/svgwg#1082](https://github.com/w3c/svgwg/issues/1082)); `unrestricted float` instead of `float` (matches SVG error model); `required` keywords added (prevents `setPathData([{}])`).
