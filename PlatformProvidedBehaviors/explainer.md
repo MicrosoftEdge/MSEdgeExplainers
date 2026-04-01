@@ -172,6 +172,8 @@ class CustomSubmitButton extends HTMLElement {
 
 To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. This gives authors full control over their element's public API.
 
+*Why not expose behavior properties automatically on the element?* Automatic exposure would require adding behavior properties (e.g., `formAction`, `name`, `value`) to `HTMLElement`'s IDL statically, since IDL attributes can't be added dynamically at runtime. This would bloat every `HTMLElement` instance's prototype — including `<div>`, `<span>`, etc. — with properties that only make sense for elements with specific behaviors. It would also introduce naming conflicts with author-defined properties and remove API control. An opt-in variant (e.g., `exposeProperties: true`) was also considered but adds API complexity without sufficient benefit. Manual delegation is more boilerplate but avoids these problems.
+
 Authors are also responsible for attribute reflection. If the author wants HTML attributes on their custom element (e.g., `<my-button formaction="/save">`) to affect the behavior, they need to observe and forward those attributes using `attributeChangedCallback`:
 
 ```javascript
@@ -838,17 +840,6 @@ This direction is explored in a separate document: [Developer-defined behaviors]
 Although this proposal currently focuses on custom elements, the behavior pattern could potentially be generalized to all HTML elements (e.g., a `<div>` element gains button behavior via behaviors). However, extending behaviors to native HTML elements would raise questions about correctness and accessibility.
 
 ## Open questions
-
-### Should behavior properties be automatically exposed on the element?
-
-The current proposal uses manual property delegation: developers create getters/setters that delegate to the stored behavior instance. This gives authors full control over their public API, avoids naming conflicts, and allows validation or side effects in setters. The tradeoff is boilerplate for each exposed property.
-
-Two alternatives have been considered:
-
-- **Automatic property exposure:** The platform adds behavior properties directly to the custom element (e.g., `btn.disabled = true` works without any getter/setter). This matches how native elements work but introduces naming conflicts, reduces API control, and feels "magical."
-- **Opt-in automatic exposure:** Authors choose per-element whether properties are auto-exposed via an option like `exposeProperties: true`. This offers flexibility but adds API complexity.
-
-Future behaviors like `HTMLCheckboxBehavior` or `HTMLInputBehavior` would require developers to write boilerplate for key properties (`checked`, `value`) that external code needs to access. A consistent approach across all behaviors should be decided before additional behaviors ship.
 
 ### Is there a better name than "behavior" for this concept?
 
