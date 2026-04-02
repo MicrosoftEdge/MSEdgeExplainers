@@ -188,6 +188,8 @@ class CustomButton extends HTMLElement {
 }
 ```
 
+*Note: Automatic exposure would require adding behavior properties (e.g., `formAction`, `name`, `value`) to `HTMLElement`. This would bloat every `HTMLElement` instance's prototype with properties that only make sense for elements with specific behaviors. An opt-in alternative was considered but adds API complexity without a clear benefit.*
+
 ### Behavior lifecycle
 
 When `attachInternals()` is called with behaviors, each behavior is attached to the element:
@@ -232,7 +234,7 @@ This ensures that element-specific properties like `behavior.form` and `behavior
 
 ### API design
 
-The current API uses instantiated behaviors with a single `behaviors` property:
+Behaviors are instantiated with `new` and passed to `attachInternals()`:
 
 - `behaviors` option in `attachInternals({ behaviors: [...] })` accepts behavior instances.
 - `behaviors` property on `ElementInternals` is a read-only `FrozenArray`.
@@ -240,15 +242,7 @@ The current API uses instantiated behaviors with a single `behaviors` property:
 
 *Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment.*
 
-**Pros:**
-- Single property name.
-- No array lookup or `instanceof` checks needed as developers hold direct references.
-- *Future* developer-defined behaviors are simpler: just instantiate and attach.
-- Consistent mental model: behaviors are objects you create and manage.
-
-**Cons:**
-- Requires developers to manage behavior instances themselves.
-- More setup code compared to passing class references directly.
+With the current approach, developers hold direct references to their behavior instances: no array lookup, `instanceof` checks, or `behaviors` interface is needed to access behavior state. It also aligns with the [W3C design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances, and it extends naturally to future developer-defined behaviors that follow the same `new` + attach pattern.
 
 *For future developer-defined behaviors:*
 
@@ -269,27 +263,6 @@ this._internals = this.attachInternals({ behaviors: [this._tooltipBehavior] });
 // Access state directly.
 this._tooltipBehavior.content = 'Helpful tooltip text';
 ```
-
-#### Alternative 1: Class references
-
-Pass behavior classes (not instances) to `attachInternals()`:
-
-```javascript
-// Attach a behavior during initialization (class reference).
-this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
-
-// Access behavior state via named accessor.
-this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
-```
-
-**Pros:**
-- Named access via `this._internals.behaviors.<behaviorName>` requires no iteration.
-- Less setup code as developers don't manage behavior instances.
-
-**Cons:**
-- Platform instantiates the behavior, so constructor parameters aren't available. This conflicts with the [design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances.
-- Requires a `behaviors` interface for named access.
-- *Future* developer-defined behaviors would need a way to name their behaviors.
 
 ### Behavior composition and conflict resolution
 
@@ -838,17 +811,6 @@ This direction is explored in a separate document: [Developer-defined behaviors]
 Although this proposal currently focuses on custom elements, the behavior pattern could potentially be generalized to all HTML elements (e.g., a `<div>` element gains button behavior via behaviors). However, extending behaviors to native HTML elements would raise questions about correctness and accessibility.
 
 ## Open questions
-
-### Should behavior properties be automatically exposed on the element?
-
-The current proposal uses manual property delegation: developers create getters/setters that delegate to the stored behavior instance. This gives authors full control over their public API, avoids naming conflicts, and allows validation or side effects in setters. The tradeoff is boilerplate for each exposed property.
-
-Two alternatives have been considered:
-
-- **Automatic property exposure:** The platform adds behavior properties directly to the custom element (e.g., `btn.disabled = true` works without any getter/setter). This matches how native elements work but introduces naming conflicts, reduces API control, and feels "magical."
-- **Opt-in automatic exposure:** Authors choose per-element whether properties are auto-exposed via an option like `exposeProperties: true`. This offers flexibility but adds API complexity.
-
-Future behaviors like `HTMLCheckboxBehavior` or `HTMLInputBehavior` would require developers to write boilerplate for key properties (`checked`, `value`) that external code needs to access. A consistent approach across all behaviors should be decided before additional behaviors ship.
 
 ### Is there a better name than "behavior" for this concept?
 
