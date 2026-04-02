@@ -234,7 +234,7 @@ This ensures that element-specific properties like `behavior.form` and `behavior
 
 ### API design
 
-The current API uses instantiated behaviors with a single `behaviors` property:
+Behaviors are instantiated with `new` and passed to `attachInternals()`:
 
 - `behaviors` option in `attachInternals({ behaviors: [...] })` accepts behavior instances.
 - `behaviors` property on `ElementInternals` is a read-only `FrozenArray`.
@@ -242,15 +242,9 @@ The current API uses instantiated behaviors with a single `behaviors` property:
 
 *Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment.*
 
-**Pros:**
-- Single property name.
-- No array lookup or `instanceof` checks needed as developers hold direct references.
-- *Future* developer-defined behaviors are simpler: just instantiate and attach.
-- Consistent mental model: behaviors are objects you create and manage.
+This design was chosen over an alternative where class references (rather than instances) are passed to `attachInternals()` and the platform instantiates the behaviors. With the current approach, developers hold direct references to their behavior instances — no array lookup, `instanceof` checks, or naming scheme is needed to access behavior state. It also aligns with the [W3C design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances, and it extends naturally to future developer-defined behaviors that follow the same `new` + attach pattern.
 
-**Cons:**
-- Requires developers to manage behavior instances themselves.
-- More setup code compared to passing class references directly.
+The behavior instance is inert before attachment: no event handlers fire and no form association exists. The window between `new HTMLSubmitButtonBehavior()` and `attachInternals()` is typically one or two lines inside the constructor, so there is no meaningful intermediate state for developers to manage. Keeping creation separate from attachment avoids a circular dependency (where `attachInternals()` needs the behavior instances but the behaviors would need the internals first) and enables useful patterns like choosing which behavior to instantiate based on element attributes.
 
 *For future developer-defined behaviors:*
 
@@ -271,27 +265,6 @@ this._internals = this.attachInternals({ behaviors: [this._tooltipBehavior] });
 // Access state directly.
 this._tooltipBehavior.content = 'Helpful tooltip text';
 ```
-
-#### Alternative 1: Class references
-
-Pass behavior classes (not instances) to `attachInternals()`:
-
-```javascript
-// Attach a behavior during initialization (class reference).
-this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
-
-// Access behavior state via named accessor.
-this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
-```
-
-**Pros:**
-- Named access via `this._internals.behaviors.<behaviorName>` requires no iteration.
-- Less setup code as developers don't manage behavior instances.
-
-**Cons:**
-- Platform instantiates the behavior, so constructor parameters aren't available. This conflicts with the [design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances.
-- Requires a `behaviors` interface for named access.
-- *Future* developer-defined behaviors would need a way to name their behaviors.
 
 ### Behavior composition and conflict resolution
 
