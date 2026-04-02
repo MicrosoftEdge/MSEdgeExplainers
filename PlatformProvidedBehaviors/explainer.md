@@ -188,7 +188,7 @@ class CustomButton extends HTMLElement {
 }
 ```
 
-*Note: Automatic exposure would require adding behavior properties (e.g., `formAction`, `name`, `value`) to `HTMLElement`. This would bloat every `HTMLElement` instance's prototype with properties that only make sense for elements with specific behaviors. An opt-in alternative was considered but adds API complexity without benefit.*
+*Note: Automatic exposure would require adding behavior properties (e.g., `formAction`, `name`, `value`) to `HTMLElement`. This would bloat every `HTMLElement` instance's prototype with properties that only make sense for elements with specific behaviors. An opt-in alternative was considered but adds API complexity without a clear benefit.*
 
 ### Behavior lifecycle
 
@@ -242,9 +242,7 @@ Behaviors are instantiated with `new` and passed to `attachInternals()`:
 
 *Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment.*
 
-This design was chosen over an alternative where class references (rather than instances) are passed to `attachInternals()` and the platform instantiates the behaviors. With the current approach, developers hold direct references to their behavior instances — no array lookup, `instanceof` checks, or naming scheme is needed to access behavior state. It also aligns with the [W3C design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances, and it extends naturally to future developer-defined behaviors that follow the same `new` + attach pattern.
-
-The behavior instance is inert before attachment: no event handlers fire and no form association exists. The window between `new HTMLSubmitButtonBehavior()` and `attachInternals()` is typically one or two lines inside the constructor, so there is no meaningful intermediate state for developers to manage. Keeping creation separate from attachment avoids a circular dependency (where `attachInternals()` needs the behavior instances but the behaviors would need the internals first) and enables useful patterns like choosing which behavior to instantiate based on element attributes.
+With the current approach, developers hold direct references to their behavior instances: no array lookup, `instanceof` checks, or `behaviors` interface is needed to access behavior state. It also aligns with the [W3C design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances, and it extends naturally to future developer-defined behaviors that follow the same `new` + attach pattern.
 
 *For future developer-defined behaviors:*
 
