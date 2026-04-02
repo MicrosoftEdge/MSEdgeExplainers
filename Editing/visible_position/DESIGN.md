@@ -1,4 +1,6 @@
-# Design: Reducing VisiblePosition Usage in Editing Commands
+# Reduce VisiblePosition usage in Editing Commands
+
+This document proposes a phased plan to reduce `VisiblePosition` usage inside Blink's editing command bodies.
 
 ---
 
@@ -9,34 +11,37 @@
 - **Entry** - renderer hands a `VisibleSelection` to the command system.
 - **Exit** - command hands its result back to update the caret on screen.
 
-Inside `DoApply()`, commands work on DOM structure - raw `Position` questions, no layout needed. VP is used throughout command bodies as a type adapter because `IsEndOfParagraph`, `MoveParagraph`, etc. had no `Position` overloads when written. Every such call silently forces a full layout update, interleaved with DOM mutations.
+Inside `DoApply()`, commands work on DOM structure - raw `Position` questions, no layout needed. VisiblePosition is used throughout command bodies as a type adapter because `IsEndOfParagraph`, `MoveParagraph`, etc. had no `Position` overloads when written. Every such call silently forces a full layout update, interleaved with DOM mutations.
 
 ---
 
 ## Problem Statement
 
 ### User-visible symptoms
+- **Wrong caret/selection bugs** - stale VisiblePositions are silently used after DOM mutations (`IsValid()` is `DCHECK`-only in release). Caret lands in wrong position after paste, list insertion, or indent.
+- **Loss of developer intent** - raw positions get silently re-canonicalized into different positions than the caller intended, taking away flexibility from developers.
 - **Typing lag** - each keystroke triggers multiple full style+layout passes against a partially-mutated tree.
 - **Paste jank** - `ReplaceSelectionCommand` triggers dozens of layout passes for a single Ctrl+V on complex content.
-- **Slow indent/outdent** - `IndentOutdentCommand` loops per-paragraph; VP construction multiplies layout cost by paragraph count.
-- **Wrong-caret bugs** - stale VPs are silently used after DOM mutations (`IsValid()` is `DCHECK`-only in release). Caret lands in wrong position after paste, list insertion, or indent.
-- **Blocks future work** - every VP inside `DoApply()` is an implicit main-thread layout dependency, blocking batched undo, speculative editing, and off-thread IME.
+- **Slow indent/outdent** - `IndentOutdentCommand` loops per-paragraph; VisiblePosition construction multiplies layout cost by paragraph count.
+- **Blocks future work** - every VisiblePosition inside `DoApply()` is an implicit main-thread layout dependency, blocking batched undo and speculative editing.
 
 ### Known bugs blocked on this work
 - [Hotlist 7675360](https://issues.chromium.org/hotlists/7675360) - 25-30 open issues: wrong caret after paste, bad selection after list insertion, undo/redo producing wrong selection, indent leaving caret in detached subtree.
-- Several WPT failures in `editing/` and `contenteditable/` where stale VP after mutation is the root cause.
+- Several WPT failures in `editing/` and `contenteditable/` where stale VisiblePosition after mutation is the root cause.
 
 ### Scale
 
 | Metric | Count |
 |--------|-------|
-| `VisiblePosition` type usage | ~391 across 18 files |
-| `CreateVisiblePosition()` calls | ~126 across 16 files |
-| `.DeepEquivalent()` calls (VP unwrapping) | ~288 across 18 files |
+| `VisiblePosition` type usage | ~370 across 16 files |
+| `CreateVisiblePosition()` calls | ~124 across 15 files |
+| `.DeepEquivalent()` calls (VisiblePosition unwrapping) | ~271 across 16 files |
 
 Top offenders: `composite_edit_command.cc` (112), `replace_selection_command.cc` (98), `insert_list_command.cc` (91), `delete_selection_command.cc` (64), `indent_outdent_command.cc` (61).
 
-~110 of 126 `CreateVisiblePosition` calls (~87%) are unnecessary type adapters. Only ~16 sites are genuinely load-bearing.
+~110 of 124 `CreateVisiblePosition` calls (~89%) are unnecessary type adapters. Only ~14 sites are genuinely load-bearing.
+
+> Unit test files (`*_test.cc`) are not included in any of the counts above.
 
 ### After this work
 
@@ -47,6 +52,8 @@ Top offenders: `composite_edit_command.cc` (112), `replace_selection_command.cc`
 | Unnecessary `UpdateStyleAndLayout` per editing op | multiple | 0 |
 
 ---
+
+## Design Principles
 
 ### The Correct Abstraction Boundary
 
@@ -63,21 +70,21 @@ User Interaction
 [Boundary-OUT]  SelectionInDOMTree → SetEndingSelection(...)  (command → renderer)
 ```
 
-`VisiblePosition` belongs only at the two boundary points. The problem is that commands create VPs deep inside `DoApply()`.
+`VisiblePosition` belongs only at the two boundary points. The problem is that commands create VisiblePositions deep inside `DoApply()`.
 
 ---
 
 ## Anti-Patterns to Eliminate
 
-Patterns are ordered by priority: highest VP count reduction first, then safety risk.
+Patterns are ordered by priority: highest VisiblePosition count reduction first, then safety risk.
 
-### P1: VP parameter forces caller canonicalization
+### P1: VisiblePosition parameter forces caller canonicalization
 
 `MoveParagraph` / `MoveParagraphWithClones` / `MoveParagraphs` in
 `composite_edit_command.h` take `const VisiblePosition&`. Every caller in
 `indent_outdent_command.cc`, `insert_list_command.cc`, `delete_selection_command.cc`,
-etc. must wrap raw positions into VPs before calling. Fixing the three method
-signatures (Step 3) removes ~80 VPs across all callers at once.
+etc. must wrap raw positions into VisiblePositions before calling. Fixing the three method
+signatures (Step 3) removes ~80 VisiblePositions across all callers at once.
 
 ### P2: `EndingVisibleSelection()` called mid-command for raw position access
 
@@ -90,29 +97,23 @@ the result in a `VisibleSelection`. It appears in two unnecessary forms througho
 |---|---|
 | Raw position only | `EndingSelection().Start()` / `.End()` - no layout |
 | After explicit layout gate, position used for navigation | Keep `UpdateStyleAndLayout`; replace `EndingVisibleSelection().VisibleStart()` with `EndingSelection().Start()` and use `Position` overloads |
-| VP from `EndingVisibleSelection()` passed directly to navigation function | `NavigationFn(EndingSelection().Start(), rule)` - explicit gate already covers layout |
+| VisiblePosition from `EndingVisibleSelection()` passed directly to navigation function | `NavigationFn(EndingSelection().Start(), rule)` - explicit gate already covers layout |
 
 `EndingSelection()` returns a `SelectionForUndoStep` with raw `Position` values that
 are already correct - no re-canonicalization needed.
 
-### P3: VP stored across a DOM mutation
 
-A `VisiblePosition` is captured before a DOM mutation and referenced after.
-`IsValid()` is `DCHECK`-only in release builds, so stale VP is silently used rather
-than caught. See crbug.com/648949. Low frequency but highest safety risk - silent
-wrong-caret corruption with no assertion to catch it.
+### P3: VisiblePosition as a type requirement for navigation tests
 
-### P4: VP as a type requirement for navigation tests
-
-`IsEndOfParagraph` / `IsStartOfParagraph` have no `Position` overload today, so VP
+`IsEndOfParagraph` / `IsStartOfParagraph` have no `Position` overload today, so VisiblePosition
 creation is forced purely to satisfy the type signature. High frequency across all
 command files; mechanical to fix once Step 1 overloads exist.
 
-### P5: Create-then-extract
+### P4: Create-then-extract
 
-A VP is created from a `PositionWithAffinity` or raw `Position` and immediately
-passed to a navigation function. The VP serves only as a type adapter - the position
-was already correct before the wrap. Fixed mechanically alongside P4 sites.
+A VisiblePosition is created from a `PositionWithAffinity` or raw `Position` and immediately
+passed to a navigation function. The VisiblePosition serves only as a type adapter - the position
+was already correct before the wrap. Fixed mechanically alongside P3 sites.
 
 ---
 
@@ -120,7 +121,7 @@ was already correct before the wrap. Fixed mechanically alongside P4 sites.
 
 1. **Add missing `Position`-based overloads** for navigation functions in `position_units` and `editing_commands_utilities` (bottom-up, purely additive).
 2. **Change `CompositeEditCommand` infrastructure signatures** to take `Position` instead of `VisiblePosition` (top-down, uses the new overloads internally).
-3. **Migrate command files** using the new overloads and the new infrastructure signatures, in ascending order of VP count.
+3. **Migrate command files** using the new overloads and the new infrastructure signatures, in ascending order of VisiblePosition count.
 
 ---
 
@@ -134,7 +135,7 @@ All `Position`-based navigation overloads live in a new dedicated pair. No
 `VisiblePosition` type appears anywhere in these files. The existing
 `Position`/`PositionWithAffinity` overloads currently in `visible_units.h` are
 relocated here in CL 1-A; the originals are removed. Callers that needed only those
-overloads switch to including `position_units.h`; files that still use VP-returning
+overloads switch to including `position_units.h`; files that still use VisiblePosition-returning
 functions keep `visible_units.h`.
 
 ### Gaps to fill
@@ -149,9 +150,9 @@ New `Position` overloads to add to `position_units.h` / `position_units.cc`:
 
 **Position traversal**: `PreviousPositionOf(const Position&, EditingBoundaryCrossingRule)`,
 `NextPositionOf(const Position&, EditingBoundaryCrossingRule)`. These bypass the
-`CreateVisiblePosition` wrap in the existing VP overloads by calling
+`CreateVisiblePosition` wrap in the existing VisiblePosition overloads by calling
 `PreviousVisuallyDistinctCandidate` / `NextVisuallyDistinctCandidate` directly. Do
-not change existing VP signatures.
+not change existing VisiblePosition signatures.
 
 **Character query**: `CharacterAfter(const Position&)`.
 
@@ -166,9 +167,36 @@ block-structure helpers private to that file): `StartOfBlock`, `EndOfBlock`,
 
 ### Already in `visible_units.h` - relocate to `position_units.h`
 
-`StartOfWordPosition`, `EndOfWordPosition`, `StartOfLine(PositionWithAffinity)`,
-`EndOfLine(PositionWithAffinity)`, `InSameLine(PositionWithAffinity, PositionWithAffinity)`,
-`StartOfDocument(Position)`.
+These already take `Position` or `PositionWithAffinity` and return the same. They are
+moved in CL 1-A and removed from `visible_units.h`.
+
+**Word:** `StartOfWordPosition`, `EndOfWordPosition`, `MiddleOfWordPosition`,
+`PreviousWordPosition`, `NextWordPosition`.
+
+**Sentence:** `StartOfSentencePosition`, `EndOfSentence(const Position&)`,
+`PreviousSentencePosition`, `NextSentencePosition`, `ExpandEndToSentenceBoundary`,
+`ExpandRangeToSentenceBoundary`.
+
+**Line:** `StartOfLine(PositionWithAffinity)`, `EndOfLine(PositionWithAffinity)`,
+`InSameLine(PositionWithAffinity, PositionWithAffinity)`.
+
+**Document:** `StartOfDocument(Position)`.
+
+Note: `EndOfSentence(const VisiblePosition&)` stays in `visible_units.h` - it is a
+VisiblePosition overload, not a `Position`-based one.
+
+### `PositionWithAffinity` ownership rule
+
+A function belongs in `position_units.h` if it answers a "where is the boundary of
+unit X?" question using DOM structure, regardless of whether it takes or returns
+`PositionWithAffinity`. `PositionWithAffinity` is just a `Position` with an affinity
+tag - it is not a layout type.
+
+A function stays in `visible_units.h` if it is a layout or hit-test utility that
+happens to use `PositionWithAffinity` as a carrier type (e.g.
+`AdjustForwardPositionToAvoidCrossingEditingBoundaries`,
+`PositionForContentsPointRespectingEditingBoundary`). These are tied to layout
+machinery, not navigation units.
 
 ### Implementation strategy
 
@@ -176,21 +204,21 @@ New overloads in `position_units.cc` call through to the existing private algori
 templates in the originating files (e.g. `StartOfParagraphAlgorithm<EditingStrategy>`
 in `visible_units_paragraph.cc`). Algorithm templates are not moved. For functions
 with no existing `Position`-typed algorithm, write the algorithm first and have both
-the VP overload and the new `Position` overload call into it.
+the VisiblePosition overload and the new `Position` overload call into it.
 
 ---
 
 ## Step 2: Migrate Simple Commands
 
-Migrate the 5 lowest-VP command files. These validate that the new overloads are
+Migrate the 5 lowest-VisiblePosition command files. These validate that the new overloads are
 drop-in replacements against the WPT editing test suite.
 
-| File | VP refs | Notes |
+| File | VisiblePosition refs | Notes |
 |------|---------|-------|
 | `style_commands.cc` | 1 | |
 | `undo_step.cc` | 2 | |
 | `editor_command.cc` | 6 | |
-| `insert_line_break_command.cc` | 6 | P3 and P5 examples |
+| `insert_line_break_command.cc` | 6 | P3 and P4 examples |
 | `insert_text_command.cc` | 7 | |
 
 ### Migration patterns
@@ -200,8 +228,8 @@ drop-in replacements against the WPT editing test suite.
 | `CreateVisiblePosition(pos).DeepEquivalent()` | `pos` - drop entirely; do not substitute `CanonicalPositionOf` |
 | `IsEndOfParagraph(CreateVisiblePosition(pos))` | `IsEndOfParagraph(pos)` |
 | `StartOfParagraph(vp).DeepEquivalent()` | `StartOfParagraph(pos)` |
-| `VP::FirstPositionInNode(*node).DeepEquivalent()` | `Position::FirstPositionInNode(*node)` |
-| `VP::LastPositionInNode(*node).DeepEquivalent()` | `Position::LastPositionInNode(*node)` |
+| `VisiblePosition::FirstPositionInNode(*node).DeepEquivalent()` | `Position::FirstPositionInNode(*node)` |
+| `VisiblePosition::LastPositionInNode(*node).DeepEquivalent()` | `Position::LastPositionInNode(*node)` |
 | `LineBreakExistsAtVisiblePosition(vp)` | `LineBreakExistsAtPosition(pos)` |
 | `VisiblePosition::BeforeNode(*node)` | `Position::BeforeNode(*node)` |
 | `EndingVisibleSelection().VisibleStart().DeepEquivalent()` | `EndingSelection().Start()` |
@@ -230,10 +258,10 @@ All callers in `indent_outdent_command.cc`, `insert_list_command.cc`,
 With Step 1 overloads and Step 3 infrastructure in place, the heavy files fall into
 two categories:
 
-- **Category A** (fixed by Step 3): VP created solely to pass to `MoveParagraph` / `MoveParagraphWithClones` / `CleanupAfterDeletion`.
-- **Category B** (fixed by Step 1): VP created solely to call `IsEndOfParagraph`, `IsStartOfParagraph`, `StartOfParagraph`, `EndOfParagraph`, `StartOfBlock`, etc.
+- **Category A** (fixed by Step 3): VisiblePosition created solely to pass to `MoveParagraph` / `MoveParagraphWithClones` / `CleanupAfterDeletion`.
+- **Category B** (fixed by Step 1): VisiblePosition created solely to call `IsEndOfParagraph`, `IsStartOfParagraph`, `StartOfParagraph`, `EndOfParagraph`, `StartOfBlock`, etc.
 
-| File | VP refs | Primary category |
+| File | VisiblePosition refs | Primary category |
 |------|---------|-----------------|
 | `insert_paragraph_separator_command.cc` | 19 | B |
 | `apply_block_element_command.cc` | 37 | B + A |
@@ -243,13 +271,13 @@ two categories:
 | `replace_selection_command.cc` | 98 | B |
 
 `composite_edit_command.cc` (112 refs): Step 3 covers the method signatures. The
-remaining VP in `RebalanceWhitespaceOnTextSubstring`,
+remaining VisiblePosition in `RebalanceWhitespaceOnTextSubstring`,
 `MoveParagraphContentsToNewBlockIfNecessary`, `BreakOutOfEmptyListItem`,
 `BreakOutOfEmptyMailBlockquotedParagraph` are addressed in Step 4.
 
-### Estimated VP reduction
+### Estimated VisiblePosition reduction
 
-| Work item | Estimated VPs removed |
+| Work item | Estimated VisiblePositions removed |
 |-----------|-----------------------|
 | Simple command migration (Step 2) | ~25 |
 | Infrastructure signature changes (Step 3) | ~80 |
@@ -258,13 +286,13 @@ remaining VP in `RebalanceWhitespaceOnTextSubstring`,
 
 ---
 
-## What is Legitimately VP (Do Not Remove)
+## What is Legitimately VisiblePosition (Do Not Remove)
 
 1. **Entry boundary.** `CompositeEditCommand` constructor calling `ComputeVisibleSelectionInDOMTreeDeprecated()`.
 
 2. **Exit boundary.** `EndingVisibleSelection()` in `Apply()` for the `IsRichlyEditablePosition` check.
 
-3. **Visual-caret equivalence checks.** When the question is "did the caret actually move?", VP equivalence is the right tool - some positions are structurally distinct but render to the same caret. `MostForwardCaretPosition(x) == MostForwardCaretPosition(y)` is often a layout-free replacement, but each site requires individual confirmation.
+3. **Visual-caret equivalence checks.** When the question is "did the caret actually move?", VisiblePosition equivalence is the right tool - some positions are structurally distinct but render to the same caret. `MostForwardCaretPosition(x) == MostForwardCaretPosition(y)` is often a layout-free replacement, but each site requires individual confirmation.
 
 4. **`VisiblePosition::FirstPositionInNode` / `LastPositionInNode` as equality tests.** Replaceable with `Position::` variants only after per-site confirmation that positions are canonical.
 
@@ -290,10 +318,10 @@ remaining VP in `RebalanceWhitespaceOnTextSubstring`,
 
 ## Next Steps: Beyond Commands
 
-- `core/editing/selection_adjuster.cc` - 28 VP refs, primarily P4/P5
-- `core/editing/editing_utilities.cc` - ~12 VP refs in internal helpers
-- `core/editing/serializers/styled_markup_serializer.cc` - 7 VP refs, P4/P5
-- `core/editing/editor.cc` - ~5 VP refs in internal helpers
+- `core/editing/selection_adjuster.cc` - 28 VisiblePosition refs, primarily P3/P4
+- `core/editing/editing_utilities.cc` - ~12 VisiblePosition refs in internal helpers
+- `core/editing/serializers/styled_markup_serializer.cc` - 7 VisiblePosition refs, P3/P4
+- `core/editing/editor.cc` - ~5 VisiblePosition refs in internal helpers
 
 Out of scope until Step 4 lands.
 
