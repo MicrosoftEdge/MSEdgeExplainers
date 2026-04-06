@@ -188,8 +188,6 @@ class CustomButton extends HTMLElement {
 }
 ```
 
-*Note: Automatic exposure would require adding behavior properties (e.g., `formAction`, `name`, `value`) to `HTMLElement`. This would bloat every `HTMLElement` instance's prototype with properties that only make sense for elements with specific behaviors. An opt-in alternative was considered but adds API complexity without a clear benefit.*
-
 ### Behavior lifecycle
 
 When `attachInternals()` is called with behaviors, each behavior is attached to the element:
@@ -242,7 +240,7 @@ Behaviors are instantiated with `new` and passed to `attachInternals()`:
 
 *Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment.*
 
-With the current approach, developers hold direct references to their behavior instances: no array lookup, `instanceof` checks, or `behaviors` interface is needed to access behavior state. It also aligns with the [W3C design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances, and it extends naturally to future developer-defined behaviors that follow the same `new` + attach pattern.
+Developers hold direct references to their behavior instances. This aligns with the [W3C design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances, and it extends naturally to future developer-defined behaviors that follow the same `new` + attach pattern.
 
 *For future developer-defined behaviors:*
 
@@ -1003,6 +1001,27 @@ customElements.define('custom-button', CustomButton);
 - Decorators are inherently JavaScript syntax and don't support a future declarative, JavaScript-less approach to custom elements. This proposal's design decouples behaviors from the class definition, enabling future declarative syntax (see [Other considerations](#other-considerations)).
 
 `HTMLSubmitButtonBehavior` could itself be designed as a decorator, but decorators can't easily access `ElementInternals` or instance state during application. Decorators would need to coordinate with `attachInternals()` timing. Additionally, getting a reference to the behavior instance for property access (e.g., `behavior.formAction`) would require additional wiring.
+
+### Alternative to API design: Class references
+
+Pass behavior classes (not instances) to `attachInternals()`:
+
+```javascript
+// Attach a behavior during initialization (class reference).
+this._internals = this.attachInternals({ behaviors: [HTMLSubmitButtonBehavior] });
+
+// Access behavior state via named accessor.
+this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
+```
+
+**Pros:**
+- Named access via `this._internals.behaviors.<behaviorName>` requires no iteration.
+- Less setup code as developers don't manage behavior instances.
+
+**Cons:**
+- Platform instantiates the behavior, so constructor parameters aren't available. This conflicts with the [design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances.
+- Requires a `behaviors` interface for named access.
+- *Future* developer-defined behaviors would need a way to name their behaviors.
 
 ## Accessibility, security, and privacy considerations
 
