@@ -177,11 +177,11 @@ This means the following example will work, even without a preceding `<link rel=
 
 The shadow root is initially rendered without the styles from "foo.css". Once the fetch completes, the styles are applied. This will cause a FOUC (Flash of Unstyled Content) — the element is first painted without the external styles and then repainted once the fetch completes.
 
-Developers should pre-fetch external CSS using [`<link rel="modulepreload">`](https://html.spec.whatwg.org/multipage/links.html#link-type-modulepreload) to ensure it's in the module map before the `<template>` is parsed, avoiding FOUC and providing error handling:
+Developers should pre-fetch external CSS using [`<link rel="modulepreload">`](https://html.spec.whatwg.org/multipage/links.html#link-type-modulepreload) to initiate the fetch before the `<template>` is parsed. If the fetch completes before the `<template>` tag is parsed, the styles will be immediately populated. The optional `blocking="render"` attribute will block rendering until the fetch completes, avoiding FOUC if desired. The `onerror` attribute may also provide error handling:
 
 ```html
 <head>
-  <link rel="modulepreload" as="style" href="./foo.css" onerror="handleError()">
+  <link rel="modulepreload" as="style" href="./foo.css" onerror="handleError()" blocking="render">
 </head>
 ...
 <div>
@@ -204,7 +204,7 @@ The fetch fallback has an important limitation: **there is no way to catch fetch
 
 For this reason, developer tools should surface a warning when `shadowrootadoptedstylesheets` triggers a fetch, recommending that developers either:
 1. Define the styles inline using `<style type="module" specifier="...">` (a [Declarative CSS Module](../ShadowDOM/explainer.md#proposal-inline-declarative-css-module-scripts)) so the styles are available synchronously, or
-2. Use `<link rel="modulepreload">` to pre-fetch the module, which supports error handling via the `onerror` event and can be combined with [`blocking="render"`](https://html.spec.whatwg.org/multipage/urls-and-fetching.html#blocking-attributes) to avoid FOUC.
+2. Use `<link rel="modulepreload">` to pre-fetch the module, which can be combined with [`blocking="render"`](https://html.spec.whatwg.org/multipage/urls-and-fetching.html#blocking-attributes) to avoid FOUC.
 
 The order of `shadowrootadoptedstylesheets` reflects the order in the underlying `adoptedStyleSheets` array, which may impact the final application of CSS rules, as they are applied [in array order](https://drafts.csswg.org/cssom/#css-style-sheet-collections). Since fetch completion order may not match the specified order, each fetch completion could trigger a separate FOUC.
 
