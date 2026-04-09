@@ -134,36 +134,7 @@ The haptic fires once per selector match transition according to `phase`. This s
 
 For interactions that require threshold or gesture logic not directly expressible as selector match transitions (e.g. drag thresholds), use the [imperative API](#imperative-api-js).
 
-#### `scroll-snap-haptic` property
-
-The `scroll-snap-haptic` property is set on a scroll container that uses [CSS Scroll Snap](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scroll_snap). It configures the browser to produce a haptic effect each time the scroll position snaps to a defined snap point due to a user-initiated scroll gesture.
-
-**Syntax:**
-
-```
-scroll-snap-haptic: <effect-name> <intensity>?
-```
-
-- `<effect-name>` — one of `hint`, `edge`, `tick`, `align`, `none`. Initial value: `none`.
-- `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0, or a `<percentage>` between 0% and 100%. Defaults to 1.0 (or 100%).
-- **Not inherited.** Not animatable.
-
-The property applies to the scroll container, not individual snap children.
-
-> **Note:** If the [`:snapped` pseudo-class](https://drafts.csswg.org/css-scroll-snap-2/#snapped) from CSS Scroll Snap 2 ships, scroll-snap haptics could instead be expressed via `haptic-feedback` on snap children (e.g. `.slide:snapped { haptic-feedback: tick; }`), potentially making this property unnecessary. See [Alternatives Considered](#alternatives-considered) and [Open Questions](#open-questions).
-
-```css
-.carousel {
-  scroll-snap-type: x mandatory;
-  scroll-snap-haptic: tick 0.6;
-}
-
-.carousel > .slide {
-  scroll-snap-align: center;
-}
-```
-
-Feature detection works via `@supports` (e.g. `@supports (haptic-feedback: tick)`).
+Feature detection works via `@supports at-rule(@haptic-trigger)` or equivalent UA-defined mechanism.
 
 ## Real-World Scenarios
 
@@ -171,7 +142,7 @@ The following examples demonstrate how selector-triggered declarative haptics an
 
 ### E-Commerce "Add to Cart" Button
 
-A tactile press confirmation — one line of CSS:
+A tactile press confirmation:
 
 ```css
 @haptic-trigger .add-to-cart:active {
@@ -183,7 +154,7 @@ A tactile press confirmation — one line of CSS:
 
 ### Social Media Stories Scrolling
 
-A horizontal story carousel with a tactile tick on each swipe — one line of CSS:
+A horizontal story carousel with a tactile tick on each snap — using the [`:snapped` pseudo-class](https://drafts.csswg.org/css-scroll-snap-2/#snapped) from CSS Scroll Snap 2:
 
 ```css
 @haptic-trigger .story-carousel > .story:snapped {
@@ -297,7 +268,7 @@ Quick matrix (details above):
 ### Other design options
 
 - **HTML attributes** (e.g. `<button haptic-on-activate="tick">`) — While HTML has adopted new attribute families (`aria-*`, `popover`, `inert`), `haptic-on-*` would require a separate attribute per interaction type (`haptic-on-activate`, `haptic-on-toggle`, `haptic-on-focus`, …), each needing dedicated spec text, parsing rules, and IDL definitions. More fundamentally, HTML attributes cannot compose with the cascade, media queries, or pseudo-class selectors — limiting expressiveness compared to a CSS-based approach.
-- **Using the `:snapped` pseudo-class** versus a dedicated scroll-snap trigger surface — [CSS Scroll Snap 2](https://drafts.csswg.org/css-scroll-snap-2/#snapped) defines a `:snapped` pseudo-class that applies to snap children when the scroll container is snapped to them. In the selector-trigger primary model this naturally enables rules like `@haptic-trigger .slide:snapped { ... }`. The main consideration is that `:snapped` is still a Working Draft and not yet widely implemented.
+- **Using the `:snapped` pseudo-class** versus a dedicated scroll-snap trigger surface — [CSS Scroll Snap 2](https://drafts.csswg.org/css-scroll-snap-2/#snapped) defines a `:snapped` pseudo-class that applies to snap children when the scroll container is snapped to them. In the selector-trigger primary model this naturally enables rules like `@haptic-trigger .slide:snapped { ... }`. The main consideration is that `:snapped` is still a Working Draft and not yet widely implemented. If `:snapped` does not ship or is significantly delayed, a dedicated `scroll-snap-haptic` CSS property on the scroll container (e.g. `.carousel { scroll-snap-haptic: tick 0.6; }`) could be introduced as a self-contained fallback that does not depend on another in-progress spec.
 
 ## Accessibility, Privacy, and Security Considerations
 
@@ -318,7 +289,7 @@ To avoid introducing a new fingerprinting vector, the API does not expose means 
 - **Is selector-trigger the right primary declarative surface, or should animation-trigger be the primary model?** This proposal uses selector-trigger as the primary path and documents animation-trigger as a serious alternative. We welcome feedback on which model should anchor standardization.
 - **Should any [future extension](#future-extensions) be promoted to v1?** Animation haptics and custom effects are deferred. If either is critical for initial adoption, we would like to hear which and why.
 - **Should script-initiated declarative haptics require user activation?** Currently, the declarative API fires haptics on selector match transitions regardless of whether the change was user- or script-initiated (e.g. a script toggling a class, attribute, checkbox, or popover state). An alternative is to gate script-initiated triggers behind sticky user activation, matching the imperative API's requirement.
-- **Should there be a dedicated scroll-snap trigger surface if `:snapped` is not widely implemented?** The selector-trigger model naturally uses `:snapped` (`@haptic-trigger .slide:snapped { ... }`). We welcome feedback on whether that is sufficient for v1 or whether a dedicated surface should be added.
+- **Should a dedicated `scroll-snap-haptic` property be added if `:snapped` does not ship?** The current proposal relies on the [`:snapped` pseudo-class](https://drafts.csswg.org/css-scroll-snap-2/#snapped) from CSS Scroll Snap 2 for scroll-snap haptics (e.g. `@haptic-trigger .slide:snapped { ... }`). If `:snapped` does not ship or is significantly delayed, a dedicated `scroll-snap-haptic` CSS property on the scroll container could serve as a self-contained fallback. We welcome feedback on whether the `:snapped` dependency is acceptable for v1.
 - **Feedback on the predefined effect vocabulary?** The current set (`hint`, `edge`, `tick`, `align`) is intentionally small. Feedback is needed on whether these four effects cover the most common interaction patterns and map well to native haptic primitives across platforms.
 - **Should the API return whether haptics was successfully played?** Currently, `playHaptics` always returns `undefined` to avoid exposing device capabilities. Returning a boolean or promise could help developers debug, but risks leaking hardware information.
 - **Is there developer interest in haptics device enumeration?** Though out of scope, we would like to understand interest. Exposing available devices or capabilities would enable richer experiences but introduces fingerprinting trade-offs that need careful evaluation.
@@ -341,6 +312,7 @@ Relevant CSS specifications:
 - [CSS Transitions](https://drafts.csswg.org/css-transitions-1/)
 - [CSS Animations](https://drafts.csswg.org/css-animations-1/)
 - [CSS Scroll Snap](https://drafts.csswg.org/css-scroll-snap-1/)
+- [CSS Scroll Snap 2](https://drafts.csswg.org/css-scroll-snap-2/)
 
 ## Stakeholder Feedback / Opposition
 
