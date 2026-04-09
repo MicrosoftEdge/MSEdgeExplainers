@@ -21,7 +21,7 @@ The browser defines a default audio output device used by all audio renderers.  
 
 Without `setPreferredSinkId()`, a top-level frame has no mechanism to change the default audio output device in its cross-origin child frames.  A top-level frame cannot use [`setSinkId()`](https://w3c.github.io/mediacapture-output/#dom-htmlmediaelement-setsinkid) in a cross-origin child frame due to security boundaries.  Instead, the top-level frame and cross-origin child frame must collaborate using postMessage() to change the audio output device.
 
-This limitation leads to an inconsistent, disjointed user experience for composable multimedia apps that include embedded video players and embedded slideshows.  Each cross origin child frame may independently chose the audio output device, potentially causing multiple audio output devices to play at the same time.  Similarly, if the top-level frame changes its audio output device, the cross origin child frame's audio does not change, disrupting the user's expectations for audio playback.
+This limitation leads to an inconsistent, disjointed user experience in composable multimedia apps that include embedded video players and embedded slideshows.  Each cross-origin child frame may independently choose the audio output device, potentially causing multiple audio output devices to play at the same time.  Similarly, if the top-level frame changes its audio output device, the cross-origin child frame's audio does not change, disrupting the user's expectations for audio playback.
 
 ## Goals
 
