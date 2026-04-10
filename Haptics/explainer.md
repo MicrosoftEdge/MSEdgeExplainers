@@ -117,11 +117,13 @@ The `@haptic-trigger` at-rule declares a selector plus descriptors that define w
 }
 ```
 
-- `effect` — one of `hint`, `edge`, `tick`, `align`, `none`.
+- `effect` — one of `hint`, `edge`, `tick`, `align`.
 - `intensity` *(optional)* — a `<number>` between 0.0 and 1.0, or a `<percentage>` between 0% and 100%.
 - `phase` *(optional)* — whether the haptic fires when the selector starts matching (`enter`), stops matching (`exit`), or both.
 
 The haptic fires once per selector match transition according to `phase`. This supports pseudo-classes (e.g. `:active`, `:checked`), class-driven state (`.is-open`), and attribute-driven state (`[aria-invalid="true"]`) with one model.
+
+When multiple `@haptic-trigger` rules have selectors that transition into (or out of) matching the same element in the same rendering update, at most one haptic fires per element. The winning rule is determined by selector specificity; ties are broken by last in document order. This prevents overlapping selectors (e.g. `button:active` and `.cta:active` both matching `<button class="cta">`) from producing a double-tap. To conditionally suppress a trigger, exclude it via `@media` rather than relying on specificity.
 
 **Example — button press:**
 
@@ -292,6 +294,7 @@ To avoid introducing a new fingerprinting vector, the API does not expose means 
 - **Should a dedicated `scroll-snap-haptic` property be added if `:snapped` does not ship?** The current proposal relies on the [`:snapped` pseudo-class](https://drafts.csswg.org/css-scroll-snap-2/#snapped) from CSS Scroll Snap 2 for scroll-snap haptics (e.g. `@haptic-trigger .slide:snapped { ... }`). If `:snapped` does not ship or is significantly delayed, a dedicated `scroll-snap-haptic` CSS property on the scroll container could serve as a self-contained fallback. We welcome feedback on whether the `:snapped` dependency is acceptable for v1.
 - **Feedback on the predefined effect vocabulary?** The current set (`hint`, `edge`, `tick`, `align`) is intentionally small. Feedback is needed on whether these four effects cover the most common interaction patterns and map well to native haptic primitives across platforms.
 - **Should the API return whether haptics was successfully played?** Currently, `playHaptics` always returns `undefined` to avoid exposing device capabilities. Returning a boolean or promise could help developers debug, but risks leaking hardware information.
+- **Are specificity-based conflict resolution rules the right model for overlapping triggers?** The current design deduplicates by element per rendering update — when multiple `@haptic-trigger` rules match the same element, the highest-specificity rule wins (last in document order breaks ties). This prevents unintended double-taps but means lower-specificity rules are silently suppressed. We welcome feedback on whether this model is intuitive or whether an alternative (e.g. all-fire-independently, explicit priority descriptors) is preferable.
 - **Is there developer interest in haptics device enumeration?** Though out of scope, we would like to understand interest. Exposing available devices or capabilities would enable richer experiences but introduces fingerprinting trade-offs that need careful evaluation.
 
 ## Reference for Relevant Haptics APIs
