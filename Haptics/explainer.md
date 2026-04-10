@@ -136,7 +136,7 @@ When multiple `@haptic-trigger` rules have selectors that transition into (or ou
 
 For interactions that require threshold or gesture logic not directly expressible as selector match transitions (e.g. drag thresholds), use the [imperative API](#imperative-api-js).
 
-Feature detection works via `@supports at-rule(@haptic-trigger)` or equivalent UA-defined mechanism.
+Haptic feedback is inherently progressive enhancement — non-supporting browsers silently ignore unknown at-rules per CSS parsing rules, so `@haptic-trigger` requires no fallback styling. For imperative feature detection in JavaScript, use `'playHaptics' in navigator`.
 
 ## Real-World Scenarios
 
