@@ -23,6 +23,7 @@ This document is a starting point for engaging the community and standards bodie
 - [Open Questions](#open-questions)
 - [Reference for Relevant Haptics APIs](#reference-for-relevant-haptics-apis)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+- [Appendix: CSS Alternatives Side-by-Side](#appendix-css-alternatives-side-by-side)
 - [References & Acknowledgements](#references--acknowledgements)
 
 ## Introduction
@@ -257,10 +258,12 @@ Quick matrix (details above):
 
 | Model | Trigger | Primary upside | Primary downside |
 |---|---|---|---|
-| A. Pseudo-class property | Entering selected dynamic pseudo-classes | Very simple for `:active`/`:checked` | Limited app-state coverage |
-| B. Transition-coupled | `transitionend` | Reuses transition family | Couples haptics to visual transitions |
-| C. Selector-trigger at-rule (current primary) | Selector match/unmatch | Broad selector coverage + explicit enter/exit | Requires precise trigger timing and conflict-resolution rules |
+| A. Selector-trigger at-rule (current primary) | Selector match/unmatch | Broad selector coverage + explicit enter/exit | Requires precise trigger timing and conflict-resolution rules |
+| B. Pseudo-class property | Entering selected dynamic pseudo-classes | Very simple for `:active`/`:checked` | Limited app-state coverage |
+| C. Transition-coupled | `transitionend` | Reuses transition family | Couples haptics to visual transitions |
 | D. Animation-trigger | `haptic-name` computed-value change | Strong precedent and reusable names | Re-trigger behavior can be less direct |
+
+See [Appendix: CSS Alternatives Side-by-Side](#appendix-css-alternatives-side-by-side) for concrete code examples of each model applied to the same real-world scenarios.
 
 ### JavaScript alternatives
 
@@ -327,6 +330,117 @@ We intend to seek feedback via:
 - Discuss within Device & Sensors Working Group.
 - Cross‑share with Haptic Industry Forum (non‑standards venue) to align on primitives vocabulary and invite suppliers/OEMs to comment publicly in WICG issues.
 - Engage CSS Working Group for review of selector-trigger primary design and animation-trigger alternative.
+
+## Appendix: CSS Alternatives Side-by-Side
+
+The following examples show how each declarative CSS model from the [comparison table](#comparison-of-current-primary-and-declarative-alternatives) would express the same two real-world scenarios.
+
+### "Add to Cart" button press
+
+<table>
+<tr><th>A. Selector-trigger (primary)</th><th>B. Pseudo-class property</th></tr>
+<tr><td>
+
+```css
+@haptic-trigger .add-to-cart:active {
+  effect: align;
+  intensity: 0.8;
+  phase: enter;
+}
+```
+
+</td><td>
+
+```css
+.add-to-cart:active {
+  haptic-feedback: align 0.8;
+}
+```
+
+</td></tr>
+<tr><th>C. Transition-coupled</th><th>D. Animation-trigger</th></tr>
+<tr><td>
+
+```css
+.add-to-cart {
+  /* Requires a visual transition to attach to */
+  transition: scale 0ms;
+  transition-haptic-effect: align;
+  transition-haptic-intensity: 0.8;
+}
+.add-to-cart:active {
+  scale: 1; /* triggers a transition */
+}
+```
+
+</td><td>
+
+```css
+@haptic bounce-land {
+  effect: align;
+  intensity: 0.8;
+}
+.add-to-cart:active {
+  haptic-name: bounce-land;
+}
+```
+
+</td></tr>
+</table>
+
+### Scroll-snap story carousel
+
+<table>
+<tr><th>A. Selector-trigger (primary)</th><th>B. Pseudo-class property</th></tr>
+<tr><td>
+
+```css
+@haptic-trigger .story:snapped {
+  effect: tick;
+  intensity: 0.5;
+  phase: enter;
+}
+```
+
+</td><td>
+
+```css
+.story:snapped {
+  haptic-feedback: tick 0.5;
+}
+```
+
+</td></tr>
+<tr><th>C. Transition-coupled</th><th>D. Animation-trigger</th></tr>
+<tr><td>
+
+```css
+.story {
+  transition: opacity 0ms;
+  transition-haptic-effect: tick;
+  transition-haptic-intensity: 0.5;
+}
+.story:snapped {
+  opacity: 1; /* triggers a transition */
+}
+```
+
+</td><td>
+
+```css
+@haptic snap-tick {
+  effect: tick;
+  intensity: 0.5;
+}
+.story:snapped {
+  haptic-name: snap-tick;
+}
+```
+
+</td></tr>
+</table>
+
+**Observations:** Model B is the most concise for pseudo-class-driven interactions but lacks coverage for class/attribute state. Model C requires a visual property change even when none is intended — the `0ms` synthetic transitions above highlight this ergonomic cost. Model D offers reusable named effects but relies on computed-value changes for re-triggering. Model A (primary) handles all selector types uniformly and makes phase control explicit.
 
 ## References & Acknowledgements
 
