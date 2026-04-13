@@ -502,9 +502,8 @@ The element gains:
 
 Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to toggle behaviors:
 
-- Since `disabled` is a union across behaviors, setting any single behavior's `disabled` to `true` disables the entire element — all behavior default actions are blocked, the element is removed from tab order, and it matches `:disabled`. There is no way to selectively disable one behavior while keeping others active.
+- Under last-in-wins, only `buttonBehavior`'s property values (the last in the array) determine the element's effective state. For `disabled`, this means setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect as only `buttonBehavior.disabled` controls whether the element matches `:disabled`, is removed from the tab order, and stops receiving activation events (no click or keyboard handler from any behavior runs while disabled).
 - All three behaviors provide default actions for click with different effects. Since behavior default actions all run, the element would submit the form, reset the form, and trigger the button action on every click.
-- Last-in-wins for other properties (like ARIA role) means `buttonBehavior`'s role applies regardless of which behaviors are disabled.
 
 Because `disabled` cannot selectively silence individual behaviors and all behavior default actions run together, loading all three simultaneously and switching between them is not viable.
 
