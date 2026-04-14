@@ -45,13 +45,12 @@ content location of future work and discussions.
     - [Scoping](#scoping)
     - [`<script>` vs `<style>` For CSS Modules](#script-vs-style-for-css-modules)
     - [Behavior with script disabled](#behavior-with-script-disabled)
-    - [Syntactic Sugar For Import Maps with Data URI](#syntactic-sugar-for-import-maps-with-data-uri)
+    - [Syntactic Sugar For Import Maps with Blob URL](#syntactic-sugar-for-import-maps-with-blob-url)
     - [Detailed Parsing Workflow](#detailed-parsing-workflow)
-    - [Use with External CSS Files](#use-with-external-css-files)
     - [Importing Other CSS Files With @import](#importing-other-css-files-with-import)
     - [Use with Imperative Module Scripts](#use-with-imperative-module-scripts)
     - [Static Versus Dynamic Values For shadowrootadoptedstylesheets Specifiers](#static-versus-dynamic-values-for-shadowrootadoptedstylesheets-specifiers)
-    - [Why shadowrootadoptedstylesheets Does Not Perform a Fetch](#why-shadowrootadoptedstylesheets-does-not-perform-a-fetch)
+    - [Fetch Behavior For External Specifiers](#fetch-behavior-for-external-specifiers)
   - [Other Declarative Modules](#other-declarative-modules)
   - [Alternate proposals](#alternate-proposals)
     - [Updates to Module Map Key](#updates-to-module-map-key)
@@ -60,7 +59,7 @@ content location of future work and discussions.
     - [Key Differences Between This Proposal And Local References For Link Rel](#key-differences-between-this-proposal-and-local-references-for-link-rel)
     - [Layer and adoptStyles](#layer-and-adoptstyles)
     - [`@Sheet`](#sheet)
-    - [Id-based `adoptedstylesheet` attribute on template](#id-based-adoptedstylesheet-attribute-on-template)
+    - [Id-based `shadowrootadoptedstylesheets` attribute on template](#id-based-shadowrootadoptedstylesheets-attribute-on-template)
   - [Polyfills](#polyfills)
   - [Future work](#future-work)
   - [Summary](#summary)
@@ -72,6 +71,8 @@ content location of future work and discussions.
 With the use of web components in web development, web authors often encounter challenges in managing styles, such as distributing global styles into shadow roots and sharing styles across different shadow roots. Markup-based shadow DOM, or [Declarative Shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom), is a new concept that makes it easier and more efficient to create a shadow DOM definition directly in HTML, without needing JavaScript for setup. [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) provides isolation for CSS, JavaScript, and HTML. Each shadow root has its own separate scope, which means styles defined inside one shadow root do not affect another or the main document.
 
 [Declarative Shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom) is a markup-based (declarative) alternative to script-based (imperative) [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM). Imperative Shadow DOM currently supports the [adoptedStyleSheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets) property, which allows for sharing stylesheets between shadow roots, but Declarative Shadow DOM does not have a declarative solution for sharing inline styles. This proposal aims to address this gap with the introduction of `<style type="module">`, which defines inline style modules to share, and the `shadowrootadoptedstylesheets` attribute on the `<template>` tag as an analog to Imperative Shadow DOM's `adoptedStyleSheets` property.
+
+> **Note:** For a focused and detailed explainer of the `shadowrootadoptedstylesheets` attribute — including evaluation rules, fetch behavior, template element reflection, polyfills, and open issues specific to that attribute — see the [`shadowrootadoptedstylesheets` explainer](../ShadowDOMAdoptedStyleSheets/explainer.md). This document focuses primarily on the `<style type="module">` feature and the broader declarative style sharing proposal.
 
 ## Problem
 Sites that make use of [Declarative Shadow DOM (DSD)](https://developer.chrome.com/docs/css-ui/declarative-shadow-dom) have reported that the lack of a way to reference repeated stylesheets creates large payloads that add large amounts of latency and increased memory overhead. Authors have repeatedly asked for a way to reference stylesheets from other DSD instances in the same way that frameworks leverage internal data structures to share constructable style sheets via `adoptedStyleSheets`. This Explainer explores several potential solutions.
@@ -132,11 +133,11 @@ This duplication is especially painful for SSR scenarios, which are typically he
 The proposed global scope for declarative CSS Modules is essential to this scenario because it allows nested shadow roots to share a global set of styles. Standard DOM scoping rules would not work here, as demonstrated by the following example:
 
 ```html
+<!-- Emit styles that might need to be shared later. -->
+<style type="module" specifier="my-component-styles">...</style>
 <template shadowrootmode="open" shadowrootadoptedstylesheets="my-component-styles">
-  <!-- Emit styles that might need to be shared later. -->
-  <style type="module" specifier="my-component-styles">...</style>
   <div>...component content...</div>
-  <!-- A child component is emitted that needs the same set of shared styles. Since the shared styles were already emitted above, they can be re-used with `shadowrootadoptedstylesheets`. -->
+  <!-- A child component is emitted that needs the same set of shared styles. Since the shared styles were already emitted above, they can be re-used with `shadowrootadoptedstylesheets` (this would not work with standard DOM scoping, which can only access identifiers in this shadow root and the light DOM). -->
   <template shadowrootmode="open" shadowrootadoptedstylesheets="my-component-styles">
     <!-- Styles are shared from the parent shadow root (this would not work with standard DOM scoping, which can only access identifiers in this shadow root and the light DOM). -->
     <div>...component content...</div>
@@ -178,7 +179,7 @@ Using `<link rel="stylesheet">` to share styles across Shadow DOM boundaries hel
 Global styles can be included in a single stylesheet, which is then importable into each shadow root to avoid redundancy. The downsides are the exact same as in [Using `rel="stylesheet"` attribute](#using-relstylesheet-attribute), with an additional disadvantage that multiple `@import` statements are loaded sequentially (while `<link>` tags will load them in parallel).
 
 ## Proposal: Inline, declarative CSS module scripts
-This proposal builds on [CSS module scripts](https://web.dev/articles/css-module-scripts), enabling authors to declare a CSS module inline in an HTML file and link it to a DSD using its [module specifier](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string). A `type=”module”` attribute on the `<style>` element would define it as a CSS module script and the specifier attribute would add it to the module cache as if it had been imported. This allows the page to render with the necessary CSS modules attached to the correct scopes without needing to load them multiple times. Note that [module maps](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) are global, meaning that modules defined in a Shadow DOM will be accessible throughout the document context.
+This proposal builds on [CSS module scripts](https://web.dev/articles/css-module-scripts), enabling authors to declare a CSS module inline in an HTML file and link it to a DSD using its [module specifier](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#:~:text=The-,module%20specifier,-provides%20a%20string). A `type="module"` attribute on the `<style>` element would define it as a CSS module script and the specifier attribute would add it to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) as if it had been imported. This allows the page to render with the necessary CSS modules attached to the correct scopes without needing to load them multiple times. Note that [module maps](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) are global, meaning that modules defined in a Shadow DOM will be accessible throughout the document context.
 ```js
 <style type="module" specifier="foo">
   #content {
@@ -341,28 +342,11 @@ Note that unlike a regular `<style>` tag with CSS content, the `sheet` attribute
 
  This generated [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is then processed using the same '[parse an import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string)' algorithm as a typical [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps).
 
-When the `<template>` element is constructed, the `shadowrootadoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute performs an [import](https://html.spec.whatwg.org/multipage/webappapis.html#integration-with-the-javascript-module-system) of that specifier with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css". If the result of that import is successful, the associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script)'s default export of type [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). This would allow for importing both Declarative CSS Modules and previously-fetched imperative CSS Modules via the `shadowrootadoptedstylesheets` attribute.
+When the `<template>` element is parsed, the `shadowrootadoptedstylesheets` attribute is evaluated. Each space-separated identifier in the attribute performs an [import](https://html.spec.whatwg.org/multipage/webappapis.html#integration-with-the-javascript-module-system) of that specifier with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css". If the result of that import is successful, the associated [CSS module script](https://html.spec.whatwg.org/multipage/webappapis.html#css-module-script)'s default export of type [CSSStyleSheet](https://www.w3.org/TR/cssom-1/#the-cssstylesheet-interface) is added to the `adoptedStyleSheets` backing list associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) in specified order, as defined in [CSS Style Sheet Collections](https://www.w3.org/TR/cssom-1/#css-style-sheet-collections). This would allow for importing both Declarative CSS Modules and previously-fetched imperative CSS Modules via the `shadowrootadoptedstylesheets` attribute.
 
 As with existing `<style>` tags, if the CSS contains invalid syntax, error handling follows the rules specified in [error handling](https://www.w3.org/TR/css-syntax-3/#error-handling).
 
-Styles would not be applied retroactively, as in the following example:
-
-```html
-<my-element>
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="foo">
-    ...
-  </template>
-</my-element>
-<style type="module" specifier="foo">
-  #content {
-    color: red;
-  }
-</style>
-```
-
-When the `<template>` element is parsed, an [import](https://html.spec.whatwg.org/multipage/webappapis.html#integration-with-the-javascript-module-system) of "foo" with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css" is performed. This import is unsuccessful, as the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) does not contain an entry with a specifier of "foo".
-
-When the `<style>` element's `specifier` attribute is parsed, an [import map string](https://html.spec.whatwg.org/multipage/webappapis.html#parse-an-import-map-string) is generated with JSON containing the contents as a data URI as specified above. Since the `adoptedStyleSheets` [backing list](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) associated with the `<template>` element's [shadow root](https://www.w3.org/TR/cssom-1/#dom-documentorshadowroot-adoptedstylesheets) was not populated, no styles are applied to the [shadow root](https://dom.spec.whatwg.org/#interface-shadowroot).
+Inline declarative modules are not applied retroactively — the `<style type="module">` definition must appear before the `<template>` that references it. For detailed examples of retroactivity behavior and the evaluation rules for `shadowrootadoptedstylesheets`, see [Declarative modules are not applied retroactively](../ShadowDOMAdoptedStyleSheets/explainer.md#declarative-modules-are-not-applied-retroactively) in the focused `shadowrootadoptedstylesheets` explainer.
 
 Only the first instance of a given `specifier` is added to the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map), because the [merge module specifier maps algorithm](https://html.spec.whatwg.org/multipage/webappapis.html#merge-module-specifier-maps) enforces that only the first instance of a given specifier mapping is applied, and subsequent duplicate specifier mappings are ignored.
 
@@ -392,63 +376,8 @@ Upon parsing the second Declarative CSS Module with `specifier="foo"` (with `col
 
 The `<template>` with `shadowrootadoptedstylesheets="foo"` will use the first definition (with `color: red`).
 
-This scenario may also occur when the `<style>` element is a child of the `<template>` that adopts it, as shown in the following example:
+This deduplication also applies when the `<style>` element is a child of the `<template>` that adopts it — in that case, the `<template>` is parsed first, so the module is not yet available. See the [focused `shadowrootadoptedstylesheets` explainer](../ShadowDOMAdoptedStyleSheets/explainer.md#declarative-modules-are-not-applied-retroactively) for this scenario.
 
-```html
-<my-element>
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="foo">
-    <style type="module" specifier="foo">
-      #content {
-        color: red;
-      }
-    </style>
-    ...
-  </template>
-</my-element>
-```
-
-In this example, the `<template>` element is parsed first. When the `<template>` element is parsed, an [import](https://html.spec.whatwg.org/multipage/webappapis.html#integration-with-the-javascript-module-system) of "foo" with a [module type](https://html.spec.whatwg.org/multipage/webappapis.html#module-type-from-module-request) of "css" is performed. This import is unsuccessful, as the [module map](https://html.spec.whatwg.org/multipage/webappapis.html#module-map) does not contain an entry with a specifier of "foo".
-
-The contents of the Declarative CSS Module with `specifier="foo"` (with `color: red`) are then parsed and an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) is created as specified above. Since the `<template>` element failed to import a module, the `color: red` styles will not be applied, although subsequent `<template>` elements could adopt a stylesheet with `specifier="foo"` now that it has been defined.
-
-### Use with External CSS Files
-
-The `<template>` element's `shadowrootadoptedstylesheets` attribute does not differentiate between specifiers created declaratively (via `<style type="module">`) or external CSS files. This means that the following example is valid:
-
-```html
-<my-element>
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="./foo.css">
-    ...
-  </template>
-</my-element>
-```
-
-...where "foo.css" is an external CSS file. Note that `shadowrootadoptedstylesheets` only queries the module map - it doesn't perform a fetch. Developers must instead pre-fetch the CSS file and add it to the module map before the
-`<template>` tag is parsed. This can be done imperatively with a JavaScript `import` statement within a `<script type="module">`, but requiring script for this scenario is not ideal.
-
-This can be handled declaratively with the existing `<link rel="modulepreload">`, which fetches a module and adds it to the module map.
-
-However, `<link rel="modulepreload">` does not currently work with CSS Module Scripts. This has been proposed by the WHATWG in [Issue 10233](https://github.com/whatwg/html/issues/10233) and makes sense to prioritize to allow external CSS files to work declaratively with `shadowrootadoptedstylesheets`.
-
-This alone does not make `shadowrootadoptedstylesheets` work well with external files, as `<link rel="modulepreload">` does not perform a synchronous fetch, and if the fetch has not completed by the time the `shadowrootadoptedstylesheets` attribute is parsed, the styles will not be available in the module map.
-
-This scenario could be handled by supporting the `blocking` attribute on `<link rel="modulepreload">`, which should be considered for this feature.
-
-All together, a fully-functional example of using `shadowrootadoptedstylesheets` with an external CSS file would look like this:
-
-```html
-<my-element>
-  <link rel="modulepreload" as="style" href="./foo.css" blocking="render">
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="./foo.css">
-    ...
-  </template>
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="./foo.css">
-    ...
-  </template>
-</my-element>
-```
-
-Note that the second `<template>` tag doesn't need a corresponding `<link rel="modulepreload">` - this only needs to happen once per external module, per document, to ensure that it's in the module map before `shadowrootadoptedstylesheets` is parsed.
 
 ### Importing Other CSS Files With @import
 
@@ -483,55 +412,11 @@ If a module is imported imperatively in this fashion and the Declarative CSS Mod
 
 ### Static Versus Dynamic Values For shadowrootadoptedstylesheets Specifiers
 
-Stylesheets referenced by specifiers in the `shadowrootadoptedstylesheets` attribute are static - they are only applied if they are available when their associated `<template>` tag is parsed.
+The `shadowrootadoptedstylesheets` attribute is evaluated once when the `<template>` element is parsed. Inline modules defined via `<style type="module">` must already be in the module map at parse time; external URL specifiers trigger a fetch if not present. For detailed evaluation rules, examples, and the design rationale for static specifiers, see [How the attribute is evaluated](../ShadowDOMAdoptedStyleSheets/explainer.md#how-the-attribute-is-evaluated) and [Declarative modules are not applied retroactively](../ShadowDOMAdoptedStyleSheets/explainer.md#declarative-modules-are-not-applied-retroactively) in the focused `shadowrootadoptedstylesheets` explainer.
 
-In the following example, the stylesheet referenced by the specifier "foo" is not applied to the adopted stylesheets array because the declarative
-definition of "foo" is after the `<template>` tag:
+### Fetch Behavior For External Specifiers
 
-```html
-<my-element>
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="foo">
-    <div id="content">filler text</div>
-  </template>
-</my-element>
-<style type="module" specifier="foo">
-  #content {
-    color: red;
-  }
-</style>
-```
-
-Similarly, for external files, no styles are adopted into the `<template>` because "foo.css" hasn't been loaded into the module map at the time the `<template>` tag has been parsed:
-
-```html
-<my-element>
-  <template shadowrootmode="open" shadowrootadoptedstylesheets="./foo.css">
-    ...
-  </template>
-</my-element>
-<link rel="modulepreload" as="style" href="./foo.css">
-```
-
-This could be addressed by treating the specifier as a dynamic reference and invalidating styles accordingly when that reference changes. However, supporting this scenario is not ideal for several reasons:
-* It would introduce a dependency on the module map to track all missing references and respond to updates. This is not ideal because it adds an additional performance cost for module map updates.
-* There is no way to support this scenario without causing a FOUC. FOUC should be avoided because it is a poor user experience and causes extra work for the renderer.
-* Once created, specifiers cannot change. Introducing new side effects when specifiers are created but not changed could be considered unintuitive.
-* This approach more closely aligns with the imperative `adoptedStyleSheets` API, as stylesheets must exist before they can be added to the `adoptedStyleSheets` array.
-
-For these reasons, we do not believe it is worth pursuing making specifiers dynamic.
-
-### Why shadowrootadoptedstylesheets Does Not Perform a Fetch
-
-The current design does not fetch the specifiers listed in `shadowrootadoptedstylesheets` - they must be present in the module map at the time `shadowrootadoptedstylesheets` is parsed.
-
-There are several reasons for this behavior:
- * Fetching stylesheets at parse time would introduce a FOUC for the initial stylesheet fetch, with additional style invalidations upon each subsequent fetch complete. FOUC should be avoided because it is a poor user experience and causes extra work for the renderer.
- * A URL alone does not allow for any flexibility of the fetch. Properties such as [`fetchpriority`](https://html.spec.whatwg.org/#dom-link-fetchpriority) and [`blocking`](https://html.spec.whatwg.org/#attr-style-blocking) that `<link rel="modulepreload">` supports are not possible to apply with a URL alone.
- * There is already a mechanism for declaratively fetching modules with `<link rel="modulepreload">`.
- * There is already a mechanism for loading external CSS files in Shadow Roots via `<link rel="stylesheet">`.
- * The imperative `adoptedStyleSheets` does not perform a fetch, so not fetching is consistent with that version.
-
-For these reasons, we do not believe that it is necessary to perform a fetch for each entry in `shadowrootadoptedstylesheets`.
+> **Note:** The design for fetch behavior has evolved since this document was originally written. When a specifier in `shadowrootadoptedstylesheets` is not present in the module map at parse time and resolves to a URL, the attribute now initiates a fetch for that URL. For full details, limitations, and recommendations, see the [Fetch Behavior For External Specifiers](../ShadowDOMAdoptedStyleSheets/explainer.md#fetch-behavior-for-external-specifiers) section of the focused `shadowrootadoptedstylesheets` explainer.
 
 ## Other Declarative Modules
 An advantage of this approach is that it can be extended to solve similar issues with other content types. Consider the case of a declarative component with many instances stamped out on the page. In the same way that the CSS must either be duplicated in the markup of each component instance or set up using script, the same problem applies to the HTML content of each component. We can envision an inline version of [HTML module scripts](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/html-modules-explainer.md) that would be declared once and applied to any number of shadow root instances:
@@ -543,7 +428,7 @@ An advantage of this approach is that it can be extended to solve similar issues
 ...
 </template>
 <my-element>
-<!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by
+<!-- The `shadowroothtml` attribute causes the `<template>` to populate the shadow root by
 cloning the contents of the HTML module given by the "foo" specifier, instead of
 parsing HTML inside the <template>. -->
   <template shadowrootmode="open" shadowroothtml="foo"></template>
@@ -561,7 +446,7 @@ This approach could also be expanded to SVG modules, similar to the HTML Modules
 ...
 </template>
 <my-element>
-<!-- The `shadoowroothtml` attribute causes the `<template>` to populate the shadow root by
+<!-- The `shadowroothtml` attribute causes the `<template>` to populate the shadow root by
 cloning the contents of the SVG module given by the "foo" specifier, instead of
 parsing SVG inside the <template>. -->
   <template shadowrootmode="open" shadowroothtml="foo"></template>
@@ -623,53 +508,7 @@ Another alternative could be to define a new [scheme](https://url.spec.whatwg.or
 
 ### Using A Link Tag To Adopt Stylesheets
 
-The samples listed use a proposed `shadowrootadoptedstylesheets` attribute on the `<template>` tag with a space-separated list of specifiers. This closely maps to the existing JavaScript `adoptedStyleSheets` property.
-
-Another option is to instead use existing HTML concepts for applying stylesheets into shadow roots, such as the `<link>` tag, as demonstrated by the following example:
-
-```html
-<style type="module" specifier="foo">
-  #content {
-    color: red;
-  }
-</style>
-
-<my-element>
-  <template shadowrootmode="open">
-    <link rel="adoptedstylesheet" specifier="foo">
-  </template>
-</my-element>
-```
-
-While this approach doesn't map as closely to the existing `adoptedStyleSheets` API, it more closely follows existing HTML semantics. It also allows for a rich set of [features](https://html.spec.whatwg.org/#the-link-element) offered by the `<link>` element, such as media queries. However, a small disadvantage is that the `<link>` element has many additional properties that would not apply in this scenario, such as `crossorigin`, `fetchpriority`, `referrerpolicy`.
-
-The `shadowrootadoptedstylesheets` attribute as specified accepts a list a stylesheets. Multiple stylesheets can be added to a shadow root's adopted stylesheet list with the `<link>` proposal by including multiple `<link>` tags.
-
-Looking forward, the `<link>` approach is directly compatible with the proposed CSS `@sheet` feature, which allows a single CSS file to contain multiple stylesheets. This allows developers to specify a single named stylesheet that is applied from the CSS definition, rather than applying the global contents of the entire sheet, as illustrated by the following example:
-
-```html
-<style type="module" specifier="foo">
-  @sheet my_cool_sheet {
-    ...
-  }
-  @sheet my_other_sheet {
-    #content {
-    ...
-    }
-  }
-  #content {
-    ...
-  }
-</style>
-
-<my-element>
-  <template shadowrootmode="open">
-    <link rel="adoptedstylesheet" specifier="foo" sheet="my_cool_sheet">
-  </template>
-</my-element>
-```
-
-Only the contents of `my_cool_sheet` would be applied, due to the `sheet` attribute on the `<link>` tag specifying that named sheet.
+An alternative to the `shadowrootadoptedstylesheets` attribute is to use a `<link>` tag inside the shadow root to adopt stylesheets. This approach trades the close mapping to the imperative `adoptedStyleSheets` API for richer HTML semantics (media queries, `@sheet` compatibility). For the full comparison, see [Using A Link Tag To Adopt Stylesheets](../ShadowDOMAdoptedStyleSheets/explainer.md#using-a-link-tag-to-adopt-stylesheets) in the focused `shadowrootadoptedstylesheets` explainer.
 
 ### [Local References For Link Rel](../LocalReferenceLinkRel/explainer.md)
 
@@ -748,7 +587,7 @@ The method aims to support both declarative and imperative shadow trees and work
 Since CSS is scoped per Shadow Root, nested Shadow DOM elements would need to inherit at each level.
 
 ### [`@Sheet`](https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1407059971)
-This proposal builds on [using multiple sheets per file](https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1407059971) that introduces a new `@sheet` rule to address the difficulties arising when using JavaScript modules to manage styles. The main idea is to enhance the way CSS is imported, managed, and bundled in JavaScript by allowing multiple named stylesheets to exist within a single CSS file. We can expand on this proposal to allow stylesheets being directly specified within the HTML markup using `shadowrootadoptedstylesheets` property without requiring JavaScript:
+This proposal builds on [using multiple sheets per file](https://github.com/w3c/csswg-drafts/issues/5629#issuecomment-1407059971) that introduces a new `@sheet` rule to address the difficulties arising when using JavaScript modules to manage styles. The main idea is to enhance the way CSS is imported, managed, and bundled in JavaScript by allowing multiple named stylesheets to exist within a single CSS file. We can expand on this proposal to allow stylesheets being directly specified within the HTML markup using the `shadowrootadoptedstylesheets` attribute without requiring JavaScript:
 
 ```html
 <style>
@@ -779,8 +618,8 @@ The JavaScript version of this could also support CSS modules:
 }
 ```
 ```html
-<script>
-import {sheet1, sheet2} from './styles1and2.css' assert {type: 'css'};
+<script type="module">
+import {sheet1, sheet2} from './styles1and2.css' with {type: 'css'};
 ...
 shadow.adoptedStyleSheets = [sheet1, sheet2];
 </script>
@@ -840,12 +679,12 @@ Stylesheets defined via `@sheet` are not global - they are scoped per shadow roo
   </template>
 </template>
  ```
-Text within both shadow roots in the above example should be blue due to the `shadowrootadoptedstylesheets` at each Shadow DOM layer. Note that it is not currently possible to export stylesheets *out* of shadow roots, which is a deal-breaker for the [Streaming SSR](#streaming-ssr) example outlined above.
+Text within the first two nested shadow roots in the above example should be blue due to the `shadowrootadoptedstylesheets` and `@import` at each Shadow DOM layer. Note that it is not currently possible to export stylesheets *out* of shadow roots, which is a deal-breaker for the [Streaming SSR](#streaming-ssr) example outlined above.
 
 An alternative to this entire proposal would be to make `@sheet` identifiers cross shadow boundaries, which would also allow for sharing styles across shadow roots. However, without a way to import inline `<style>` blocks into shadow roots, as proposed in [Local References in Link Tags](../LocalReferenceLinkRel/explainer.md#local-references-in-link-tags), this behavior would be limited to external .css files. Due to DOM scoping, [Local References in Link Tags](../LocalReferenceLinkRel/explainer.md#local-references-in-link-tags) would not work as required in a [Streaming SSR](#streaming-ssr) scenario.
 
 ### [Id-based `shadowrootadoptedstylesheets` attribute on template](https://github.com/WICG/webcomponents/issues/939#issue-971914425)
-This proposal will add a new markup-based `shadowrootadoptedstylesheets` property that closely matches the existing JavaScript property. The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object.
+This proposal will add a new markup-based `shadowrootadoptedstylesheets` attribute that closely matches the existing JavaScript property. The behavior would be just like the `adoptedStyleSheet` property that already exists in JavaScript, except it would accept a list of id attributes instead of a `ConstructableStylesheet` JavaScript object.
 ```html
 <style type="css" id="shared_shadow_styles">
     :host {
@@ -859,7 +698,7 @@ or
 ```html
 <link rel=”stylesheet” href=”styles.css” id=”external_shared_shadow_styles”>
 ```
-Web authors can use the `shadowrootadoptedstylesheets` property on the `<template>` element to associate the stylesheets with a declarative shadow root.
+Web authors can use the `shadowrootadoptedstylesheets` attribute on the `<template>` element to associate the stylesheets with a declarative shadow root.
 ```html
 <template shadowrootmode="open" shadowrootadoptedstylesheets="shared_shadow_styles external_shared_shadow_styles">
       <!-- -->
@@ -879,31 +718,7 @@ shadowRoot.adoptedStyleSheets = [sheet];
 
 ## Polyfills
 
-Web developers often seek polyfills to allow them to use new web platform features while falling back gracefully in user agents where such features are not supported. A common strategy is to use JavaScript for polyfills. An example of this could be the following:
-
-```html
-<script>
-  function supportsDeclarativeAdoptedStyleSheets() {
-    return document.createElement('template').shadowRootAdoptedStyleSheets != undefined;
-  }
-
-  if (!supportsDeclarativeAdoptedStyleSheets()) {
-    // AdoptedStyleSheets is not supported on <template> - apply polyfill. This polyfill could be an injected <link> tag.
-  }
-</script>
-```
-
-There was also a [suggestion](https://github.com/whatwg/html/issues/10673#issuecomment-2453512552) for adding browser support to enable falling back to a normal `<link>` tag without the use of script, by binding the `<link>` tag's `href` attribute value to the CSS module identifier and adding a new attribute (`noadoptedstylesheets`) to avoid double-applying stylesheets.
-
-This suggestion looks like the following:
-
-```html
-<my-element>
-   <template shadowrootmode="open" shadowrootadoptedstylesheets="foo">
-       <link rel="stylesheet" href="/foo.css" noadoptedstylesheets> <!-- no-op on browsers that support shadowrootadoptedstylesheets on <template> tags -->
-   </template>
-</my-element>
-```
+For details on polyfill strategies for `shadowrootadoptedstylesheets` — including feature detection via the proposed `shadowRootAdoptedStyleSheets` reflection property and the `<link>` tag fallback approach — see [Polyfills](../ShadowDOMAdoptedStyleSheets/explainer.md#polyfills) in the focused `shadowrootadoptedstylesheets` explainer.
 
 ## Future Work
 
@@ -929,7 +744,7 @@ The following table compares pros and cons of the various proposals:
 | 2 | `<link rel>` | ✅ Yes | ❌ Yes | ❌ Yes | Yes, on a **per-sheet** basis | ❌ No |
 | 3 | `@layer` + `importStyles` | ❌ No | ✅ No | ✅ No (unless `@imports` is used) | Yes, on a **per-sheet** basis | ❌ Not currently, but could be specified. |
 | 4 | `@Sheet` | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ Not currently, but could be specified. |
-| 5 | `adoptedstylesheets` attribute | ❌ No | ✅ No | ✅ No | Yes, on a **per-sheet** basis | ❌ No |
+| 5 | `adoptedstylesheets` attribute | ❌ No | ✅ No (unless specifier resolves to an external URL) | ✅ No (unless specifier resolves to an external URL) | Yes, on a **per-sheet** basis | ❌ No |
 
 ## Open issues
 * Since Import Maps have no knowledge of an underlying module type for their mappings, declarative modules with the same specifier (e.g. "foo"), but differing module types (e.g. one JavaScript module with a specifier of "foo" and one CSS module with a specifier of "foo") would create separate entries in the generated import map, and only the first definition would actually be mapped. There are a few possible solutions to this issue. The simplest is that developers could be instructed to avoid name collisions for declarative modules of different types (for example, using the type as a prefix). Another option is for a type prefix to automatically be added as part of the syntactic sugar for declarative modules, but this would require developers to manually add the prefix when mixing declarative and imperative definitions. Alternatively, the JSON definition for Import Maps could support an underlying `type` property when a data URI is specified, mapping the data URI type to supported Module Record types. For example, "text/css" could be mapped to a "CSS" module type, and likewise, "text/javascript" could be mapped to a JavaScript module type. This approach would require adding several special cases for Import Map resolution for each of the module types.
@@ -937,13 +752,14 @@ The following table compares pros and cons of the various proposals:
 * Should the [`media` attribute](https://html.spec.whatwg.org/multipage/semantics.html#attr-style-media) that the `<style>` tag currently supports apply for modules? If so, how should it be applied?
 * Does the [`blocking` attribute](https://html.spec.whatwg.org/multipage/semantics.html#attr-style-blocking) on the `<style>` tag apply to CSS Modules? If so, how would it work?
 * What happens in scenarios that cross document boundaries, such as `Document.parseHTMLUnsafe`?
-* How can developers check for and polyfill `shadowrootadoptedstylesheets`, given that the template element disappears from the DOM?
-* Is it possible to define an intentional race between an async preload of an external stylesheet and a just-in-time definition of a declarative module and only apply the one that wins? This might not be possible due to the fact that specifiers are unique.
-* How should this proposal work if non-constructable stylesheets are adopted for `adoptedstylesheets`? See https://github.com/w3c/csswg-drafts/issues/10013.
+
+For open issues specific to the `shadowrootadoptedstylesheets` attribute (polyfill detection, non-constructable stylesheets, fetch error handling, etc.), see [Open issues](../ShadowDOMAdoptedStyleSheets/explainer.md#open-issues) in the focused `shadowrootadoptedstylesheets` explainer.
 
 ## References and acknowledgements
 Many thanks for valuable feedback and advice from other contributors:
 - Alison Maher
 - Alex Russell
+- Anne van Kesteren
+- Jeffrey Yasskin
 - Justin Fagnani
 - Steve Orvell
