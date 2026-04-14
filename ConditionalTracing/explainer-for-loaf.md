@@ -58,7 +58,7 @@ performance.markConditional("mark1");  // at time t1
 // Add another mark.
 performance.markConditional("mark2");   // at time t2
 
-// This mark is never refered to by conditional measures, because it's not conditional.
+// This mark is never referred to by conditional measures, because it's not conditional.
 performance.mark("mark1");  // at time tx
 
 // Combines mark->mark as a single entry with duration.
@@ -97,9 +97,9 @@ had never been reached, the output would be:
 
 ## Alternatives Considered
 
-[User-defined script entry point (UDSEP)](https://github.com/w3c/long-animation-frames/blob/main/user-defined-script-entry-point-explainer.md) is another way to annotate code for LoAF. UDSEP monitors script entry point enter and exit timing and keeps track of nesting entry points as well as time spent by microtasks that are not annotated but dispatched within UDSEP. This approach requires [an efficient V8 extension](https://docs.google.com/document/d/1wEXU0nv8DhzN7XpfmlfbRcbsJ2JNWjfAF-3J7qtWiEw/edit?usp=sharing) that allows Blink to be notified at the microtask enter and exit points. Due to the complexty involved, we prefer this conditional tracing approach.
+[User-defined script entry point (UDSEP)](https://github.com/w3c/long-animation-frames/blob/main/user-defined-script-entry-point-explainer.md) is another way to annotate code for LoAF. UDSEP monitors script entry point enter and exit timing and keeps track of nesting entry points as well as time spent by microtasks that are not annotated but dispatched within UDSEP. This approach requires [an efficient V8 extension](https://docs.google.com/document/d/1wEXU0nv8DhzN7XpfmlfbRcbsJ2JNWjfAF-3J7qtWiEw/edit?usp=sharing) that allows Blink to be notified at the microtask enter and exit points. Due to the complexity involved, we prefer this conditional tracing approach.
 
-## Future extention to this proposal
+## Future extension to this proposal
 
 We can apply the same enhancement to event timing in the future.
 
@@ -113,7 +113,7 @@ The information exposed by this API is similar to what the User Timing API expos
 
 >1.	What information does this feature expose, and for what purposes?
 
-This feature extends the existing performance User Timing API. The app can add `mark` and `measure` points in a similar fasion but the `PerformanceMark` and `PerformanceMeasure` entries can now be specified for a particular kind of performance incidents, so the UA filters out unrelevant entries and report the relevant ones in the corresponding `PerformanceEntry`.
+This feature extends the existing performance User Timing API. The app can add `mark` and `measure` points in a similar fashion but the `PerformanceMark` and `PerformanceMeasure` entries can now be specified for a particular kind of performance incidents, so the UA filters out irrelevant entries and report the relevant ones in the corresponding `PerformanceEntry`.
 
 The purpose of this new feature is to improve the computational efficiency and ergonomics of the User Timing API when diagnosing the cause of LoAF.
 
