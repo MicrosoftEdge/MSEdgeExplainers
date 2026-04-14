@@ -20,9 +20,9 @@ One example is the [wrapper problem](https://github.com/w3c/long-animation-frame
 
 The [performance User Timing API](https://www.w3.org/TR/user-timing/) can be used to diagnose performance problems further when additional information is needed to locate the root cause. However, it has some drawbacks:
 
-- The browser doesn't know the performance user timing points are set to diagnose a particular kind of performance incidents, so the browser cannot manage the coresponding data efficiently. The data cannot be filtered properly based on the the absence of performance incidents. Consequently the sites must process and upload more metric data back to the server than needed. This causes considerable performance overhead on the client.  
+- The browser doesn't know the performance user timing points are set to diagnose a particular kind of performance incidents, so the browser cannot manage the corresponding data efficiently. The data cannot be filtered properly based on the the absence of performance incidents. Consequently the sites must process and upload more metric data back to the server than needed. This causes considerable performance overhead on the client.
 
-- The data collected from performance User Timing API is separate from the data collected from perfornance monitoring APIs like LoAF, requiring developers to relate them after careful analysis.
+- The data collected from performance User Timing API is separate from the data collected from performance monitoring APIs like LoAF, requiring developers to relate them after careful analysis.
 
 This document proposes a lightweight User Timing API extension specifically designed to support LoAF. Compared to the standard User Timing API, this proposal offers lower runtime overhead and improved developer ergonomics. A similar enhancement could be applied to the Event Timing API in the future.
 
@@ -67,13 +67,13 @@ performance.measureConditional("myMeasure", "mark1", "mark2");
 // Observe long animation frame entries, and print out the
 // conditional tracing results.
 const observer = new PerformanceObserver(entries => {
-    for (const loaf : entries.getEntriesByType("long-animation-frame") {
+    for (const loaf of entries.getEntriesByType("long-animation-frame")) {
       // This will print all the conditional marks & measures that occur during a LoAF.
       for (const userTimingEntry of loaf.userTimingEntries) {
         if( userTimingEntry.entryType === "conditionalMark"){
           console.log(userTimingEntry.entryType,  userTimingEntry.name, userTimingEntry.startTime);
         }
-        else if ( userTimingEntry.entryType == "conditionalMeasure"){
+        else if ( userTimingEntry.entryType === "conditionalMeasure"){
           console.log(userTimingEntry.entryType, userTimingEntry.name, userTimingEntry.duration);
         }
       }
