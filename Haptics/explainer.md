@@ -59,7 +59,9 @@ Beyond the limitations of the existing API, there is no declarative way for deve
 
 ## Proposed Approach
 
-The Web Haptics API uses a predefined list of effects with an optional intensity parameter, without exposing raw waveform authoring or low-level parameters like duration, sharpness, or ramp. Developers request a named effect, and the user agent maps it to the closest native capability (which may be a generic pattern if OS or hardware support is lacking). To minimize fingerprinting risks, the API does not currently allow developers to query haptics-capable hardware or available waveforms. Instead, haptics will be sent to the last input device if haptics-capable.
+The Web Haptics API uses a predefined list of effects with an optional intensity parameter, without exposing raw waveform authoring or low-level parameters like duration, sharpness, or ramp. Developers request a named effect, and the user agent maps it to the closest native capability (which may be a generic pattern if OS or hardware support is lacking). To minimize fingerprinting risks, the API does not currently allow developers to query haptics-capable hardware or available waveforms.
+
+For both imperative and declarative APIs, target selection follows one shared model: dispatch to the most recent input device. If that device is not haptics-capable, no haptic is played. User agents do not reroute to another connected haptics-capable device.
 
 Both the imperative and declarative paths share the same effect vocabulary.
 
@@ -71,7 +73,6 @@ Both the imperative and declarative paths share the same effect vocabulary.
 | `edge`  | A heavy boundary signal that indicates reaching the end of a range or hitting a limit. | Validation failure, pull-to-refresh threshold, scroll hitting a boundary. |
 | `tick`  | A firm pulse that marks discrete changes, like moving through a list or toggling a switch. | Scroll-snap landing, stepping through picker values, toggling a switch. |
 | `align` | A crisp confirmation when an object locks into place or aligns with guides or edges. | Drag-to-snap, window snapping to screen edges, zoom snapping to 100%. |
-| `none`  | Explicitly disables haptic feedback. | Suppressing haptics on a "quiet" variant of a component. |
 
 The table below illustrates example mappings of the predefined effects (hint, edge, tick, align) to representative platform-native feedback patterns across Windows, macOS, iOS, and Android. These mappings are illustrative examples only. User agents may choose different mappings, including synthesizing custom effects from lower-level primitives and parameters. The API standardizes the developer-facing intent, while the underlying realization remains platform-defined.
 
@@ -96,7 +97,7 @@ navigator.playHaptics(effect, intensity);
 - `effect` — one of the predefined effect names: `"hint"`, `"edge"`, `"tick"`, `"align"`.
 - `intensity` *(optional)* — a normalized value between 0.0 and 1.0. Defaults to 1.0.
 
-The API always returns `undefined`. No haptic is played if the last input device is not haptics-capable. If sticky user activation has expired, the call is silently ignored.
+The API always returns `undefined`. No haptic is played if the last input device is not haptics-capable, and the user agent does not reroute to another connected haptics-capable device. If sticky user activation has expired, the call is silently ignored.
 
 ### Declarative API (CSS)
 
@@ -124,7 +125,11 @@ The `@haptic-trigger` at-rule declares a selector plus descriptors that define w
 
 The haptic fires once per selector match transition according to `phase`. This supports pseudo-classes (e.g. `:active`, `:checked`), class-driven state (`.is-open`), and attribute-driven state (`[aria-invalid="true"]`) with one model.
 
+When a declarative trigger fires, target selection uses the same input-device model as the imperative API: the most recent input device is targeted; if that device is not haptics-capable, no haptic is played and no rerouting occurs. This target selection and activation check are evaluated when the trigger fires, not at style computation time.
+
 When multiple `@haptic-trigger` rules have selectors that transition into (or out of) matching the same element in the same rendering update, at most one haptic fires per element. The winning rule is determined by selector specificity; ties are broken by last in document order. This prevents overlapping selectors (e.g. `button:active` and `.cta:active` both matching `<button class="cta">`) from producing a double-tap. To conditionally suppress a trigger, exclude it via `@media` rather than relying on specificity.
+
+Across multiple elements in the same rendering update, user agents may coalesce or suppress triggers and fire at most one haptic per target device per frame as a temporary v1 anti-overload rule.
 
 **Example — button press:**
 
@@ -207,6 +212,10 @@ An `edge` fires at 40% when the element hits the baseline, and a softer `align` 
 
 The current set of four effects is intentionally small. If the effect vocabulary grows (e.g. platform-specific effects or developer-defined waveforms), the API should accommodate them without syntax changes.
 
+### User preference media feature (`prefers-haptics`)
+
+A coarse user-preference media feature could be considered in a future phase (for example, `prefers-haptics: reduce | no-preference`) to help authors adapt non-essential feedback. This is deferred from v1 to avoid expanding API surface before concrete implementation and privacy review feedback.
+
 ## Alternatives Considered
 
 ### CSS alternatives
@@ -279,7 +288,7 @@ See [Appendix: CSS Alternatives Side-by-Side](#appendix-css-alternatives-side-by
 
 ### Privacy
 
-To avoid introducing a new fingerprinting vector, the API does not expose means to query haptics-capable devices, available effects, or whether a haptic was successfully played. No new media features are introduced.
+To avoid introducing a new fingerprinting vector, the API does not expose means to query haptics-capable devices, available effects, or whether a haptic was successfully played. No new media features are introduced in v1.
 
 ### Security
 
@@ -287,17 +296,18 @@ To avoid introducing a new fingerprinting vector, the API does not expose means 
 
 **Imperative API:** Requires sticky user activation. No permission gate.
 
-**Declarative API:** No user activation required. Selector match transitions fire haptics regardless of whether the state change was user- or script-initiated. This keeps the model simple — user agents need not distinguish the source.
+**Declarative API:** Selector match transitions from direct user interaction may fire haptics without additional activation checks. Activation checks apply to script-initiated selector transitions, which require sticky user activation; if activation is not present, the trigger is ignored.
 
 ## Open Questions
 
 - **Is selector-trigger the right primary declarative surface, or should animation-trigger be the primary model?** This proposal uses selector-trigger as the primary path and documents animation-trigger as a serious alternative. We welcome feedback on which model should anchor standardization.
 - **Should any [future extension](#future-extensions) be promoted to v1?** Animation haptics and custom effects are deferred. If either is critical for initial adoption, we would like to hear which and why.
-- **Should script-initiated declarative haptics require user activation?** Currently, the declarative API fires haptics on selector match transitions regardless of whether the change was user- or script-initiated (e.g. a script toggling a class, attribute, checkbox, or popover state). An alternative is to gate script-initiated triggers behind sticky user activation, matching the imperative API's requirement.
+- **Is the proposed split activation model right for v1?** Current proposal: direct user-interaction transitions can fire declarative haptics without additional activation checks, while script-initiated transitions require sticky user activation. Should this split be retained, or should declarative triggers be uniformly activation-gated?
+- **Should a user-preference media feature be added in a future phase?** v1 introduces no media query. A possible extension is a coarse preference signal (e.g. `prefers-haptics: reduce | no-preference`) if there is concrete use-case and privacy review support.
 - **Should a dedicated `scroll-snap-haptic` property be added if `:snapped` does not ship?** The current proposal relies on the [`:snapped` pseudo-class](https://drafts.csswg.org/css-scroll-snap-2/#snapped) from CSS Scroll Snap 2 for scroll-snap haptics (e.g. `@haptic-trigger .slide:snapped { ... }`). If `:snapped` does not ship or is significantly delayed, a dedicated `scroll-snap-haptic` CSS property on the scroll container could serve as a self-contained fallback. We welcome feedback on whether the `:snapped` dependency is acceptable for v1.
 - **Feedback on the predefined effect vocabulary?** The current set (`hint`, `edge`, `tick`, `align`) is intentionally small. Feedback is needed on whether these four effects cover the most common interaction patterns and map well to native haptic primitives across platforms.
 - **Should the API return whether haptics was successfully played?** Currently, `playHaptics` always returns `undefined` to avoid exposing device capabilities. Returning a boolean or promise could help developers debug, but risks leaking hardware information.
-- **Are specificity-based conflict resolution rules the right model for overlapping triggers?** The current design deduplicates by element per rendering update — when multiple `@haptic-trigger` rules match the same element, the highest-specificity rule wins (last in document order breaks ties). This prevents unintended double-taps but means lower-specificity rules are silently suppressed. We welcome feedback on whether this model is intuitive or whether an alternative (e.g. all-fire-independently, explicit priority descriptors) is preferable.
+- **Should global arbitration be standardized beyond per-element dedupe?** Current v1 proposal allows user agents to coalesce/suppress cross-element triggers and fire at most one haptic per target device per frame. We welcome feedback on whether a future level should define a deterministic cross-element winner algorithm.
 - **Is there developer interest in haptics device enumeration?** Though out of scope, we would like to understand interest. Exposing available devices or capabilities would enable richer experiences but introduces fingerprinting trade-offs that need careful evaluation.
 
 ## Reference for Relevant Haptics APIs
