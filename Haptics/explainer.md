@@ -158,7 +158,7 @@ A tactile press confirmation:
 
 ### Social Media Stories Scrolling
 
-A horizontal story carousel with a tactile tick on each snap — using the [`:snapped` pseudo-class](https://drafts.csswg.org/css-scroll-snap-2/#snapped) from CSS Scroll Snap 2:
+A horizontal story carousel with a tactile tick on each snap — using the [`:snapped` pseudo-class](https://drafts.csswg.org/css-scroll-snap-2/#snapped) from CSS Scroll Snap 2. Note: `:snapped` is currently draft-level and not yet widely implemented:
 
 ```css
 @haptic-trigger .story-carousel > .story:snapped {
