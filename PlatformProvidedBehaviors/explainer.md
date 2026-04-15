@@ -76,7 +76,6 @@ This proposal is informed by:
 1. There's a clear gap with implicit form submission.
 2. Form submission has clear semantics, making it useful for validating the overall pattern (lifecycle, conflict resolution, accessibility integration) before expanding to more complex behaviors.
 3. There's no API to make a custom element participate in implicit form submission as `form.requestSubmit()` only handles explicit activation.
-4. Starting with form submission establishes a composable pattern that can extend to inputs, labels, popovers, and more.
 
 ## Proposed approach
 
@@ -172,7 +171,7 @@ class CustomSubmitButton extends HTMLElement {
 }
 ```
 
-Authors are responsible for attribute reflection. If the author wants HTML attributes on their custom element to affect the behavior, they need to observe and forward those attributes using `attributeChangedCallback`:
+Authors are responsible for attribute reflection. If the author wants HTML attributes on their custom element to affect the `behavior`, they need to observe and forward those attributes using `attributeChangedCallback`:
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -188,14 +187,14 @@ class CustomButton extends HTMLElement {
 }
 ```
 
-Form override values (`formAction`, `formEnctype`, `formMethod`, `formNoValidate`, `formTarget`, `name`, `value`) are read from behavior properties. Setting a value declaratively in markup (e.g., `<my-button formaction="/save">`) or programmatically (e.g. `setAttribute('formaction', '/save')`) has no effect on form submission unless the author explicitly forwards that attribute to the behavior. However, some element attributes are read directly by the platform as part of the existing [form-associated custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements) mechanism, independently of behaviors:
+Form override values (`formAction`, `formEnctype`, `formMethod`, `formNoValidate`, `formTarget`, `name`, `value`) are read from `behavior` properties. Setting a value declaratively in markup (e.g., `<my-button formaction="/save">`) or programmatically (e.g. `setAttribute('formaction', '/save')`) has no effect on form submission unless the author explicitly forwards that attribute to the `behavior`. However, some element attributes are applied to form submission as part of the existing [form-associated custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements) mechanism, independently of behaviors:
 
-| Element attribute | Read by platform | Notes |
-|-------------------|------------------|-------|
+| Element attribute | Applied via form-associated custom element mechanics | Notes |
+|-------------------|------------------------------------------------------|-------|
 | `form` | Yes | Standard form association by ID. `behavior.form` is read-only and delegates to `ElementInternals.form`, which reflects this association. |
 | `disabled` | Yes | Standard form control disabling. Combined with `behavior.disabled`. |
-| `name` | Yes | As a form-associated custom element attribute, `name` determines the key for the element's own form data (via `setFormValue()`), but this is separate from `behavior.name`, which is the submitter's name/value pair appended on submission. |
-| `formaction`, `formenctype`, `formmethod`, `formtarget` | No | Only behavior properties are read. |
+| `name` | Yes | As a form-associated custom element attribute, `name` determines the key for the element's own form data (via `setFormValue()`). `behavior.name` is a separate property: it sets the submitter's name/value pair appended on submission. For example, `<my-button name="field" value="data">` with `behavior.name = "action"` and `behavior.value = "save"` would submit both `field=data` (from the element's form data) and `action=save` (from the submitter). |
+| `formaction`, `formenctype`, `formmethod`, `formtarget` | No | Only `behavior` properties are read. |
 
 ### Behavior lifecycle
 
@@ -275,6 +274,8 @@ this._tooltipBehavior.content = 'Helpful tooltip text';
 
 For the built-in behaviors currently under consideration and mentioned in this document (`HTMLSubmitButtonBehavior`, `HTMLButtonBehavior`, `HTMLResetButtonBehavior`, etc.), no two are expected to be compatible. However, as this framework allows for composability, conflicts may be resolved using order of precedence: the position of behaviors in the array determines which behavior's value takes effect.
 
+Consider the following example of behaviors that could potentially be compatible, `HTMLLabelBehavior` and `HTMLSubmitButtonBehavior`:
+
 ```javascript
 class LabeledSubmitButton extends HTMLElement {
   static formAssociated = true;
@@ -295,23 +296,20 @@ class LabeledSubmitButton extends HTMLElement {
 customElements.define('labeled-submit-button', LabeledSubmitButton);
 
 const btn = document.createElement('labeled-submit-button');
-```
 
-For properties where an element can only have one value (ARIA role, `disabled`, `formAction`, etc.), last-in-wins applies.
+// For properties where an element can only have one value (ARIA role, `disabled`,
+// `formAction`, etc.), last-in-wins applies:
 
-```javascript
 // The element's implicit role is "button" (from HTMLSubmitButtonBehavior, last in list).
 console.log(btn.computedRole);  // "button"
 
 // If the author sets `internals.role`, that takes precedence over all behavior defaults.
 this._internals.role = 'link';
 console.log(btn.computedRole);  // "link"
-```
 
-However, the element is disabled if any behavior's `disabled` is `true`. When disabled, the entire element is affected: all behavior default actions are blocked, the element is removed from tab order, and it matches `:disabled`.
-
-```javascript
-// If any one behavior is disabled, the whole element is disabled:
+// However, the element is disabled if any behavior's `disabled` is `true`. When
+// disabled, the entire element is affected: all behavior default actions are blocked,
+// the element is removed from tab order, and it matches `:disabled`.
 submitBehavior.disabled = true;
 labelBehavior.disabled = false;
 console.log(btn.matches(':disabled'));  // true
@@ -498,14 +496,7 @@ The element gains:
 - Participation in implicit form submission (for submit buttons).
 - Behavior properties like `disabled` and `formAction` are accessible via the stored behavior reference.
 
-#### Dynamically changing the `type` attribute
-
-Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to toggle behaviors:
-
-- Under last-in-wins, only `buttonBehavior`'s property values (the last in the array) determine the element's effective state. For `disabled`, this means setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect as only `buttonBehavior.disabled` controls whether the element matches `:disabled`, is removed from the tab order, and stops receiving activation events (no click or keyboard handler from any behavior runs while disabled).
-- All three behaviors provide default actions for click with different effects. Since behavior default actions all run, the element would submit the form, reset the form, and trigger the button action on every click.
-
-Because `disabled` cannot selectively silence individual behaviors and all behavior default actions run together, loading all three simultaneously and switching between them is not viable.
+*Note: Dynamically switching `type` after the element is connected is not supported because `internals.behaviors` can't be changed after `ElementInternals` is attached. If it turns out that dynamically switching `type` is needed, future work could consider removing this restriction.*
 
 ### Framework use cases
 
@@ -885,9 +876,7 @@ this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 - Requires a `behaviors` interface for named access.
 - *Future* developer-defined behaviors would need a way to name their behaviors.
 
-### Alternatives for conflict resolution of composable behaviors
-
-#### Option 1: Compatibility allow-list
+### Alternative conflict resolution: Compatibility allow-list
 
 Compatibility between behaviors could be defined in the specification. This follows the pattern used by [`attachShadow`](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow), where the [list of valid shadow host names](https://dom.spec.whatwg.org/#valid-shadow-host-name) is spec-defined and enforced at runtime. Web authors can reference documentation or DevTools errors to determine which combinations are valid.
 
@@ -923,9 +912,9 @@ There can be two interpretations of what "compatible behaviors" means:
 - More restrictive as authors can't experiment with novel combinations.
 - May block legitimate use cases that weren't anticipated.
 
-#### Option 2: Explicit conflict resolution
+### Alternative conflict resolution: Explicit resolution
 
-The platform could require the author to explicitly resolve all conflicts. This applies to properties, methods, and event handlers:
+An alternative to the compatibility allow-list would be to require authors to explicitly resolve all conflicts. This applies to properties, methods, and event handlers:
 
 ```javascript
 this._labelBehavior = new HTMLLabelBehavior();
