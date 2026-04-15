@@ -113,7 +113,7 @@ The information exposed by this API is similar to what the User Timing API expos
 
 >1.	What information does this feature expose, and for what purposes?
 
-This feature extends the existing performance User Timing API. The app can add `mark` and `measure` points in a similar fashion but the `PerformanceMark` and `PerformanceMeasure` entries can now be specified for a particular kind of performance incidents, so the UA filters out irrelevant entries and report the relevant ones in the corresponding `PerformanceEntry`.
+This feature extends the existing performance User Timing API. The app can add `mark` and `measure` points in a similar fashion but the `PerformanceMark` and `PerformanceMeasure` entries can now be specified for a particular kind of performance incidents, so the UA filters out irrelevant entries and reports the relevant ones in the corresponding `PerformanceEntry`.
 
 The purpose of this new feature is to improve the computational efficiency and ergonomics of the User Timing API when diagnosing the cause of LoAF.
 
