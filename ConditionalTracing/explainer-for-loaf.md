@@ -38,13 +38,13 @@ performance.measureConditional(measureName, startMark/*optional*/, endMark /*opt
 
 In comparison to `performance.mark()` and `performance.measure()`, these don't have the arguments `markOptions` and `measureOptions`.
 
-The `startMark` and `endMark` refers to the conditional mark points that occur during the time interval for the current relevant PerformanceEntry only.
+The `startMark` and `endMark` refer to the conditional mark points that occur during the time interval for the current relevant PerformanceEntry only.
 
 Unlike the User Timing API, neither `markConditional` nor `measureConditional` returns a `PerformanceMark` or a `PerformanceMeasure` entry. These conditional `mark`s and `measure`s are tracked for the relevant performance incidents(such as LoAF) only. Therefore they are only provided in the relevant PerformanceEntry(i.e., `PerformanceLongAnimationFrameTiming`) if they occur during a LoAF.
 
 We report the tracing points with `ConditionalMark` and `ConditionalMeasure` entries. They are similar to `PerformanceMark` and `PerformanceMeasure` entries. But they don't have a `detail` field.
 
-A new field, `userTimingEntries` is added to `PerformanceLongAnimationFrameTiming` interface. It's an array consisting of relevant `ConditionalMark` and `ConditionalMeasure` entries that occurs during a LoAF.
+A new field, `userTimingEntries` is added to `PerformanceLongAnimationFrameTiming` interface. It's an array consisting of relevant `ConditionalMark` and `ConditionalMeasure` entries that occur during a LoAF.
 
 Conditional markers and measures do not appear in the global timeline.
 
@@ -126,7 +126,7 @@ No.
 >4.	How do the features in your specification deal with sensitive information?
 
 It does not deal with sensitive information.
->5.	Does data exposed by your specification carry related but distinct information that may not be obvious to users??
+>5.	Does data exposed by your specification carry related but distinct information that may not be obvious to users?
 
 No.
 >6.	Do the features in your specification introduce state that persists across browsing sessions?
