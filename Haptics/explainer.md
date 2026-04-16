@@ -32,7 +32,7 @@ Modern operating systems have embraced haptics as a core part of user experience
 
 This proposal offers two complementary mechanisms:
 
-1. **Declarative API (CSS)** — a selector-triggered at-rule (`@haptic-trigger`) that fires haptic effects when selectors start or stop matching (works with pseudo-classes, classes, and attributes).
+1. **Declarative API (CSS)** — a selector-triggered at-rule (`@haptic-trigger`) that fires haptic effects when selectors start matching (works with pseudo-classes, classes, and attributes).
 2. **Imperative API (JS)** — `navigator.playHaptics(effect, intensity)` for interactions that require runtime logic or have no corresponding CSS state change.
 
 ## User-Facing Problem
@@ -121,7 +121,7 @@ The `@haptic-trigger` at-rule declares a selector plus descriptors that define w
 - `effect` — one of `hint`, `edge`, `tick`, `align`.
 - `intensity` *(optional)* — a `<number>` between 0.0 and 1.0, or a `<percentage>` between 0% and 100%.
 
-The haptic fires once when the selector starts matching. This supports pseudo-classes (e.g. `:active`, `:checked`), class-driven state (`.is-open`), and attribute-driven state (`[aria-invalid="true"]`) with one model.
+The haptic fires once when the selector starts matching. The at-rule accepts any selector — pseudo-classes (e.g. `:active`, `:checked`), class-driven state (`.is-open`), attribute-driven state (`[aria-invalid="true"]`), or any combination. No selector types are restricted; authors are responsible for writing trigger rules that correspond to meaningful interactions. Because each rule tracks its own selector independently, two rules with the same effect value (e.g. `button:hover` and `button:active` both using `tick`) each fire when their selector starts matching — avoiding the same-value collision problem inherent in computed-value-based trigger models (see [Alternatives Considered](#css-alternatives)).
 
 When a declarative trigger fires, target selection uses the same input-device model as the imperative API: the most recent input device is targeted; if that device is not haptics-capable, no haptic is played and no rerouting occurs. This target selection and activation check are evaluated when the trigger fires, not at style computation time.
 
@@ -219,29 +219,18 @@ v1 declarative triggering is intentionally enter-only to keep the model simple a
 
 ### CSS alternatives
 
-- **Pseudo-class property model (`haptic-feedback`)**. A prior primary candidate where haptics fire when elements enter selected dynamic pseudo-class states:
+- **Computed-value property model (`haptic-feedback`)**. A potential primary candidate where haptics fire when the computed value of `haptic-feedback` changes on an element:
 
   ```css
   button:active { haptic-feedback: align; }
   input:checked { haptic-feedback: tick 0.5; }
   ```
 
-  **Strengths:** Very concise for common native interactions.
+  **Strengths:** Very concise for common native interactions. Works with any selector type (pseudo-classes, classes, attributes) — any computed-value change triggers the haptic.
 
-  **Weaknesses:** Depends on pseudo-class categorization and does not directly cover class/attribute-driven app state.
+  **Weaknesses:** Triggering is based on computed-value changes, so if multiple selectors resolve to the same effect value, transitioning between them produces no haptic. For example, `button:hover { haptic-feedback: tick; }` and `button:active { haptic-feedback: tick; }` — pressing a hovered button doesn't change the computed value (still `tick`), so the press haptic is silently dropped. With only four effect values, such collisions are common.
 
-- **Transition-based haptics (`transition-haptic-effect` / `transition-haptic-intensity`)**. An alternative declarative model where haptics are integrated into the [CSS Transitions](https://drafts.csswg.org/css-transitions-1/) lifecycle. Longhands `transition-haptic-effect` and `transition-haptic-intensity` would pair with `transition-property` to fire haptics when transitions complete (`transitionend`):
-
-  ```css
-  .sidebar {
-    transition: transform 300ms ease;
-    transition-haptic-effect: align;
-  }
-  ```
-
-  **Strengths:** Reuses established `transition-*` patterns and gives natural bidirectional firing.
-
-  **Weaknesses:** Couples haptics to visual transitions even when interaction intent exists without animation, and can require synthetic transitions for non-animated interactions.
+  An earlier variant of this model restricted triggering to an allowlist of dynamic pseudo-classes (`:active`, `:checked`, `:focus-visible`, etc.), which provided cleaner filtering of non-interactive state changes (e.g. `:first-child` would not fire). However, this limits coverage to browser-defined pseudo-classes and requires ongoing maintenance as new pseudo-classes are added — a concern raised by CSSWG participants.
 
 - **Animation-trigger model (`@haptic` + `haptic-name`)**. A model where named haptic effects are defined and then attached similarly to animation patterns:
 
@@ -260,16 +249,29 @@ v1 declarative triggering is intentionally enter-only to keep the model simple a
 
   **Weaknesses:** Re-trigger behavior depends on computed-value changes and can require value choreography.
 
+- **Transition-based haptics (`transition-haptic-effect` / `transition-haptic-intensity`)**. An alternative declarative model where haptics are integrated into the [CSS Transitions](https://drafts.csswg.org/css-transitions-1/) lifecycle. Longhands `transition-haptic-effect` and `transition-haptic-intensity` would pair with `transition-property` to fire haptics when transitions complete (`transitionend`):
+
+  ```css
+  .sidebar {
+    transition: transform 300ms ease;
+    transition-haptic-effect: align;
+  }
+  ```
+
+  **Strengths:** Reuses established `transition-*` patterns and gives natural bidirectional firing.
+
+  **Weaknesses:** Couples haptics to visual transitions even when interaction intent exists without animation, and can require synthetic transitions for non-animated interactions.
+
 ### Comparison of current primary and declarative alternatives
 
 Quick matrix (details above):
 
 | Model | Trigger | Primary upside | Primary downside |
 |---|---|---|---|
-| A. Selector-trigger at-rule (current primary) | Selector start-matching | Broad selector coverage with direct trigger semantics | Requires precise trigger timing and conflict-resolution rules |
-| B. Pseudo-class property | Entering selected dynamic pseudo-classes | Very simple for `:active`/`:checked` | Limited app-state coverage |
-| C. Transition-coupled | `transitionend` | Reuses transition family | Couples haptics to visual transitions |
-| D. Animation-trigger | `haptic-name` computed-value change | Strong precedent and reusable names | Re-trigger behavior can be less direct |
+| A. Selector-trigger at-rule (current primary) | Selector start-matching | Per-rule trigger avoids same-value collision | More verbose syntax |
+| B. Computed-value property | Computed-value change | Most concise syntax | Same-value collision drops re-trigger |
+| C. Animation-trigger | `haptic-name` computed-value change | Reusable named patterns; familiar animation-like syntax | Same re-trigger problem as B |
+| D. Transition-coupled | `transitionend` | Reuses transition family | Couples haptics to visual transitions |
 
 See [Appendix: CSS Alternatives Side-by-Side](#appendix-css-alternatives-side-by-side) for concrete code examples of each model applied to the same real-world scenarios.
 
@@ -347,7 +349,7 @@ The following examples show how each declarative CSS model from the [comparison 
 ### "Add to Cart" button press
 
 <table>
-<tr><th>A. Selector-trigger (primary)</th><th>B. Pseudo-class property</th></tr>
+<tr><th>A. Selector-trigger (primary)</th><th>B. Computed-value property</th></tr>
 <tr><td>
 
 ```css
@@ -366,8 +368,20 @@ The following examples show how each declarative CSS model from the [comparison 
 ```
 
 </td></tr>
-<tr><th>C. Transition-coupled</th><th>D. Animation-trigger</th></tr>
+<tr><th>C. Animation-trigger</th><th>D. Transition-coupled</th></tr>
 <tr><td>
+
+```css
+@haptic bounce-land {
+  effect: align;
+  intensity: 0.8;
+}
+.add-to-cart:active {
+  haptic-name: bounce-land;
+}
+```
+
+</td><td>
 
 ```css
 .add-to-cart {
@@ -381,25 +395,13 @@ The following examples show how each declarative CSS model from the [comparison 
 }
 ```
 
-</td><td>
-
-```css
-@haptic bounce-land {
-  effect: align;
-  intensity: 0.8;
-}
-.add-to-cart:active {
-  haptic-name: bounce-land;
-}
-```
-
 </td></tr>
 </table>
 
 ### Scroll-snap story carousel
 
 <table>
-<tr><th>A. Selector-trigger (primary)</th><th>B. Pseudo-class property</th></tr>
+<tr><th>A. Selector-trigger (primary)</th><th>B. Computed-value property</th></tr>
 <tr><td>
 
 ```css
@@ -418,8 +420,20 @@ The following examples show how each declarative CSS model from the [comparison 
 ```
 
 </td></tr>
-<tr><th>C. Transition-coupled</th><th>D. Animation-trigger</th></tr>
+<tr><th>C. Animation-trigger</th><th>D. Transition-coupled</th></tr>
 <tr><td>
+
+```css
+@haptic snap-tick {
+  effect: tick;
+  intensity: 0.5;
+}
+.story:snapped {
+  haptic-name: snap-tick;
+}
+```
+
+</td><td>
 
 ```css
 .story {
@@ -432,22 +446,10 @@ The following examples show how each declarative CSS model from the [comparison 
 }
 ```
 
-</td><td>
-
-```css
-@haptic snap-tick {
-  effect: tick;
-  intensity: 0.5;
-}
-.story:snapped {
-  haptic-name: snap-tick;
-}
-```
-
 </td></tr>
 </table>
 
-**Observations:** Model B is the most concise for pseudo-class-driven interactions but lacks coverage for class/attribute state. Model C requires a visual property change even when none is intended — the `0ms` synthetic transitions above highlight this ergonomic cost. Model D offers reusable named effects but relies on computed-value changes for re-triggering. Model A (primary) handles all selector types uniformly with a direct trigger model.
+**Observations:** Models A, B, and C all work with any selector type (pseudo-classes, classes, attributes). Model B is the most concise but shares a re-trigger limitation with C: if multiple selectors resolve to the same effect value (e.g. both `:hover` and `:active` setting `tick`), transitioning between them produces no computed-value change and no haptic fires. Model D requires a visual property change even when none is intended — the `0ms` synthetic transitions above highlight this ergonomic cost. Model A avoids the re-trigger problem because each rule tracks its own selector independently — the effect value is irrelevant to triggering — at the cost of more verbose syntax.
 
 ## References & Acknowledgements
 
