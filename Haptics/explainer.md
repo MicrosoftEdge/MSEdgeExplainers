@@ -1,6 +1,6 @@
 # Web Haptics API
 
-Authors: [Nesh Gandhe](https://github.com/neshgandhe), [Limin Zhu](https://github.com/liminzhu)
+Authors: [Nesh Gandhe](https://github.com/neshgandhe), [Kevin Babbitt](https://github.com/kbabbitt), [Limin Zhu](https://github.com/liminzhu)
 
 ## Status of this Document
 
