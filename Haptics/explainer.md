@@ -100,7 +100,7 @@ The API always returns `undefined`. No haptic is played if the last input device
 
 ### Declarative API (CSS)
 
-The declarative API introduces a nested `@haptic` at-rule that fires a haptic effect when the parent selector starts matching — no JavaScript required.
+The declarative API introduces a nested `@haptic` at-rule that fires a haptic effect when the containing rule starts matching — no JavaScript required.
 
 #### `@haptic` at-rule
 
