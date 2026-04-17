@@ -193,7 +193,7 @@ Form override values (`formAction`, `formEnctype`, `formMethod`, `formNoValidate
 |-------------------|------------------------------------------------------|-------|
 | `form` | Yes | Standard form association by ID. `behavior.form` is read-only and delegates to `ElementInternals.form`, which reflects this association. |
 | `disabled` | Yes | Standard form control disabling. Combined with `behavior.disabled`. |
-| `name` | Yes | As a form-associated custom element attribute, `name` determines the key for the element's own form data (via `setFormValue()`). `behavior.name` is a separate property: it sets the submitter's name/value pair appended on submission. For example, `<my-button name="field" value="data">` with `behavior.name = "action"` and `behavior.value = "save"` would submit both `field=data` (from the element's form data) and `action=save` (from the submitter). |
+| `name`, `value` | No | Only `behavior.name` and `behavior.value` are read on submission, matching how native `<button>` submitter name/value works. |
 | `formaction`, `formenctype`, `formmethod`, `formtarget` | No | Only `behavior` properties are read. |
 
 ### Behavior lifecycle
@@ -272,7 +272,7 @@ this._tooltipBehavior.content = 'Helpful tooltip text';
 
 ### Behavior composition and conflict resolution
 
-For the built-in behaviors currently under consideration and mentioned in this document (`HTMLSubmitButtonBehavior`, `HTMLButtonBehavior`, `HTMLResetButtonBehavior`, etc.), no two are expected to be compatible. However, as this framework allows for composability, conflicts may be resolved using order of precedence: the position of behaviors in the array determines which behavior's value takes effect.
+For the built-in behaviors currently under consideration and mentioned in this document (`HTMLSubmitButtonBehavior`, `HTMLButtonBehavior`, `HTMLResetButtonBehavior`, etc.), there probably isn't a practical use case for combining them. However, attaching multiple behaviors is not prohibited. If multiple behaviors are provided, conflicts are resolved using order of precedence: the position of behaviors in the array determines which behavior's value takes effect.
 
 Consider the following example of behaviors that could potentially be compatible, `HTMLLabelBehavior` and `HTMLSubmitButtonBehavior`:
 
