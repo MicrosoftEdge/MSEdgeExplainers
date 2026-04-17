@@ -104,7 +104,7 @@ The declarative API introduces a nested `@haptic` at-rule that fires a haptic ef
 
 #### `@haptic` at-rule
 
-The `@haptic` at-rule nests inside a style rule and declares which effect to fire and at what intensity. The haptic fires once when the parent selector transitions into matching an element. It does not fire on initial style computation — only on subsequent transitions from not-matching to matching.
+The `@haptic` at-rule nests inside a style rule and declares which effect to fire and at what intensity. The haptic fires once when the containing rule transitions into matching an element. It does not fire on initial style computation — only on subsequent transitions from not-matching to matching.
 
 **Syntax:**
 
