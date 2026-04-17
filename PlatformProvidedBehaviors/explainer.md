@@ -193,7 +193,7 @@ Form override values (`formAction`, `formEnctype`, `formMethod`, `formNoValidate
 |-------------------|------------------------------------------------------|-------|
 | `form` | Yes | Standard form association by ID. `behavior.form` is read-only and delegates to `ElementInternals.form`, which reflects this association. |
 | `disabled` | Yes | Standard form control disabling. Combined with `behavior.disabled`. |
-| `name`, `value` | No | Only `behavior.name` and `behavior.value` are read on submission, matching how native `<button>` submitter name/value works. |
+| `name`, `value` | No | Only `behavior.name` and `behavior.value` are read on submission. |
 | `formaction`, `formenctype`, `formmethod`, `formtarget` | No | Only `behavior` properties are read. |
 
 ### Behavior lifecycle
