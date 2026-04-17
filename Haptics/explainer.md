@@ -31,7 +31,7 @@ Modern operating systems have embraced haptics as a core part of user experience
 
 This proposal offers two complementary mechanisms:
 
-1. **Declarative API (CSS)** — a nested `@haptic` at-rule inside style rules that fires haptic effects when the parent selector starts matching (works with pseudo-classes, classes, and attributes).
+1. **Declarative API (CSS)** — a nested `@haptic` at-rule inside style rules that fires haptic effects when the rule starts matching.
 2. **Imperative API (JS)** — `navigator.playHaptics(effect, intensity)` for interactions that require runtime logic or have no corresponding CSS state change.
 
 ## User-Facing Problem
@@ -100,11 +100,11 @@ The API always returns `undefined`. No haptic is played if the last input device
 
 ### Declarative API (CSS)
 
-The declarative API introduces a nested `@haptic` at-rule that fires a haptic effect when the parent selector starts matching — no JavaScript required.
+The declarative API introduces a nested `@haptic` at-rule that fires a haptic effect when the containing rule starts matching — no JavaScript required.
 
 #### `@haptic` at-rule
 
-The `@haptic` at-rule nests inside a style rule and declares which effect to fire and at what intensity. The haptic fires once when the parent selector transitions into matching an element. It does not fire on initial style computation — only on subsequent transitions from not-matching to matching.
+The `@haptic` at-rule nests inside a style rule and declares which effect to fire and at what intensity. The haptic fires once when the containing rule transitions into matching an element. It does not fire on initial style computation — only on subsequent transitions from not-matching to matching.
 
 **Syntax:**
 
@@ -118,7 +118,6 @@ The `@haptic` at-rule nests inside a style rule and declares which effect to fir
 - `<effect-name>` — one of `hint`, `edge`, `tick`, `align`.
 - `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0. Defaults to 1.0.
 
-The at-rule works with any parent selector — pseudo-classes (e.g. `:active`, `:checked`), class-driven state (`.is-open`), attribute-driven state (`[aria-invalid="true"]`), or any combination.
 
 **Behavior:**
 
@@ -138,17 +137,6 @@ The at-rule works with any parent selector — pseudo-classes (e.g. `:active`, `
 ```css
 button:active {
   @haptic align;
-}
-```
-
-`@haptic` can nest inside `@keyframes` blocks the same way, enabling multi-step choreography:
-
-```css
-@keyframes bounce-settle {
-  0%   { transform: translateY(-100%); }
-  40%  { transform: translateY(0);  @haptic edge; }
-  60%  { transform: translateY(-20%); }
-  100% { transform: translateY(0);  @haptic align 0.5; }
 }
 ```
 
@@ -197,6 +185,21 @@ divider.addEventListener('pointermove', (e) => {
 ## Future Extensions
 
 The following extensions are out of scope for this initial proposal but represent natural next steps that could broaden the declarative surface.
+
+### Animation haptics (`@keyframes` descriptors)
+
+Properties `haptic-effect` and `haptic-intensity` inside `@keyframes` blocks would embed haptic cues at specific keyframe offsets, hooking into the existing [CSS Animations](https://drafts.csswg.org/css-animations-1/) lifecycle. This enables **multi-step haptic choreography** — a capability that cannot be expressed with the one-shot `@haptic` trigger alone.
+
+```css
+@keyframes bounce-settle {
+  0%   { transform: translateY(-100%); }
+  40%  { haptic-effect: edge;  transform: translateY(0); }
+  60%  { transform: translateY(-20%); }
+  100% { haptic-effect: align; haptic-intensity: 0.5; transform: translateY(0); }
+}
+```
+
+An `edge` fires at 40% when the element hits the baseline, and a softer `align` at 100% when it settles.
 
 ### Custom haptic effects
 
@@ -280,7 +283,7 @@ To avoid introducing a new fingerprinting vector, the API does not expose means 
 ## Open Questions
 
 - **Which declarative model should anchor standardization?** This proposal uses a nested `@haptic` at-rule as the primary path — its at-rule syntax matches the one-shot, fire-and-forget nature of haptics, it co-locates with visual styles, and it avoids re-trigger pitfalls. The standalone `@haptic-trigger` separates haptics into dedicated blocks; the computed-value property is the most concise; the animation-trigger model offers reusable named patterns. We welcome feedback on which tradeoffs best serve developers.
-- **Should any [future extension](#future-extensions) be promoted to v1?** Custom effects and other deferred extensions are listed above. If any is critical for initial adoption, we would like to hear which and why.
+- **Should any [future extension](#future-extensions) be promoted to v1?** Animation haptics and custom effects are deferred. If either is critical for initial adoption, we would like to hear which and why.
 - **Is the proposed split activation model right for v1?** Current proposal: direct user-interaction selector start-matching events can fire declarative haptics without additional activation checks, while script-initiated start-matching events require sticky user activation. Should this split be retained, or should declarative triggers be uniformly activation-gated?
 - **Should a user-preference media feature be added in a future phase?** v1 introduces no media query. A possible extension is a coarse preference signal (e.g. `prefers-haptics: reduce | no-preference`) if there is concrete use-case and privacy review support.
 - **Should a dedicated `scroll-snap-haptic` property be added if `:snapped` does not ship?** The current proposal relies on the [`:snapped` pseudo-class](https://drafts.csswg.org/css-scroll-snap-2/#snapped) from CSS Scroll Snap 2 for scroll-snap haptics (e.g. `.slide:snapped { @haptic tick; }`). If `:snapped` does not ship or is significantly delayed, a dedicated `scroll-snap-haptic` CSS property on the scroll container could serve as a self-contained fallback. We welcome feedback on whether the `:snapped` dependency is acceptable for v1.
