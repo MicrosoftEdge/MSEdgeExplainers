@@ -128,7 +128,7 @@ The at-rule works with any parent selector — pseudo-classes (e.g. `:active`, `
   button:active { scale: 0.95;  @haptic tick; }
   ```
   Hovering fires `tick`; pressing fires `tick` again — no collision.
-- **No initial fire.** Does not fire on initial style computation — only on subsequent transitions from not-matching to matching.
+- **No initial fire.** Does not fire on initial style computation — only on subsequent transitions from not-matching to matching. [`@starting-style`](https://drafts.csswg.org/css-transitions-2/#defining-before-change-style) does not trigger haptics as the explainer only scopes to reactive haptics feedback.
 - **Same-element dedup.** When multiple `@haptic` rules start matching the same element in the same rendering update, at most one fires. Winner is determined by specificity, then document order.
 - **Cross-element coalescing.** User agents may fire at most one haptic per target device per frame.
 - **Target selection.** Same model as the imperative API: the most recent input device is targeted. If not haptics-capable, no haptic fires. Script-initiated selector matches (e.g. `classList.add()`) require sticky user activation.
