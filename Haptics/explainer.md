@@ -118,7 +118,6 @@ The `@haptic` at-rule nests inside a style rule and declares which effect to fir
 - `<effect-name>` — one of `hint`, `edge`, `tick`, `align`.
 - `<intensity>` *(optional)* — a `<number>` between 0.0 and 1.0. Defaults to 1.0.
 
-The at-rule works with any parent selector — pseudo-classes (e.g. `:active`, `:checked`), class-driven state (`.is-open`), attribute-driven state (`[aria-invalid="true"]`), or any combination.
 
 **Behavior:**
 
