@@ -31,7 +31,7 @@ Modern operating systems have embraced haptics as a core part of user experience
 
 This proposal offers two complementary mechanisms:
 
-1. **Declarative API (CSS)** — a nested `@haptic` at-rule inside style rules that fires haptic effects when the parent selector starts matching (works with pseudo-classes, classes, and attributes).
+1. **Declarative API (CSS)** — a nested `@haptic` at-rule inside style rules that fires haptic effects when the rule starts matching.
 2. **Imperative API (JS)** — `navigator.playHaptics(effect, intensity)` for interactions that require runtime logic or have no corresponding CSS state change.
 
 ## User-Facing Problem
