@@ -28,7 +28,7 @@
 - [Considered Alternatives](#considered-alternatives)
 - [Standards Position](#standards-position)
 - [Target Users](#target-users)
-- [References and Acknowledgements](#references-and-acknowledgements)
+- [References](#references)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
