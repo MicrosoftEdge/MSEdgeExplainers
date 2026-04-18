@@ -21,7 +21,7 @@
 - [Non-Goals](#non-goals)
 - [Proposed Solution](#proposed-solution)
 - [The API Surface](#the-api-surface)
-- [Feature Activation](#feature-activation)
+- [Feature Activation and Rollout Plan](#feature-activation-and-rollout-plan)
 - [Privacy and Security Considerations](#privacy-and-security-considerations)
 - [Performance Impact](#performance-impact)
 - [Interoperability](#interoperability)
@@ -109,9 +109,11 @@ When the `BidiVisualOrderCaretNavigation` feature flag is enabled, Chromium's ar
 At a high level:
 
 1. When a user presses an arrow key, the caret's current position is resolved to the layout fragment it belongs to.
-2. The caret advances in the visual direction within that fragment. For LTR text, moving right increments the position; for RTL text, moving right decrements it.
+2. The caret advances in the visual direction within that fragment. For LTR text, moving right increments the position; for RTL text, moving right decrements it — in both cases the caret moves rightward on screen.
 3. When the caret reaches the edge of a fragment, it uses the **bidi level** of the current and adjacent fragments to determine which edge to enter — ensuring the caret crosses bidi boundaries smoothly without jumping.
 4. At line boundaries, the caret moves to the next or previous line as expected.
+
+Word-level movement (Ctrl+Left/Right on Windows, Option+Left/Right on macOS) and `Selection.modify()` with `'word'` granularity also follow the same visual direction.
 
 ## The API Surface
 
@@ -129,12 +131,19 @@ selection.modify('move', 'backward', 'character');
 
 With this feature enabled, `'left'` and `'right'` will perform true visual movement in bidi text, while `'forward'` and `'backward'` will continue to perform logical movement. This matches the behavior of Firefox and Safari.
 
-## Feature Activation
+## Feature Activation and Rollout Plan
 
 The feature is currently gated behind a disabled-by-default runtime flag:
 
 - **Command line:** `--enable-blink-features=BidiVisualOrderCaretNavigation`
-- **Rollout plan:** A `chrome://flags` entry, followed by enabling by default.
+
+**Rollout phases:**
+
+1. **Phase 1 (current):** Feature flag disabled by default. Developers and testers can opt in via the command-line flag above.
+2. **Phase 2:** Expose a `chrome://flags` entry so that users can enable visual caret movement without command-line flags.
+3. **Phase 3:** Enable by default for all users.
+
+Until the feature is enabled, caret behavior remains unchanged — existing logical movement continues to work exactly as it does today. No user-visible changes occur without explicit opt-in during Phases 1 and 2.
 
 ## Privacy and Security Considerations
 
