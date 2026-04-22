@@ -10,7 +10,7 @@
 
 ## Introduction
 
-Custom element authors frequently need their elements to leverage platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided behaviors as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement native behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes native capabilities as composable behaviors.
+Custom element authors frequently need their elements to use platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided behaviors as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement native behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes native capabilities as composable behaviors.
 
 ## User-facing problem
 
@@ -76,7 +76,6 @@ This proposal is informed by:
 1. There's a clear gap with implicit form submission.
 2. Form submission has clear semantics, making it useful for validating the overall pattern (lifecycle, conflict resolution, accessibility integration) before expanding to more complex behaviors.
 3. There's no API to make a custom element participate in implicit form submission as `form.requestSubmit()` only handles explicit activation.
-4. The value also lies in establishing a composable pattern for exposing platform behaviors that can extend to inputs, labels, popovers, and more.
 
 ## Proposed approach
 
@@ -106,7 +105,7 @@ Platform behaviors give custom elements capabilities that would otherwise requir
 - Focusability: The element participates in the tab order as appropriate for the behavior.
 - CSS pseudo-classes: Behavior-specific pseudo-classes are managed by the platform.
 
-By bundling these capabilities as high-level units, the platform can ensure accessible defaults, correct event wiring, and proper pseudo-class management.
+Bundling these capabilities as high-level units lets the platform provide accessible defaults, wire up events correctly, and manage pseudo-class state.
 
 This proposal introduces `HTMLSubmitButtonBehavior`, which mirrors the submission capability of `<button type="submit">`:
 
@@ -144,6 +143,8 @@ Each behavior exposes properties and methods from its corresponding native eleme
 - `name`
 - `value`
 
+To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior.
+
 ```javascript
 class CustomSubmitButton extends HTMLElement {
   constructor() {
@@ -170,9 +171,7 @@ class CustomSubmitButton extends HTMLElement {
 }
 ```
 
-To expose properties like `disabled` or `formAction` to external code, authors define getters and setters that delegate to the behavior. This gives authors full control over their element's public API.
-
-Authors are also responsible for attribute reflection. If the author wants HTML attributes on their custom element (e.g., `<my-button formaction="/save">`) to affect the behavior, they need to observe and forward those attributes using `attributeChangedCallback`:
+Authors are responsible for attribute reflection. If the author wants HTML attributes on their custom element to affect the `behavior`, they need to observe and forward those attributes using `attributeChangedCallback`:
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -187,6 +186,15 @@ class CustomButton extends HTMLElement {
   }
 }
 ```
+
+Form override values (`formAction`, `formEnctype`, `formMethod`, `formNoValidate`, `formTarget`, `name`, `value`) are read from `behavior` properties. Setting a value declaratively in markup (e.g., `<my-button formaction="/save">`) or programmatically (e.g. `setAttribute('formaction', '/save')`) has no effect on form submission unless the author explicitly forwards that attribute to the `behavior`. However, some element attributes are applied to form submission as part of the existing [form-associated custom element](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements) mechanism, independently of behaviors:
+
+| Element attribute | Applied via form-associated custom element mechanics | Notes |
+|-------------------|------------------------------------------------------|-------|
+| `form` | Yes | Standard form association by ID. `behavior.form` is read-only and delegates to `ElementInternals.form`, which reflects this association. |
+| `disabled` | Yes | Standard form control disabling. Combined with `behavior.disabled`. |
+| `name`, `value` | No | Only `behavior.name` and `behavior.value` are read on submission. |
+| `formaction`, `formenctype`, `formmethod`, `formtarget` | No | Only `behavior` properties are read. |
 
 ### Behavior lifecycle
 
@@ -222,7 +230,7 @@ this._internals = this.attachInternals({
 ```
 This restriction exists because having two instances of the same behavior type on one element creates ambiguity.
 
-Additionally, a behavior instance can only be attached to one element. Attempting to attach an already-attached instance to another element throws a `TypeError`:
+A behavior instance can only be attached to one element. Attempting to attach an already-attached instance to another element throws a `TypeError`:
 ```javascript
 const sharedBehavior = new HTMLSubmitButtonBehavior();
 element1._internals = element1.attachInternals({ behaviors: [sharedBehavior] });
@@ -240,7 +248,7 @@ Behaviors are instantiated with `new` and passed to `attachInternals()`:
 
 *Note: An ordered array is preferred over a set because order may be significant for [conflict resolution](#behavior-composition-and-conflict-resolution). `behaviors` uses a `FrozenArray` because behaviors are immutable after attachment.*
 
-Developers hold direct references to their behavior instances. This aligns with the [W3C design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances, and it extends naturally to future developer-defined behaviors that follow the same `new` + attach pattern.
+Developers hold direct references to their behavior instances. This follows the [W3C design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances, and it extends naturally to future developer-defined behaviors that follow the same `new` + attach pattern.
 
 *For future developer-defined behaviors:*
 
@@ -264,208 +272,61 @@ this._tooltipBehavior.content = 'Helpful tooltip text';
 
 ### Behavior composition and conflict resolution
 
-When multiple behaviors are attached to an element, they may provide overlapping capabilities. This section discusses strategies for resolving such conflicts.
+For the built-in behaviors currently under consideration and mentioned in this document (`HTMLSubmitButtonBehavior`, `HTMLButtonBehavior`, `HTMLResetButtonBehavior`, etc.), there probably isn't a practical use case for combining them. However, attaching multiple behaviors is not prohibited. If multiple behaviors are provided, conflicts are resolved using order of precedence: the position of behaviors in the array determines which behavior's value takes effect.
 
-For the built-in behaviors currently under consideration and mentioned in this document (`HTMLSubmitButtonBehavior`, `HTMLButtonBehavior`, `HTMLResetButtonBehavior`, etc.), no two are expected to be compatible. However, this framework allows for composability if use cases emerge, at which point a conflict resolution strategy would need to be followed.
-
-The conflict resolution strategy should:
-
-- Allow the platform to add new low-level behaviors to existing bundled behaviors without creating compatibility issues.
-- Enable authors to reason about which behavior "wins" for any given capability.
-- Give authors control over the outcome when behaviors conflict in meaningful ways.
-
-Behaviors can conflict in several ways, such as:
-
-| Conflict Type | Example |
-|---------------|---------|
-| ARIA role | Behaviors provide a default role |
-| Event handling | Behaviors handle `click` in different ways |
-| CSS pseudo-class | Behaviors contribute to `:disabled` |
-| Mutually exclusive | Checkbox behavior combined with radio behavior |
-
-#### Alternative 1: Order of precedence (preferred)
-
-The order of behaviors in the array determines precedence. The last behavior in the array "wins" for any capability that can only have one value:
+Consider the following example of behaviors that could potentially be compatible, `HTMLLabelBehavior` and `HTMLSubmitButtonBehavior`:
 
 ```javascript
-// Last behavior's role wins.
-this._labelBehavior = new HTMLLabelBehavior();
-this._submitBehavior = new HTMLSubmitButtonBehavior();
-this._internals = this.attachInternals({
-  behaviors: [this._labelBehavior, this._submitBehavior]
-});
+class LabeledSubmitButton extends HTMLElement {
+  static formAssociated = true;
+
+  constructor() {
+    super();
+    this._labelBehavior = new HTMLLabelBehavior();
+    this._submitBehavior = new HTMLSubmitButtonBehavior();
+    this._internals = this.attachInternals({
+      behaviors: [this._labelBehavior, this._submitBehavior]
+    });
+
+    this.addEventListener('click', (event) => {
+      console.log('Author click handler');
+    });
+  }
+}
+customElements.define('labeled-submit-button', LabeledSubmitButton);
+
+const btn = document.createElement('labeled-submit-button');
+
+// For properties where an element can only have one value (ARIA role, `disabled`,
+// `formAction`, etc.), last-in-wins applies:
 
 // The element's implicit role is "button" (from HTMLSubmitButtonBehavior, last in list).
-console.log(this.computedRole);  // "button"
+console.log(btn.computedRole);  // "button"
 
 // If the author sets `internals.role`, that takes precedence over all behavior defaults.
 this._internals.role = 'link';
-console.log(this.computedRole);  // "link"
+console.log(btn.computedRole);  // "link"
+
+// However, the element is disabled if any behavior's `disabled` is `true`. When
+// disabled, the entire element is affected: all behavior default actions are blocked,
+// the element is removed from tab order, and it matches `:disabled`.
+submitBehavior.disabled = true;
+labelBehavior.disabled = false;
+console.log(btn.matches(':disabled'));  // true
 ```
 
-There are two options for how strictly to apply last-in-wins:
+For events, behavior responses follow the platform's existing default action model:
 
-##### Option A: Strict last-in-wins (properties and event handlers)
+1. The event dispatches through the DOM.
+2. All author-registered event listeners run during dispatch.
+3. After dispatch completes, each behavior's default action runs unless a listener called `preventDefault()`.
 
-Last-in-wins applies uniformly to everything: properties, methods, and event handlers. Only the last behavior's handler for a given event runs.
-
-```javascript
-class LabeledSubmitButton extends HTMLElement {
-  static formAssociated = true;
-
-  constructor() {
-    super();
-    this._labelBehavior = new HTMLLabelBehavior();
-    this._submitBehavior = new HTMLSubmitButtonBehavior();
-    this._internals = this.attachInternals({
-      behaviors: [this._labelBehavior, this._submitBehavior]
-    });
-  }
-}
-```
-
-When clicked:
-- HTMLLabelBehavior's click handler is skipped.
-- HTMLSubmitButtonBehavior's click handler runs → form submits.
-Result: Form submits and no focus delegation occurs.
-
-If the author wants both behaviors' handlers to run, they must manually invoke the earlier behavior's logic:
-
-```javascript
-this.addEventListener('click', () => {
-  // Manually trigger label behavior's focus delegation.
-  const labelTarget = this._labelBehavior?.control;
-  if (labelTarget) {
-    labelTarget.focus();
-  }
-});
-```
-
-**Pros:**
-- Consistent mental model: authors always know last-in-wins applies.
-- No unexpected double-actions (e.g., submit form and delegate focus).
-
-**Cons:**
-- Authors who want both handlers must manually wire up the earlier behavior's logic.
-- May not match author expectations if they assume events "stack" like regular DOM event listeners.
-
-##### Option B: Last-in-wins for properties, additive for events (preferred)
-
-Properties are inherently exclusive (an element can only have one `role`, one `disabled` state, one `formAction` value), but events are additive in the DOM (multiple listeners can respond to the same event). Behaviors following this pattern align with how authors already think about event handling.
-
-Event handlers run in reverse array order (last-to-first), so the last behavior in the array has priority for both properties and events. For events, "priority" means running first. For example:
-
-```javascript
-class LabeledSubmitButton extends HTMLElement {
-  static formAssociated = true;
-
-  constructor() {
-    super();
-    this._labelBehavior = new HTMLLabelBehavior();
-    this._submitBehavior = new HTMLSubmitButtonBehavior();
-    this._internals = this.attachInternals({
-      behaviors: [this._labelBehavior, this._submitBehavior]
-    });
-  }
-}
-```
-
-When clicked:
-- HTMLSubmitButtonBehavior's click handler runs first → form submits.
-- HTMLLabelBehavior's click handler runs second → delegates focus to associated control.
-Result: Form submits and delegates focus.
-
-**Pros:**
-- Matches DOM event semantics (multiple listeners can coexist).
-- Enables composition where behaviors handle different aspects of the same event.
-
-**Cons:**
-- Risk of unexpected double-actions if authors don't realize both handlers run.
-
-**Shared considerations for both options:**
-
-**Pros:**
-- Simple and predictable once understood.
-- Enables forward compatibility: if a future version of `HTMLSubmitButtonBehavior` internally composes a new low-level behavior, the existing resolution rules still apply.
-
-**Cons:**
-- May hide subtle issues. For example:
-  - If two behaviors both provide `disabled`, setting it on one doesn't sync to the other. Authors might not realize which behavior's `disabled` is "winning."
-  - An unexpected ARIA role could harm accessibility if the author doesn't notice the last behavior overrode the intended role.
-- Authors may accidentally combine behaviors that don't make sense together.
-
-#### Alternative 2: Compatibility allow-list
-
-Compatibility between behaviors are defined in the specification. This follows the pattern used by [`attachShadow`](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow), where the [list of valid shadow host names](https://dom.spec.whatwg.org/#valid-shadow-host-name) is spec-defined and enforced at runtime. Web authors can reference documentation or DevTools errors to determine which combinations are valid.
-
-Any combination not explicitly allowed would be rejected by `attachInternals()`, preventing invalid states (like being both a button and a form):
-
-```javascript
-// This would work if anchor were made compatible with button (nav-button pattern).
-this._buttonBehavior = new HTMLButtonBehavior();
-this._anchorBehavior = new HTMLAnchorBehavior();
-this.attachInternals({
-  behaviors: [this._buttonBehavior, this._anchorBehavior]
-});
-
-// Throws: checkbox is not compatible with submit button.
-this._submitBehavior = new HTMLSubmitButtonBehavior();
-this._checkboxBehavior = new HTMLCheckboxBehavior();
-this.attachInternals({
-  behaviors: [this._submitBehavior, this._checkboxBehavior]
-});
-// Error message: "HTMLSubmitButtonBehavior is not compatible with HTMLCheckboxBehavior".
-```
-
-There can be two interpretations of what "compatible behaviors" means:
-
-1. Compatible behaviors have completely disjoint capabilities (e.g., one provides `disabled`, the other provides `href`). No conflict resolution is needed because they never touch the same property or event.
-2. Compatible behaviors may share some capabilities (e.g., both provide a role or handle click). In this case, a conflict resolution strategy (Alternative 1 or 3) is still required for overlapping capabilities.
-
-**Pros:**
-- Prevents nonsensical combinations at attachment time.
-- Clear error messages guide developers to do the *right thing*.
-- The platform can expand compatibility lists in future versions without breaking existing code.
-
-**Cons:**
-- More restrictive as authors can't experiment with novel combinations.
-- Requires the platform to update compatibility lists.
-- May block legitimate use cases that weren't anticipated.
-- Must still be combined with Alternative 1 or 3 when compatible behaviors have overlapping capabilities.
-
-#### Alternative 3: Explicit conflict resolution
-
-If conflicts occur, the platform requires the author to explicitly resolve them. This applies to properties, methods, and event handlers:
-
-```javascript
-class LabeledSubmitButton extends HTMLElement {
-  static formAssociated = true;
-
-  constructor() {
-    super();
-    this._labelBehavior = new HTMLLabelBehavior();
-    this._submitBehavior = new HTMLSubmitButtonBehavior();
-    this._internals = this.attachInternals({ 
-      behaviors: [this._labelBehavior, this._submitBehavior],
-      resolve: {
-        role: 'button',  // Use button role.
-        click: 'all',  // Both handlers run. Also could be 'first', 'last'.
-        disabled: 'HTMLSubmitButtonBehavior'  // Use submit button's disabled.
-      }
-    });
-  }
-}
-```
-
-**Pros:**
-- Authors have full control over conflict resolution, no hidden behavior.
-- Supports complex use cases where default resolution isn't appropriate.
-- Authors can mix strategies (e.g., last-in-wins for role, additive for events).
-
-**Cons:**
-- More verbose API.
-- Adds complexity for simple cases where order-based resolution would suffice.
-- Authors must understand all potential conflicts to resolve them correctly.
+When `btn` is clicked:
+- Author event listeners run during event dispatch.
+- `HTMLSubmitButtonBehavior`'s default action runs (form submits).
+- `HTMLLabelBehavior`'s default action runs (delegates focus to associated control).
+- If any listener called `preventDefault()`, both form submission and focus delegation are cancelled
+- `stopImmediatePropagation()` prevents subsequent listeners on the same element from running, but does not affect behavior default actions.
 
 ### Feature detection
 
@@ -635,14 +496,7 @@ The element gains:
 - Participation in implicit form submission (for submit buttons).
 - Behavior properties like `disabled` and `formAction` are accessible via the stored behavior reference.
 
-#### Dynamically changing the `type` attribute
-
-Consider `behaviors: [submitBehavior, resetBehavior, buttonBehavior]` with the intent to toggle behaviors:
-
-- Under last-in-wins, only `buttonBehavior`'s property values (the last in the array) determine the element's effective state. For `disabled`, this means setting `submitBehavior.disabled` or `resetBehavior.disabled` has no effect as only `buttonBehavior.disabled` controls whether the element matches `:disabled`, is removed from the tab order, and stops receiving activation events (no click or keyboard handler from any behavior runs while disabled).
-- All three behaviors register click handlers with different effects. Under strict last-in-wins (Option A), only `buttonBehavior`'s handler runs. Under additive events (Option B), all handlers run (the element would submit and reset the form on every click).
-
-Because `disabled` cannot selectively silence individual behaviors and conflict resolution applies uniformly to all attached behaviors, loading all three simultaneously and switching between them is not viable.
+*Note: Dynamically switching `type` after the element is connected is not supported because `internals.behaviors` can't be changed after `ElementInternals` is attached. If it turns out that dynamically switching `type` is needed, future work could consider removing this restriction.*
 
 ### Framework use cases
 
@@ -987,7 +841,6 @@ Use [TC39 decorators](https://github.com/tc39/proposal-decorators) to attach beh
 class CustomButton extends HTMLElement {
   // Decorator applies submit button behavior to the class.
 }
-customElements.define('custom-button', CustomButton);
 ```
 
 **Pros:**
@@ -1000,9 +853,9 @@ customElements.define('custom-button', CustomButton);
 - Instance-specific behavior configuration (e.g., setting `formAction` before attachment) isn't supported.
 - Decorators are inherently JavaScript syntax and don't support a future declarative, JavaScript-less approach to custom elements. This proposal's design decouples behaviors from the class definition, enabling future declarative syntax (see [Other considerations](#other-considerations)).
 
-`HTMLSubmitButtonBehavior` could itself be designed as a decorator, but decorators can't easily access `ElementInternals` or instance state during application. Decorators would need to coordinate with `attachInternals()` timing. Additionally, getting a reference to the behavior instance for property access (e.g., `behavior.formAction`) would require additional wiring.
+`HTMLSubmitButtonBehavior` could itself be designed as a decorator, but decorators can't easily access `ElementInternals` or instance state during application. Decorators would need to coordinate with `attachInternals()` timing, and getting a reference to the behavior instance for property access (e.g., `behavior.formAction`) would require additional wiring.
 
-### Alternative to API design: Class references
+### Alternative API design: Class references
 
 Pass behavior classes (not instances) to `attachInternals()`:
 
@@ -1022,6 +875,68 @@ this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 - Platform instantiates the behavior, so constructor parameters aren't available. This conflicts with the [design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances.
 - Requires a `behaviors` interface for named access.
 - *Future* developer-defined behaviors would need a way to name their behaviors.
+
+### Alternative conflict resolution: Compatibility allow-list
+
+Compatibility between behaviors could be defined in the specification. This follows the pattern used by [`attachShadow`](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow), where the [list of valid shadow host names](https://dom.spec.whatwg.org/#valid-shadow-host-name) is spec-defined and enforced at runtime. Web authors can reference documentation or DevTools errors to determine which combinations are valid.
+
+Any combination not explicitly allowed would be rejected by `attachInternals()`, preventing invalid states (like being both a button and a form):
+
+```javascript
+// This would work if anchor were made compatible with button (nav-button pattern).
+this._buttonBehavior = new HTMLButtonBehavior();
+this._anchorBehavior = new HTMLAnchorBehavior();
+this.attachInternals({
+  behaviors: [this._buttonBehavior, this._anchorBehavior]
+});
+
+// Throws: checkbox is not compatible with submit button.
+this._submitBehavior = new HTMLSubmitButtonBehavior();
+this._checkboxBehavior = new HTMLCheckboxBehavior();
+this.attachInternals({
+  behaviors: [this._submitBehavior, this._checkboxBehavior]
+});
+// Error message: "HTMLSubmitButtonBehavior is not compatible with HTMLCheckboxBehavior".
+```
+
+There can be two interpretations of what "compatible behaviors" means:
+
+1. Compatible behaviors have completely disjoint capabilities (e.g., one provides `disabled`, the other provides `href`). No conflict resolution is needed because they never touch the same property or event.
+2. Compatible behaviors may share some capabilities (e.g., both provide a role or handle click). In this case, a conflict resolution strategy (order of precedence or explicit resolution) is still required for overlapping capabilities.
+
+**Pros:**
+- Clear error messages guide developers to do the *right thing*.
+- The platform can expand compatibility lists in future versions without breaking existing code.
+
+**Cons:**
+- More restrictive as authors can't experiment with novel combinations.
+- May block legitimate use cases that weren't anticipated.
+
+### Alternative conflict resolution: Explicit resolution
+
+An alternative to the compatibility allow-list would be to require authors to explicitly resolve all conflicts. This applies to properties, methods, and event handlers:
+
+```javascript
+this._labelBehavior = new HTMLLabelBehavior();
+this._submitBehavior = new HTMLSubmitButtonBehavior();
+this._internals = this.attachInternals({ 
+  behaviors: [this._labelBehavior, this._submitBehavior],
+  resolve: {
+    role: 'button',  // Use button role.
+    click: 'all',  // Both handlers run. Also could be 'first', 'last'.
+  }
+});
+```
+
+**Pros:**
+- Authors have full control over conflict resolution.
+- Supports complex use cases where default resolution isn't appropriate.
+- Authors can mix strategies (e.g., last-in-wins for role, additive for events).
+
+**Cons:**
+- More verbose API.
+- Adds complexity for simple cases where order-based resolution would suffice.
+- Authors must understand all potential conflicts to resolve them correctly.
 
 ## Accessibility, security, and privacy considerations
 
