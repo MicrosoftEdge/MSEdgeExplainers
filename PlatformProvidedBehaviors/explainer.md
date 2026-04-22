@@ -699,7 +699,7 @@ class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 - Authors might need to generate many class variations for different combinations.
 - It strictly binds functionality to the JavaScript class hierarchy, making a future declarative syntax hard to implement without creating new classes.
 
-Rejected in favor of the imperative API because it doesn't allow composition (attaching multiple complementary capabilities to a single element), requires multiple classes instead of a single element that adapts to initial configuration, and doesn't support configuring element behavior state before attachment.
+Rejected in favor of the imperative API because it doesn't allow composition (attaching multiple complementary capabilities to a single element), requires multiple classes instead of a single element that adapts to initial configuration, and doesn't support configuring its capabilities state before attachment.
 
 ### Alternative 2: ElementInternals.type ([Proposed](../ElementInternalsType/explainer.md))
 
@@ -801,7 +801,7 @@ Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`
 **Cons:**
 - Doesn't currently address form submission functionality.
 - Scoped to specific attributes rather than general capabilities.
-- Since the composition doesn't have an order/sequence to it, web authors would not be able to specify a desired "winner" when using multiple capabilities that happen to impact a shared value or capability.
+- Since the composition doesn't have an order/sequence to it, web authors would not be able to specify a desired "winner" when using multiple capabilities that happen to impact a shared value or functionality.
 
 ### Alternative 6: Fully Customizable Native Elements
 
