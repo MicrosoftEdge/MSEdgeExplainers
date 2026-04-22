@@ -1,6 +1,6 @@
 # performance.markPaintTime() Explainer
 
-Authors:  [Wangsong Jin](https://github.com/JosephJin0815) - Engineer at Microsoft Edge
+Author:  [Wangsong Jin](https://github.com/JosephJin0815) - Engineer at Microsoft Edge
 
 ## Status of this Document
 
@@ -39,72 +39,68 @@ The platform already captures paint and presentation timestamps for key moments 
 
 ## The Problem
 
-Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's post](https://nolanlawson.com/2015/09/29/the-difference-between-throttling-and-debouncing/)). Furthermore, no workaround can provide `presentationTime` — the actual time when pixels appear on screen. For example, a developer measuring when a virtual DOM (vdom) change actually lands on the real DOM and renders:
+Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)). Furthermore, no workaround can provide `presentationTime` — the actual time when pixels appear on screen. For example, a developer wants to measure when a chat input box appears after the page loads, but the component is rendered asynchronously by a framework. A typical pattern uses `IntersectionObserver` to detect when the element enters the viewport, then `requestAnimationFrame` to approximate the paint time:
+
+### Single requestAnimationFrame
+
+```javascript
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    observer.disconnect();
+    requestAnimationFrame(() => {
+      performance.mark('chat-input-visible');
+    });
+  }
+});
+observer.observe(document.querySelector('.chat-input'));
+```
+
+Since `requestAnimationFrame` fires before the browser paints, the recorded timestamp is earlier than when the content is actually rendered. It is better than logging at the moment of the DOM update, but still only an approximation.
 
 ### Double requestAnimationFrame
 
 ```javascript
-// React component measuring vdom → DOM rendering
-function MyComponent() {
-  useLayoutEffect(() => {
-    // useLayoutEffect fires after React's DOM commit but before the browser's
-    // rendering update. Resort to double-rAF to approximate paint timing.
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    observer.disconnect();
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        performance.mark('component-rendered');
+        performance.mark('chat-input-visible');
       });
     });
-  });
-}
+  }
+});
+observer.observe(document.querySelector('.chat-input'));
 ```
 
-This is a widely-used approach to approximate when a vdom change actually lands on the DOM. However, we cannot be guaranteed that we are looking at the frame that corresponds to the change 100% of the time. This gets worse when observers (e.g., ResizeObserver, IntersectionObserver) are present — their callbacks add work between frames, making the second rAF even less likely to land on the expected frame.
+The second rAF fires after the first frame's paint, getting closer to the actual paint time. However, there is no guarantee that this captures the frame that corresponds to the change. This gets worse when observers (e.g., `ResizeObserver`, `IntersectionObserver`) are present — their callbacks add work between frames, making the second rAF even less likely to land on the expected frame.
 
 ### requestAnimationFrame + setTimeout
 
-```javascript
-// Alternative approach used with React useLayoutEffect
-function MyComponent() {
-  useLayoutEffect(() => {
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        performance.mark('component-rendered');
-      }, 0);
-    });
-  });
-}
-```
+Another common workaround is `requestAnimationFrame` + `setTimeout`, which defers the mark to the next task after the rAF callback. This is more likely to land after the paint, but the overshoot is non-deterministic due to other queued tasks — the timestamp ends up well past the actual frame, making the measurement less precise.
 
-This is more accurate but less precise because now we are well past the frame in the next task. The overshoot is non-deterministic due to other queued tasks.
-
-Both approaches presuppose React via `useLayoutEffect` to measure "on DOM and interactive." Both workarounds exist because there is no API to get paint timing for arbitrary visual updates.
-
-### With markPaintTime:
+### With markPaintTime
 
 ```javascript
-function MyComponent() {
-  useLayoutEffect(() => {
-    performance.markPaintTime("component-rendered");
-  });
-}
-
-// Observe the result
-const observer = new PerformanceObserver((list) => {
-  for (const entry of list.getEntries()) {
-    // paintTime — captured during the rendering opportunity, after style+layout
-    // presentationTime — the time when pixels were actually shown on display
-    console.log(`Paint time: ${entry.paintTime}ms`);
-    console.log(`Presentation time: ${entry.presentationTime}ms`);
-    console.log(`Rendering latency: ${entry.paintTime - entry.startTime}ms`);
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    observer.disconnect();
+    performance.markPaintTime('chat-input-visible');
   }
 });
-observer.observe({ type: "mark-paint-time" });
+observer.observe(document.querySelector('.chat-input'));
+
+new PerformanceObserver((list) => {
+  for (const entry of list.getEntries()) {
+    console.log(`Paint: ${entry.paintTime}ms`);
+    console.log(`Presented: ${entry.presentationTime}ms`);
+  }
+}).observe({ type: 'mark-paint-time' });
 ```
 
-Benefits:
-- **Accurate time**: No idle time gap, no task queue delay.
-- **Main-thread rendering cost**: `paintTime - startTime` captures the time from the call to the paint phase of the rendering update.
-- **End-to-end visual latency**: `presentationTime - startTime` captures the full latency until pixels are actually shown on the display.
+- **Accurate**: `paintTime` is captured at the rendering update, not approximated by rAF.
+- **End-to-end**: `presentationTime` tells you when pixels actually appeared on the display.
+- **Stable**: No rAF variance — the timestamp comes directly from the rendering pipeline.
 
 ## Proposed API
 
@@ -140,9 +136,9 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 ### What developers can measure
 
 - **`startTime`**: `performance.now()` at the time `markPaintTime()` is called.
-- `paintTime - startTime` = main-thread rendering cost (how long until the browser finished processing the visual update)
-- `presentationTime - startTime` = end-to-end visual latency (how long until the user actually sees the update)
-- `presentationTime - paintTime` = off-main-thread cost (compositor + GPU time)
+- **`paintTime - startTime`** = main-thread rendering cost (how long until the browser finished processing the visual update)
+- **`presentationTime - startTime`** = end-to-end visual latency (how long until the user actually sees the update)
+- **`presentationTime - paintTime`** = off-main-thread cost (compositor + GPU time)
 
 ## Key Design Decisions
 
