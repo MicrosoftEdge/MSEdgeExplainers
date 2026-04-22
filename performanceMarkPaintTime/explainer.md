@@ -115,6 +115,11 @@ new PerformanceObserver((list) => {
  | `paintTime` | The rendering update end time — same as FP/FCP/LCP `paintTime` |
  | `presentationTime` | When pixels were actually shown on the display — same as FP/FCP/LCP `presentationTime` |
 
+**Behavior:**
+- On-demand — no data is collected until `markPaintTime()` is called.
+- One-shot — each call tags the next rendering update and produces exactly one entry.
+- Multiple calls before a rendering update each produce their own entry with distinct `paintTime` and `presentationTime`.
+
 The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming) from the Paint Timing spec, so `paintTime` and `presentationTime` have identical semantics to the timestamps developers already see on FP, FCP, and LCP entries.
 
 ## Rendering Pipeline and Timing
