@@ -20,6 +20,7 @@ This document is a starting point for engaging the community and standards bodie
 - [Rendering Pipeline and Timing](#rendering-pipeline-and-timing)
 - [Key Design Decisions](#key-design-decisions)
 - [Alternatives Considered](#alternatives-considered)
+- [Open Questions](#open-questions)
 - [Security and Privacy Considerations](#security-and-privacy-considerations)
 - [Appendix: WebIDL](#appendix-webidl)
 
@@ -173,6 +174,19 @@ This would approximate `paintTime` more accurately than double-rAF, since the ca
 
 - **No `presentationTime`** — rPAF fires on the main thread, before compositor and GPU work. There is no way to know when pixels actually appeared on the display.
 - **Not being pursued** — the proposal's original author has noted that a post-animation callback may not be useful for optimizing rendering latency, as downstream graphics pipeline latency matters more than hitting a specific VSYNC deadline, and the [proposal is not being pursued](https://github.com/WICG/request-post-animation-frame).
+
+## Open Questions
+
+### paintTime vs. a new "post-paint" timestamp
+
+The current design reuses `paintTime` from PaintTimingMixin, which is captured at [step 11.14.21 of the rendering update](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model) — right before the browser performs the actual paint. This means it does not include the cost of paint itself, so it is not truly the last piece of main-thread work for the frame.
+
+A "post-paint" timestamp — captured after paint completes — would more accurately reflect the total main-thread rendering cost. However:
+
+- **Security concerns**: a post-paint timestamp could expose more precise timing information about rendering complexity, potentially enabling new side-channel attacks.
+- **Interoperability**: the HTML spec's update-the-rendering steps do not define a "post-paint" point. This concept does not exist as a spec-level primitive today, making cross-browser agreement uncertain.
+
+We welcome feedback on whether `paintTime` is sufficient for developer needs or whether a post-paint timestamp is worth pursuing despite these tradeoffs.
 
 ## Security and Privacy Considerations
 
