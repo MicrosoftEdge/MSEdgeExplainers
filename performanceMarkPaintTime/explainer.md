@@ -19,6 +19,7 @@ This document is a starting point for engaging the community and standards bodie
 - [Proposed API](#proposed-api)
 - [Spec Draft](#spec-draft)
 - [Entry Properties](#entry-properties)
+- [Rendering Pipeline and Timing](#rendering-pipeline-and-timing)
 - [Key Design Decisions](#key-design-decisions)
 - [Alternatives Considered](#alternatives-considered)
 - [Security and Privacy Considerations](#security-and-privacy-considerations)
@@ -141,6 +142,29 @@ PerformancePaintTimeMark includes PaintTimingMixin;
  | `duration` | DOMHighResTimeStamp | Always `0` |
  | `paintTime` | DOMHighResTimeStamp | The rendering update end time, captured at [step 21 ("mark paint timing")](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model) of the event loop processing model. Same as FP/FCP/LCP `paintTime`. |
  | `presentationTime` | DOMHighResTimeStamp? | Implementation-defined presentation time when the composited frame is actually presented to the display. Same semantics as FP/FCP/LCP `presentationTime`. |
+
+## Rendering Pipeline and Timing
+
+`markPaintTime()` captures timestamps at specific points in the browser's rendering pipeline.
+
+### paintTime
+
+`paintTime` is the rendering update end time, captured after style recalculation and layout. This is the same timestamp that FP/FCP/LCP use via [PaintTimingMixin](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), defined at [step 11.14.21 of the event loop](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model).
+
+![paintTime in the rendering pipeline](paint-time-pipeline.png)
+
+### presentationTime
+
+`presentationTime` is the time when the composited frame is actually presented to the display — the next hardware display refresh that contains the updated content.
+
+![presentationTime in the rendering pipeline](presentation-time-pipeline.png)
+
+### What developers can measure
+
+- **`startTime`**: `performance.now()` at the time `markPaintTime()` is called.
+- `paintTime - startTime` = main-thread rendering cost (how long until the browser finished processing the visual update)
+- `presentationTime - startTime` = end-to-end visual latency (how long until the user actually sees the update)
+- `presentationTime - paintTime` = off-main-thread cost (compositor + GPU time)
 
 ## Key Design Decisions
 
