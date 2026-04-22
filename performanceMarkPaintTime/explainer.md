@@ -144,7 +144,7 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 - **`startTime`**: `performance.now()` at the time `markPaintTime()` is called.
 - **`paintTime - startTime`** = main-thread rendering cost (how long until the browser finished processing the visual update)
 - **`presentationTime - startTime`** = end-to-end visual latency (how long until the user actually sees the update)
-- **`presentationTime - paintTime`** = off-main-thread cost (compositor + GPU time)
+- **`presentationTime - paintTime`** = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation)
 
 ## Key Design Decisions
 
