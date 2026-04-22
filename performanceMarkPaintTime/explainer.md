@@ -150,10 +150,24 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 
 ### requestPostAnimationFrame (rPAF)
 
-`requestPostAnimationFrame` by design fires immediately after the rendering update completes. Calling `performance.now()` inside the callback could approximate `paintTime`, but:
+`requestPostAnimationFrame` fires immediately after the rendering update completes. Using it for the same chat-input example:
 
-- Cannot provide `presentationTime` — rPAF fires on the main thread, before compositor/GPU work.
-- The proposal's original author has concluded that a post-animation callback is not actually useful for its intended purpose (optimizing rendering latency), and the proposal is not being pursued.
+```javascript
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    observer.disconnect();
+    requestPostAnimationFrame(() => {
+      performance.mark('chat-input-visible');
+    });
+  }
+});
+observer.observe(document.querySelector('.chat-input'));
+```
+
+This would approximate `paintTime` more accurately than double-rAF, since the callback fires right after paint rather than at the start of the next frame. However:
+
+- **No `presentationTime`** — rPAF fires on the main thread, before compositor and GPU work. There is no way to know when pixels actually appeared on the display.
+- **Not being pursued** — the proposal's original author has noted that a post-animation callback may not be useful for optimizing rendering latency, as downstream graphics pipeline latency matters more than hitting a specific VSYNC deadline, and the [proposal is not being pursued](https://github.com/WICG/request-post-animation-frame).
 
 ## Security and Privacy Considerations
 
