@@ -17,12 +17,11 @@ This document is a starting point for engaging the community and standards bodie
 - [Non-goals](#non-goals)
 - [The Problem](#the-problem)
 - [Proposed API](#proposed-api)
-- [Spec Draft](#spec-draft)
-- [Entry Properties](#entry-properties)
 - [Rendering Pipeline and Timing](#rendering-pipeline-and-timing)
 - [Key Design Decisions](#key-design-decisions)
 - [Alternatives Considered](#alternatives-considered)
 - [Security and Privacy Considerations](#security-and-privacy-considerations)
+- [Appendix: WebIDL](#appendix-webidl)
 
 ## Introduction
 
@@ -109,39 +108,18 @@ Benefits:
 
 ## Proposed API
 
-### Spec Draft
+`performance.markPaintTime(markName)` tags the next rendering update with a developer-chosen name. The browser then delivers a `PerformancePaintTimeMark` entry through `PerformanceObserver` with the following properties:
 
-We extend the existing Paint Timing spec by adding `markPaintTime()` to the Performance interface. The returned entry includes `PaintTimingMixin`, reusing the same `paintTime` and `presentationTime` attributes that FP/FCP/LCP already define:
+ | Attribute | Description |
+ |-----------|-------------|
+ | `entryType` | Always `"mark-paint-time"` |
+ | `name` | The mark name passed to `markPaintTime()` |
+ | `startTime` | `performance.now()` at the time `markPaintTime()` was called |
+ | `duration` | Always `0` |
+ | `paintTime` | The rendering update end time — same as FP/FCP/LCP `paintTime` |
+ | `presentationTime` | When pixels were actually shown on the display — same as FP/FCP/LCP `presentationTime` |
 
-```webidl
-// Extends Paint Timing spec — https://w3c.github.io/paint-timing/
-partial interface Performance {
-  undefined markPaintTime(DOMString markName);
-};
-
-[Exposed=Window]
-interface PerformancePaintTimeMark : PerformanceEntry {
-  [Default] object toJSON();
-};
-PerformancePaintTimeMark includes PaintTimingMixin;
-
-// PaintTimingMixin already defined in Paint Timing spec:
-// interface mixin PaintTimingMixin {
-//   readonly attribute DOMHighResTimeStamp paintTime;
-//   readonly attribute DOMHighResTimeStamp? presentationTime;
-// };
-```
-
- ### Entry Properties
- 
- | Attribute | Type | Description |
- |-----------|------|-------------|
- | `entryType` | DOMString | Always `"mark-paint-time"` (inherited from PerformanceEntry) |
- | `name` | DOMString | The mark name passed to `markPaintTime()` (inherited from PerformanceEntry) |
- | `startTime` | DOMHighResTimeStamp | `performance.now()` at the time `markPaintTime()` was called |
- | `duration` | DOMHighResTimeStamp | Always `0` |
- | `paintTime` | DOMHighResTimeStamp | The rendering update end time, captured at [step 21 ("mark paint timing")](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model) of the event loop processing model. Same as FP/FCP/LCP `paintTime`. |
- | `presentationTime` | DOMHighResTimeStamp? | Implementation-defined presentation time when the composited frame is actually presented to the display. Same semantics as FP/FCP/LCP `presentationTime`. |
+The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming) from the Paint Timing spec, so `paintTime` and `presentationTime` have identical semantics to the timestamps developers already see on FP, FCP, and LCP entries.
 
 ## Rendering Pipeline and Timing
 
@@ -185,3 +163,24 @@ PerformancePaintTimeMark includes PaintTimingMixin;
 
 - `paintTime` and `presentationTime` are subject to the same cross-origin coarsening as existing paint timing entries.
 - Timestamps are coarsened to mitigate timing side-channel attacks, consistent with `performance.now()` resolution restrictions.
+
+## Appendix: WebIDL
+
+```webidl
+// Extends Paint Timing spec — https://w3c.github.io/paint-timing/
+partial interface Performance {
+  undefined markPaintTime(DOMString markName);
+};
+
+[Exposed=Window]
+interface PerformancePaintTimeMark : PerformanceEntry {
+  [Default] object toJSON();
+};
+PerformancePaintTimeMark includes PaintTimingMixin;
+
+// PaintTimingMixin already defined in Paint Timing spec:
+// interface mixin PaintTimingMixin {
+//   readonly attribute DOMHighResTimeStamp paintTime;
+//   readonly attribute DOMHighResTimeStamp? presentationTime;
+// };
+```
