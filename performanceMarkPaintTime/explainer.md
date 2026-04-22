@@ -78,7 +78,21 @@ The second rAF fires after the first frame's paint, getting closer to the actual
 
 ### requestAnimationFrame + setTimeout
 
-Another common workaround is `requestAnimationFrame` + `setTimeout`, which defers the mark to the next task after the rAF callback. This is more likely to land after the paint, but the overshoot is non-deterministic due to other queued tasks — the timestamp ends up well past the actual frame, making the measurement less precise.
+```javascript
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    observer.disconnect();
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        performance.mark('chat-input-visible');
+      }, 0);
+    });
+  }
+});
+observer.observe(document.querySelector('.chat-input'));
+```
+
+This defers the mark to the next task after the rAF callback, which is more likely to land after the paint. However, the overshoot is non-deterministic due to other queued tasks — the timestamp ends up well past the actual frame, making the measurement less precise.
 
 ### With markPaintTime
 
