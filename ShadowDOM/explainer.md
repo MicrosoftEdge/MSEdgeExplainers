@@ -202,7 +202,7 @@ An inline CSS module script could also be imported in a JavaScript module in the
 ```html
 import styles from 'foo' with { type: 'css' };
 ```
-Another advantage of this proposal is that it can allow multiple module specifiers in the `shadowrootadoptedstylesheets` property:
+Another advantage of this proposal is that it can allow multiple module specifiers in the `shadowrootadoptedstylesheets` attribute:
 ```html
 <style type="module" specifier="foo">
   #content {
@@ -406,7 +406,7 @@ import sheet from "foo" with { type: "css" };
 shadowRoot.adoptedStyleSheets = [sheet];
 ```
 
-...assuming that "foo" hasn't been used as the key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects it to a URL. If "foo" has used as a key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects to a URL, that URL will be fetched instead of locating the declarative version.
+...assuming that "foo" hasn't been used as the key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects it to a URL. If "foo" has been used as a key of an [import map](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps) that redirects to a URL, that URL will be fetched instead of locating the declarative version.
 
 If a module is imported imperatively in this fashion and the Declarative CSS Module is not in the [module map](https://html.spec.whatwg.org/#module-map), the import fails, even if it is added declaratively at a later time.
 
@@ -712,7 +712,7 @@ A challenge that arises is dealing with scopes and idrefs. If a declarative styl
 
 The script version of this already exists via the [adoptedStyleSheets](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/adoptedStyleSheets) property:
 ```html
-import sheet from './styles.css' assert { type: 'css' }; // or new CSSStyleSheet();
+import sheet from './styles.css' with { type: 'css' }; // or new CSSStyleSheet();
 shadowRoot.adoptedStyleSheets = [sheet];
 ```
 
