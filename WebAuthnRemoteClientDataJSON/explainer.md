@@ -14,8 +14,9 @@ venue and content location of future work and discussions.
 * This document status: **`ACTIVE`**
 * Expected venue: [W3C Web Authentication Working Group](https://www.w3.org/groups/wg/webauthn/)
 * **Current version: this document**
-* Related spec PR: [w3c/webauthn#2375](https://github.com/w3c/webauthn/pull/2375)
+* Related spec PR: [w3c/webauthn#2375](https://github.com/w3c/webauthn/pull/2375) — **approved by the Working Group; pending merge**. Editorial polish is expected to land as follow-up PRs.
 * Related issue: [w3c/webauthn#1577](https://github.com/w3c/webauthn/issues/1577)
+* Approving reviewers: @pascoej, @emlun, @ve7jtb, @timcappalli, @MasterKale
 
 ## Introduction
 
@@ -23,9 +24,9 @@ The [Web Authentication API](https://www.w3.org/TR/webauthn-3/) (WebAuthn) enabl
 
 Remote desktop web clients present a challenge for this model. When a user initiates a WebAuthn ceremony within a remote desktop session, the request originates from the remote host (e.g., `https://accounts.example.com`) but is executed in the context of the local web client (e.g., `https://myrdc.example`). The browser constructs `clientDataJSON` using the *local* client's origin rather than the *remote* host's origin. Meanwhile, the remote desktop host passes its own `clientDataJSON` (with the remote origin) to the platform authenticator API (e.g., the Windows WebAuthn API). This mismatch between the browser-constructed and host-provided `clientDataJSON` causes signature validation to fail.
 
-The existing [`remoteDesktopClientOverride`](https://w3c.github.io/webauthn/#sctn-remoteDesktopClientOverride-extension) extension partially addresses this by allowing remote desktop clients to override the `origin` and `crossOrigin` fields. However, it still relies on the browser to *construct* `clientDataJSON` from component values, which may differ from the `clientDataJSON` that the remote host passed to the platform API. Any structural differences -- field ordering, additional fields, whitespace -- will produce a different hash and break signature verification.
+A preexisting Chromium-only extension, `remoteDesktopClientOverride`, partially addresses this by allowing remote desktop clients to override the `origin` and `crossOrigin` fields. It has never been standardized in the W3C WebAuthn specification. Even where supported, it relies on the browser to *construct* `clientDataJSON` from component values, which may differ from the `clientDataJSON` that the remote host passed to the platform API. Any structural differences -- field ordering, additional fields, whitespace -- will produce a different hash and break signature verification.
 
-The `remoteClientDataJSON` extension solves this by allowing an authorized remote desktop web client to provide the *complete* `clientDataJSON` string, which the browser passes through verbatim without modification.
+The `remoteClientDataJSON` extension solves this by allowing an authorized remote desktop web client to provide the *complete* `clientDataJSON` string, which the browser passes through verbatim without modification. It is the first remote-desktop WebAuthn extension to be standardized in the W3C spec (via [PR #2375](https://github.com/w3c/webauthn/pull/2375)).
 
 ## Background
 
@@ -40,9 +41,9 @@ The `remoteClientDataJSON` extension solves this by allowing an authorized remot
 7. The response is sent back to the remote host, which attempts to verify the signature against the `clientDataJSON` it originally provided to the platform API.
 8. **Verification fails** because the two `clientDataJSON` objects differ.
 
-### Existing `remoteDesktopClientOverride` Extension
+### Existing `remoteDesktopClientOverride` Extension (Chromium-only, non-standard)
 
-Chromium already supports a [`remoteDesktopClientOverride`](https://w3c.github.io/webauthn/#sctn-remoteDesktopClientOverride-extension) extension that allows overriding the `origin` and `sameOriginWithAncestors` values used when constructing `clientDataJSON`:
+Chromium already supports a `remoteDesktopClientOverride` extension that allows overriding the `origin` and `sameOriginWithAncestors` values used when constructing `clientDataJSON`. Note that this extension is a Chromium-specific implementation; it is **not** defined in the published W3C WebAuthn specification:
 
 ```js
 navigator.credentials.get({
@@ -71,7 +72,7 @@ This extension corrects the origin and cross-origin flag, but the browser still 
 
 ## Non-Goals
 
-- Deprecating or removing the existing `remoteDesktopClientOverride` extension. Both extensions will coexist.
+- Deprecating or removing Chromium's existing (non-standard) `remoteDesktopClientOverride` extension. Both extensions will coexist in Chromium, with `remoteClientDataJSON` taking priority when both are present.
 - Modifying the behavior of WebAuthn for non-remote-desktop use cases.
 - Implementing a general-purpose mechanism for arbitrary `clientDataJSON` injection outside of remote desktop scenarios.
 - Defining platform-specific authenticator behavior. The extension operates entirely at the client (browser) level.
@@ -122,7 +123,7 @@ The value is a JSON-serialized string containing the standard `clientDataJSON` f
 
 ### WebIDL
 
-Per [w3c/webauthn PR #2375](https://github.com/w3c/webauthn/pull/2375):
+Per [w3c/webauthn PR #2375](https://github.com/w3c/webauthn/pull/2375) (approved):
 
 **Client Extension Input:**
 
@@ -148,32 +149,56 @@ partial dictionary AuthenticationExtensionsClientOutputsJSON {
 };
 ```
 
-> Note: The input uses `remoteClientDataJSON` (uppercase `JSON`) while the output uses `remoteClientDataJson` (camelCase `Json`), per the naming in the W3C spec PR.
+> Note: The input uses `remoteClientDataJSON` (uppercase `JSON`) while the output uses `remoteClientDataJson` (camelCase `Json`), per the current spec PR naming. The output is simply a boolean `true` indicating the extension was acted upon. Earlier drafts also returned a `remoteDesktopClientOrigin` string in the output; that field was removed during review because the origin is already conveyed inside `clientDataJSON`.
 
 ### Processing Steps
 
-When `remoteClientDataJSON` is present in the extension inputs:
+When `remoteClientDataJSON` is present in the extension inputs, the algorithm replaces the standard "establish the RP ID" and "construct `collectedClientData`" steps of the registration / authentication ceremonies with the following (per the approved spec PR):
 
-1. **Permission check**: Verify that the calling origin is authorized to use this extension (via enterprise policy, browser flag allowlist, or permissions policy).
-2. **Parse the JSON**: Parse the provided `remoteClientDataJSON` string. If parsing fails, throw `NotSupportedError`.
-3. **Extract the remote origin**: Read the `"origin"` field from the parsed JSON.
-4. **Validate RP ID**: Verify that the requested `rpId` is a valid registrable domain suffix of the extracted remote origin. If validation fails, throw `SecurityError`.
-5. **Skip `clientDataJSON` construction**: The browser MUST NOT construct its own `clientDataJSON`. The provided string is used as-is.
-6. **Compute the hash**: Compute `SHA-256` of the provided `clientDataJSON` string for the authenticator.
-7. **Return verbatim**: The `clientDataJSON` in the response is the exact string provided by the caller, with no additions, removals, or modifications.
+1. **Permission check**: If the current permission state for `"publickey-credentials-remote-client-data-json"` and the current settings object is not `"granted"`, throw `NotAllowedError`.
+2. **RP ID presence**: If `publicKey.rp.id` (registration) / `publicKey.rpId` (authentication) is not present, throw `NotAllowedError`. The caller MUST supply an explicit RP ID — the browser does not default it to the calling origin.
+3. **Parse the JSON**: Parse the provided `remoteClientDataJSON` string as a JSON value (using the Infra "parse a JSON string to an Infra value" algorithm). If parsing fails:
+    * For `navigator.credentials.create()`, throw `EncodingError`.
+    * For `navigator.credentials.get()`, throw `NotSupportedError`.
+    > Note: the two ceremonies use different exception types in the current spec text; this may be aligned in a follow-up editorial PR.
+4. **Extract the remote origin**: Read the `"origin"` key from the parsed JSON; call this `remoteOrigin`.
+5. **Skip the registrable-domain-suffix check**: The browser does **not** verify that `rpId` is a registrable domain suffix of `remoteOrigin`. RP ID validation is delegated to the remote client, which has the full context needed to evaluate related origins and platform-specific app-deployment models.
+6. **Skip `clientDataJSON` construction**: The browser MUST NOT build its own `collectedClientData`; the parsed JSON from step 3 is used directly.
+7. **Pass the JSON through verbatim**: In the "serialize client data" step, set `clientDataJSON` to the exact `remoteClientDataJSON` string supplied by the caller. The user agent MUST NOT add, remove, or modify any of its contents (doing so would invalidate the remote machine's hash and cause signature verification to fail at the RP).
+8. **Compute the hash**: Compute `SHA-256` of the verbatim string for the authenticator.
 
-### Precedence
+### Client Extension Output
 
-If both `remoteClientDataJSON` and `remoteDesktopClientOverride` are present in the same request, `remoteClientDataJSON` takes priority. The `remoteDesktopClientOverride` fields are ignored without raising an error.
+The client extension output is simply `true`, signaling to the RP that the extension was acted upon. The earlier draft also returned a `remoteDesktopClientOrigin` field; that was removed in response to review feedback from [@MasterKale](https://github.com/w3c/webauthn/pull/2375#pullrequestreview-7fOMrd) so that origin information travels only inside `clientDataJSON`.
 
-### Permissions Policy
+### Interaction with the Chromium-only `remoteDesktopClientOverride`
 
-The W3C spec PR defines a permissions policy feature:
+`remoteDesktopClientOverride` is not part of the W3C spec and interaction between the two extensions is therefore a Chromium implementation detail. In Chromium, if both extensions are present in the same request, `remoteClientDataJSON` takes priority and `remoteDesktopClientOverride` is ignored without raising an error.
 
-- **Feature identifier:** `publickey-credentials-remote-client-data-json`
-- **Default allowlist:** `'none'`
+### Permissions and Permissions Policy
 
-This is designated as a [powerful feature](https://w3c.github.io/permissions/#powerful-feature) with a default permission state of `"denied"`.
+The approved spec PR defines the extension as both a [powerful feature](https://w3c.github.io/permissions/#powerful-feature) and a [policy-controlled feature](https://w3c.github.io/webappsec-permissions-policy/), identified by the same token:
+
+* **Feature identifier:** `publickey-credentials-remote-client-data-json`
+* **Default allowlist (Permissions Policy):** `'none'` — disabled for all origins by default.
+* **Default permission state (Permissions API):** `"denied"` — the extension is unavailable until explicitly granted per-origin.
+* **Permission descriptor type:** defaults to `PermissionDescriptor` (no additional aspects).
+
+A remote desktop web client can feature-detect whether the user agent has been configured to allow the extension for its origin using the standard Permissions API:
+
+```js
+const status = await navigator.permissions.query({
+  name: "publickey-credentials-remote-client-data-json",
+});
+
+if (status.state === "granted") {
+  // Proceed with the remoteClientDataJSON flow.
+}
+```
+
+The step numbered 1 in the [Processing Steps](#processing-steps) section calls `getting the current permission state` for this feature; a state other than `"granted"` causes the WebAuthn call to reject with `NotAllowedError`.
+
+User agents MUST only expose per-origin configuration mechanisms (enterprise policy, managed-profile policy, or per-origin user opt-in in client settings); a "permit all origins" switch is explicitly forbidden by the spec.
 
 ### Example: Registration (Create)
 
@@ -247,13 +272,17 @@ For personal or non-managed devices, users can enable WebAuthn remote desktop su
 
 The flags page includes a standard warning about enabling experimental features and their potential security implications.
 
-### 3. Permissions Policy (Future)
+### 3. Permissions Policy and the Permissions API
 
-The W3C spec PR defines integration with the [Permissions API](https://w3c.github.io/permissions/) and [Permissions Policy](https://w3c.github.io/permissions-policy/). When standardized, this will provide a web-standard mechanism for sites to declare permission via HTTP headers:
+The approved spec PR integrates the extension with both the [Permissions API](https://w3c.github.io/permissions/) and [Permissions Policy](https://w3c.github.io/permissions-policy/). Once the spec is merged and published, sites can declare the extension via an HTTP header:
 
 ```
 Permissions-Policy: publickey-credentials-remote-client-data-json=(self "https://myrdc.example")
 ```
+
+Web-exposed feature detection is available via `navigator.permissions.query({ name: "publickey-credentials-remote-client-data-json" })`, which returns `"granted"` only when the calling origin has been authorized by one of the mechanisms above.
+
+Per the spec, this configuration MUST remain per-origin: user agents are forbidden from offering a single toggle that permits the extension for all origins.
 
 ## Considered Alternatives
 
@@ -283,37 +312,48 @@ Allow the caller to provide only the `SHA-256` hash of `clientDataJSON`, rather 
 
 The `remoteClientDataJSON` extension allows the calling origin to supply a `clientDataJSON` containing a different `origin` value than the local browser context. This is inherent to the remote desktop use case, but it means the browser must trust the caller to provide an accurate remote origin. This trust is mitigated by the per-origin authorization requirement.
 
-#### RP ID Validation
+#### RP ID Validation is Delegated to the Remote Client
 
-The browser parses the provided `clientDataJSON` and validates the requested `rpId` against the `origin` extracted from the JSON, using the standard registrable domain suffix check. This ensures that even with a complete JSON override, the caller cannot make requests for arbitrary relying parties unrelated to the specified origin.
+The approved spec PR **skips** the usual "is the `rpId` a registrable domain suffix of the origin?" check on the local client. The registrable-domain-suffix test is instead the responsibility of the remote client, because only the remote side has the full context required: related origins, platform-specific app-deployment models (e.g., Android asset links, iOS associated domains), and the remote RP's allowed-origin configuration. Any user agent that grants this permission to an origin MUST therefore trust that origin to have performed RP ID validation honestly and correctly. This makes the per-origin authorization step (below) the primary defense.
 
 #### Per-Origin Authorization
 
-User agents MUST NOT grant this permission globally. The extension is only available to origins explicitly authorized via:
-- Enterprise device management policy, or
-- Explicit user opt-in through browser flags with a per-origin allowlist.
+User agents MUST NOT grant this permission globally. The spec requires that configuration mechanisms be per-origin, via either:
 
-This ensures that arbitrary web pages cannot use this extension to forge `clientDataJSON`.
+* Enterprise / managed-device / managed-profile policy, or
+* Explicit per-origin user opt-in in user-agent settings (e.g., a browser flag with a per-origin allowlist).
 
-#### Interaction with `remoteDesktopClientOverride`
+A "permit all origins" option is explicitly forbidden. This is the load-bearing security boundary, since the local client no longer performs the registrable-domain-suffix check itself.
 
-When both extensions are present, `remoteClientDataJSON` takes precedence. This is safe because `remoteClientDataJSON` provides a strict superset of the functionality of `remoteDesktopClientOverride`, and the same authorization model applies to both.
+#### Security of the `remoteDesktopClientOverride` Coexistence
+
+`remoteDesktopClientOverride` is not a standardized extension, so their interaction is a Chromium implementation detail. When both are present in a Chromium request, `remoteClientDataJSON` takes precedence. This is safe because `remoteClientDataJSON` is a strict superset of the functionality of `remoteDesktopClientOverride`, and the same authorization model applies.
 
 ### Privacy
 
-This extension does not introduce new privacy concerns beyond those already present in the `remoteDesktopClientOverride` extension. The `clientDataJSON` string provided by the caller contains only the standard fields (`type`, `challenge`, `origin`, `crossOrigin`) that the browser would normally construct itself. No additional user data is exposed.
+This extension does not introduce new privacy concerns beyond those already present in a normal WebAuthn ceremony. The `clientDataJSON` string provided by the caller contains only the standard fields (`type`, `challenge`, `origin`, `crossOrigin`) that the browser would otherwise construct itself. No additional user data is exposed.
 
 The extension is not available by default and cannot be used for fingerprinting, as it requires explicit per-origin authorization that is not detectable by unauthorized origins.
 
+## Resolved During W3C Review
+
+Several points from earlier drafts of this explainer were resolved in the approved version of [PR #2375](https://github.com/w3c/webauthn/pull/2375):
+
+1. **Permission descriptor shape (RESOLVED)**: Earlier drafts proposed a custom `PermissionDescriptor` subtype. Per review feedback from [@kreichgauer](https://github.com/w3c/webauthn/pull/2375), the custom descriptor was dropped; the feature now uses the default `PermissionDescriptor` type, queried with `{ name: "publickey-credentials-remote-client-data-json" }`.
+
+2. **Feature identifier naming (RESOLVED)**: The feature identifier `publickey-credentials-remote-client-data-json` was chosen, consistent with the existing `publickey-credentials-create` / `publickey-credentials-get` Permissions Policy features.
+
+3. **RP ID validation location (RESOLVED)**: The WG accepted the proposal that the local client delegates the registrable-domain-suffix check (and related-origin evaluation) to the remote client, because only the remote side has the full context (related origins, app-deployment-specific origin linking). This is reflected in the Processing Steps above.
+
+4. **`remoteDesktopClientOrigin` output field (RESOLVED)**: The earlier draft returned a `remoteDesktopClientOrigin` DOMString in `AuthenticationExtensionsClientOutputs`. Per review by [@MasterKale](https://github.com/w3c/webauthn/pull/2375), it was removed — the output is now just a `boolean remoteClientDataJson` flag. The origin is already inside `clientDataJSON`, so echoing it in the output was redundant.
+
 ## Open Questions
 
-1. **Permissions API integration**: The W3C spec PR (#2375) defines `remoteClientDataJSON` as a [powerful feature](https://w3c.github.io/permissions/#powerful-feature) with a custom permission descriptor. Ongoing review ([kreichgauer, April 2026](https://github.com/w3c/webauthn/pull/2375)) suggests the custom descriptor may be unnecessary. The scope of Permissions API integration depends on the resolution of this review.
+1. **User communication**: The spec recommends that user agents clearly communicate to users when a remote-desktop-proxied WebAuthn operation is in progress, so users understand their authenticator is being used on behalf of a remotely hosted RP. The exact form of this UI (indicator, prompt, chrome decoration) is left to user agents and is not yet defined.
 
-2. **Feature identifier naming**: Should the permissions policy feature use `remote-client-data-json` or `publickey-credentials-remote-client-data-json` to align with existing WebAuthn permission feature naming conventions?
+2. **Exception parity between `create()` and `get()`**: The current spec text throws `EncodingError` on JSON parse failure in `create()` but `NotSupportedError` in `get()`. [@emlun](https://github.com/w3c/webauthn/pull/2375) noted this may be tidied up in a follow-up editorial PR.
 
-3. **Related origin requests**: When `remoteClientDataJSON` is present and RP ID validation is performed against the extracted origin, should [related origin requests](https://w3c.github.io/webauthn/#sctn-related-origins) also be evaluated, or should they be skipped?
-
-4. **User communication**: The spec recommends that user agents clearly communicate to users when a remote-desktop-proxied WebAuthn operation is in progress. The form and requirements of this communication are not yet defined.
+3. **End-to-end sequence diagram**: [@MasterKale](https://github.com/w3c/webauthn/pull/2375) contributed a sequence diagram illustrating a full passkey flow using the extension (remote browser → remote platform → RDP channel → local RDP web client → local browser → local authenticator). The diagram is likely to land either in the spec itself or in the associated explainer as a follow-up.
 
 ## References
 
@@ -321,8 +361,7 @@ The extension is not available by default and cannot be used for fingerprinting,
 - [W3C WebAuthn PR #2375: `remoteClientDataJSON` Extension](https://github.com/w3c/webauthn/pull/2375)
 - [W3C WebAuthn Issue #1577: Remote Desktop Support](https://github.com/w3c/webauthn/issues/1577)
 - [W3C WebAuthn Wiki: Explainer -- Remote Desktop Support](https://github.com/w3c/webauthn/wiki/Explainer:-Remote-Desktop-Support)
-- [Existing `remoteDesktopClientOverride` Extension Spec](https://w3c.github.io/webauthn/#sctn-remoteDesktopClientOverride-extension)
-- Chromium CLs for existing extension:
+- Chromium-only `remoteDesktopClientOverride` extension (not part of the W3C spec). Chromium CLs for that extension:
   - [Add `remoteDesktopClientOverride` extension IDL (CL 3499163)](https://chromium-review.googlesource.com/c/chromium/src/+/3499163)
   - [Wire up `RemoteDesktopClientOverride` client extension (CL 3577285)](https://chromium-review.googlesource.com/c/chromium/src/+/3577285)
   - [Add `remoteDesktopClientOverride` support on Android (CL 6281085)](https://chromium-review.googlesource.com/c/chromium/src/+/6281085)
