@@ -133,7 +133,7 @@ new PerformanceObserver((list) => {
 **Behavior:**
 - On-demand — no data is collected until `markPaintTime()` is called.
 - One-shot — each call tags the next rendering update and produces exactly one entry.
-- Multiple calls before a rendering update each produce their own entry with distinct `paintTime` and `presentationTime`.
+- Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime` and `presentationTime`.
 
 The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming) from the Paint Timing spec, so `paintTime` and `presentationTime` have identical semantics to the timestamps developers already see on FP, FCP, and LCP entries.
 
