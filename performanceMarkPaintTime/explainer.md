@@ -40,7 +40,7 @@ The platform already captures paint and presentation timestamps for key moments 
 
 ## The Problem
 
-Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)). Furthermore, no workaround can provide `presentationTime` — the actual time when pixels appear on screen. For example, a developer wants to measure when a chat input box appears after the page loads, but the component is rendered asynchronously by a framework. A typical pattern uses `IntersectionObserver` to detect when the element enters the viewport, then `requestAnimationFrame` to approximate the paint time:
+Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)). Furthermore, no existing workaround provides `presentationTime` — the actual time when pixels appear on screen. For example, a developer wants to measure when a chat input box appears after the page loads, but the component is rendered asynchronously by a framework. A typical pattern uses `IntersectionObserver` to detect when the element enters the viewport, then `requestAnimationFrame` to approximate the paint time:
 
 ### Single requestAnimationFrame
 
@@ -114,8 +114,8 @@ new PerformanceObserver((list) => {
 ```
 
 - **Accurate**: `paintTime` is captured at the rendering update, not approximated by rAF.
-- **End-to-end**: `presentationTime` tells you when pixels actually appeared on the display.
-- **Stable**: No rAF variance — the timestamp comes directly from the rendering pipeline.
+- **End-to-end**: `presentationTime`, when available, tells you when pixels appeared on the display.
+- **Stable**: No rAF variance — the timestamps come from the rendering pipeline, not rAF approximation.
 
 ## Proposed API
 
@@ -128,7 +128,7 @@ new PerformanceObserver((list) => {
  | `startTime` | `performance.now()` at the time `markPaintTime()` was called, unless overridden via `options.startTime` — same semantics as [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor) (see [step 5](https://w3c.github.io/user-timing/#the-performancemark-constructor)). This is **not** a rendering-pipeline timestamp; it records when the developer invoked the API, regardless of where in the event loop the call occurs (e.g., a microtask, `IntersectionObserver` callback, or `requestAnimationFrame`). |
  | `duration` | Always `0` |
  | `paintTime` | The rendering update end time — same as FP/FCP/LCP `paintTime` |
- | `presentationTime` | When pixels were actually shown on the display — same as FP/FCP/LCP `presentationTime` |
+ | `presentationTime` | When pixels were shown on the display, or `null` if unsupported by the UA — same as FP/FCP/LCP `presentationTime` |
 
 **Behavior:**
 - On-demand — no data is collected until `markPaintTime()` is called.
@@ -151,7 +151,7 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 
 ### presentationTime
 
-`presentationTime` is the time when the composited frame is actually presented to the display — the next hardware display refresh that contains the updated content.
+`presentationTime` is the implementation-defined time when the composited frame is presented to the display.
 
 ![presentationTime in the rendering pipeline](presentation-time-pipeline.png)
 
@@ -159,8 +159,8 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 
 - **`startTime`**: `performance.now()` at the time `markPaintTime()` is called.
 - **`paintTime - startTime`** = main-thread rendering cost (how long until the browser finished processing the visual update)
-- **`presentationTime - startTime`** = end-to-end visual latency (how long until the user actually sees the update)
-- **`presentationTime - paintTime`** = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation)
+- **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency (how long until the user actually sees the update)
+- **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation)
 
 ## Key Design Decisions
 
@@ -188,7 +188,7 @@ observer.observe(document.querySelector('.chat-input'));
 
 This would approximate `paintTime` more accurately than double-rAF, since the callback fires right after paint rather than at the start of the next frame. However:
 
-- **No `presentationTime`** — rPAF fires on the main thread, before compositor and GPU work. There is no way to know when pixels actually appeared on the display.
+- **No `presentationTime`** — rPAF fires on the main thread, before compositor and GPU work. For UAs that support `presentationTime`, there is no way to obtain this timestamp through rPAF. For UAs that do not, `paintTime` and a rPAF callback would provide similar timing, though `markPaintTime()` still offers a standardized `PerformanceObserver`-based delivery model.
 - **Not being pursued** — the proposal's original author has noted that a post-animation callback may not be useful for optimizing rendering latency, as downstream graphics pipeline latency matters more than hitting a specific VSYNC deadline, and the [proposal is not being pursued](https://github.com/WICG/request-post-animation-frame).
 
 ## Open Questions
