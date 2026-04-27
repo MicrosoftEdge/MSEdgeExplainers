@@ -133,7 +133,7 @@ new PerformanceObserver((list) => {
 **Behavior:**
 - On-demand — no data is collected until `markPaintTime()` is called.
 - One-shot — each call tags the next rendering update and produces exactly one entry.
-- Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime` and `presentationTime`.
+- Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime`. `presentationTime` values depend on when the compositor presents frames to the display and may vary independently.
 - If `options.startTime` is provided, it is used as the entry's `startTime`; if negative, a `TypeError` is thrown. Otherwise, `startTime` defaults to `performance.now()` at call time — consistent with [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor).
 - `presentationTime` may be `null` when the user agent does not support implementation-defined presentation timestamps, consistent with [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin).
 
