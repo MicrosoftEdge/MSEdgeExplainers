@@ -28,7 +28,7 @@ This document is a starting point for engaging the community and standards bodie
 
 Web developers need to measure when their visual updates actually render — not just the browser-detected milestones like [First Paint](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming) or [`Largest Contentful Paint`](https://www.w3.org/TR/largest-contentful-paint/), but any update they care about: a component mount, a state transition, a style change.
 
-The platform already captures paint and presentation timestamps for key moments via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), but only for entries the browser selects automatically. `performance.markPaintTime()` extends this capability to let developers capture the same `paintTime` and `presentationTime` for any visual update, on demand.
+The platform already captures paint and presentation timestamps for key moments via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), but only for entries the browser selects automatically. `performance.markPaintTime()` extends this capability to let developers capture `paintTime` and `presentationTime` (when supported by the UA) for any visual update, on demand.
 
 ## Goals
  - Give developers on-demand access to `paintTime` and `presentationTime` for any visual update.
