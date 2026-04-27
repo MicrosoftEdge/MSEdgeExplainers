@@ -202,6 +202,17 @@ A "post-paint" timestamp — captured after paint completes — would more accur
 
 We welcome feedback on whether `paintTime` is sufficient for developer needs or whether a post-paint timestamp is worth pursuing despite these tradeoffs.
 
+### API naming: `markPaintTime()` vs. alternatives
+
+The current name `markPaintTime()` mirrors `performance.mark()`, but unlike `mark()` — which records a timestamp synchronously — `markPaintTime()` schedules observation of a future rendering update. This mismatch could mislead developers into thinking the timestamp is captured at call time.
+
+Alternative names that better signal deferred capture:
+
+- **`markNextPaint()`** — emphasizes that the mark targets the *next* rendering opportunity, not the current moment.
+- **`observeNextPaint()`** — aligns with the observation pattern (`PerformanceObserver`) and makes the asynchronous nature explicit.
+
+We welcome feedback on whether the current naming is clear enough or whether a rename would reduce developer confusion.
+
 ## Security and Privacy Considerations
 
 - `paintTime` and `presentationTime` are subject to the same cross-origin coarsening as existing paint timing entries.
