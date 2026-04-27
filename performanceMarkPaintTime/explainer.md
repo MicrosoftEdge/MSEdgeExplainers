@@ -125,7 +125,7 @@ new PerformanceObserver((list) => {
  |-----------|-------------|
  | `entryType` | Always `"mark-paint-time"` |
  | `name` | The mark name passed to `markPaintTime()` |
- | `startTime` | `performance.now()` at the time `markPaintTime()` was called |
+ | `startTime` | `performance.now()` at the time `markPaintTime()` was called, unless overridden via `options.startTime` — same semantics as [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor) (see [step 5](https://w3c.github.io/user-timing/#the-performancemark-constructor)). This is **not** a rendering-pipeline timestamp; it records when the developer invoked the API, regardless of where in the event loop the call occurs (e.g., a microtask, `IntersectionObserver` callback, or `requestAnimationFrame`). |
  | `duration` | Always `0` |
  | `paintTime` | The rendering update end time — same as FP/FCP/LCP `paintTime` |
  | `presentationTime` | When pixels were actually shown on the display — same as FP/FCP/LCP `presentationTime` |
@@ -134,6 +134,7 @@ new PerformanceObserver((list) => {
 - On-demand — no data is collected until `markPaintTime()` is called.
 - One-shot — each call tags the next rendering update and produces exactly one entry.
 - Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime` and `presentationTime`.
+- If `options.startTime` is provided, it is used as the entry's `startTime`; if negative, a `TypeError` is thrown. Otherwise, `startTime` defaults to `performance.now()` at call time — consistent with [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor).
 
 The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming) from the Paint Timing spec, so `paintTime` and `presentationTime` have identical semantics to the timestamps developers already see on FP, FCP, and LCP entries.
 
@@ -222,8 +223,12 @@ We welcome feedback on whether the current naming is clear enough or whether a r
 
 ```webidl
 // Extends Paint Timing spec — https://w3c.github.io/paint-timing/
+dictionary MarkPaintTimeOptions {
+  DOMHighResTimeStamp startTime;
+};
+
 partial interface Performance {
-  undefined markPaintTime(DOMString markName);
+  undefined markPaintTime(DOMString markName, optional MarkPaintTimeOptions options = {});
 };
 
 [Exposed=Window]
