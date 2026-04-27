@@ -26,16 +26,16 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-Web developers need to measure when their visual updates actually render — not just the browser-detected milestones like First Paint or Largest Contentful Paint, but any update they care about: a component mount, a state transition, a style change.
+Web developers need to measure when their visual updates actually render — not just the browser-detected milestones like First Paint or [`Largest Contentful Paint`](https://www.w3.org/TR/largest-contentful-paint/), but any update they care about: a component mount, a state transition, a style change.
 
-The platform already captures paint and presentation timestamps for key moments via PaintTimingMixin, but only for entries the browser selects automatically. `performance.markPaintTime()` extends this capability to let developers capture the same `paintTime` and `presentationTime` for any visual update, on demand.
+The platform already captures paint and presentation timestamps for key moments via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), but only for entries the browser selects automatically. `performance.markPaintTime()` extends this capability to let developers capture the same `paintTime` and `presentationTime` for any visual update, on demand.
 
 ## Goals
  - Give developers on-demand access to `paintTime` and `presentationTime` for any visual update.
  - Deliver timestamps through `PerformanceObserver`, consistent with modern performance APIs.
 
 ## Non-goals
- - **Replacing existing paint timing entries.** FP, FCP, LCP, Event Timing, and LoAF continue to serve their existing purposes.
+ - **Replacing existing paint timing entries.** [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://w3c.github.io/largest-contentful-paint/), [Event Timing](https://w3c.github.io/event-timing/), and [LoAF](https://w3c.github.io/long-animation-frames/) continue to serve their existing purposes.
  - **Forcing a rendering update.** `markPaintTime()` does not cause a rendering opportunity — it tags the next one that naturally occurs.
 
 ## The Problem
