@@ -40,20 +40,27 @@ The platform already captures paint and presentation timestamps for key moments 
 
 ## The Problem
 
-Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)). Furthermore, no existing workaround provides `presentationTime` — the actual time when pixels appear on screen. For example, a developer wants to measure when a chat input box appears after the page loads, but the component is rendered asynchronously by a framework. A typical pattern uses `IntersectionObserver` to detect when the element enters the viewport, then `requestAnimationFrame` to approximate the paint time:
+Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)). Furthermore, no existing workaround provides `presentationTime` — the actual time when pixels appear on screen. For example, a developer wants to measure when a chat input box appears after an asynchronous content load. A typical pattern uses `requestAnimationFrame` to approximate the paint time:
 
 ### Single requestAnimationFrame
 
-```javascript
-const observer = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) {
-    observer.disconnect();
-    requestAnimationFrame(() => {
-      performance.mark('chat-input-visible');
+```html
+<!DOCTYPE html>
+<html>
+<body>
+  <div id="app">Loading chat...</div>
+  <script>
+    fetch('/api/chat').then(() => {
+      document.getElementById('app').innerHTML =
+        '<input class="chat-input" placeholder="Type a message...">';
+
+      requestAnimationFrame(() => {
+        performance.mark('chat-input-rendered');
+      });
     });
-  }
-});
-observer.observe(document.querySelector('.chat-input'));
+  </script>
+</body>
+</html>
 ```
 
 Since `requestAnimationFrame` fires before the browser paints, the recorded timestamp is earlier than when the content is actually rendered. It is better than logging at the moment of the DOM update, but still only an approximation.
@@ -61,17 +68,16 @@ Since `requestAnimationFrame` fires before the browser paints, the recorded time
 ### Double requestAnimationFrame
 
 ```javascript
-const observer = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) {
-    observer.disconnect();
+fetch('/api/chat').then(() => {
+  document.getElementById('app').innerHTML =
+    '<input class="chat-input" placeholder="Type a message...">';
+
+  requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        performance.mark('chat-input-visible');
-      });
+      performance.mark('chat-input-rendered');
     });
-  }
+  });
 });
-observer.observe(document.querySelector('.chat-input'));
 ```
 
 The second rAF fires after the first frame's paint, getting closer to the actual paint time. However, there is no guarantee that this captures the frame that corresponds to the change. This gets worse when observers (e.g., `ResizeObserver`, `IntersectionObserver`) are present — their callbacks add work between frames, making the second rAF even less likely to land on the expected frame.
@@ -79,38 +85,52 @@ The second rAF fires after the first frame's paint, getting closer to the actual
 ### requestAnimationFrame + setTimeout
 
 ```javascript
-const observer = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) {
-    observer.disconnect();
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        performance.mark('chat-input-visible');
-      }, 0);
-    });
-  }
+fetch('/api/chat').then(() => {
+  document.getElementById('app').innerHTML =
+    '<input class="chat-input" placeholder="Type a message...">';
+
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      performance.mark('chat-input-rendered');
+    }, 0);
+  });
 });
-observer.observe(document.querySelector('.chat-input'));
 ```
 
 This defers the mark to the next task after the rAF callback, which is more likely to land after the paint. However, the overshoot is non-deterministic due to other queued tasks — the timestamp ends up well past the actual frame, making the measurement less precise.
 
 ### With markPaintTime
 
-```javascript
-const observer = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) {
-    observer.disconnect();
-    performance.markPaintTime('chat-input-visible');
-  }
-});
-observer.observe(document.querySelector('.chat-input'));
+The following end-to-end example shows a page that loads chat content asynchronously and measures how long it takes for the chat input to be painted and presented to the user:
 
-new PerformanceObserver((list) => {
-  for (const entry of list.getEntries()) {
-    console.log(`Paint: ${entry.paintTime}ms`);
-    console.log(`Presented: ${entry.presentationTime}ms`);
-  }
-}).observe({ type: 'mark-paint-time' });
+```html
+<!DOCTYPE html>
+<html>
+<body>
+  <div id="app">Loading chat...</div>
+  <script>
+    // 1. Set up observer to collect paint timing entries
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        console.log(`${entry.name}:`);
+        console.log(`  Time to paint:   ${entry.paintTime - entry.startTime}ms`);
+        if (entry.presentationTime) {
+          console.log(`  Time to present: ${entry.presentationTime - entry.startTime}ms`);
+        }
+      }
+    }).observe({ type: 'mark-paint-time' });
+
+    // 2. Async content load (e.g., framework rendering a component)
+    fetch('/api/chat').then(() => {
+      document.getElementById('app').innerHTML =
+        '<input class="chat-input" placeholder="Type a message...">';
+
+      // 3. Mark the next paint after this DOM update
+      performance.markPaintTime('chat-input-rendered');
+    });
+  </script>
+</body>
+</html>
 ```
 
 - **Accurate**: `paintTime` is captured at the rendering update, not approximated by rAF.
@@ -175,15 +195,14 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 `requestPostAnimationFrame` fires immediately after the rendering update completes. Using it for the same chat-input example:
 
 ```javascript
-const observer = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) {
-    observer.disconnect();
-    requestPostAnimationFrame(() => {
-      performance.mark('chat-input-visible');
-    });
-  }
+fetch('/api/chat').then(() => {
+  document.getElementById('app').innerHTML =
+    '<input class="chat-input" placeholder="Type a message...">';
+
+  requestPostAnimationFrame(() => {
+    performance.mark('chat-input-rendered');
+  });
 });
-observer.observe(document.querySelector('.chat-input'));
 ```
 
 This would approximate `paintTime` more accurately than double-rAF, since the callback fires right after paint rather than at the start of the next frame. However:
