@@ -246,7 +246,7 @@ Unlike `StaticRange`, `OpaqueRange` is **live** — it tracks changes to the und
 ### Properties and Methods
 
 #### Properties
-`OpaqueRange` objects cannot be constructed directly; they are created internally by elements that [support opaque ranges](#supports-opaque-ranges). In HTML, they are obtained via `createValueRange()`.
+`OpaqueRange` objects cannot be constructed directly; they are created internally by elements that [support opaque ranges](#supports-opaque-ranges). In HTML, they are obtained via `createValueRange()`. Each `OpaqueRange` has an associated element (an `Element` or null).
 
 `OpaqueRange` exposes useful endpoint information while maintaining encapsulation:
 - `startOffset` and `endOffset`: Non negative integers that index into the element's relevant value (for example, the value of a `<textarea>` in HTML), using the same UTF-16 code unit indices as `selectionStart`/`selectionEnd`. These offsets are updated automatically as the content changes.
@@ -254,6 +254,7 @@ Unlike `StaticRange`, `OpaqueRange` is **live** — it tracks changes to the und
 - `startContainer` and `endContainer`: Return `null`, ensuring the element's internal structure is never exposed to authors.
 
 #### Available Methods
+- `disconnect()`: Disconnects the range from its associated element and stops live updates. Afterwards, `startOffset` and `endOffset` are `0`, and `getClientRects()` and `getBoundingClientRect()` return empty results. Calling `disconnect()` on an already-disconnected range has no effect.
 - `getClientRects()`: Returns a list of rectangles for the rendered portion of the range.
 - `getBoundingClientRect()`: Returns a single rectangle that is the union of the rectangles from `getClientRects()`.
 
@@ -334,8 +335,9 @@ The `createValueRange(start, end)` method is defined on elements that [support o
 4. If _end_ is greater than _length_, throw an `"IndexSizeError"` `DOMException`.
 5. If _start_ is greater than _end_, set _end_ to _start_ (collapse the range to _start_).
 6. Create a new `OpaqueRange` with start container and end container set to the element's **opaque range internal container**, start offset _start_, and end offset _end_.
-7. Append the range to the element's **set of associated OpaqueRanges**.
-8. Return the range.
+7. Set the range's associated element to this element.
+8. Append the range to the element's **set of associated OpaqueRanges**.
+9. Return the range.
 
 Sample code for `<input type="text">`:
 
@@ -393,7 +395,7 @@ Each element that supports opaque ranges has:
 - An **opaque range internal container** — an implementation-defined representation of the element's relevant value text.
 - A **set of associated OpaqueRanges** — a set of `OpaqueRange` objects, initially empty.
 
-When an element is removed from the document or an `<input>` element's type changes from a type that supports OpaqueRange to a type that doesn't, all associated OpaqueRanges have their `startOffset` and `endOffset` set to 0 and the element's set of associated OpaqueRanges is cleared.
+When an element is removed from the document or an `<input>` element's type changes from a type that supports OpaqueRange to a type that doesn't, all associated OpaqueRanges are disconnected.
 
 When the underlying content changes, the browser automatically adjusts the offsets of all associated OpaqueRanges. For incremental edits (such as user typing or `setRangeText()`), offsets shift to reflect inserted or deleted characters. For wholesale value changes (such as setting the `value` property or changing the `type` attribute), offsets are reset.
 
