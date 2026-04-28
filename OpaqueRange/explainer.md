@@ -336,7 +336,7 @@ The `createValueRange(start, end)` method is defined on elements that [support o
 5. If _start_ is greater than _end_, set _end_ to _start_ (collapse the range to _start_).
 6. Create a new `OpaqueRange` with start container and end container set to the element's **opaque range internal container**, start offset _start_, and end offset _end_.
 7. Set the range's associated element to this element.
-8. Append the range to the element's **set of associated OpaqueRanges**.
+8. Append the range to the element's **set of associated `OpaqueRange`s**.
 9. Return the range.
 
 Sample code for `<input type="text">`:
@@ -393,11 +393,11 @@ Initially, the following HTML elements would support opaque ranges:
 
 Each element that supports opaque ranges has:
 - An **opaque range internal container** — an implementation-defined representation of the element's relevant value text.
-- A **set of associated OpaqueRanges** — a set of `OpaqueRange` objects, initially empty.
+- A **set of associated `OpaqueRange`s** — a set of `OpaqueRange` objects, initially empty.
 
-When an element is removed from the document or an `<input>` element's type changes from a type that supports OpaqueRange to a type that doesn't, all associated OpaqueRanges are disconnected.
+When an element is removed from the document or an `<input>` element's type changes from a type that supports `OpaqueRange` to a type that doesn't, all associated `OpaqueRange`s are disconnected.
 
-When the underlying content changes, the browser automatically adjusts the offsets of all associated OpaqueRanges. For incremental edits (such as user typing or `setRangeText()`), offsets shift to reflect inserted or deleted characters. For wholesale value changes (such as setting the `value` property or changing the `type` attribute), offsets are reset.
+When the underlying content changes, the browser automatically adjusts the offsets of all associated `OpaqueRange`s. For incremental edits (such as user typing or `setRangeText()`), offsets shift to reflect inserted or deleted characters. For wholesale value changes (such as setting the `value` property or changing the `type` attribute), offsets are reset.
 
 ## Live Range Example
 
@@ -544,7 +544,7 @@ The `OpaqueRange` interface is currently compatible with any API that utilizes `
 
 ## Potential Future Work
 ### DynamicRange
-To address the compatibility limition above, one proposed solution is to introduce a new interface called `DynamicRange`. This interface would serve as the counterpart to `StaticRange` and would also extend `AbstractRange`.
+To address the compatibility limitation above, one proposed solution is to introduce a new interface called `DynamicRange`. This interface would serve as the counterpart to `StaticRange` and would also extend `AbstractRange`.
 
 A `DynamicRange` object would not have a direct use in JavaScript beyond serving as a parent class for `Range` and `OpaqueRange`. However, common methods such as `getBoundingClientRect()` and `getClientRects()`—which are implemented in both `Range` and `OpaqueRange`—could be moved into `DynamicRange` to reduce redundancy.
 
