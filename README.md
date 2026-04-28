@@ -112,7 +112,6 @@ These are proposals that are still really early in their lifecycle. We might jus
 | [Animation Smoothness](AnimationSmoothness/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/AnimationSmoothness">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/AnimationSmoothness?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=jenna-sasson&labels=AnimationSmoothness&title=%5BAnimationSmoothness%5D+%3CTITLE+HERE%3E) | Web Perf |
 | [Event Phases For Reliably Fast DOM Operations](EventPhases/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Event%20Phases">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Event%20Phases?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=slightlyoff&labels=Event%20Phases&title=%5BEventPhases%5D+%3CTITLE+HERE%3E) | Web Perf |
 | [Drag Multiple Virtual Files Out of Browser](DownloadURL/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/DownloadURL">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/DownloadURL?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=joone&labels=DownloadURL&title=%5BDownloadURL%5D+%3CTITLE+HERE%3E) | N/A |
-| [Web Haptics](Haptics/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Web%20Haptics">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Web%20Haptics?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=web-haptics.md) | Device |
 
 # Alumni 🎓
 
@@ -173,6 +172,7 @@ standards communities. Thanks for your continued interest!
 | [IndexedDB getAllRecords()](https://w3c.github.io/IndexedDB/#dom-idbobjectstore-getallrecords) | [W3C Web Applications Working Group](https://www.w3.org/groups/wg/webapps/) | [2025-08-06](IndexedDbGetAllEntries/explainer.md)
 | [Delayed Message Timing API](https://github.com/WICG/delayed-message-timing/blob/main/README.md) | [W3C Web Incubator Community Group](https://wicg.io/) | [2026-01-28](DelayedMessages/explainer.md) |
 | [CSS Gap Decorations](https://github.com/w3c/csswg-drafts/blob/main/css-gaps-1/explainer.md) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2026-02-27](CSSGapDecorations/explainer.md) |
+| [Web Haptics](https://github.com/WICG/web-haptics) | [W3C Web Incubator Community Group](https://wicg.io/) | [2026-04-27](Haptics/explainer.md) |
 
 # DevTools 🧰
 
