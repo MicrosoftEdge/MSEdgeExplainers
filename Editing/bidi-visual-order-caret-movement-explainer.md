@@ -1,11 +1,11 @@
-# Visual Order Caret Navigation for Bidirectional Text
+# Visual Order Caret Movement for Bidirectional Text
 
 ## Authors
 
 - Samba Murthy Bandaru (sambamurthy.bandaru@microsoft.com)
 
 ## Participate
-- Feature request: [Visual order caret navigation for bidi text](https://issues.chromium.org/issues/499819853)
+- Feature request: [Visual-order caret movement for bidi text](https://issues.chromium.org/issues/499819853)
 - Spec: [Selection API -- `Selection.modify()`](https://w3c.github.io/selection-api/#dom-selection-modify)
 - [Chromium editing-dev group](https://groups.google.com/a/chromium.org/g/editing-dev)
 
@@ -21,14 +21,14 @@
 - [Non-Goals](#non-goals)
 - [Proposed Solution](#proposed-solution)
 - [The API Surface](#the-api-surface)
-- [Feature Activation](#feature-activation)
+- [Feature Activation and Rollout Plan](#feature-activation-and-rollout-plan)
 - [Privacy and Security Considerations](#privacy-and-security-considerations)
 - [Performance Impact](#performance-impact)
 - [Interoperability](#interoperability)
 - [Considered Alternatives](#considered-alternatives)
 - [Standards Position](#standards-position)
 - [Target Users](#target-users)
-- [References and Acknowledgements](#references-and-acknowledgements)
+- [References](#references)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -48,7 +48,7 @@ This makes the current caret movement visually inconsistent:
 
 This behavior is confusing and disorienting, particularly for users who routinely work with bidirectional content.
 
-This explainer proposes implementing **visual caret navigation** in Chromium -- arrow key movement that always follows the on-screen direction, so that Right moves the caret rightward and Left moves it leftward regardless of text or line direction. The feature will be gated behind a feature flag for incremental rollout.
+This explainer proposes implementing **visual caret movement** in Chromium -- arrow key movement that always follows the on-screen direction, so that Right moves the caret rightward and Left moves it leftward regardless of text or line direction. The feature will be gated behind a feature flag for incremental rollout.
 
 ## The Bidirectional Text Problem
 
@@ -88,7 +88,7 @@ Visual movement solves this by moving the caret based on its **screen position**
 
 ## Goals
 
-1. **Provide visual caret movement** — Right always moves rightward, Left always moves leftward — matching the mental model that user research confirms almost all participants expect.
+1. **Provide visual caret movement** — Right always moves rightward, Left always moves leftward — matching the mental model that most users of bidirectional text would expect.
 
 2. **Predictable caret behavior at bidi boundaries** — The caret should move smoothly in the arrow key's direction when crossing between LTR and RTL text runs.
 
@@ -96,7 +96,7 @@ Visual movement solves this by moving the caret based on its **screen position**
 
 4. **Gate behind a feature flag** for safe incremental rollout, with no behavior change for users who do not opt in.
 
-5. **Correctly handle all bidi scenarios**: simple LTR/RTL boundaries, multiple bidi runs, nested bidi embeddings, bidi control characters, CSS `direction`/`unicode-bidi` overrides, and cross-line navigation.
+5. **Correctly handle all bidi scenarios**: simple LTR/RTL boundaries, multiple bidi runs, nested bidi embeddings, bidi control characters, CSS `direction`/`unicode-bidi` overrides, and cross-line movement.
 
 ## Non-Goals
 
@@ -104,14 +104,16 @@ Visual movement solves this by moving the caret based on its **screen position**
 
 ## Proposed Solution
 
-When the `BidiVisualOrderCaretNavigation` feature flag is enabled, Chromium's arrow key handling switches to visual (screen-order) caret movement. The implementation works by leveraging Blink's existing inline layout fragments, which are already stored in visual display order after bidi reordering. This allows the algorithm to walk through text in the order it appears on screen rather than the order it is stored in memory.
+When the `BidiVisualOrderCaretMovement` feature flag is enabled, Chromium's arrow key handling switches to visual (screen-order) caret movement. The implementation works by leveraging Blink's existing inline layout fragments, which are already stored in visual display order after bidi reordering. This allows the algorithm to walk through text in the order it appears on screen rather than the order it is stored in memory.
 
 At a high level:
 
 1. When a user presses an arrow key, the caret's current position is resolved to the layout fragment it belongs to.
-2. The caret advances in the visual direction within that fragment. For LTR text, moving right increments the position; for RTL text, moving right decrements it.
+2. The caret advances in the visual direction within that fragment. For LTR text, moving right increments the position; for RTL text, moving right decrements it — in both cases the caret moves rightward on screen.
 3. When the caret reaches the edge of a fragment, it uses the **bidi level** of the current and adjacent fragments to determine which edge to enter — ensuring the caret crosses bidi boundaries smoothly without jumping.
 4. At line boundaries, the caret moves to the next or previous line as expected.
+
+Word-level movement (Ctrl+Left/Right on Windows, Option+Left/Right on macOS) and `Selection.modify()` with `'word'` granularity also follow the same visual direction.
 
 ## The API Surface
 
@@ -129,19 +131,24 @@ selection.modify('move', 'backward', 'character');
 
 With this feature enabled, `'left'` and `'right'` will perform true visual movement in bidi text, while `'forward'` and `'backward'` will continue to perform logical movement. This matches the behavior of Firefox and Safari.
 
-## Feature Activation
+## Feature Activation and Rollout Plan
 
-The feature is currently gated behind a disabled-by-default runtime flag:
+The feature will be gated behind a disabled-by-default runtime flag:
 
-- **Command line:** `--enable-blink-features=BidiVisualOrderCaretNavigation`
-- **Rollout plan:** A `chrome://flags` entry, followed by enabling by default.
+- **Command line:** `--enable-blink-features=BidiVisualOrderCaretMovement`
+
+**Rollout phases:**
+
+1. **Phase 1 (current):** Feature flag disabled by default. Developers and testers can opt in via the command-line flag above.
+2. **Phase 2:** Expose a `chrome://flags` entry so that users can enable visual caret movement without command-line flags.
+3. **Phase 3:** Enable by default for all users.
+4. **Phase 4:** Remove the feature flag and the legacy logical-movement codepaths.
+
+Until the feature is enabled, caret behavior remains unchanged — existing logical movement continues to work exactly as it does today. No user-visible changes occur without explicit opt-in during Phases 1 and 2.
 
 ## Privacy and Security Considerations
 
-This feature introduces no new privacy or security concerns.
-
-- **No new APIs that expose user information.** The `Selection.modify()` API already exists; this feature changes the behavior of existing direction parameters, not the API surface.
-- **Feature flag gated.** The feature is disabled by default and requires explicit opt-in during the experimental phase.
+This feature introduces no new privacy or security concerns. The `Selection.modify()` API already exists; this feature changes the behavior of existing direction parameters, not the API surface. No new APIs are introduced and no user information is exposed.
 
 ## Performance Impact
 
@@ -149,7 +156,9 @@ This feature introduces minimal overhead. Each caret movement requires one addit
 
 ## Interoperability
 
-This feature aligns Chromium with the default behavior of both Firefox (Gecko) and Safari (WebKit), which use visual caret movement for bidirectional text. Chrome is currently the only major browser that uses logical movement by default. By adopting visual caret movement, this feature improves cross-browser consistency for developers and users working with bidirectional content. The existing [`Selection.modify()`](https://w3c.github.io/selection-api/#dom-selection-modify) API semantics for `'left'`/`'right'` directions are preserved and made consistent with their documented visual behavior.
+This feature aligns Chromium with the default behavior of both Firefox (Gecko) and Safari (WebKit), which use visual caret movement for bidirectional text. Chrome is currently the only major browser that uses logical movement by default. By adopting visual caret movement, this feature improves cross-browser consistency for developers and users working with bidirectional content.
+
+The [`Selection.modify()`](https://w3c.github.io/selection-api/#dom-selection-modify) API already defines `'left'`/`'right'` as visual directions and `'forward'`/`'backward'` as logical directions. Currently in Chromium, `'left'`/`'right'` behave the same as `'forward'`/`'backward'` (logical movement). With this feature enabled, `'left'`/`'right'` will perform true visual movement, making their behavior consistent with the spec and with Firefox and Safari.
 
 Beyond browsers, visual caret movement is also the default in macOS native text editing (TextKit) and GTK on Linux, and is an option in Microsoft Word.
 
@@ -159,8 +168,7 @@ No alternatives were considered. Visual caret movement is the established defaul
 
 ## Standards Position
 
-- **W3C:** No specification mandates logical or visual caret movement. The CSS Text Module and the `Selection` API leave movement behavior to UA implementation.
-- **WHATWG:** The `Selection.modify()` method's `'left'`/`'right'` parameters are already defined as visual directions, distinct from `'forward'`/`'backward'` (logical). This feature makes `'left'`/`'right'` behave consistently with their documented semantics.
+- **W3C:** No specification mandates logical or visual caret movement. The CSS Text Module and the Selection API leave movement behavior to UA implementation. However, the [`Selection.modify()`](https://w3c.github.io/selection-api/#dom-selection-modify) method's `'left'`/`'right'` parameters are already defined as visual directions, distinct from `'forward'`/`'backward'` (logical). This feature makes `'left'`/`'right'` behave consistently with their documented semantics.
 
 ## Target Users
 
@@ -168,12 +176,12 @@ No alternatives were considered. Visual caret movement is the established defaul
 - Web developers building multilingual editing experiences
 - Accessibility users who rely on consistent and predictable caret behavior
 
-User research with Arabic–English bilingual users confirms that almost all participants expect visual caret movement — Left always moves left, Right always moves right — regardless of script direction.
+An unmoderated usability study with Arabic–English bilingual users found that the overwhelming expectation is visual caret movement — Left always moves left, Right always moves right — regardless of script direction.
 
 ## References
 
 1. **Unicode Bidirectional Algorithm (UAX #9):** https://unicode.org/reports/tr9/
-2. **WHATWG Selection API -- `Selection.modify()`:** https://w3c.github.io/selection-api/#dom-selection-modify
+2. **W3C Selection API -- `Selection.modify()`:** https://w3c.github.io/selection-api/#dom-selection-modify
 3. **Firefox `bidi.edit.caret_movement_style` preference:** https://kb.mozillazine.org/bidi.edit.caret_movement_style
 4. **macOS TextKit 2 — NSTextSelectionNavigation:** https://developer.apple.com/documentation/uikit/nstextselectionnavigation/direction
-5. **Chromium M76 visual navigation removal:** https://crbug.com/972750, https://crbug.com/834765
+5. **Chromium M76 switch to logical caret movement:** [PSA: Changing Left/Right Caret Movement from Visual to Logical](https://groups.google.com/a/chromium.org/g/blink-dev/c/Rm1CGy6RBAI/m/uYN8IiZlCgAJ)
