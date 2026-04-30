@@ -1,6 +1,6 @@
-# Multi-Range Selection in Chromium
+# Multi-Range Selection
 
-This document proposes implementing multi-range selection support in Chromium's Selection API, enabling discontinuous text selection and aligning with Firefox's existing implementation.
+This document proposes updating the W3C Selection API specification to support multiple selection ranges, enabling discontinuous text selection across the web platform. Firefox already supports multi-range selection; this proposal seeks to align the spec and other browser engines with that behavior.
 
 ## Authors
 
@@ -8,58 +8,60 @@ This document proposes implementing multi-range selection support in Chromium's 
 
 ## Participate
 
-- Spec: [W3C Selection API](https://w3c.github.io/selection-api/#dom-selection-addrange)
+- Spec: [W3C Selection API](https://w3c.github.io/selection-api/)
+- Canonical spec issue: [w3c/selection-api#41 - Support multi range selection](https://github.com/w3c/selection-api/issues/41)
 - Spec issue tracker: [w3c/selection-api](https://github.com/w3c/selection-api/issues)
-- [Chromium editing-dev group](https://groups.google.com/a/chromium.org/g/editing-dev)
-- MDN: [Selection.addRange()](https://developer.mozilla.org/en-US/docs/Web/API/Selection/addRange)
+- [W3C Web Editing Working Group](https://www.w3.org/groups/wg/webediting/)
+- Chromium feature request: [issues.chromium.org/504686717](https://issues.chromium.org/issues/504686717)
 
----
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents** 
 
-## Table of Contents
+- [Introduction](#introduction)
+- [Problem Statement](#problem-statement)
+- [Goals and Non-Goals](#goals-and-non-goals)
+- [Current State of the Platform](#current-state-of-the-platform)
+- [Key Use Cases](#key-use-cases)
+  - [1. Ctrl+Click Discontinuous Word Selection](#1-ctrlclick-discontinuous-word-selection)
+  - [2. Table Column Selection](#2-table-column-selection)
+  - [3. Bidirectional Text Selection](#3-bidirectional-text-selection)
+  - [4. CSS Grid Layout Reordering](#4-css-grid-layout-reordering)
+  - [5. Shadow DOM Slot Reordering](#5-shadow-dom-slot-reordering)
+  - [6. Multi-Cursor Code Editors](#6-multi-cursor-code-editors)
+- [Proposed API Design](#proposed-api-design)
+- [Compatibility Risk and Mitigation](#compatibility-risk-and-mitigation)
+- [Privacy and Security Considerations](#privacy-and-security-considerations)
+- [Interoperability and Spec Alignment](#interoperability-and-spec-alignment)
+- [Open Questions](#open-questions)
 
-1. [Introduction](#1-introduction)
-2. [Problem Statement](#2-problem-statement)
-3. [Goals and Non-Goals](#3-goals-and-non-goals)
-4. [Current State of the Platform](#4-current-state-of-the-platform)
-5. [Key Use Cases](#5-key-use-cases)
-6. [Proposed API Design](#6-proposed-api-design)
-7. [Implementation Overview](#7-implementation-overview)
-8. [Feature Activation and Rollout Plan](#8-feature-activation-and-rollout-plan)
-9. [Compatibility Risk and Mitigation](#9-compatibility-risk-and-mitigation)
-10. [Interoperability and Spec Alignment](#10-interoperability-and-spec-alignment)
-11. [Standards Position](#11-standards-position)
-12. [Performance Impact](#12-performance-impact)
-13. [Security and Privacy](#13-security-and-privacy)
-14. [Accessibility](#14-accessibility)
-15. [Open Questions](#15-open-questions)
-16. [References](#16-references)
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
----
 
-## 1. Introduction
 
-Users cannot Ctrl+Click to select multiple non-contiguous words in Chrome. This interaction works in Firefox and in word processors like Microsoft Word and LibreOffice Writer. Chrome's limitation stems from Blink's `Selection` implementation being hardcoded to a single range.
 
-The [Selection API](https://w3c.github.io/selection-api/) exposes a `Selection` object with methods like `addRange()`, `removeRange()`, `getRangeAt(index)`, and the `rangeCount` attribute, all implying a collection of disjoint `Range` objects. However, Chrome (and Safari) implement single-range-only semantics: `addRange()` is silently ignored when a range already exists, and `rangeCount` is always `0` or `1`.
+## Introduction
 
-This explainer proposes making Chromium's `Selection` honor multiple ranges, enabling discontinuous text selection for web content.
+The [Selection interface](https://w3c.github.io/selection-api/#selection-interface) exposes  methods like `addRange()`, `removeRange()`, `getRangeAt(index)`, and the `rangeCount` attribute — all originally designed for a collection of disjoint `Range` objects. In 2011, the spec was narrowed to mandate single-range semantics: `addRange()` must be ignored when a range already exists, and `rangeCount` must be `0` or `1`. Chrome and Safari follow this restriction; Firefox never adopted it and continues to support multiple ranges.
 
----
+This explainer proposes removing that restriction, restoring the multi-range semantics the API was designed for. Chromium is actively pursuing implementation ([feature request](https://issues.chromium.org/issues/504686717)).
 
-## 2. Problem Statement
+## Problem Statement
 
-### 2.1 The User-Visible Problem
+**The User-Visible Problem**
 
-Some desktop applications support Ctrl+Click (or Cmd+Click on macOS) to build a non-contiguous, multi-word selection. Microsoft Word and LibreOffice Writer both support this interaction natively. Among browsers, Firefox supports Ctrl+Click to add words to a selection. In Chrome, Ctrl+Click simply replaces the existing selection with a new one.
+Desktop applications like Microsoft Word and LibreOffice Writer support Ctrl+Click (Cmd+Click on macOS) to build non-contiguous selections. On the web, this interaction is blocked by the spec's single-range restriction; Ctrl+Click in Chromium and Safari simply replaces the existing selection.
 
-Note: Code editors like VS Code and JetBrains IDEs support multi-cursor editing, but this is implemented via custom overlays rather than the native platform selection API. The existence of these workarounds is itself evidence of demand for the feature (see Section 2.3).
+Code editors like VS Code and JetBrains IDEs work around this by implementing multi-cursor entirely via custom overlays, bypassing the native Selection API.
 
-This gap is particularly noticeable for:
-- Users switching between Word/Firefox and Chrome who expect the same Ctrl+Click behavior
-- Power users copying non-adjacent table cells
-- Web-based code editors that want native multi-cursor selection without custom overlays
+**Developer Workarounds**
 
-### 2.2 The API Gap
+Because the platform does not support multi-range selection, developers are forced into complex workarounds:
+
+- Web-based spreadsheets (Google Sheets, Notion, Airtable) maintain custom canvas/overlay highlight layers to simulate column selection
+- Browser-based code editors (vscode.dev, CodeMirror) implement multi-cursor entirely outside the native `Selection`, losing native clipboard, copy, and accessibility integration
+
+**The API Gap**
 
 ```javascript
 const sel = window.getSelection();
@@ -76,70 +78,37 @@ sel.addRange(r2);           // silently ignored
 console.log(sel.rangeCount); // still 1
 ```
 
-The W3C Selection API spec (Step 2 of `addRange()`) currently mandates: "If `rangeCount` is not `0`, abort these steps." Chromium and Safari follow this spec text. Firefox deviates from the spec and accumulates multiple ranges. The spec was deliberately restricted to single-range in 2011 to simplify implementation, but this leaves developers without a standards-based way to express discontinuous selection.
+The W3C Selection API spec (Step 2 of `addRange()`) mandates: "If `rangeCount` is not `0`, abort these steps." This leaves developers without a standards-based way to express discontinuous selection.
 
-### 2.3 Developer Workarounds
+## Goals and Non-Goals
 
-Because the platform does not support multi-range selection, developers are forced into complex workarounds:
+**Goals**
 
-- Web-based spreadsheets (Google Sheets, Notion, Airtable) maintain custom canvas/overlay highlight layers to simulate column selection
-- Browser-based code editors (vscode.dev, CodeMirror) implement multi-cursor entirely outside the native `Selection`, losing native clipboard, copy, and accessibility integration
-- Chrome itself built a separate `TextFragmentHighlighter` / `kSearchText` highlight layer because `FrameSelection` cannot hold multiple ranges
+1. Update the W3C Selection API spec to permit multiple ranges per selection, restoring the API's original multi-range design
+2. `addRange()` accumulates ranges rather than silently discarding subsequent calls
+3. `rangeCount`, `getRangeAt(i)`, `removeRange()` work correctly for N ranges
+4. Enable discontinuous text selection via Ctrl+Click/Drag across all implementing browsers
+5. Native clipboard integration: Ctrl+C copies the concatenated text of all ranges
+6. All selected ranges are visually highlighted
+7. Backward compatibility: existing code using `getRangeAt(0)` or checking `rangeCount` must continue to work without modification
 
-### 2.4 Blink Source Evidence
+**Non-Goals**
 
-The single-range restriction is intentionally hardcoded:
+1. Cross-origin or cross-frame multi-range selection
+2. Multi-range inside `<input>` / `<textarea>` text controls (these use a separate selection model with tighter OS input API constraints)
+3. Changing Shift+Arrow selection extension behavior (Shift+Arrow operates on a single logical selection; multi-range selection extension is a separate future concern)
 
-```cpp
-// dom_selection.cc - addRange()
-void DOMSelection::addRange(Range* new_range) {
-  if (rangeCount() == 0) {
-    UpdateFrameSelection(...);
-    return;
-  }
-  // function simply ends here when rangeCount() > 0
-}
+## Current State of the Platform
 
-// selection_editor.h - internal storage
-SelectionInDOMTree selection_;  // single (anchor, focus) pair
-```
-
----
-
-## 3. Goals and Non-Goals
-
-### Goals
-
-- **G1**: Enable discontinuous text selection in Chrome, so users can Ctrl+Click/Drag to select multiple non-adjacent text spans
-- **G2**: `addRange()` accumulates ranges rather than silently discarding subsequent calls
-- **G3**: `rangeCount`, `getRangeAt(i)`, `removeRange()` work correctly for N ranges
-- **G4**: Native clipboard integration: Ctrl+C copies the concatenated text of all ranges
-- **G5**: All selected ranges are visually highlighted
-- **G6**: Align programmatic behavior with Firefox for web compatibility
-
-### Non-Goals
-
-- **NG1**: Cross-origin or cross-frame multi-range selection
-- **NG2**: Multi-range inside `<input>` / `<textarea>` text controls (these use a separate selection model with tighter OS input API constraints)
-- **NG3**: Changing Shift+Arrow selection extension behavior (Shift+Arrow operates on a single logical selection; multi-range selection extension is a separate future concern)
-- **NG4**: Changing existing selection behavior when only a single range is present (must be 100% backward-compatible)
-
----
-
-## 4. Current State of the Platform
-
-### 4.1 Browser Landscape
+**Browser Landscape**
 
 | Browser | Multi-range support | Notes |
 |---------|-------------------|-------|
-| **Firefox** | Yes | Ctrl+Click to add words; table column/cell selection. Supported since early Gecko. [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/Selection/addRange) |
-| **Chrome / Chromium** | No | `addRange()` no-op when non-empty (follows spec Step 2) |
-| **Safari / WebKit** | No | Same as Chrome |
-| **Edge (Chromium)** | No | Inherits Chromium behavior |
+| **Firefox (Gecko)** | Yes | Shipped since early Gecko. [MDN reference](https://developer.mozilla.org/en-US/docs/Web/API/Selection/addRange) |
+| **Chromium (Blink)** | No | `addRange()` no-op when non-empty (follows spec Step 2). [Feature request](https://issues.chromium.org/issues/504686717) |
+| **Safari (WebKit)** | No | Same as Chrome; no public signal |
 
-MDN explicitly notes: "only Firefox supports multiple selection ranges."
-
-### 4.2 The W3C Selection API Spec (Current State)
+**The W3C Selection API Spec (Current State)**
 
 The [W3C Selection API](https://w3c.github.io/selection-api/) (Editor's Draft, January 2025, edited by Ryosuke Niwa of Apple) currently mandates single-range behavior:
 
@@ -156,23 +125,7 @@ The [W3C Selection API](https://w3c.github.io/selection-api/) (Editor's Draft, J
 
 **Spec NOTE on `addRange()`:** "At Step 2, Chrome 58 and Edge 25 do nothing. Firefox 51 gives you a multi-range selection."
 
-This means:
-- Chrome **follows** the current spec
-- Firefox **deviates** from the spec (but has done so stably for 20+ years)
-- Implementing multi-range requires both a Chromium implementation **and** a spec change
-
-### 4.3 UseCounter Instrumentation
-
-Blink already tracks selection operations via `UseCounterFeature`:
-```
-kSelectionRangeCount  = 1002
-kSelectionGetRangeAt  = 1003
-kSelectionAddRange    = 1004
-```
-
-These counters can be used to measure how often `addRange()` is called when a range already exists, indicating demand for multi-range behavior.
-
-### 4.4 WPT Test Coverage
+**WPT Test Coverage**
 
 The WPT suite (`selection/addRange-*.html` tests) explicitly asserts that the second `addRange()` call does nothing:
 
@@ -183,59 +136,137 @@ testAddRangeDoesNothing(exception, range2, endpoints2, "second", testName);
 
 These tests reflect the current spec and would need to be updated alongside the spec change.
 
----
+## Key Use Cases
 
-## 5. Key Use Cases
+### 1. Ctrl+Click Discontinuous Word Selection
 
-### 5.1 Ctrl+Click Discontinuous Word Selection
-
-Desktop text editors universally support Ctrl+Click to select non-contiguous words. The browser has never supported this for web content.
+Desktop text editors universally support Ctrl+Click to select non-contiguous words.
 
 ```
-"The quick brown fox jumps over the lazy dog"
-         ^^^^^       ^^^             ^^^^
-         Range 1     Range 2         Range 3
+"The [quick] brown [fox] jumps over the [lazy] dog"
 ```
 
-User selects "quick", Ctrl+clicks "fox", Ctrl+clicks "lazy". Pressing Ctrl+C copies "quickfoxlazy".
+User selects "quick", Ctrl+clicks "fox", Ctrl+clicks "lazy". Result: three disjoint ranges.
 
-### 5.2 Table Column Selection
+**Real-world need:** Microsoft Word and LibreOffice Writer support this interaction natively. Users expect the same behavior in the browser.
 
-Selecting a table column means selecting cells from many rows while excluding other columns. This is inherently non-contiguous.
+### 2. Table Column Selection
 
+Selecting a table column means selecting cells from many rows while excluding other columns. This is inherently non-contiguous in DOM order.
+
+<table>
+  <tr>
+    <th></th><th>Col 1</th><th>Col 2</th><th>Col 3</th>
+  </tr>
+  <tr>
+    <td>Row 1</td><td>A</td><td><b>B</b></td><td>C</td>
+  </tr>
+  <tr>
+    <td>Row 2</td><td>D</td><td><b>E</b></td><td>F</td>
+  </tr>
+  <tr>
+    <td>Row 3</td><td>G</td><td><b>H</b></td><td>I</td>
+  </tr>
+</table>
+
+Selecting column 2 requires three ranges: one for "B", one for "E", one for "H". A single DOM Range from "B" to "H" would incorrectly include cells A, C, D, F, G (the entire table).
+
+### 3. Bidirectional Text Selection
+
+In bidirectional (bidi) text, a visually contiguous selection can be non-contiguous in logical (DOM) order. Consider:
+
+```html
+<div>Hello &#x05D0;&#x05D1;&#x05D2;&#x05D3;&#x05D4;&#x05D5; World</div>
 ```
-| A | B | C |     Selecting column B:
-| D | E | F |     Range 1: "B"
-| G | H | I |     Range 2: "E"
-                  Range 3: "H"
+
+**Visual rendering** (due to the [Unicode Bidi Algorithm](https://unicode.org/reports/tr9/)):
+
+![bidi-text.png](bidi-text.png)
+
+The Hebrew characters render right-to-left within the LTR paragraph. If the user drags from after "Hello" rightward through half the Hebrew, a true visual selection maps to two non-contiguous DOM ranges:
+- Position 0 up to position 6 (the space after "Hello")
+- Positions 9 to 12
+
+Positions 6-9 would be skipped because they are visually to the *right* of what the user selected.
+
+A single DOM Range is not sufficient to represent this visual selection and would show a disjoint selection as in the above image, which is not what the user expects.
+
+*Reference: [Ben Peters (Microsoft), public-webapps mailing list, Jan 2015](https://lists.w3.org/Archives/Public/public-webapps/2015JanMar/0098.html): "Depending on who you talk to, BIDI should support selection in document order or layout order. Layout order is not possible without multi-selection."*
+
+### 4. CSS Grid Layout Reordering
+
+CSS Grid can visually reorder elements independent of DOM order. When the user drags to select visually contiguous content, the resulting single DOM Range includes content from visually non-adjacent grid items.
+
+```html
+<style>
+  .grid { display: grid; }
+</style>
+<div class="grid">
+  <div style="grid-row: 1">content1 foo1 bar1</div>
+  <div style="grid-row: 3">content2 foo2 bar2</div>
+  <div style="grid-row: 2">content3 foo3 bar3</div>
+</div>
+```
+**Visual rendering**
+
+![css-grid-layout-reordering.png](css-grid-layout-reordering.png)
+
+If the user drags from "foo1" (row 1) to "foo3" (visually row 2), they expect to select `"oo1 bar1"` + `"content3 f"`. But a single Range in DOM order includes the intervening `"content2 foo2 bar2"` (row 3, visually below), which is not part of the visual selection.
+
+With multi-range, the browser can represent exactly what's visually selected: two ranges that skip the DOM-interleaved content.
+
+*Source: [yoichio's TPAC 2017 multi-range proposal](https://github.com/yoichio/public-documents/blob/master/multiranges.md)*
+
+### 5. Shadow DOM Slot Reordering
+
+Shadow DOM slots can display slotted content in a different order than the light DOM. This creates the same visual-vs-DOM mismatch as CSS Grid.
+
+```html
+out
+<span id="host">
+  <span slot="s1">foo1</span>
+  <span slot="s2">bar2</span>
+</span>
+<script>
+  host.attachShadow({ mode: "open" }).innerHTML =
+    '<slot name="s2"></slot><slot name="s1"></slot>';
+</script>
 ```
 
-Not possible via the native Selection API in Chrome today. Firefox supports this with Ctrl+Click on cells.
+**Visual rendering** 
 
-### 5.3 Multi-Cursor Code Editors
+![out bar2 foo1](shadow-dom-slot-reordering.png) 
 
-VS Code's web version (vscode.dev) and other browser-based IDEs simulate multi-cursor via canvas or custom overlay elements. With native multi-range selection:
+If the user selects from "out" to "bar2" (visually adjacent), `getRangeAt(0)` returns a Range `{out, 1, bar2, 2}` that includes "foo1", content that is **not visually between** the start and end of the selection.
+
+With multi-range, the selection can be represented as two ranges: `{out, 1, out, 3}` and `{bar2, 0, bar2, 2}`, matching what the user sees.
+
+*Source: [yoichio's TPAC 2017 multi-range proposal](https://github.com/yoichio/public-documents/blob/master/multiranges.md); see also [w3c/selection-api#336](https://github.com/w3c/selection-api/issues/336)*
+
+### 6. Multi-Cursor Code Editors
+
+VS Code's web version (vscode.dev), CodeMirror, and other browser-based IDEs simulate multi-cursor via canvas or custom overlay elements. With native multi-range selection:
 - Each cursor/selection would be a native `Range`
 - Clipboard operations would automatically aggregate all ranges
 - Screen readers would receive native selection-changed events
-- IME composition panels would position correctly
+- IME composition panels would position correctly at the focused range
 
-### 5.4 Find-and-Replace: "Select All Occurrences"
+These editors currently reimplement selection entirely outside the platform, losing native clipboard, accessibility, and input method integration.
 
-"Select All Occurrences of Current Word" should result in every occurrence being natively selected. Today Chrome uses a separate parallel highlight system (`TextFragmentHighlighter`) because `FrameSelection` cannot hold multiple ranges. With multi-range, this could be a real `Selection` operation with native Ctrl+C support.
+**Note on visual-vs-DOM mismatch cases (bidi, Grid, Shadow DOM)**
 
----
+Use cases 3-5 above (bidi text, CSS Grid reordering, Shadow DOM slot reordering) describe scenarios where a single visual selection maps to non-contiguous DOM positions. This proposal enables user agents to represent such selections as multiple ranges, but does **not** mandate that they do so. Whether a browser creates multi-range selections during drag/click in these scenarios is a user agent decision; the spec change removes the API restriction that currently makes it impossible.
 
-## 6. Proposed API Design
+## Proposed API Design
 
-### 6.1 Behavior Changes
+**Behavior Changes**
 
-#### `addRange(range)` accumulates ranges
+**`addRange(range)` accumulates ranges**
 
 When a selection already exists:
 - **Current (spec-mandated):** silently ignore the call.
 - **Proposed:** add `range` as an additional disjoint range.
-  - If `range` overlaps or is adjacent to an existing range, merge them into a union range (matching Firefox).
+  - If `range` overlaps or is adjacent to an existing range, merge them into a union range.
   - Ranges are stored sorted by document-order start position.
 
 ```javascript
@@ -245,113 +276,60 @@ sel.addRange(r2);  // [r1, r2] or merged if overlapping
 console.log(sel.rangeCount);  // 2
 ```
 
-#### `rangeCount` reflects true count
+**`rangeCount` reflects true count**
 
 Returns the actual number of ranges: 0, 1, or N.
 
-#### `getRangeAt(index)` works for all valid indices
+**`getRangeAt(index)` works for all valid indices**
 
 Valid for `0 <= index < rangeCount`. Ranges ordered by document position.
 
-#### `toString()` concatenates all ranges
+**`toString()` concatenates all ranges**
 
-Returns text of all ranges in document order with no separator (matching Firefox).
+Returns text of all ranges in document order with no separator.
 
-#### User gesture: Ctrl+Click / Ctrl+Drag
+**Clipboard copy (Ctrl+C)**
 
-Wire up `SelectionController` to handle Ctrl+Click/Drag as "add to selection":
+Copies text of all ranges separated by newlines. This matches the behavior of word processors (Microsoft Word, LibreOffice) when copying discontinuous selections and provides better usability than no separator.
+
+**User gesture: Ctrl+Click / Ctrl+Drag**
+
+Browsers should handle Ctrl+Click/Drag (Cmd+Click/Drag on macOS) as "add to selection":
 - Ctrl+Click: add a caret or word selection at the click position
 - Ctrl+Drag: add a range for the drag. Merge if overlapping.
 
-### 6.2 Unchanged APIs
+**Unchanged APIs**
 
 - `collapse()`, `collapseToStart()`, `collapseToEnd()`: collapse to single caret, removing all other ranges
-- `extend()`: extends the focused (most recently added) range only
+- `extend()`: extends the focused (most recently added) range only. If the extended range overlaps another range, the other range is truncated (the focused range takes priority).
 - `setBaseAndExtent()`: replaces all ranges with a single new range
 - `selectAllChildren()`: replaces all ranges with a single range
-- `deleteFromDocument()`: deletes content of all ranges (matching Firefox)
+- `deleteFromDocument()`: deletes content of all ranges
 
-### 6.3 `getComposedRanges()` Extension
+**`getComposedRanges()` Extension**
 
 Currently returns at most one `StaticRange`. Under multi-range, returns a `StaticRange[]` for each range, each rescoped to the provided shadow roots.
 
----
+> **Note:** The behaviors described in this section (merge semantics, range sorting, `toString()` concatenation, `deleteFromDocument()` on all ranges) are consistent with Gecko's existing multi-range implementation, which serves as the primary interop reference.
 
-## 7. Implementation Overview
-
-The implementation touches every layer of the selection pipeline in Blink. Key architectural challenges:
-
-### Storage
-
-Replace the single `SelectionInDOMTree selection_` in `SelectionEditor` with a vector-based `MultiRangeSelection` class behind a `RuntimeEnabledFeature` flag. Single-range sites see no change.
-
-### Layout and Painting
-
-`LayoutSelection` currently tags each `LayoutObject` with a single `SelectionState` (`kNone`, `kStart`, `kInside`, `kEnd`, `kStartAndEnd`). A `LayoutObject` belonging to two ranges simultaneously cannot be expressed with this enum. The painting layer needs to support multiple `(startOffset, endOffset)` spans per `LayoutText` node.
-
-### Accessibility
-
-Platform accessibility APIs (UIA on Windows, NSAccessibility on macOS) do not support multi-range selection. The accessibility layer should report the focused (most recently added) range as the primary selection and fire `selectionchange` events normally.
-
-### Phased Plan
-
-| Phase | Scope | Description |
-|-------|-------|-------------|
-| **1** | Storage + DOM | Vector-based multi-range storage behind flag; `addRange()` accumulates; `rangeCount`/`getRangeAt()` return correct values |
-| **2** | Layout + Paint | Extend layout and paint to handle multiple paint ranges; highlight all ranges |
-| **3** | Clipboard | Ctrl+C copies concatenated text of all ranges |
-| **4** | Input gestures | Ctrl+Click / Ctrl+Drag adds to selection |
-| **5** | Accessibility | Platform bridges report multi-range correctly |
-| **6** | WPT / Spec | Update WPT expectations; land spec PRs |
-
----
-
-## 8. Feature Activation and Rollout Plan
-
-The feature will be gated behind a disabled-by-default runtime flag:
-
-- **Command line:** `--enable-blink-features=MultiRangeSelection`
-- **Runtime flag:** `RuntimeEnabledFeatures::MultiRangeSelectionEnabled()`
-
-**Rollout phases:**
-
-1. **Phase 1 (current):** Feature flag disabled by default. Developers and testers can opt in via command-line flag.
-2. **Phase 2:** Expose a `chrome://flags` entry for user opt-in without command-line flags.
-3. **Phase 3:** Enable by default for all users (after spec alignment and WPT updates).
-4. **Phase 4:** Remove the feature flag and legacy single-range codepaths.
-
-Until the feature is enabled, selection behavior remains unchanged. No user-visible changes occur without explicit opt-in during Phases 1 and 2.
-
----
-
-## 9. Compatibility Risk and Mitigation
-
-### 9.1 Risk Assessment
+## Compatibility Risk and Mitigation
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| Sites checking `rangeCount === 1` as a guard | Medium | Feature flag gating; UseCounter data to assess frequency |
-| Polyfills calling `addRange()` expecting no-op | Low | UseCounter already tracks `kSelectionAddRange`; monitor calls with existing non-empty selection |
-| WPT tests assert `addRange` does nothing | Low | Phase WPT changes alongside spec PR |
+| Sites checking `rangeCount === 1` as a guard | Medium | Incremental rollout behind feature flags; telemetry to assess frequency |
+| Polyfills calling `addRange()` expecting no-op | Low | Monitor calls with existing non-empty selection via telemetry |
+| WPT tests assert `addRange` does nothing | Low | Update WPT expectations alongside spec change |
 | IME composition with multi-range active | Medium | Collapse to focused range on IME start (matching multi-cursor editor convention) |
 
-### 9.2 UseCounter Strategy
+## Privacy and Security Considerations
 
-Before enabling by default, collect UseCounter data on:
-- How often `addRange()` is called when `rangeCount > 0` (indicates intentional multi-range attempts vs. accidental)
-- How often code relies on `rangeCount === 1` post-`addRange()`
+This feature introduces no new privacy or security concerns. The `Selection` and `Range` APIs already exist; this proposal changes the behavior of existing methods, not the API surface. No new user information is exposed.
 
-### 9.3 Rollback
+## Interoperability and Spec Alignment
 
-If regressions appear, the feature flag can be disabled instantly via Finch (Chrome's server-side feature configuration) without requiring a new Chrome release.
+**Required Spec Changes**
 
----
-
-## 10. Interoperability and Spec Alignment
-
-### 10.1 Required Spec Changes
-
-Implementing multi-range requires changing the W3C Selection API spec. The specific text to change:
+This proposal requires updating the W3C Selection API spec to remove the single-range restriction. The specific text to change:
 
 **Section 2 (Definition):** Change "Each selection can be associated with a single range" to allow a collection of ranges.
 
@@ -363,114 +341,33 @@ Implementing multi-range requires changing the W3C Selection API spec. The speci
 
 The spec NOTE about the single-range restriction would be updated to reflect the new multi-range consensus.
 
-### 10.2 Spec Change Strategy
+**Spec Change Strategy**
 
 1. File an issue on [w3c/selection-api](https://github.com/w3c/selection-api/issues) proposing multi-range support
 2. Engage with the spec editor (Ryosuke Niwa, Apple) and Web Editing Working Group
-3. Define merge semantics for overlapping ranges (match Firefox)
+3. Define merge semantics for overlapping ranges (see [Firefox Reference Behavior](#firefox-reference-behavior) below)
 4. Clarify `anchor`/`focus` semantics when N ranges exist
-5. Land spec PR alongside Chromium implementation reaching Phase 3
+5. Land spec PR alongside browser implementations
 
-### 10.3 Firefox Reference Behavior
+**Firefox Reference Behavior**
 
-Firefox is the primary implementation reference:
-- `addRange()` merges overlapping ranges into a union range
-- Ranges stored sorted by start position in document order
-- `anchorNode`/`anchorOffset` is the first range's start
-- `focusNode`/`focusOffset` is the last range's end
-- `toString()` returns concatenated text with no separator
-- `deleteFromDocument()` deletes all ranges' content
+Gecko is the only engine that currently implements multi-range selection. Key behaviors that serve as the interop reference:
+- `addRange()` merges overlapping ranges; ranges sorted by document-order start position
+- `anchorNode`/`anchorOffset` = first range's start; `focusNode`/`focusOffset` = last range's end
+- `toString()` concatenates text with no separator; `deleteFromDocument()` deletes all ranges
 
----
+Early engagement with the spec editor (Ryosuke Niwa, Apple) and the Web Editing Working Group is needed to build consensus. The API surface (`addRange()`, `rangeCount`, `getRangeAt(index)`) retains its original multi-range design, so the change is a restriction removal rather than a new API.
 
-## 11. Standards Position
-
-### 11.1 Current Spec
-
-The W3C Selection API spec (Editor's Draft, January 2025) explicitly restricts selections to a single range. This restriction was introduced in 2011 by then-editor Aryeh Gregor to simplify implementations after non-Gecko engines never adopted multi-range.
-
-### 11.2 Browser Positions
-
-| Engine | Position | Evidence |
-|--------|----------|----------|
-| **Gecko (Firefox)** | Positive (ships multi-range) | Has shipped for 20+ years; stable implementation in `dom/base/Selection.cpp` |
-| **Blink (Chrome)** | Proposing to implement | This explainer |
-| **WebKit (Safari)** | Unknown / likely cautious | Spec editor Ryosuke Niwa (Apple) authored the single-range restriction. No public signal of intent to change. |
-
-### 11.3 Assessment
-
-This proposal goes against the current spec text but aligns with Firefox's longstanding behavior. Gaining WebKit buy-in may be the largest standards challenge, given that Apple's representative authored the restriction language. Early engagement with the Web Editing Working Group is critical.
-
----
-
-## 12. Performance Impact
-
-This feature introduces minimal overhead for the common case (single range). When only one range is present, the code path is identical to today.
-
-For multi-range scenarios:
-- `LayoutSelection::Commit()` walks the flat tree once per paint frame. With N ranges, the walk is structured as a single pass with a sorted range list, so complexity remains O(layout tree nodes) rather than O(N x layout tree nodes).
-- Each `addRange()` call requires O(N) to check for overlaps and maintain sort order. In practice, N is small (typically < 10 for user-gesture selections).
-- Memory overhead is one additional `EphemeralRange` (a few pointers) per range.
-
----
-
-## 13. Security and Privacy
-
-This feature introduces no new security or privacy concerns:
-
-- The `Selection` and `Range` APIs already exist; this changes the behavior of existing methods, not the API surface
-- No new user information is exposed
-- Programmatic `addRange()` calls are already possible from script (they just currently no-op)
-- The Ctrl+Click gesture requires user interaction (same as any other selection operation)
-- `navigator.clipboard.readText()` still requires explicit permission regardless of range count
-
----
-
-## 14. Accessibility
-
-Platform accessibility APIs largely do not support multi-range selection:
-
-| Platform | Multi-range support |
-|----------|-------------------|
-| Windows (UIA) | `ITextProvider` exposes one `ITextRangeProvider` selection |
-| macOS (NSAccessibility) | `AXSelectedTextRange` is a single range |
-| Linux (AT-SPI) | Partial: `Accessible::getSelection()` can return multiple ranges in some implementations |
-| Android (AccessibilityNodeInfo) | Single selection range |
-
-**Recommended behavior:**
-- Report the focused range (most recently added) as the primary accessibility selection
-- Fire `selectionchange` for each selection change
-- Screen readers announce the focused range text; optionally indicate "[N] ranges selected" when `rangeCount > 1`
-
----
-
-## 15. Open Questions
+## Open Questions
 
 1. **Merge or error on overlap?**
-   Firefox merges overlapping ranges. Should Chrome throw on overlap or merge silently? **Recommendation:** merge, matching Firefox.
+   Should overlapping ranges be merged into a union range, or should the call throw? **Recommendation:** merge (consistent with Gecko).
 
 2. **What is `anchorNode`/`focusNode` when `rangeCount > 1`?**
-   Firefox reports `anchor` as the first range's start and `focus` as the last range's end (in document order, since ranges are sorted by start position). **Recommendation:** match Firefox for compat.
+   One approach: `anchor` = first range's start, `focus` = last range's end (since ranges are sorted by start position). **Recommendation:** adopt this convention for interop.
 
 3. **IME composition with multi-range?**
-   `InputMethodController` tracks a single composition range. **Recommendation:** use the focused range, collapse all others on IME start (matching multi-cursor editor convention).
+   **Recommendation:** use the focused range, collapse all others on IME start (matching multi-cursor editor convention).
 
-4. **WebKit engagement strategy?**
-   The spec editor is from Apple. What is the path to gaining WebKit support or at least non-opposition? Early engagement via the Web Editing Working Group is essential.
-
-5. **`revealSelection()` with N ranges?**
-   **Recommendation:** scroll to the most recently modified range.
-
----
-
-## 16. References
-
-1. **W3C Selection API (Editor's Draft):** https://w3c.github.io/selection-api/
-2. **W3C Selection API issue tracker:** https://github.com/w3c/selection-api/issues
-3. **MDN: Selection.addRange():** https://developer.mozilla.org/en-US/docs/Web/API/Selection/addRange
-4. **MDN: Selection.rangeCount:** https://developer.mozilla.org/en-US/docs/Web/API/Selection/rangeCount
-5. **Firefox multi-range implementation:** https://searchfox.org/mozilla-central/source/dom/base/Selection.cpp
-6. **Chromium source: `dom_selection.cc`:** https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/editing/dom_selection.cc
-7. **Chromium source: `selection_editor.h`:** https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/editing/selection_editor.h
-8. **WPT: `selection/addRange.js`:** https://github.com/web-platform-tests/wpt/blob/master/selection/addRange.js
-9. **WPT results for Selection:** https://wpt.fyi/results/selection/
+4. **Clipboard copy separator?**
+   `toString()` uses no separator between ranges. However, clipboard copy (Ctrl+C) of discontinuous selections in word processors uses newline separators. **Recommendation:** `toString()` with no separator for API compat; clipboard copy with newline separators for user-facing consistency with desktop apps.
