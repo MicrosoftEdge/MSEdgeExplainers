@@ -6,7 +6,7 @@ Platform-provided behaviors allow custom elements to adopt native HTML element c
 
 ## Enabling the feature
 
-Navigate to `edge://flags/#enable-experimental-web-platform-features` (or `chrome://flags/#enable-experimental-web-platform-features`) and set it to **Enabled**, then restart the browser.
+Navigate to `chrome://flags/#enable-experimental-web-platform-features` (or `chrome://flags/#enable-experimental-web-platform-features`) and set it to **Enabled**, then restart the browser.
 
 Alternatively, launch the browser with:
 ```
