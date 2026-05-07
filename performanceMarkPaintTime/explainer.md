@@ -1,6 +1,6 @@
 # performance.markPaintTime() Explainer
 
-Author:  [Wangsong Jin](https://github.com/JosephJin0815) - Engineer at Microsoft Edge
+Author:  [Wangsong Jin](https://github.com/JosephJin0815) - Engineer at Microsoft Edge, [Andy Luhrs](https://github.com/aluhrs13)
 
 ## Status of this Document
 
@@ -26,12 +26,10 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-Web developers need to measure when their visual updates actually render — not just the browser-detected milestones like [`First Paint`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming) or [`Largest Contentful Paint`](https://www.w3.org/TR/largest-contentful-paint/), but any update they care about: a component mount, a state transition, a style change.
-
-The platform already captures paint and presentation timestamps for key moments via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), but only for entries the browser selects automatically. `performance.markPaintTime()` extends this capability to let developers capture `paintTime` and `presentationTime` (when supported by the UA) for any visual update, on demand.
+Proper measurement and understanding of end-to-end user experience is key to optimizing web performance. Today, web developers don't have a way to measure when their own visual updates actually reach the screen outside browser-selected milestones like [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), and [LCP](https://www.w3.org/TR/largest-contentful-paint/). `markPaintTime()` closes that gap by letting developers understand the actual timing of paint and when pixels are drawn to the screen following any of their JS execution, adding more complete measurement of real end-to-end user experience.
 
 ## Goals
- - Give developers on-demand access to `paintTime` and `presentationTime` for any visual update.
+ - Give developers on-demand access to various paint-related metrics for an arbitrary update.
  - Deliver timestamps through `PerformanceObserver`, consistent with modern performance APIs.
 
 ## Non-goals
@@ -39,6 +37,8 @@ The platform already captures paint and presentation timestamps for key moments 
  - **Forcing a rendering update.** `markPaintTime()` does not cause a rendering opportunity — it tags the next one that naturally occurs.
 
 ## The Problem
+
+Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related entries like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Event Timing](https://w3c.github.io/event-timing/), and [LoAF](https://w3c.github.io/long-animation-frames/) do report real paint and presentation timestamps, but only for moments the platform selects. Today, developers have no way to ask "when did *this* update I just made actually paint?"
 
 Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)). Furthermore, no existing workaround provides `presentationTime` — the actual time when pixels appear on screen. For example, a developer wants to measure when a chat input box appears after an asynchronous content load. A typical pattern uses `requestAnimationFrame` to approximate the paint time:
 
@@ -180,7 +180,7 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 - **`startTime`**: `performance.now()` at the time `markPaintTime()` is called.
 - **`paintTime - startTime`** = time from the `markPaintTime()` call to the end of the rendering update
 - **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency (how long until the user actually sees the update)
-- **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation)
+- **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation). This is less in the developer's control, but can help them understand if they're in an extreme scenario where an outside factor impacted their performance.
 
 ## Key Design Decisions
 
