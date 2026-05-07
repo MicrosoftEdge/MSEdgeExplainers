@@ -1,6 +1,6 @@
 # performance.markPaintTime() Explainer
 
-Author:  [Wangsong Jin](https://github.com/JosephJin0815) - Engineer at Microsoft Edge, [Andy Luhrs](https://github.com/aluhrs13)
+Author:  [Wangsong Jin](https://github.com/JosephJin0815), [Andy Luhrs](https://github.com/aluhrs13)
 
 ## Status of this Document
 
@@ -63,7 +63,7 @@ Without an on-demand API, developers resort to workarounds like double-rAF or rA
 </html>
 ```
 
-Since `requestAnimationFrame` fires before the browser paints, the recorded timestamp is earlier than when the content is actually rendered. It is better than logging at the moment of the DOM update, but still only an approximation.
+Since `requestAnimationFrame` callbacks run before the style and layout, the recorded timestamp is earlier than when the content is actually rendered. It is better than logging at the moment of the DOM update, but still only an approximation.
 
 ### Double requestAnimationFrame
 
@@ -165,7 +165,9 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 
 ### paintTime
 
-`paintTime` is the rendering update end time, captured after style recalculation and layout. This is the same timestamp that FP/FCP/LCP use via [PaintTimingMixin](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), defined at [step 11.14.21 of the event loop](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model).
+`paintTime` is the rendering update end time, captured after style and layout. This is the same timestamp that FP/FCP/LCP use via [PaintTimingMixin](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), defined at [step 11.14.21 of the event loop](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model).
+
+*Note: Below diagram illustrates the Chromium rendering architecture. Other browser engines may have a different pipeline structure, but the spec-defined timing semantics remain the same.*
 
 ![paintTime in the rendering pipeline](paint-time-pipeline.png)
 
@@ -173,13 +175,14 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 
 `presentationTime` is the implementation-defined time when the composited frame is presented to the display.
 
-![presentationTime in the rendering pipeline](presentation-time-pipeline.png)
+*Note: Below diagram uses Chromium's architecture as an example. Other browser engines may structure this differently, but `presentationTime` refers to the moment the composited frame is presented to the display.*
+![presentationTime in the path from rendering to display](presentation-time-pipeline.png)
 
 ### What developers can measure
 
-- **`startTime`**: `performance.now()` at the time `markPaintTime()` is called.
-- **`paintTime - startTime`** = time from the `markPaintTime()` call to the end of the rendering update
-- **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency (how long until the user actually sees the update)
+- **`startTime`**: Defaults to `performance.now()` at the time `markPaintTime()` is called, but developers can optionally provide a custom value to mark a meaningful start point (e.g., an event timestamp from a `click` or `input` event, or a timestamp captured at the start of a state change).
+- **`paintTime - startTime`** = time from the `markPaintTime()` call to the end of the rendering update.
+- **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency (how long until the user actually sees the update).
 - **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation). This is less in the developer's control, but can help them understand if they're in an extreme scenario where an outside factor impacted their performance.
 
 ## Key Design Decisions
