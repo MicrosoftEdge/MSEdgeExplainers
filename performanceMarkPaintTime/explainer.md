@@ -28,6 +28,8 @@ This document is a starting point for engaging the community and standards bodie
 
 Proper measurement and understanding of end-to-end user experience is key to optimizing web performance. Today, web developers don't have a way to measure when their own visual updates actually reach the screen outside browser-selected milestones like [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), and [LCP](https://www.w3.org/TR/largest-contentful-paint/). `markPaintTime()` closes that gap by letting developers understand the actual timing of paint and when pixels are drawn to the screen following any of their JS execution, adding more complete measurement of real end-to-end user experience.
 
+*Note: The exact meaning of "drawn to the screen" depends on the operating system. On some platforms, the precise time pixels are presented to the display is not available, in which case `presentationTime` will report the next closest time, which is typically when the frame is sent to the GPU.*
+
 ## Goals
  - Give developers on-demand access to various paint-related metrics for an arbitrary update.
  - Deliver timestamps through `PerformanceObserver`, consistent with modern performance APIs.
@@ -40,7 +42,7 @@ Proper measurement and understanding of end-to-end user experience is key to opt
 
 Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related entries like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Event Timing](https://w3c.github.io/event-timing/), and [LoAF](https://w3c.github.io/long-animation-frames/) do report real paint and presentation timestamps, but only for moments the platform selects. Today, developers have no way to ask "when did *this* update I just made actually paint?"
 
-Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)). Furthermore, no existing workaround provides `presentationTime` — the actual time when pixels appear on screen. For example, a developer wants to measure when a chat input box appears after an asynchronous content load. A typical pattern uses `requestAnimationFrame` to approximate the paint time:
+Without an on-demand API, developers resort to workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes, but these workarounds are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)). Furthermore, no existing workaround provides `presentationTime` — the actual time when pixels are drawn to the screen. For example, a developer wants to measure when a chat input box appears after an asynchronous content load. A typical pattern uses `requestAnimationFrame` to approximate the paint time:
 
 ### Single requestAnimationFrame
 
@@ -134,7 +136,7 @@ The following end-to-end example shows a page that loads chat content asynchrono
 ```
 
 - **Accurate**: `paintTime` is captured at the rendering update, not approximated by rAF.
-- **End-to-end**: `presentationTime`, when available, tells you when pixels appeared on the display.
+- **End-to-end**: `presentationTime`, when available, tells you when pixels are drawn to the screen.
 - **Stable**: No rAF variance — the timestamps come from the rendering pipeline, not rAF approximation.
 
 ## Proposed API
@@ -148,7 +150,7 @@ The following end-to-end example shows a page that loads chat content asynchrono
  | `startTime` | `performance.now()` at the time `markPaintTime()` was called, unless overridden via `options.startTime` — same semantics as [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor) (see [step 5](https://w3c.github.io/user-timing/#the-performancemark-constructor)). This is **not** a rendering-pipeline timestamp; it records when the developer invoked the API, regardless of where in the event loop the call occurs (e.g., a microtask, `IntersectionObserver` callback, or `requestAnimationFrame`). |
  | `duration` | Always `0` |
  | `paintTime` | The rendering update end time — same as FP/FCP/LCP `paintTime` |
- | `presentationTime` | When pixels were shown on the display, or `null` if unsupported by the UA — same as FP/FCP/LCP `presentationTime` |
+ | `presentationTime` | When pixels were drawn to the screen, or `null` if unsupported by the UA — same as FP/FCP/LCP `presentationTime` |
 
 **Behavior:**
 - On-demand — no data is collected until `markPaintTime()` is called.
