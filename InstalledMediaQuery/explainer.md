@@ -6,8 +6,8 @@
 
 ## Participate
 
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Install%20Detection)
-- [Github Discussion](https://github.com/w3c/manifest/issues/1092#issuecomment-2515488152)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues?q=is%3Aissue%20label%3A%22Installed%20Media%20Query%22)
+- [Github Discussion](https://github.com/w3c/manifest/issues/1092)
 
 ## Status of this Document
 
