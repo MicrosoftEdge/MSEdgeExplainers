@@ -77,7 +77,7 @@ This makes `navigator.standalone` unsuitable as a cross-browser standard.
 
 ## Goals
 
-- Provide a **stable, boolean signal** for "running in an installed app window" that is orthogonal to display mode.
+- Provide a **stable, boolean signal** for "running in an installed app window" that is separate from display mode.
 - Require **no new JavaScript API**. CSS `@media` rules and `matchMedia()` cover both declarative and imperative use cases.
 
 ## Non-goals
@@ -228,7 +228,7 @@ A dedicated JS property could work, but:
 |-------------|----------|-------|
 | Edge | Positive |  |
 | Chrome | Positive |  |
-| Mozilla | ΓÇö | Pending feedback |
+| Mozilla | - | Pending feedback |
 | WebKit | Positive | |
 | Web developers | Positive | Frequently requested in [CRBugs](https://issues.chromium.org/issues/331692948#comment15) and [issue discussions](https://github.com/w3c/manifest/issues/1092#). |
 
