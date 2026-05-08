@@ -37,7 +37,7 @@ This document is intended as a starting point for engaging the community and sta
 
 ## Introduction
 
-The **`installed` CSS media feature** provides a reliable, boolean signal indicating whether the current document is running inside an installed web application window. It evaluates to `true` when the document is in an application context (a top-level browsing context with a manifest applied, presented in its own app window) and `false` otherwise.
+The **`installed` CSS media feature** provides a reliable way for developers to know whether their web app is running inside an installed app window. It separates the concept of "running as an installed app" from the app's current display mode, solving a long-standing gap in the web platform where developers lacked a clean, stable signal for installation state.
 
 ```css
 @media (installed: yes) {
@@ -45,11 +45,9 @@ The **`installed` CSS media feature** provides a reliable, boolean signal indica
 }
 ```
 
-This feature separates the concept of "running as an installed app" from the app's current display mode, solving a long-standing gap in the web platform where developers lacked a clean, stable signal for installation state.
-
 ## User-facing Problems
 
-Developers frequently need to know whether their web app is running in an installed app window. Common use cases include:
+Developers would like a way to style their content differently depending on whether their web app is running in an installed app window. Common use cases include:
 
 - **Hiding install prompts** when the user is already in the installed experience.
 - **Showing app-specific UI** (e.g., a title bar, back navigation, or "open in browser" link) that only makes sense in an app window.
@@ -57,7 +55,7 @@ Developers frequently need to know whether their web app is running in an instal
 
 ### The `display-mode` Problem
 
-Today, the best available signal is the `display-mode` media query:
+Today, the best available signal is the [`display-mode` media query](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/display-mode#syntax):
 
 ```css
 @media (display-mode: standalone) {
@@ -119,7 +117,7 @@ A new CSS media feature named `installed` with two valid values:
 | Installed, minimal-ui mode | **true** | **false** |
 | Any iframe inside app window | false | false |
 
-The key scenario today is "Installed, then goes fullscreen". With `display-mode: standalone`, the installed signal is lost when entering fullscreen. With `installed: yes`, it remains stable.
+The key benefit of this approach over the existing `display-mode` media query is that it provides a consistent signal for the installed state, regardless of the current display mode of the window.
 
 ## Key Scenarios
 
