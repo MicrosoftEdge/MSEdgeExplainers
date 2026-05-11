@@ -133,7 +133,7 @@ A recurring concern about consolidating form-control semantics into an opt-in is
 
 - Each element behavior maps to a single native pattern (e.g., `HTMLSubmitButtonBehavior` provides exactly the semantics of `<button type="submit">`). Future element behaviors will need to follow the same naming convention, each pinned to a single native pattern.
 - Each behavior is specified in terms of existing HTML algorithms. The behavior is the union of those algorithms, applied to a custom element.
-- Web authors can override individual defaults. `ElementInternals` exposes the active behaviors and their state (form, validity, default-button status), so DevTools and accessibility inspectors can surface them the same way they surface `formAssociated`, role, and pseudo-class state today. Where an author needs a different default for one piece of the behavior (a different role, a different focusability mode, a different keyboard activation policy), they override the corresponding primitive on `ElementInternals` instead of replacing the behavior wholesale. The [layering example in Alternative 7](#alternative-7-low-level-primitives-on-elementinternals) walks through that pattern.
+- Web authors can override individual defaults. This already works today for role: `internals.role` overrides a behavior's default role without replacing the behavior. The same layering pattern can extend to other defaults (focusability, keyboard activation, and similar) if and when future proposals add the corresponding primitives on `ElementInternals`. The [layering example in Alternative 7](#alternative-7-low-level-primitives-on-elementinternals) walks through what that would look like.
 
 ### Accessing behavior state
 
@@ -836,15 +836,15 @@ Expose individual primitives directly on `ElementInternals`. Authors compose eve
 - Each primitive is independently useful.
 
 **Cons:**
-- Common cases require boilerplate that wires several primitives together correctly. A custom element with submission capabilities has to wire role, focusability, keyboard activation, submitter eligibility, implicit submission, the `:default` pseudo-class match, and disabled-state coordination on every state change. See [Platform-provided behaviors and low-level primitives`](#platform-provided-behaviors-and-low-level-primitives) below.
-- High-level capabilities like form submission carry accessibility constraints (focusability, keyboard activation, role) that are hard to separate without accessibility regressions. This is why `popovertarget` was scoped to buttons rather than allowing any element. See the [design-principles tradeoff between high-level and low-level APIs](https://www.w3.org/TR/design-principles/#high-level-low-level). Further, the [ARIA Working Group discussion on 2025-09-25](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) (tracking issue [w3c/aria#2637](https://github.com/w3c/aria/issues/2637)) reached agreement that role and focusability defaults are appropriate for element behaviors that imply activation.
+- Common cases require boilerplate that wires several primitives together correctly. For example, a custom element with submission capabilities has to wire role, focusability, keyboard activation, submitter eligibility, implicit submission, the `:default` pseudo-class match, and disabled-state coordination on every state change. See [Platform-provided behaviors and low-level primitives](#platform-provided-behaviors-and-low-level-primitives) below.
+- High-level capabilities like form submission carry accessibility constraints (focusability, keyboard activation, role) that are hard to separate without accessibility regressions. This is why `popovertarget` was scoped to buttons rather than allowing any element ([openui/open-ui#302](https://github.com/openui/open-ui/issues/302)). See the [design-principles tradeoff between high-level and low-level APIs](https://www.w3.org/TR/design-principles/#high-level-low-level). Further, the [ARIA Working Group discussion on 2025-09-25](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) (tracking issue [w3c/aria#2637](https://github.com/w3c/aria/issues/2637)) reached agreement that role and focusability defaults are appropriate for element behaviors that imply activation.
 
 #### Platform-provided behaviors and low-level primitives
 
 Platform-provided behaviors does not reject primitives. The two approaches are complementary as behaviors provide the default experience for common cases, while low-level primitives let authors override individual defaults for custom elements that might just need certain functionalities that make sense to be on their own. This proposal follows that pattern with `role`:
 
 - Native `<button>` has implicit role `"button"`, so `HTMLSubmitButtonBehavior` provides the same default for custom elements.
--`ElementInternals.role` overrides the default if the author needs different semantics.
+- `ElementInternals.role` overrides the default if the author needs different semantics.
 
 The same model can be extended to other capabilities that aren't yet available in the ElementInternals API and the two layers can advance independently:
 
@@ -918,12 +918,8 @@ class ScriptedSubmitter extends HTMLElement {
     // Assuming low-level primitives such as internals.focusable,
     // internals.keyboardActivation, and internals.role and
     // HTMLSubmitButtonBehavior are available on ElementInternals.
-    //
-    // "programmatic" focusability drops the element out of the sequential
-    // tab order while still allowing the component's script to call .focus()
-    // on it. "auto" or "sequential" would put it back in the tab order;
-    // "unfocusable" would block .focus() entirely. API shape used in
-    // discussed in https://github.com/WICG/webcomponents/issues/762
+    // API shape for focusable discussed in
+    // https://github.com/WICG/webcomponents/issues/762
     this.#internals.focusable = "programmatic";
     // Disabling default keyboard activation lets the component install
     // its own Space/Enter handler and decide when to run the behavior's
@@ -935,8 +931,6 @@ class ScriptedSubmitter extends HTMLElement {
   }
 }
 ```
-
-A primitive can change one default that the platform-provided behavior would otherwise set, while the rest of the behavior continues to flow through the platform's built-in coordination (disabled state, `:default`, implicit submission, constraint validation, etc.).
 
 ### Alternative 8: TC39 Decorators
 
@@ -1071,24 +1065,42 @@ this._internals = this.attachInternals({
 - Chromium: Positive
 - Gecko: No signal
 - WebKit: No signal
+- Web developers: [Positive](https://docs.google.com/document/d/1eU_c4_fQ1yVSm8mjjfuqd1wWN9T8z2N6dr4XIwMv9uM/edit?usp=sharing)
 
 ### Prior group and community feedback
 
-The two most relevant issues discussed related to this proposal are [WICG/webcomponents#814](https://github.com/WICG/webcomponents/issues/814) (2019, the original "submit button" thread) and [whatwg/html#11061](https://github.com/whatwg/html/issues/11061) (2025, the `ElementInternals.type` discussion). The following points were mentioned:
+#### Issue [WICG/webcomponents#814](https://github.com/WICG/webcomponents/issues/814)
 
-1. Form-associated custom elements should behave as interactive content by default [whatwg/html#5423](https://github.com/whatwg/html/issues/5423) (2020) argued that form-associated custom elements should be treated as [interactive content](https://html.spec.whatwg.org/multipage/dom.html#interactive-content-2), with default focusability and label-activation.This is directly addressed in `HTMLSubmitButtonBehavior`, as it provides focusability, role, label association, and activation.
+- Comments over the years on this issue show clear demand from web developers for a way to make a custom element submit a form.
+  - `requestSubmit()` throws on form-associated custom elements ([2022](https://github.com/WICG/webcomponents/issues/814#issuecomment-1218452137), [2025](https://github.com/WICG/webcomponents/issues/814#issuecomment-2773123949))
+  - The `form=...` attribute path is not covered ([2023](https://github.com/WICG/webcomponents/issues/814#issuecomment-1429901740))
+  - Current workarounds rely on wrapping a `<button>` and wiring it to `internals.form` by hand ([2025](https://github.com/WICG/webcomponents/issues/814#issuecomment-3382335174)).
+- One recurring ask is that, once an element is designated as a submit button via `ElementInternals`, it should "behave as a native button out of the box" so authors do not have to re-wire submission, implicit submission, or label activation ([2022](https://github.com/WICG/webcomponents/issues/814#issuecomment-1161845917), [2023](https://github.com/WICG/webcomponents/issues/814#issuecomment-1429901740)).
+- A 2023 [comment](https://github.com/WICG/webcomponents/issues/814#issuecomment-1448167731) enumerated the concrete semantics that a custom element with submit capabilities should have.
+- [Comments](https://github.com/WICG/webcomponents/issues/814#issuecomment-3392480397) in 2025 pushed for a pluggable, list-shaped mechanism aligned with the way other UI platforms expose attachable behaviors.
 
-2. Provide a single `ElementInternals` opt-in to mark a custom element as a submit button. A 2023 review of the WICG issue concluded that the right shape is a single switch on `ElementInternals` rather than a script-defined `type` string (see [comment](https://github.com/WICG/webcomponents/issues/814#issuecomment-1429278039)). `HTMLSubmitButtonBehavior` is that single opt-in.
+How this proposal addresses these comments:
 
-3. The missing piece is concrete spec text and tests. A 2021 review of the same WICG issue identified the blocker as engineering effort, not principle (see [comment](https://github.com/WICG/webcomponents/issues/814#issuecomment-836184790)).
+- ✅ `attachInternals({ behaviors: [new HTMLSubmitButtonBehavior()] })` is a list-shaped `ElementInternals` opt-in.
+- ✅ Once a custom element attaches the behavior, it participates in form submission, implicit submission via Enter, the `:default` pseudo-class, label activation, the `form=...` attribute path, and `<form method="dialog">`, without authors writing submission code.
+- ✅ The list shape leaves room for additional behaviors to be attached to the same element.
+- ✅ The sketched API `this.attachInternals().behaviors.push(new HTMLButtonBehavior())` is essentially the API shape this proposal lands on ([sketch](https://github.com/WICG/webcomponents/issues/814#issuecomment-3392480397)).
 
-4. Avoid "behave like *tagName*" framing; stay within the `ElementInternals` pattern used by form-associated custom elements and `ARIAMixin`; allow remixing; preserve static opt-ins; do not bundle popover invocation with form submission [whatwg/html#11061, 2025](https://github.com/whatwg/html/issues/11061#issuecomment-3213526709).
+#### Issue [whatwg/html#11061](https://github.com/whatwg/html/issues/11061)
 
-  - The behavior is named for its capability (`HTMLSubmitButtonBehavior`), not for an existing tag.
-  - The proposal extends the existing `ElementInternals` decomposition pattern that already ships in form-associated custom elements and `ARIAMixin`. It does not introduce a sugar layer that bypasses `attachInternals()`, and it does not automatically mirror native-element APIs onto custom elements. Authors who want `element.form` or `element.checkValidity()` still write the usual boilerplate (`get form() { return this.#internals.form; }`), exactly as they do for FACEs today.
-  - `behaviors` is a list, not a singular `type` string. A custom element can attach multiple behaviors at once, and future low-level primitives can override individual pieces of any behavior. So a custom element can compose, for example, submit-button semantics with label-association semantics, rather than being limited to a single mutually-exclusive `type` value. See [Behavior composition and conflict resolution](#behavior-composition-and-conflict-resolution) and [Alternative 7: Low-level primitives on `ElementInternals`](#alternative-7-low-level-primitives-on-elementinternals).
-  - Form association still requires `static formAssociated = true`. Behaviors are an additive, instance-level configuration on top of that static opt-in, which preserves inheritance through a base class such as `MyFormAssociatedBaseClass`.
-  - `HTMLSubmitButtonBehavior` handles only form submission. Popover and command invocation are out of scope for this behavior, leaving them for a separate behavior or for primitives developed in parallel.
+In addition to similar comments stated above, a 2025 [historical-perspective comment](https://github.com/whatwg/html/issues/11061#issuecomment-3213526709):
+  - Cautioned against the "behave like *tagName*" framing
+  - Called for staying within the existing `ElementInternals` decomposition pattern used by form-associated custom elements and `ARIAMixin`
+  - Encouraged remixing across behaviors
+  - Warned against bundling popover invocation with form submission.
+
+How this proposal addresses these comments:
+
+- ✅ Element behaviors should be named for its capability (e.g., `HTMLSubmitButtonBehavior`), not for an existing tag.
+- ✅ The proposal extends the `ElementInternals` decomposition pattern in form-associated custom elements and `ARIAMixin`. It does not introduce a sugar layer that bypasses `attachInternals()`, and it does not automatically mirror native-element APIs onto custom elements.
+- ✅ `behaviors` is a list, not a singular `type` string. A custom element will be able to attach multiple behaviors at once, and future low-level primitives can override individual pieces of any behavior. See [Behavior composition and conflict resolution](#behavior-composition-and-conflict-resolution) and [Alternative 7: Low-level primitives on `ElementInternals`](#alternative-7-low-level-primitives-on-elementinternals).
+- ✅ Element behaviors are an additive, instance-level configuration on top of that static opt-in, which preserves inheritance through a base class.
+- ✅ `HTMLSubmitButtonBehavior` handles only form submission. Popover and command invocation are out of scope for this initial proposal.
 
 ## References & acknowledgements
 
