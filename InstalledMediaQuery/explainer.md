@@ -20,9 +20,7 @@ This document is intended as a starting point for engaging the community and sta
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [User-facing Problems](#user-facing-problems)
   - [The `display-mode` Problem](#the-display-mode-problem)
-  - [The `navigator.standalone` Problem](#the-navigatorstandalone-problem)
 - [Goals](#goals)
 - [Non-goals](#non-goals)
 - [Proposed Solution](#proposed-solution)
@@ -32,20 +30,12 @@ This document is intended as a starting point for engaging the community and sta
 - [Key Scenarios](#key-scenarios)
 - [Alternatives Considered](#alternatives-considered)
 - [Privacy and Security Considerations](#privacy-and-security-considerations)
-- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+- [Future Extension: Service Worker `clients` Integration](#future-extension-service-worker-clients-integration)
 - [References & Acknowledgements](#references--acknowledgements)
 
 ## Introduction
 
-The **`installed` CSS media feature** provides a reliable way for developers to know whether their web app is running inside an installed app window. It separates the concept of "running as an installed app" from the app's current display mode, solving a long-standing gap in the web platform where developers lacked a clean, stable signal for installation state.
-
-```css
-@media (installed: yes) {
-  .install-banner { display: none; }
-}
-```
-
-## User-facing Problems
+Today, web developers lack a reliable way to determine whether their app is running in an installed app window, because the existing `display-mode` media queries conflate installation state with presentation mode and break under common scenarios like entering fullscreen. The **`installed` CSS media feature** solves this by providing a stable, dedicated signal for "running as an installed app" that is independent of the app's current display mode.
 
 Developers would like a way to style their content differently depending on whether their web app is running in an installed app window. Common use cases include:
 
@@ -55,7 +45,7 @@ Developers would like a way to style their content differently depending on whet
 
 ### The `display-mode` Problem
 
-Today, the best available signal is the [`display-mode` media query](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/display-mode#syntax):
+Currently, the best available signal is the [`display-mode` media query](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/display-mode#syntax):
 
 ```css
 @media (display-mode: standalone) {
@@ -67,16 +57,10 @@ This works only until the app enters fullscreen. When a user triggers fullscreen
 
 The two concepts of "is this an installed app?" and "what is the current display mode?" are **orthogonal** and should be treated as such. A web app can be installed and rendered in `standalone`, `fullscreen`, or `minimal-ui` mode. Developers need a signal that remains stable across all of these states.
 
-### The `navigator.standalone` Problem
-
-WebKit has shipped `navigator.standalone` as a property on iOS for a considerable amount of time. However, this property has become a de facto method for detecting iOS/iPad rather than detecting installed apps. When Safari 17 brought `navigator.standalone` to macOS desktop, Mozilla was using `platform === 'MacIntel' && 'standalone' in navigator` to identify iPads, sending desktop Mac users to the iOS App Store. While it was fixed, this exposed ambiguous semantics that don't directly match to installation and causes web compatibility issues.
-
-This makes `navigator.standalone` unsuitable as a cross-browser standard.
-
 ## Goals
 
 - Provide a **stable, boolean signal** for "running in an installed app window" that is separate from display mode.
-- Require **no new JavaScript API**. CSS `@media` rules and `matchMedia()` cover both declarative and imperative use cases.
+- Provide both **declarative and imperative** access to the signal. CSS `@media` rules enable reactive styling, while `matchMedia()` enables JavaScript-driven logic.
 
 ## Non-goals
 
@@ -87,29 +71,29 @@ This makes `navigator.standalone` unsuitable as a cross-browser standard.
 
 ### Syntax
 
-A new CSS media feature named `installed` with two valid values:
+A new CSS media feature named `installed`, used as a boolean media feature:
 
 ```css
-@media (installed: yes) {
+@media (installed) {
   /* Styles applied only inside an installed app window */
 }
 
-@media (installed: no) {
+@media not (installed) {
   /* Styles applied only in a regular browser tab */
 }
 ```
 
 ### Behavior Rules
 
-1. **Evaluates to `yes`** when the document is in an application context: a top-level browsing context with a manifest applied, presented in its own OS-level app window.
-2. **Remains `yes` regardless of display mode.** Whether the app is in `standalone`, `fullscreen`, or `minimal-ui` mode, the `installed` media feature continues to match.
-3. **Only applies to top-level browsing contexts.** In any iframe (same-origin or cross-origin) the feature evaluates to `no`.
-4. **Evaluates to `no` in browser tabs.** Even if the same URL has an installed app elsewhere, opening it in a regular browser tab yields `installed: no`. The feature reflects the *current* browsing context, not global installation state.
-5. **Usable via `matchMedia()`.** JavaScript can query and listen for changes using `window.matchMedia('(installed: yes)')`, following standard media query semantics.
+1. **Evaluates to `true`** when the document is in an application context: a top-level browsing context with a manifest applied, presented in its own OS-level app window.
+2. **Remains `true` regardless of display mode.** Whether the app is in `standalone`, `fullscreen`, or `minimal-ui` mode, the `installed` media feature continues to match.
+3. **Only applies to top-level browsing contexts.** In any iframe (same-origin or cross-origin) the feature evaluates to `false`.
+4. **Evaluates to `false` in browser tabs.** Even if the same URL has an installed app elsewhere, opening it in a regular browser tab means `(installed)` does not match. The feature reflects the *current* browsing context, not global installation state.
+5. **Usable via `matchMedia()`.** JavaScript can query and listen for changes using `window.matchMedia('(installed)')`, following standard media query semantics.
 
 ### Behavior Summary
 
-| Context | `(installed: yes)` | `(display-mode: standalone)` |
+| Context | `(installed)` | `(display-mode: standalone)` |
 |---------|:-------------------:|:----------------------------:|
 | Browser tab | false | false |
 | Installed, standalone mode | true | true |
@@ -130,7 +114,7 @@ A PWA shows an install banner to browser-tab users but hides it for users alread
   display: flex;
 }
 
-@media (installed: yes) {
+@media (installed) {
   .install-banner {
     display: none;
   }
@@ -148,7 +132,7 @@ An installed app shows a back button and "open in browser" link that don't make 
   display: none;
 }
 
-@media (installed: yes) {
+@media (installed) {
   .app-nav {
     display: flex;
   }
@@ -160,7 +144,7 @@ An installed app shows a back button and "open in browser" link that don't make 
 A site conditionally shows a service worker update prompt only in the installed experience:
 
 ```js
-if (window.matchMedia('(installed: yes)').matches) {
+if (window.matchMedia('(installed)').matches) {
   showUpdatePrompt();
 }
 ```
@@ -170,21 +154,43 @@ if (window.matchMedia('(installed: yes)').matches) {
 Although uncommon, a document could transition between contexts (e.g., a browser tab being "captured" into an app window). Developers can listen for this reactively:
 
 ```js
-window.matchMedia('(installed: yes)').addEventListener('change', (e) => {
+window.matchMedia('(installed)').addEventListener('change', (e) => {
   document.body.classList.toggle('is-installed', e.matches);
 });
 ```
 
 ## Alternatives Considered
 
+### An Enumerated Media Feature (`app-context`)
+
+An alternative approach is to define an enumerated media feature such as `app-context` with discrete values like `installed` and `browser`:
+
+```css
+@media (app-context: installed) {
+  /* Styles for an installed app window */
+}
+
+@media (app-context: browser) {
+  /* Styles for a regular browser tab */
+}
+```
+
+This design offers extensibility — future values could be added to describe additional application contexts without introducing new media features. However:
+
+- The current use case is fundamentally binary: a document is either running in an installed app window or it is not. An enumerated feature adds complexity without a clear near-term benefit.
+- A boolean media feature (`installed`) is simpler to author and read. It follows the same pattern as other boolean media features like `(hover)` or `(scripting)`, and avoids the need for developers to learn and remember enumerated values for what is today a two-state check.
+- If additional application contexts emerge in the future, a new enumerated feature can still be introduced alongside `installed` without conflict.
+
+**Conclusion:** A boolean media feature is the simplest solution for the current problem. If additional application contexts emerge or if the standards community prefers a more extensible design from the outset, this remains a compelling alternative. This explainer proposes the boolean form as a starting point, but the enumerated approach could be adopted instead without significant trade-offs.
+
 ### Standardizing `navigator.standalone`
 
-`navigator.standalone` has been historically supported on WebKit. It returns `true` when a page is displayed in standalone mode. However:
+`navigator.standalone` has been historically supported on WebKit. It returns `true` when a page is displayed in standalone mode. However, the property has become a de facto method for detecting iOS/iPad rather than detecting installed apps:
 
-- **Web compatibility risk.** Countless sites use `'standalone' in navigator` as a platform-detection signal for iOS/iPads, not to detect installed apps. Standardizing this property across Chrome, Firefox, and others would cause those checks to fire on all platforms, massively amplifying breakage.
+- **Web compatibility risk.** Countless sites use `'standalone' in navigator` as a platform-detection signal for iOS/iPads, not to detect installed apps. Standardizing this property across Chrome, Firefox, and others would cause those checks to fire on all platforms, massively amplifying breakage. When Safari 17 brought `navigator.standalone` to macOS desktop, Mozilla was using `platform === 'MacIntel' && 'standalone' in navigator` to identify iPads, sending desktop Mac users to the iOS App Store. While it was fixed, this exposed ambiguous semantics that don't directly match to installation and causes web compatibility issues.
 - **Naming confusion.** The term "standalone" is already defined as a `display-mode` value in the Web App Manifest spec. Reusing it as a navigator property name conflates two different concepts (installation state and display mode) making developer intent ambiguous.
 
-**Conclusion:** WebKit can maintain its proprietary behavior which is used to identify iOS devices; other engines should not adopt it. A CSS media feature avoids all of these issues.
+**Conclusion:** `navigator.standalone` is unsuitable as a cross-browser standard. WebKit can maintain its proprietary behavior which is used to identify iOS devices; other engines should not adopt it. A CSS media feature avoids all of these issues.
 
 ### Extending `display-mode` with a New Value
 
@@ -194,7 +200,9 @@ One option is adding a value like `display-mode: installed`. However:
 - An app in fullscreen would still report `display-mode: fullscreen`, not `display-mode: installed`, so the problem remains unsolved.
 - Media features can only match one value at a time, you cannot simultaneously match `display-mode: standalone` and `display-mode: installed`.
 
-**Conclusion:** A separate media feature is the correct design.
+A related idea is a compound value like `display-mode: standalone-fullscreen`, representing a state where the app is both standalone and fullscreen. There are similarities here to how `window-controls-overlay` seems to extend standalone mode. An author could then write an OR query like `@media (display-mode: standalone) or (display-mode: standalone-fullscreen)` to cover both states. However, while `window-controls-overlay` is an appropriate extension of `display-mode` because it describes a visible presentation change (the title bar area has developer-mutable elements), installation state is not a presentation change — it does not alter how content is visually rendered. Encoding it into `display-mode` still conflates "is this app installed?" with "how is this app displayed?"
+
+**Conclusion:** A separate media feature is the correct design. The `display-mode` media feature should remain focused on visible presentation differences. Installation state is orthogonal to how content is displayed, and a dedicated boolean signal cleanly represents this without overloading `display-mode` with non-presentational semantics.
 
 ### A New JavaScript API (`navigator.isInstalled`)
 
@@ -209,7 +217,7 @@ A dedicated JS property could work, but:
 
 ### Privacy
 
-- **No cross-site information leak.** The feature only reflects the current browsing context. It does not reveal whether the app is installed on the device, only whether the current document is *running* in an app window. A site opened in a browser tab always sees `installed: no`, even if the user has the app installed.
+- **No cross-site information leak.** The feature only reflects the current browsing context. It does not reveal whether the app is installed on the device, only whether the current document is *running* in an app window. A site opened in a browser tab always sees `(installed)` as non-matching, even if the user has the app installed.
 - **No new fingerprinting surface.** The information exposed (`true`/`false` for the current context) is already inferable from existing signals like `display-mode: standalone`, except that `installed` is stable across display mode changes. It does not expose any new bits of entropy beyond what the user has already disclosed by opening the app window.
 - **Iframe isolation.** The feature evaluates to `false` in all iframes, preventing embedded third-party content from detecting the host app's installation state.
 
@@ -218,21 +226,38 @@ A dedicated JS property could work, but:
 - **No elevated privileges.** The media feature is purely informational; it does not grant any new capabilities.
 - **No new attack surface.** The feature does not interact with system APIs, credentials, or storage in any novel way.
 
-## Stakeholder Feedback / Opposition
+## Future Extension: Service Worker `clients` Integration
 
-<!-- TODO: Add feedback from other browser vendors and web developers as discussions progress. -->
+### Background: Service Workers and the Clients API
 
-| Stakeholder | Position | Notes |
-|-------------|----------|-------|
-| Edge | Positive |  |
-| Chrome | Positive |  |
-| Mozilla | - | Pending feedback |
-| WebKit | Positive | |
-| Web developers | Positive | Frequently requested in [CRBugs](https://issues.chromium.org/issues/331692948#comment15) and [issue discussions](https://github.com/w3c/manifest/issues/1092#). |
+[Service workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) run in a separate thread from the page and act as a network proxy and event handler for the web app. They have no access to the DOM and therefore cannot use CSS media queries or `window.matchMedia()`. Instead, service workers interact with their controlled pages through the Clients API, which provides a list of [`Client`](https://developer.mozilla.org/en-US/docs/Web/API/Client) objects representing each window, tab, or worker controlled by the service worker.
+
+Today, each `Client` exposes properties such as `url`, `id`, `type`, and `frameType`, but it does not indicate whether the client is running in an installed app window or a regular browser tab. Currently, there is no direct way for a service worker to distinguish between these contexts. Developers resort to workarounds like message-passing from the page to the service worker to relay installation state, which is fragile, asynchronous, and not always timely.
+
+### Proposed Extension
+
+A natural complement to the `installed` CSS media feature would be exposing the same information on the [`WindowClient`](https://developer.mozilla.org/en-US/docs/Web/API/WindowClient) interface in the Service Worker API. For example, a boolean `installed` property:
+
+```js
+const allClients = await self.clients.matchAll({ type: 'window' });
+const installedClient = allClients.find(client => client.installed);
+
+if (installedClient) {
+  // An installed app window exists — post a message to it
+  installedClient.postMessage({ type: 'update-available' });
+} else {
+  // No installed client — show a system notification
+  self.registration.showNotification('New update available');
+}
+```
+
+This extension would align the service worker's view of its clients with the information already available to pages via the `installed` media feature, closing the gap in contexts where DOM-based detection is not possible. The exact shape of this API (property name, semantics for non-window clients, etc.) is left for future discussion and would be specified alongside the Service Worker and Clients API standards.
 
 ## References & Acknowledgements
 Many thanks for valuable feedback and advice from:
 - Lu Huang
+- Alison Maher
+- Alex Russell
 
 References:
 - [W3C Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/)
