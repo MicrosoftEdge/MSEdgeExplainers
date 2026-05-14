@@ -66,6 +66,7 @@ The two concepts of "is this an installed app?" and "what is the current display
 
 - **Standardize `navigator.standalone` cross-browser.** WebKit can keep its existing behavior; other engines should not adopt it. See [Alternatives Considered](#alternatives-considered).
 - **Replace `display-mode` media queries.** `display-mode` remains useful for adapting to presentation changes. `app-context` complements it.
+- **Expose media query state to service workers.** The inability to access media queries from a service worker is a general limitation that affects all media features, not just `app-context`. A solution would need to be generalized across all media query types and is outside the scope of this proposal.
 
 ## Proposed Solution
 
@@ -234,7 +235,7 @@ A dedicated JS property could work, but:
 
 [Service workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) run in a separate thread from the page and act as a network proxy and event handler for the web app. They have no access to the DOM and therefore cannot use CSS media queries or `window.matchMedia()`. Instead, service workers interact with their controlled pages through the Clients API, which provides a list of [`Client`](https://developer.mozilla.org/en-US/docs/Web/API/Client) objects representing each window, tab, or worker controlled by the service worker.
 
-Today, each `Client` exposes properties such as `url`, `id`, `type`, and `frameType`, but it does not indicate whether the client is running in an installed app window or a regular browser tab. Currently, there is no direct way for a service worker to distinguish between these contexts. Developers resort to workarounds like message-passing from the page to the service worker to relay installation state, which is fragile, asynchronous, and not always timely.
+Today, each `Client` exposes properties such as `url`, `id`, `type`, and `frameType`, but it does not indicate whether the client is running in an installed app window or a regular browser tab. Currently, there is no direct way for a service worker to distinguish between these contexts. Developers resort to workarounds like message-passing from the page to the service worker to relay installation state, which is fragile, asynchronous, and not always timely. It is worth noting that this limitation is not unique to `app-context`, service workers cannot access *any* media query state for their clients. A comprehensive solution would need to generalize across all media feature types, which is beyond the scope of this proposal. The following is included to illustrate the problem space and a possible future direction.
 
 ### Current Workaround: Message-Passing
 
