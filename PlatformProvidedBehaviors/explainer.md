@@ -902,7 +902,7 @@ This approach has the following disadvantages:
 - Activation ordering: Form submission runs as part of the [activation behavior](https://dom.spec.whatwg.org/#eventtarget-activation-behavior), which interacts with the `click` event in a specific order with respect to `preventDefault`. Authors hand-wiring a `click` listener get this ordering wrong in subtle ways.
 - Future-proofing: When HTML adds a new requirement to submit buttons (a new IDL attribute, a new constraint-validation hook, a new accessibility computation), web authors have to discover and re-wire each addition.
 
-The behavior and primitive layers can also be used together. If low-level primitives were to ship on `ElementInternals` alongside this proposal, an author who wants the full submission capabilities but needs to deviate from one default does not have to reimplement everything: they attach `HTMLSubmitButtonBehavior` for the form submission semantics and then override the specific primitive they care about.
+Combining `HTMLSubmitButtonBehavior` with a primitive override:
 
 ```javascript
 class ScriptedSubmitter extends HTMLElement {
