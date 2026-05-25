@@ -19,14 +19,15 @@ Authors: [Ashish Kumar](mailto:ashishkum@microsoft.com)
 - [Proposal](#proposal)
   - [Behavior summary](#behavior-summary)
 - [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
-- [Potential Opposition & Mitigations](#potential-opposition--mitigations)
+- [Interoperability](#interoperability)
+- [Risks & Mitigations](#risks--mitigations)
 - [References & Acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Introduction
 
-On Windows, every native application (Notepad, Windows Terminal etc.) automatically hides the mouse pointer while the user types into an editable field, honoring the OS-level *Hide pointer while typing* setting (`SPI_GETMOUSEVANISH`). Chromium does not. This leaves Chromium-based browsers as the only major software on Windows where the pointer remains visible and obstructive during typing. This is a [long-standing request](https://issues.chromium.org/issues/41021563) that affects every Chromium embedder.
+On Windows, every native application (Notepad, Windows Terminal, etc.) automatically hides the mouse pointer while the user types into an editable field, honoring the OS-level *Hide pointer while typing* setting (`SPI_GETMOUSEVANISH`). Chromium does not. This leaves Chromium-based browsers as the only major software on Windows where the pointer remains visible and obstructive during typing. This is a [long-standing request](https://issues.chromium.org/issues/41021563) that affects every Chromium embedder.
 
 This proposal adds the same behavior to Chromium on Windows: **on Windows, automatically hide the mouse pointer while the user is typing into an editable region, and instantly restore it on the next mouse move or click**.
 
@@ -34,13 +35,13 @@ This proposal adds the same behavior to Chromium on Windows: **on Windows, autom
 
 ## User Problem
 
-When a user is typing into a text input on a Chromium-based browser or app, the **mouse pointer stays parked at its last position on screen**. Because users almost always click into a field before typing, that "last position" is typically right next to, and frequently directly on top of, the text caret. The result is a pointer that visually **obscures the very characters the user is typing**, forcing the user to physically nudge the mouse aside to read what they just typed. For anyone who works in text-heavy environments (developers, writers etc.), this means **moving the mouse out of the way potentially hundreds of times a day**, a persistent friction that accumulates into productivity loss and frustration.
+When a user is typing into a text input on a Chromium-based browser or app, the **mouse pointer stays parked at its last position on screen**. Because users almost always click into a field before typing, that "last position" is typically right next to, and frequently directly on top of, the text caret. The result is a pointer that visually **obscures the very characters the user is typing**, forcing the user to physically nudge the mouse aside to read what they just typed. For anyone who works in text-heavy environments (developers, writers, etc.), this means **moving the mouse out of the way potentially hundreds of times a day**, a persistent friction that accumulates into productivity loss and frustration.
 
 *Current Behavior*
 
 ![current_cursor_behavior.gif](./current_cursor_behavior.gif)
 
-*Expected behavior*
+*Expected Behavior*
 
 ![expected_cursor_behavior.gif](./expected_cursor_behavior.gif)
 
@@ -56,6 +57,7 @@ When a user is typing into a text input on a Chromium-based browser or app, the 
 - **Non-Windows platforms.** This proposal targets Chromium on Windows only. macOS already provides this behavior. Linux/ChromeOS behavior is unchanged by this proposal and can be picked up in a later phase.
 - **Browser views.** Pointer hiding in browser-owned UI (omnibox, search bars, settings) is out of scope; this covers DOM-level editable regions only. Extending to browser views can be picked up in a later phase.
 - **New web-platform APIs.** This is a UI behavior gap, not a standards issue.
+- **IME composition.** Pointer behavior during active IME composition is unchanged. The pointer remains visible while a composition is in progress.
 
 ## Proposal
 
@@ -84,7 +86,15 @@ The pointer is **restored** on the **next mouse move or click**. Recovery is imm
 - **Privacy:** No data is collected, persisted, or sent to a server. Pointer visibility is a local UI presentation state.
 - **Security:** No new attack surface is introduced. The browser already controls cursor visibility internally; this proposal only constrains *when* it hides the pointer. Pages cannot trigger or observe the behavior.
 
-## Potential Opposition & Mitigations
+## Interoperability
+
+| Browser \ Platform | macOS | Windows |
+|--------------------|-------|---------|
+| Chromium | Supported | **Not supported** (this proposal) |
+| Firefox | Supported | Supported (see [bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1757463)) |
+| Safari | Supported | N/A |
+
+## Risks & Mitigations
 
 Some users may prefer a permanently visible pointer. However, this behavior is already established in Chromium on macOS.
 Mitigations include:
@@ -98,5 +108,5 @@ Mitigations include:
 - **Chromium feature request**: [*Hide mouse cursor while typing*](https://issues.chromium.org/issues/516096689)
 - **Chromium past issue**: [*Mouse pointer doesn't disappear when typing*](https://issues.chromium.org/issues/41021563)
 - **Firefox bug**: [*Support Windows "Hide pointer while typing" system setting to hide the mouse pointer*](https://bugzilla.mozilla.org/show_bug.cgi?id=1757463)
-- **Vscode issue**: [*Mouse cursor doesn't disappear when typing*](https://github.com/microsoft/vscode/issues/79915)
+- **VS Code issue**: [*Mouse cursor doesn't disappear when typing*](https://github.com/microsoft/vscode/issues/79915)
 - **Windows Mouse Vanish setting**: [*SPI_GETMOUSEVANISH* (About Mouse Input)](https://learn.microsoft.com/en-us/windows/win32/inputdev/about-mouse-input#mouse-vanish), [*SystemParametersInfoW*](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-systemparametersinfow)
