@@ -1,4 +1,4 @@
-# performance.markPaintTime() Explainer
+# Paint Timing for User Marks Explainer
 
 Author:  [Wangsong Jin](https://github.com/JosephJin0815), [Andy Luhrs](https://github.com/aluhrs13)
 
@@ -19,6 +19,7 @@ This document is a starting point for engaging the community and standards bodie
 - [Proposed API](#proposed-api)
 - [Rendering Pipeline and Timing](#rendering-pipeline-and-timing)
 - [Key Design Decisions](#key-design-decisions)
+- [Relationship to Other APIs](#relationship-to-other-apis)
 - [Alternatives Considered](#alternatives-considered)
 - [Open Questions](#open-questions)
 - [Security and Privacy Considerations](#security-and-privacy-considerations)
@@ -26,17 +27,19 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-Proper measurement and understanding of end-to-end user experience is key to optimizing web performance. Today, web developers don't have a way to measure when their own visual updates reach the screen outside browser-selected milestones like [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), and [LCP](https://www.w3.org/TR/largest-contentful-paint/). `markPaintTime()` closes that gap by letting developers understand the actual timing of paint and when the frame is presented to the user following any of their JS execution, adding more complete measurement of real end-to-end user experience.
+Proper measurement and understanding of end-to-end user experience is key to optimizing web performance. Today, web developers don't have a way to measure when their own visual updates reach the screen outside browser-selected milestones like [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), and [LCP](https://www.w3.org/TR/largest-contentful-paint/). This proposal extends `performance.mark()` with an opt-in `paintTiming` option that adds [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) timestamps (`paintTime` and `presentationTime`) to the resulting `PerformanceMark` entry, letting developers understand the actual timing of paint and when the frame is presented to the user following any of their JS execution.
 
 *Note: `presentationTime` is not supported by all user agents — it will be `null` when the UA does not implement presentation timestamps. When supported, the exact meaning of "when the frame is presented to the user" depends on the operating system. On some platforms, the precise time when pixels are presented to the display is not available, in which case `presentationTime` will report the next closest time, which is typically when the frame is sent to the GPU.*
 
 ## Goals
- - Give developers on-demand access to various paint-related metrics for an arbitrary update.
- - Deliver timestamps through `PerformanceObserver`, consistent with modern performance APIs.
+ - Give developers on-demand access to paint-related timestamps for any visual update, using the familiar `performance.mark()` API.
+ - Deliver paint timing through [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin), consistent with existing paint timing entries (FP, FCP, LCP).
+ - Avoid adding new entry types — reuse the existing `PerformanceMark` interface.
 
 ## Non-goals
  - **Replacing existing paint timing entries.** [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://w3c.github.io/largest-contentful-paint/), [Event Timing](https://w3c.github.io/event-timing/), and [LoAF](https://w3c.github.io/long-animation-frames/) continue to serve their existing purposes.
- - **Forcing a rendering update.** `markPaintTime()` does not cause a rendering opportunity — it tags the next one that naturally occurs.
+ - **Forcing a rendering update.** `performance.mark()` with `paintTiming: true` does not cause a rendering opportunity — it tags the next one that naturally occurs.
+ - **Paint attribution / causality.** This API does not attempt to attribute paints to the specific code that caused them. Paint attribution is a broader topic being explored in the context of [soft navigations](https://wicg.github.io/soft-navigations/) and [AsyncContext](https://github.com/nicolo-ribaudo/tc39-proposal-await-dictionary).
 
 ## The Problem
 
@@ -101,7 +104,7 @@ fetch('/api/chat').then(() => {
 
 This defers the mark to the next task after the rAF callback, which is more likely to land after the paint. However, the overshoot is non-deterministic due to other queued tasks — the timestamp ends up well past the actual frame, making the measurement less precise.
 
-### With markPaintTime
+### With `performance.mark()` and `paintTiming` option
 
 The following end-to-end example shows a page that loads chat content asynchronously and measures how long it takes for the chat input to be painted and presented to the user:
 
@@ -111,16 +114,18 @@ The following end-to-end example shows a page that loads chat content asynchrono
 <body>
   <div id="app">Loading chat...</div>
   <script>
-    // 1. Set up observer to collect paint timing entries
+    // 1. Set up observer to collect marks with paint timing
     new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        console.log(`${entry.name}:`);
-        console.log(`  Time to paint:   ${entry.paintTime - entry.startTime}ms`);
-        if (entry.presentationTime) {
-          console.log(`  Time to present: ${entry.presentationTime - entry.startTime}ms`);
+        if (entry.paintTime) {
+          console.log(`${entry.name}:`);
+          console.log(`  Time to paint:   ${entry.paintTime - entry.startTime}ms`);
+          if (entry.presentationTime) {
+            console.log(`  Time to present: ${entry.presentationTime - entry.startTime}ms`);
+          }
         }
       }
-    }).observe({ type: 'mark-paint-time' });
+    }).observe({ type: 'mark' });
 
     // 2. Async content load (e.g., framework rendering a component)
     fetch('/api/chat').then(() => {
@@ -128,7 +133,7 @@ The following end-to-end example shows a page that loads chat content asynchrono
         '<input class="chat-input" placeholder="Type a message...">';
 
       // 3. Mark the next paint after this DOM update
-      performance.markPaintTime('chat-input-rendered');
+      performance.mark('chat-input-rendered', { paintTiming: true });
     });
   </script>
 </body>
@@ -141,29 +146,31 @@ The following end-to-end example shows a page that loads chat content asynchrono
 
 ## Proposed API
 
-`performance.markPaintTime(markName)` tags the next rendering update with a developer-chosen name. The browser then delivers a `PerformancePaintTimeMark` entry through `PerformanceObserver` with the following properties:
+`performance.mark(markName, { paintTiming: true })` extends the existing [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark) with an opt-in `paintTiming` option. When set, the resulting `PerformanceMark` entry includes [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) timestamps and is delivered to observers only after the next paint completes. The entry has the following properties:
 
  | Attribute | Description |
  |-----------|-------------|
- | `entryType` | Always `"mark-paint-time"` |
- | `name` | The mark name passed to `markPaintTime()` |
- | `startTime` | `performance.now()` at the time `markPaintTime()` was called, unless overridden via `options.startTime` — same semantics as [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor) (see [step 5](https://w3c.github.io/user-timing/#the-performancemark-constructor)). This is **not** a rendering-pipeline timestamp; it records when the developer invoked the API, regardless of where in the event loop the call occurs (e.g., a microtask, `IntersectionObserver` callback, or `requestAnimationFrame`). |
+ | `entryType` | `"mark"` — the same entry type as regular `performance.mark()` |
+ | `name` | The mark name passed to `performance.mark()` |
+ | `startTime` | `performance.now()` at the time `performance.mark()` was called, unless overridden via `options.startTime` — same semantics as [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor) (see [step 5](https://w3c.github.io/user-timing/#the-performancemark-constructor)). This is **not** a rendering-pipeline timestamp; it records when the developer invoked the API, regardless of where in the event loop the call occurs (e.g., a microtask, `IntersectionObserver` callback, or `requestAnimationFrame`). |
  | `duration` | Always `0` |
- | `paintTime` | The rendering update end time — same as FP/FCP/LCP `paintTime` |
- | `presentationTime` | An implementation-defined, coarsened timestamp for when the frame is presented to the user, or `null` if unsupported by the UA — same as FP/FCP/LCP `presentationTime` |
+ | `detail` | The `detail` value from `PerformanceMarkOptions`, if provided |
+ | `paintTime` | The rendering update end time — same as FP/FCP/LCP `paintTime` via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `0` for marks without `paintTiming: true`. |
+ | `presentationTime` | An implementation-defined, coarsened timestamp for when the frame is presented to the user, or `null` if unsupported by the UA — same as FP/FCP/LCP `presentationTime` via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `null` for marks without `paintTiming: true`. |
 
 **Behavior:**
-- On-demand — no data is collected until `markPaintTime()` is called.
+- On-demand — no paint timing data is collected until `performance.mark()` is called with `paintTiming: true`.
 - One-shot — each call tags the next rendering update and produces exactly one entry.
+- Marks with `paintTiming: true` are delivered to `PerformanceObserver` **after** the paint completes, unlike regular marks which are delivered synchronously. The synchronous return value of `performance.mark()` is still a `PerformanceMark` with `startTime` set, but `paintTime` and `presentationTime` are populated asynchronously.
 - Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime`. `presentationTime` values depend on when the compositor presents frames to the display and may vary independently.
-- If `options.startTime` is provided, it is used as the entry's `startTime`; if negative, a `TypeError` is thrown. Otherwise, `startTime` defaults to `performance.now()` at call time — consistent with [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor).
+- If no paint occurs after the mark (e.g., the modified content is outside the viewport and the browser skips rendering), no `paintTime` will be reported. This is consistent with [Element Timing](https://w3c.github.io/element-timing/), which does not emit entries for elements that are never painted.
 - `presentationTime` may be `null` when the user agent does not support implementation-defined presentation timestamps, consistent with [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin).
 
-The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming) from the Paint Timing spec, so `paintTime` and `presentationTime` have identical semantics to the timestamps developers already see on FP, FCP, and LCP entries.
+The opt-in pattern is consistent with other Web Performance APIs that require explicit developer annotation, such as [Element Timing](https://w3c.github.io/element-timing/) (`elementtiming` attribute) and [Container Timing](https://github.com/WICG/container-timing) (`containertiming` attribute).
 
 ## Rendering Pipeline and Timing
 
-`markPaintTime()` captures timestamps at specific points in the browser's rendering pipeline.
+`performance.mark()` with `paintTiming: true` captures timestamps at specific points in the browser's rendering pipeline.
 
 ### paintTime
 
@@ -182,18 +189,90 @@ The entry reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-Pe
 
 ### What developers can measure
 
-- **`startTime`**: Defaults to `performance.now()` at the time `markPaintTime()` is called, but developers can optionally provide a custom value to mark a meaningful start point (e.g., an event timestamp from a `click` or `input` event, or a timestamp captured at the start of a state change).
-- **`paintTime - startTime`** = time from the `markPaintTime()` call to the end of the rendering update.
+- **`startTime`**: Defaults to `performance.now()` at the time `performance.mark()` is called, but developers can optionally provide a custom value to mark a meaningful start point (e.g., an event timestamp from a `click` or `input` event, or a timestamp captured at the start of a state change).
+- **`paintTime - startTime`** = time from the `performance.mark()` call to the end of the rendering update.
 - **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency estimate through the implementation-defined presentation timestamp.
 - **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation). This is less in the developer's control, but can help them understand if they're in an extreme scenario where an outside factor impacted their performance.
 
 ## Key Design Decisions
 
+- **Extends `performance.mark()` rather than adding a new API**: Reuses the familiar `performance.mark()` interface and the existing `PerformanceMark` entry type. No new entry types or observer types are needed. This avoids further fragmentation of the paint timing API landscape.
+- **Opt-in via `paintTiming` option**: Only marks that explicitly request paint timing incur the overhead of registering paint callbacks. This is consistent with other Web Performance APIs that use opt-in annotation ([Element Timing](https://w3c.github.io/element-timing/), [Container Timing](https://github.com/WICG/container-timing)).
 - **Reuses PaintTimingMixin**: No new timestamp concepts — `paintTime` and `presentationTime` are the same timestamps that FP/FCP/LCP already expose. Developers who understand paint timing milestones already understand this API.
-- **On-demand**: Unlike FP/FCP/LCP which fire automatically for browser-detected milestones, `markPaintTime()` is triggered by the developer for any visual update at any time.
+- **On-demand**: Unlike FP/FCP/LCP which fire automatically for browser-detected milestones, `paintTiming: true` is triggered by the developer for any visual update at any time.
 - **PerformanceObserver-based**: Consistent with modern performance APIs (LoAF, FCP, LCP).
+- **Forward-compatible**: This design is compatible with future [per-paint reporting](https://github.com/w3c/performance-timeline/issues/228) — marks with `paintTime` can be grouped by frame alongside other paint-related entries. It is also compatible with the [PaintTimingMixin fallback](https://github.com/w3c/paint-timing/issues/121) proposal for consistent behavior when no paint occurs.
+
+## Relationship to Other APIs
+
+Several existing APIs provide paint-related timing. This proposal is complementary — it fills a gap none of them cover.
+
+### Element Timing
+
+[Element Timing](https://w3c.github.io/element-timing/) reports the first rendering time of individual elements annotated with the `elementtiming` attribute. It is declarative (HTML-driven), fires once per element (on first paint), and only tracks [timing-eligible](https://w3c.github.io/paint-timing/#timing-eligible) content (images and text). It does not detect subsequent updates to already-painted content, nor does it detect non-text/image changes such as background colors or borders.
+
+`performance.mark()` with `paintTiming: true` is imperative (JS-driven), captures any rendering frame regardless of content type, and works for both initial paints and subsequent updates. It is especially useful in complex applications using frameworks like React, where the actual DOM elements are abstracted away by middleware libraries, making it impractical to add `elementtiming` attributes to the right elements.
+
+### Container Timing
+
+[Container Timing](https://github.com/WICG/container-timing) tracks progressive paint coverage within a DOM subtree annotated with the `containertiming` attribute. It emits entries each time the painted area grows — useful for measuring component visual completeness during page load (e.g., "when is this widget fully rendered?").
+
+However, Container Timing only fires when **new, previously unpainted area** is covered. Repainting the same area (e.g., updating text in place, changing a color) does not trigger a new entry. Like Element Timing, it only detects image and text paints.
+
+`performance.mark()` with `paintTiming: true` captures any visual change — including repaints of existing content — making it suitable for interaction-driven updates where the DOM region doesn't change but the content does.
+
+### Interaction Contentful Paint (ICP)
+
+[Interaction Contentful Paint](https://wicg.github.io/soft-navigations/) reports contentful paint updates within the same document that are initiated by user interactions. It uses [AsyncContext](https://github.com/nicolo-ribaudo/tc39-proposal-await-dictionary) to automatically track causality from an interaction through asynchronous operations to the eventual paint. ICP covers **interaction-triggered** updates comprehensively, but does not cover updates triggered by non-interaction sources (e.g., `fetch()` completions, WebSocket messages, timers, server-sent events).
+
+`performance.mark()` with `paintTiming: true` covers updates triggered by **anything** — whether interaction-driven or not. The two are complementary: ICP provides rich, automatic attribution for interaction-driven paints; paint-timed marks provide a lightweight, imperative mechanism for any scenario.
+
+### Summary
+
+| | Element Timing | Container Timing | ICP | mark with paintTiming |
+|---|---|---|---|---|
+| Trigger | Declarative (HTML) | Declarative (HTML) | Automatic (interaction) | Imperative (JS) |
+| What it detects | Single image/text first paint | Subtree paint area growth | Interaction-caused contentful paint | Any visual change |
+| Fires on content update/repaint? | No | Only if area grows | Yes (if interaction-caused) | Yes |
+| Detects non-text/image changes? | No | No | No | Yes |
+| Covers non-interaction triggers? | N/A | N/A | No | Yes |
+| Provides spatial info? | Yes | Yes | Yes | No |
+| Provides attribution? | Element reference | Container reference | interactionId + AsyncContext | Developer-chosen name |
 
 ## Alternatives Considered
+
+### Dedicated `markPaintTime()` API
+
+An earlier version of this proposal introduced a new `performance.markPaintTime(label)` method that would create a new `PerformancePaintTimeMark` entry type:
+
+```javascript
+performance.markPaintTime('chat-input-rendered');
+
+new PerformanceObserver((list) => {
+  for (const entry of list.getEntries()) {
+    console.log(entry.paintTime - entry.startTime);
+  }
+}).observe({ type: 'mark-paint-time' });
+```
+
+This approach has the advantage of clear intent — a dedicated API for a dedicated purpose — but adds a new entry type and observer type to an already fragmented paint timing landscape. After feedback from the [Web Performance Working Group](https://www.w3.org/webperf/), we moved to extending `performance.mark()` to reuse the existing `PerformanceMark` interface, reducing API surface and avoiding further fragmentation.
+
+### All marks automatically include `paintTime`
+
+Instead of an opt-in `paintTiming` option, every `performance.mark()` call could automatically include `paintTime` and `presentationTime` via `PaintTimingMixin`, with a [fallback value](https://github.com/w3c/paint-timing/issues/121) when no paint occurs:
+
+```javascript
+performance.mark('chat-input-rendered');
+// paintTime automatically populated (real value or fallback)
+```
+
+This approach aligns most closely with the vision of paint timing as a [first-class performance timeline primitive](https://github.com/w3c/performance-timeline/issues/228), allowing every mark to be grouped by frame in per-paint reporting. However:
+
+- **Performance overhead** — every mark registers a paint callback, even marks unrelated to rendering (e.g., `performance.mark('db-query-done')`).
+- **Requires fallback behavior** — not yet specified ([Issue #121](https://github.com/w3c/paint-timing/issues/121)).
+- **Entry mutation** — marks are created synchronously but `paintTime` would be filled asynchronously, diverging from the current immutable-entry contract.
+
+We consider opt-in (`paintTiming: true`) the more practical starting point. This is forward-compatible — the opt-in can be removed in the future once fallback behavior and per-paint reporting infrastructure are in place.
 
 ### requestPostAnimationFrame (rPAF)
 
@@ -212,7 +291,7 @@ fetch('/api/chat').then(() => {
 
 This would approximate `paintTime` more accurately than double-rAF, since the callback fires right after paint rather than at the start of the next frame. However:
 
-- **No `presentationTime`** — rPAF fires on the main thread, before compositor and GPU work. For UAs that support `presentationTime`, there is no way to obtain this timestamp through rPAF. For UAs that do not, `paintTime` and a rPAF callback would provide similar timing, though `markPaintTime()` still offers a standardized `PerformanceObserver`-based delivery model.
+- **No `presentationTime`** — rPAF fires on the main thread, before compositor and GPU work. For UAs that support `presentationTime`, there is no way to obtain this timestamp through rPAF. For UAs that do not, `paintTime` and a rPAF callback would provide similar timing, though `performance.mark()` with `paintTiming: true` still offers a standardized `PerformanceObserver`-based delivery model.
 - **Not being pursued** — the proposal's original author has noted that a post-animation callback may not be useful for optimizing rendering latency, as downstream graphics pipeline latency matters more than hitting a specific VSYNC deadline, and the [proposal is not being pursued](https://github.com/WICG/request-post-animation-frame).
 
 ## Open Questions
@@ -228,43 +307,36 @@ A "post-paint" timestamp — captured after paint completes — would more accur
 
 We welcome feedback on whether `paintTime` is sufficient for developer needs or whether a post-paint timestamp is worth pursuing despite these tradeoffs.
 
-### API naming: `markPaintTime()` vs. alternatives
+### Automatic paint timing for all marks
 
-The current name `markPaintTime()` mirrors `performance.mark()`, but unlike `mark()` — which records a timestamp synchronously — `markPaintTime()` schedules observation of a future rendering update. This mismatch could mislead developers into thinking the timestamp is captured at call time.
-
-Alternative names that better signal deferred capture:
-
-- **`markNextPaint()`** — emphasizes that the mark targets the *next* rendering opportunity, not the current moment.
-- **`observeNextPaint()`** — aligns with the observation pattern (`PerformanceObserver`) and makes the asynchronous nature explicit.
-
-We welcome feedback on whether the current naming is clear enough or whether a rename would reduce developer confusion.
+As discussed in [Alternatives Considered](#alternatives-considered), a future direction could make `paintTime` available on all `performance.mark()` entries by default (without `paintTiming: true`), once the [PaintTimingMixin fallback behavior](https://github.com/w3c/paint-timing/issues/121) and [per-paint reporting](https://github.com/w3c/performance-timeline/issues/228) infrastructure are defined. We welcome feedback on whether opt-in or automatic is the right default.
 
 ## Security and Privacy Considerations
 
+- The `paintTime` exposed by this API is the same value as `renderTime` in [Element Timing](https://w3c.github.io/element-timing/) and [Container Timing](https://github.com/WICG/container-timing), both of which have undergone security review. The primary difference is the triggering mechanism (JS call vs. HTML attribute), but this does not expose additional information about page content or cross-origin resources.
 - `paintTime` and `presentationTime` are subject to the same cross-origin coarsening as existing paint timing entries.
 - Timestamps are coarsened to mitigate timing side-channel attacks, consistent with `performance.now()` resolution restrictions.
+- The API does not report paint timing for cross-origin iframes or content not within the calling document's origin.
 
 ## Appendix: WebIDL
 
 ```webidl
-// Extends Paint Timing spec — https://w3c.github.io/paint-timing/
-dictionary MarkPaintTimeOptions {
+// Extends User Timing spec — https://w3c.github.io/user-timing/
+dictionary PerformanceMarkOptions {
+  any detail;
   DOMHighResTimeStamp startTime;
+  boolean paintTiming = false;   // NEW — opt-in to paint timing
 };
 
-partial interface Performance {
-  undefined markPaintTime(DOMString markName, optional MarkPaintTimeOptions options = {});
-};
-
-[Exposed=Window]
-interface PerformancePaintTimeMark : PerformanceEntry {
-  [Default] object toJSON();
-};
-PerformancePaintTimeMark includes PaintTimingMixin;
+// PerformanceMark gains PaintTimingMixin attributes
+PerformanceMark includes PaintTimingMixin;
 
 // PaintTimingMixin already defined in Paint Timing spec:
 // interface mixin PaintTimingMixin {
 //   readonly attribute DOMHighResTimeStamp paintTime;
 //   readonly attribute DOMHighResTimeStamp? presentationTime;
 // };
+//
+// For marks without paintTiming: true, paintTime is 0 and
+// presentationTime is null.
 ```
