@@ -17,12 +17,14 @@ This document is a starting point for engaging the community and standards bodie
 - [Non-goals](#non-goals)
 - [The Problem](#the-problem)
 - [Proposed API](#proposed-api)
-- [Rendering Pipeline and Timing](#rendering-pipeline-and-timing)
+  - [What developers can measure](#what-developers-can-measure)
+  - [Entry Delivery and Mutability](#entry-delivery-and-mutability)
 - [Key Design Decisions](#key-design-decisions)
 - [Relationship to Other APIs](#relationship-to-other-apis)
 - [Alternatives Considered](#alternatives-considered)
 - [Open Questions](#open-questions)
 - [Security and Privacy Considerations](#security-and-privacy-considerations)
+- [Appendix: Rendering Pipeline and Timing](#appendix-rendering-pipeline-and-timing)
 - [Appendix: WebIDL](#appendix-webidl)
 
 ## Introduction
@@ -161,31 +163,12 @@ The following end-to-end example shows a page that loads chat content asynchrono
 **Behavior:**
 - On-demand — no paint timing data is collected until `performance.mark()` is called with `paintTiming: true`.
 - One-shot — each call tags the next rendering update and produces exactly one entry.
-- Marks with `paintTiming: true` are delivered to `PerformanceObserver` **after** the paint completes, unlike regular marks which are delivered synchronously. The synchronous return value of `performance.mark()` is still a `PerformanceMark` with `startTime` set, but `paintTime` and `presentationTime` are populated asynchronously.
+- Marks with `paintTiming: true` are delivered to `PerformanceObserver` **after** the paint completes, unlike regular marks which are delivered synchronously. The synchronous return value of `performance.mark()` is the same `PerformanceMark` object that the observer receives (`===` identity is preserved). At creation time, `paintTime` and `presentationTime` are unpopulated; the browser fills them in internally after the rendering update completes (see [Entry Delivery and Mutability](#entry-delivery-and-mutability)).
 - Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime`. `presentationTime` values depend on when the compositor presents frames to the display and may vary independently.
 - If no paint occurs after the mark (e.g., the modified content is outside the viewport and the browser skips rendering), no `paintTime` will be reported. This is consistent with [Element Timing](https://w3c.github.io/element-timing/), which does not emit entries for elements that are never painted.
 - `presentationTime` may be `null` when the user agent does not support implementation-defined presentation timestamps, consistent with [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin).
 
 The opt-in pattern is consistent with other Web Performance APIs that require explicit developer annotation, such as [Element Timing](https://w3c.github.io/element-timing/) (`elementtiming` attribute) and [Container Timing](https://github.com/WICG/container-timing) (`containertiming` attribute).
-
-## Rendering Pipeline and Timing
-
-`performance.mark()` with `paintTiming: true` captures timestamps at specific points in the browser's rendering pipeline.
-
-### paintTime
-
-`paintTime` is the rendering update end time, captured after style and layout. This is the same timestamp that FP/FCP/LCP use via [PaintTimingMixin](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), defined at [step 11.14.21 of the event loop](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model).
-
-*Note: Below diagram illustrates the Chromium rendering architecture. Other browser engines may have a different pipeline structure, but the spec-defined timing semantics remain the same.*
-
-![paintTime in the rendering pipeline](paint-time-pipeline.png)
-
-### presentationTime
-
-`presentationTime` is the implementation-defined time when the composited frame is presented to the display.
-
-*Note: Below diagram uses Chromium's architecture as an example. Other browser engines may structure this differently, but `presentationTime` refers to the moment the composited frame is presented to the display.*
-![presentationTime in the path from rendering to display](presentation-time-pipeline.png)
 
 ### What developers can measure
 
@@ -194,14 +177,63 @@ The opt-in pattern is consistent with other Web Performance APIs that require ex
 - **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency estimate through the implementation-defined presentation timestamp.
 - **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation). This is less in the developer's control, but can help them understand if they're in an extreme scenario where an outside factor impacted their performance.
 
+### Entry Delivery and Mutability
+
+`performance.mark()` synchronously returns a `PerformanceMark` and the same object is accessible via `PerformanceObserver` and `getEntriesByName()` — all three return the identical (`===`) object. When `paintTiming: true` is specified, `paintTime` and `presentationTime` are not yet known at creation time; the browser populates them internally after the paint completes, then delivers the entry to the observer.
+
+**Chosen approach: same object, browser-internal slot update.** The synchronous return value starts with `paintTime` and `presentationTime` unpopulated. After the rendering update completes, the browser fills in the internal slots and notifies the `PerformanceObserver`. This preserves the `===` identity between the synchronous return, `getEntriesByName()`, and the observer-delivered entry.
+
+The `readonly` keyword in WebIDL prevents JavaScript from assigning to these properties, but does not prevent the browser from updating its internal slots. This is the same mechanism browsers use for all `readonly` attributes — the value is stored in an internal slot and exposed via a getter.
+
+#### Initial value of `paintTime`: non-nullable vs. nullable
+
+Two sub-options exist for the initial (unpopulated) value of `paintTime`:
+
+##### Sub-option A — Non-nullable (reuse PaintTimingMixin)
+
+```js
+const mark = performance.mark('my-mark', { paintTiming: true });
+mark.paintTime         // 0 (initial, before paint)
+mark.presentationTime  // null (initial, before paint)
+
+// After paint, browser fills internal slots:
+mark.paintTime         // 165.00
+mark.presentationTime  // 172.00 (or null if UA does not support)
+```
+
+- Pro: Directly reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) (`paintTime` is `DOMHighResTimeStamp`, non-nullable).
+- Con: `0` does not clearly distinguish "not yet populated" from "no paint occurred".
+
+##### Sub-option B — Nullable (custom attributes)
+
+```js
+const mark = performance.mark('my-mark', { paintTiming: true });
+mark.paintTime         // null (initial, before paint)
+mark.presentationTime  // null (initial, before paint)
+
+// After paint, browser fills internal slots:
+mark.paintTime         // 165.00
+mark.presentationTime  // 172.00 (or null if UA does not support)
+```
+
+- Pro: `null` clearly means "not yet available" — no ambiguity.
+- Pro: Consistent — both `paintTime` and `presentationTime` use `null` for the unpopulated state.
+- Con: Cannot directly reuse `PaintTimingMixin` (which defines `paintTime` as non-nullable). Uses identical attribute names and semantics, but defined separately on `PerformanceMark`.
+
+#### Alternatives considered and rejected
+
+- **Not returning a value** (returning `null` from `mark()`): Would change the return type of `performance.mark()` from `PerformanceMark` to `PerformanceMark?`, breaking existing code patterns like `performance.mark(...).startTime`.
+- **Returning two separate entry objects** (synchronous return + observer entry): Would break the established `===` identity between `mark()` return, `getEntriesByName()`, and observer entries. Would also require deciding whether the observer receives one or two entries.
+
 ## Key Design Decisions
 
 - **Extends `performance.mark()` rather than adding a new API**: Reuses the familiar `performance.mark()` interface and the existing `PerformanceMark` entry type. No new entry types or observer types are needed. This avoids further fragmentation of the paint timing API landscape.
 - **Opt-in via `paintTiming` option**: Only marks that explicitly request paint timing incur the overhead of registering paint callbacks. This is consistent with other Web Performance APIs that use opt-in annotation ([Element Timing](https://w3c.github.io/element-timing/), [Container Timing](https://github.com/WICG/container-timing)).
-- **Reuses PaintTimingMixin**: No new timestamp concepts — `paintTime` and `presentationTime` are the same timestamps that FP/FCP/LCP already expose. Developers who understand paint timing milestones already understand this API.
+- **Uses `paintTime` and `presentationTime` timestamps**: These are the same timestamp concepts that FP/FCP/LCP already expose via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). Developers who understand paint timing milestones already understand this API. Whether the implementation directly reuses `PaintTimingMixin` or defines equivalent nullable attributes is discussed in [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 - **On-demand**: Unlike FP/FCP/LCP which fire automatically for browser-detected milestones, `paintTiming: true` is triggered by the developer for any visual update at any time.
 - **PerformanceObserver-based**: Consistent with modern performance APIs (LoAF, FCP, LCP).
 - **Forward-compatible**: This design is compatible with future [per-paint reporting](https://github.com/w3c/performance-timeline/issues/228) — marks with `paintTime` can be grouped by frame alongside other paint-related entries. It is also compatible with the [PaintTimingMixin fallback](https://github.com/w3c/paint-timing/issues/121) proposal for consistent behavior when no paint occurs.
+- **Same object, deferred delivery**: The synchronous return value, `PerformanceObserver`, and `getEntriesByName()` all return the same (`===`) object. Paint timing slots are populated internally by the browser after the rendering update completes. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 
 ## Relationship to Other APIs
 
@@ -270,7 +302,7 @@ This approach aligns most closely with the vision of paint timing as a [first-cl
 
 - **Performance overhead** — every mark registers a paint callback, even marks unrelated to rendering (e.g., `performance.mark('db-query-done')`).
 - **Requires fallback behavior** — not yet specified ([Issue #121](https://github.com/w3c/paint-timing/issues/121)).
-- **Entry mutation** — marks are created synchronously but `paintTime` would be filled asynchronously, diverging from the current immutable-entry contract.
+- **Entry mutation** — marks are created synchronously but `paintTime` would be filled asynchronously. While this is acceptable for opt-in marks (see [Entry Delivery and Mutability](#entry-delivery-and-mutability)), applying it to all marks universally may raise stronger concerns.
 
 We consider opt-in (`paintTiming: true`) the more practical starting point. This is forward-compatible — the opt-in can be removed in the future once fallback behavior and per-paint reporting infrastructure are in place.
 
@@ -317,6 +349,25 @@ As discussed in [Alternatives Considered](#alternatives-considered), a future di
 - `paintTime` and `presentationTime` are subject to the same cross-origin coarsening as existing paint timing entries.
 - Timestamps are coarsened to mitigate timing side-channel attacks, consistent with `performance.now()` resolution restrictions.
 - The API does not report paint timing for cross-origin iframes or content not within the calling document's origin.
+
+## Appendix: Rendering Pipeline and Timing
+
+`performance.mark()` with `paintTiming: true` captures timestamps at specific points in the browser's rendering pipeline.
+
+### paintTime
+
+`paintTime` is the rendering update end time, captured after style and layout. This is the same timestamp that FP/FCP/LCP use via [PaintTimingMixin](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), defined at [step 11.14.21 of the event loop](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model).
+
+*Note: Below diagram illustrates the Chromium rendering architecture. Other browser engines may have a different pipeline structure, but the spec-defined timing semantics remain the same.*
+
+![paintTime in the rendering pipeline](paint-time-pipeline.png)
+
+### presentationTime
+
+`presentationTime` is the implementation-defined time when the composited frame is presented to the display.
+
+*Note: Below diagram uses Chromium's architecture as an example. Other browser engines may structure this differently, but `presentationTime` refers to the moment the composited frame is presented to the display.*
+![presentationTime in the path from rendering to display](presentation-time-pipeline.png)
 
 ## Appendix: WebIDL
 
