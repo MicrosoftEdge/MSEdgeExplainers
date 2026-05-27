@@ -29,12 +29,10 @@ This document is a starting point for engaging the community and standards bodie
 
 ## Introduction
 
-Proper measurement and understanding of end-to-end user experience is key to optimizing web performance. Today, web developers don't have a way to measure when their own visual updates reach the screen outside browser-selected milestones like [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), and [LCP](https://www.w3.org/TR/largest-contentful-paint/). This proposal extends `performance.mark()` with an opt-in `paintTiming` option that adds [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) timestamps (`paintTime` and `presentationTime`) to the resulting `PerformanceMark` entry, letting developers understand the actual timing of paint and when the frame is presented to the user following any of their JS execution.
-
-*Note: `presentationTime` is not supported by all user agents — it will be `null` when the UA does not implement presentation timestamps. When supported, the exact meaning of "when the frame is presented to the user" depends on the operating system. On some platforms, the precise time when pixels are presented to the display is not available, in which case `presentationTime` will report the next closest time, which is typically when the frame is sent to the GPU.*
+Proper measurement and understanding of end-to-end user experience is key to optimizing web performance. Today, web developers don't have a way to measure when their own visual updates reach the screen outside browser-selected milestones like [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), and [LCP](https://www.w3.org/TR/largest-contentful-paint/). This proposal extends `performance.mark()` with an opt-in `paintTiming` option, closing that gap by letting developers measure the actual timing of paint and frame presentation, enabling more complete end-to-end user experience measurement.
 
 ## Goals
- - Give developers on-demand access to paint-related timestamps for any visual update, using the familiar `performance.mark()` API.
+ - Give developers on-demand access to paint-related timestamps for any visual update by extending the existing `performance.mark()` API.
  - Deliver paint timing through [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin), consistent with existing paint timing entries (FP, FCP, LCP).
  - Avoid adding new entry types — reuse the existing `PerformanceMark` interface.
 
