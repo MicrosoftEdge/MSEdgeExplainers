@@ -1,8 +1,8 @@
 ---
-name: App Context Media Query
+name: Application Context Media Feature
 about: new issue
-title: "[App Context Media Query] <TITLE HERE>"
-labels: App Context Media Query
+title: "[Application Context Media Feature] <TITLE HERE>"
+labels: Application Context Media Feature
 assignees: kyerebo
 
 ---
