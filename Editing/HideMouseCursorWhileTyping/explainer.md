@@ -54,19 +54,16 @@ When a user is typing into a text input on a Chromium-based browser or app, the 
 
 ## Non-Goals
 
-- **Non-Windows platforms.** This proposal targets Chromium on Windows only. macOS already provides this behavior. Linux/ChromeOS behavior is unchanged by this proposal and can be picked up in a later phase.
-- **Browser views.** Pointer hiding in browser-owned UI (omnibox, search bars, settings) is out of scope; this covers DOM-level editable regions only. Extending to browser views can be picked up in a later phase.
-- **New web-platform APIs.** This is a UI behavior gap, not a standards issue.
-- **IME composition.** Pointer behavior during active IME composition is unchanged. The pointer remains visible while a composition is in progress.
+- **New web-platform APIs**: No new JavaScript APIs, CSS properties, or observable behavior is exposed to web content. This is a browser UI behavior change, not a standards proposal.
+- **Cursor appearance**: This proposal only controls when the pointer is hidden, not its shape, size, or style.
 
 ## Proposal
 
 When all of the following are true on Windows, the OS mouse pointer is **hidden**:
 
 - The Windows OS-level *Hide pointer while typing* preference (`SPI_GETMOUSEVANISH`) is enabled.
-- The focused element is editable (e.g. `<input>`, `<textarea>`, or a `contenteditable` region).
+- The focused element is editable (e.g. `<input>`, `<textarea>`, `contenteditable` region, or browser-owned editable fields such as the omnibox).
 - The user presses a key that produces a character or modifies editable content. This includes character keys, `Backspace`, `Delete`, and `Enter`. Navigation keys also trigger hiding because they reposition the caret within the editable region. Bare modifiers, function keys, media/launcher keys, and keyboard shortcuts (e.g. `Ctrl+A`) do **not** trigger hiding.
-- No IME composition is currently active. Once composition commits, subsequent keystrokes resume normal hiding behavior.
 
 The pointer is **restored** on the **next mouse move or click**. Recovery is immediate; a single mouse nudge is enough.
 
@@ -76,7 +73,6 @@ The pointer is **restored** on the **next mouse move or click**. Recovery is imm
 |----------|------------------|--------------------|
 | Type in an editable region | Pointer parked over text | Pointer hides on first keystroke; reappears on next mouse move or click |
 | Press a function key or keyboard shortcut (e.g. `F5`, `Ctrl+A`) | Pointer visible | Pointer visible (unchanged) |
-| Type while IME composition is active | Pointer visible | Pointer visible during composition (unchanged); after composition commits, next keystroke hides pointer normally |
 | Press keys while focus is not in an editable element | Pointer visible | Pointer visible (unchanged) |
 | Windows user has turned off *Hide pointer while typing* | Pointer visible | Pointer visible (OS preference honored) |
 
@@ -88,15 +84,15 @@ The pointer is **restored** on the **next mouse move or click**. Recovery is imm
 
 ## Interoperability
 
-| Browser \ Platform | macOS | Windows |
-|--------------------|-------|---------|
-| Chromium | Supported | **Not supported** (this proposal) |
-| Firefox | Supported | Supported (see [bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1757463)) |
-| Safari | Supported | N/A |
+| Browser \ Platform | Windows | macOS | Linux | ChromeOS |
+|--------------------|---------|-------|-------|----------|
+| Chromium | **Not supported** (this proposal) | Supported | Not supported | Supported |
+| Firefox | Supported (see [bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1757463)) | Supported | Not supported | N/A |
+| Safari | N/A | Supported | N/A | N/A |
 
 ## Risks & Mitigations
 
-Some users may prefer a permanently visible pointer. However, this behavior is already established in Chromium on macOS.
+Some users may prefer a permanently visible pointer. However, this behavior is already established in Chromium on macOS and ChromeOS.
 Mitigations include:
 
 1. **OS preference gating**: The behavior is only active when the Windows *Hide pointer while typing* setting (`SPI_GETMOUSEVANISH`) is enabled. Users can disable it in OS Mouse settings.
