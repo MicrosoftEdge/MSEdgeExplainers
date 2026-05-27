@@ -37,9 +37,9 @@ Proper measurement and understanding of end-to-end user experience is key to opt
  - Avoid adding new entry types — reuse the existing `PerformanceMark` interface.
 
 ## Non-goals
- - **Replacing existing paint timing entries.** [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://w3c.github.io/largest-contentful-paint/), [Event Timing](https://w3c.github.io/event-timing/), and [LoAF](https://w3c.github.io/long-animation-frames/) continue to serve their existing purposes.
- - **Forcing a rendering update.** `performance.mark()` with `paintTiming: true` does not cause a rendering opportunity — it tags the next one that naturally occurs.
- - **Paint attribution / causality.** This API does not attempt to attribute paints to the specific code that caused them. Paint attribution is a broader topic being explored in the context of [soft navigations](https://wicg.github.io/soft-navigations/) and [AsyncContext](https://github.com/nicolo-ribaudo/tc39-proposal-await-dictionary).
+ - **Replacing existing paint timing entries.** [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://w3c.github.io/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), and [LoAF](https://w3c.github.io/long-animation-frames/) continue to serve their existing purposes.
+ - **Not forcing a rendering update.** `performance.mark()` with `paintTiming: true` does not cause a rendering opportunity — it tags the next one that naturally occurs.
+ - **Paint attribution / causality.** This API does not attempt to attribute paints to the specific code that caused them.
 
 ## The Problem
 
