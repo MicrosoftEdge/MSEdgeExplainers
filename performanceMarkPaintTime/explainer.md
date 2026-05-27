@@ -235,7 +235,7 @@ mark.presentationTime  // 172.00 (or null if UA does not support)
 - **Uses `paintTime` and `presentationTime` timestamps**: These are the same timestamp concepts that FP/FCP/LCP already expose via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). Developers who understand paint timing milestones already understand this API. Whether the implementation directly reuses `PaintTimingMixin` or defines equivalent nullable attributes is discussed in [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 - **On-demand**: Unlike FP/FCP/LCP which fire automatically for browser-detected milestones, `paintTiming: true` is triggered by the developer for any visual update at any time.
 - **PerformanceObserver-based**: Consistent with modern performance APIs (LoAF, FCP, LCP).
-- **Forward-compatible**: This design is compatible with future [per-paint reporting](https://github.com/w3c/performance-timeline/issues/228) — marks with `paintTime` can be grouped by frame alongside other paint-related entries. It is also compatible with the [PaintTimingMixin fallback](https://github.com/w3c/paint-timing/issues/121) proposal for consistent behavior when no paint occurs.
+- **Forward-compatible**: This design is compatible with the [PaintTimingMixin fallback](https://github.com/w3c/paint-timing/issues/121) proposal for consistent behavior when no paint occurs.
 - **Same object, deferred delivery**: The synchronous return value, `PerformanceObserver`, and `getEntriesByName()` all return the same (`===`) object. Paint timing slots are populated internally by the browser after the rendering update completes. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 
 ## Relationship to Other APIs
@@ -367,7 +367,7 @@ As discussed in [Alternatives Considered](#alternatives-considered), a future di
 
 ### presentationTime
 
-`presentationTime` is the implementation-defined time when the composited frame is presented to the display.
+`presentationTime` is the implementation-defined time when the composited frame is presented to the display. `presentationTime` is not supported by all user agents — it will be `null` when the UA does not implement presentation timestamps. When supported, the exact meaning depends on the operating system. On some platforms, the precise time when pixels are presented to the display is not available, in which case `presentationTime` will report the next closest time, which is typically when the frame is sent to the GPU.
 
 *Note: Below diagram uses Chromium's architecture as an example. Other browser engines may structure this differently, but `presentationTime` refers to the moment the composited frame is presented to the display.*
 ![presentationTime in the path from rendering to display](presentation-time-pipeline.png)
