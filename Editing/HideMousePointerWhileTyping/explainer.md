@@ -1,10 +1,10 @@
-# Hide Mouse Cursor While Typing on Windows
+# Hide Mouse Pointer While Typing on Windows
 
 Authors: [Ashish Kumar](mailto:ashishkum@microsoft.com)
 
 ## Participate
 
-- Chromium feature request: [Hide mouse cursor while typing](https://issues.chromium.org/issues/516096689)
+- Chromium feature request: [Hide mouse pointer while typing](https://issues.chromium.org/issues/516096689)
 
 ## Table of Contents
 
@@ -31,7 +31,7 @@ On Windows, every native application (Notepad, Windows Terminal, etc.) automatic
 
 This proposal adds the same behavior to Chromium on Windows: **on Windows, automatically hide the mouse pointer while the user is typing into an editable region, and instantly restore it on the next mouse move or click**.
 
-**Note:** On macOS, Chromium already hides the cursor for all apps during typing via the system-level `[NSCursor setHiddenUntilMouseMoves:]` primitive. macOS is therefore **out of scope** for this proposal.
+**Note:** On macOS, Chromium already hides the mouse pointer for all apps during typing via the system-level `[NSCursor setHiddenUntilMouseMoves:]` primitive. macOS is therefore **out of scope** for this proposal.
 
 ## User Problem
 
@@ -39,23 +39,23 @@ When a user is typing into a text input on a Chromium-based browser or app, the 
 
 *Current Behavior*
 
-![current_cursor_behavior.gif](./current_cursor_behavior.gif)
+![current_pointer_behavior.gif](./current_pointer_behavior.gif)
 
 *Expected Behavior*
 
-![expected_cursor_behavior.gif](./expected_cursor_behavior.gif)
+![expected_pointer_behavior.gif](./expected_pointer_behavior.gif)
 
 ## Goals
 
 - Hide the mouse pointer while the user is typing in an editable region on Windows, reducing visual obstruction over the text being typed.
 - Honor the Windows *Hide pointer while typing* OS setting (`SPI_GETMOUSEVANISH`), which is on by default on Windows 10/11.
-- Restore the pointer instantly on the next mouse move or click so users never feel "stuck" with a hidden cursor.
+- Restore the pointer instantly on the next mouse move or click so users never feel "stuck" with a hidden pointer.
 - Remain invisible to web content: no new APIs, no observable behavior change for pages or scripts.
 
 ## Non-Goals
 
 - **New web-platform APIs**: No new JavaScript APIs, CSS properties, or observable behavior is exposed to web content. This is a browser UI behavior change, not a standards proposal.
-- **Cursor appearance**: This proposal only controls when the pointer is hidden, not its shape, size, or style.
+- **Pointer appearance**: This proposal only controls when the pointer is hidden, not its shape, size, or style.
 
 ## Proposal
 
@@ -80,7 +80,7 @@ The pointer is **restored** on the **next mouse move or click**. Recovery is imm
 
 - **Accessibility:** Users who prefer the pointer always visible (e.g. some screen-magnifier and low-vision workflows) can disable the OS-level "hide pointer while typing" setting in the OS Mouse settings. Recovery is instantaneous on the next mouse move or click. For users with cognitive or attention-related needs, removing the stationary pointer over freshly typed characters can reduce visual noise.
 - **Privacy:** No data is collected, persisted, or sent to a server. Pointer visibility is a local UI presentation state.
-- **Security:** No new attack surface is introduced. The browser already controls cursor visibility internally; this proposal only constrains *when* it hides the pointer. Pages cannot trigger or observe the behavior.
+- **Security:** No new attack surface is introduced. The browser already controls pointer visibility internally; this proposal only constrains *when* it hides the pointer. Pages cannot trigger or observe the behavior.
 
 ## Interoperability
 
@@ -97,11 +97,11 @@ Mitigations include:
 
 1. **OS preference gating**: The behavior is only active when the Windows *Hide pointer while typing* setting (`SPI_GETMOUSEVANISH`) is enabled. Users can disable it in OS Mouse settings.
 2. **Progressive rollout**: The feature ships behind a flag, allowing controlled rollout and the ability to disable it quickly if issues arise.
-3. **Instant recovery**: A single mouse move or click immediately restores the pointer, so users are never stuck with a hidden cursor.
+3. **Instant recovery**: A single mouse move or click immediately restores the pointer, so users are never stuck with a hidden pointer.
 
 ## References & Acknowledgements
 
-- **Chromium feature request**: [*Hide mouse cursor while typing*](https://issues.chromium.org/issues/516096689)
+- **Chromium feature request**: [*Hide mouse pointer while typing*](https://issues.chromium.org/issues/516096689)
 - **Chromium past issue**: [*Mouse pointer doesn't disappear when typing*](https://issues.chromium.org/issues/41021563)
 - **Firefox bug**: [*Support Windows "Hide pointer while typing" system setting to hide the mouse pointer*](https://bugzilla.mozilla.org/show_bug.cgi?id=1757463)
 - **VS Code issue**: [*Mouse cursor doesn't disappear when typing*](https://github.com/microsoft/vscode/issues/79915)
