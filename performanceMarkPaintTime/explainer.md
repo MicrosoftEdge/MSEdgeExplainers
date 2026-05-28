@@ -31,10 +31,11 @@ This document is a starting point for engaging the community and standards bodie
 
 Proper measurement and understanding of end-to-end user experience is key to optimizing web performance. Today, the web platform provides several paint timing APIs, each measuring paint timing in different contexts. Some are fully automatic: [FP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming)/[FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/) and [LoAF](https://w3c.github.io/long-animation-frames/) report milestones the browser selects. Others, like [Element Timing](https://w3c.github.io/element-timing/), let developers annotate specific elements for paint observation. However, the ability for developers to measure their own arbitrary visual updates remains limited.
  
-This proposal extends `performance.mark()` with the `paintTiming` option, closing that gap by letting developers capture the actual paint time and presentation time following any JS execution — adding more complete, on-demand measurement of real end-to-end user experience.
+This proposal extends `performance.mark()` with the `paintTiming` option, closing that gap by letting developers capture the actual paint time and presentation time following any JS execution  adding more complete measurement of real end-to-end user experience.
 
 ## Goals
- - Give developers on-demand access to paint-related timestamps for any visual update by extending the existing `performance.mark()` API.
+ - Allow developers to measure any visual update, not limited to specific triggers, content types, or page lifecycle milestones.
+ - Give developers on-demand access to paint-related metrics for any visual update by extending the existing `performance.mark()` API.
  - Deliver timestamps through `PerformanceObserver`, consistent with modern performance APIs.
 
 ## Non-goals
