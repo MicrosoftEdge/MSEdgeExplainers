@@ -1,4 +1,4 @@
-# Paint Timing for User Marks Explainer
+# Paint Timing for `performance.mark()` Explainer
 
 Author:  [Wangsong Jin](https://github.com/JosephJin0815), [Andy Luhrs](https://github.com/aluhrs13)
 
