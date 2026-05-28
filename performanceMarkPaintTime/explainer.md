@@ -17,9 +17,10 @@ This document is a starting point for engaging the community and standards bodie
 - [Non-goals](#non-goals)
 - [The Problem](#the-problem)
 - [Proposed API](#proposed-api)
+  - [Behavior](#behavior)
+  - [Key Design Decisions](#key-design-decisions)
   - [What developers can measure](#what-developers-can-measure)
   - [Entry Delivery and Mutability](#entry-delivery-and-mutability)
-- [Key Design Decisions](#key-design-decisions)
 - [Relationship to Other APIs](#relationship-to-other-apis)
 - [Alternatives Considered](#alternatives-considered)
 - [Open Questions](#open-questions)
@@ -148,19 +149,15 @@ The following end-to-end example shows a page that loads chat content asynchrono
 
 ## Proposed API
 
-`performance.mark(markName, { paintTiming: true })` extends the existing [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark) with an opt-in `paintTiming` option. When set, the resulting `PerformanceMark` entry includes [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) timestamps and is delivered to observers only after the next paint completes. The entry has the following properties:
+`performance.mark(markName, { paintTiming: true })` extends the existing [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark) with an opt-in `paintTiming` option. When set, the resulting `PerformanceMark` entry includes [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) timestamps and is delivered to observers after the next rendering update. The entry has the following properties:
 
  | Attribute | Description |
  |-----------|-------------|
- | `entryType` | `"mark"` — the same entry type as regular `performance.mark()` |
- | `name` | The mark name passed to `performance.mark()` |
- | `startTime` | `performance.now()` at the time `performance.mark()` was called, unless overridden via `options.startTime` — same semantics as [`performance.mark()`](https://w3c.github.io/user-timing/#the-performancemark-constructor) (see [step 5](https://w3c.github.io/user-timing/#the-performancemark-constructor)). This is **not** a rendering-pipeline timestamp; it records when the developer invoked the API, regardless of where in the event loop the call occurs (e.g., a microtask, `IntersectionObserver` callback, or `requestAnimationFrame`). |
- | `duration` | Always `0` |
- | `detail` | The `detail` value from `PerformanceMarkOptions`, if provided |
- | `paintTime` | The rendering update end time — same as FP/FCP/LCP `paintTime` via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `0` for marks without `paintTiming: true`. |
- | `presentationTime` | An implementation-defined, coarsened timestamp for when the frame is presented to the user, or `null` if unsupported by the UA — same as FP/FCP/LCP `presentationTime` via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `null` for marks without `paintTiming: true`. |
+ | `paintTime` | When the rendering update completed, via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `0` when `paintTiming: true` is not set or paint has not yet occurred. |
+ | `presentationTime` | When the frame was presented to the screen, via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `null` when `paintTiming: true` is not set, paint has not yet occurred, or the UA does not support presentation timestamps. |
 
-**Behavior:**
+### Behavior
+
 - On-demand — no paint timing data is collected until `performance.mark()` is called with `paintTiming: true`.
 - One-shot — each call tags the next rendering update and produces exactly one entry.
 - Marks with `paintTiming: true` are delivered to `PerformanceObserver` **after** the paint completes, unlike regular marks which are delivered synchronously. The synchronous return value of `performance.mark()` is the same `PerformanceMark` object that the observer receives (`===` identity is preserved). At creation time, `paintTime` and `presentationTime` are unpopulated; the browser fills them in internally after the rendering update completes (see [Entry Delivery and Mutability](#entry-delivery-and-mutability)).
@@ -225,7 +222,7 @@ mark.presentationTime  // 172.00 (or null if UA does not support)
 - **Not returning a value** (returning `null` from `mark()`): Would change the return type of `performance.mark()` from `PerformanceMark` to `PerformanceMark?`, breaking existing code patterns like `performance.mark(...).startTime`.
 - **Returning two separate entry objects** (synchronous return + observer entry): Would break the established `===` identity between `mark()` return, `getEntriesByName()`, and observer entries. Would also require deciding whether the observer receives one or two entries.
 
-## Key Design Decisions
+### Key Design Decisions
 
 - **Extends `performance.mark()` rather than adding a new API**: Reuses the familiar `performance.mark()` interface and the existing `PerformanceMark` entry type. No new entry types or observer types are needed. This avoids further fragmentation of the paint timing API landscape.
 - **Opt-in via `paintTiming` option**: Only marks that explicitly request paint timing incur the overhead of registering paint callbacks. This is consistent with other Web Performance APIs that use opt-in annotation ([Element Timing](https://w3c.github.io/element-timing/), [Container Timing](https://github.com/WICG/container-timing)).
