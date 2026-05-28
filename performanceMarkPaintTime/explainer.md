@@ -160,17 +160,14 @@ The following end-to-end example shows a page that loads chat content asynchrono
 
 - On-demand — no paint timing data is collected until `performance.mark()` is called with `paintTiming: true`.
 - One-shot — each call tags the next rendering update and produces exactly one entry.
-- Marks with `paintTiming: true` are delivered to `PerformanceObserver` **after** the paint completes, unlike regular marks which are delivered synchronously. The synchronous return value of `performance.mark()` is the same `PerformanceMark` object that the observer receives (`===` identity is preserved). At creation time, `paintTime` and `presentationTime` are unpopulated; the browser fills them in internally after the rendering update completes (see [Entry Delivery and Mutability](#entry-delivery-and-mutability)).
-- Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime`. `presentationTime` values depend on when the compositor presents frames to the display and may vary independently.
-- If no paint occurs after the mark (e.g., the modified content is outside the viewport and the browser skips rendering), no `paintTime` will be reported. This is consistent with [Element Timing](https://w3c.github.io/element-timing/), which does not emit entries for elements that are never painted.
-- `presentationTime` may be `null` when the user agent does not support implementation-defined presentation timestamps, consistent with [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin).
+- Marks with `paintTiming: true` are delivered to `PerformanceObserver` after the rendering update, unlike regular marks which are delivered synchronously. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
+- Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime`.
+- If no rendering update occurs after the mark, `paintTime` remains `0`.
 
 The opt-in pattern is consistent with other Web Performance APIs that require explicit developer annotation, such as [Element Timing](https://w3c.github.io/element-timing/) (`elementtiming` attribute) and [Container Timing](https://github.com/WICG/container-timing) (`containertiming` attribute).
 
 ### What developers can measure
-
-- **`startTime`**: Defaults to `performance.now()` at the time `performance.mark()` is called, but developers can optionally provide a custom value to mark a meaningful start point (e.g., an event timestamp from a `click` or `input` event, or a timestamp captured at the start of a state change).
-- **`paintTime - startTime`** = time from the `performance.mark()` call to the end of the rendering update.
+- **`paintTime - startTime`** = time from the `performance.mark(markName, { paintTiming: true })` call to the end of the rendering update.
 - **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency estimate through the implementation-defined presentation timestamp.
 - **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation). This is less in the developer's control, but can help them understand if they're in an extreme scenario where an outside factor impacted their performance.
 
