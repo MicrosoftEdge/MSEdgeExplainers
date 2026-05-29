@@ -45,7 +45,7 @@ This proposal extends `performance.mark()` with the `paintTiming` option, closin
 
 ## The Problem
 
-Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously  in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related entries like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), [Event Timing](https://w3c.github.io/event-timing/), and [LoAF](https://w3c.github.io/long-animation-frames/) do report paint-related timing information, but only for specific scenarios — platform-selected milestones, annotated elements, or interaction-driven updates. Today, developers have no general-purpose way to ask, for any arbitrary visual change: *"when did the update I just made actually paint?"*
+Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously  in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related APIs like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), [Event Timing](https://w3c.github.io/event-timing/), [LoAF](https://w3c.github.io/long-animation-frames/), and the emerging [Interaction Contentful Paint](https://wicg.github.io/soft-navigations/) do report paint-related timing information, but only for specific scenarios — platform-selected milestones, annotated elements, or interaction-driven updates. Today, developers have no general-purpose way to ask, for any arbitrary visual change: *"when did the update I just made actually paint?"*
 
 Common workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)), and none provides `presentationTime` — an implementation-defined presentation timestamp for the frame. Consider a developer measuring when a chat input box appears after an asynchronous content load:
 
@@ -161,7 +161,7 @@ The following end-to-end example shows a page that loads chat content asynchrono
 - One-shot — each call tags the next rendering update and produces exactly one entry.
 - Marks with `paintTiming: true` are delivered to `PerformanceObserver` after the rendering update completes, with paint timing values populated. Developers should read `paintTime` and `presentationTime` from the observer callback. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 - Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime`.
-- If no rendering update occurs after the mark, `paintTime` remains `0`.
+- If the user agent believes that updating the rendering would have no visible effect, the entry is still delivered with `paintTime` set to `0` and `presentationTime` set to `null`. See [Fallback when no paint occurs](#fallback-when-no-paint-occurs).
 
 The opt-in pattern is consistent with other Web Performance APIs that require explicit developer annotation, such as [Element Timing](https://w3c.github.io/element-timing/) (`elementtiming` attribute) and [Container Timing](https://github.com/WICG/container-timing) (`containertiming` attribute).
 
@@ -175,6 +175,24 @@ The opt-in pattern is consistent with other Web Performance APIs that require ex
 `performance.mark()` synchronously returns a `PerformanceMark` and the same object is accessible via `PerformanceObserver` and `getEntriesByName()` — all three return the identical (`===`) object. When `paintTiming: true` is specified, `paintTime` and `presentationTime` are not yet known at creation time; the browser populates them internally after the rendering update completes, then delivers the entry to the observer. Reading these values immediately after `performance.mark()` returns will yield unpopulated values (`0` / `null`).
 
 **Chosen approach: same object, browser-internal slot update.** The synchronous return value starts with `paintTime` and `presentationTime` unpopulated. After the rendering update completes, the browser fills in the internal slots and notifies the `PerformanceObserver`. This preserves the `===` identity between the synchronous return, `getEntriesByName()`, and the observer-delivered entry.
+
+#### Fallback when no paint occurs
+
+If the user agent believes that updating the rendering would have no visible effect — for example, the DOM was not modified, the modified content is outside the viewport, or no repaint is needed — the entry is still delivered to the `PerformanceObserver` with `paintTime` set to `0` and `presentationTime` set to `null`. This ensures developers always receive a response to their `performance.mark()` call.
+
+```js
+// Developer changes a hidden element, then marks:
+hiddenDiv.style.color = 'red';  // not visible
+performance.mark('hidden-update', { paintTiming: true });
+
+// Observer still fires:
+// entry.paintTime         → 0    (no paint occurred)
+// entry.presentationTime  → null (no frame presented)
+```
+
+In the observer callback, `paintTime === 0` unambiguously means "no paint occurred" — there is no confusion with "not yet populated", since entries are only delivered after resolution.
+
+This design ensures developers always receive a callback, avoiding "dangling marks" that never resolve. If [PaintTimingMixin](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) later adds a unified fallback getter such as `renderTime` ([Issue #121](https://github.com/w3c/paint-timing/issues/121)), marks would inherit it automatically through the mixin.
 
 #### Initial value of `paintTime`: non-nullable vs. nullable
 
@@ -223,7 +241,7 @@ mark.presentationTime  // 172.00 (or null if UA does not support)
 - **Uses `paintTime` and `presentationTime` timestamps**: These are the same timestamp concepts that FP/FCP/LCP already expose via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). Developers who understand paint timing milestones already understand this API. Whether the implementation directly reuses `PaintTimingMixin` or defines equivalent nullable attributes is discussed in [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 - **On-demand**: Unlike FP/FCP/LCP which fire automatically for browser-detected milestones, `paintTiming: true` is triggered by the developer for any visual update at any time.
 - **PerformanceObserver-based**: Consistent with modern performance APIs (LoAF, FCP, LCP).
-- **Forward-compatible**: This design is compatible with the [PaintTimingMixin fallback](https://github.com/w3c/paint-timing/issues/121) proposal for consistent behavior when no paint occurs.
+- **Forward-compatible**: If `PaintTimingMixin` later adds a unified fallback getter such as `renderTime` ([Issue #121](https://github.com/w3c/paint-timing/issues/121)), marks would inherit it automatically through the mixin without API changes.
 - **Same object, deferred delivery**: The synchronous return value, `PerformanceObserver`, and `getEntriesByName()` all return the same (`===`) object. Paint timing slots are populated internally by the browser after the rendering update completes. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 
 ## Relationship to Other APIs
