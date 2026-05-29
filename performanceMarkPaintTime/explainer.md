@@ -148,18 +148,18 @@ The following end-to-end example shows a page that loads chat content asynchrono
 
 ## Proposed API
 
+A new `paintTiming` option is added to [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark):
+
 ```js
 performance.mark(markName, { paintTiming: true });
 ```
 
-This extends the existing [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark) with an opt-in `paintTiming` option. When set, the resulting `PerformanceMark` entry gains two additional attributes from [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin):
+When `paintTiming` is set, the resulting `PerformanceMark` entry gains two additional attributes from [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). The entry is delivered to `PerformanceObserver` after the next rendering update, with both values populated.
 
  | Attribute | Description |
  |-----------|-------------|
  | `paintTime` | When the rendering update completed. `0` when `paintTiming: true` is not set or no paint occurred. |
  | `presentationTime` | When the frame was presented to the screen. `null` when `paintTiming: true` is not set, no paint occurred, or the UA does not support presentation timestamps. |
-
-The entry is delivered to `PerformanceObserver` after the next rendering update, with both values populated.
 
 ### What developers can measure
 - **`paintTime - startTime`** = time from the `performance.mark(markName, { paintTiming: true })` call to the end of the rendering update.
