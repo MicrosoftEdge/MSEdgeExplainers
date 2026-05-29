@@ -10,7 +10,7 @@
 
 ## Introduction
 
-Custom element authors frequently need their elements to use platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). The motivation of this proposal is to give custom element authors visibility into the same protocols, lifecycle hooks, and internal state that native elements use. Platform-provided behaviors name wiring that is already in HTML and exposes it for reuse, rather than asking authors to reimplement the wiring in Javascript.
+Custom element authors frequently need their elements to use platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). The motivation of this proposal is to give custom element authors visibility into the same protocols, lifecycle hooks, and internal state that native elements use. Platform-provided behaviors name the platform-internal logic HTML already runs for native elements and expose it for reuse, rather than asking authors to reimplement that logic in Javascript.
 
 ## User-facing problem
 
@@ -98,7 +98,7 @@ const submitBehavior = this._internals.behaviors.find(
 submitBehavior?.disabled = true;
 ```
 
-Each behavior names the specific platform wiring it engages:
+Each behavior names the specific platform logic it engages:
 
 - Event handling and activation
 - ARIA defaults (implicit role and ARIA properties)
@@ -226,8 +226,7 @@ Behaviors are immutable after `attachInternals()`. Adding, removing, or replacin
 
 `<input>` can be cited as a platform precedent for adding and removing capabilities and properties mid-life. However, `<input>` exposes its entire IDL surface at all times and the `type` attribute changes which subset of properties is currently active; it doesn't add or remove anything from the element. The same is true for `<a>`, where setting or unsetting `href` changes how the element behaves but doesn't change what's exposed on it.
 
-For elements that want to express toggle-like behavior at runtime, the proposed path is to attach every relevant behavior at `attachInternals()` and use a per-behavior off switch to turn each behavior's capabilities on or off from the outside. The behaviors stay attached and their IDL surfaces stay exposed on the host; only their participation toggles. The current proposal's `behavior.disabled` is element-scoped and therefore not suitable for this, but a behavior-scoped variant that does support this toggle pattern is captured as [Alternative API design 3: Behavior-scoped behavior.disabled](#alternative-api-design-3-behavior-scoped-behaviordisabled).
-
+For elements that want to express toggle-like behavior at runtime, the proposed path is captured in [Alternative API design 3: Behavior-scoped behavior.disabled](#alternative-api-design-3-behavior-scoped-behaviordisabled).
 
 ### Duplicate behaviors
 
@@ -1040,7 +1039,7 @@ class CustomSubmitButton extends HTMLElement {
 
 ### Alternative API design 3: Behavior-scoped `behavior.disabled`
 
-Under the current design, setting `behavior.disabled = true` disables the host element. An alternative semantics is for `behavior.disabled` to disable only that behavior's contribution. The behavior remains attached (the proposal still forbids removing it after `attachInternals()`), its attribute and IDL surface stays exposed on the host, but the behavior becomes inert: its activation handler is not invoked, it does not contribute to focusability, and its implicit ARIA role and pseudo-class participation are suppressed. Element-level disabled state continues to drive the host's actual disabled state.
+For elements that want to express toggle-like behavior at runtime, the proposed path is to attach every relevant behavior at `attachInternals()` and use a per-behavior off switch to turn each behavior's capabilities on or off from the outside. The behaviors stay attached and their IDL surfaces stay exposed on the host; only their participation toggles. Under the current design, setting `behavior.disabled = true` disables the host element. An alternative semantics is for `behavior.disabled` to disable only that behavior's contribution. The behavior remains attached (the proposal still forbids removing it after `attachInternals()`), its attribute and IDL surface stays exposed on the host, but the behavior becomes inert: its activation handler is not invoked, it does not contribute to focusability, and its implicit ARIA role and pseudo-class participation are suppressed. Element-level disabled state continues to drive the host's actual disabled state.
 
 ```javascript
 class CustomButton extends HTMLElement {
