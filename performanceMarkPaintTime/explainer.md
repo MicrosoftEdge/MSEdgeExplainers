@@ -17,9 +17,9 @@ This document is a starting point for engaging the community and standards bodie
 - [Non-goals](#non-goals)
 - [The Problem](#the-problem)
 - [Proposed API](#proposed-api)
+  - [What developers can measure](#what-developers-can-measure)
   - [Behavior](#behavior)
   - [Key Design Decisions](#key-design-decisions)
-  - [What developers can measure](#what-developers-can-measure)
   - [Entry Delivery and Mutability](#entry-delivery-and-mutability)
 - [Relationship to Other APIs](#relationship-to-other-apis)
 - [Alternatives Considered](#alternatives-considered)
@@ -155,6 +155,11 @@ The following end-to-end example shows a page that loads chat content asynchrono
  | `paintTime` | When the rendering update completed, via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `0` when `paintTiming: true` is not set or paint has not yet occurred. |
  | `presentationTime` | When the frame was presented to the screen, via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `null` when `paintTiming: true` is not set, paint has not yet occurred, or the UA does not support presentation timestamps. |
 
+### What developers can measure
+- **`paintTime - startTime`** = time from the `performance.mark(markName, { paintTiming: true })` call to the end of the rendering update.
+- **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency estimate through the implementation-defined presentation timestamp.
+- **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation). This is less in the developer's control, but can help them understand if they're in an extreme scenario where an outside factor impacted their performance.
+
 ### Behavior
 
 - On-demand — no paint timing data is collected until `performance.mark()` is called with `paintTiming: true`.
@@ -163,22 +168,13 @@ The following end-to-end example shows a page that loads chat content asynchrono
 - Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime`.
 - If the user agent believes that updating the rendering would have no visible effect, the entry is still delivered with `paintTime` set to `0` and `presentationTime` set to `null`. See [Fallback when no paint occurs](#fallback-when-no-paint-occurs).
 
-The opt-in pattern is consistent with other Web Performance APIs that require explicit developer annotation, such as [Element Timing](https://w3c.github.io/element-timing/) (`elementtiming` attribute) and [Container Timing](https://github.com/WICG/container-timing) (`containertiming` attribute).
-
 ### Key Design Decisions
 
 - **Extends `performance.mark()` rather than adding a new API**: Reuses the familiar `performance.mark()` interface and the existing `PerformanceMark` entry type. No new entry types or observer types are needed. See [Alternatives Considered](#alternatives-considered).
-- **Opt-in via `paintTiming` option**: Only marks that explicitly request paint timing incur the overhead of registering paint callbacks. This is consistent with other Web Performance APIs that use opt-in annotation ([Element Timing](https://w3c.github.io/element-timing/), [Container Timing](https://github.com/WICG/container-timing)).
+- **Opt-in via `paintTiming` option**: Only marks that explicitly request paint timing incur the overhead of registering paint callbacks. This opt-in pattern is consistent with other Web Performance APIs that require explicit developer annotation, such as [Element Timing](https://w3c.github.io/element-timing/) (`elementtiming` attribute) and [Container Timing](https://github.com/WICG/container-timing) (`containertiming` attribute).
 - **Uses `paintTime` and `presentationTime` timestamps**: These are the same timestamp concepts that FP/FCP/LCP already expose via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). Developers who understand paint timing milestones already understand this API. Whether the implementation directly reuses `PaintTimingMixin` or defines equivalent nullable attributes is discussed in [Entry Delivery and Mutability](#entry-delivery-and-mutability).
-- **On-demand**: Unlike FP/FCP/LCP which fire automatically for browser-detected milestones, `paintTiming: true` is triggered by the developer for any visual update at any time.
-- **PerformanceObserver-based**: Consistent with modern performance APIs (LoAF, FCP, LCP).
 - **Forward-compatible**: If `PaintTimingMixin` later adds a unified fallback getter such as `renderTime` ([Issue #121](https://github.com/w3c/paint-timing/issues/121)), marks would inherit it automatically through the mixin without API changes.
 - **Same object, deferred delivery**: The synchronous return value, `PerformanceObserver`, and `getEntriesByName()` all return the same (`===`) object. Paint timing slots are populated internally by the browser after the rendering update completes. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
-
-### What developers can measure
-- **`paintTime - startTime`** = time from the `performance.mark(markName, { paintTiming: true })` call to the end of the rendering update.
-- **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency estimate through the implementation-defined presentation timestamp.
-- **`presentationTime - paintTime`** (when `presentationTime` is non-null) = pipeline cost from rendering update to display (includes paint, compositing, and GPU presentation). This is less in the developer's control, but can help them understand if they're in an extreme scenario where an outside factor impacted their performance.
 
 ### Entry Delivery and Mutability
 
