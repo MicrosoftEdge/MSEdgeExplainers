@@ -148,12 +148,18 @@ The following end-to-end example shows a page that loads chat content asynchrono
 
 ## Proposed API
 
-`performance.mark(markName, { paintTiming: true })` extends the existing [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark) with an opt-in `paintTiming` option. When set, the resulting `PerformanceMark` entry includes [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) timestamps and is delivered to observers after the next rendering update. The entry has the following properties:
+```js
+performance.mark(markName, { paintTiming: true });
+```
+
+This extends the existing [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark) with an opt-in `paintTiming` option. When set, the resulting `PerformanceMark` entry gains two additional attributes from [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin):
 
  | Attribute | Description |
  |-----------|-------------|
- | `paintTime` | When the rendering update completed, via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `0` when `paintTiming: true` is not set or paint has not yet occurred. |
- | `presentationTime` | When the frame was presented to the screen, via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). `null` when `paintTiming: true` is not set, paint has not yet occurred, or the UA does not support presentation timestamps. |
+ | `paintTime` | When the rendering update completed. `0` when `paintTiming: true` is not set or no paint occurred. |
+ | `presentationTime` | When the frame was presented to the screen. `null` when `paintTiming: true` is not set, no paint occurred, or the UA does not support presentation timestamps. |
+
+The entry is delivered to `PerformanceObserver` after the next rendering update, with both values populated.
 
 ### What developers can measure
 - **`paintTime - startTime`** = time from the `performance.mark(markName, { paintTiming: true })` call to the end of the rendering update.
@@ -261,18 +267,6 @@ However, Container Timing only fires when **new, previously unpainted area** is 
 [Interaction Contentful Paint](https://wicg.github.io/soft-navigations/) reports contentful paint updates within the same document that are initiated by user interactions. It uses [AsyncContext](https://github.com/nicolo-ribaudo/tc39-proposal-await-dictionary) to automatically track causality from an interaction through asynchronous operations to the eventual paint. ICP covers **interaction-triggered** updates comprehensively, but does not cover updates triggered by non-interaction sources (e.g., `fetch()` completions, WebSocket messages, timers, server-sent events).
 
 `performance.mark()` with `paintTiming: true` covers updates triggered by **anything** — whether interaction-driven or not. The two are complementary: ICP provides rich, automatic attribution for interaction-driven paints; paint-timed marks provide a lightweight, imperative mechanism for any scenario.
-
-### Summary
-
-| | Element Timing | Container Timing | ICP | mark with paintTiming |
-|---|---|---|---|---|
-| Trigger | Declarative (HTML) | Declarative (HTML) | Automatic (interaction) | Imperative (JS) |
-| What it detects | Single image/text first paint | Subtree paint area growth | Interaction-caused contentful paint | Any visual change |
-| Fires on content update/repaint? | No | Only if area grows | Yes (if interaction-caused) | Yes |
-| Detects non-text/image changes? | No | No | No | Yes |
-| Covers non-interaction triggers? | N/A | N/A | No | Yes |
-| Provides spatial info? | Yes | Yes | Yes | No |
-| Provides attribution? | Element reference | Container reference | interactionId + AsyncContext | Developer-chosen name |
 
 ## Alternatives Considered
 
