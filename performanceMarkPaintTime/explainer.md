@@ -165,6 +165,16 @@ The following end-to-end example shows a page that loads chat content asynchrono
 
 The opt-in pattern is consistent with other Web Performance APIs that require explicit developer annotation, such as [Element Timing](https://w3c.github.io/element-timing/) (`elementtiming` attribute) and [Container Timing](https://github.com/WICG/container-timing) (`containertiming` attribute).
 
+### Key Design Decisions
+
+- **Extends `performance.mark()` rather than adding a new API**: Reuses the familiar `performance.mark()` interface and the existing `PerformanceMark` entry type. No new entry types or observer types are needed. See [Alternatives Considered](#alternatives-considered).
+- **Opt-in via `paintTiming` option**: Only marks that explicitly request paint timing incur the overhead of registering paint callbacks. This is consistent with other Web Performance APIs that use opt-in annotation ([Element Timing](https://w3c.github.io/element-timing/), [Container Timing](https://github.com/WICG/container-timing)).
+- **Uses `paintTime` and `presentationTime` timestamps**: These are the same timestamp concepts that FP/FCP/LCP already expose via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). Developers who understand paint timing milestones already understand this API. Whether the implementation directly reuses `PaintTimingMixin` or defines equivalent nullable attributes is discussed in [Entry Delivery and Mutability](#entry-delivery-and-mutability).
+- **On-demand**: Unlike FP/FCP/LCP which fire automatically for browser-detected milestones, `paintTiming: true` is triggered by the developer for any visual update at any time.
+- **PerformanceObserver-based**: Consistent with modern performance APIs (LoAF, FCP, LCP).
+- **Forward-compatible**: If `PaintTimingMixin` later adds a unified fallback getter such as `renderTime` ([Issue #121](https://github.com/w3c/paint-timing/issues/121)), marks would inherit it automatically through the mixin without API changes.
+- **Same object, deferred delivery**: The synchronous return value, `PerformanceObserver`, and `getEntriesByName()` all return the same (`===`) object. Paint timing slots are populated internally by the browser after the rendering update completes. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
+
 ### What developers can measure
 - **`paintTime - startTime`** = time from the `performance.mark(markName, { paintTiming: true })` call to the end of the rendering update.
 - **`presentationTime - startTime`** (when `presentationTime` is non-null) = end-to-end visual latency estimate through the implementation-defined presentation timestamp.
@@ -231,16 +241,6 @@ mark.presentationTime  // 172.00 (or null if UA does not support)
 
 - **Not returning a value** (returning `null` from `mark()`): Would change the return type of `performance.mark()` from `PerformanceMark` to `PerformanceMark?`, breaking existing code patterns like `performance.mark(...).startTime`.
 - **Returning two separate entry objects** (synchronous return + observer entry): Developers would need to correlate two entries by name to get the full picture (mark's `startTime` + paint entry's `paintTime`). If multiple marks share the same name, matching becomes ambiguous.
-
-### Key Design Decisions
-
-- **Extends `performance.mark()` rather than adding a new API**: Reuses the familiar `performance.mark()` interface and the existing `PerformanceMark` entry type. No new entry types or observer types are needed. See [Alternatives Considered](#alternatives-considered).
-- **Opt-in via `paintTiming` option**: Only marks that explicitly request paint timing incur the overhead of registering paint callbacks. This is consistent with other Web Performance APIs that use opt-in annotation ([Element Timing](https://w3c.github.io/element-timing/), [Container Timing](https://github.com/WICG/container-timing)).
-- **Uses `paintTime` and `presentationTime` timestamps**: These are the same timestamp concepts that FP/FCP/LCP already expose via [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin). Developers who understand paint timing milestones already understand this API. Whether the implementation directly reuses `PaintTimingMixin` or defines equivalent nullable attributes is discussed in [Entry Delivery and Mutability](#entry-delivery-and-mutability).
-- **On-demand**: Unlike FP/FCP/LCP which fire automatically for browser-detected milestones, `paintTiming: true` is triggered by the developer for any visual update at any time.
-- **PerformanceObserver-based**: Consistent with modern performance APIs (LoAF, FCP, LCP).
-- **Forward-compatible**: If `PaintTimingMixin` later adds a unified fallback getter such as `renderTime` ([Issue #121](https://github.com/w3c/paint-timing/issues/121)), marks would inherit it automatically through the mixin without API changes.
-- **Same object, deferred delivery**: The synchronous return value, `PerformanceObserver`, and `getEntriesByName()` all return the same (`===`) object. Paint timing slots are populated internally by the browser after the rendering update completes. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 
 ## Relationship to Other APIs
 
