@@ -4,7 +4,7 @@ Authors: [Ashish Kumar](mailto:ashishkum@microsoft.com)
 
 ## Participate
 
-- Chromium feature request: [Hide mouse pointer while typing](https://issues.chromium.org/issues/516096689)
+- Chromium issue: [Mouse pointer doesn't disappear when typing](https://issues.chromium.org/issues/41021563)
 
 ## Table of Contents
 
@@ -47,7 +47,7 @@ When a user is typing into a text input on a Chromium-based browser or app, the 
 
 ## Goals
 
-- Hide the mouse pointer while the user is typing in an editable region on Windows, reducing visual obstruction over the text being typed.
+- Hide the mouse pointer while the user is typing in any editable region on Windows, including web content fields and browser-owned UI such as the address bar, reducing visual obstruction over the text being typed.
 - Honor the Windows *Hide pointer while typing* OS setting (`SPI_GETMOUSEVANISH`), which is on by default on Windows 10/11.
 - Restore the pointer instantly on the next mouse move or click so users never feel "stuck" with a hidden pointer.
 - Remain invisible to web content: no new APIs, no observable behavior change for pages or scripts.
@@ -63,23 +63,15 @@ When all of the following are true on Windows, the OS mouse pointer is **hidden*
 
 - The Windows OS-level *Hide pointer while typing* preference (`SPI_GETMOUSEVANISH`) is enabled.
 - The focused element is editable (e.g. `<input>`, `<textarea>`, `contenteditable` region, or browser-owned editable fields such as the omnibox).
-- The user presses a key that produces a character or modifies editable content. This includes character keys, `Backspace`, `Delete`, and `Enter`. Navigation keys also trigger hiding because they reposition the caret within the editable region. Bare modifiers, function keys, media/launcher keys, and keyboard shortcuts (e.g. `Ctrl+A`) do **not** trigger hiding.
+- The mouse pointer is currently within the bounds of the browser window.
+- The user presses a key that produces a character or modifies editable content. This includes character keys, `Backspace`, `Delete`, and `Enter`. Bare modifiers, function keys, media/launcher keys, navigation keys and keyboard shortcuts (e.g. `Ctrl+A`) do **not** trigger hiding.
 
 The pointer is **restored** on the **next mouse move or click**. Recovery is immediate; a single mouse nudge is enough.
-
-### Behavior summary
-
-| Scenario | Current behavior | With this proposal |
-|----------|------------------|--------------------|
-| Type in an editable region | Pointer parked over text | Pointer hides on first keystroke; reappears on next mouse move or click |
-| Press a function key or keyboard shortcut (e.g. `F5`, `Ctrl+A`) | Pointer visible | Pointer visible (unchanged) |
-| Press keys while focus is not in an editable element | Pointer visible | Pointer visible (unchanged) |
-| Windows user has turned off *Hide pointer while typing* | Pointer visible | Pointer visible (OS preference honored) |
 
 ## Accessibility, Privacy, and Security Considerations
 
 - **Accessibility:** Users who prefer the pointer always visible (e.g. some screen-magnifier and low-vision workflows) can disable the OS-level "hide pointer while typing" setting in the OS Mouse settings. Recovery is instantaneous on the next mouse move or click. For users with cognitive or attention-related needs, removing the stationary pointer over freshly typed characters can reduce visual noise.
-- **Privacy:** No data is collected, persisted, or sent to a server. Pointer visibility is a local UI presentation state.
+- **Privacy:** No data is collected, persisted, or sent to a server. Pointer visibility is a local UI presentation state, and websites will not be able to observe that the pointer is hidden.
 - **Security:** No new attack surface is introduced. The browser already controls pointer visibility internally; this proposal only constrains *when* it hides the pointer. Pages cannot trigger or observe the behavior.
 
 ## Interoperability
@@ -101,8 +93,7 @@ Mitigations include:
 
 ## References & Acknowledgements
 
-- **Chromium feature request**: [*Hide mouse pointer while typing*](https://issues.chromium.org/issues/516096689)
-- **Chromium past issue**: [*Mouse pointer doesn't disappear when typing*](https://issues.chromium.org/issues/41021563)
+- **Chromium issue**: [*Mouse pointer doesn't disappear when typing*](https://issues.chromium.org/issues/41021563)
 - **Firefox bug**: [*Support Windows "Hide pointer while typing" system setting to hide the mouse pointer*](https://bugzilla.mozilla.org/show_bug.cgi?id=1757463)
 - **VS Code issue**: [*Mouse cursor doesn't disappear when typing*](https://github.com/microsoft/vscode/issues/79915)
 - **Windows Mouse Vanish setting**: [*SPI_GETMOUSEVANISH* (About Mouse Input)](https://learn.microsoft.com/en-us/windows/win32/inputdev/about-mouse-input#mouse-vanish), [*SystemParametersInfoW*](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-systemparametersinfow)
