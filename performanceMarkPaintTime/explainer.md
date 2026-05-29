@@ -230,7 +230,7 @@ mark.presentationTime  // 172.00 (or null if UA does not support)
 #### Alternatives considered and rejected
 
 - **Not returning a value** (returning `null` from `mark()`): Would change the return type of `performance.mark()` from `PerformanceMark` to `PerformanceMark?`, breaking existing code patterns like `performance.mark(...).startTime`.
-- **Returning two separate entry objects** (synchronous return + observer entry): Would break the established `===` identity between `mark()` return, `getEntriesByName()`, and observer entries. Would also require deciding whether the observer receives one or two entries.
+- **Returning two separate entry objects** (synchronous return + observer entry): Developers would need to correlate two entries by name to get the full picture (mark's `startTime` + paint entry's `paintTime`). If multiple marks share the same name, matching becomes ambiguous.
 
 ### Key Design Decisions
 
