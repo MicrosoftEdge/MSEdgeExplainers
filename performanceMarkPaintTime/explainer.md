@@ -172,9 +172,7 @@ The opt-in pattern is consistent with other Web Performance APIs that require ex
 
 ### Entry Delivery and Mutability
 
-`performance.mark()` synchronously returns a `PerformanceMark` and the same object is accessible via `PerformanceObserver` and `getEntriesByName()` — all three return the identical (`===`) object. When `paintTiming: true` is specified, `paintTime` and `presentationTime` are not yet known at creation time; the browser populates them internally after the rendering update completes, then delivers the entry to the observer. Reading these values immediately after `performance.mark()` returns will yield unpopulated values (`0` / `null`).
-
-**Chosen approach: same object, browser-internal slot update.** The synchronous return value starts with `paintTime` and `presentationTime` unpopulated. After the rendering update completes, the browser fills in the internal slots and notifies the `PerformanceObserver`. This preserves the `===` identity between the synchronous return, `getEntriesByName()`, and the observer-delivered entry.
+`performance.mark()` synchronously returns a `PerformanceMark` with `paintTime` and `presentationTime` unpopulated (`0` / `null`). The same object is accessible via `PerformanceObserver` and `getEntriesByName()` — all three return the identical (`===`) object. After the rendering update completes, the browser fills in the internal slots and notifies the `PerformanceObserver`. Reading these values immediately after `performance.mark()` returns will yield unpopulated values.
 
 #### Fallback when no paint occurs
 
@@ -211,7 +209,7 @@ mark.presentationTime  // 172.00 (or null if UA does not support)
 ```
 
 - Pro: Directly reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) (`paintTime` is `DOMHighResTimeStamp`, non-nullable).
-- Con: `0` does not clearly distinguish "not yet populated" from "no paint occurred".
+- Con: Before observer delivery, `0` is ambiguous — it could mean "not yet populated" or "no paint occurred" (see [Fallback when no paint occurs](#fallback-when-no-paint-occurs)). However, since developers should read values from the observer callback (where slots are already resolved), this ambiguity is limited to the synchronous return value.
 
 ##### Sub-option B — Nullable (custom attributes)
 
