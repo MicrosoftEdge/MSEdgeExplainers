@@ -128,7 +128,7 @@ As with `focusgroup`, I believe the solution has to be declarative: if it requir
 ## Principles
 
 1. **Intuitive in declarative markup.** A focus landmark should be easy to reason about from the source, behave rationally when nested or embedded, and integrate with existing semantics (landmarks, `tabindex`, `focusgroup`) rather than overriding them.
-2. **Build on what exists.** Reuse ARIA landmarks for semantics and reuse `focusgroup`'s conventions (source-order default, `reading-flow` hook, memory with a `nomemory` opt-out, a `none` opt-out) so the two features stay consistent and authors learn one set of ideas.
+2. **Build on what exists.** Reuse ARIA landmarks for semantics and reuse `focusgroup`'s conventions (the `reading-flow` hook, memory with a `nomemory` opt-out, a `none` opt-out) so the two features stay consistent and authors learn one set of ideas.
 3. **No new burden on current pages.** Landmark navigation is a new key-driven paradigm. Adding it should not change current focus order, tab order, or layout for any existing page.
 4. **Browser-mediated, not script-mediated, across boundaries.** Cross-document traversal must not become a way for one origin to enumerate another's structure.
 
@@ -214,7 +214,7 @@ Simple usage:
 | *(bare, no value)* | Marks the element as a focus landmark for navigation. On an element that is already a landmark, changes only where focus goes. On a generic element, whether it stays a pure navigation marker or defaults to the `region` role is open.                                                                                              |
 | `<subrole>`        | Names a concrete landmark subrole (`banner`, `complementary`, `contentinfo`, `form`, `main`, `navigation`, `region`, `search`). The element joins landmark navigation and — in the case that deliberately confers semantics — takes that ARIA role. Whether the shorthand confers the role or only validates an existing one is open. |
 | `nomemory`         | Opt out of remembering the region's last entry target (memory is on by default).                                                                                                                                                                                                                                                      |
-| `none`             | Opt this element out as a landmark destination, while its descendant landmarks still participate (e.g., an implicit-landmark `<form>` that should stay focusable but not be a destination). See [Opting out](#opting-out).                                                                                                              |
+| `none`             | Opt this element out as a landmark destination, while its descendant landmarks still participate (e.g., an implicit-landmark `<form>` that should stay focusable but not be a destination). See [Opting out](#opting-out).                                                                                                            |
 
 Related attributes used in the examples:
 
@@ -285,7 +285,7 @@ A programmatic entry target that is not in the normal tab order should use `tabi
 
 ### The focuslandmarkstart attribute
 
-`focuslandmarkstart` marks the preferred entry target within a landmark. It mirrors `focusgroup`'s `focusgroupstart`: it only applies when there is no remembered entry target (or when `nomemory` is set); memory takes precedence. If several descendants carry it, the first in source order (or reading-flow order, where that applies) would win. Direction of travel (next vs. previous) would not change which element is chosen.
+`focuslandmarkstart` marks the preferred entry target within a landmark. It mirrors `focusgroup`'s `focusgroupstart`: it only applies when there is no remembered entry target (or when `nomemory` is set); memory takes precedence. If several descendants carry it, the first in flat tree order (or reading-flow order, where that applies) would win. Direction of travel (next vs. previous) would not change which element is chosen.
 
 ## Disabling landmark memory
 
@@ -304,7 +304,7 @@ When a focus landmark is *also* a `focusgroup`, I would prefer to reuse `focusgr
 
 I don't think we should follow the path `tabindex` took and introduce a numeric `focuslandmarkindex`. A numeric index would recreate the problems of positive `tabindex`: global-ish manual ordering, difficult maintenance, and surprising keyboard/AT behavior.
 
-Instead, the default order should be **flat tree order** — the flattened, composed tree that places slotted content at its rendered position — adjusted by the same reading-order concepts used for sequential focus navigation where applicable. Flat tree order is preferable to plain DOM order or shadow-including tree order: it follows where slotted content is actually rendered, so landmark order is more likely to match what the user sees, and it matches how sequential focus navigation already behaves. This follows the direction already used by `focusgroup`: source order by default, with CSS [`reading-flow`](https://developer.mozilla.org/en-US/docs/Web/CSS/reading-flow) / `reading-order` as the platform hook when visual order intentionally differs from DOM order. The precise treatment of slotted content should match whatever `focusgroup` settles on, so the two features stay consistent.
+Instead, the default order should be **flat tree order** — the flattened, composed tree that places slotted content at its rendered position — adjusted by the same reading-order concepts used for sequential focus navigation where applicable. Flat tree order is preferable to plain DOM order or shadow-including tree order: it follows where slotted content is actually rendered, so landmark order is more likely to match what the user sees, and it matches how sequential focus navigation already behaves. The `reading-flow` hook below is shared with `focusgroup`, but the flat-tree default goes a step further than `focusgroup`, whose default is DOM source order across shadow-inclusive descendants and which doesn't yet specify slotted-content ordering. As with the rest of the proposal, CSS [`reading-flow`](https://developer.mozilla.org/en-US/docs/Web/CSS/reading-flow) / `reading-order` is the platform hook when visual order intentionally differs from DOM order. We'd want the slotted-content treatment to stay aligned with whatever `focusgroup` settles on, so the two features remain consistent ([open question](#open-questions)).
 
 ## Opting out
 
@@ -314,9 +314,9 @@ This mirrors `focusgroup`'s `none` opt-out token, though the scope differs: `foc
 
 Placeholder token shape (name bikesheddable; how it shares the value space with subrole names is an [open question](#open-questions)):
 
-| Intent                                              | Placeholder            |
-| --------------------------------------------------- | ---------------------- |
-| Opt this node out as a landmark destination         | `focuslandmark="none"` |
+| Intent                                      | Placeholder            |
+| ------------------------------------------- | ---------------------- |
+| Opt this node out as a landmark destination | `focuslandmark="none"` |
 
 ```html
 <!-- Focusable and tabbable, but not itself a landmark destination;
@@ -446,10 +446,10 @@ No significant security concerns are anticipated beyond the cross-origin enumera
 There are no resolved standards discussions to link yet; this section records the rationale behind the current exploratory choices so reviewers can challenge them directly:
 
 * **Build on ARIA landmarks rather than a parallel concept** — reuses semantics AT already exposes and avoids a second region model.
-* **Reuse `focusgroup` conventions** (source-order default, `reading-flow` hook, default-on memory with `nomemory`, `none` opt-out) — so authors learn one set of ideas and the two features compose predictably.
+* **Reuse `focusgroup` conventions** (`reading-flow` hook, default-on memory with `nomemory`, `none` opt-out) — so authors learn one set of ideas and the two features compose predictably.
 * **No numeric ordering attribute** — avoids re-introducing positive-`tabindex` problems.
 * **Node-scoped opt-out** — a focusable element (e.g., a `<form>`) may need to *not* be a landmark destination while its descendant landmarks still are, which `tabindex="-1"` cannot express; hence `focuslandmark="none"` opts out only the node, with a subtree-wide opt-out left as an [open question](#open-questions).
-* **Flat tree order for slotted content** — landmark order should follow rendered position, matching sequential focus navigation and `focusgroup`.
+* **Flat tree order for slotted content** — landmark order should follow rendered position so it tracks what the user sees; this goes a step beyond `focusgroup`'s DOM-source-order default, which doesn't yet specify slotted content, and we'd keep the two aligned.
 * **Lean on Permissions Policy for cross-frame participation** — reuses the mechanism the platform already uses to gate cross-frame focus ([`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) instead of a bespoke attribute, and composes with that policy rather than working around it.
 * **Browser-mediated cross-frame traversal** — the privacy boundary is a requirement, not a detail.
 * **Define a mechanism, not a key** — keeps the proposal aligned with each platform's existing convention and with how `focusgroup` abstracts directional input.
@@ -462,12 +462,12 @@ All names here are placeholders to make the examples concrete; none are proposed
 
 `focuslandmark` attribute:
 
-| Description                                            | Placeholder syntax                                                                                         |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Navigation marker only                                 | *(bare; no value)*                                                                                         |
-| Confer / validate a landmark subrole                   | `focuslandmark="banner \| complementary \| contentinfo \| form \| main \| navigation \| region \| search"` |
-| Disable entry memory                                   | `focuslandmark="nomemory"`                                                                                 |
-| Opt this node out as a landmark destination            | `focuslandmark="none"`                                                                                     |
+| Description                                 | Placeholder syntax                                                                                         |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Navigation marker only                      | *(bare; no value)*                                                                                         |
+| Confer / validate a landmark subrole        | `focuslandmark="banner \| complementary \| contentinfo \| form \| main \| navigation \| region \| search"` |
+| Disable entry memory                        | `focuslandmark="nomemory"`                                                                                 |
+| Opt this node out as a landmark destination | `focuslandmark="none"`                                                                                     |
 
 Related attributes:
 
