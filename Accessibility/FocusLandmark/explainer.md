@@ -60,14 +60,12 @@ Because this problem is common across many web apps, it seems worth standardizin
 It helps to place this next to the two keyboard-navigation paradigms the web already has, and the one it is missing:
 
 1. **Sequential focus navigation** (`Tab` / `Shift+Tab`): the browser-managed order of tabbable elements. It already spans browser chrome and web content as one order, but it visits *every* control, which is exactly what users want to skip when moving between regions.
-2. **Directional navigation** (arrow keys, D-pad), as standardized by [`focusgroup`](https://open-ui.org/components/scoped-focusgroup.explainer/): moves focus *within* one composite widget (a toolbar, a tablist, a menu) without leaving it.
+2. **Directional navigation** (arrow keys), as standardized by [`focusgroup`](https://open-ui.org/components/scoped-focusgroup.explainer/): moves focus *within* one composite widget (a toolbar, a tablist, a menu) without leaving it.
 3. **Landmark navigation** (this proposal): moves focus *between* the major regions of a page, across frames, and ideally across the browser's own panes too. This is the paradigm that has no declarative web primitive today.
 
 `focuslandmark` and `focusgroup` are distinct, composing features, not the same mechanism. `focusgroup` brings arrow-key movement to the items inside a region; `focuslandmark` brings region-to-region movement to the page. A single region can be both: `focuslandmark` lands focus in it, and once focus is inside, `focusgroup` owns arrow-key movement among its items.
 
 ### Before / After at a glance
-
-This comparison is about *authoring burden and consistency*, not about promising a finished UX. Several hard parts (the platform key, AT interaction, cross-frame privacy) are discussed later and remain open. Each pair below changes only one thing — the per-app script disappears — so it's an apples-to-apples comparison of the same markup with and without the feature.
 
 **Generic regions (explicit opt-in).** Elements without a landmark role opt in with a bare `focuslandmark`, which defaults them to the `region` role.
 
@@ -91,9 +89,9 @@ Before:
 After (same markup, plus one attribute per region; the script is gone):
 
 ```html
-<div role="region" focuslandmark aria-label="App ribbon">…</div>
-<div role="region" focuslandmark aria-label="Primary">…</div>
-<div role="region" focuslandmark aria-label="Canvas">…</div>
+<div focuslandmark="region" aria-label="App ribbon">…</div>
+<div focuslandmark="region" aria-label="Primary">…</div>
+<div focuslandmark="region" aria-label="Canvas">…</div>
 ```
 
 **Semantic landmark elements (implicit participation).** Elements that already carry a landmark role need no attribute at all under the proposed implicit behavior.
@@ -144,16 +142,15 @@ As with `focusgroup`, I believe the solution has to be declarative: if it requir
 ### Non-goals
 
 * **Mandating a key.** The key that triggers the navigation is left to the user agent per platform, matching each platform's existing convention. `F6` / `Shift+F6` are examples, not a requirement.
-* **Replacing `focusgroup`.** Arrow-key movement *within* a composite widget stays the job of `focusgroup`.
 * **A numeric ordering attribute.** This proposal deliberately avoids a positive-`tabindex`-style `focuslandmarkindex` (see [Ordering](#ordering)).
-* **Selection or activation.** Like `focusgroup`, this is about moving focus, not changing selection or activating controls.
+* 
 
 ## Principles
 
 1. **Intuitive in declarative markup.** A focus landmark should be easy to reason about from the source, behave rationally when nested or embedded, and integrate with existing semantics (landmarks, `tabindex`, `focusgroup`) rather than overriding them.
 2. **Build on what exists.** Reuse ARIA landmarks for semantics and reuse `focusgroup`'s conventions (the `reading-flow` hook, memory with a `nomemory` opt-out, a `none` opt-out) so the two features stay consistent and authors learn one set of ideas.
-3. **No new burden on current pages.** Landmark navigation is a new key-driven paradigm. Adding it should not change current focus order, tab order, or layout for any existing page.
-4. **Browser-mediated, not script-mediated, across boundaries.** Cross-document traversal must not become a way for one origin to enumerate another's structure.
+3. **No new burden on current pages.** Landmark navigation is a new key-driven paradigm. Adding it should not break existing features.
+4. **Browser-mediated, not script-mediated, across boundaries.** The solution is managed by the browser, and the web content can only suggest what should be a landmark. The parent frame must remain in control of whether subframes can participate in the focus landmark navigation loop.
 
 ## Quickstart
 
@@ -184,7 +181,7 @@ Because the regions an author wants to mark are almost always the page's landmar
 
 ```html
 <div focuslandmark="navigation" aria-label="Primary">…</div>
-<!-- one possible meaning: equivalent to role="navigation" focuslandmark -->
+<!-- equivalent to role="navigation" focuslandmark -->
 ```
 
 If a region already carries a landmark role, a bare `focuslandmark` just adds the navigation behavior and changes nothing about the semantics:
@@ -241,10 +238,11 @@ Simple usage:
 
 Related attributes used in the examples:
 
-| Attribute               | Applies to                       | What it would do                                                                                                                                                                                                                                                                     |
-| ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `focuslandmarkstart`    | a descendant of a focus landmark | Marks the preferred entry target for the region.                                                                                                                                                                                                                                     |
-| `focuslandmarkchildren` | `<iframe>`                       | Treat the child as a single opaque landmark (`self`) instead of flattening its internals. The include/exclude choice is expected to be a Permissions Policy (see [Iframes](#iframes-shadow-dom-and-flattened-order)) rather than a value of this attribute. Names are bikesheddable. |
+| Attribute            | Applies to                       | What it would do                                 |
+| -------------------- | -------------------------------- | ------------------------------------------------ |
+| `focuslandmarkstart` | a descendant of a focus landmark | Marks the preferred entry target for the region. |
+
+Cross-frame participation is governed entirely by a Permissions Policy, not a bespoke attribute (see [Iframes](#iframes-shadow-dom-and-flattened-order)). To treat a whole iframe as a single opaque landmark, put `focuslandmark` on the `<iframe>` element itself and don't grant the participation policy.
 
 ## Use cases
 
@@ -362,9 +360,8 @@ Proposed shape:
 
 * **Shadow DOM:** landmark discovery uses the flattened tree, similar to `focusgroup`. A component author can opt the host node out as a destination with `focuslandmark="none"` (see [Opting out](#opting-out)). Closed shadow roots remain UA-visible for navigation but not script-inspectable.
 * **Iframes:** a child document's focus landmarks participate at the iframe element's position in the parent order, when the iframe is eligible and not opted out by the parent.
-* **Parent control:** the embedding context decides whether a child participates. There are two candidate mechanisms, and which to use is an [open question](#open-questions):
-  * **A Permissions Policy** for the include/exclude choice. The platform already gates cross-frame focus behavior this way: the [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md) policy lets an embedder stop a child frame from taking focus without user activation. A landmark-participation policy (placeholder name `focus-landmark-participation`) would fit the same shape — set via the `Permissions-Policy` header or an `<iframe allow="…">` attribute, inherited down the frame tree, with a default allowlist. This reuses a mechanism authors already use for other features instead of inventing a bespoke attribute. It mirrors the trade-off the `focus-without-user-activation` proposal itself made: it explicitly rejected a one-off `disallowprogrammaticfocus` iframe attribute in favor of a policy, reasoning that sites already reach for permissions policies and a policy is lighter-weight and more adoptable.
-  * **A slim iframe attribute** for the one case a policy doesn't express: treating the whole iframe as a *single opaque landmark* (`self` below) rather than flattening its internals. That is an aggregation/presentation choice, not a permission, so an attribute is a reasonable home for it.
+* **Parent control:** the embedding context decides whether a child participates, through a **Permissions Policy** rather than a bespoke attribute. The platform already gates cross-frame focus behavior this way: the [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md) policy lets an embedder stop a child frame from taking focus without user activation. A landmark-participation policy (placeholder name `focus-landmark-participation`) would fit the same shape — set via the `Permissions-Policy` header or an `<iframe allow="…">` attribute, inherited down the frame tree, with a default allowlist. This reuses a mechanism authors already use for other features instead of inventing a one-off attribute, mirroring the trade-off the `focus-without-user-activation` proposal itself made: it explicitly rejected a bespoke `disallowprogrammaticfocus` iframe attribute in favor of a policy, reasoning that sites already reach for permissions policies and a policy is lighter-weight and more adoptable.
+* **Treating an iframe as one opaque landmark:** when the embedder wants the whole frame to be a *single* landmark rather than flattening its internals, it puts `focuslandmark` on the `<iframe>` element itself and does not grant the participation policy. The iframe element then behaves like any other element carrying `focuslandmark` — one destination — and the child's internal structure is never enumerated. No separate attribute is needed.
 
 ```html
 <!-- Child landmarks participate (gated by a permissions policy on the embedder). -->
@@ -374,11 +371,11 @@ Proposed shape:
 <!-- Child landmarks do not participate (policy not granted to the child's origin). -->
 <iframe src="ad.html" title="Sponsored content"></iframe>
 
-<!-- The iframe is one opaque landmark; its internals are not flattened. -->
+<!-- The iframe is one opaque landmark; its internals are not flattened.
+     `focuslandmark` on the element, no participation policy granted. -->
 <iframe src="third-party-app.html"
         title="Third-party app"
-        focuslandmark
-        focuslandmarkchildren="self"></iframe>
+        focuslandmark></iframe>
 ```
 
 The key requirement: cross-document traversal is **browser-mediated, not script-mediated**. A cross-origin parent must not gain a way to enumerate child landmark names, counts, or structure. The browser can still move focus through the composed order internally.
@@ -409,14 +406,9 @@ partial interface mixin HTMLOrSVGElement {
   [SameObject, PutForwards=value, Reflect] readonly attribute DOMTokenList focusLandmark;
   [CEReactions, Reflect] attribute boolean focusLandmarkStart;
 };
-
-partial interface HTMLIFrameElement {
-  // Reflects the opaque-landmark attribute only. The include/exclude
-  // participation choice is expected to be a Permissions Policy, not a
-  // reflected content attribute.
-  [CEReactions, Reflect] attribute DOMString focusLandmarkChildren;
-};
 ```
+
+Cross-frame participation is a Permissions Policy rather than a reflected content attribute, so it isn't part of this interface; an iframe treated as one opaque landmark just reflects `focusLandmark` like any other element.
 
 ## Future considerations
 
@@ -436,13 +428,13 @@ partial interface HTMLIFrameElement {
 These are the points we most want early feedback on. The goal is to standardize an end-to-end landmark-navigation operation so the browser, top-level web app, embedded web app, and assistive technology can all take part in one consistent model, while leaving the triggering key to each platform's convention.
 
 1. **Is this a problem we should work on solving?** Does the region-to-region gap match what you see in real apps?
-2. **Attribute names.** `focuslandmark`, `focuslandmarkstart`, and `focuslandmarkchildren` are placeholders. Better names?
+2. **Attribute names.** `focuslandmark` and `focuslandmarkstart` are placeholders. Better names?
 3. **Implicit landmarks.** Should the HTML elements that already carry a landmark role (`<main>`, `<nav>`, `<aside>`, …) become focus landmarks automatically, without an explicit `focuslandmark` attribute? If so, authors will need an opt-out for elements that should stay focusable but not be landmark destinations (see [Opting out](#opting-out)).
 4. **Eligibility and semantics.** Should `focuslandmark="<subrole>"` confer the ARIA role, or only validate one the element already has? And on a non-landmark element, should a bare `focuslandmark` stay a pure navigation marker or default to the `region` role?
 5. **Value grammar.** How should behavioral tokens (`none`, `nomemory`) and subrole names share one attribute's value space without ambiguity?
 6. **Virtualized / canvas content.** Is declarative DOM enough for a first version, or is a companion imperative API needed? (My current guess: with HTML-in-Canvas, declarative is likely enough.)
 7. **Memory default.** Is "memory on by default, with `nomemory` to opt out" the right default for regions, as it is for focusgroups?
-8. **Cross-frame participation control.** Should whether a child frame's landmarks join the flattened order be a Permissions Policy (consistent with [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) rather than a bespoke iframe attribute? An attribute may still be the right home for the "treat as one opaque landmark" case. How should landmark traversal interact with that policy's still-open cross-frame edge cases ([whatwg/html#11839](https://github.com/whatwg/html/issues/11839), [whatwg/html#12032](https://github.com/whatwg/html/issues/12032))?
+8. **Cross-frame participation control.** Cross-frame participation is gated by a Permissions Policy (consistent with [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) rather than a bespoke iframe attribute, with the opaque-landmark case expressed by putting `focuslandmark` on the `<iframe>` itself. How should landmark traversal interact with that policy's still-open cross-frame edge cases ([whatwg/html#11839](https://github.com/whatwg/html/issues/11839), [whatwg/html#12032](https://github.com/whatwg/html/issues/12032))?
 9. **Subtree opt-out.** `focuslandmark="none"` opts out only the node it's on; its descendant landmarks still participate. We don't see a need today for a subtree-wide opt-out (excluding an element *and* all its descendant landmarks, the way `focusgroup="none"` works), but should one be added if a use case appears, and what should it be called? Relatedly, should an iframe skip generalize to ordinary `Tab` navigation into iframes, or stay specific to landmark navigation?
 10. **Ordering and slotted content.** Is flat tree order the right default, and should its treatment of slotted content track `focusgroup` exactly?
 
@@ -454,7 +446,7 @@ No polyfill exists yet. A polyfill could approximate the authoring shape within 
 
 ### Privacy
 
-The central concern is cross-document traversal. It must be browser-mediated, never script-mediated. A cross-origin parent must not gain a way to enumerate the names, counts, structure, or content of a child document's focus landmarks; it only decides *whether* the child participates — via a permissions policy for the include/exclude choice, or (for the opaque-landmark case) an iframe attribute — never *what* the child contains. The browser can move focus through the composed order internally without exposing the child's internals to the embedder.
+The central concern is cross-document traversal. It must be browser-mediated, never script-mediated. A cross-origin parent must not gain a way to enumerate the names, counts, structure, or content of a child document's focus landmarks; it only decides *whether* the child participates — via a permissions policy, or (for the opaque-landmark case) `focuslandmark` on the `<iframe>` element — never *what* the child contains. The browser can move focus through the composed order internally without exposing the child's internals to the embedder.
 
 This aligns with how the platform already gates cross-frame focus: the [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md) policy exists precisely to stop embedded content from stealing focus. Landmark navigation composes with that policy rather than working around it (see [Composition with `focus-without-user-activation`](#composition-with-focus-without-user-activation)): because traversal is user-triggered and browser-mediated, a participating child still cannot take focus without the user's keypress.
 
@@ -498,7 +490,7 @@ Related attributes:
 | ---------------------------------------------- | ----------------------------------------------------------------------------- |
 | Preferred entry target within a landmark       | `focuslandmarkstart` (boolean, on a descendant)                               |
 | Child landmark participation (include/exclude) | Permissions Policy, e.g. `allow="focus-landmark-participation"` on `<iframe>` |
-| Treat a child iframe as one opaque landmark    | `focuslandmarkchildren="self"`                                                |
+| Treat a child iframe as one opaque landmark    | `focuslandmark` on the `<iframe>` (no participation policy granted)           |
 
 ## Acknowledgments
 
