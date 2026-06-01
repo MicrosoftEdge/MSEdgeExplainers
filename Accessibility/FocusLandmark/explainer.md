@@ -63,7 +63,7 @@ It helps to place this next to the two keyboard-navigation paradigms the web alr
 2. **Directional navigation** (arrow keys), as standardized by [`focusgroup`](https://open-ui.org/components/scoped-focusgroup.explainer/): moves focus *within* one composite widget (a toolbar, a tablist, a menu) without leaving it.
 3. **Landmark navigation** (this proposal): moves focus *between* the major regions of a page, across frames, and ideally across the browser's own panes too. This is the paradigm that has no declarative web primitive today.
 
-`focuslandmark` and `focusgroup` are distinct, composing features, not the same mechanism. `focusgroup` brings arrow-key movement to the items inside a region; `focuslandmark` brings region-to-region movement to the page. A single region can be both: `focuslandmark` lands focus in it, and once focus is inside, `focusgroup` owns arrow-key movement among its items.
+`focuslandmark` and `focusgroup` are distinct, independent features that address different axes of navigation. `focusgroup` brings arrow-key movement to the items inside a region; `focuslandmark` brings region-to-region movement to the page. They operate separately and an element may carry both, each doing its own job.
 
 ### Before / After at a glance
 
@@ -143,7 +143,6 @@ As with `focusgroup`, I believe the solution has to be declarative: if it requir
 
 * **Mandating a key.** The key that triggers the navigation is left to the user agent per platform, matching each platform's existing convention. `F6` / `Shift+F6` are examples, not a requirement.
 * **A numeric ordering attribute.** This proposal deliberately avoids a positive-`tabindex`-style `focuslandmarkindex` (see [Ordering](#ordering)).
-* 
 
 ## Principles
 
@@ -190,24 +189,6 @@ If a region already carries a landmark role, a bare `focuslandmark` just adds th
 <section role="search" focuslandmark aria-label="Site search">…</section>
 ```
 
-A focus landmark can also be a `focusgroup`; the two compose. `focuslandmark` brings focus to the region, and once focus is inside, `focusgroup` owns arrow-key movement among the items:
-
-```html
-<div role="toolbar"
-     aria-label="Formatting"
-     focuslandmark
-     focusgroup="toolbar wrap">
-  <button>Bold</button>
-  <button>Italic</button>
-  <button>Underline</button>
-</div>
-```
-
-What to notice:
-
-* `focuslandmark` and `focusgroup` sit on the same element but do different jobs: between-region entry vs. within-region arrow movement.
-* The `toolbar` role here comes from the author; `focuslandmark` does not change it.
-
 Underneath, the user agent would define abstract operations such as "move to next focus landmark" and "move to previous focus landmark," and could fold them into its own pane-navigation cycle:
 
 ```text
@@ -242,18 +223,15 @@ Related attributes used in the examples:
 | -------------------- | -------------------------------- | ------------------------------------------------ |
 | `focuslandmarkstart` | a descendant of a focus landmark | Marks the preferred entry target for the region. |
 
-Cross-frame participation is governed entirely by a Permissions Policy, not a bespoke attribute (see [Iframes](#iframes-shadow-dom-and-flattened-order)). To treat a whole iframe as a single opaque landmark, put `focuslandmark` on the `<iframe>` element itself and don't grant the participation policy.
-
 ## Use cases
 
 1. **Region-to-region navigation.** A user moves focus directly between a page's major regions (ribbon, navigation pane, canvas, composer, sidebar) with one platform key, without tabbing through intervening controls.
 2. **Shared order with browser chrome.** The same key continues the browser's own pane cycle into the page and back out, so chrome and content feel like one app.
 3. **Custom entry point.** An author directs focus to a specific element within a region (e.g., a search field) rather than the first focusable element.
 4. **Memory of last position.** Returning to a region restores where the user last was, unless the author opts out (e.g., a tablist that should always start on the selected tab).
-5. **Implicit landmarks.** Existing landmark markup (`<nav>`, `<main>`, `<aside>`, …) participates with little or no new attributes (an [open question](#open-questions) is whether this should be automatic).
-6. **Composition with `focusgroup`.** Landmark navigation enters a composite widget; arrow keys then move within it.
-7. **Embedded apps.** Landmarks inside an iframe participate in the host's order, under the host's control, without the two apps negotiating a shortcut.
-8. **Opt-out.** A region or an embedded subtree can decline to participate.
+5. **Implicit landmarks.** Existing landmark markup (`<nav>`, `<main>`, `<aside>`, …) participates with little or no new attributes (an [open question](#open-questions) is whether this should be automatic, and if so, what should be the opt out mechanism).
+6. **Embedded apps.** Landmarks inside an iframe participate in the host's order, under the host's control, without the two apps negotiating a shortcut.
+7. **Opt-out.** A region or an embedded subtree can decline to participate.
 
 ## Focus landmark concepts
 
@@ -291,7 +269,7 @@ This is one possible resolution, not a settled algorithm. When moving to a focus
 
 1. If the landmark has a remembered entry target and it is still eligible, restore it (unless `nomemory` is set).
 2. Otherwise, focus the first eligible `focuslandmarkstart` descendant.
-3. Otherwise, if the landmark is a `focusgroup`, use the focusgroup entry algorithm.
+3. Otherwise, focus the first focusable descendant in flat tree order.
 4. Otherwise, if the `focuslandmark` element itself is focusable, focus it.
 5. Otherwise, skip the landmark.
 
@@ -319,7 +297,7 @@ By default a focus landmark remembers the last element focused within it and res
 </form>
 ```
 
-When a focus landmark is *also* a `focusgroup`, I would prefer to reuse `focusgroup`'s existing focus-memory mechanism rather than define a separate one, so the two features behave consistently. The precise rules for when memory is cleared (hidden/`inert`/removed targets, and so on) would follow `focusgroup`'s lead.
+A landmark's memory is its own: the rules for when a remembered target is cleared (when it becomes hidden, `inert`, or is removed from the DOM, and so on) are defined by landmark navigation itself, independent of any other focus feature that may apply to the same element.
 
 ## Ordering
 
@@ -391,7 +369,7 @@ That policy is still settling its own cross-frame edge cases — for example wha
 
 ## Interaction with related platform features
 
-* **`focusgroup`.** Distinct and composing, as shown in [Quickstart](#quickstart): `focuslandmark` enters a region, `focusgroup` moves within it. Where a landmark is also a focusgroup, memory and entry behavior should defer to the focusgroup mechanism.
+* **`focusgroup`.** A separate, sibling primitive for a different axis of navigation: `focusgroup` moves focus *within* a composite widget with arrow keys, while `focuslandmark` moves *between* regions. They address different problems and operate independently; an element may carry both, each doing its own job.
 * **ARIA landmarks and assistive technology.** `focuslandmark` is layered on the existing `landmark` role, so AT's existing landmark understanding and announcements apply; the proposal adds the user-agent navigation side the ARIA definition already anticipates.
 * **CSS `reading-flow` / `reading-order`.** Used as the hook for landmark order when visual order intentionally differs from DOM order, matching how `focusgroup` treats directional order (see [Ordering](#ordering)).
 * **Directional / spatial navigation.** Like `focusgroup`, this proposal defines an abstract "next / previous focus landmark" operation rather than a specific key or input device; mapping platform input (keyboard, D-pad, AT command) onto that operation is the user agent's responsibility. Document-level spatial navigation, where it exists, addresses a different scope (any focusable element) and is expected to compose with, not replace, landmark navigation.
@@ -450,7 +428,7 @@ The central concern is cross-document traversal. It must be browser-mediated, ne
 
 This aligns with how the platform already gates cross-frame focus: the [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md) policy exists precisely to stop embedded content from stealing focus. Landmark navigation composes with that policy rather than working around it (see [Composition with `focus-without-user-activation`](#composition-with-focus-without-user-activation)): because traversal is user-triggered and browser-mediated, a participating child still cannot take focus without the user's keypress.
 
-Because the entry target on landing derives from markup the document already controls (`focuslandmarkstart`, focusgroup memory, the first focusable element), the feature does not expose new information that sequential focus navigation does not already reveal within a single origin. Closed shadow roots remain UA-visible for navigation but are not made script-inspectable.
+Because the entry target on landing derives from markup the document already controls (`focuslandmarkstart`, the landmark's own memory of the last-focused element, the first focusable element), the feature does not expose new information that sequential focus navigation does not already reveal within a single origin. Closed shadow roots remain UA-visible for navigation but are not made script-inspectable.
 
 ### Security
 
