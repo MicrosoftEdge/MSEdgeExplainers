@@ -29,6 +29,7 @@ Last updated: 2026-06-01
   * [The focuslandmarkstart attribute](#the-focuslandmarkstart-attribute)
 * [Disabling landmark memory](#disabling-landmark-memory)
 * [Ordering](#ordering)
+* [Opting out](#opting-out)
 * [Iframes, shadow DOM, and flattened order](#iframes-shadow-dom-and-flattened-order)
   * [Composition with focus-without-user-activation](#composition-with-focus-without-user-activation)
 * [Interaction with related platform features](#interaction-with-related-platform-features)
@@ -206,6 +207,7 @@ Simple usage:
 <element focuslandmark="<subrole>">…</element>
 <element focuslandmark="nomemory">…</element>
 <element focuslandmark="none">…</element>
+<element focuslandmark="skip">…</element>
 ```
 
 | Token              | What it would do                                                                                                                                                                                                                                                                                                                      |
@@ -213,14 +215,15 @@ Simple usage:
 | *(bare, no value)* | Marks the element as a focus landmark for navigation. On an element that is already a landmark, changes only where focus goes. On a generic element, whether it stays a pure navigation marker or defaults to the `region` role is open.                                                                                              |
 | `<subrole>`        | Names a concrete landmark subrole (`banner`, `complementary`, `contentinfo`, `form`, `main`, `navigation`, `region`, `search`). The element joins landmark navigation and — in the case that deliberately confers semantics — takes that ARIA role. Whether the shorthand confers the role or only validates an existing one is open. |
 | `nomemory`         | Opt out of remembering the region's last entry target (memory is on by default).                                                                                                                                                                                                                                                      |
-| `none`             | Opt an element and its subtree out of an ancestor's flattened landmark order.                                                                                                                                                                                                                                                         |
+| `none`             | Opt an element **and its subtree** (shadow DOM descendants and child iframes) out of landmark navigation. See [Opting out](#opting-out).                                                                                                                                                                                              |
+| `skip`             | Opt out **just this node** as a landmark destination while its descendant landmarks still participate (e.g., an implicit-landmark `<form>` that should stay focusable but not be a destination). See [Opting out](#opting-out).                                                                                                       |
 
 Related attributes used in the examples:
 
-| Attribute               | Applies to                       | What it would do                                                                                                                                                                     |
-| ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `focuslandmarkstart`    | a descendant of a focus landmark | Marks the preferred entry target for the region.                                                                                                                                     |
-| `focuslandmarkchildren` | `<iframe>` | Treat the child as a single opaque landmark (`self`) instead of flattening its internals. The include/exclude choice is expected to be a Permissions Policy (see [Iframes](#iframes-shadow-dom-and-flattened-order)) rather than a value of this attribute. Names are bikesheddable. |
+| Attribute               | Applies to                       | What it would do                                                                                                                                                                                                                                                                     |
+| ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `focuslandmarkstart`    | a descendant of a focus landmark | Marks the preferred entry target for the region.                                                                                                                                                                                                                                     |
+| `focuslandmarkchildren` | `<iframe>`                       | Treat the child as a single opaque landmark (`self`) instead of flattening its internals. The include/exclude choice is expected to be a Permissions Policy (see [Iframes](#iframes-shadow-dom-and-flattened-order)) rather than a value of this attribute. Names are bikesheddable. |
 
 ## Use cases
 
@@ -250,6 +253,8 @@ A focus landmark builds **on** ARIA landmarks; it does not replace them. A bare 
 ## Landmark candidates
 
 `landmark` is an abstract ARIA role with a set of concrete subroles, each with a matching HTML element: `banner` (`<header>`), `complementary` (`<aside>`), `contentinfo` (`<footer>`), `form` (`<form>`), `main` (`<main>`), `navigation` (`<nav>`), `region` (`<section>`), and `search` (`<search>`). These already describe the major areas of a page, which is exactly what this navigation moves between, so landmarks are the natural anchor for the primitive.
+
+Because these elements already mark the major regions, a natural suggestion (carried as an [open question](#open-questions)) is that they become focus landmarks *implicitly*, without the author writing `focuslandmark` at all. That would not change current focus, tab order, or layout; it only adds destinations for the new navigation key. It does, though, imply an opt-out: an author may want a `<form>` (or another implicit landmark) to stay focusable and tabbable without being a landmark *destination*. `tabindex="-1"` cannot express that — it would remove the element from tabbing entirely — so a dedicated opt-out is needed (see [Opting out](#opting-out)).
 
 This raises a few candidate-related open questions, carried in [Open questions](#open-questions): whether the implicit-landmark HTML elements should become focus landmarks automatically; whether a bare `focuslandmark` on a non-landmark element stays a pure navigation marker or takes on a default `region` role; and how behavioral tokens such as `none` and `nomemory` share the value space with subrole names.
 
@@ -301,7 +306,35 @@ When a focus landmark is *also* a `focusgroup`, I would prefer to reuse `focusgr
 
 I don't think we should follow the path `tabindex` took and introduce a numeric `focuslandmarkindex`. A numeric index would recreate the problems of positive `tabindex`: global-ish manual ordering, difficult maintenance, and surprising keyboard/AT behavior.
 
-Instead, the default order should be DOM / shadow-including tree order, adjusted by the same reading-order concepts used for sequential focus navigation where applicable. This follows the direction already used by `focusgroup`: source order by default, with CSS [`reading-flow`](https://developer.mozilla.org/en-US/docs/Web/CSS/reading-flow) / `reading-order` as the platform hook when visual order intentionally differs from DOM order.
+Instead, the default order should be **flat tree order** — the flattened, composed tree that places slotted content at its rendered position — adjusted by the same reading-order concepts used for sequential focus navigation where applicable. Flat tree order is preferable to plain DOM order or shadow-including tree order: it follows where slotted content is actually rendered, so landmark order is more likely to match what the user sees, and it matches how sequential focus navigation already behaves. This follows the direction already used by `focusgroup`: source order by default, with CSS [`reading-flow`](https://developer.mozilla.org/en-US/docs/Web/CSS/reading-flow) / `reading-order` as the platform hook when visual order intentionally differs from DOM order. The precise treatment of slotted content should match whatever `focusgroup` settles on, so the two features stay consistent.
+
+## Opting out
+
+A region, an embedded frame, or a component subtree must be able to decline landmark navigation. Two scopes are useful, and they are genuinely different — a distinction `tabindex="-1"` cannot express, since an element can be focusable yet not a landmark:
+
+* **Opt out a node *and* its subtree.** The element is not a focus landmark, and none of its shadow-inclusive descendants — including child iframes — participate either. This is the broad "make this whole thing invisible to landmark navigation" opt-out, and it matches `focusgroup`'s single `focusgroup="none"` token.
+* **Opt out just the node.** The element itself is not a focus landmark, but its descendant landmarks still participate. This is the case for an implicit landmark such as a `<form>` that should stay focusable and tabbable but should not be a landmark *destination*, while a nested `<nav>` inside it still is.
+
+Placeholder token shapes (names bikesheddable; how they share the value space with subrole names is an [open question](#open-questions)):
+
+| Intent                                                | Placeholder            |
+| ----------------------------------------------------- | ---------------------- |
+| Opt out node + subtree (shadow DOM and child iframes) | `focuslandmark="none"` |
+| Opt out just this node; descendants still participate | `focuslandmark="skip"` |
+
+```html
+<!-- Focusable and tabbable, but not itself a landmark destination;
+     the nested landmark inside it still participates. -->
+<form focuslandmark="skip" aria-label="Filters">
+  <nav focuslandmark aria-label="Saved filters">…</nav>
+  …
+</form>
+
+<!-- This subtree, and any iframes within it, is entirely removed from landmark navigation. -->
+<div focuslandmark="none">…</div>
+```
+
+For iframes specifically, an embedder controls child participation through a [permissions policy](#iframes-shadow-dom-and-flattened-order) rather than reaching into the child. `focuslandmark="none"` on the `<iframe>` element opts that frame and its contents out from the parent side, and the policy default (participation not granted) is effectively a document-wide "skip all iframes for landmark navigation." A reviewer asked whether such an iframe skip should generalize to ordinary `Tab` navigation into iframes; that would be a broader change to sequential focus navigation and is out of scope here, though the parent-controlled, browser-mediated shape is deliberately analogous.
 
 ## Iframes, shadow DOM, and flattened order
 
@@ -311,7 +344,7 @@ Landmark navigation should flatten participating landmarks across boundaries, bu
 
 Proposed shape:
 
-* **Shadow DOM:** landmark discovery uses the shadow-inclusive tree, similar to `focusgroup`. A component author can opt a subtree out with `focuslandmark="none"`. Closed shadow roots remain UA-visible for navigation but not script-inspectable.
+* **Shadow DOM:** landmark discovery uses the flattened tree, similar to `focusgroup`. A component author can opt a subtree out with `focuslandmark="none"`, or opt out just the host node with `focuslandmark="skip"` (see [Opting out](#opting-out)). Closed shadow roots remain UA-visible for navigation but not script-inspectable.
 * **Iframes:** a child document's focus landmarks participate at the iframe element's position in the parent order, when the iframe is eligible and not opted out by the parent.
 * **Parent control:** the embedding context decides whether a child participates. There are two candidate mechanisms, and which to use is an [open question](#open-questions):
   * **A Permissions Policy** for the include/exclude choice. The platform already gates cross-frame focus behavior this way: the [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md) policy lets an embedder stop a child frame from taking focus without user activation. A landmark-participation policy (placeholder name `focus-landmark-participation`) would fit the same shape — set via the `Permissions-Policy` header or an `<iframe allow="…">` attribute, inherited down the frame tree, with a default allowlist. This reuses a mechanism authors already use for other features instead of inventing a bespoke attribute. It mirrors the trade-off the `focus-without-user-activation` proposal itself made: it explicitly rejected a one-off `disallowprogrammaticfocus` iframe attribute in favor of a policy, reasoning that sites already reach for permissions policies and a policy is lighter-weight and more adoptable.
@@ -388,12 +421,14 @@ These are the points we most want early feedback on. The goal is to standardize 
 
 1. **Is this a problem we should work on solving?** Does the region-to-region gap match what you see in real apps?
 2. **Attribute names.** `focuslandmark`, `focuslandmarkstart`, and `focuslandmarkchildren` are placeholders. Better names?
-3. **Implicit landmarks.** Should the HTML elements that already carry a landmark role (`<main>`, `<nav>`, `<aside>`, …) become focus landmarks automatically, without an explicit `focuslandmark` attribute?
+3. **Implicit landmarks.** Should the HTML elements that already carry a landmark role (`<main>`, `<nav>`, `<aside>`, …) become focus landmarks automatically, without an explicit `focuslandmark` attribute? If so, authors will need an opt-out for elements that should stay focusable but not be landmark destinations (see [Opting out](#opting-out)).
 4. **Eligibility and semantics.** Should `focuslandmark="<subrole>"` confer the ARIA role, or only validate one the element already has? And on a non-landmark element, should a bare `focuslandmark` stay a pure navigation marker or default to the `region` role?
 5. **Value grammar.** How should behavioral tokens (`none`, `nomemory`) and subrole names share one attribute's value space without ambiguity?
 6. **Virtualized / canvas content.** Is declarative DOM enough for a first version, or is a companion imperative API needed? (My current guess: with HTML-in-Canvas, declarative is likely enough.)
 7. **Memory default.** Is "memory on by default, with `nomemory` to opt out" the right default for regions, as it is for focusgroups?
 8. **Cross-frame participation control.** Should whether a child frame's landmarks join the flattened order be a Permissions Policy (consistent with [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) rather than a bespoke iframe attribute? An attribute may still be the right home for the "treat as one opaque landmark" case. How should landmark traversal interact with that policy's still-open cross-frame edge cases ([whatwg/html#11839](https://github.com/whatwg/html/issues/11839), [whatwg/html#12032](https://github.com/whatwg/html/issues/12032))?
+9. **Opt-out scope and naming.** Are two opt-out scopes — node-only vs. node + subtree — the right model, and what should the tokens be? (Placeholders: `skip` vs. `none`.) Should an iframe skip generalize to ordinary `Tab` navigation into iframes, or stay specific to landmark navigation?
+10. **Ordering and slotted content.** Is flat tree order the right default, and should its treatment of slotted content track `focusgroup` exactly?
 
 ## Polyfilling
 
@@ -420,6 +455,8 @@ There are no resolved standards discussions to link yet; this section records th
 * **Build on ARIA landmarks rather than a parallel concept** — reuses semantics AT already exposes and avoids a second region model.
 * **Reuse `focusgroup` conventions** (source-order default, `reading-flow` hook, default-on memory with `nomemory`, `none` opt-out) — so authors learn one set of ideas and the two features compose predictably.
 * **No numeric ordering attribute** — avoids re-introducing positive-`tabindex` problems.
+* **Two opt-out scopes** — a focusable element (e.g., a `<form>`) may need to *not* be a landmark while its descendants still are, which `tabindex="-1"` cannot express; hence a node-only opt-out alongside the broad subtree opt-out.
+* **Flat tree order for slotted content** — landmark order should follow rendered position, matching sequential focus navigation and `focusgroup`.
 * **Lean on Permissions Policy for cross-frame participation** — reuses the mechanism the platform already uses to gate cross-frame focus ([`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) instead of a bespoke attribute, and composes with that policy rather than working around it.
 * **Browser-mediated cross-frame traversal** — the privacy boundary is a requirement, not a detail.
 * **Define a mechanism, not a key** — keeps the proposal aligned with each platform's existing convention and with how `focusgroup` abstracts directional input.
@@ -437,15 +474,16 @@ All names here are placeholders to make the examples concrete; none are proposed
 | Navigation marker only               | *(bare; no value)*                                                                                         |
 | Confer / validate a landmark subrole | `focuslandmark="banner \| complementary \| contentinfo \| form \| main \| navigation \| region \| search"` |
 | Disable entry memory                 | `focuslandmark="nomemory"`                                                                                 |
-| Opt element and subtree out          | `focuslandmark="none"`                                                                                     |
+| Opt out node + subtree               | `focuslandmark="none"`                                                                                     |
+| Opt out just this node (descendants still participate) | `focuslandmark="skip"`                                                                   |
 
 Related attributes:
 
-| Description                                           | Placeholder syntax                                |
-| ----------------------------------------------------- | ------------------------------------------------- |
-| Preferred entry target within a landmark              | `focuslandmarkstart` (boolean, on a descendant)   |
-| Child landmark participation (include/exclude)        | Permissions Policy, e.g. `allow="focus-landmark-participation"` on `<iframe>` |
-| Treat a child iframe as one opaque landmark           | `focuslandmarkchildren="self"`                    |
+| Description                                    | Placeholder syntax                                                            |
+| ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| Preferred entry target within a landmark       | `focuslandmarkstart` (boolean, on a descendant)                               |
+| Child landmark participation (include/exclude) | Permissions Policy, e.g. `allow="focus-landmark-participation"` on `<iframe>` |
+| Treat a child iframe as one opaque landmark    | `focuslandmarkchildren="self"`                                                |
 
 ## Acknowledgments
 
