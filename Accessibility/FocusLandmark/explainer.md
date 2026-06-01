@@ -8,15 +8,7 @@ Last updated: 2026-06-01
 * Related primitives: ARIA [`landmark` role](https://w3c.github.io/aria/#landmark), [`focusgroup`](https://open-ui.org/components/scoped-focusgroup.explainer/)
 * Status: **early exploration**
 
-> **How to read this document.** It borrows the section structure of more mature
-> explainers (notably the [scoped `focusgroup` explainer](https://open-ui.org/components/scoped-focusgroup.explainer/))
-> where that structure helps, so reviewers familiar with that document can find their
-> way around. The structure is the only thing that is settled. The details below —
-> attribute names, tokens, the entry algorithm, the IDL — are exploratory and meant to
-> make the examples concrete, not to propose a final design. Names like `focuslandmark`,
-> `focuslandmarkstart`, and `focuslandmarkchildren` are placeholders and bikesheddable.
-> The goal of this document is to confirm the problem and check whether this is a
-> reasonable starting point.
+> 
 
 ## Table of contents
 
@@ -51,13 +43,13 @@ Last updated: 2026-06-01
 
 ## Introduction
 
-Rich web apps are built from major regions, such as a ribbon, a navigation pane, a document canvas, a chat list, a message composer, or an assistant sidebar, much like native applications. Many users want to move between these regions directly from the keyboard, without tabbing through every control in between. This is one of the most common accessibility and productivity requests I hear from people who use web apps.
+Rich web apps are built from major regions, such as a ribbon, a navigation pane, a document canvas, a chat list, a message composer, or an assistant sidebar, much like native applications. Users want to move between these regions directly from the keyboard, without tabbing through every control in between. This is one of the most common accessibility and productivity requests I hear from people who use web apps.
 
 Today there is no consistent way to do it. Some platforms support it natively, some web apps build their own version, and the browser treats the page as a single block. As a result, the same action works differently, or not at all, depending on the app.
 
 On native platforms this navigation is routine. On Windows, for example, `F6` and `Shift+F6` move focus from one area of an app to the next, and browsers use the same idea for their own chrome (tab strip, address bar, and so on). But this stops at the edge of web content. Authors have no way to plug page regions into the browser's own focus-navigation cycle.
 
-I'm proposing a declarative HTML primitive, with the placeholder name `focuslandmark`, that lets authors mark the major regions of a page so the browser can move focus to the next or previous one. Browser UI and web content would then share a single landmark-navigation model, similar to how `Tab` already provides one focus order across browser chrome and web content. The feature defines the behavior; the browser owns the key, choosing the platform's natural one (for example `F6` on Windows) or picking one where the platform has no such convention.
+We're proposing a declarative HTML primitive, with the placeholder name `focuslandmark`, that lets authors mark the major regions of a page so the browser can move focus to the next or previous one. Browser UI and web content would then share a single landmark-navigation model, similar to how `Tab` already provides one focus order across browser chrome and web content. The feature defines the behavior; the browser owns the key, choosing the platform's natural one (for example `F6` on Windows) or picking one where the platform has no such convention.
 
 Because this problem is common across many web apps, it seems worth standardizing so that the behavior, default accessibility, and interoperability come from the platform rather than from per-site script.
 
@@ -215,19 +207,19 @@ Simple usage:
 <element focuslandmark="none">…</element>
 ```
 
-| Token | What it would do |
-| --- | --- |
-| *(bare, no value)* | Marks the element as a focus landmark for navigation. On an element that is already a landmark, changes only where focus goes. On a generic element, whether it stays a pure navigation marker or defaults to the `region` role is open. |
-| `<subrole>` | Names a concrete landmark subrole (`banner`, `complementary`, `contentinfo`, `form`, `main`, `navigation`, `region`, `search`). The element joins landmark navigation and — in the case that deliberately confers semantics — takes that ARIA role. Whether the shorthand confers the role or only validates an existing one is open. |
-| `nomemory` | Opt out of remembering the region's last entry target (memory is on by default). |
-| `none` | Opt an element and its subtree out of an ancestor's flattened landmark order. |
+| Token              | What it would do                                                                                                                                                                                                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| *(bare, no value)* | Marks the element as a focus landmark for navigation. On an element that is already a landmark, changes only where focus goes. On a generic element, whether it stays a pure navigation marker or defaults to the `region` role is open.                                                                                              |
+| `<subrole>`        | Names a concrete landmark subrole (`banner`, `complementary`, `contentinfo`, `form`, `main`, `navigation`, `region`, `search`). The element joins landmark navigation and — in the case that deliberately confers semantics — takes that ARIA role. Whether the shorthand confers the role or only validates an existing one is open. |
+| `nomemory`         | Opt out of remembering the region's last entry target (memory is on by default).                                                                                                                                                                                                                                                      |
+| `none`             | Opt an element and its subtree out of an ancestor's flattened landmark order.                                                                                                                                                                                                                                                         |
 
 Related attributes used in the examples:
 
-| Attribute | Applies to | What it would do |
-| --- | --- | --- |
-| `focuslandmarkstart` | a descendant of a focus landmark | Marks the preferred entry target for the region. |
-| `focuslandmarkchildren` | `<iframe>` | Whether the child document's landmarks participate in the parent's flattened order: `include`, `none`, or `self` (treat the iframe as one opaque landmark). Names are bikesheddable. |
+| Attribute               | Applies to                       | What it would do                                                                                                                                                                     |
+| ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `focuslandmarkstart`    | a descendant of a focus landmark | Marks the preferred entry target for the region.                                                                                                                                     |
+| `focuslandmarkchildren` | `<iframe>`                       | Whether the child document's landmarks participate in the parent's flattened order: `include`, `none`, or `self` (treat the iframe as one opaque landmark). Names are bikesheddable. |
 
 ## Use cases
 
@@ -375,7 +367,7 @@ partial interface HTMLIFrameElement {
 
 ## Open questions
 
-These are the points I most want early feedback on. The goal is to standardize an end-to-end landmark-navigation operation so the browser, top-level web app, embedded web app, and assistive technology can all take part in one consistent model, while leaving the triggering key to each platform's convention.
+These are the points we most want early feedback on. The goal is to standardize an end-to-end landmark-navigation operation so the browser, top-level web app, embedded web app, and assistive technology can all take part in one consistent model, while leaving the triggering key to each platform's convention.
 
 1. **Is this a problem we should work on solving?** Does the region-to-region gap match what you see in real apps?
 2. **Attribute names.** `focuslandmark`, `focuslandmarkstart`, and `focuslandmarkchildren` are placeholders. Better names?
@@ -419,18 +411,18 @@ All names here are placeholders to make the examples concrete; none are proposed
 
 `focuslandmark` attribute:
 
-| Description | Placeholder syntax |
-| --- | --- |
-| Navigation marker only | *(bare; no value)* |
+| Description                          | Placeholder syntax                                                                                         |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Navigation marker only               | *(bare; no value)*                                                                                         |
 | Confer / validate a landmark subrole | `focuslandmark="banner \| complementary \| contentinfo \| form \| main \| navigation \| region \| search"` |
-| Disable entry memory | `focuslandmark="nomemory"` |
-| Opt element and subtree out | `focuslandmark="none"` |
+| Disable entry memory                 | `focuslandmark="nomemory"`                                                                                 |
+| Opt element and subtree out          | `focuslandmark="none"`                                                                                     |
 
 Related attributes:
 
-| Description | Placeholder syntax |
-| --- | --- |
-| Preferred entry target within a landmark | `focuslandmarkstart` (boolean, on a descendant) |
+| Description                                           | Placeholder syntax                                |
+| ----------------------------------------------------- | ------------------------------------------------- |
+| Preferred entry target within a landmark              | `focuslandmarkstart` (boolean, on a descendant)   |
 | Child-document landmark participation (on `<iframe>`) | `focuslandmarkchildren="include \| none \| self"` |
 
 ## Acknowledgments
