@@ -230,7 +230,7 @@ Related attributes used in the examples:
 3. **Custom entry point.** An author directs focus to a specific element within a region (e.g., a search field) rather than the first focusable element.
 4. **Memory of last position.** Returning to a region restores where the user last was, unless the author opts out (e.g., a tablist that should always start on the selected tab).
 5. **Implicit landmarks.** Existing landmark markup (`<nav>`, `<main>`, `<aside>`, …) participates with little or no new attributes (an [open question](#open-questions) is whether this should be automatic, and if so, what should be the opt out mechanism).
-6. **Embedded apps.** Landmarks inside an iframe participate in the host's order, under the host's control, without the two apps negotiating a shortcut.
+6. **Embedded apps.** Landmarks inside an iframe participate in the host's order, under the host's control through a [Permissions Policy](#iframes-shadow-dom-and-flattened-order), without the two apps negotiating a shortcut.
 7. **Opt-out.** A region or an embedded subtree can decline to participate.
 
 ## Focus landmark concepts
