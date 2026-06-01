@@ -67,14 +67,16 @@ It helps to place this next to the two keyboard-navigation paradigms the web alr
 
 ### Before / After at a glance
 
-This comparison is about *authoring burden and consistency*, not about promising a finished UX. Several hard parts (the platform key, AT interaction, cross-frame privacy) are discussed later and remain open.
+This comparison is about *authoring burden and consistency*, not about promising a finished UX. Several hard parts (the platform key, AT interaction, cross-frame privacy) are discussed later and remain open. Each pair below changes only one thing — the per-app script disappears — so it's an apples-to-apples comparison of the same markup with and without the feature.
 
-Before (a custom shortcut, re-invented per app):
+**Generic regions (explicit opt-in).** Elements without a landmark role opt in with a bare `focuslandmark`, which defaults them to the `region` role.
+
+Before:
 
 ```html
-<div id="ribbon">…</div>
-<div id="nav">…</div>
-<main id="canvas">…</main>
+<div role="region" aria-label="App ribbon">…</div>
+<div role="region" aria-label="Primary">…</div>
+<div role="region" aria-label="Canvas">…</div>
 <script>
   // Without focuslandmark an author script must:
   //  - Pick a key (F6? Ctrl+F6? something else?) and hope it doesn't clash
@@ -86,15 +88,36 @@ Before (a custom shortcut, re-invented per app):
 </script>
 ```
 
-After (declarative markup; the browser owns the key and the cross-frame plumbing):
+After (same markup, plus one attribute per region; the script is gone):
 
 ```html
-<header focuslandmark aria-label="App ribbon">…</header>
-<nav focuslandmark aria-label="Primary">…</nav>
-<main focuslandmark aria-labelledby="doc-title">…</main>
+<div role="region" focuslandmark aria-label="App ribbon">…</div>
+<div role="region" focuslandmark aria-label="Primary">…</div>
+<div role="region" focuslandmark aria-label="Canvas">…</div>
 ```
 
-What changed: the regions are declared once, the browser maps the platform's natural key onto a "move to next / previous focus landmark" operation, and that operation flows through browser chrome, page regions, and embedded frames as one order. The author keeps only app-specific logic.
+**Semantic landmark elements (implicit participation).** Elements that already carry a landmark role need no attribute at all under the proposed implicit behavior.
+
+Before:
+
+```html
+<header aria-label="App ribbon">…</header>
+<nav aria-label="Primary">…</nav>
+<main aria-labelledby="doc-title">…</main>
+<script>
+  // The same hand-rolled key handler as above, re-implemented per app.
+</script>
+```
+
+After (same markup, with the script gone and no new attributes):
+
+```html
+<header aria-label="App ribbon">…</header>
+<nav aria-label="Primary">…</nav>
+<main aria-labelledby="doc-title">…</main>
+```
+
+What changed: in both cases the regions were already declared; the browser maps the platform's natural key onto a "move to next / previous focus landmark" operation that flows through browser chrome, page regions, and embedded frames as one order, so the per-app script disappears. Generic regions opt in with an explicit `focuslandmark`; elements that already carry a landmark role participate implicitly. (Whether landmark elements participate implicitly, versus always needing an explicit `focuslandmark`, is itself an [open question](#open-questions).)
 
 ## Why a declarative primitive?
 
