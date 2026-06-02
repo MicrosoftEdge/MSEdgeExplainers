@@ -749,7 +749,7 @@ class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 - Authors might need to generate many class variations for different behavior combinations.
 - It strictly binds behavior to the JavaScript class hierarchy, making a future declarative syntax hard to implement without creating new classes.
 
-Rejected in favor of the imperative API because it doesn't allow behavior composition (attaching multiple complementary behaviors to a single element), requires multiple classes instead of a single element that adapts to initial configuration (see [Use case: Design system button](#use-case-design-system-button)), and doesn't support configuring behavior state before attachment.
+Rejected in favor of the imperative API because it requires multiple classes instead of a single element that adapts to initial configuration (see [Use case: Design system button](#use-case-design-system-button)), and doesn't support configuring behavior state before attachment.
 
 ### Alternative 2: ElementInternals.type ([Proposed](../ElementInternalsType/explainer.md))
 
@@ -1039,7 +1039,7 @@ class CustomSubmitButton extends HTMLElement {
 
 ### Alternative API design 3: Behavior-scoped `behavior.disabled`
 
-For elements that want to express toggle-like behavior at runtime, the proposed path is to attach every relevant behavior at `attachInternals()` and use a per-behavior off switch to turn each behavior's capabilities on or off from the outside. The behaviors stay attached and their IDL surfaces stay exposed on the host; only their participation toggles. Under the current design, setting `behavior.disabled = true` disables the host element. An alternative semantics is for `behavior.disabled` to disable only that behavior's contribution. The behavior remains attached (the proposal still forbids removing it after `attachInternals()`), its attribute and IDL surface stays exposed on the host, but the behavior becomes inert: its activation handler is not invoked, it does not contribute to focusability, and its implicit ARIA role and pseudo-class participation are suppressed. Element-level disabled state continues to drive the host's actual disabled state.
+For elements that want to freely turn behaviors on and off at runtime, the proposed path is to attach every relevant behavior at `attachInternals()` and use a per-behavior off switch to turn each behavior's capabilities on or off from the outside. The behaviors stay attached and their IDL surfaces stay exposed on the host; only their participation toggles. Under the current design, setting `behavior.disabled = true` disables the host element. An alternative semantics is for `behavior.disabled` to disable only that behavior's contribution. The behavior remains attached (the proposal still forbids removing it after `attachInternals()`), its attribute and IDL surface stays exposed on the host, but the behavior becomes inert: its activation handler is not invoked, it does not contribute to focusability, and its implicit ARIA role and pseudo-class participation are suppressed. Element-level disabled state continues to drive the host's actual disabled state.
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -1077,6 +1077,7 @@ class CustomButton extends HTMLElement {
 **Cons:**
 
 - There is still some complexity to resolve as this would likely affect how conflict resolution works and even if `disabled` is the right attribute to use or if we should introduce a special attribute or event that signifies behavior disablement.
+- Mid-interaction state changes remain ambiguous. Changing `behavior.disabled` between events of a single interaction (for example, between `mousedown` and `mouseup`, or between `keydown` and `keyup` on a key activation) raises the same question as runtime add/remove: does the activation that started against the enabled behavior still complete, or does it become inert at the moment the toggle happens?
 - The current `behavior.disabled` semantics matches what authors most often expect from a `disabled` flag set on an element.
 
 If developer feedback agrees that multi-behavior on/off is needed, this is the proposed path.
@@ -1101,7 +1102,7 @@ class MyButton extends HTMLElement {
 - More consistent with how the implementation models the element.
 
 **Cons:**
-- Deprecation of `attachInternals()`.
+- Requires deprecating the existing `attachInternals()` API, which is standardized and used for form-associated custom elements. Replacing it with an always-available accessor means carrying both shapes through a long deprecation window and asking authors to migrate.
 - Behavior attachment still has to land at a specific point. Moving to a writable list reintroduces the timing question that the current set-once-at-attach design resolved.
 
 ### Alternative conflict resolution: Compatibility allow-list
