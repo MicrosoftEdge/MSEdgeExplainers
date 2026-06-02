@@ -10,7 +10,7 @@
 
 ## Introduction
 
-Custom element authors frequently need their elements to use platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). This proposal introduces platform-provided behaviors as a mechanism for autonomous custom elements to adopt specific native HTML element behaviors. Rather than requiring developers to reimplement native behaviors in JavaScript or extend native elements (customized built-ins), this approach exposes native capabilities as composable behaviors.
+Custom element authors frequently need their elements to use platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). The motivation of this proposal is to give custom element authors visibility into the same protocols, lifecycle hooks, and internal state that native elements use. Platform-provided behaviors name the platform-internal logic HTML already runs for native elements and expose it for reuse, rather than asking authors to reimplement that logic in Javascript.
 
 ## User-facing problem
 
@@ -71,6 +71,8 @@ This proposal is informed by:
    </ds-button>
    ```
 
+These frameworks mirror a native `<button>` by having one custom element class whose form activation is selected by the `type` attribute. The same pattern appears across other design systems including [Adobe Spectrum Web Components](https://github.com/adobe/spectrum-web-components/blob/main/1st-gen/packages/button/src/ButtonBase.ts) (`<sp-button>` with `type` attribute, hidden `<button type="submit">` proxy) and [Microsoft Fluent UI Web Components](https://github.com/microsoft/fluentui/blob/master/packages/web-components/src/button/button.base.ts) (`<fluent-button>` with `type` attribute, built on the FAST web component foundation).
+
 ### Why start with form submission?
 
 1. There's a clear gap with implicit form submission.
@@ -79,7 +81,7 @@ This proposal is informed by:
 
 ## Proposed approach
 
-This proposal introduces a `behaviors` option to `attachInternals()`. Behaviors are instantiated with `new` and attached via the options object. Once attached, behaviors can't be added, removed, or replaced but the behavior instances themselves remain mutable.
+A platform-provided behavior is a set of methods, values, and platform-protocol hooks that a custom element can participate in, which today are reserved to native HTML elements. This proposal introduces a `behaviors` option to `attachInternals()`. Behaviors are instantiated with `new` and attached via the options object. Once attached, behaviors can't be added, removed, or replaced but the behavior instances themselves remain mutable.
 
 ```javascript
 // Instantiate the behavior and attach it.
@@ -96,30 +98,29 @@ const submitBehavior = this._internals.behaviors.find(
 submitBehavior?.disabled = true;
 ```
 
-### Platform-provided behaviors
+Each behavior names the specific platform logic it engages:
 
-Platform behaviors give custom elements capabilities that would otherwise require reimplementation or workarounds. Each behavior automatically provides:
+- Event handling and activation
+- ARIA defaults (implicit role and ARIA properties)
+- Focusability
+- CSS pseudo-classes
+- Configurable data and state owned by the behavior
+- Platform protocol hooks
 
-- Event handling: Platform events (click, keydown, etc.) are wired up automatically using the standard DOM event infrastructure (respecting `stopPropagation`, `preventDefault`, etc.)
-- ARIA defaults: Implicit roles and properties for accessibility.
-- Focusability: The element participates in the tab order as appropriate for the behavior.
-- CSS pseudo-classes: Behavior-specific pseudo-classes are managed by the platform.
-
-Bundling these capabilities as high-level units lets the platform provide accessible defaults, wire up events correctly, and manage pseudo-class state.
+### HTMLSubmitButtonBehavior
 
 This proposal introduces `HTMLSubmitButtonBehavior`, which mirrors the submission capability of `<button type="submit">`:
 
-| Capability | Details |
-|------------|---------|
-| Activation | Click and keyboard (Space/Enter) trigger form submission. |
-| Implicit submission | The element participates in "Enter to submit" within forms. |
-| ARIA | Implicit `role="button"`. |
-| Focusability | Participates in tab order; removed when `disabled` is `true`. |
-| CSS pseudo-classes | `:default`, `:disabled`/`:enabled`, `:focus`, `:focus-visible`. |
+- User activation (click, Enter, Space, implicit submission) reaches the behavior through the same DOM event-dispatch path as native elements, including `stopPropagation` and `preventDefault`. The behavior's activation handler is invoked after default-prevention checks the same way `<button>`'s is.
+- The behavior provides a default implicit `role="button"` which authors can override the role through `internals.role`.
+- The custom element participates in sequential focus navigation using the same focusability logic native elements use, with `tabindex` and disabled state following the established rules.
+- The same logic that toggles `:default`, `:disabled`/`:enabled`, `:focus`, and `:focus-visible` on native elements applies to the behavior's host.
+- Mirrored `HTMLButtonElement` properties are available on the behavior instance. They are configurable per-element and mutable for the life of the behavior.
+- Form ownership, submitter eligibility, implicit submission, the `:default` pseudo-class match, the implicit role, and focusability are wired into the corresponding platform machinery the same way they are for native `<button type="submit">`.
 
 *Note: While `HTMLButtonElement` also supports generic button behavior (type="button") and reset behavior (type="reset"), this proposal focuses exclusively on introducing the submit behavior.*
 
-`HTMLSubmitButtonBehavior` doesn't require the custom element to be form-associated (`static formAssociated = true`), but form association is needed for submission to work. Without it, `behavior.form` is always `null` and activation is a no-op even if the element is inside a form. This is a divergence from native `<button>`, which submits its form without any explicit opt-in.
+`HTMLSubmitButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission to actually fire. Without it, `behavior.form` is always `null` and activation is a no-op even when the element is inside a form. This is a divergence from native `<button>`, which submits its form without any explicit opt-in.
 
 | Scenario | Behavior |
 |----------|----------|
@@ -214,7 +215,18 @@ When `attachInternals()` is called with behaviors, each behavior is attached to 
 | Element disconnected from DOM | Behavior state is preserved. Event handlers remain conceptually attached but inactive. |
 | Element reconnected to DOM | Event handlers become active again. Behavior state (e.g., `formAction`, `disabled`) is preserved. |
 
-*Note: Behaviors are immutable after `attachInternals()`. Dynamic behavior updates (adding, removing, or replacing behaviors after attachment) are not supported, as developer feedback indicated that the problems with `<input>`'s mutable `type` attribute (state migration, event handler cleanup, property compatibility) should not be replicated.*
+### Dynamic behaviors
+
+Behaviors are immutable after `attachInternals()`. Adding, removing, or replacing behaviors after attachment is not supported in this proposal (e.g., a `<custom-button>` that gains submit behavior when an attribute appears and loses it when the attribute is removed). Dynamically adding or removing behaviors the following questions:
+
+- What happens to form ownership if the behavior is removed mid-life?
+- What does the element's role become, and is the role transition observable to assistive technologies?
+- How does focusability need to transition while adding and removing behaviors?
+- What if activation is in flight (mousedown happened with the behavior attached, mouseup arrives after the behavior is removed)?
+
+`<input>` can be cited as a platform precedent for adding and removing capabilities and properties mid-life. However, `<input>` exposes its entire IDL surface at all times and the `type` attribute changes which subset of properties is currently active; it doesn't add or remove anything from the element. The same is true for `<a>`, where setting or unsetting `href` changes how the element behaves but doesn't change what's exposed on it.
+
+For elements that want to express toggle-like behavior at runtime, the proposed path is captured in [Alternative API design 3: Behavior-scoped behavior.disabled](#alternative-api-design-3-behavior-scoped-behaviordisabled).
 
 ### Duplicate behaviors
 
@@ -276,6 +288,35 @@ this._internals = this.attachInternals({ behaviors: [this._tooltipBehavior] });
 
 // Access state directly.
 this._tooltipBehavior.content = 'Helpful tooltip text';
+```
+
+The choice of which behaviors to attach can depend on attributes at element initialization. Web authors may use `connectedCallback` for this because by the time the element is connected, its attributes are observable, including for elements created via `document.createElement()` and then configured with `setAttribute()` before insertion.
+
+```javascript
+class MyButton extends HTMLElement {
+  static formAssociated = true;
+  #internals;
+  #submitBehavior;
+
+  connectedCallback() {
+    // Defer to connectedCallback because parser-set attributes
+    // aren't present yet in the constructor.
+    // connectedCallback also works for elements created with
+    // document.createElement() and configured with
+    // setAttribute() before insertion.
+    if (this.#internals) {
+      return;
+    }
+    const behaviors = [];
+    if (this.hasAttribute('submit')) {
+      this.#submitBehavior = new HTMLSubmitButtonBehavior();
+      behaviors.push(this.#submitBehavior);
+    }
+    // If behavior selection doesn't depend on attributes,
+    // attachInternals() can run in the constructor instead.
+    this.#internals = this.attachInternals({ behaviors });
+  }
+}
 ```
 
 ### Behavior composition and conflict resolution
@@ -504,7 +545,7 @@ The element gains:
 - Participation in implicit form submission (for submit buttons).
 - Behavior properties like `disabled` and `formAction` are accessible via the stored behavior reference.
 
-*Note: Dynamically switching `type` after the element is connected is not supported because `internals.behaviors` can't be changed after `ElementInternals` is attached. If it turns out that dynamically switching `type` is needed, future work could consider removing this restriction.*
+*Note: Switching `type` after the element is connected is not supported because `internals.behaviors` can't be changed after `ElementInternals` is attached. If it turns out that switching `type` is needed after attachment, future work could consider removing this restriction.*
 
 ### Framework use cases
 
@@ -708,7 +749,7 @@ class CustomSubmitButton extends HTMLSubmitButtonMixin(HTMLElement) { ... }
 - Authors might need to generate many class variations for different behavior combinations.
 - It strictly binds behavior to the JavaScript class hierarchy, making a future declarative syntax hard to implement without creating new classes.
 
-Rejected in favor of the imperative API because it doesn't allow behavior composition (attaching multiple complementary behaviors to a single element), requires multiple classes instead of a single element that adapts to initial configuration, and doesn't support configuring behavior state before attachment.
+Rejected in favor of the imperative API because it requires multiple classes instead of a single element that adapts to initial configuration (see [Use case: Design system button](#use-case-design-system-button)), and doesn't support configuring behavior state before attachment.
 
 ### Alternative 2: ElementInternals.type ([Proposed](../ElementInternalsType/explainer.md))
 
@@ -949,13 +990,13 @@ class CustomButton extends HTMLElement {
 - Allows composition.
 
 **Cons:**
-- Decorators operate at class definition time, not instance creation time. This creates the same limitation as static class mixins: behavior is fixed when the class is defined, not when instances are created (e.g., a design system couldn't offer a single `<ds-button>` class that adapts behavior based on the `type` attribute).
-- Instance-specific behavior configuration (e.g., setting `formAction` before attachment) isn't supported.
+- Decorators operate at class definition time, not instance creation time. This creates the same limitation as static class mixins: behavior is fixed when the class is defined, not when instances are created.
+- Decorators are a class-level construct, but behavior state (e.g., `disabled`, `formAction`) is per-instance, so instance-specific behavior configuration (e.g., setting `formAction` before attachment) isn't supported.
+- A decorator can't easily access `ElementInternals` or instance state at application time, so it would need to coordinate with `attachInternals()` timing.
+- Getting a reference to the behavior instance for property access (e.g., `behavior.formAction`) would require additional wiring.
 - Decorators are inherently JavaScript syntax and don't support a future declarative, JavaScript-less approach to custom elements. This proposal's design decouples behaviors from the class definition, enabling future declarative syntax (see [Other considerations](#other-considerations)).
 
-`HTMLSubmitButtonBehavior` could itself be designed as a decorator, but decorators can't easily access `ElementInternals` or instance state during application. Decorators would need to coordinate with `attachInternals()` timing, and getting a reference to the behavior instance for property access (e.g., `behavior.formAction`) would require additional wiring.
-
-### Alternative API design: Class references
+### Alternative API design 1: Class references
 
 Pass behavior classes (not instances) to `attachInternals()`:
 
@@ -975,6 +1016,94 @@ this._internals.behaviors.htmlSubmitButton.formAction = '/custom';
 - Platform instantiates the behavior, so constructor parameters aren't available. This conflicts with the [design principle that classes should have constructors](https://www.w3.org/TR/design-principles/#constructors) that allow authors to create and configure instances.
 - Requires a `behaviors` interface for named access.
 - *Future* developer-defined behaviors would need a way to name their behaviors.
+
+### Alternative API design 2: Static behavior list on the class
+
+Declare behaviors as a static class field that holds a list of strings. The platform reads the static field at custom-element registration time and attaches behaviors to every instance.
+
+```javascript
+class CustomSubmitButton extends HTMLElement {
+  static behaviors = ["form-associated", "submit"];
+}
+```
+
+**Pros:**
+- Familiar shape, modeled on `static formAssociated = true`.
+- One declaration replaces both the FACE static opt-in and the `attachInternals({ behaviors })` call.
+- No behavior instance for the author to construct.
+
+**Cons:**
+- Constructor arguments are not expressible in a static token. Behaviors have configurable state (e.g., `HTMLSubmitButtonBehavior`'s `formAction`, `formMethod`, `formNoValidate`). With a static list, the platform has to expose a separate mechanism for the author to look the behavior up and mutate it after attachment.
+- Behavior selection can't depend on attributes. HTML already does this with `<button type=>` and `<input type=>`, and frameworks use a single custom element class whose form behavior is selected by the `type` attribute on each instance.
+- Naming collisions and ambiguity get more likely as behaviors become available.
+
+### Alternative API design 3: Behavior-scoped `behavior.disabled`
+
+For elements that want to freely turn behaviors on and off at runtime, the proposed path is to attach every relevant behavior at `attachInternals()` and use a per-behavior off switch to turn each behavior's capabilities on or off from the outside. The behaviors stay attached and their IDL surfaces stay exposed on the host; only their participation toggles. Under the current design, setting `behavior.disabled = true` disables the host element. An alternative semantics is for `behavior.disabled` to disable only that behavior's contribution. The behavior remains attached (the proposal still forbids removing it after `attachInternals()`), its attribute and IDL surface stays exposed on the host, but the behavior becomes inert: its activation handler is not invoked, it does not contribute to focusability, and its implicit ARIA role and pseudo-class participation are suppressed. Element-level disabled state continues to drive the host's actual disabled state.
+
+```javascript
+class CustomButton extends HTMLElement {
+  static formAssociated = true;
+  static observedAttributes = ['type'];
+
+  #submitBehavior = new HTMLSubmitButtonBehavior();
+  #resetBehavior = new HTMLResetButtonBehavior();
+  #internals;
+
+  constructor() {
+    super();
+    this.#internals = this.attachInternals({
+      behaviors: [this.#submitBehavior, this.#resetBehavior],
+    });
+    // Start as a submit button. The reset behavior is attached but inert.
+    this.#resetBehavior.disabled = true;
+  }
+
+  attributeChangedCallback(name, _oldValue, newValue) {
+    if (name === 'type') {
+      this.#submitBehavior.disabled = newValue !== 'submit';
+      this.#resetBehavior.disabled = newValue !== 'reset';
+    }
+  }
+}
+```
+
+**Pros:**
+
+- Dynamic de-application of a behavior object stays disallowed, the on/off switch lives on the behavior itself.
+- Answers the "we need dynamic behaviors" use cases without reintroducing add/remove: A `<custom-button>` whose `type` attribute selects between submit and reset, a custom toggle that swaps between switch and press-button shape, a component that activates different behaviors on mobile versus desktop are all addressed by attaching every behavior up front and toggling each one's `disabled` in response to attribute or state changes.
+- The capabilities of each attached behavior stay discoverable on the host regardless of disabled state.
+
+**Cons:**
+
+- There is still some complexity to resolve as this would likely affect how conflict resolution works and even if `disabled` is the right attribute to use or if we should introduce a special attribute or event that signifies behavior disablement.
+- Mid-interaction state changes remain ambiguous. Changing `behavior.disabled` between events of a single interaction (for example, between `mousedown` and `mouseup`, or between `keydown` and `keyup` on a key activation) raises the same question as runtime add/remove: does the activation that started against the enabled behavior still complete, or does it become inert at the moment the toggle happens?
+- The current `behavior.disabled` semantics matches what authors most often expect from a `disabled` flag set on an element.
+
+If developer feedback agrees that multi-behavior on/off is needed, this is the proposed path.
+
+### Alternative API design 4: Always-available internals
+
+Replace `attachInternals()` with an always-available accessor (`getInternals()` or an `internals` property) that returns an `ElementInternals` for every custom element regardless of whether the element opts in. Behaviors would be configured by assignment:
+
+```javascript
+class MyButton extends HTMLElement {
+  static formAssociated = true;
+
+  constructor() {
+    super();
+    this.internals.behaviors = [new HTMLSubmitButtonBehavior()];
+  }
+}
+```
+
+**Pros:**
+- The "attach" step disappears and web authors no longer have to remember to call `attachInternals()` before configuring the element.
+- More consistent with how the implementation models the element.
+
+**Cons:**
+- Requires deprecating the existing `attachInternals()` API, which is standardized and used for form-associated custom elements. Replacing it with an always-available accessor means carrying both shapes through a long deprecation window and asking authors to migrate.
+- Behavior attachment still has to land at a specific point. Moving to a writable list reintroduces the timing question that the current set-once-at-attach design resolved.
 
 ### Alternative conflict resolution: Compatibility allow-list
 
