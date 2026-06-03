@@ -17,7 +17,7 @@
 
 WebAudio works well in a realtime playback context but it is not suitable for offline context (faster-than-realtime) processing due to a limitation in the design of WebAudio's [OfflineAudioContext API](https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext). The design of the API requires allocating memory to render the whole audio graph's memory up-front which can reach gigabytes of AudioBuffer data.
 
-This document will propose expanding the functionality of the offline context rendering function so that the audio graph data can be incrementally processed rather than allocating the whole audio buffer up-front.
+This document proposes expanding the functionality of the offline context rendering function so that the audio graph data can be incrementally processed rather than allocating the whole audio buffer up-front.
 
 ## User-Facing Problem
 
@@ -31,17 +31,17 @@ A workaround to these limitations is for developers to build custom WASM audio-p
 
 ### Goals
 
-- Allow incrementally rendering data out of a WebAudio offline context for rendering large audio graphs
+- Allow incrementally rendering data out of a OfflineAudioContext for rendering large audio graphs
 
 ### Non-goals
 
 - Change the existing `startRendering()` behavior, this API change is additive
 
-## Proposed Approach - `startRendering` can render in chunks
+## Proposed Approach
 
-The preferred approach is to modify the behavior of `startRendering()` in a backwards-compatible manner so that it always renders incrementally in chunks. With it, as will be explained ahead, the current one-shot render scenario now becomes a special case of the new behavior where the `chunkSize` is set to `OfflineAudioContextOptions.length`.
+We propose modifying the behavior of `startRendering()` in a backwards-compatible manner so that it always renders incrementally in chunks. With this, the current one-shot render scenario becomes a special case of the new behavior where the new `chunkSize` parameter is set to `OfflineAudioContextOptions.length`.
 
-To make this work, we need to modify `startRendering()` to accept an optional `long chunkSize` argument and `OfflineAudioContextOptions.length` will be allowed to be set to `Infinity`. With this, every call to `startRendering` will now return an `AudioBuffer` that has a maximum number of samples given by `chunkSize`. If `chunkSize` is not provided to `startRendering`, it defaults to:
+To enable this, we will need to modify `startRendering()` to accept an optional `long chunkSize` argument and `OfflineAudioContextOptions.length` will be allowed to be set to `Infinity`. With this, every call to `startRendering` will now return an `AudioBuffer` that has a maximum number of samples given by `chunkSize`. If `chunkSize` is not provided to `startRendering`, it defaults to:
 - The [render quantum size](https://webaudio.github.io/web-audio-api/#render-quantum-size) if `OfflineAudioContextOptions.length` is `Infinity`.
 - The `OfflineAudioContextOptions.length` otherwise.
 
@@ -50,7 +50,7 @@ With this proposal, all offline audio rendering is incremental by definition:
 - Unknown duration rendering is supported by making `OfflineAudioContextOptions.length` equal to `Infinity`. 
 - Incremental rendering can be done by calling startRendering multiple times.
 
-For the cases where there is a long ongoing one-shot render or an `Infinity`-length render that needs to stop, users can call `OfflineAudioContext.close()` to stop the rendering. Similarly to regular `AudioContexts`, after `close` is called, the audio context cannot be resumed. Moreover, for the defined-length render case, the context will automatically transition to the `closed` state when all the audio data has been rendered.
+For the cases where there is a long ongoing one-shot render or an `Infinity`-length render that needs to stop, users can call `OfflineAudioContext.close()` to stop the rendering. Just like regular `AudioContexts`, the audio context cannot be resumed after `close` is called. Moreover, for the defined-length render case, the context will automatically transition to the `closed` state when all the audio data has been rendered.
 
 Proposed interface:
 
@@ -84,16 +84,18 @@ context.close();
 ```
 
 ### Pros
-- Solution that is also backward-compatible.
-- Simple to reason about and implement, since callers just need to request chunks whenever they are ready to process them.
+- Maintains backwards compatibility.
+- Simple to reason about and implement. Callers just need to request chunks whenever they are ready to process them.
 - Supports unknown duration rendering.
 - Doesn't require integration with the Streams API.
 
 ### Cons
-- Harder to feature-detect — Unlike a new method (e.g., startRenderingStream), you can't simply check if ("newMethod" in context). Detecting chunkSize support requires a try/catch or similar heuristic.
-- Changes the mental model for startRendering a bit.
+- Harder to feature-detect. In contrast, adding a new method would allow checking for its presence `in` the context ("newMethod" in context). Detecting `chunkSize` support requires a try/catch or similar heuristic.
+- Evolves the mental model for `startRendering`.
 
-## Alternative 1 - Add `startRenderingStream()` function
+## Alternatives considered
+
+### Alternative 1 - Add `startRenderingStream()` function
 
 This alternative adds a new method `startRenderingStream()` that yields buffers of interleaved audio samples in a Float32Array, or another format as outlined in Open Questions. In this scenario, the user can read chunks as they arrive and consume them for storage, transcoding via WebCodecs, sending to a server, etc.
 
@@ -155,21 +157,21 @@ partial interface OfflineAudioContext {
 };
 ```
 
-### Pros
+#### Pros
 
 - The new capability is feature detectable because it is a new function. Compared to the proposed approach and alternative 2 which cannot be easily detected.
 - Aligns well with other web streaming APIs.
 - Works with very large durations, no upper limit to WebAudio graph duration.
 
-### Cons
+#### Cons
 
 - `ReadableStreams` are quite complex both for spec writers and web developers. WebCodecs has decided to decouple their specification from it (more info [here](https://docs.google.com/document/d/10S-p3Ob5snRMjBqpBf5oWn6eYij1vos7cujHoOCCCAw/edit?tab=t.0)).
 
-### Output format
+#### Output format
 
 There is an open question of what data format `startRenderingStream()` should return. The options under consideration are `AudioBuffer`, `Float32Array` planar or `Float32Array` interleaved.
 
-#### `AudioBuffer`
+##### `AudioBuffer`
 
 **Pros**
 
@@ -179,7 +181,7 @@ There is an open question of what data format `startRenderingStream()` should re
 
 - does not allow developers to BYOB (bring your own buffer) and BYOB helps developers manage memory usage, so `AudioBuffer` removes a bit of control
 
-#### Planar Float32Array
+##### Planar Float32Array
 
 **Pros**
 
@@ -190,7 +192,7 @@ There is an open question of what data format `startRenderingStream()` should re
 - requires the output of `startStreamingRendering()` to return an array of `Float32Array` in planar format for each output channel
 - this leaves a question of what to do if only one channel is read by the consumer, i.e. what should happen to the other channel's data?
 
-#### Interleaved Float32Array
+##### Interleaved Float32Array
 
 **Pros**
 
@@ -201,7 +203,7 @@ There is an open question of what data format `startRenderingStream()` should re
 
 - None of note
 
-## Alternative 2 - Modify existing `startRendering` method to allow streaming output
+### Alternative 2 - Modify existing `startRendering` method to allow streaming output
 
 An alternative approach is to add options to the existing `startRendering()` to configure its operating mode. The mode can be set to `stream` to achieve streaming output. This is similar to alternative 1 but rather than adding a new function, it re-uses an existing function.
 
@@ -256,17 +258,17 @@ interface OfflineAudioContext {
 }
 ```
 
-### Pros
+#### Pros
 
 - The same pros as Alternative 1
 
-### Cons
+#### Cons
 
 - The same cons as Alternative 1
-- It is not feature detectable, as compared to Alternative 1, because it only adds options dictionary to an existing function
+- Unlike Alternative 1, it is not feature detectable because it modifies an existing function.
 - Less explicit than Alternative 1 as it overloads an existing public API function. It is safer and simpler to add a new function and not change the behaviour of an existing function
 
-## Alternative 3 - emit `ondataavailable` events
+### Alternative 3 - emit `ondataavailable` events
 
 Keep current `startRendering()` API but do not allocate the full `AudioBuffer`. After starting, periodically emit events on the context or a new interface such as `ondataavailable(chunk: AudioBuffer)`.
 
@@ -274,11 +276,11 @@ The user can subscribe and collect chunks for processing.
 
 At the end, the API may optionally still provide a full `AudioBuffer`.
 
-### Pros
+#### Pros
 
 - Simple to integrate with existing event-driven patterns
 
-### Cons
+#### Cons
 
 - None of note but lacking support in the community discussion
 
