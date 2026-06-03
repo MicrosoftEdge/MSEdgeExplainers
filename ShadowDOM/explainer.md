@@ -7,7 +7,7 @@ An [Origin Trial](https://chromestatus.com/feature/4790543041298432) was started
 Due to feedback, the `<style type="module">` part of this proposal will be redesigned. Starting in Edge/Chrome 151, the Origin Trial
 will no longer include `<style type="module">` functionality, and will be scoped to only enable `shadowrootadoptedstylesheets`.
 
-A workaround for `<style type="module">` is to use Import Maps with a dataURI. A style module defined as the following:
+A workaround for `<style type="module">` is to use Import Maps with a data URI. A style module defined as follows:
 
 ```html
 <style type="module" specifier="foo">
@@ -21,7 +21,7 @@ A workaround for `<style type="module">` is to use Import Maps with a dataURI. A
 <script type="importmap">
 {
   "imports": {
-    "foo": "data:text/css,span {color: blue;}"
+    "foo": "data:text/css,span{color:blue;}"
   }
 }
 </script>
