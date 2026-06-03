@@ -64,7 +64,7 @@ It helps to place this next to the two keyboard-navigation paradigms the web alr
 
 ### Before / After at a glance
 
-**Generic regions (explicit opt-in).** Elements without a landmark role opt in with a bare `focuslandmark`, which defaults them to the `region` role.
+**Generic regions (explicit opt-in).** Generic elements that already carry `role="region"` add a bare `focuslandmark` to join landmark navigation; it changes only where focus goes, not the semantics.
 
 Before:
 
@@ -86,9 +86,9 @@ Before:
 After (same markup, plus one attribute per region; the script is gone):
 
 ```html
-<div focuslandmark="region" aria-label="App ribbon">…</div>
-<div focuslandmark="region" aria-label="Primary">…</div>
-<div focuslandmark="region" aria-label="Canvas">…</div>
+<div role="region" focuslandmark aria-label="App ribbon">…</div>
+<div role="region" focuslandmark aria-label="Primary">…</div>
+<div role="region" focuslandmark aria-label="Canvas">…</div>
 ```
 
 **Semantic landmark elements (implicit participation).** Elements that already carry a landmark role need no attribute at all under the proposed implicit behavior.
@@ -248,7 +248,7 @@ This section defines vocabulary only; the behavior is described in the sections 
 
 Because these elements already mark the major regions, a natural suggestion (carried as an [open question](#open-questions)) is that they become focus landmarks *implicitly*, without the author writing `focuslandmark` at all. That would not change current focus, tab order, or layout; it only adds destinations for the new navigation key. It does, though, imply an opt-out: an author may want a `<form>` (or another implicit landmark) to stay focusable and tabbable without being a landmark *destination*. A dedicated opt-out is needed (see [Opting out](#opting-out)).
 
-This raises a few candidate-related open questions, carried in [open questions](open-questions): whether the implicit-landmark HTML elements should become focus landmarks automatically; whether a bare `focuslandmark` on a non-landmark element stays a pure navigation marker or takes on a default `region` role; and how behavioral tokens such as `none` and `nomemory` share the value space with subrole names.
+This raises a few candidate-related open questions, carried in [open questions](#open-questions): whether the implicit-landmark HTML elements should become focus landmarks automatically; whether a bare `focuslandmark` on a non-landmark element stays a pure navigation marker or takes on a default `region` role; and how behavioral tokens such as `none` and `nomemory` share the value space with subrole names.
 
 ## Relationship to ARIA semantics
 
@@ -268,7 +268,7 @@ This is one possible resolution, not a settled algorithm. When moving to a focus
 4. Otherwise, if the `focuslandmark` element itself is focusable, focus it.
 5. Otherwise, skip the landmark.
 
-[Open question](#open-questions): Should we allow entry targets to be focusable but isn't a tab stop? 
+[Open question](#open-questions): Should we allow entry targets that are focusable but not a tab stop?
 
 ```html
 <section focuslandmark aria-labelledby="chat-title">
@@ -345,7 +345,7 @@ Landmark navigation is **user-triggered and browser-mediated**: focus moves only
 
 * **`focusgroup`.** A separate, sibling primitive for a different axis of navigation: `focusgroup` moves focus *within* a composite widget with arrow keys, while `focuslandmark` moves *between* regions. They address different problems and operate independently; an element may carry both, each doing its own job.
 
-* **ARIA landmarks and assistive technology.** `focuslandmark` is layered on the existing `landmark` role, so AT's existing landmark understanding and announcements apply; the proposal adds the user-agent navigation side the ARIA definition already anticipates. This proposal is a keyboard accessibility feature built on top of the already standardized assistive technology  feature to solve the same problem.
+* **ARIA landmarks and assistive technology.** `focuslandmark` is layered on the existing `landmark` role, so AT's existing landmark understanding and announcements apply; the proposal adds the user-agent navigation side the ARIA definition already anticipates. This proposal is a keyboard accessibility feature built on top of the already standardized assistive technology feature to solve the same problem.
 
 * **Permissions Policy / `focus-without-user-activation`.** Cross-frame landmark participation should be gated by, and compose with, the platform's existing cross-frame focus controls rather than a bespoke mechanism; see [Iframes, shadow DOM, and flattened order](#iframes-shadow-dom-and-flattened-order).
 
@@ -388,7 +388,7 @@ These are the points we most want early feedback on. The goal is to standardize 
 
 No privacy or security concerns are anticipated. Cross-document traversal is browser-mediated rather than script-mediated: a cross-origin parent only decides *whether* a child participates via a permissions policy, and never gains a way to enumerate the names, counts, structure, or content of the child's landmarks. We welcome community feedback if we've missed anything.
 
-## ## Index of placeholder values
+## Index of placeholder values
 
 All names here are placeholders to make the examples concrete; none are proposed as final.
 
