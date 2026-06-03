@@ -347,6 +347,7 @@ Landmark navigation is **user-triggered and browser-mediated**: focus moves only
 ## Interaction with related platform features
 
 * **`focusgroup`.** A separate, sibling primitive for a different axis of navigation: `focusgroup` moves focus *within* a composite widget with arrow keys, while `focuslandmark` moves *between* regions. They address different problems and operate independently; an element may carry both, each doing its own job.
+
 * **ARIA landmarks and assistive technology.** `focuslandmark` is layered on the existing `landmark` role, so AT's existing landmark understanding and announcements apply; the proposal adds the user-agent navigation side the ARIA definition already anticipates. This proposal is a keyboard accessibility feature built on top of the already standardized assistive technology  feature to solve the same problem.
 
 * **Permissions Policy / `focus-without-user-activation`.** Cross-frame landmark participation should be gated by, and compose with, the platform's existing cross-frame focus controls rather than a bespoke mechanism; see [Iframes, shadow DOM, and flattened order](#iframes-shadow-dom-and-flattened-order).
@@ -374,7 +375,7 @@ Cross-frame participation is a Permissions Policy rather than a reflected conten
 These are the points we most want early feedback on. The goal is to standardize an end-to-end landmark-navigation operation so the browser, top-level web app, embedded web app, and assistive technology can all take part in one consistent model, while leaving the triggering key to each platform's convention.
 
 1. **Is this a problem we should work on solving?** Does the region-to-region gap match what you see in real apps?
-2. **Platform support, especially macOS.** Landmark navigation maps cleanly onto a platform convention on Windows (F6 / Shift+F6) and at least partially on Linux, but macOS has no equivalent system convention. That absence shouldn't stop user agents from offering the feature themselves — Microsoft Edge already supports F6 landmark navigation on macOS today, and we'd like to keep doing so. How should the proposal frame UA-provided navigation on platforms without a native convention?
+2. **Platform support, especially macOS.** Landmark navigation maps cleanly onto a platform convention on Windows (F6 / Shift+F6) and at least partially on Linux, but macOS has no equivalent system convention. That absence shouldn't stop user agents from offering the feature themselves — Microsoft Edge already supports F6 landmark navigation on macOS today (but not in web content). How should the proposal frame UA-provided navigation on platforms without a native convention?
 3. **Attribute names.** `focuslandmark` and `focuslandmarkstart` are placeholders. Better names?
 4. **Implicit landmarks.** Should the HTML elements that already carry a landmark role (`<main>`, `<nav>`, `<aside>`, …) become focus landmarks automatically, without an explicit `focuslandmark` attribute? If so, authors will need an opt-out for elements that should stay focusable but not be landmark destinations (see [Opting out](#opting-out)).
 5. **Eligibility and semantics.** Should `focuslandmark="<subrole>"` confer the ARIA role, or only validate one the element already has? And on a non-landmark element, should a bare `focuslandmark` stay a pure navigation marker or default to the `region` role?
@@ -382,44 +383,15 @@ These are the points we most want early feedback on. The goal is to standardize 
 7. **Value grammar.** How should behavioral tokens (`none`, `nomemory`) and subrole names share one attribute's value space without ambiguity?
 8. **Virtualized / canvas content.** Is declarative DOM enough for a first version, or is a companion imperative API needed? (My current guess: with HTML-in-Canvas, declarative is likely enough.)
 9. **Memory default.** Is "memory on by default, with `nomemory` to opt out" the right default for regions, as it is for focusgroups?
-10. **Cross-frame participation control.** Cross-frame participation is gated by a Permissions Policy (consistent with [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) rather than a bespoke iframe attribute. How should landmark traversal interact with that policy's still-open cross-frame edge cases ([whatwg/html#11839](https://github.com/whatwg/html/issues/11839), [whatwg/html#12032](https://github.com/whatwg/html/issues/12032))?
-11. **Iframe skip and tabbing.** Should opting an iframe out of landmark navigation generalize to ordinary `Tab` navigation into that iframe, or stay specific to landmark navigation?
-12. **Ordering and slotted content.** Is flat tree order the right default, and should its treatment of slotted content track `focusgroup` exactly?
-
-## Polyfilling
-
-No polyfill exists yet. A polyfill could approximate the authoring shape within a single document (ordering, entry target, memory) using a `keydown` handler, but two central properties are out of reach for script and only a user agent can provide: folding page regions into the **browser's own pane cycle**, and **browser-mediated cross-origin iframe** traversal that does not expose one origin's landmark structure to another. Those limits are part of why this is proposed as a platform primitive rather than a library.
+10. **Iframe skip and tabbing.** Should opting an iframe out of landmark navigation generalize to ordinary `Tab` navigation into that iframe, or stay specific to landmark navigation?
+11. **Ordering and slotted content.** Is flat tree order the right direction?
+12. **Polyfill.** Would a polyfill be appropriate for this feature? I wouldn't think so because it also requires UA support to add landmark navigation.
 
 ## Privacy and security considerations
 
-### Privacy
+No privacy or security concerns are anticipated. Cross-document traversal is browser-mediated rather than script-mediated: a cross-origin parent only decides *whether* a child participates via a permissions policy, and never gains a way to enumerate the names, counts, structure, or content of the child's landmarks. We welcome community feedback if we've missed anything.
 
-The central concern is cross-document traversal. It must be browser-mediated, never script-mediated. A cross-origin parent must not gain a way to enumerate the names, counts, structure, or content of a child document's focus landmarks; it only decides *whether* the child participates, via a permissions policy — never *what* the child contains. The browser can move focus through the composed order internally without exposing the child's internals to the embedder.
-
-This aligns with the approach being taken for cross-frame focus: the [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md) policy is designed precisely to stop embedded content from stealing focus. Landmark navigation composes with that policy rather than working around it (see [Composition with `focus-without-user-activation`](#composition-with-focus-without-user-activation)): because traversal is user-triggered and browser-mediated, a participating child still cannot take focus without the user's keypress.
-
-Because the entry target on landing derives from markup the document already controls (`focuslandmarkstart`, the landmark's own memory of the last-focused element, the first focusable element), the feature does not expose new information that sequential focus navigation does not already reveal within a single origin. Closed shadow roots remain UA-visible for navigation but are not made script-inspectable.
-
-### Security
-
-No significant security concerns are anticipated beyond the cross-origin enumeration boundary described above, but community feedback is welcome.
-
-## Design notes
-
-There are no resolved standards discussions to link yet; this section records the rationale behind the current exploratory choices so reviewers can challenge them directly:
-
-* **Build on ARIA landmarks rather than a parallel concept** — reuses semantics AT already exposes and avoids a second region model.
-* **Reuse `focusgroup` conventions** (`reading-flow` hook, default-on memory with `nomemory`, `none` opt-out) — so authors learn one set of ideas and the two features compose predictably.
-* **No numeric ordering attribute** — avoids re-introducing positive-`tabindex` problems.
-* **Element-level opt-out** — an implicit landmark (e.g., a `<form>` or `<nav>`) may need to stay focusable and tabbable without participating in landmark navigation, which `tabindex="-1"` cannot express; hence `focuslandmark="none"`.
-* **Flat tree order for slotted content** — landmark order should follow rendered position so it tracks what the user sees; this goes a step beyond `focusgroup`'s DOM-source-order default, which doesn't yet specify slotted content, and we'd keep the two aligned.
-* **Lean on Permissions Policy for cross-frame participation** — follows the approach being taken for cross-frame focus ([`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) instead of a bespoke attribute, and composes with that policy rather than working around it.
-* **Browser-mediated cross-frame traversal** — the privacy boundary is a requirement, not a detail.
-* **Define a mechanism, not a key** — keeps the proposal aligned with each platform's existing convention and with how `focusgroup` abstracts directional input.
-
-As real discussion happens, this section would evolve into links to specific issues and their resolutions, the way mature explainers track their design history.
-
-## Index of placeholder values
+## ## Index of placeholder values
 
 All names here are placeholders to make the examples concrete; none are proposed as final.
 
