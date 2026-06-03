@@ -271,8 +271,6 @@ This is one possible resolution, not a settled algorithm. When moving to a focus
 4. Otherwise, if the `focuslandmark` element itself is focusable, focus it.
 5. Otherwise, skip the landmark.
 
-
-
 [Open question](#open-questions): Should we allow entry targets to be focusable but isn't a tab stop? 
 
 ```html
@@ -281,8 +279,6 @@ This is one possible resolution, not a settled algorithm. When moving to a focus
   …
 </section>
 ```
-
-
 
 ### The focuslandmarkstart attribute
 
@@ -309,9 +305,9 @@ Instead, the default order should be **flat tree order** — the flattened, comp
 
 ## Opting out
 
-An implicit landmark — an element that would participate in landmark navigation by virtue of its role, such as a `<form>` or a `<nav>` — must be able to decline. `focuslandmark="none"` opts the element out: it is not treated as a focus landmark and does not take part in the navigation, while staying focusable and tabbable. `tabindex="-1"` cannot express this, since it would remove the element from sequential focus navigation entirely.
+An implicit landmark — an element that would participate in landmark navigation by virtue of its role, such as a `<form>` or a `<nav>` — must be able to decline. `focuslandmark="none"` opts the element out: it is not treated as a focus landmark and does not take part in the navigation, without affecting the focusable state.
 
-Placeholder token shape (name bikesheddable; how it shares the value space with subrole names is an [open question](#open-questions)):
+The exact token name is still open, as is how it fits alongside the subrole names (see [open questions](#open-questions)):
 
 | Intent                                      | Placeholder            |
 | ------------------------------------------- | ---------------------- |
