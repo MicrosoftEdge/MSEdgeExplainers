@@ -337,7 +337,7 @@ Proposed shape:
 <iframe src="ad.html" title="Sponsored content"></iframe>
 ```
 
-The key requirement: cross-document traversal is **browser-mediated, not script-mediated**. A cross-origin parent must not gain a way to enumerate child landmark names, counts, or structure. The browser can still move focus through the composed order internally.
+
 
 ### Composition with `focus-without-user-activation`
 
@@ -345,8 +345,6 @@ Landmark navigation is **user-triggered and browser-mediated**: focus moves only
 
 * Participation must not become a backdoor around [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md). A child cannot use a focus landmark to grab focus absent the user's keypress.
 * Conversely, because the move is user-initiated, a frame with that policy *denied* should still be reachable by the user via landmark navigation. The policy targets unsolicited script/auto focus, not user-driven traversal.
-
-That policy is still settling its own cross-frame edge cases — for example what a subframe may do once it already has focus ([whatwg/html#11839](https://github.com/whatwg/html/issues/11839)) and whether a parent may delegate focus into a denied child ([whatwg/html#12032](https://github.com/whatwg/html/issues/12032)). The merged spec change is [whatwg/html#10672](https://github.com/whatwg/html/pull/10672), but the feature is not yet broadly shipped. Flattened landmark order crosses exactly those boundaries, so rather than answer the questions independently we should track and inherit their resolutions.
 
 ## Interaction with related platform features
 
