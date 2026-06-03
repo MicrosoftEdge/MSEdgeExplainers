@@ -35,11 +35,8 @@ Last updated: 2026-06-01
 * [Interaction with related platform features](#interaction-with-related-platform-features)
 * [Feature detection](#feature-detection)
 * [Future considerations](#future-considerations)
-* [Alternatives considered](#alternatives-considered)
 * [Open questions](#open-questions)
-* [Polyfilling](#polyfilling)
 * [Privacy and security considerations](#privacy-and-security-considerations)
-* [Design notes](#design-notes)
 * [Index of placeholder values](#index-of-placeholder-values)
 * [Acknowledgments](#acknowledgments)
 
