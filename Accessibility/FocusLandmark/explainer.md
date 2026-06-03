@@ -337,8 +337,6 @@ Proposed shape:
 <iframe src="ad.html" title="Sponsored content"></iframe>
 ```
 
-
-
 ### Composition with `focus-without-user-activation`
 
 Landmark navigation is **user-triggered and browser-mediated**: focus moves only when the user presses the platform's landmark key, and the browser, not page script, performs the move. So it is not "focus without user activation," and a participating child still cannot pull focus to itself on its own — it can only receive focus when the user navigates there. Two consequences:
@@ -349,14 +347,13 @@ Landmark navigation is **user-triggered and browser-mediated**: focus moves only
 ## Interaction with related platform features
 
 * **`focusgroup`.** A separate, sibling primitive for a different axis of navigation: `focusgroup` moves focus *within* a composite widget with arrow keys, while `focuslandmark` moves *between* regions. They address different problems and operate independently; an element may carry both, each doing its own job.
-* **ARIA landmarks and assistive technology.** `focuslandmark` is layered on the existing `landmark` role, so AT's existing landmark understanding and announcements apply; the proposal adds the user-agent navigation side the ARIA definition already anticipates.
-* **CSS `reading-flow` / `reading-order`.** Used as the hook for landmark order when visual order intentionally differs from DOM order, matching how `focusgroup` treats directional order (see [Ordering](#ordering)).
-* **Directional / spatial navigation.** Like `focusgroup`, this proposal defines an abstract "next / previous focus landmark" operation rather than a specific key or input device; mapping platform input (keyboard, D-pad, AT command) onto that operation is the user agent's responsibility. Document-level spatial navigation, where it exists, addresses a different scope (any focusable element) and is expected to compose with, not replace, landmark navigation.
+* **ARIA landmarks and assistive technology.** `focuslandmark` is layered on the existing `landmark` role, so AT's existing landmark understanding and announcements apply; the proposal adds the user-agent navigation side the ARIA definition already anticipates. This proposal is a keyboard accessibility feature built on top of the already standardized assistive technology  feature to solve the same problem.
+
 * **Permissions Policy / `focus-without-user-activation`.** Cross-frame landmark participation should be gated by, and compose with, the platform's existing cross-frame focus controls rather than a bespoke mechanism; see [Iframes, shadow DOM, and flattened order](#iframes-shadow-dom-and-flattened-order).
 
 ## Feature detection
 
-The IDL below shows *one possible shape* for feature detection, mirroring `focusgroup`'s reflected attributes. It is illustrative, not a proposed final interface, and the names are placeholders.
+The IDL below shows *one possible shape* for feature detection. It is illustrative, not a proposed final interface, and the names are placeholders.
 
 ```webidl
 partial interface mixin HTMLOrSVGElement {
@@ -371,30 +368,23 @@ Cross-frame participation is a Permissions Policy rather than a reflected conten
 
 * **Imperative companion for virtualized / canvas content.** For content that is virtualized or drawn to `<canvas>`, declarative DOM landmarks may not be enough. An imperative companion API could let such apps expose landmarks. My current expectation is that, with HTML-in-Canvas, the declarative proposal would already cover most cases, so this is left as a future consideration rather than part of a first version.
 * **Browser-pane integration details.** Exactly how page landmarks interleave with the browser's own panes (and how `Shift+`-style reverse traversal behaves at the boundaries) is a user-agent concern this document only sketches.
-* **Richer embedder policies.** Beyond `include` / `none` / `self`, embedders might eventually want finer control (e.g., a cap on how many child landmarks surface). Out of scope for now.
-
-## Alternatives considered
-
-* **Custom `keydown` handlers** for `F6`, `Ctrl+F6`, or `Command+F6`. There is no version of this without downsides. Overriding `F6` breaks the browser's own focus navigation and no longer flows with it. Picking `Ctrl+F6` or another shortcut makes the browser and the website feel like two separate apps rather than one unified experience the way `Tab` does. Either way it forces authors into more scripting, competes with browser shortcuts, and does not compose across nested apps.
-* **Skip links.** Useful, but author-authored, visible links are not a full browser/app navigation model and don't fold into the browser's pane cycle. A complement, not the same thing.
-* **A numeric `focuslandmarkindex`.** Rejected for the same reasons positive `tabindex` is discouraged; see [Ordering](#ordering).
-* **A brand-new set of native elements.** Higher cost and slower coverage than an attribute that upgrades existing landmark markup; see [Why a declarative primitive?](#why-a-declarative-primitive).
 
 ## Open questions
 
 These are the points we most want early feedback on. The goal is to standardize an end-to-end landmark-navigation operation so the browser, top-level web app, embedded web app, and assistive technology can all take part in one consistent model, while leaving the triggering key to each platform's convention.
 
 1. **Is this a problem we should work on solving?** Does the region-to-region gap match what you see in real apps?
-2. **Attribute names.** `focuslandmark` and `focuslandmarkstart` are placeholders. Better names?
-3. **Implicit landmarks.** Should the HTML elements that already carry a landmark role (`<main>`, `<nav>`, `<aside>`, …) become focus landmarks automatically, without an explicit `focuslandmark` attribute? If so, authors will need an opt-out for elements that should stay focusable but not be landmark destinations (see [Opting out](#opting-out)).
-4. **Eligibility and semantics.** Should `focuslandmark="<subrole>"` confer the ARIA role, or only validate one the element already has? And on a non-landmark element, should a bare `focuslandmark` stay a pure navigation marker or default to the `region` role?
-5. **Tab stop.** Should we include as entry targets focusable elements that are not tab stop?
-6. **Value grammar.** How should behavioral tokens (`none`, `nomemory`) and subrole names share one attribute's value space without ambiguity?
-7. **Virtualized / canvas content.** Is declarative DOM enough for a first version, or is a companion imperative API needed? (My current guess: with HTML-in-Canvas, declarative is likely enough.)
-8. **Memory default.** Is "memory on by default, with `nomemory` to opt out" the right default for regions, as it is for focusgroups?
-9. **Cross-frame participation control.** Cross-frame participation is gated by a Permissions Policy (consistent with [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) rather than a bespoke iframe attribute. How should landmark traversal interact with that policy's still-open cross-frame edge cases ([whatwg/html#11839](https://github.com/whatwg/html/issues/11839), [whatwg/html#12032](https://github.com/whatwg/html/issues/12032))?
-10. **Iframe skip and tabbing.** Should opting an iframe out of landmark navigation generalize to ordinary `Tab` navigation into that iframe, or stay specific to landmark navigation?
-11. **Ordering and slotted content.** Is flat tree order the right default, and should its treatment of slotted content track `focusgroup` exactly?
+2. **Platform support, especially macOS.** Landmark navigation maps cleanly onto a platform convention on Windows (F6 / Shift+F6) and at least partially on Linux, but macOS has no equivalent system convention. That absence shouldn't stop user agents from offering the feature themselves — Microsoft Edge already supports F6 landmark navigation on macOS today, and we'd like to keep doing so. How should the proposal frame UA-provided navigation on platforms without a native convention?
+3. **Attribute names.** `focuslandmark` and `focuslandmarkstart` are placeholders. Better names?
+4. **Implicit landmarks.** Should the HTML elements that already carry a landmark role (`<main>`, `<nav>`, `<aside>`, …) become focus landmarks automatically, without an explicit `focuslandmark` attribute? If so, authors will need an opt-out for elements that should stay focusable but not be landmark destinations (see [Opting out](#opting-out)).
+5. **Eligibility and semantics.** Should `focuslandmark="<subrole>"` confer the ARIA role, or only validate one the element already has? And on a non-landmark element, should a bare `focuslandmark` stay a pure navigation marker or default to the `region` role?
+6. **Tab stop.** Should we include as entry targets focusable elements that are not tab stop?
+7. **Value grammar.** How should behavioral tokens (`none`, `nomemory`) and subrole names share one attribute's value space without ambiguity?
+8. **Virtualized / canvas content.** Is declarative DOM enough for a first version, or is a companion imperative API needed? (My current guess: with HTML-in-Canvas, declarative is likely enough.)
+9. **Memory default.** Is "memory on by default, with `nomemory` to opt out" the right default for regions, as it is for focusgroups?
+10. **Cross-frame participation control.** Cross-frame participation is gated by a Permissions Policy (consistent with [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md)) rather than a bespoke iframe attribute. How should landmark traversal interact with that policy's still-open cross-frame edge cases ([whatwg/html#11839](https://github.com/whatwg/html/issues/11839), [whatwg/html#12032](https://github.com/whatwg/html/issues/12032))?
+11. **Iframe skip and tabbing.** Should opting an iframe out of landmark navigation generalize to ordinary `Tab` navigation into that iframe, or stay specific to landmark navigation?
+12. **Ordering and slotted content.** Is flat tree order the right default, and should its treatment of slotted content track `focusgroup` exactly?
 
 ## Polyfilling
 
