@@ -30,8 +30,6 @@ This document is a **short explainer** for an implementation of an existing cons
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & Acknowledgements](#references--acknowledgements)
-- [Testing](#testing)
-- [Implementation Notes](#implementation-notes)
 - [Appendix: WebIDL](#appendix-webidl)
 
 ---
@@ -185,7 +183,7 @@ Our implementation-specific choices (dictionary vs interface, `unrestricted floa
 - **Accessibility:** No impact. Programmatic API only - no new visual content, interaction patterns, or ARIA roles. Indirectly benefits a11y by making it easier to build well-structured SVG.
 - **Internationalization:** No impact. Path data uses single-character Latin commands and numbers only.
 - **Privacy:** No new concerns. Returns the same data available via `getAttribute('d')` - purely a convenience API over existing capabilities. No fingerprinting surface, no network requests.
-- **Security:** No new concerns. Operates entirely within the renderer on already-structured data. `setPathData()` operates on structured `{type, values}` dictionaries - no string parsing is needed (segments are pre-typed), reducing attack surface compared to `setAttribute('d')`. No additional IPC beyond existing DOM access. Gated behind a Blink `RuntimeEnabledFeature` (`SVGPathDataAPI`).
+- **Security:** No new concerns. Operates entirely within the renderer on already-structured data. `setPathData()` operates on structured `{type, values}` dictionaries - no string parsing is needed (segments are pre-typed), reducing attack surface compared to `setAttribute('d')`. No additional IPC beyond existing DOM access.
 
 ---
 
@@ -211,27 +209,6 @@ Our implementation-specific choices (dictionary vs interface, `unrestricted floa
 **Prior art:** [path-data-polyfill](https://github.com/jarek-foksa/path-data-polyfill) (129+ stars) · [pathseg polyfill](https://github.com/progers/pathseg) · [Interop hotlist](https://issues.chromium.org/hotlists/5575920) (Chromium cross-browser interop tracking; includes [crbug.com/40441025](https://issues.chromium.org/issues/40441025))
 
 **Acknowledgements:** Fredrik Söderquist (fs@opera.com, original API sketch author, SVG OWNERS), Philip Rogers (pdr@chromium.org, drove SVGPathSegList removal, pathseg polyfill), Robert Longson (Mozilla SVG lead, Firefox implementation), Jarek Foksa (path-data-polyfill author), Cameron McCormack (spec editor).
-
----
-
-## Testing
-
-**Existing WPTs:** Firefox landed web-platform-tests alongside their implementation in [svg/path/interfaces/](https://wpt.fyi/results/svg/path/interfaces?label=experimental&label=master&aligned), including `SVGPathSegment.svg` which covers `getPathData()`, `setPathData()`, `getPathSegmentAtLength()`, normalization, and basic command coverage.
-
-**Planned additional tests:**
-- Edge cases: empty paths, NaN/Infinity values, distance > totalLength clamping, negative distance clamping
-- Normalization accuracy: arc-to-cubic precision, quadratic-to-cubic exactness
-- POJO acceptance: plain `{type, values}` objects work without constructors
-- Two-level validation: TypeError for missing required fields vs silent skip for semantic errors
-- Blink layout tests for rendering integration
-
----
-
-## Implementation Notes
-
-**Feature flag:** This API will be gated behind a Blink `RuntimeEnabledFeature` named `SVGPathDataAPI`. It will not have a separate `chrome://flags` entry - it follows the standard Blink shipping process (flag → origin trial → ship).
-
-**UseCounters:** The implementation will include UseCounters for each method (`getPathData`, `setPathData`, `getPathSegmentAtLength`) to track adoption and inform the ship decision. No existing UseCounter data is available since the API does not yet exist in Blink.
 
 ---
 
