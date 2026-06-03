@@ -314,12 +314,9 @@ The exact token name is still open, as is how it fits alongside the subrole name
 | Opt this element out of landmark navigation | `focuslandmark="none"` |
 
 ```html
-<!-- Stays focusable and tabbable, but is not a focus landmark
-     and does not participate in landmark navigation. -->
+<!-- Does not participate in landmark navigation. -->
 <form focuslandmark="none" aria-label="Filters">…</form>
 ```
-
-For iframes specifically, an embedder controls child participation through a [permissions policy](#iframes-shadow-dom-and-flattened-order) rather than reaching into the child. The policy default (participation not granted) is effectively a document-wide "skip all iframes for landmark navigation." A reviewer asked whether such an iframe skip should generalize to ordinary `Tab` navigation into iframes; that would be a broader change to sequential focus navigation and is out of scope here, though the parent-controlled, browser-mediated shape is deliberately analogous.
 
 ## Iframes, shadow DOM, and flattened order
 
@@ -331,7 +328,7 @@ Proposed shape:
 
 * **Shadow DOM:** landmark discovery uses the flattened tree, similar to `focusgroup`. A component author can opt the host node out as a destination with `focuslandmark="none"` (see [Opting out](#opting-out)). Closed shadow roots remain UA-visible for navigation but not script-inspectable.
 * **Iframes:** a child document's focus landmarks participate at the iframe element's position in the parent order, when the iframe is eligible and not opted out by the parent.
-* **Parent control:** the embedding context decides whether a child participates, through a **Permissions Policy** rather than a bespoke attribute. The platform already gates cross-frame focus behavior this way: the [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md) policy lets an embedder stop a child frame from taking focus without user activation. A landmark-participation policy (placeholder name `focus-landmark-participation`) would fit the same shape — set via the `Permissions-Policy` header or an `<iframe allow="…">` attribute, inherited down the frame tree, with a default allowlist. This reuses a mechanism authors already use for other features instead of inventing a one-off attribute, mirroring the trade-off the `focus-without-user-activation` proposal itself made: it explicitly rejected a bespoke `disallowprogrammaticfocus` iframe attribute in favor of a policy, reasoning that sites already reach for permissions policies and a policy is lighter-weight and more adoptable.
+* **Parent control:** the embedding context decides whether a child participates, through a **Permissions Policy** rather than a bespoke attribute. The platform already gates cross-frame focus behavior this way: the [`focus-without-user-activation`](https://github.com/w3c/webappsec-permissions-policy/blob/main/policies/focus-without-user-activation.md) policy lets an embedder stop a child frame from taking focus without user activation. A landmark-participation policy (placeholder name `focus-landmark-participation`) would fit the same shape — set via the `Permissions-Policy` header or an `<iframe allow="…">` attribute, inherited down the frame tree, with a default allowlist. With participation off by default, an embedder that does nothing effectively skips all iframes for landmark navigation, and opts specific frames in. This reuses a mechanism authors already use for other features instead of inventing a one-off attribute, mirroring the trade-off the `focus-without-user-activation` proposal itself made: it explicitly rejected a bespoke `disallowprogrammaticfocus` iframe attribute in favor of a policy, reasoning that sites already reach for permissions policies and a policy is lighter-weight and more adoptable.
 * **Treating an iframe as one opaque landmark:** when the embedder wants the whole frame to be a *single* landmark rather than flattening its internals, it puts `focuslandmark` on the `<iframe>` element itself and does not grant the participation policy. The iframe element then behaves like any other element carrying `focuslandmark` — one destination — and the child's internal structure is never enumerated. No separate attribute is needed.
 
 ```html
