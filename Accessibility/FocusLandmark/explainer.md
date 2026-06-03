@@ -322,8 +322,6 @@ The exact token name is still open, as is how it fits alongside the subrole name
 
 Landmark navigation should flatten participating landmarks across boundaries, but the embedding context must be able to prevent embedded content from participating. The details below are exploratory; the firm requirement is the privacy property in the last paragraph.
 
-`focusgroup` gives useful precedent but does not solve this exact problem. It crosses shadow DOM boundaries by default and has `focusgroup="none"` as an opt-out, but it does not define flattened iframe traversal; its explainer instead treats iframes with focusable content as key-conflict elements. Landmark navigation needs a browser-mediated child-navigable model.
-
 Proposed shape:
 
 * **Shadow DOM:** landmark discovery uses the flattened tree, similar to `focusgroup`. A component author can opt the host node out as a destination with `focuslandmark="none"` (see [Opting out](#opting-out)). Closed shadow roots remain UA-visible for navigation but not script-inspectable.
