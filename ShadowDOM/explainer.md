@@ -1,5 +1,34 @@
 # Declarative adoptedStyleSheets for Sharing Styles In Declarative Shadow DOM
 
+## June 2026 Breaking Change in Origin Trial
+
+An [Origin Trial](https://chromestatus.com/feature/4790543041298432) was started in Edge/Chrome 148.
+
+Due to feedback, the `<style type="module">` part of this proposal will be redesigned. Starting in Edge/Chrome 151, the Origin Trial
+will no longer include `<style type="module">` functionality, and will be scoped to only enable `shadowrootadoptedstylesheets`.
+
+A workaround for the lack of `<style type="module">` support is to use Import Maps with a data URI. A style module that was defined as follows:
+
+```html
+<style type="module" specifier="foo">
+  span {color: blue;}
+</style>
+```
+
+...can instead be expressed as:
+
+```html
+<script type="importmap">
+{
+  "imports": {
+    "foo": "data:text/css,span{color:blue;}"
+  }
+}
+</script>
+```
+
+This is the recommended approach while we redesign `<style type="module">`.
+
 ## Authors
 
 - Kurt Catti-Schmidt
