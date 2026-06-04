@@ -50,7 +50,7 @@ With this proposal, all offline audio rendering is incremental by definition:
 - Unknown duration rendering is supported by making `OfflineAudioContextOptions.length` equal to `Infinity`. 
 - Incremental rendering can be done by calling startRendering multiple times.
 
-For the cases where there is a long ongoing one-shot render or an `Infinity`-length render that needs to stop, users can call `OfflineAudioContext.close()` to stop the rendering. Just like regular `AudioContexts`, the audio context cannot be resumed after `close` is called. Moreover, for the defined-length render case, the context will automatically transition to the `closed` state when all the audio data has been rendered.
+For the cases where there is a long ongoing one-shot render or an `Infinity`-length render that needs to stop, we propose adding a new `OfflineAudioContext.close()` that users can call to stop the rendering. Just like regular `AudioContexts`, the audio context cannot be resumed after `close` is called. Moreover, for the defined-length render case, the context will automatically transition to the `closed` state when all the audio data has been rendered.
 
 Proposed interface:
 
@@ -86,11 +86,12 @@ context.close();
 ### Pros
 - Maintains backwards compatibility.
 - Simple to reason about and implement. Callers just need to request chunks whenever they are ready to process them.
+- It's possible to feature detect by checking for the presence of the `close` method.
 - Supports unknown duration rendering.
 - Doesn't require integration with the Streams API.
 
 ### Cons
-- Harder to feature-detect. In contrast, adding a new method would allow checking for its presence `in` the context ("newMethod" in context). Detecting `chunkSize` support requires a try/catch or similar heuristic.
+- Feature detection relies on checking the presence of an adjacent method (`close`) instead of checking directly the method that renders the chunks.
 - Evolves the mental model for `startRendering`.
 
 ## Alternatives considered
