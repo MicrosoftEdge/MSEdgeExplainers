@@ -331,7 +331,7 @@ Many thanks for valuable feedback and advice from:
 - Alison Maher
 - Alex Russell
 - Rob Paveza
-- Macros Caceres
+- Marcos Caceres
 - Ben Francis
 
 References:
