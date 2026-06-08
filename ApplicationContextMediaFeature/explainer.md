@@ -72,31 +72,31 @@ The two concepts of "is this an installed app?" and "what is the current display
 
 ### Syntax
 
-A new CSS media feature named `application-context`, used as an enumerated media feature with discrete values:
+A new CSS media feature named `application-context`, used as a boolean media feature:
 
 ```css
-@media (application-context: installed) {
+@media (application-context) {
   /* Styles applied only inside an installed app window */
 }
 
-@media (application-context: browser) {
+@media not (application-context) {
   /* Styles applied only in a regular browser tab */
 }
 ```
 
-The name `application-context` communicates that the feature describes the context in which the application is running, not whether the app is installed on the device globally.
+The name `application-context` communicates that the feature describes the context in which the application is running, not whether the app is installed on the device globally. The feature matches (evaluates to `true`) when the document is running in an installed app window, and does not match (evaluates to `false`) in a regular browser tab.
 
 ### Behavior Rules
 
-1. **Matches `installed`** when the document is in an application context: a top-level browsing context with a manifest applied, presented in its own OS-level app window.
-2. **Remains `installed` regardless of display mode.** Whether the app is in `standalone`, `fullscreen`, or `minimal-ui` mode, the `application-context` media feature continues to match `installed`.
-3. **Only applies to top-level browsing contexts and same-origin iframes.** In cross-origin iframes, the feature matches `browser`. Same-origin iframes inherit the top-level context, since they already have access to the top-level window via `window.top`.
-4. **Matches `browser` in browser tabs.** Even if the same URL has an installed app elsewhere, opening it in a regular browser tab means `(application-context: installed)` does not match. The feature reflects the *current* browsing context, not global installation state.
+1. **Matches** when the document is in an application context: a top-level browsing context with a manifest applied, presented in its own OS-level app window.
+2. **Remains matching regardless of display mode.** Whether the app is in `standalone`, `fullscreen`, or `minimal-ui` mode, the `application-context` media feature continues to match.
+3. **Only applies to top-level browsing contexts and same-origin iframes.** In cross-origin iframes, the feature does not match. Same-origin iframes inherit the top-level context, since they already have access to the top-level window via `window.top`.
+4. **Does not match in browser tabs.** Even if the same URL has an installed app elsewhere, opening it in a regular browser tab means `(application-context)` does not match. The feature reflects the *current* browsing context, not global installation state.
 5. **Usable via `matchMedia()`.** JavaScript can query and listen for changes using `window.matchMedia()`, following standard media query semantics.
 
 ### Behavior Summary
 
-| Context | `(application-context: installed)` | `(display-mode: standalone)` |
+| Context | `(application-context)` | `(display-mode: standalone)` |
 |---------|:-------------------:|:----------------------------:|
 | Browser tab | no match | no match |
 | Installed, standalone mode | match | match |
@@ -118,7 +118,7 @@ A PWA shows an install banner to browser-tab users but hides it for users alread
   display: flex;
 }
 
-@media (application-context: installed) {
+@media (application-context) {
   .install-banner {
     display: none;
   }
@@ -136,7 +136,7 @@ An installed app shows a back button and "open in browser" link that don't make 
   display: none;
 }
 
-@media (application-context: installed) {
+@media (application-context) {
   .app-nav {
     display: flex;
   }
@@ -148,7 +148,7 @@ An installed app shows a back button and "open in browser" link that don't make 
 A site conditionally shows a service worker update prompt only in the installed experience:
 
 ```js
-if (window.matchMedia('(application-context: installed)').matches) {
+if (window.matchMedia('(application-context)').matches) {
   showUpdatePrompt();
 }
 ```
@@ -158,16 +158,16 @@ if (window.matchMedia('(application-context: installed)').matches) {
 Although uncommon, a document could transition between contexts (e.g., a browser tab being "captured" into an app window). Developers can listen for this reactively:
 
 ```js
-window.matchMedia('(application-context: installed)').addEventListener('change', (e) => {
+window.matchMedia('(application-context)').addEventListener('change', (e) => {
   document.body.classList.toggle('is-installed', e.matches);
 });
 ```
 
 ## Alternatives Considered
 
-### A Boolean Media Feature (`installed`)
+### Naming the Boolean Feature `installed`
 
-An alternative approach is to define a boolean media feature named `installed`:
+An alternative is to name the boolean media feature `installed` instead of `application-context`:
 
 ```css
 @media (installed) {
@@ -179,13 +179,32 @@ An alternative approach is to define a boolean media feature named `installed`:
 }
 ```
 
-This design is simpler to author, following the pattern of other boolean media features like `(hover)` or `(scripting)`. However:
+This name is shorter and follows the pattern of other boolean media features like `(hover)` or `(scripting)`. However:
 
-- **Naming ambiguity.** The name `installed` suggests a statement about global installation state. A developer might reasonably expect `(installed)` to be `true` if the app is installed on the device, even when viewed in a browser tab. In reality, the feature would only match when running *inside* an installed app window. The name `application-context` makes this distinction explicit, and describes the current context, not a global property.
-- **Limited extensibility.** A boolean feature can only express two states. If future application contexts emerge, a boolean feature cannot accommodate them without introducing additional media features. An enumerated feature like `application-context` can grow by adding new values.
-- **No `browser` counterpart.** With a boolean feature, styling for the browser-tab case requires `not (installed)`, which is less readable and less intentional than `(application-context: browser)`.
+- **Naming ambiguity.** The name `installed` suggests a statement about global installation state. A developer might reasonably expect `(installed)` to be `true` if the app is installed on the device, even when viewed in a browser tab. In reality, the feature only matches when running *inside* an installed app window. The name `application-context` makes this distinction explicit, and describes the current context, not a global property.
 
-**Conclusion:** While the boolean form is simpler for a binary state check, the `application-context` enumerated approach offers clearer semantics and room to grow.
+**Conclusion:** Both names describe the same boolean signal, but `application-context` offers clearer semantics and avoids conflation with global installation state.
+
+### An Enumerated Media Feature
+
+Rather than a boolean, `application-context` could be defined as an enumerated media feature with discrete values such as `installed` and `browser`:
+
+```css
+@media (application-context: installed) {
+  /* Styles for an installed app window */
+}
+
+@media (application-context: browser) {
+  /* Styles for a regular browser tab */
+}
+```
+
+An enumerated feature offers an explicit `browser` value and room to add future context values. However:
+
+- **Unnecessary complexity for a binary state.** The installed-versus-browser distinction is fundamentally binary. A boolean feature expresses it more simply: `(application-context)` for the installed case and `not (application-context)` for the browser case, matching the existing pattern of boolean media features.
+- **Speculative extensibility.** The additional values an enumerated feature could accommodate are hypothetical. If new application contexts ever emerge, they can be represented by dedicated media features at that time, rather than designing for them speculatively today.
+
+**Conclusion:** A boolean feature is the simplest fit for a binary state. The enumerated form adds overhead without a corresponding benefit for the current use case.
 
 ### Standardizing `navigator.standalone`
 
@@ -221,7 +240,7 @@ A dedicated JS property could work, but:
 
 ### Privacy
 
-- **No cross-site information leak.** The feature only reflects the current browsing context. It does not reveal whether the app is installed on the device, only whether the current document is *running* in an app window. A site opened in a browser tab always sees `(application-context: installed)` as non-matching, even if the user has the app installed.
+- **No cross-site information leak.** The feature only reflects the current browsing context. It does not reveal whether the app is installed on the device, only whether the current document is *running* in an app window. A site opened in a browser tab always sees `(application-context)` as non-matching, even if the user has the app installed.
 - **No new fingerprinting surface.** The information exposed (the current app context) is already inferable from existing signals like `display-mode: standalone`, except that `application-context` is stable across display mode changes. It does not expose any new bits of entropy beyond what the user has already disclosed by opening the app window.
 - **Cross-origin iframe isolation.** The feature evaluates to `browser` in cross-origin iframes, preventing embedded third-party content from detecting the host app's installation state. Same-origin iframes are permitted to inherit the top-level context, as they already have full access to the top-level window via `window.top` and do not represent a privacy boundary.
 
@@ -247,7 +266,7 @@ Without a built-in property on `Client`, developers would manually relay the app
 ```js
 // On page load, inform the service worker of the current app context
 if (navigator.serviceWorker.controller) {
-  const isInstalled = window.matchMedia('(application-context: installed)').matches;
+  const isInstalled = window.matchMedia('(application-context)').matches;
   navigator.serviceWorker.controller.postMessage({
     type: 'app-context-report',
     context: isInstalled ? 'installed' : 'browser'
@@ -289,11 +308,11 @@ This approach has several drawbacks:
 
 ### Proposed Extension
 
-A natural complement to the `app-context` CSS media feature would be exposing the same information on the [`WindowClient`](https://developer.mozilla.org/en-US/docs/Web/API/WindowClient) interface in the Service Worker API. For example, an `appContext` property:
+A natural complement to the `application-context` CSS media feature would be exposing the same information on the [`WindowClient`](https://developer.mozilla.org/en-US/docs/Web/API/WindowClient) interface in the Service Worker API. For example, a boolean `applicationContext` property:
 
 ```js
 const allClients = await self.clients.matchAll({ type: 'window' });
-const installedClient = allClients.find(client => client.appContext === 'installed');
+const installedClient = allClients.find(client => client.applicationContext);
 
 if (installedClient) {
   // An installed app window exists — post a message to it
@@ -312,6 +331,8 @@ Many thanks for valuable feedback and advice from:
 - Alison Maher
 - Alex Russell
 - Rob Paveza
+- Marcos Caceres
+- Ben Francis
 
 References:
 - [W3C Media Queries Level 5](https://drafts.csswg.org/mediaqueries-5/)
