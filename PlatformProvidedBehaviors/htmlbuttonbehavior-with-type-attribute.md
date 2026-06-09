@@ -97,7 +97,8 @@ Each behavior exposes properties and methods from its corresponding native eleme
 - `name`, `value` - submitter name and value. Read on submission (`type === 'submit'`).
 - `formAction`, `formEnctype`, `formMethod`, `formNoValidate`, `formTarget` - submission overrides. Read on submission (`type === 'submit'`).
 - `labels` - read-only, delegates to `ElementInternals.labels`.
-- `title` - surfaced through the user agent's default tooltip UI.
+
+*Note: `HTMLButtonElement` adds the properties listed above on top of `HTMLElement`. Custom elements already inherit the global `HTMLElement` IDL surface (`title`, `tabIndex`, `hidden`, etc.). Web authors can use these properties on the host as they would on any element.*
 
 To expose these properties to external code, authors define getters and setters on the host that delegate to the behavior. See [Use case: Design system button](#use-case-design-system-button) for a complete worked example.
 
