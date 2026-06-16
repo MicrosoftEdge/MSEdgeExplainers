@@ -72,7 +72,7 @@ Developers of Search Engines could use the API to include a way to directly inst
 
  Another potential use case for the API is related to the creation of online catalogs. A web site/app can list and install web apps. A unique aspect of this approach is that since the applications that are installed are web apps, this could enable a new set of true cross-device, cross-platform app repositories. 
  
-  ![Install flow from an app repository](./apprepositoryinstallation.png)
+  ![Install flow from an app repository](../apprepositoryinstallation.png)
 
 ## Proposed approach
 
@@ -328,4 +328,4 @@ Throughout the development of this capability we've revceived a lot of feedback 
 ## Feedback
 For suggestions and comments, please file an [issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=diekus&labels=Web+Install+API&projects=&template=web-install-api.md&title=%5BWeb+Install%5D+%3CTITLE+HERE%3E).
 
-![Web Install logo](installlogo.png)
+![Web Install logo](../installlogo.png)

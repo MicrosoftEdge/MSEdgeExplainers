@@ -40,4 +40,4 @@ Throughout the development of this capability we've revceived a lot of feedback 
 ## Feedback
 For suggestions and comments, please file an [issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=diekus&labels=Web+Install+API&projects=&template=web-install-api.md&title=%5BWeb+Install%5D+%3CTITLE+HERE%3E).
 
-![Web Install logo](installlogo.png)
+![Web Install logo](../installlogo.png)
