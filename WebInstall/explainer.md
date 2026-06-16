@@ -72,21 +72,8 @@ A second, **declarative** entry point is incubating in parallel:
   user-agent-styled button that invokes the same install algorithm defined
   here. It implements the same [permission element](https://wicg.github.io/PEPC/permission-elements.html)
   specification as `<geolocation>` and `<usermedia>`.
-
-To avoid duplication, the topic split is:
-
-| Topic | Defined here | Defined in `<install>` |
-|---|---|---|
-| `navigator.install()` shape and IDL | Yes | -- |
-| `<install>` element shape and IDL | -- | Yes |
-| Manifest fetch / parse / validate pipeline | Yes (normative) | References this doc |
-| Consent UI contract | Yes (normative) | References this doc |
-| Activation requirements | Yes (normative) | References this doc, plus element specifics |
-| Error taxonomy | Yes (normative) | Maps backend errors to element-specific events |
-
-Readers working on the `<install>` element should treat this document as the
-normative source for backend behavior. Readers working on `navigator.install()`
-do not need to read the element explainers.
+- Readers working on the `<install>` element should treat this document as the
+  normative source for backend behavior.
 
 ## User-Facing Problem
 
