@@ -77,16 +77,18 @@ A second, **declarative** entry point is incubating in parallel:
 
 ## User-Facing Problem
 
-End users don't have a standard, cross-platform way to acquire web
-applications. The process of distributing and installing web apps is
-both fragmented and limited:
+Think about all the websites you use regularly - email, online shopping, social
+media, streaming sites, etc. For most users, this requires launching a browser
+and clicking or typing to get to those sites every time. Web applications enable
+developers to provide native, "app-like" experiences to end users while building
+on the trust set by their browser. However, for end users there's no standard,
+cross-platform way to acquire web applications. The process of distributing and
+installing web apps is both fragmented and limited:
 
-- Each browser has different, often hidden, entry points for
-  installation (address bar icons, menu items, prompts). Users may not
-  understand what the
+- Each browser has different, often hidden, entry points for installation
+  (address bar icons, menu items, prompts). Users may not understand what the
   [icon/prompt in the browser's address bar](https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/ux#installing-a-pwa)
-  does, or how to
-  [deep search several layers](https://support.google.com/chrome/answer/9658361?hl=en-GG&co=GENIE.Platform%3DDesktop&oco=1)
+  does, or how to [deep search several layers](https://support.google.com/chrome/answer/9658361?hl=en-GG&co=GENIE.Platform%3DDesktop&oco=1)
   of [browser UX to add the app](https://support.apple.com/en-us/104996#create)
   to their devices.
 - Users may not know that a web app exists for the site they're
@@ -349,7 +351,50 @@ installation steps.
   authentication or localized URLs, making it difficult to provide one single
   install_url. (Direct feedback from public trials).
 
-### Use `<a href>`
+### Declarative install with `<a>`
+
+Allow a new `target` type of `_install` to the HTML anchor tag. It could also
+use the [`rel`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel)
+attribute to hint to the UA that the url in the link should be installed.
+
+`<a href="https://airhorner.com" target="_install">honk</a>`
+
+`<a href="https://airhorner.com" rel="install">honk</a>`
+
+*Pros:*
+* Platform fallback to navigate to the content automatically.
+* Does not need JavaScript.
+
+*Cons:*
+* Takes the user out of the current context, providing no alternative if the use
+  case benefits from them staying in context.
+* Limits the amount of information a developer can act upon that the promise
+  provides, such as if the installation was successful.
+* Developers can't easily detect UA declarative support in order to be able to
+  tailor their UX to different situations.
+* More complex combinations for the UA to take into account: additional attributes
+  that act on a link HTML tag (`a`) like the target mean there is an increased
+  set of scenarios that might have unintended consequences for end users. For
+  example, how does a target of `_ top` differ from `_blank`? While we could look
+  at ignoring the `target` attribute if a `rel` attribute is present, the idea
+  is to use acquisition mechanisms that are already present in UAs. 
+
+We believe that a declarative implementation is a simple and effective solution,
+and a future entry point for the API. It should be considered for a v2 of the
+capability. For the current solution, we've decided to go with an imperative
+implementation since it allows more control over the overall installation UX:
+
+* Allows the source to detect if an installation occurred with ease.
+  (resolves/rejects a promise).
+* Supports `install_url`. This url can be an optimized url or the normal homepage
+  that an application already has. The advantage is that unlike a declarative version,
+  there is no scenario where an end user can be left stranded accidentally in a
+  blank page that is meant to be a lightweight entry point to the app.
+* The developer ergonomics of handling a promise are better than responding to
+  an `a` tag navigation.
+* Keeps the user in the context, which *can* be beneficial in certain scenarios
+  (importantly, if the developer *wants* to take the user out of the current context,
+  they *can* do so by navigating).
 
 
 ## Accessibility, Privacy, and Security Considerations
