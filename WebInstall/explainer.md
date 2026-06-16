@@ -2,23 +2,32 @@
 
 ## Authors:
 
-- [Diego Gonzalez](https://github.com/diekus), [Microsoft](https://microsoft.com)
+- [Diego Gonzalez](https://github.com/diekus)
 - Lia Hiscock, Microsoft
 
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Web%20Install%20API%22)
 
 > **Here for Origin Trials?**
-> The Web Install API is currently available as an [Origin Trial](https://developer.chrome.com/docs/web-platform/origin-trials/) in Chrome and Microsoft Edge versions 143-150. See [Origin Trial Instructions](https://github.com/MicrosoftEdge/Demos/blob/main/pwa-web-install-api/README.md) to learn more.
+> The Web Install API is currently available as an [Origin Trial](https://developer.chrome.com/docs/web-platform/origin-trials/)
+in Chrome and Microsoft Edge versions 143-150. See [Origin Trial Instructions](https://github.com/MicrosoftEdge/Demos/blob/main/pwa-web-install-api/README.md)
+to learn more.
 >
-> The Origin Trial exposes the earlier `install_url`-based shape of the API, which is being replaced. For background on that earlier design, see the archived [install-url-version/](./install-url-version/) explainers.
+> The Origin Trial exposes the earlier `install_url`-based shape of the API,
+which is being replaced. For background on that earlier design, see the archived
+[install-url-version/](./install-url-version/) explainers.
 
 ## Status of this Document
 
-This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
+This document is a starting point for engaging the community and standards
+bodies in developing collaborative solutions fit for standardization. As the
+solutions to problems described in this document progress along the
+standards-track, we will retain this document as an archive and use this
+section to keep the community up-to-date with the most current standards venue
+and content location of future work and discussions.
 
 - This document status: **Active**
-- Expected venue: [W3C Web Incubator Community Group](https://github.com/WICG)
+- Expected venue: WebApps WG
 - **Current version: this document**
 
 ## Table of contents
@@ -32,7 +41,7 @@ This document is a starting point for engaging the community and standards bodie
 - [Proposed Approach](#proposed-approach)
   - [Sample code](#sample-code)
 - [Alternatives considered](#alternatives-considered)
-- [Accessibility, Privacy, and Security Considerations](#accessibility-privacy-and-security-considerations)
+- [Accessibility, Privacy, and Security](#accessibility-privacy-and-security-considerations)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [Security and Privacy Self-Review](#security-and-privacy-self-review)
 - [Additional Links](#additional-links)
@@ -49,7 +58,7 @@ applications and experiences that they can acquire with reduced friction_.
 
 ## Relationship to other proposals
 
-This document is the **main** specification for web app installation initiated
+This document is the **main** explainer for web app installation initiated
 by a website. It defines:
 
 - The `navigator.install()` JavaScript entry point.
@@ -61,10 +70,8 @@ A second, **declarative** entry point is incubating in parallel:
 
 - [`<install>` element](https://github.com/WICG/install-element) (WICG) -- a
   user-agent-styled button that invokes the same install algorithm defined
-  here. It is a [permission element](https://wicg.github.io/PEPC/permission-elements.html)
-  and adds element-specific surfaces (PEPC validity gating, `promptaction` /
-  `promptdismiss` events, fallback content, launch-when-installed UI).
-
+  here. It implements the same [permission element](https://wicg.github.io/PEPC/permission-elements.html)
+  specification as `<geolocation>` and `<usermedia>`.
 
 To avoid duplication, the topic split is:
 
@@ -73,10 +80,9 @@ To avoid duplication, the topic split is:
 | `navigator.install()` shape and IDL | Yes | -- |
 | `<install>` element shape and IDL | -- | Yes |
 | Manifest fetch / parse / validate pipeline | Yes (normative) | References this doc |
-| Consent UI contract | Yes (normative) | References this doc, adds element flow |
-| Cross-origin, sandbox, activation gates | Yes (normative) | References this doc, adds PEPC visibility overlay |
-| Error taxonomy | Yes (normative) | Maps backend errors to element events |
-| `manifestId` privacy contract | Yes | References this doc |
+| Consent UI contract | Yes (normative) | References this doc |
+| Activation requirements | Yes (normative) | References this doc, plus element specifics |
+| Error taxonomy | Yes (normative) | Maps backend errors to element-specific events |
 
 Readers working on the `<install>` element should treat this document as the
 normative source for backend behavior. Readers working on `navigator.install()`
@@ -180,10 +186,11 @@ contrast against the legacy shape. The migration explainer does the
 former and is cleaner for it.
 -->
 
-The solution is a promise-based extension of the navigator interface. A developer
-calls `navigator.install({ manifest: 'https://foo.com/manifest.json', [id: 'https://foo.com/home'] })`.
+The solution is a promise-based extension of the navigator interface. A
+developer calls `navigator.install({ manifest, id? })`.
 
-**The developer may omit the `id` parameter, if and only if the json at `manifest`
+**The developer may omit the `id` parameter, if and only if the JSON at
+`manifest`
 contains an `id`.**
 
 As an added convenience, the developer may omit the dictionary object entirely,
@@ -196,8 +203,10 @@ The API's promise will:
 [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException)
 value of:
     * `AbortError`: The user cancelled/quit the installation flow.
-    * `DataError`: There was a problem with the data provided. Notable failures include:
-       - invalid manifest URL, failure to fetch the manifest, malformed manifest file, etc.
+    * `DataError`: There was a problem with the data provided. Notable
+      failures include:
+      - invalid manifest URL, failure to fetch the manifest, malformed
+        manifest file, etc.
        - the developer omitted the `id` parameter when there was none declared
        in the manifest file
        - the developer provided an `id` parameter, but it did not match the `id`
@@ -273,48 +282,53 @@ According to the manifest spec, if there is no `id` member present, the computed
 string resolves to that of the `start_url`.
 
 We acknowledge that only around 4% (as of 2024) of web apps have defined `id`s
-in their manifest. We also know that `id`s are a crucial part to support to avoid
-situations of multiple *same* applications with no path to being updated. For
-apps that have an `id` defined in their manifest, the `id` may be omitted from
-the API call. For apps that do **not** define the `id` field, the API caller
-must include the expected, computed id.
+in their manifest. We also know that `id`s are a crucial part to support to
+avoid situations of multiple *same* applications with no path to being
+updated. For apps that have an `id` defined in their manifest, the `id` may be
+omitted from the API call. For apps that do **not** define the `id` field, the
+API caller must include the expected, computed id.
 
 ### Steps to install the app - No-argument API signature
 
 1. User gesture activates code that calls `install()`.
 2. If the currently loaded document links to a manifest file, continue. Else
-reject with `DataError`.
+  reject with `DataError`.
 3. If the manifest file has an `id` field defined, continue. Else reject with
-`DataError`.
-4. UA presents confirmation UX with appropriate security sensitive fields. If
-the user accepts, continue. Else reject with `AbortError`.
+  `DataError`.
+4. UA presents confirmation UX with appropriate security-sensitive fields. If
+  the user accepts, continue. Else reject with `AbortError`.
 5. Promise resolves.
 
-> Note: if the application is already installed, the UA can choose to display UX
-to launch the application. The UA should follow the same error behavior, resolving
-the promise if the user accepts the launch, and rejecting with `AbortError` otherwise.
+> Note: if the application is already installed, the UA can choose to display
+> UX to launch the application. The UA should follow the same error behavior,
+> resolving the promise if the user accepts the launch, and rejecting with
+> `AbortError` otherwise.
 
 ### Steps to install the app - Dictionary API Signature
 
 #### `manifest` only
 
 1. User gesture activates code that calls `install({manifest: <url>})`.
-2. If `<url`> is cross-origin with the current document, the UA asks for permission
-to install apps from other origins (if not previously granted). Else reject.
-3. UA tries to fetch the manifest file at `url`. If the fetch succeeds, continue.
-Else reject with `DataError`.
-4. If the fetched manifest contains an `id`, continue. Else reject with `DataError`.
-5. UA presents confirmation UX with appropriate security sensitive fields. If
-the user accepts, continue. Else reject with `AbortError`.
+2. If `<url`> is cross-origin with the current document, the UA asks for
+  permission to install apps from other origins (if not previously granted).
+  Else reject.
+3. UA tries to fetch the manifest file at `url`. If the fetch succeeds,
+  continue. Else reject with `DataError`.
+4. If the fetched manifest contains an `id`, continue. Else reject with
+  `DataError`.
+5. UA presents confirmation UX with appropriate security-sensitive fields. If
+  the user accepts, continue. Else reject with `AbortError`.
 6. Promise resolves.
 
 #### `manifest` and `id`
 
-1. User gesture activates code that calls `install({manifest: <url>, id: <manifest_id>})`.
-2. If `<url`> is cross-origin with the current document, the UA asks for permission
-to install apps from other origins (if not previously granted). Else reject.
-3. UA tries to fetch the manifest file at `url`. If the fetch succeeds, continue.
-Else reject with `DataError`.
+1. User gesture activates code that calls
+  `install({manifest: <url>, id: <manifest_id>})`.
+2. If `<url`> is cross-origin with the current document, the UA asks for
+  permission to install apps from other origins (if not previously granted).
+  Else reject.
+3. UA tries to fetch the manifest file at `url`. If the fetch succeeds,
+  continue. Else reject with `DataError`.
 4. UA determines the computed/processed id of the manifest -- if it matches
 `<manifest_id>`, continue. Else reject with `DataError`.
 5. UA presents confirmation UX with appropriate security sensitive fields. If
@@ -325,23 +339,25 @@ the user accepts, continue. Else reject with `AbortError`.
 
 ### Install by `install_url`
 
-We publicly trialed a version of the API that accepted a document URL instead of
-manifest URL. The target document was fetched and loaded in the background, and
-its linked manifest was retrieved before proceeding with the same installation steps.
+We publicly trialed a version of the API that accepted a document URL instead
+of manifest URL. The target document was fetched and loaded in the background,
+and its linked manifest was retrieved before proceeding with the same
+installation steps.
 
 * Pros:
-   * Leveraged the existing document-based trust path: starting from a loaded page let
-  the browser rely on the page-to-manifest relationship the web platform already
-  understands, including common deployments where the manifest is hosted
-  separately from the app document.
+  * Leveraged the existing document-based trust path: starting from a loaded
+    page let the browser rely on the page-to-manifest relationship the web
+    platform already understands, including common deployments where the
+    manifest is hosted separately from the app document.
    * Service worker registration - service workers are registered on page load.
    They provide offline resource caching and app-like functionality, such as
    online install, offline launch. 
 * Cons:
   * Privacy leak - fetching the target document discloses cross-origin request
   context and credential state (including cookie-related signals).
-  * Performance - loading a full document when we're ultimately interested in the
-  manifest is a heavyweight operation that increases the potential attack surface.
+  * Performance - loading a full document when we're ultimately interested in
+    the manifest is a heavyweight operation that increases the potential attack
+    surface.
   * Document urls are brittle - many sites utilize redirects for things such as
   authentication or localized URLs, making it difficult to provide one single
   install_url. (Direct feedback from public trials).
@@ -404,19 +420,19 @@ platform convention.
 
 #### Same-origin policy
 
-The content installed using the navigator.install does not inherit or auto-grant
-permissions from the installation origin. This API does not break the same-origin
-security model of the web. Every different domain has its own set of independent
-permissions bound to their specific origin.
+The content installed using the navigator.install does not inherit or
+auto-grant permissions from the installation origin. This API does not break
+the same-origin security model of the web. Every different domain has its own
+set of independent permissions bound to their specific origin.
 
 #### Preventing installation prompt spamming
 
 * Transient user activation is required to invoke this API.
 * The API is blocked in all sandboxed contexts (documents and iframes).
 * The API is blocked in cross-origin subframes.
-* The cross-origin installation capabilities are gated behind a user-facing permission - 
-e.g. if a user declines the permission for evil.com, evil.com will be blocked
-from invoking navigator.install.
+* The cross-origin installation capabilities are gated behind a user-facing
+  permission. For example, if a user declines the permission for evil.com,
+  evil.com will be blocked from invoking navigator.install.
 
 #### Cross-origin resource fetching
 
@@ -426,8 +442,9 @@ cookies or identifiable information are leaked to the target server.
 #### Private / Incognito contexts
 
 This feature is not available in private browsing or off-the-record profiles,
-as web apps are not generally installable there. UAs must ensure failure 
-signaling does not create a reliable private-mode detection channel (for example,
+as web apps are not generally installable there. UAs must ensure failure
+signaling does not create a reliable private-mode detection channel (for
+example,
 failing immediately in private modes).
 
 #### Further potential mitigations
@@ -460,21 +477,22 @@ additional trust checks?
 
 ### Relative URL resolution
 
-Related to the above. Manifests may contain relative URLs, which are [specified](https://www.w3.org/TR/appmanifest/#start_url-member).
-to resolve against the document's URL. However, this proposal does **not** load 
-the target document, so how should relative manifest URLs be resolved?
+Related to the above. Manifests may contain relative URLs, which are
+[specified](https://www.w3.org/TR/appmanifest/#start_url-member) to resolve
+against the document's URL. However, this proposal does **not** load the
+target document, so how should relative manifest URLs be resolved?
 
-**Current decision: resolve relative URLs using the `manifest` URL's origin, since
-cross-origin manifest URLs are currently not supported.**
+**Current decision: resolve relative URLs using the `manifest` URL's origin,
+since cross-origin manifest URLs are currently not supported.**
 
 ### Versioned manifest URLs and stale links
 
 Apps that version manifest filenames (for example, `manifest-1.0.2.json`) can
-leave previously published `navigator.install` calls pointing at stale URLs. Should
-the platform define guidance or a stable convention (for example,
-indirection via a fixed URL) to reduce breakage?\
+leave previously published `navigator.install` calls pointing at stale URLs.
+Should the platform define guidance or a stable convention (for example,
+indirection via a fixed URL) to reduce breakage?
 
-**Current decision: Rely on DataError to inform callers of broken URLs and 
+**Current decision: Rely on DataError to inform callers of broken URLs and
 await developer feedback.**
 
 ## Stakeholder Feedback / Opposition
@@ -482,7 +500,7 @@ await developer feedback.**
 - Developers: Positive.
 - W3C TAG Review: PENDING
 - Browser Standards Positions:
-  - Chrome: [Supportive/Implementing](https://chromestatus.com/feature/5183481574850560)
+  - Chromium: [Supportive/Implementing](https://chromestatus.com/feature/5183481574850560)
   - Mozilla: [mozilla/standards-positions#1179](https://github.com/mozilla/standards-positions/issues/1179)
   - WebKit: [WebKit/standards-positions#463](https://github.com/WebKit/standards-positions/issues/463)
 
