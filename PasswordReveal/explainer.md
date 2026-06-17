@@ -23,7 +23,7 @@ Our motivation to bring that to Chromium came from a preference test with end us
 
 Of the respondents, 2 out of 3 users stated that they incorrectly type in their passwords Occasionally, Frequently, or Very Frequently.
 
-Realizing that many users are still impacted by this, despite evolution of standards and extensions we did a usability study to discuss our proposed reveal solution. We asked them which option they preferred when logging into an email account or their favorite social media network:
+Realizing that many users are still affected by this, despite evolution of standards and extensions we did a usability study to discuss our proposed reveal solution. We asked them which option they preferred when logging into an email account or their favorite social media network:
 
 <center><img src="preference.png"></center>
 
