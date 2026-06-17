@@ -276,9 +276,9 @@ function OneTimeInit() {
 
 const focusgroupManagers = new WeakMap();
 
-if ( document.readyState != "complete" ) {
-  document.addEventListener('DOMContentLoaded', OneTimeInit, { once: true } );
+if ( document.readyState != "loading" ) {
+  OneTimeInit(); // run right now.
 }
 else {
-  OneTimeInit(); // run right now.
+  document.addEventListener('DOMContentLoaded', OneTimeInit, { once: true } );
 }
