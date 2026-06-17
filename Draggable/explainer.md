@@ -118,6 +118,10 @@ The (Generic Beautiful) button has the `app-region` set to `drag`. This button c
 
 > Note: This is just an example to test the _current_ behaviour on elements that have animations. The `app-region` is generally used on emulated titlebars or other UX designed to let the end user move the window around.
 
+### Inheritance
+
+The property inherits and both `drag` and `no-drag` transfer to child elements. In either case, child elements can override it but setting the value of the property to an alternate value.
+
 ### `app-region` and pointer events
 
 Current implementations of `app-region` **consume all pointer events**, even if they don't result in a drag. Interactive elements inside an area defined with `app-region: drag` will require a `app-region: no-drag` to be interacted with.
@@ -157,6 +161,11 @@ Note that there is [positive](https://github.com/w3c/csswg-drafts/issues/7017#is
 
 ## Accessibility, Privacy, and Security Considerations
 There are no considerations at this time.
+
+## Open Questions
+- The name `app-region` is not representative of the property's purpose. A new name would be in order to better represent the capability (`drag-area`?, `drag-point`?, `drag-behavior`?). See this [issue](https://github.com/w3c/csswg-drafts/issues/13102) to contribute to the discussion.
+
+- There are cases where 
 
 ## References & acknowledgements
 
