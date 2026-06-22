@@ -35,14 +35,11 @@ and content location of future work and discussions.
 - [Introduction](#introduction)
 - [Relationship to other proposals](#relationship-to-other-proposals)
 - [User-Facing Problem](#user-facing-problem)
-  - [Use cases](#use-cases)
-  - [Goals](#goals)
-  - [Non-goals](#non-goals)
+- [Use Cases](#use-cases)
 - [Proposed Approach](#proposed-approach)
-  - [Sample code](#sample-code)
 - [Alternatives considered](#alternatives-considered)
 - [Accessibility, Privacy, and Security](#accessibility-privacy-and-security-considerations)
-- [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
+- [Stakeholder Feedback](#stakeholder-feedback--opposition)
 - [Security and Privacy Self-Review](#security-and-privacy-self-review)
 - [Additional Links](#additional-links)
 
@@ -100,38 +97,11 @@ installing web apps is both fragmented and limited:
 - Cross-origin installation (e.g. an app catalog installing apps from
   other sites) has no built-in web platform support.
 
-### Use cases
-
-**Install me!** A site can ergonomically trigger the user agent's
-installation flow, eliminating the need to subscribe to events, or try
-and direct users through potentially several layers of browser UX to
-discover the installation entry point on their own.
-
-![Same domain install flow](./samedomaininstall.png)
-
-**Suite of web apps.** A family of software applications -- a
-productivity or photography suite, for example -- where each application
-is a separate web app. The developer can offer installation of any
-sibling app from the suite's home page, without redirecting users to
-platform-specific stores.
-
-**Search and discovery surfaces.** A search engine or content site can
-offer a frictionless way to install an app that a user is searching
-for, surfacing app candidates the user might not otherwise have known
-existed.
-
-**App directories and online catalogs.** A site whose purpose is to
-list and recommend web apps can offer one-click install for the apps
-it catalogs, enabling cross-device, cross-platform app directories
-that don't depend on any single store.
-
-![Install flow from an app repository](./apprepositoryinstallation.png)
-
 ### Goals
 
 - Enable a site to install a web app identified by its manifest URL,
   subject to user consent.
-- Extend the functionality of beforeinstallprompt that cannot install
+- Extend the functionality of beforeinstallprompt, which cannot install
   content other than the current loaded web application.
 - Keep the consent UI clearly attributable: the user sees which site
   is asking and which app is being installed.
@@ -141,57 +111,82 @@ that don't depend on any single store.
 
 ### Non-goals
 
-- **Discovering an app's manifest from an arbitrary page URL.** The
-  caller must supply the manifest URL directly. (This is the capability
-  the prior `install_url` design offered; see
-  [Alternatives considered](#alternatives-considered).)
-- **Silent or unattended installation.** User consent is always
-  required.
+- **Define what "installation" means.** This varies by platform and browser.
+- **Silent or unattended installation.** User consent is always required.
 - **Installing arbitrary web content that is not an app.** The target
   must have a manifest file. See [historical context](https://docs.google.com/document/d/19dad0LnqdvEhK-3GmSaffSGHYLeM0kHQ_v4ZRNBFgWM/edit?tab=t.0#heading=h.koe6r7c5fhdg)
 - **Installing native apps, browser extensions, or other non-PWA
   artifacts.**
 - **Reporting install state of arbitrary apps back to the caller.**
-- **Changing the way the user agent currently allows installation of a
-  web app**, or defining what "installation" means on a given platform.
+
+## Use cases
+
+### Install me! (Same origin install)
+
+A site can ergonomically trigger the user agent's installation flow, eliminating
+the need to subscribe to events, or try and direct users through potentially
+several layers of browser UX to discover the installation entry point on their own.
+
+This is the simplest case -- no parameters are needed:
+```js
+navigator.install();
+```
+
+![Same domain install flow](./samedomaininstall.png)
+
+### Suite of web apps
+
+A family of software applications -- productivity or photography suite, for
+example -- where each application is a separate web app. The developer can offer
+installation of any sibling app from the suite's home page, without redirecting
+users to platform-specific stores.
+
+```js
+navigator.install("https://suite.example/mail/manifest.webmanifest")
+navigator.install("https://suite.example/calendar/manifest.webmanifest")
+navigator.install("https://suite.example/tasks/manifest.webmanifest")
+```
+
+### Search and discovery surfaces
+
+A search engine or content site can offer a frictionless way to install an app
+that a user is searching for, surfacing app candidates the user might not
+otherwise have known existed.
+
+### App directories and online catalogs
+
+A site whose purpose is to list and recommend web apps can offer one-click
+install for the apps it catalogs, enabling cross-device, cross-platform app
+directories that don't depend on any single store.
+
+```js
+navigator.install("https://music.youtube.com/manifest.webmanifest",
+                  "https://music.youtube.com/?source=pwa")
+```
+
+![Install flow from an app repository](./apprepositoryinstallation.png)
 
 ## Proposed Approach
 
-<!--
-TODO: This is the "how" section. Recommended sub-structure:
+The solution is a promise-based extension of the navigator interface that is
+simple and ergonomic for developers. A developer calls
 
-1. The shape of the API at the call site (one short code sample, in
-   prose form: "A page calls navigator.install({manifest, id?}). The
-   browser fetches the manifest, parses it, and prompts the user.")
-2. What the browser does (manifest fetch, validation, consent UI).
-3. What the caller gets back (the promise resolution shape, and
-   importantly what is NOT returned -- no manifest_id on success, to
-   avoid cross-origin probing).
-4. How this composes with the existing manifest pipeline.
+`navigator.install({ manifest: <url> [, id: <url>] })`.
 
-Note for the writer: the legacy install_url overloads still ship behind
-the Origin Trial. Decide whether to describe the new shape only, or to
-contrast against the legacy shape. The migration explainer does the
-former and is cleaner for it.
--->
-
-The solution is a promise-based extension of the navigator interface. A
-developer calls `navigator.install({ manifest, id? })`.
-
-**The developer may omit the `id` parameter, if and only if the JSON at
-`manifest`
-contains an `id`.**
+**The developer may omit `id` if and only if the JSON at `manifest` contains an `id`.**
 
 As an added convenience, the developer may omit the dictionary object entirely,
-in which case the currently loaded page's manifest will be targeted for install.
+in which case the currently loaded page's manifest is targeted for install.
 
 The API's promise will:
 
 * Resolve if the installation was completed.
+    * The promise resolves with an empty `WebInstallResult` dictionary for
+    future-proofing.
 * Be rejected if the installation did not complete. It will reject with a
 [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException)
 value of:
-    * `AbortError`: The user cancelled/quit the installation flow.
+    * `AbortError`: The user aborted the installation flow.
     * `DataError`: There was a problem with the data provided. Notable
       failures include:
       - invalid manifest URL, failure to fetch the manifest, malformed
@@ -203,50 +198,25 @@ value of:
 
 ### Sample code
 
-<!--
-TODO: One small example per scenario from User-Facing Problem.
-Keep examples to ~10 lines. Show the happy path first, then one
-error-handling example.
-
-Skeleton:
-
-```js
-// App directory installing a third-party PWA by manifest URL.
-const button = document.querySelector('#install');
-button.addEventListener('click', async () => {
-  try {
-    await navigator.install({
-      manifest: 'https://app.example.com/manifest.webmanifest',
-    });
-  } catch (err) {
-    // AbortError: user dismissed the prompt.
-    // DataError: manifest could not be fetched or parsed.
-    // TypeError: arguments were invalid.
-  }
-});
-```
-
-Also show the optional `id` form, with a note that it must be an
-absolute URL when supplied.
--->
-
 **1. Install me! (No argument signature)**
 
-The developer can offer installation of their own site (provided their manifest
-contains an `id` field):
+The developer can offer installation of their own site (ie. the currently loaded
+page) with minimal JavaScript:
 
 ```js
 const button = document.querySelector('#install');
 button.addEventListener('click', async () => {
-  try {
     await navigator.install();
-  }
 });
 ```
+
+> Reminder! Use of this signature requires you to add an `id` field to your 
+> site's manifest.json.
 
 **2. Suite of web apps. (Dictionary signature)**
 
-The developer can offer installation of a *different* site:
+The developer can offer installation of a *different* site (that may or may not
+contain an `id`):
 
 ```js
 const button = document.querySelector('#install');
@@ -257,15 +227,23 @@ button.addEventListener('click', async () => {
       // Must be an absolute URL.
       id: 'https://foo.com/home',
     });
+    // Success: promise resolved!
   } catch (err) {
-    // AbortError: user dismissed the prompt.
-    // DataError: manifest could not be fetched or parsed.
-    // TypeError: arguments were invalid.
+    if (err.name === 'DataError' || err.name === 'TypeError') {
+      // Action needed: illegal/invalid parameters; invalid
+      // manifest data; etc.
+    } else if (err.name === 'AbortError') {
+      // User existed the installation flow. No action needed.
+    } else {
+      // Installation failed for an unexpected reason. Notify
+      // the user, or ask if they want to try again?
+      ShowRecoveryUX();
+    }
   }
 });
 ```
 
-### A note on manifest ids
+### A note on manifest `id`
 
 According to the manifest spec, if there is no `id` member present, the computed
 string resolves to that of the `start_url`.
@@ -273,11 +251,13 @@ string resolves to that of the `start_url`.
 We acknowledge that only around 4% (as of 2024) of web apps have defined `id`s
 in their manifest. We also know that `id`s are a crucial part to support to
 avoid situations of multiple *same* applications with no path to being
-updated. For apps that have an `id` defined in their manifest, the `id` may be
-omitted from the API call. For apps that do **not** define the `id` field, the
-API caller must include the expected, computed id.
+updated. 
 
-### Steps to install the app - No-argument API signature
+For apps that have an `id` defined in their manifest, the `id` may be
+omitted from the API call. For apps that do **not** define the `id` field, the
+API caller must include the expected, absolute, computed id.
+
+### Steps to install the app - no-argument signature
 
 1. User gesture activates code that calls `install()`.
 2. If the currently loaded document links to a manifest file, continue. Else
@@ -293,36 +273,38 @@ API caller must include the expected, computed id.
 > resolving the promise if the user accepts the launch, and rejecting with
 > `AbortError` otherwise.
 
-### Steps to install the app - Dictionary API Signature
+### Steps to install the app - dictionary signature
 
 #### `manifest` only
 
 1. User gesture activates code that calls `install({manifest: <url>})`.
-2. If `<url`> is cross-origin with the current document, the UA asks for
+2. If `<url>` is a valid URL, continue. Else reject with `TypeError`.
+3. If `<url>` is cross-origin with the current document, the UA asks for
   permission to install apps from other origins (if not previously granted).
-  Else reject.
-3. UA tries to fetch the manifest file at `url`. If the fetch succeeds,
+  If permission is granted, continue. Else reject with `AbortError`.
+4. UA tries to fetch the manifest file at `<url>`. If the fetch succeeds,
   continue. Else reject with `DataError`.
-4. If the fetched manifest contains an `id`, continue. Else reject with
+5. If the fetched manifest contains an `id`, continue. Else reject with
   `DataError`.
-5. UA presents confirmation UX with appropriate security-sensitive fields. If
+6. UA presents confirmation UX with appropriate security-sensitive fields. If
   the user accepts, continue. Else reject with `AbortError`.
-6. Promise resolves.
+7. Promise resolves.
 
 #### `manifest` and `id`
 
 1. User gesture activates code that calls
   `install({manifest: <url>, id: <manifest_id>})`.
-2. If `<url`> is cross-origin with the current document, the UA asks for
+2. If `<url>` is a valid URL, continue. Else reject with `TypeError`.
+3. If `<url`> is cross-origin with the current document, the UA asks for
   permission to install apps from other origins (if not previously granted).
-  Else reject.
-3. UA tries to fetch the manifest file at `url`. If the fetch succeeds,
+  If permission is granted, continue. Else reject with `AbortError`.
+4. UA tries to fetch the manifest file at `<url>`. If the fetch succeeds,
   continue. Else reject with `DataError`.
-4. UA determines the computed/processed id of the manifest -- if it matches
+5. UA determines the computed/processed id of the manifest -- if it matches
 `<manifest_id>`, continue. Else reject with `DataError`.
-5. UA presents confirmation UX with appropriate security sensitive fields. If
+6. UA presents confirmation UX with appropriate security sensitive fields. If
 the user accepts, continue. Else reject with `AbortError`.
-6. Promise resolves.
+7. Promise resolves.
 
 ## Alternatives considered
 
@@ -379,113 +361,9 @@ attribute to hint to the UA that the url in the link should be installed.
   at ignoring the `target` attribute if a `rel` attribute is present, the idea
   is to use acquisition mechanisms that are already present in UAs. 
 
-We believe that a declarative implementation is a simple and effective solution,
-and a future entry point for the API. It should be considered for a v2 of the
-capability. For the current solution, we've decided to go with an imperative
-implementation since it allows more control over the overall installation UX:
-
-* Allows the source to detect if an installation occurred with ease.
-  (resolves/rejects a promise).
-* Supports `install_url`. This url can be an optimized url or the normal homepage
-  that an application already has. The advantage is that unlike a declarative version,
-  there is no scenario where an end user can be left stranded accidentally in a
-  blank page that is meant to be a lightweight entry point to the app.
-* The developer ergonomics of handling a promise are better than responding to
-  an `a` tag navigation.
-* Keeps the user in the context, which *can* be beneficial in certain scenarios
-  (importantly, if the developer *wants* to take the user out of the current context,
-  they *can* do so by navigating).
-
-
-## Accessibility, Privacy, and Security Considerations
-
-### Accessibility
-
-The install consent UI is browser-rendered, using existing accessible PWA
-install surfaces.
-
-### Privacy
-
-<!--
-TODO: Walk through the privacy surfaces. Recommended structure:
-
-- What the caller learns on success. (Resolution of the promise =
-  "user accepted install". Nothing about the manifest contents,
-  app identity, or pre-existing install state.)
-- What the caller learns on rejection. (Distinguish error types that
-  are safe to expose from ones that aren't. AbortError vs. DataError
-  vs. TypeError vs. NotAllowedError.)
-- Why manifest_id is intentionally NOT returned: it would let a caller
-  probe cross-origin app identity by trying candidate ids and observing
-  whether resolution succeeded.
-- Why the API requires transient user activation.
-
-This section will get scrutiny in TAG and security review -- be
-explicit about what was traded off.
--->
-
-> **Open question:** What result information should be exposed to the
-> caller? See #1341.
-
-The install flow's promise must settle in some way. The question is how
-much the resolution or rejection reveals to the calling origin --
-particularly in the cross-origin case, where origin A is installing
-origin B's app.
-
-**Side-channel considerations:** Regardless of which option is chosen,
-the calling origin can partially infer outcomes through observable side
-channels. Focus/blur events reveal whether a secondary dialog was
-shown. These side channels exist independently of the promise result
-and limit the privacy benefit of withholding explicit results.
-
-**`AbortError` convention:** Per the [Web IDL specification][webidl-abort],
-`AbortError` is the established convention for user-cancelled operations
-across the web platform (Payment Request API, File Picker API, Web Share
-API, Credential Management). If retained, it should be narrowed to mean
-*only* "the user dismissed the prompt" -- the current implementation
-also uses it as a catch-all for internal failures, which does not match
-platform convention.
-
-[webidl-abort]: https://webidl.spec.whatwg.org/#AbortError
-
-### Security
-
-#### Same-origin policy
-
-The content installed using the navigator.install does not inherit or
-auto-grant permissions from the installation origin. This API does not break
-the same-origin security model of the web. Every different domain has its own
-set of independent permissions bound to their specific origin.
-
-#### Preventing installation prompt spamming
-
-* Transient user activation is required to invoke this API.
-* The API is blocked in all sandboxed contexts (documents and iframes).
-* The API is blocked in cross-origin subframes.
-* The cross-origin installation capabilities are gated behind a user-facing
-  permission. For example, if a user declines the permission for evil.com,
-  evil.com will be blocked from invoking navigator.install.
-
-#### Cross-origin resource fetching
-
-When fetching the manifest and any of its resources, UAs must ensure that n
-cookies or identifiable information are leaked to the target server.
-
-#### Private / Incognito contexts
-
-This feature is not available in private browsing or off-the-record profiles,
-as web apps are not generally installable there. UAs must ensure failure
-signaling does not create a reliable private-mode detection channel (for
-example,
-failing immediately in private modes).
-
-#### Further potential mitigations
-
-* UAs may gate 
-
-UAs may choose to 
-
-Two pieces 
+While there is certainly merit to an `<a>` based approach, we believe an element
+`<install>` offers UAs better control over the presentation and end to end UX.
+See [`<install>` proposal](https://github.com/WICG/install-element).
 
 ## Open Questions
 
@@ -493,7 +371,7 @@ Two pieces
 
 When installation is initiated from a manifest URL, the target app's page
 will not be loaded before install completes. That can delay service worker
-registration and would prevent online install/offline launch scenarios.
+registration and prevent online install/offline launch scenarios.
 
 **Current decision: Deferred. UAs can mitigate this in the meantime by
 automatically launching the app after installation.**
@@ -503,7 +381,7 @@ automatically launching the app after installation.**
 Some apps serve manifests from CDNs on a different origin than the app's
 `start_url`. Should this API require the manifest URL to be same-origin
 with `start_url`, or can cross-origin manifests be supported with
-additional trust checks?
+additional trust checks that do not involve loading the entire document?
 
 **Current decision: manifest URL must be same origin with `start_url`.**
 
@@ -527,7 +405,129 @@ indirection via a fixed URL) to reduce breakage?
 **Current decision: Rely on DataError to inform callers of broken URLs and
 await developer feedback.**
 
-## Stakeholder Feedback / Opposition
+## Accessibility, Privacy, and Security Considerations
+
+### Accessibility 
+
+The install consent UI is browser-rendered, using existing accessible PWA
+install surfaces.
+
+### What information is exposed to the caller (especially for cross-origin installs)
+
+Generally, we want to expose as little information as possible, while still
+maintaining usability for developers. Currently, that looks like -
+
+1. Promise resolves on successful install
+    - This is one of the main requirements to allow functional web app stores
+2. Promise rejects with `DataError` for any data/manifest-related failures.
+    - This is critical for developer usability given the manifest id
+    prerequisites for using the API.
+3. Promise rejects with `AbortError` for user cancellations.
+    - This was explicitly requested by multiple developers during public trials
+    so they can know whether to show retry UX.
+
+Additionally, the promise can also reject with
+
+- `TypeError`: arguments were invalid; incorrect type; incorrect URL scheme; etc
+- `NotFoundError`: missing document
+- `NotAllowedError`: missing user activation
+- `InvalidStateError`: invoked outside the main frame, or invalid script state
+
+See #1341.
+
+**Side-channel considerations:** Regardless of which option is chosen,
+the calling origin can partially infer outcomes through observable side
+channels. Focus/blur events reveal whether a secondary dialog was
+shown. These side channels exist independently of the promise result
+and limit the privacy benefit of withholding explicit results.
+
+### Same-origin policy
+
+The content installed using the navigator.install does not inherit or
+auto-grant permissions from the installation origin. This API does not break
+the same-origin security model of the web. Every different domain has its own
+set of independent permissions bound to their specific origin.
+
+### Cross-origin resource fetching
+
+When fetching the manifest and any of its resources, UAs must ensure that no
+cross-origin cookies or identifiable information are leaked to the target server.
+
+### Private / Incognito contexts
+
+This feature is not available in private browsing or off-the-record profiles,
+as web apps are not generally installable there. UAs must ensure failure
+signaling does not create a reliable private-mode detection channel (for
+example, failing immediately in private modes).
+
+### Preventing installation prompt spamming
+
+* Transient user activation is required to invoke this API.
+* The API is blocked in all sandboxed contexts (documents and iframes).
+* The API is blocked in cross-origin subframes.
+* The cross-origin installation capabilities are gated behind a user-facing
+  permission. For example, if a user declines the permission for evil.com,
+  evil.com will be blocked from invoking navigator.install.
+
+### New "installation" permission for origins
+
+A new "installation" permission is required if `manifest` is from a different
+origin than the requesting site. This permission is associated with the
+**requesting** origin.
+
+This results in a new integration with the [Permissions API](https://www.w3.org/TR/permissions/).
+The install API will make available the "web-app-installation"
+[PermissionDescriptor](https://www.w3.org/TR/permissions/#dom-permissiondescriptor)
+as a new [*powerful feature*](https://www.w3.org/TR/permissions/#dfn-specifies-a-powerful-feature).
+This would make it possible to know programmatically if `install` would be blocked.
+
+```javascript
+/* example of querying for the state of an installation permission using the Permission API  */
+
+const { state } = await navigator.permissions.query({
+  name: "web-app-installation"
+});
+switch (state) {
+  case "granted":
+  case "prompt":
+    navigator.install('https://productivitysuite.com');
+  case "denied":
+    // navigator.install will always abort. Developers
+    // can hide the install UI, or offer a redirect to
+    // the desired app's page.
+    break;
+}
+```
+
+> **Note:** For background documents, a permission prompt will appear for origins
+> that do not have the capability to install apps. Even if the installation is
+> of a "[background document](#background-document-1-param)" in the same origin,
+> for consistency the origin must have the permission to install apps. The only
+> cases that will not prompt for the permission are the installation of the
+> "[current document](#current-document)" or a "[background document](#background-document-1-param)"
+> in an origin that already has installation permissions.
+
+**Example:**
+
+The app located in `https://productivitysuite.com` displays in its homepage 3 buttons that aim to install 3 different apps (notice all apps are in the same origin):
+* the text processor located at `https://productivitysuite.com/text`
+* the presentation app located at `https://productivitysuite.com/slides`
+* the spreadsheet located at `https://productivitysuite.com/spreadsheet`
+
+The end user goes to the homepage in the `https://productivitysuite.com`'s origin and clicks on the button to install the presentation application. As this is a _background document_ (not the current document the user is interacting with) and the origin does not have permission to install apps, a permission prompt will appear. If this permission is granted for the origin, it can now install apps. After this permission prompt, the second prompt where the user confirms the installation appears.
+
+The end user then tries to install the text processor, and since the origin has been granted the permission, then the UA will skip the permission prompt and skip directly to confirm installation with a prompt indicating that "productivity suite wants to install text processor". The installation permission is bound to an origin.
+
+If the user were to deny the permission to install for the origin, they could browse to the app itself and once there, they could install the application. In this case, there wouldn't be any permission prompt required as this would now be a *current document* installation. 
+
+### Further potential abuse mitigations
+
+* UAs may restrict API usage to installed contexts - that is, only installed
+  apps can install other apps.
+* UAs may implement a cooldown period, throttle, etc on the amount of
+  installation requests allowed from a given webpage.
+
+## Stakeholder Feedback
 
 - Developers: Positive.
 - W3C TAG Review: PENDING
@@ -535,18 +535,6 @@ await developer feedback.**
   - Chromium: [Supportive/Implementing](https://chromestatus.com/feature/5183481574850560)
   - Mozilla: [mozilla/standards-positions#1179](https://github.com/mozilla/standards-positions/issues/1179)
   - WebKit: [WebKit/standards-positions#463](https://github.com/WebKit/standards-positions/issues/463)
-
-## Security and Privacy Self-Review
-
-<!--
-TODO: Answer the 22 questions from
-https://www.w3.org/TR/security-privacy-questionnaire/
-
-The archived `install-url-version/web-install-security-privacy-review.md`
-has answers for the prior design; many can be adapted but the privacy
-answers in particular need to be rewritten for the new shape (especially
-2.1, 2.5, and 2.13 -- the surfaces narrowed substantially).
--->
 
 ## Additional Links
 
