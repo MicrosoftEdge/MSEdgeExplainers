@@ -72,7 +72,7 @@ On Stack Overflow, variations of "How to change SVG color on hover" are perennia
 ## Goals
 
 1. **Enable parameterized external SVG images** — allow developers to pass named values into external SVG resources that can be read via `env()` in the SVG's own stylesheets.
-2. **Supported everywhere SVG files are embedded** — work with `<img>`, `background-image`, `list-style-image`, `content`, and any other context where external SVG resources are referenced via CSS.
+2. **Supported everywhere SVG files are embedded** — work with `<img>`, `background-image`, `list-style-image`, and other contexts that load external SVG as an image resource
 3. **Interop** — implement according to the [CSS Linked Parameters Module Level 1](https://drafts.csswg.org/css-link-params/) specification to ensure cross-browser compatibility as other engines adopt the spec.
 4. **Graceful degradation** — SVG images that use [`env()`](https://caniuse.com/css-env-function) with fallback values continue to render correctly in browsers that do not support link parameters.
 
