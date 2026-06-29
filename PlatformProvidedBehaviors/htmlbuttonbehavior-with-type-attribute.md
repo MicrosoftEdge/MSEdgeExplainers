@@ -82,7 +82,7 @@ A recurring concern about consolidating form-control semantics into an opt-in is
 
 - Each element behavior maps to a single native pattern (e.g., `HTMLButtonBehavior` provides exactly the semantics of `<button>`). Future element behaviors will need to follow the same naming convention.
 - Each behavior is specified in terms of existing HTML algorithms. The behavior is the union of those algorithms, applied to a custom element.
-- Web authors can override individual defaults. This already works today for role: `internals.role` overrides a behavior's default role without replacing the behavior. The same layering pattern can extend to other defaults (focusability, keyboard activation, and similar) if and when future proposals add the corresponding primitives on `ElementInternals`. The [layering example in Alternative 7](#explainer.md#alternative-7-low-level-primitives-on-elementinternals) walks through what that would look like.
+- Web authors can override individual defaults. This already works today for role: `internals.role` overrides a behavior's default role without replacing the behavior. The same layering pattern can extend to other defaults (focusability, keyboard activation, and similar) if and when future proposals add the corresponding primitives on `ElementInternals`. The [layering example in Alternative 7](explainer.md#alternative-7-low-level-primitives-on-elementinternals) walks through what that would look like.
 
 ### Accessing behavior state
 
