@@ -25,12 +25,15 @@ The platform reads `static behaviors` at `customElements.define()` time and stor
 ```javascript
 class CustomButton extends HTMLElement {
   static formAssociated = true;
-  // Attach behavior.
+  // Declare which behaviors the platform attaches to each instance.
   static behaviors = [HTMLButtonBehavior];
 
   #internals;
   constructor() {
     super();
+    // attachInternals() is the access route to the platform-created behaviors.
+    this.#internals = this.attachInternals();
+
     // Access the behavior state directly.
     const buttonBehavior = this.#internals.behaviors.get(HTMLButtonBehavior);
 
@@ -40,6 +43,8 @@ class CustomButton extends HTMLElement {
   }
 }
 ```
+
+In this model authors never construct behaviors. `new HTMLButtonBehavior()` throws an `"Illegal constructor"` `TypeError`, the same as other platform-owned objects such as `ElementInternals`, because a free-standing instance would have no host to act on. The instance is obtained only through `internals.behaviors.get(HTMLButtonBehavior)` after `attachInternals()`.
 
 Each behavior names the specific platform logic it engages:
 
@@ -52,22 +57,15 @@ Each behavior names the specific platform logic it engages:
 
 ### HTMLButtonBehavior
 
-This alternative introduces `HTMLButtonBehavior`, which mirrors native `<button>`. The behavior has a `type` property (`'submit'`, `'reset'`, or `'button'`, defaulting to `'submit'`) that selects the active button mode. The `type` is mutable for the life of the behavior.
+This alternative introduces `HTMLButtonBehavior`, which mirrors native `<button>`.
 
-- User activation (click, Enter, Space, implicit submission) reaches the behavior through the same DOM event-dispatch path as native elements, including `stopPropagation` and `preventDefault`. The behavior's activation handler is invoked after default-prevention checks the same way `<button>`'s is.
+- The behavior has a `type` property (`'submit'` (default), `'reset'`, or `'button'`) that selects the active button mode. The `type` is mutable for the life of the behavior.
+- User activation (click, Enter, Space, implicit submission) reaches the behavior through the same DOM event-dispatch path as native elements.
 - The behavior provides a default implicit `role="button"`. Authors can override the role through `internals.role`.
-- The custom element participates in sequential focus navigation using the same focusability logic native elements use, with `tabindex` and disabled state following the established rules.
-- The same logic that toggles `:default`, `:disabled`/`:enabled`, `:focus`, and `:focus-visible` on native elements applies to the behavior's host. The `:default` pseudo-class only matches when `type === 'submit'` and the host is the form's default submit button, matching native behavior.
+- The custom element with HTMLButtonBehavior participates in sequential focus navigation, with `tabindex` and disabled state following established rules.
+- The same logic that toggles `:default`, `:disabled`/`:enabled`, `:focus`, and `:focus-visible` on native elements applies to the behavior's host. The `:default` pseudo-class only matches when `type === 'submit'` and the host is the form's default submit button.
 - Mirrored `HTMLButtonElement` properties are available on the behavior instance. They are configurable per-element and mutable for the life of the behavior.
-- Form ownership applies whenever `type` is `'submit'` or `'reset'`. Activation behavior depends on `type`: `'submit'` triggers form submission and implicit submission; `'reset'` triggers form reset; `'button'` does neither. The wiring matches the corresponding native `<button type="...">` activation behavior.
-
-What the `type` property gates:
-
-| `type` value | Activation behavior | `:default` match | Implicit submission | Form ownership |
-|--------------|--------------------|------------------|--------------------|----------------|
-| `'submit'` (default) | Submits the form | Yes, if default submit button | Yes | Yes |
-| `'reset'` | Resets the form | No | No | Yes |
-| `'button'` | None | No | No | No |
+- Form ownership applies whenever `type` is `'submit'` or `'reset'`. Activation behavior depends on `type`: `'submit'` triggers form submission and implicit submission; `'reset'` triggers form reset; `'button'` does generic activation.
 
 `HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission to actually fire when `type` is `'submit'` or `'reset'`. Without it, `behavior.form` is always `null` and activation is a no-op even when the element is inside a form. This is a divergence from native `<button>`, which submits its form without any explicit opt-in.
 
@@ -109,10 +107,10 @@ To expose these properties to external code, authors define getters and setters 
 | Element creation (`new`, parser upgrade, or `customElements.upgrade()`) | The platform instantiates each declared behavior with its defined defaults. The behavior's `type` selects the initial active button mode (`'submit'` by default). Role, focusability, and pseudo-class participation are active from this point. |
 | `attachInternals()` | `internals.behaviors` is populated with the already-existing behavior instances. Authors now have read/write access through `internals.behaviors.get(ElementBehavior)`. |
 | Host connected | Form association runs if `formAssociated = true`. The behavior's `form` is resolved. |
-| `behavior.type` set to a new value | Form ownership, role, focusability, and pseudo-class state are recomputed. See [Dynamic behaviors](#dynamic-behaviors). |
+| `behavior.type` set to a new value | Form ownership, role, focusability, and pseudo-class state are recomputed. See [Mutating the `type` property](#mutating-the-type-property). |
 | Host disconnected | Form association detaches. The behavior remains attached for when the host re-connects. |
 
-### Dynamic behaviors
+### Mutating the `type` property
 
 Setting `behavior.type` to a new value toggles the activation path and which pseudo-classes match.
 
@@ -189,8 +187,12 @@ if (typeof HTMLButtonBehavior !== 'undefined') {
 This proposal supports common web component patterns:
 
 - Custom elements using behaviors can follow progressive enhancement patterns: use `<slot>` to render fallback content, provide `<noscript>` alternatives, and design markup to be readable without JavaScript. If script fails to load, the element receives no behavior, which is true for any autonomous custom element with or without this proposal.
-- Because behaviors are pinned to existing algorithms, this framework also enables polyfilling: authors can approximate new behaviors in *userland* before native support ships (see [Developer-defined behaviors](#developer-defined-behaviors) in [Future Work](#future-work)).
-- While this proposal uses an imperative API, the design supports future declarative custom elements.
+- Because behaviors are pinned to existing algorithms, this framework also enables polyfilling: authors can approximate new behaviors in *userland* before native support ships.
+- While this proposal uses an imperative API, the design supports future declarative custom elements. A declarative form would attach behaviors by a registered string name rather than a class reference. Each built-in behavior would have a canonical token (for example, `HTMLButtonBehavior` registered as `"button"`).
+
+```html
+<my-button behaviors="button">Help</my-button>
+```
 
 ### Use case: Design system button
 
