@@ -13,8 +13,8 @@ This document is an **explainer** for an implementation of an existing consensus
 ## Participate
 
 - [Chromium bug 41482962](https://issues.chromium.org/issues/41482962) (implementation tracking)
-- [CSS Linked Parameters Module Level 1](https://drafts.csswg.org/css-link-params/) (specification)
 - [w3c/csswg-drafts#9872](https://github.com/w3c/csswg-drafts/issues/9872) (original CSSWG discussion)
+- [File a new spec issue](https://github.com/w3c/csswg-drafts/issues/new?title=%5Bcss-link-params%5D) · [File an Edge explainer issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=CSS+Linked+Parameters)
 
 ## Table of Contents
 
@@ -195,11 +195,9 @@ When parameters are specified via multiple mechanisms, they are merged in this o
 
 1. **`env()` rather than `var()` for consumption.** Link parameters are exposed as custom *environment* variables, not custom *properties*. This is intentional: `env()` is globally scoped and does not participate in the cascade, making it appropriate for externally-injected values. Custom properties (`var()`) are part of the cascade and could conflict with the SVG's own stylesheet.
 
-2. **Comma is mandatory in `param()`.** Per [CSSWG resolution on issue #13767](https://github.com/w3c/csswg-drafts/issues/13767), `param(--foo)` (without a comma) is a parse error. Both `param(--foo, )` (empty value) and `param(--foo, red)` are valid. This avoids ambiguity and aligns with `var()` parsing behavior.
+2. **`link-parameters` applies to all external resources on the element.** This means a single `link-parameters` declaration on an element affects its `<img>` source, `background-image`, `list-style-image`, and any other CSS-referenced external resources. This keeps the API simple, developers don't need per-resource parameter overrides for the common case.
 
-3. **`link-parameters` applies to all external resources on the element.** This means a single `link-parameters` declaration on an element affects its `<img>` source, `background-image`, `list-style-image`, and any other CSS-referenced external resources. This keeps the API simple, developers don't need per-resource parameter overrides for the common case.
-
-4. **Phased implementation.** Our Chromium implementation is split into phases (see the [Chromium design document](https://docs.google.com/document/d/1Dn0v19ljsQD8EKSxsAj2JhoG7DbK_Y3kZc7z8Fu36jg) for full details):
+3. **Phased implementation.** Our Chromium implementation is split into phases (see the [Chromium design document](https://docs.google.com/document/d/1Dn0v19ljsQD8EKSxsAj2JhoG7DbK_Y3kZc7z8Fu36jg) for full details):
    - **Phase 1 (current):** The `link-parameters` CSS property — parsing, computed style, and SVG image pipeline wiring via `env()` variables.
    - **Phase 2:** URL fragment `param()` parsing and application.
    - **Phase 3:** `url()` function `param()` modifier support.
@@ -208,9 +206,9 @@ When parameters are specified via multiple mechanisms, they are merged in this o
 
 ## Alternatives Considered
 
-1. **Extending CSS custom properties to cross document boundaries.** Rejected because custom properties are cascade-scoped; leaking them across security boundaries would violate the isolation model of external resources.
+1. **Extending CSS custom properties to cross document boundaries.** Custom properties participate in the cascade and inherit through the DOM tree. Extending them into external resources would require defining how an outer document's cascade interacts with the inner document's cascade — creating ambiguity about specificity, inheritance, and which properties "win." Link parameters sidestep this by using `env()`, which is explicitly outside the cascade and has clear, context-free resolution semantics.
 
-2. **SVG `<use>` with external references.** `<use>` allows some reuse but has significant limitations: it clones DOM subtrees rather than documents, doesn't support full CSS isolation, and has inconsistent cross-browser behavior for external references.
+2. **SVG `<use>` with external references.** `<use>` references clone a subtree into the current document, which means the referenced content becomes part of the embedding page's DOM and is subject to its styles. This is fundamentally different from the `<img>` / `background-image` use case, where the external resource renders in its own isolated context. Link parameters address the isolated-context case — enabling parameterization without merging documents.
 
 3. **CSS `currentColor` inheritance.** Only works for a single color value, and only when the SVG uses `currentColor`, too limited for multi-parameter theming.
 
@@ -232,7 +230,7 @@ When parameters are specified via multiple mechanisms, they are merged in this o
 
 | Stakeholder | Signal | Evidence |
 |---|---|---|
-| **CSSWG** | ✅ Positive | [First Public Working Draft](https://drafts.csswg.org/css-link-params/) published; active spec discussions |
+| **CSSWG** | ✅ Positive | [Resolution to publish FPWD](https://github.com/w3c/csswg-drafts/issues/14028); active spec discussions ([Editor's Draft](https://drafts.csswg.org/css-link-params/)) |
 | **Firefox** | ✅ Positive | Experimental implementation landed ([bug 2022783](https://bugzilla.mozilla.org/show_bug.cgi?id=2022783)) |
 | **Safari/WebKit** | No signal | No known implementation or public position (TODO: file standards position request) |
 | **Web developers** | ✅ Positive | Long-standing demand for parameterized external SVG; [Stack Overflow (3.5M views)](https://stackoverflow.com/questions/22252472/how-can-i-change-the-color-of-an-svg-element), [State of CSS 2025 survey](https://2025.stateofcss.com/en-US/features/), [Roma Komarov's workaround analysis](https://kizu.dev/svg-linked-parameters-workaround/) |
