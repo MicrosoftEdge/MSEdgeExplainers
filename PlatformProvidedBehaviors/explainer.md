@@ -160,7 +160,7 @@ Form override values (`formAction`, `formEnctype`, `formMethod`, `formNoValidate
 
 ### Behavior lifecycle
 
-Calling `attachInternals()` with behaviors adds each behavior's event handlers and the default ARIA role is applied. Disconnecting the element from the DOM leaves event handlers attached but suspends them, while behavior state (`formAction`, `disabled`, etc.) is preserved. Reconnecting reactivates event handling against the preserved state.
+Calling `attachInternals()` with behaviors adds each behavior's event handlers and applies that behavior's default ARIA (e.g. the implicit `role="button"`). Event handlers remain attached whether or not the element is connected, matching native elements. Behavior state (`formAction`, `disabled`, etc.) is preserved across disconnect and reconnect. Disconnecting only affects behavior that needs the element to be in the document (e.g., a submit behavior cannot submit a form while detached because there is no form to submit to, but it does not stop the behavior's event handlers from running).
 
 ### Dynamic behaviors
 
@@ -551,18 +551,9 @@ btn._internals.role = 'link';
 console.log(btn.computedRole);  // "link"
 ```
 
-For events, behavior responses follow the platform's existing default action model:
+For events, a behavior's default action plugs into the platform's existing [event dispatch](https://dom.spec.whatwg.org/#concept-event-dispatch) and [activation behavior](https://dom.spec.whatwg.org/#eventtarget-activation-behavior) model. This proposal does not change dispatch itself. The only behavior-specific point is that each attached behavior contributes its own default action, and those default actions are additive and gated by `preventDefault()`.
 
-1. The event dispatches through the DOM.
-2. All author-registered event listeners run during dispatch.
-3. After dispatch completes, each behavior's default action runs unless a listener called `preventDefault()`.
-
-When `btn` is clicked:
-- Author event listeners run during event dispatch.
-- `HTMLSubmitButtonBehavior`'s default action runs (the form submits).
-- `HTMLResetButtonBehavior`'s default action runs (the form resets).
-- If any listener called `preventDefault()`, both default actions are cancelled.
-- `stopImmediatePropagation()` prevents subsequent listeners on the same element from running, but does not affect behavior default actions.
+When `btn` is clicked, author listeners run during dispatch, then both `HTMLSubmitButtonBehavior`'s default action (the form submits) and `HTMLResetButtonBehavior`'s (the form resets) run, unless a listener called `preventDefault()`, which cancels both. `stopImmediatePropagation()` still only prevents subsequent listeners on the same element from running; it does not affect behavior default actions.
 
 ### Developer-defined behaviors
 
@@ -1100,6 +1091,7 @@ Many thanks for valuable feedback and advice from:
 - [Alex Russell](https://github.com/slightlyoff)
 - [Andy Luhrs](https://github.com/aluhrs13)
 - [Daniel Clark](https://github.com/dandclark)
+- [Greg Whitworth](https://github.com/gregwhitworth)
 - [Hoch Hochkeppel](https://github.com/mhochk)
 - [Justin Fagnani](https://github.com/justinfagnani)
 - [Keith Cirkel](https://github.com/keithamus)
