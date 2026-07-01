@@ -55,9 +55,125 @@ Each behavior names the specific platform logic it engages:
 - Configurable data and state owned by the behavior
 - Platform protocol hooks
 
+### Behavior categories and composition
+
+Behaviors are organized into a set of categories, expressed as abstract base classes.
+
+```mermaid
+classDiagram
+    class ElementBehavior
+    class ActivationBehavior {
+        <<abstract>>
+        +activationBehavior(event)
+        +legacyPreActivationBehavior(event)
+        +legacyCanceledActivationBehavior(event)
+    }
+    class EmbeddedContentBehavior {
+        <<abstract>>
+    }
+    class HTMLButtonBehavior
+    class HTMLAnchorBehavior
+    class HTMLLabelBehavior
+    class HTMLRadioGroupBehavior
+    class HTMLCheckboxBehavior
+    class HTMLImageBehavior
+    ElementBehavior <|-- ActivationBehavior
+    ElementBehavior <|-- EmbeddedContentBehavior
+    ActivationBehavior <|-- HTMLButtonBehavior
+    ActivationBehavior <|-- HTMLAnchorBehavior
+    ActivationBehavior <|-- HTMLLabelBehavior
+    ActivationBehavior <|-- HTMLRadioGroupBehavior
+    ActivationBehavior <|-- HTMLCheckboxBehavior
+    EmbeddedContentBehavior <|-- HTMLImageBehavior
+```
+
+`ActivationBehavior` and `EmbeddedContentBehavior` are abstract category bases; the concrete leaves (`HTMLButtonBehavior`, `HTMLAnchorBehavior`, `HTMLLabelBehavior`, `HTMLRadioGroupBehavior`, `HTMLCheckboxBehavior`, `HTMLImageBehavior`) are what an author attaches.
+
+An element attaches at most one behavior per category. Two behaviors in the same category are mutually exclusive, and attaching both throws a `TypeError`:
+
+```javascript
+static behaviors = [HTMLButtonBehavior, HTMLAnchorBehavior]; // throws!
+// TypeError: an element can have at most one ActivationBehavior;
+// HTMLButtonBehavior and HTMLAnchorBehavior cannot be combined.
+```
+
+Behaviors in different categories compose. Combining an `HTMLButtonBehavior` (activation) with an `HTMLImageBehavior` (embedded content) produces a submit button that renders as an image, mirroring native [`<input type=image>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/image):
+
+```javascript
+class ImageButton extends HTMLElement {
+  static formAssociated = true;
+  static observedAttributes = ['src', 'alt'];
+  static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
+
+  #internals;
+  #image;
+
+  constructor() {
+    super();
+    this.#internals = this.attachInternals();
+    // HTMLButtonBehavior defaults to type 'submit', so it needs no configuration.
+    this.#image = this.#internals.behaviors.get(HTMLImageBehavior);
+  }
+
+  attributeChangedCallback(name, _old, value) {
+    if (name === 'src') {
+      this.#image.src = value;
+    }
+    if (name === 'alt') {
+      this.#image.alt = value;
+    }
+  }
+}
+customElements.define('image-button', ImageButton);
+```
+
+```html
+<form action="/search">
+  <image-button src="/go.png" alt="Search"></image-button>
+</form>
+```
+
+On activation the host submits the form (from `HTMLButtonBehavior`) while rendering the image and exposing its `alt` text as the accessible name (from `HTMLImageBehavior`). The two behaviors are in different categories, so the platform allows the combination.
+
+Because the category is the base class, the platform decides compatibility with a membership test (`behavior instanceof ActivationBehavior`). Adding a new behavior only requires placing it under the right base; it does not require enumerating its compatibility with every existing behavior.
+
+#### `ActivationBehavior`
+
+`ActivationBehavior` corresponds to the DOM standard's [activation behavior](https://dom.spec.whatwg.org/#eventtarget-activation-behavior): the algorithm an `EventTarget` runs when a `click` is dispatched to it and not canceled. The DOM standard pairs it with two optional hooks, [legacy-pre-activation behavior](https://dom.spec.whatwg.org/#eventtarget-legacy-pre-activation-behavior) and [legacy-canceled-activation behavior](https://dom.spec.whatwg.org/#eventtarget-legacy-canceled-activation-behavior), which native checkbox and radio use to set checkedness before listeners run and restore it if the event is canceled.
+
+`ActivationBehavior` provides:
+
+- Participation in the activation dispatch path (click, keyboard activation, and `element.click()`), honoring `preventDefault()` and `stopPropagation()`.
+- The `legacy-pre-activation behavior` and `legacy-canceled-activation behavior` hooks (no-ops unless overridden).
+
+Each concrete behavior supplies the rest:
+
+- What the element does when activated (the activation algorithm).
+- Its implicit ARIA role default.
+- Its focusability default.
+- Its keyboard-activation specifics.
+- Its own state and the protocol surface it exposes.
+
+Mapping a few native patterns onto categories helps validate the model:
+
+| Native pattern | Behavior | Category | Notes |
+|---|---|---|---|
+| `<button>` | `HTMLButtonBehavior` | activation | submit/reset/button via `type`; invoker surface; form participation. |
+| `<a href>` | `HTMLAnchorBehavior` | activation | Role `"link"`. |
+| `<label>` | `HTMLLabelBehavior` | activation | `for`-attribute association and focus delegation, activation delegates a click to the labeled control, no implicit role, not focusable. |
+| `<input type=radio>` | `HTMLRadioGroupBehavior` | activation | `name`-based mutual exclusion; needs the `legacy-pre-activation`/`legacy-canceled-activation` hooks for the check-then-restore dance. This is the concrete reason the base exposes those hooks. |
+| `<input type=checkbox>` | `HTMLCheckboxBehavior` | activation | An independent on/off toggle, using the same `legacy-pre-activation`/`legacy-canceled-activation` hooks. |
+| `<img>` | `HTMLImageBehavior` | embedded content | Shown to demonstrate composition (a clickable image). |
+
+Of these, `HTMLButtonBehavior`, `HTMLLabelBehavior`, and `HTMLRadioGroupBehavior` are the near-term candidates for Future work. `HTMLAnchorBehavior` and `HTMLImageBehavior` appear only to illustrate the category rules (a same-category conflict and a cross-category composition); they are not behaviors this proposal defines. The embedded-content category corresponds to the HTML spec's [embedded content](https://html.spec.whatwg.org/multipage/dom.html#embedded-content-2).
+
+### Duplicate behaviors
+
+Listing the same behavior class twice in `static behaviors` (for example, `static behaviors = [HTMLButtonBehavior, HTMLButtonBehavior]`) throws a `TypeError` at `customElements.define()` time. A host has at most one instance of each behavior class. This is the degenerate case of the [category rule](#behavior-categories-and-composition): two behaviors of the same category are mutually exclusive, and two instances of the same class are trivially the same category.
+
 ### HTMLButtonBehavior
 
-This alternative introduces `HTMLButtonBehavior`, which mirrors native `<button>`.
+This alternative introduces `HTMLButtonBehavior`, a concrete behavior in the activation category (`class HTMLButtonBehavior extends ActivationBehavior`) that mirrors native `<button>`.
 
 - The behavior has a `type` property (`'submit'` (default), `'reset'`, or `'button'`) that selects the active button mode. The `type` is mutable for the life of the behavior.
 - User activation (click, Enter, Space, implicit submission) reaches the behavior through the same DOM event-dispatch path as native elements.
@@ -90,7 +206,7 @@ Each behavior exposes properties and methods from its corresponding native eleme
 
 **Properties:**
 - `type` - selects the active button mode (`'submit'`, `'reset'`, or `'button'`); defaults to `'submit'`.
-- `disabled` - The element is effectively disabled if either `behavior.disabled` is `true` or the element is disabled via attribute or is a descendant of `<fieldset disabled>` ([spec](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-disabled)).
+- `disabled` - read-only. Reflects whether the element is disabled, which is determined by the standard form-control mechanism (the `disabled` attribute or a `<fieldset disabled>` ancestor, [spec](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-disabled)) and surfaced through `ElementInternals`. This proposal does not add a separately settable per-behavior disabled state.
 - `form` - read-only, delegates to `ElementInternals.form`. Form ownership only affects activation when `type` is `'submit'` or `'reset'`.
 - `name`, `value` - submitter name and value. Read on submission (`type === 'submit'`).
 - `formAction`, `formEnctype`, `formMethod`, `formNoValidate`, `formTarget` - submission overrides. Read on submission (`type === 'submit'`).
@@ -132,10 +248,6 @@ Each subsystem affected by `type` is recomputed through the same paths the platf
 Setting `behavior.type` to an unknown string does not throw. The behavior coerces the value to the default state (`'submit'`), and the getter returns the canonical keyword for the active state. This matches the [Auto state](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-auto-state) that `<button>`'s `type` content attribute uses as the missing-value and invalid-value default.
 
 Changing `behavior.type` between events of a single interaction (for example, between `mousedown` and `mouseup`, or between `keydown` and `keyup` on a key activation) queues the change. The change applies at end-of-interaction, between event tasks. This mirrors how the platform already handles `type` mutations on a native `<button>` during click dispatch.
-
-### Duplicate behaviors
-
-Listing the same behavior class twice in `static behaviors` (for example, `static behaviors = [HTMLButtonBehavior, HTMLButtonBehavior]`) throws a `TypeError` at `customElements.define()` time. A host has at most one instance of each behavior class.
 
 ### API design
 
