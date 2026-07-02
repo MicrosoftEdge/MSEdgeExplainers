@@ -14,7 +14,8 @@ This document is an **explainer** for an implementation of an existing consensus
 
 - [Chromium bug 41482962](https://issues.chromium.org/issues/41482962) (implementation tracking)
 - [w3c/csswg-drafts#9872](https://github.com/w3c/csswg-drafts/issues/9872) (original CSSWG discussion)
-- [File a new spec issue](https://github.com/w3c/csswg-drafts/issues/new?title=%5Bcss-link-params%5D) · [File an Edge explainer issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=CSS+Linked+Parameters)
+- [File a new spec issue](https://github.com/w3c/csswg-drafts/issues/new?title=%5Bcss-link-params%5D)
+- [File an Edge explainer issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=CSS+Linked+Parameters)
 
 ## Table of Contents
 
