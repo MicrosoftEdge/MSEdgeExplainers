@@ -101,8 +101,8 @@ installing web apps is both fragmented and limited:
 
 - Enable a site to install a web app identified by its manifest URL,
   subject to user consent.
-- Extend the functionality of beforeinstallprompt, which cannot install
-  content other than the current loaded web application.
+- Extend the functionality of [beforeinstallprompt](https://wicg.github.io/manifest-incubations/#beforeinstallpromptevent-interface), which cannot install content other than
+  the current loaded web application.
 - Keep the consent UI clearly attributable: the user sees which site
   is asking and which app is being installed.
 - Avoid creating a cross-origin probing surface: the calling site should learn
