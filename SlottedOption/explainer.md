@@ -2,7 +2,7 @@
 
 ## Authors
 
-- [@ffiori](https://github.com/ffiori) (Microsoft Edge)
+- [@ffiori](https://github.com/ffiori)
 
 ## Participate
 
@@ -32,7 +32,7 @@ to keep the community up to date.
 - [Alternatives Considered](#alternatives-considered)
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
-- [References & Acknowledgements](#references--acknowledgements)
+- [References](#references)
 
 ## Introduction
 
