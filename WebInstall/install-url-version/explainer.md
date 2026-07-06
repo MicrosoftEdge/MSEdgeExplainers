@@ -1,10 +1,13 @@
-# **Web Install API**
+# **Web Install API (install_url version)**
 Authors: [Diego Gonzalez](https://github.com/diekus)
 
 ## State of the work
 
->**Here for Origin Trials?** 
-The Web Install API is currently available as an [Origin Trial](https://developer.chrome.com/docs/web-platform/origin-trials/) in Chrome and Microsoft Edge versions 143-148. See [Origin Trial Instructions](https://github.com/MicrosoftEdge/Demos/blob/main/pwa-web-install-api/README.md) to learn more.
+> # Disclaimer
+> This version of the API is **archived**, however it is currently shipping as
+an [Origin Trial](https://developer.chrome.com/docs/web-platform/origin-trials/)
+in Google Chrome and Microsoft Edge versions 143-150. See
+[Origin Trial Instructions](https://github.com/MicrosoftEdge/Demos/blob/main/pwa-web-install-api/README.md) to learn more. At the conclusion of the trial, this version will be end of life in favor of the new [manifest_url](../explainer.md) version.
 
 The work on Web Install has been separated into two explainers: _current_ and _background_ document installations. The '[**current document**](./explainer-current-doc.md)' installation refers to installation of the curently loaded web application and is [being discussed](https://github.com/w3c/manifest/pull/1175) in the Web Applications WG. The '[**background document**](./explainer-background-doc.md)' installation refers to installation of web applications different from the current loaded navigable. Background document installations are being discussed and incubated in WICG.
 
