@@ -67,7 +67,7 @@ Installation of a _current document_ is when the install API is invoked to insta
 
 Picture a user browsing on their favorite video streaming web app. The user might browse to this web app daily, yet not be aware that there is a way that they can install the app directly from the app's UI (or that that specific web site has an app altogether). This could be through a button that the webapp would be able to implement, that would trigger the installation.
 
-![Same domain install flow](./samedomaininstall.png) 
+![Same domain install flow](../samedomaininstall.png) 
 
 ## Proposed approach
 
@@ -203,4 +203,4 @@ Throughout the development of this capability we've revceived a lot of feedback 
 ## Feedback
 For suggestions and comments, please file an [issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=diekus&labels=Web+Install+API&projects=&template=web-install-api.md&title=%5BWeb+Install%5D+%3CTITLE+HERE%3E).
 
-![Web Install logo](installlogo.png)
+![Web Install logo](../installlogo.png)
