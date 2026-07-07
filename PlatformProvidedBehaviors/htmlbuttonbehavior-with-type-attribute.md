@@ -55,19 +55,16 @@ Each behavior names the specific platform logic it engages:
 
 ### Behavior categories and composition
 
-Behaviors are organized into a set of categories, expressed as abstract base classes.
+Behaviors are organized into a set of categories. Categories are conceptual groupings the platform uses to decide which behaviors can coexist on one element. They are not classes exposed to authors; authors only ever reference the concrete behaviors (the leaves below).
 
 ```mermaid
 classDiagram
     class ElementBehavior
     class ActivationBehavior {
-        <<abstract>>
-        +activationBehavior(event)
-        +legacyPreActivationBehavior(event)
-        +legacyCanceledActivationBehavior(event)
+        <<category>>
     }
     class EmbeddedContentBehavior {
-        <<abstract>>
+        <<category>>
     }
     class HTMLButtonBehavior
     class HTMLLabelBehavior
@@ -83,7 +80,7 @@ classDiagram
     EmbeddedContentBehavior <|-- HTMLImageBehavior
 ```
 
-`ActivationBehavior` and `EmbeddedContentBehavior` are abstract category bases; the concrete leaves (`HTMLButtonBehavior`, `HTMLLabelBehavior`, `HTMLRadioGroupBehavior`, `HTMLCheckboxBehavior`, `HTMLImageBehavior`) are what an author attaches.
+`ActivationBehavior` and `EmbeddedContentBehavior` are not part of the author-facing API surface. The concrete leaves (`HTMLButtonBehavior`, `HTMLLabelBehavior`, `HTMLRadioGroupBehavior`, `HTMLCheckboxBehavior`, `HTMLImageBehavior`) are the real classes an author attaches.
 
 An element attaches at most one behavior per category. Two behaviors in the same category are mutually exclusive, and attaching both throws a `TypeError`:
 
@@ -129,16 +126,16 @@ customElements.define('image-button', ImageButton);
 </form>
 ```
 
-On activation the host submits the form (from `HTMLButtonBehavior`) while rendering the image and exposing its `alt` text as the accessible name (from `HTMLImageBehavior`). The two behaviors are in different categories, so the platform allows the combination. Because the category is the base class, the platform decides compatibility with a membership test. Adding a new behavior only requires placing it under the right base; it does not require enumerating its compatibility with every existing behavior.
+On activation the host submits the form (from `HTMLButtonBehavior`) while rendering the image and exposing its `alt` text as the accessible name (from `HTMLImageBehavior`). The two behaviors are in different categories, so the platform allows the combination. Each behavior carries its category internally, so the platform checks compatibility with a membership test. Adding a new behavior only requires assigning it a category; it does not require enumerating its compatibility with every existing behavior.
 
-#### `ActivationBehavior`
+#### The activation category
 
-`ActivationBehavior` corresponds to the DOM standard's [activation behavior](https://dom.spec.whatwg.org/#eventtarget-activation-behavior): the algorithm an `EventTarget` runs when a `click` is dispatched to it and not canceled. The DOM standard pairs it with two optional hooks, [legacy-pre-activation behavior](https://dom.spec.whatwg.org/#eventtarget-legacy-pre-activation-behavior) and [legacy-canceled-activation behavior](https://dom.spec.whatwg.org/#eventtarget-legacy-canceled-activation-behavior), which native checkbox and radio use to set checkedness before listeners run and restore it if the event is canceled.
+The activation category corresponds to the DOM standard's [activation behavior](https://dom.spec.whatwg.org/#eventtarget-activation-behavior): the algorithm an `EventTarget` runs when a `click` is dispatched to it and not canceled. The DOM standard pairs it with two optional algorithm hooks, [legacy-pre-activation behavior](https://dom.spec.whatwg.org/#eventtarget-legacy-pre-activation-behavior) and [legacy-canceled-activation behavior](https://dom.spec.whatwg.org/#eventtarget-legacy-canceled-activation-behavior), which native checkbox and radio use to set checkedness before listeners run and restore it if the event is canceled. These are algorithms the platform implements per behavior.
 
-`ActivationBehavior` provides:
+Behaviors in the activation category share:
 
 - Participation in the activation dispatch path (click, keyboard activation, and `element.click()`), honoring `preventDefault()` and `stopPropagation()`.
-- The `legacy-pre-activation behavior` and `legacy-canceled-activation behavior` hooks (no-ops unless overridden).
+- Access to the legacy-pre-activation and legacy-canceled-activation algorithm hooks where a behavior needs them.
 
 Each concrete behavior supplies the rest:
 
@@ -154,16 +151,18 @@ Mapping a few native patterns onto categories helps validate the model:
 |---|---|---|---|
 | `<button>` | `HTMLButtonBehavior` | activation | submit/reset/button via `type`; invoker surface; form participation. |
 | `<label>` | `HTMLLabelBehavior` | activation | `for`-attribute association and focus delegation, activation delegates a click to the labeled control, no implicit role, not focusable. |
-| `<input type=radio>` | `HTMLRadioGroupBehavior` | activation | `name`-based mutual exclusion; needs the `legacy-pre-activation`/`legacy-canceled-activation` hooks for the check-then-restore dance. This is the concrete reason the base exposes those hooks. |
+| `<input type=radio>` | `HTMLRadioGroupBehavior` | activation | `name`-based mutual exclusion; needs the `legacy-pre-activation`/`legacy-canceled-activation` hooks for the check-then-restore dance. This is the reason the category includes those hooks. |
 | `<input type=checkbox>` | `HTMLCheckboxBehavior` | activation | An independent on/off toggle, using the same `legacy-pre-activation`/`legacy-canceled-activation` hooks. |
 
 Of these, `HTMLButtonBehavior`, `HTMLLabelBehavior`, and `HTMLRadioGroupBehavior` are the near-term candidates for future work.
 
 The embedded-content category corresponds to the HTML spec's [embedded content](https://html.spec.whatwg.org/multipage/dom.html#embedded-content-2).
 
+These categories are internal to the platform: authors attach and retrieve behaviors only by their concrete classes, and the platform enforces the one-per-category rule without exposing the categories themselves. If developer-defined behaviors are specified in the future, the categories could be promoted to real, subclassable base classes (for example, `class MyBehavior extends ActivationBehavior`) as an additive change that leaves the `static behaviors` shape untouched.
+
 ### HTMLButtonBehavior
 
-This alternative introduces `HTMLButtonBehavior`, a behavior in the activation category (`class HTMLButtonBehavior extends ActivationBehavior`) that mirrors native `<button>`.
+This alternative introduces `HTMLButtonBehavior`, a behavior in the activation category, that mirrors native `<button>`.
 
 - The behavior has a `type` property (`'submit'` (default), `'reset'`, or `'button'`) that selects the active button mode. The `type` is mutable for the life of the behavior.
 - User activation (click, Enter, Space, implicit submission) reaches the behavior through the same DOM event-dispatch path as native elements.
@@ -211,7 +210,7 @@ To expose these properties to external code, authors define getters and setters 
 | Event | What happens |
 |-------|--------------|
 | Element creation (`new`, parser upgrade, or `customElements.upgrade()`) | The platform instantiates each declared behavior with its defined defaults. The behavior's `type` selects the initial active button mode (`'submit'` by default). Role, focusability, and pseudo-class participation are active from this point. |
-| `attachInternals()` | `internals.behaviors` is populated with the already-existing behavior instances. Authors now have read/write access through `internals.behaviors.get(ElementBehavior)`. |
+| `attachInternals()` | `internals.behaviors` is populated with the already-existing behavior instances. Authors have read/write access through `internals.behaviors.get(HTMLButtonBehavior)`. |
 | Host connected | Form association runs if `formAssociated = true`. The behavior's `form` is resolved. |
 | `behavior.type` set to a new value | Form ownership, role, focusability, and pseudo-class state are recomputed. See [Mutating the `type` property](#mutating-the-type-property). |
 | Host disconnected | Form association detaches. The behavior remains attached for when the host re-connects. |
@@ -250,10 +249,14 @@ Authors declare behaviors via a static class property; the platform creates and 
 
 #### Classes vs a string-based API
 
-Behaviors are class references, not string tokens. An earlier proposal, [`elementInternals.type`](https://github.com/whatwg/html/issues/11061), collected consistent feedback that a string opt-in is the wrong shape for this problem. That feedback motivates the class-based design used here.
+Behaviors are class references, not string tokens. An earlier proposal, [`elementInternals.type`](https://github.com/whatwg/html/issues/11061), took the string approach.
 
-- A misspelled token has no good failure mode. [As noted in the discussion](https://github.com/whatwg/html/issues/11061#issuecomment-3146290495), `static activationBehavior = 'buton'` "likely [...] can't throw," so the typo silently does nothing. A class reference is resolved by the JavaScript engine, so a misspelled `HTMLButtnBehavior` is a `ReferenceError` at parse time instead of a no-op.
-- String tokens are not discoverable. The [same comment](https://github.com/whatwg/html/issues/11061#issuecomment-3146290495) adds that string tokens are "not super discoverable [...] there is no additional API surface to discover." A behavior class carries its own surface (properties, methods, and an `instanceof` relationship) that authors and tooling can inspect. See [Behaviors are not opaque tokens](#behaviors-are-not-opaque-tokens).
+The one substantive reason to prefer classes is extensibility. A string enum is a closed set the platform owns, so it closes the door on developer-defined behaviors. A class reference keeps that door open: the `static behaviors` array that takes `HTMLButtonBehavior` could just take an author's own class. [A comment on the thread](https://github.com/whatwg/html/issues/11061#issuecomment-3146290495) raised this as the gap in the string design.
+
+Beyond that, we are open to a string-based API instead. The [TAG endorses string constants](https://www.w3.org/TR/design-principles/#string-constants) for selecting from a fixed set, and the objections raised against strings in the thread are either shared with the class approach or resolvable:
+
+- Typos are not unique to strings. A misspelled identifier throws a `ReferenceError`, but a wrong-but-valid class (`static behaviors = [HTMLButtonElement]`) fails just as silently as a bad string; both can only be rejected when `customElements.define()` validates the array. A string token can be validated the same way, throwing on an unknown value.
+- Discoverability is resolvable. A string is opaque on its own, but an author can inspect a behavior's surface at runtime through the instance from `internals.behaviors`, and the set of tokens can be documented and feature-detected.
 
 #### One `behaviors` array vs per-category slots
 
@@ -279,13 +282,13 @@ static behaviors = {
 };
 ```
 
-`HTMLButtonBehavior extends ActivationBehavior`, so its category is intrinsic. Naming the slot (`activationBehavior:`) restates that. It also forces the author to know the right key for every behavior, and a wrong key (`replacedContent: HTMLButtonBehavior`) becomes a new failure mode. A single flat array avoids all of it:
+`HTMLButtonBehavior` belongs to the activation category, so its category is intrinsic. Naming the slot (`activationBehavior:`) restates that. It also forces the author to know the right key for every behavior, and a wrong key (`replacedContent: HTMLButtonBehavior`) becomes a new failure mode. A single flat array avoids all of it:
 
 ```javascript
 static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
 ```
 
-The platform reads each behavior's category from its base class, so it enforces one behavior per category on its own (see [Behavior categories and composition](#behavior-categories-and-composition)). The declaration stays short as categories are added, and each behavior is named once.
+The platform knows each behavior's category, so it enforces one behavior per category on its own (see [Behavior categories and composition](#behavior-categories-and-composition)). The declaration stays short as categories are added, and each behavior is named once.
 
 ### Feature detection
 
