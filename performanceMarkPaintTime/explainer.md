@@ -45,9 +45,11 @@ This proposal extends `performance.mark()` with the `paintTiming` option, closin
 
 ## The Problem
 
-Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously  in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related APIs like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), [Event Timing](https://w3c.github.io/event-timing/), [LoAF](https://w3c.github.io/long-animation-frames/), and the emerging [Container Timing](https://github.com/WICG/container-timing) do report paint-related timing information, but only for specific scenarios — platform-selected milestones, annotated elements, interaction-driven updates, or progressive area growth. Today, developers have no general-purpose way to ask, for any arbitrary visual change: *"when did the update I just made actually paint?"*
+Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously  in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related APIs like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), [Event Timing](https://w3c.github.io/event-timing/), [LoAF](https://w3c.github.io/long-animation-frames/), and [Container Timing](https://github.com/WICG/container-timing) do report paint-related timing information, but only for specific scenarios — platform-selected milestones, annotated elements, interaction-driven updates, or progressive area growth. Today, developers have no general-purpose way to ask, for any arbitrary visual change: *"when did the update I just made actually paint?"*
 
-Common workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)), and none provides `presentationTime` — an implementation-defined presentation timestamp for the frame. Consider a developer measuring when a chat input box appears after an asynchronous content load:
+Common workarounds like double-rAF or rAF+setTimeout approximate when the rendering update completes, but are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)), and none provides `presentationTime` — an implementation-defined presentation timestamp for the frame.
+
+Consider a developer measuring when a chat response finishes rendering. The framework updates existing DOM nodes in place — changing text content and styles — without adding new elements. Existing declarative APIs like Container Timing stay silent because the painted area hasn't grown. The developer resorts to `requestAnimationFrame` to approximate the paint time:
 
 ### Single requestAnimationFrame
 
@@ -55,14 +57,16 @@ Common workarounds like double-rAF or rAF+setTimeout to approximate when the ren
 <!DOCTYPE html>
 <html>
 <body>
-  <div id="app">Loading chat...</div>
+  <div id="chat">
+    <div class="message">Hello, how can I help?</div>
+  </div>
   <script>
-    fetch('/api/chat').then(() => {
-      document.getElementById('app').innerHTML =
-        '<input class="chat-input" placeholder="Type a message...">';
+    // Server responds, framework updates the message in place
+    onChatResponse((text) => {
+      document.querySelector('.message').textContent = text;
 
       requestAnimationFrame(() => {
-        performance.mark('chat-input-rendered');
+        performance.mark('chat-response-rendered');
       });
     });
   </script>
@@ -75,13 +79,12 @@ Since `requestAnimationFrame` callbacks run before the style and layout, the rec
 ### Double requestAnimationFrame
 
 ```javascript
-fetch('/api/chat').then(() => {
-  document.getElementById('app').innerHTML =
-    '<input class="chat-input" placeholder="Type a message...">';
+onChatResponse((text) => {
+  document.querySelector('.message').textContent = text;
 
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      performance.mark('chat-input-rendered');
+      performance.mark('chat-response-rendered');
     });
   });
 });
@@ -92,13 +95,12 @@ The second rAF fires after the first frame's paint, getting closer to the actual
 ### requestAnimationFrame + setTimeout
 
 ```javascript
-fetch('/api/chat').then(() => {
-  document.getElementById('app').innerHTML =
-    '<input class="chat-input" placeholder="Type a message...">';
+onChatResponse((text) => {
+  document.querySelector('.message').textContent = text;
 
   requestAnimationFrame(() => {
     setTimeout(() => {
-      performance.mark('chat-input-rendered');
+      performance.mark('chat-response-rendered');
     }, 0);
   });
 });
@@ -108,13 +110,15 @@ This defers the mark to the next task after the rAF callback, which is more like
 
 ### With `performance.mark(name, { paintTiming: true })` option
 
-The following end-to-end example shows a page that loads chat content asynchronously and measures how long it takes for the chat input to be painted and presented to the user:
+The following end-to-end example shows a page that updates chat content in place and measures how long it takes for the response to be painted and presented to the user:
 
 ```html
 <!DOCTYPE html>
 <html>
 <body>
-  <div id="app">Loading chat...</div>
+  <div id="chat">
+    <div class="message">Hello, how can I help?</div>
+  </div>
   <script>
     // 1. Set up observer to collect marks with paint timing
     new PerformanceObserver((list) => {
@@ -129,21 +133,19 @@ The following end-to-end example shows a page that loads chat content asynchrono
       }
     }).observe({ type: 'mark' });
 
-    // 2. Async content load (e.g., framework rendering a component)
-    fetch('/api/chat').then(() => {
-      document.getElementById('app').innerHTML =
-        '<input class="chat-input" placeholder="Type a message...">';
+    // 2. Server responds, framework updates the message in place
+    onChatResponse((text) => {
+      document.querySelector('.message').textContent = text;
 
       // 3. Mark the next paint after this DOM update
-      performance.mark('chat-input-rendered', { paintTiming: true });
+      performance.mark('chat-response-rendered', { paintTiming: true });
     });
   </script>
 </body>
 </html>
 ```
 
-- **Accurate**: `paintTime` is captured at the rendering update, not approximated by rAF.
-- **End-to-end**: `presentationTime`, when available, provides an implementation-defined presentation timestamp for the frame.
+Unlike the workarounds above, `paintTime` is captured directly at the rendering update — not approximated by rAF. When available, `presentationTime` provides an implementation-defined presentation timestamp for the frame.
 
 ## Proposed API
 
