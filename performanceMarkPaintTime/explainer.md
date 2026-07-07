@@ -24,6 +24,9 @@ This document is a starting point for engaging the community and standards bodie
 - [Relationship to Other APIs](#relationship-to-other-apis)
 - [Alternatives Considered](#alternatives-considered)
 - [Open Questions](#open-questions)
+  - [paintTime vs. a new "post-paint" timestamp](#painttime-vs-a-new-post-paint-timestamp)
+  - [Automatic paint timing for all marks](#automatic-paint-timing-for-all-marks)
+  - [Initial value of paintTime: non-nullable vs. nullable](#initial-value-of-painttime-non-nullable-vs-nullable)
 - [Security and Privacy Considerations](#security-and-privacy-considerations)
 - [Appendix: Rendering Pipeline and Timing](#appendix-rendering-pipeline-and-timing)
 - [Appendix: WebIDL](#appendix-webidl)
@@ -45,7 +48,7 @@ This proposal extends `performance.mark()` with the `paintTiming` option, closin
 
 ## The Problem
 
-Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously  in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related APIs like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), [Event Timing](https://w3c.github.io/event-timing/), [LoAF](https://w3c.github.io/long-animation-frames/), and [Container Timing](https://github.com/WICG/container-timing) do report paint-related timing information, but only for specific scenarios — platform-selected milestones, annotated elements, interaction-driven updates, or progressive area growth. Today, developers have no general-purpose way to ask, for any arbitrary visual change: *"when did the update I just made actually paint?"*
+Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related APIs like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), [Event Timing](https://w3c.github.io/event-timing/), [LoAF](https://w3c.github.io/long-animation-frames/), and [Container Timing](https://github.com/WICG/container-timing) do report paint-related timing information, but only for specific scenarios — platform-selected milestones, annotated elements, interaction-driven updates, or progressive area growth. Today, developers have no general-purpose way to ask, for any arbitrary visual change: *"when did the update I just made actually paint?"*
 
 Common workarounds like double-rAF or rAF+setTimeout approximate when the rendering update completes, but are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)), and none provides `presentationTime` — an implementation-defined presentation timestamp for the frame.
 
@@ -224,7 +227,7 @@ Several existing APIs provide paint-related timing. This proposal is complementa
 
 [Container Timing](https://github.com/WICG/container-timing) tracks progressive paint coverage within a DOM subtree annotated with the `containertiming` attribute. It emits entries each time the painted area grows — useful for measuring component visual completeness during page load (e.g., "when is this widget fully rendered?").
 
-However, Container Timing only fires when **new, previously unpainted area** is covered. Repainting the same area (e.g., updating text in place, changing a color) does not trigger a new entry. Like Element Timing, it only detects image and text paints.
+However, Container Timing only fires when **new, previously unpainted area** is covered. Repainting the same area (e.g., updating text in place, changing a color) does not trigger a new entry. Like Element Timing, it only detects image and text paints — elements without text or image content (such as input fields, canvas, or SVG) do not trigger entries even when they expand the painted area.
 
 `performance.mark()` with `paintTiming: true` captures any visual change — including repaints of existing content — making it suitable for interaction-driven updates where the DOM region doesn't change but the content does.
 
@@ -274,12 +277,11 @@ We consider opt-in (`paintTiming: true`) the more practical starting point. This
 `requestPostAnimationFrame` fires immediately after the rendering update completes. Using it for the same chat-input example:
 
 ```javascript
-fetch('/api/chat').then(() => {
-  document.getElementById('app').innerHTML =
-    '<input class="chat-input" placeholder="Type a message...">';
+onChatResponse((text) => {
+  document.querySelector('.message').textContent = text;
 
   requestPostAnimationFrame(() => {
-    performance.mark('chat-input-rendered');
+    performance.mark('chat-response-rendered');
   });
 });
 ```
