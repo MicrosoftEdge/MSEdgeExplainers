@@ -45,7 +45,7 @@ This proposal extends `performance.mark()` with the `paintTiming` option, closin
 
 ## The Problem
 
-Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously  in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related APIs like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), [Event Timing](https://w3c.github.io/event-timing/), [LoAF](https://w3c.github.io/long-animation-frames/), and the emerging [Interaction Contentful Paint](https://wicg.github.io/soft-navigations/) do report paint-related timing information, but only for specific scenarios — platform-selected milestones, annotated elements, or interaction-driven updates. Today, developers have no general-purpose way to ask, for any arbitrary visual change: *"when did the update I just made actually paint?"*
+Existing web performance APIs leave a gap between two kinds of measurement. On one side, [User Timing](https://www.w3.org/TR/user-timing/) (`performance.mark()` / `performance.measure()`) lets developers timestamp arbitrary points in their own JavaScript, but those marks are recorded synchronously  in script and say nothing about when (or whether) the resulting visual update reached the screen. On the other side, paint-related APIs like [FP/FCP](https://w3c.github.io/paint-timing/#sec-PerformancePaintTiming), [LCP](https://www.w3.org/TR/largest-contentful-paint/), [Element Timing](https://w3c.github.io/element-timing/), [Event Timing](https://w3c.github.io/event-timing/), [LoAF](https://w3c.github.io/long-animation-frames/), and the emerging [Container Timing](https://github.com/WICG/container-timing) do report paint-related timing information, but only for specific scenarios — platform-selected milestones, annotated elements, interaction-driven updates, or progressive area growth. Today, developers have no general-purpose way to ask, for any arbitrary visual change: *"when did the update I just made actually paint?"*
 
 Common workarounds like double-rAF or rAF+setTimeout to approximate when the rendering update completes are unreliable (see [Nolan Lawson's analysis](https://nolanlawson.com/2018/09/25/accurately-measuring-layout-on-the-web/)), and none provides `presentationTime` — an implementation-defined presentation timestamp for the frame. Consider a developer measuring when a chat input box appears after an asynchronous content load:
 
@@ -144,7 +144,6 @@ The following end-to-end example shows a page that loads chat content asynchrono
 
 - **Accurate**: `paintTime` is captured at the rendering update, not approximated by rAF.
 - **End-to-end**: `presentationTime`, when available, provides an implementation-defined presentation timestamp for the frame.
-- **Stable**: No rAF variance — the timestamps come from the rendering pipeline, not rAF approximation.
 
 ## Proposed API
 
