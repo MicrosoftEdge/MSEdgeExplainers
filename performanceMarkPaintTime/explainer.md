@@ -149,7 +149,7 @@ Unlike the workarounds above, `paintTime` is captured directly at the rendering 
 
 ## Proposed API
 
-A new `paintTiming` option is added to [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark):
+This extends the existing [`performance.mark()`](https://w3c.github.io/user-timing/#dom-performance-mark) with an opt-in `paintTiming` option:
 
 ```js
 performance.mark(markName, { paintTiming: true });
@@ -171,7 +171,7 @@ When `paintTiming` is set, the resulting `PerformanceMark` entry gains two addit
 
 - On-demand — no paint timing data is collected until `performance.mark()` is called with `paintTiming: true`.
 - One-shot — each call tags the next rendering update and produces exactly one entry.
-- Marks with `paintTiming: true` are delivered to `PerformanceObserver` after the rendering update completes, with paint timing values populated. Developers should read `paintTime` and `presentationTime` from the observer callback. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
+- Marks with `paintTiming: true` are delivered to `PerformanceObserver` after the rendering update completes. Paint timing values are only guaranteed populated when delivered via `PerformanceObserver`. See [Entry Delivery and Mutability](#entry-delivery-and-mutability).
 - Multiple calls within the same rendering opportunity each produce their own entry with the same `paintTime` and `presentationTime`, but distinct `name` and `startTime`. Calls that span different rendering opportunities produce entries with distinct `paintTime`.
 - If the user agent believes that updating the rendering would have no visible effect, the entry is still delivered with `paintTime` set to `0` and `presentationTime` set to `null`. See [Fallback when no paint occurs](#fallback-when-no-paint-occurs).
 
@@ -205,42 +205,7 @@ In the observer callback, `paintTime === 0` unambiguously means "no paint occurr
 
 This design ensures developers always receive a callback, avoiding "dangling marks" that never resolve. If [PaintTimingMixin](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) later adds a unified fallback getter such as `renderTime` ([Issue #121](https://github.com/w3c/paint-timing/issues/121)), marks would inherit it automatically through the mixin.
 
-#### Initial value of `paintTime`: non-nullable vs. nullable
-
-Two sub-options exist for the initial (unpopulated) value of `paintTime`:
-
-##### Sub-option A — Non-nullable (reuse PaintTimingMixin)
-
-```js
-const mark = performance.mark('my-mark', { paintTiming: true });
-mark.paintTime         // 0 (initial, before paint)
-mark.presentationTime  // null (initial, before paint)
-
-// After paint, browser fills internal slots:
-mark.paintTime         // 165.00
-mark.presentationTime  // 172.00 (or null if UA does not support)
-```
-
-- Pro: Directly reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) (`paintTime` is `DOMHighResTimeStamp`, non-nullable).
-- Con: Before observer delivery, `0` is ambiguous — it could mean "not yet populated" or "no paint occurred" (see [Fallback when no paint occurs](#fallback-when-no-paint-occurs)). However, since developers should read values from the observer callback (where slots are already resolved), this ambiguity is limited to the synchronous return value.
-
-##### Sub-option B — Nullable (custom attributes)
-
-```js
-const mark = performance.mark('my-mark', { paintTiming: true });
-mark.paintTime         // null (initial, before paint)
-mark.presentationTime  // null (initial, before paint)
-
-// After paint, browser fills internal slots:
-mark.paintTime         // 165.00
-mark.presentationTime  // 172.00 (or null if UA does not support)
-```
-
-- Pro: `null` clearly means "not yet available" — no ambiguity.
-- Pro: Consistent — both `paintTime` and `presentationTime` use `null` for the unpopulated state.
-- Con: Cannot directly reuse `PaintTimingMixin` (which defines `paintTime` as non-nullable). Uses identical attribute names and semantics, but defined separately on `PerformanceMark`.
-
-#### Alternatives considered and rejected
+#### Entry delivery alternatives considered and rejected
 
 - **Not returning a value** (returning `null` from `mark()`): Would change the return type of `performance.mark()` from `PerformanceMark` to `PerformanceMark?`, breaking existing code patterns like `performance.mark(...).startTime`.
 - **Returning two separate entry objects** (synchronous return + observer entry): Developers would need to correlate two entries by name to get the full picture (mark's `startTime` + paint entry's `paintTime`). If multiple marks share the same name, matching becomes ambiguous.
@@ -340,6 +305,41 @@ We welcome feedback on whether `paintTime` is sufficient for developer needs or 
 ### Automatic paint timing for all marks
 
 As discussed in [Alternatives Considered](#alternatives-considered), a future direction could make `paintTime` available on all `performance.mark()` entries by default (without `paintTiming: true`), once the [PaintTimingMixin fallback behavior](https://github.com/w3c/paint-timing/issues/121) and [per-paint reporting](https://github.com/w3c/performance-timeline/issues/228) infrastructure are defined. We welcome feedback on whether opt-in or automatic is the right default.
+
+### Initial value of `paintTime`: non-nullable vs. nullable
+
+`performance.mark()` synchronously returns a `PerformanceMark` with `paintTime` unpopulated. Two sub-options exist for this initial value. We lean toward Sub-option A for `PaintTimingMixin` reuse, but welcome feedback.
+
+#### Sub-option A — Non-nullable (reuse PaintTimingMixin)
+
+```js
+const mark = performance.mark('my-mark', { paintTiming: true });
+mark.paintTime         // 0 (initial, before paint)
+mark.presentationTime  // null (initial, before paint)
+
+// After paint, browser fills internal slots:
+mark.paintTime         // 165.00
+mark.presentationTime  // 172.00 (or null if UA does not support)
+```
+
+- Pro: Directly reuses [`PaintTimingMixin`](https://w3c.github.io/paint-timing/#sec-PaintTimingMixin) (`paintTime` is `DOMHighResTimeStamp`, non-nullable).
+- Con: Before observer delivery, `0` is ambiguous — it could mean "not yet populated" or "no paint occurred" (see [Fallback when no paint occurs](#fallback-when-no-paint-occurs)). However, since developers should read values from the observer callback (where slots are already resolved), this ambiguity is limited to the synchronous return value.
+
+#### Sub-option B — Nullable (custom attributes)
+
+```js
+const mark = performance.mark('my-mark', { paintTiming: true });
+mark.paintTime         // null (initial, before paint)
+mark.presentationTime  // null (initial, before paint)
+
+// After paint, browser fills internal slots:
+mark.paintTime         // 165.00
+mark.presentationTime  // 172.00 (or null if UA does not support)
+```
+
+- Pro: `null` clearly means "not yet available" — no ambiguity.
+- Pro: Consistent — both `paintTime` and `presentationTime` use `null` for the unpopulated state.
+- Con: Cannot directly reuse `PaintTimingMixin` (which defines `paintTime` as non-nullable). Uses identical attribute names and semantics, but defined separately on `PerformanceMark`.
 
 ## Security and Privacy Considerations
 
