@@ -293,6 +293,36 @@ explicit `<slot>`:
 **Proposed result:** the `<select>` recognizes both `<option>`s, because they
 are in the select's flat tree.
 
+A common reason to do this is styling. `::slotted()` can only style elements
+directly assigned to a slot, so a select's shadow root cannot reach `<option>`s
+nested inside a slotted `<optgroup>`. Wrapping each option in a custom element
+that keeps a real `<option>` in its own shadow root lets the component
+encapsulate the option's styles, because an element is styled by the CSS of the
+shadow tree it lives in:
+
+```html
+<my-select>
+  <template shadowrootmode="open">
+    <select><slot></slot></select>
+  </template>
+
+  <my-option>
+    <template shadowrootmode="open">
+      <style>
+        option { padding-inline: 1em; background: canvas; }
+      </style>
+      <option><slot></slot></option>
+    </template>
+    One
+  </my-option>
+</my-select>
+```
+
+**Proposed result:** the `<select>` recognizes the native `<option>` inside each
+`<my-option>`. Because that `<option>` lives in the wrapper's shadow root, it is
+styled by the wrapper's own CSS, so the component controls each option's
+appearance while the wrapper stays transparent to the select.
+
 ### JavaScript APIs
 
 Because slotted options are treated as the select's options, the existing
