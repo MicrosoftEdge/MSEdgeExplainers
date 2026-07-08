@@ -80,31 +80,51 @@ options:
 ```
 
 **This doesn't work today.** A `<select>` builds its option list from its own
-direct children. The slotted `<option>`s are children of `<my-custom-select>`,
+descendants. The slotted `<option>`s are descendants of `<my-custom-select>`,
 not of the `<select>`, so the select never sees them and the dropdown is empty.
 
-There are two workarounds today, both with real costs. One keeps a native
-`<select>` in the shadow root and uses a
-[`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)
-to move or copy the slotted options into it. Native keyboard, focus, and
-accessibility keep working because the options become real children of the
-`<select>`, but you own the bookkeeping of a second, relocated set of elements
-and keeping it in sync. The other drops the native control and rebuilds the
-trigger, popup, keyboard support, focus, and screen-reader semantics by hand.
-Design systems already ship these workarounds; Shopify's
+There are two common workarounds today:
+
+- **Sync with a `MutationObserver`**. Keep a native `<select>` in the shadow
+  root and use a
+  [`MutationObserver`](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)
+  to move or copy the slotted options into it whenever they change. The native
+  control keeps working, but you take on the bookkeeping: a second, relocated
+  (or duplicated) set of option elements that has to be kept in sync on every
+  change. Moving options pulls them out of the light DOM where the author wrote
+  them; copying them leaves the select using clones that can drift from the
+  originals (attributes, state, and event listeners set in JavaScript don't
+  carry over). The sync also runs asynchronously, so options can show up late or
+  flicker, with potential performance issues.
+- **Rebuild the control by hand.** Drop the native `<select>` and re-create the
+  trigger, popup, option list, keyboard support, focus handling, and
+  screen-reader semantics with custom elements and JavaScript.
+
+Design systems already ship these workarounds; see Shopify's
 [Polaris web components](https://shopify.dev/docs/api/app-home/polaris-web-components/forms/select)
-are one example.
+as an example.
 
-**Why this matters to end users.** Hand-rebuilt selects are often less
-accessible than the native control. They drop keyboard shortcuts, mishandle
-focus, or expose incomplete information to assistive technology, which mostly
-affects people who use screen readers or keyboard navigation. Reusing the real
-`<select>` inside a component gives users the native control's accessibility
-instead of a re-implementation.
+**Why this matters to end users.** Both workarounds reach the user. The
+`MutationObserver` approach keeps the native control, so its accessibility
+mostly survives, but the syncing is fragile: options can show up late or
+flicker, the selected value can fall out of step with what the page shows, and
+copied options can drift from the originals, all while shipping extra JavaScript
+on every page. The rebuild approach replaces the native control, so keyboard
+support, focus, and screen-reader semantics are re-implemented by hand and are
+often worse or inconsistent.
 
-> **Note on scope:** This applies only to `<select>` in customizable mode
-> (`appearance: base-select`). A `<select>` with the default native appearance
-> is unchanged.
+**Why this matters to web developers.** Slotting removes the workaround
+entirely: no `MutationObserver` to sync options, no second copy to keep in step,
+and no rebuilding the control from scratch. Developers keep a real `<select>`
+and let consumers pass `<option>`s the way they already do, so selection,
+accessibility, and form behavior come from the platform instead of being
+reimplemented and maintained by hand. Easier, correct authoring helps users too:
+developers reach for the accessible native control instead of a fragile
+substitute.
+
+> **Note on scope:** This initially targets `<select>` in customizable mode
+> (`appearance: base-select`). Whether to extend it to the default native
+> appearance is an open question.
 
 ### Goals
 
@@ -117,13 +137,13 @@ instead of a re-implementation.
   and form submission.
 - Support nested components, where options pass through more than one `<slot>`
   before reaching the `<select>`.
+- Recognize options that reach the `<select>` through its flat tree, whether via
+  a `<slot>` or a descendant's shadow tree.
 - Keep the option list in sync as options are added, removed, or re-slotted,
   with the changes observable immediately.
 
 ### Non-goals
 
-- Changing `<select>` elements that use the default native appearance. This
-  proposal applies only to `appearance: base-select`.
 - Extending this behavior to other elements in this proposal (for example
   `<datalist>`, `<table>`, `<fieldset>`, or `<form>`). Those may be worth doing
   later, but are out of scope here.
@@ -133,10 +153,10 @@ instead of a re-implementation.
 
 ## Motivation
 
-Multiple teams and design-system authors have asked for this. They want to offer
-a `<select>`-based component with a familiar API, where consumers just write
-`<option>`s, while staying close to the platform. Without slotting support, each
-of them has to ship a large, hand-built select and maintain its accessibility.
+Multiple developers and design-system authors have asked for this. They want to
+offer a `<select>`-based component with a familiar API, where consumers just
+write `<option>`s, while staying close to the platform. Without slotting
+support, each of them has to ship a large, hand-built select.
 
 The recurring request in the
 [discussion](https://github.com/whatwg/html/issues/11535) is to let `<option>`s
@@ -253,6 +273,26 @@ just like directly authored groups: the label groups the options, and a
 </my-custom-select>
 ```
 
+### Options from a nested shadow tree
+
+The lookup is over the flat tree, so it is not limited to `<slot>`. Options
+placed in a descendant's shadow tree are recognized too, even without an
+explicit `<slot>`:
+
+```html
+<select>
+  <options-container>
+    <template shadowrootmode="open">
+      <option>One</option>
+      <option>Two</option>
+    </template>
+  </options-container>
+</select>
+```
+
+**Proposed result:** the `<select>` recognizes both `<option>`s, because they
+are in the select's flat tree.
+
 ### JavaScript APIs
 
 Because slotted options are treated as the select's options, the existing
@@ -285,6 +325,11 @@ select.options.length;          // already reflects the new option
 The proposed direction is to have a customizable `<select>` look for its options
 in the flat tree. The main things to work through:
 
+- **Default vs customizable appearance.** This initially targets
+  `appearance: base-select`, but the same flat-tree lookup could apply to a
+  default-appearance `<select>` too. The main concern is web compatibility,
+  which we would want to measure (for example, with use counters) before
+  deciding.
 - **Performance.** The select should not walk its whole flat tree every time its
   options are queried. It needs to update its option list incrementally as
   slotting changes.
@@ -388,11 +433,11 @@ gives a concrete case to learn from before designing something broader.
 
 ## Accessibility, Internationalization, Privacy, and Security Considerations
 
-**Accessibility (the primary motivation).** Reusing the native `<select>` inside
-a component gives end users the platform's built-in keyboard support, focus
-handling, and assistive-technology semantics, instead of a hand-rebuilt control
-that often gets these wrong. A slotted `<option>` is exposed to accessibility
-tooling the same way a directly authored `<option>` is.
+**Accessibility.** Reusing the native `<select>` inside a component gives end
+users the platform's built-in keyboard support, focus handling, and
+assistive-technology semantics, instead of a hand-rebuilt control that often
+gets these wrong. A slotted `<option>` is exposed to accessibility tooling the
+same way a directly authored `<option>` is.
 
 **Internationalization.** No new internationalization surface is introduced.
 Slotted options carry their text, language, and direction just like ordinary
@@ -410,16 +455,10 @@ already compose.
 ## Stakeholder Feedback / Opposition
 
 - **Web developers / design-system authors:** Positive and actively requesting
-  it. Several independent teams have already had to build workarounds, for
+  it. Several independent developers have already had to build workarounds, for
   example:
   [1](https://github.com/whatwg/html/issues/11535#issuecomment-3155754832),
   [2](https://github.com/whatwg/html/issues/11535#issuecomment-3520607548).
-- **Implementors** (signals from the
-  [discussion](https://github.com/whatwg/html/issues/11535)):
-  - Chromium: prototyping and supportive.
-  - Mozilla: has questioned whether to solve this only for `<select>` rather
-    than more generally.
-  - WebKit: no signal yet.
 - **Open standards-level questions raised in discussion:**
   - Whether to solve this for `<select>` in isolation, or as part of a general
     mechanism that applies to many elements.
@@ -435,6 +474,8 @@ Related work and background:
 
 - [Customizable `<select>` and `appearance: base-select`](https://open-ui.org/components/customizableselect/)
   (Open UI).
+- [Customizable select](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select)
+  (MDN).
 - [Using shadow DOM and slots](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)
   (MDN).
 - [The `<select>` element](https://html.spec.whatwg.org/multipage/form-elements.html#the-select-element)
