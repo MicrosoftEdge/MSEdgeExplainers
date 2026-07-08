@@ -9,7 +9,7 @@ Four things motivate this alternative:
 
 1. Modeling the button types as three separate behaviors duplicates most of the surface to express activation differences.
 2. Web authors who want a single custom element class that can switch between submit, reset, and generic-button at runtime also want one element with one mutable property. A single `HTMLButtonBehavior` with a mutable `type` avoids having to define what happens when two button-shaped behaviors are attached at once and one is toggled off.
-3. It matches native `<button>` and frameworks also use this shape.
+3. It matches native `<button>`, and many frameworks also use this shape.
 4. The platform owns instantiation; authors look up state through `ElementInternals`.
 
 ## Proposed approach
@@ -18,7 +18,7 @@ A platform-provided behavior is a set of methods, values, and platform-protocol 
 
 The platform reads `static behaviors` at `customElements.define()` time and stores it on the custom element definition, the same way it reads `static formAssociated`. When an element is created (`new`, parser upgrade, or `customElements.upgrade()`), the platform instantiates one of each declared behavior per host and associates them with the element. This mirrors how a form-associated custom element participates in form submission and form-related lifecycle callbacks.
 
-`attachInternals()` is the author's access route to those already-existing instances, exposed through a new `behaviors` collection on `ElementInternals`. The set of behaviors attached to a host is fixed at the class declaration; the behavior instances themselves remain mutable post-attachment.
+`attachInternals()` is the author's access route to those already-existing instances, exposed through a new `behaviors` collection on `ElementInternals`. The set of behaviors attached to a host is fixed at the class declaration; the behavior instances' own properties remain mutable post-attachment.
 
 ```javascript
 class CustomButton extends HTMLElement {
@@ -165,14 +165,15 @@ These categories are internal to the platform: authors attach and retrieve behav
 This alternative introduces `HTMLButtonBehavior`, a behavior in the activation category, that mirrors native `<button>`.
 
 - The behavior has a `type` property (`'submit'` (default), `'reset'`, or `'button'`) that selects the active button mode. The `type` is mutable for the life of the behavior.
-- User activation (click, Enter, Space, implicit submission) reaches the behavior through the same DOM event-dispatch path as native elements.
+- User activation (click, Enter, Space, implicit submission) reaches the behavior through the same DOM event-dispatch path as native elements. Author-added event listeners for those same modalities coexist with the behavior: they fire during normal dispatch, and calling `preventDefault()` cancels the behavior's activation, matching native `<button>`.
 - The behavior provides a default implicit `role="button"`. Authors can override the role through `internals.role`.
+- The host is exposed to the accessibility tree with its `button` role and an accessible name computed from its contents, and disabled and default state are surfaced to assistive technologies, so AT users get the same information as for a native `<button>`.
 - The custom element with HTMLButtonBehavior participates in sequential focus navigation, with `tabindex` and disabled state following established rules.
 - The same logic that toggles `:default`, `:disabled`/`:enabled`, `:focus`, and `:focus-visible` on native elements applies to the behavior's host. The `:default` pseudo-class only matches when `type === 'submit'` and the host is the form's default submit button.
 - Mirrored `HTMLButtonElement` properties are available on the behavior instance. They are configurable per-element and mutable for the life of the behavior.
 - Form ownership applies whenever `type` is `'submit'` or `'reset'`. Activation behavior depends on `type`: `'submit'` triggers form submission and implicit submission; `'reset'` triggers form reset; `'button'` does generic activation.
 
-`HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission to actually fire when `type` is `'submit'` or `'reset'`. Without it, `behavior.form` is always `null` and activation is a no-op even when the element is inside a form. This is a divergence from native `<button>`, which submits its form without any explicit opt-in.
+`HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission to actually fire when `type` is `'submit'` or `'reset'`. Without it, `behavior.form` is always `null` and activation is a no-op even when the element is inside a form. This is a divergence from native `<button>`, which submits its form without any explicit opt-in. The platform could later imply form association, removing the extra opt-in.
 
 | Scenario | Behavior |
 |----------|----------|
@@ -187,7 +188,7 @@ A recurring concern about consolidating form-control semantics into an opt-in is
 
 - Each element behavior maps to a single native pattern (e.g., `HTMLButtonBehavior` provides exactly the semantics of `<button>`). Future element behaviors will need to follow the same naming convention.
 - Each behavior is specified in terms of existing HTML algorithms. The behavior is the union of those algorithms, applied to a custom element.
-- Web authors can override individual defaults. This already works today for role: `internals.role` overrides a behavior's default role without replacing the behavior. The same layering pattern can extend to other defaults (focusability, keyboard activation, and similar) if and when future proposals add the corresponding primitives on `ElementInternals`.
+- Web authors can override individual defaults. This already works today for role: `internals.role` overrides a behavior's default role without replacing the behavior. The same layering pattern can extend to other defaults (focusability, keyboard activation, and similar) if and when future proposals add the corresponding primitives on `ElementInternals`. The layering example in [Alternative 7](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/PlatformProvidedBehaviors/explainer.md#alternative-7-low-level-primitives-on-elementinternals) walks through what that would look like.
 
 ### Accessing behavior state
 
@@ -258,9 +259,9 @@ Beyond that, we are open to a string-based API instead. The [TAG endorses string
 - Typos are not unique to strings. A misspelled identifier throws a `ReferenceError`, but a wrong-but-valid class (`static behaviors = [HTMLButtonElement]`) fails just as silently as a bad string; both can only be rejected when `customElements.define()` validates the array. A string token can be validated the same way, throwing on an unknown value.
 - Discoverability is resolvable. A string is opaque on its own, but an author can inspect a behavior's surface at runtime through the instance from `internals.behaviors`, and the set of tokens can be documented and feature-detected.
 
-#### One `behaviors` array vs per-category slots
+#### One `behaviors` array vs per-category fields
 
-Even with classes instead of strings, the declaration could be split into one named opt-in per category. [Issue #1353](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1353) proposes a `static activationBehavior` next to a `static replacedContent`, each set to a cluster keyword, so conflicts resolve at the WebIDL level: one slot per category.
+Even with classes instead of strings, the declaration could be split into one named opt-in per category. [Issue #1353](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1353) proposes a `static activationBehavior` next to a `static replacedContent`, each set to a cluster keyword, so conflicts resolve at the WebIDL level: one field per category.
 
 ```javascript
 // Per-category string clusters (issue #1353)
@@ -268,10 +269,10 @@ static activationBehavior = 'button';
 static replacedContent = 'image';
 ```
 
-The keywords carry the [same problems](#classes-vs-a-string-based-api). Substituting classes keeps the per-slot shape while repeating what the class already encodes:
+The keywords carry the [same problems](#classes-vs-a-string-based-api). Substituting classes keeps the per-field shape while repeating what the class already encodes:
 
 ```javascript
-// Per-category slots, with classes
+// Per-category fields, with classes
 static activationBehavior = HTMLButtonBehavior;
 static replacedContent = HTMLImageBehavior;
 
@@ -282,7 +283,7 @@ static behaviors = {
 };
 ```
 
-`HTMLButtonBehavior` belongs to the activation category, so its category is intrinsic. Naming the slot (`activationBehavior:`) restates that. It also forces the author to know the right key for every behavior, and a wrong key (`replacedContent: HTMLButtonBehavior`) becomes a new failure mode. A single flat array avoids all of it:
+`HTMLButtonBehavior` belongs to the activation category, so its category is intrinsic. Naming the field (`activationBehavior:`) restates that. It also forces the author to know the right key for every behavior, and a wrong key (`replacedContent: HTMLButtonBehavior`) becomes a new failure mode. A single flat array avoids all of it:
 
 ```javascript
 static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
@@ -331,12 +332,8 @@ if (typeof HTMLButtonBehavior !== 'undefined') {
 This proposal supports common web component patterns:
 
 - Custom elements using behaviors can follow progressive enhancement patterns: use `<slot>` to render fallback content, provide `<noscript>` alternatives, and design markup to be readable without JavaScript. If script fails to load, the element receives no behavior, which is true for any autonomous custom element with or without this proposal.
-- Because behaviors are pinned to existing algorithms, this framework also enables polyfilling: authors can approximate new behaviors in *userland* before native support ships.
-- While this proposal uses an imperative API, the design supports future declarative custom elements. A declarative form would attach behaviors by a registered string name rather than a class reference. Each built-in behavior would have a canonical token (for example, `HTMLButtonBehavior` registered as `"button"`).
-
-```html
-<my-button behaviors="button">Help</my-button>
-```
+- Because behaviors are pinned to existing algorithms, this framework also enables polyfilling: authors can approximate new behaviors in *userland* before native support ships, though some capabilities (CSS pseudo-classes in particular) can only be partially approximated, often at a performance cost.
+- While this proposal uses an imperative API, the design supports a future declarative form that would attach behaviors by a registered string name rather than a class reference. That declarative approach will be proposed separately once the imperative shape is agreed upon.
 
 ### Use case: Design system button
 
