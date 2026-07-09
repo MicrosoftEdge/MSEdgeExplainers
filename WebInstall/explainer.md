@@ -142,9 +142,15 @@ installation of any sibling app from the suite's home page, without redirecting
 users to platform-specific stores.
 
 ```js
-navigator.install("https://suite.example/mail/manifest.webmanifest")
-navigator.install("https://suite.example/calendar/manifest.webmanifest")
-navigator.install("https://suite.example/tasks/manifest.webmanifest")
+navigator.install({
+  manifest: "https://suite.example/mail/manifest.json"
+});
+navigator.install({
+  manifest: "https://suite.example/calendar/manifest.json"
+});
+navigator.install({
+  manifest: "https://suite.example/tasks/manifest.json"
+});
 ```
 
 ### Search and discovery surfaces
@@ -160,8 +166,10 @@ install for the apps it catalogs, enabling cross-device, cross-platform app
 directories that don't depend on any single store.
 
 ```js
-navigator.install("https://music.youtube.com/manifest.webmanifest",
-                  "https://music.youtube.com/?source=pwa")
+navigator.install({
+  manifest: "https://music.youtube.com/manifest.webmanifest",
+  id: "https://music.youtube.com/?source=pwa",
+});
 ```
 
 ![Install flow from an app repository](./apprepositoryinstallation.png)
@@ -195,6 +203,8 @@ value of:
        in the manifest file
        - the developer provided an `id` parameter, but it did not match the `id`
        computed by the browser
+    * Abort and Data are the primary outcomes; see [Privacy section](#what-information-is-exposed-to-the-caller-especially-for-cross-origin-installs)
+    for the complete list.
 
 ### Sample code
 
@@ -223,8 +233,8 @@ const button = document.querySelector('#install');
 button.addEventListener('click', async () => {
   try {
     await navigator.install({
+      // If relative, URLs resolve against the currently loaded document.
       manifest: 'https://foo.com/manifest.json',
-      // Must be an absolute URL.
       id: 'https://foo.com/home',
     });
     // Success: promise resolved!
@@ -233,7 +243,7 @@ button.addEventListener('click', async () => {
       // Action needed: illegal/invalid parameters; invalid
       // manifest data; etc.
     } else if (err.name === 'AbortError') {
-      // User existed the installation flow. No action needed.
+      // User exited the installation flow. No action needed.
     } else {
       // Installation failed for an unexpected reason. Notify
       // the user, or ask if they want to try again?
@@ -255,18 +265,24 @@ updated.
 
 For apps that have an `id` defined in their manifest, the `id` may be
 omitted from the API call. For apps that do **not** define the `id` field, the
-API caller must include the expected, absolute, computed id.
+API caller must include the expected, *computed id**.
+
+*The *computed id* is easily accessible in the 'Application' tab of Developer
+Tools in Chromium-based browsers.
 
 ### Steps to install the app - no-argument signature
 
-1. User gesture activates code that calls `install()`.
-2. If the currently loaded document links to a manifest file, continue. Else
+1. `install()` is called.
+2. If it has transient user activation, continue. Else reject with `NotAllowedError`.
+3. If the frame is **not** sandboxed, and is **not** a cross-origin subframe,
+   continue. Else reject with `InvalidStateError`.
+4. If the currently loaded document links to a manifest file, continue. Else
   reject with `DataError`.
-3. If the manifest file has an `id` field defined, continue. Else reject with
+5. If the manifest file has an `id` field defined, continue. Else reject with
   `DataError`.
-4. UA presents confirmation UX with appropriate security-sensitive fields. If
+6. UA presents confirmation UX with appropriate security-sensitive fields. If
   the user accepts, continue. Else reject with `AbortError`.
-5. Promise resolves.
+7. Promise resolves.
 
 > Note: if the application is already installed, the UA can choose to display
 > UX to launch the application. The UA should follow the same error behavior,
@@ -277,34 +293,39 @@ API caller must include the expected, absolute, computed id.
 
 #### `manifest` only
 
-1. User gesture activates code that calls `install({manifest: <url>})`.
-2. If `<url>` is a valid URL, continue. Else reject with `TypeError`.
-3. If `<url>` is cross-origin with the current document, the UA asks for
+1. `install({manifest: <url>})` is called.
+2. If it has transient user activation, continue. Else reject with `NotAllowedError`.
+3. If the frame is **not** sandboxed, or a cross-origin subframe, continue.
+   Else reject with `InvalidStateError`.
+4. If `<url>` is a valid URL, continue. Else reject with `TypeError`.
+5. If `<url>` is cross-origin with the current document, the UA asks for
   permission to install apps from other origins (if not previously granted).
   If permission is granted, continue. Else reject with `AbortError`.
-4. UA tries to fetch the manifest file at `<url>`. If the fetch succeeds,
-  continue. Else reject with `DataError`.
-5. If the fetched manifest contains an `id`, continue. Else reject with
+6. UA fetches the manifest at `<url>` with credentials mode `"omit"` (no cookies
+  sent). If the fetch succeeds, continue. Else reject with `DataError`.
+7. If the fetched manifest contains an `id`, continue. Else reject with
   `DataError`.
-6. UA presents confirmation UX with appropriate security-sensitive fields. If
+8. UA presents confirmation UX with appropriate security-sensitive fields. If
   the user accepts, continue. Else reject with `AbortError`.
-7. Promise resolves.
+9. Promise resolves.
 
 #### `manifest` and `id`
 
-1. User gesture activates code that calls
-  `install({manifest: <url>, id: <manifest_id>})`.
-2. If `<url>` is a valid URL, continue. Else reject with `TypeError`.
-3. If `<url`> is cross-origin with the current document, the UA asks for
+1. `install({manifest: <url>, id: <manifest_id>})` is called.
+2. If it has transient user activation, continue. Else reject with `NotAllowedError`.
+3. If the frame is **not** sandboxed, or a cross-origin subframe, continue.
+   Else reject with `InvalidStateError`.
+4. If `<url>` is a valid URL, continue. Else reject with `TypeError`.
+5. If `<url>` is cross-origin with the current document, the UA asks for
   permission to install apps from other origins (if not previously granted).
   If permission is granted, continue. Else reject with `AbortError`.
-4. UA tries to fetch the manifest file at `<url>`. If the fetch succeeds,
-  continue. Else reject with `DataError`.
-5. UA determines the computed/processed id of the manifest -- if it matches
+6. UA fetches the manifest at `<url>` with credentials mode `"omit"` (no cookies
+  sent). If the fetch succeeds, continue. Else reject with `DataError`.
+7. UA determines the computed/processed id of the manifest -- if it matches
 `<manifest_id>`, continue. Else reject with `DataError`.
-6. UA presents confirmation UX with appropriate security sensitive fields. If
+8. UA presents confirmation UX with appropriate security sensitive fields. If
 the user accepts, continue. Else reject with `AbortError`.
-7. Promise resolves.
+9. Promise resolves.
 
 ## Alternatives considered
 
@@ -389,10 +410,10 @@ additional trust checks that do not involve loading the entire document?
 
 Related to the above. Manifests may contain relative URLs, which are
 [specified](https://www.w3.org/TR/appmanifest/#start_url-member) to resolve
-against the document's URL. However, this proposal does **not** load the
+against the loaded document's URL. However, this proposal does **not** load the
 target document, so how should relative manifest URLs be resolved?
 
-**Current decision: resolve relative URLs using the `manifest` URL's origin,
+**Current decision: resolve relative URLs using the original `manifest` URL,
 since cross-origin manifest URLs are currently not supported.**
 
 ### Versioned manifest URLs and stale links
@@ -458,7 +479,7 @@ cross-origin cookies or identifiable information are leaked to the target server
 This feature is not available in private browsing or off-the-record profiles,
 as web apps are not generally installable there. UAs must ensure failure
 signaling does not create a reliable private-mode detection channel (for
-example, failing immediately in private modes).
+example, not failing immediately in private modes).
 
 ### Preventing installation prompt spamming
 
