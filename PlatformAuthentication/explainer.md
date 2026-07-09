@@ -11,7 +11,7 @@ There are already some browser extensions which rely on such a broker to provide
 
 While the extension-aided approach can help obtain a secure device-bound token, it requires a browser extension and a dedicated executable to be installed on the system and is not available on mobile platforms which is an important use case as it represents a significant portion of enterprise device users.
 
-To bridge this gap, we propose allowing browser-based applications running within an enterprise-managed browser to call a set of built-into-the-browser APIs. These APIs will enable these apps to invoke a native broker. The broker is a well-established concept for native applications which know how to invoke it for authentication requests. By leveraging the broker, we can provide web applications with the necessary cryptographic tools and enterprise device information, ensuring a secure and unified experience across both web and native applications. The initial set of APIs that we propose are named "GetCookies", "GetToken" and "SignOut".
+To bridge this gap, we propose allowing browser-based applications running within an enterprise-managed browser to call a set of built-into-the-browser APIs. These APIs will enable these apps to invoke a native broker. The broker is a well-established concept for native applications which know how to invoke it for authentication requests. By leveraging the broker, we can provide web applications with the necessary cryptographic tools and enterprise device information, ensuring a secure and unified experience across both web and native applications. The initial set of APIs that we propose are named "GetToken" and "SignOut".
 
 Because of the significant privacy implication of binding (and thus associating) tokens with a specific device, we propose scoping the APIs to enterprise-managed devices only. Administrators would need to enable the APIs through a policy that will be enforced by the browser that implements the APIs.
  
@@ -31,7 +31,7 @@ The broker typically has access to the device's secure enclave (e.g. a TPM). It 
 ## Goals 
 Our primary goal is to provide enhanced security to enterprise web app authentication flows by allowing websites to interact with a broker. 
  
-We plan to start with providing APIs for "get token" and "sign out", and "apply cookies" scenarios but also envision expanding the set of supported scenarios via new API functionality. 
+We plan to start with providing APIs for "get token" and "sign out" scenarios but also envision expanding the set of supported scenarios via new API functionality. 
 
 By allowing web apps to request tokens from brokers we allow resource providers and enterprises to enforce conditional access policies that secure the sign-in sessions and the sign-in artifacts. 
 
@@ -57,22 +57,15 @@ navigator.platformAuthentication.getSupportedContracts(
 ```
 `brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to "MicrosoftEntra". Browsers can define additional per-platform requirements for how new brokers can be registered and verified by the browser.
 
-The response for this API will be a sequence of contracts – initially those will be `get-token-and-sign-out` (which contains both `GetToken` and `SignOut` APIs) and `apply-cookies`.
+The response for this API will be a sequence of contracts – initially those will be `get-token-and-sign-out` (which contains both `GetToken` and `SignOut` APIs).
 ```
 enum NativeAuthContracts { 
-    apply-cookies, 
     get-token-and-sign-out 
 } 
 ```
 
 ### Execution API
 These functions are the bridge which will pass the JS request directly to the broker and return the response directly back to JS. The browser (or library used by the browser) will convert the request and the response parameters to formats that are consumed/returned by the broker. 
-
-When the response of `getSupportedContracts` contains `apply-cookies`, the following function can be used. It helps get authentication cookies from broker and apply it to the current origin. Before this function is added, similar functionality was only available through [Microsoft Single Sign On extension](https://chromewebstore.google.com/detail/microsoft-single-sign-on/ppnbnpeolgkicgegkbkbjmhlideopiji). 
-
-```
-navigator.platformAuthentication.executeApplyCookies (ApplyCookiesParameters) -> Promise<ApplyCookiesResult>
-``` 
 
 When the response of `getSupportedContracts` contains `get-token-and-sign-out`, the following functions can be used. They help retrieve the device bound token from the broker and perform the sign-out action.
 
@@ -81,7 +74,7 @@ navigator.platformAuthentication.executeGetToken(GetTokenParameters) -> Promise<
 navigator.platformAuthentication.executeSignOut(SignOutParameters) -> Promise<SignOutResult>
 ```
 
-The types `GetTokenResult`, `GetTokenParameters`, `ApplyCookiesResult`, `ApplyCookiesParameters`, `SignOutResult` and `SignOutParameters` are strongly-typed dictionaries defined in WebIDL.
+The types `GetTokenResult`, `GetTokenParameters`, `SignOutResult` and `SignOutParameters` are strongly-typed dictionaries defined in WebIDL.
 
 #### GetToken Request
 The `GetTokenParameters` request parameter is a dictionary containing all parameters needed to obtain an authentication token from the broker. The request payload closely follows the OAuth2 specification.
@@ -232,30 +225,6 @@ dictionary GetTokenResult  {
 
 `properties`: Additional response data that also may include platform-specific telemetry data.
 
-#### GetCookies Request
-The `ApplyCookiesParameters` request parameter is a dictionary containing all parameters needed to obtain PRT-based cookies from the broker:  
-
-```
-dictionary ApplyCookiesParameters { 
-    DOMString brokerId,
-    DOMString uri 
-}   
-```
-`brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to `MicrosoftEntra`. Browsers should define their own mechanisms for registering/exposing brokers.
-
-`uri`: The URI for which the cookies request is done.
-
-#### ApplyCookies Response 
-The `ApplyCookiesResult` is also a dictionary that will contain a success flag and an error if needed. 
- 
-```
-dictionary GetCookiesResult  { 
-    boolean is_success, 
-    ErrorResult error 
-} 
-```
-`isSuccess`: `true` when the cookies have successfully applied to current origin and false otherwise.
-
 #### SignOut Request
 The `SignOutParameters` request parameter is a dictionary containing all parameters needed to sign out a user from the from the broker:  
 
@@ -266,7 +235,7 @@ dictionary SignOutParameters {
     record<DOMString, DOMString>? extraParameters 
 }   
 ```
-`brokerId`: The same definition as for `ApplyCookiesParameters`.
+`brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to `MicrosoftEntra`. Browsers can define additional per-platform requirements for how new brokers can be registered and verified by the browser.
 
 `accountId`: The account ID for which the signout request is being made.
 
