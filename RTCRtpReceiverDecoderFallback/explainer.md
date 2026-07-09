@@ -132,9 +132,11 @@ pc.addEventListener('track', (event) => {
 ## Alternatives Considered
 1. Use [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) info via WebRTC Stats API
     * Rejected because it now requires [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) permissions, which are invasive and have a high failure rate.
-2. Guess based on decode times
+2. Use [`MediaCapabilitiesInfo.powerEfficient`](https://www.w3.org/TR/media-capabilities/#media-capabilities-info)
+    * Rejected because this is a static hint that does not update when the browser silently switches from hardware to software decoding.
+3. Guess based on decode times
     * Unreliable and has masked bugs in production.
-3. [Add `decoderFallback` field to `RTCInboundRtpStreamStats`](https://github.com/w3c/webrtc-stats/pull/725)
+4. [Add `decoderFallback` field to `RTCInboundRtpStreamStats`](https://github.com/w3c/webrtc-stats/pull/725)
     * Rejected because relying on stats to trigger a change felt like an anti-pattern and the recommendation was to explore an event driven solution. Additionally, there were concerns around fingerprinting.
     * [WebRTC March 2023 meeting – 21 March 2023](https://www.w3.org/2023/03/21-webrtc-minutes.html)
 
