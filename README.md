@@ -279,3 +279,4 @@ We'd love to hear your feedback!
 | [Extending Long Tasks API to Web Workers](LongTasks/explainer.md) | Rather than extending the Long Tasks API to monitor long tasks in web workers, we propose introducing [the Delayed Messages API](DelayedMessages/explainer.md) | 2025-06-09 |
 | [Back to Opener: Seamless Back Navigation in New Tabs](BackToOpener/explainer.md) | We are pursuing this feature as a [Chromium feature](https://issues.chromium.org/issues/448173940) instead of a web platform one. | 2025-08-28 |
 | [Web Haptics API](HapticsDevice/explainer.md) | A new haptics API is being incubated as [Web Haptics](https://github.com/WICG/web-haptics) in the [W3C Web Incubator Community Group](https://wicg.io/). | 2026-05-13 |
+| [Paint Timing for `performance.mark()`](PerformanceMarkPaintTime/explainer.md) | Internal customers are not interested in this API due to an alternative solution. | 2026-07-10 |

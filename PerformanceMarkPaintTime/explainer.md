@@ -6,9 +6,9 @@ Author:  [Wangsong Jin](https://github.com/JosephJin0815), [Andy Luhrs](https://
 
 This document is a starting point for engaging the community and standards bodies in developing collaborative solutions fit for standardization. As the solutions to problems described in this document progress along the standards-track, we will retain this document as an archive and use this section to keep the community up-to-date with the most current standards venue and content location of future work and discussions.
 
-* This document status: **Active**
-* Expected venue: [W3C Web Incubator Community Group](https://wicg.io/)
-* Current version: this document
+* This document status: **Archived**
+* Expected venue: N/A
+* Current version: Internal customers are not interested in this API due to an alternative solution.
 
 ## Table of Contents
 
