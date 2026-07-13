@@ -256,13 +256,16 @@ button.addEventListener('click', async () => {
 
 ### A note on manifest `id`
 
-According to the manifest spec, if there is no `id` member present, the computed
-string resolves to that of the `start_url`.
+According to the manifest [spec](https://www.w3.org/TR/appmanifest/#id-member),
+if there is no `id` member present, the computed string resolves to that of the
+`start_url`.
 
 We acknowledge that only around 4% (as of 2024) of web apps have defined `id`s
-in their manifest. We also know that `id`s are a crucial part to support to
-avoid situations of multiple *same* applications with no path to being
-updated. 
+in their manifest. We also know that `id`s are a critical part of
+avoiding situations of multiple *same* applications with no path to being
+updated -- if the developer ever changes their `start_url` without an `id`
+declared, their app appears to UAs as a distinct, new application, and existing
+installs are orphaned.
 
 For apps that have an `id` defined in their manifest, the `id` may be
 omitted from the API call. For apps that do **not** define the `id` field, the
