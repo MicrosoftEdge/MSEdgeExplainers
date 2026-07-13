@@ -168,7 +168,7 @@ directories that don't depend on any single store.
 ```js
 navigator.install({
   manifest: "https://music.youtube.com/manifest.webmanifest",
-  id: "https://music.youtube.com/?source=pwa",
+  manifestId: "https://music.youtube.com/?source=pwa",
 });
 ```
 
@@ -179,9 +179,10 @@ navigator.install({
 The solution is a promise-based extension of the navigator interface that is
 simple and ergonomic for developers. A developer calls
 
-`navigator.install({ manifest: <url> [, id: <url>] })`.
+`navigator.install({ manifest: <url> [, manifestId: <url>] })`.
 
-**The developer may omit `id` if and only if the JSON at `manifest` contains an `id`.**
+**The developer may omit `manifestId` if and only if the JSON at `manifest`
+contains an `id`.**
 
 As an added convenience, the developer may omit the dictionary object entirely,
 in which case the currently loaded page's manifest is targeted for install.
@@ -197,14 +198,14 @@ value of:
     * `AbortError`: The user aborted the installation flow.
     * `DataError`: There was a problem with the data provided. Notable
       failures include:
-      - invalid manifest URL, failure to fetch the manifest, malformed
+      - invalid `manifest` URL, failure to fetch the manifest, malformed
         manifest file, etc.
-       - the developer omitted the `id` parameter when there was none declared
-       in the manifest file
-       - the developer provided an `id` parameter, but it did not match the `id`
-       computed by the browser
-    * Abort and Data are the primary outcomes; see [Privacy section](#what-information-is-exposed-to-the-caller-especially-for-cross-origin-installs)
-    for the complete list.
+       - the developer omitted the `manifestId` parameter when there was none
+       declared in the manifest file
+       - the developer provided a `manifestId` parameter, but it did not match
+       the one computed by the browser.
+    * See [Privacy section](#what-information-is-exposed-to-the-caller-especially-for-cross-origin-installs)
+    for the complete list of `DOMException` rejection codes.
 
 ### Sample code
 
@@ -235,7 +236,7 @@ button.addEventListener('click', async () => {
     await navigator.install({
       // If relative, URLs resolve against the currently loaded document.
       manifest: 'https://foo.com/manifest.json',
-      id: 'https://foo.com/home',
+      manifestId: 'https://foo.com/home',
     });
     // Success: promise resolved!
   } catch (err) {
@@ -309,9 +310,9 @@ Tools in Chromium-based browsers.
   the user accepts, continue. Else reject with `AbortError`.
 9. Promise resolves.
 
-#### `manifest` and `id`
+#### `manifest` and `manifestId`
 
-1. `install({manifest: <url>, id: <manifest_id>})` is called.
+1. `install({manifest: <url>, manifestId: <manifest_id>})` is called.
 2. If it has transient user activation, continue. Else reject with `NotAllowedError`.
 3. If the frame is **not** sandboxed, or a cross-origin subframe, continue.
    Else reject with `InvalidStateError`.
