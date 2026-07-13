@@ -86,8 +86,8 @@ An element attaches at most one behavior per category. Two behaviors in the same
 
 ```javascript
 static behaviors = [HTMLButtonBehavior, HTMLLabelBehavior]; // throws!
-// TypeError: an element can have at most one ActivationBehavior;
-// HTMLButtonBehavior and HTMLLabelBehavior cannot be combined.
+// TypeError: HTMLButtonBehavior and HTMLLabelBehavior cannot be combined;
+// an element can have only one activation behavior.
 ```
 
 Behaviors in different categories compose. Combining an `HTMLButtonBehavior` (activation) with an `HTMLImageBehavior` (embedded content) produces a submit button that renders as an image, similar to [`<input type=image>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/image):
@@ -290,6 +290,8 @@ static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
 ```
 
 The platform knows each behavior's category, so it enforces one behavior per category on its own (see [Behavior categories and composition](#behavior-categories-and-composition)). The declaration stays short as categories are added, and each behavior is named once.
+
+However, a per-field shape (like the one expressed in [issue #1353](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1353)) has the advantage that same-category collisions become impossible to express rather than something the platform rejects at definition time. The cost is that per-category fields put the category shape back into the author-facing declaration, which this proposal keeps internal.
 
 ### Feature detection
 
