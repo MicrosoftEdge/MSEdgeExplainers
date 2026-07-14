@@ -259,39 +259,36 @@ Beyond that, we are open to a string-based API instead. The [TAG endorses string
 - Typos are not unique to strings. A misspelled identifier throws a `ReferenceError`, but a wrong-but-valid class (`static behaviors = [HTMLButtonElement]`) fails just as silently as a bad string; both can only be rejected when `customElements.define()` validates the array. A string token can be validated the same way, throwing on an unknown value.
 - Discoverability is resolvable. A string is opaque on its own, but an author can inspect a behavior's surface at runtime through the instance from `internals.behaviors`, and the set of tokens can be documented and feature-detected.
 
-#### One `behaviors` array vs per-category fields
+#### Open question: one `behaviors` array or per-category properties
 
-Even with classes instead of strings, the declaration could be split into one named opt-in per category. [Issue #1353](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1353) proposes a `static activationBehavior` next to a `static replacedContent`, each set to a cluster keyword, so conflicts resolve at the WebIDL level: one field per category.
+There are two natural shapes for declaring which behaviors the platform attaches. Both enforce the one-behavior-per-category rule; they differ in where that rule lives.
 
-```javascript
-// Per-category string clusters (issue #1353)
-static activationBehavior = 'button';
-static replacedContent = 'image';
-```
-
-The keywords carry the [same problems](#classes-vs-a-string-based-api). Substituting classes keeps the per-field shape while repeating what the class already encodes:
-
-```javascript
-// Per-category fields, with classes
-static activationBehavior = HTMLButtonBehavior;
-static replacedContent = HTMLImageBehavior;
-
-// Or one object keyed by category
-static behaviors = {
-  activationBehavior: HTMLButtonBehavior,
-  replacedContent: HTMLImageBehavior,
-};
-```
-
-`HTMLButtonBehavior` belongs to the activation category, so its category is intrinsic. Naming the field (`activationBehavior:`) restates that. It also forces the author to know the right key for every behavior, and a wrong key (`replacedContent: HTMLButtonBehavior`) becomes a new failure mode. A single flat array avoids all of it:
+The first is a single array of behavior classes:
 
 ```javascript
 static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
 ```
 
-The platform knows each behavior's category, so it enforces one behavior per category on its own (see [Behavior categories and composition](#behavior-categories-and-composition)). The declaration stays short as categories are added, and each behavior is named once.
+The second is one static property per category, each holding a single behavior class:
 
-However, a per-field shape (like the one expressed in [issue #1353](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1353)) has the advantage that same-category collisions become impossible to express rather than something the platform rejects at definition time. The cost is that per-category fields put the category shape back into the author-facing declaration, which this proposal keeps internal.
+```javascript
+static activationBehavior = HTMLButtonBehavior;
+static embeddedContentBehavior = HTMLImageBehavior;
+```
+
+[Issue #1353](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1353) first raised the per-category shape using string keywords (`static activationBehavior = 'button'`); the [reasons to prefer classes over strings](#classes-vs-a-string-based-api) apply equally here, so the comparison below is between an array of classes and one class-valued property per category. A single object keyed by category (`static behaviors = { activationBehavior: HTMLButtonBehavior }`) is a third variant that shares the drawbacks of both.
+
+The two shapes have the following trade-offs:
+
+| Consideration | `behaviors` array | Per-category properties |
+|---|---|---|
+| Same-category collision | The platform rejects it at `customElements.define()` time (a runtime check). | Impossible to express, since there is only one property per category. |
+| Category visibility | An author writes the behavior class and never names its category. | An author has to know that a button is an activation behavior and which property it belongs in. |
+| Precedent | New pattern. | Matches how custom elements already opt into platform features (`static formAssociated`, `static observedAttributes`). |
+| Growth | Absorbs new categories without changing shape. | Each new category adds a static property to the API surface. |
+| (Future) Developer-defined behaviors | Would accept an author's own class directly. | Would need a separate category. |
+
+This document uses the array form in its examples, but the choice is unresolved.
 
 ### Feature detection
 
