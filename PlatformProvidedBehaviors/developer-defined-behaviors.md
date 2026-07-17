@@ -8,87 +8,123 @@
 
 ## Overview
 
-The [Platform-Provided Behaviors](explainer.md) proposal introduces a set of browser-supplied behaviors (e.g., `HTMLSubmitButtonBehavior`) that custom elements can opt into via `attachInternals()`. A natural extension of this model is to allow developers to define their own reusable behaviors by subclassing an `ElementBehavior` base class. This would enable patterns such as:
+The [Platform-Provided Behaviors](explainer.md) proposal introduces a set of browser-supplied behaviors (e.g., `HTMLButtonBehavior`) that custom elements declare via a `static behaviors` class property. A natural extension of this model is to allow developers to define their own reusable behaviors by subclassing one of the platform's [category base classes](explainer.md#behavior-categories-and-composition). This would enable patterns such as:
 
-- Encapsulating common interaction patterns (tooltips, drag-and-drop, keyboard shortcuts) as composable units.
+- Defining new activation or embedded-content identities that the platform does not provide.
 - Polyfilling upcoming platform behaviors before they ship natively.
-- Composing developer-defined behaviors with platform-provided ones on the same element.
+- Composing developer-defined behaviors with platform-provided ones across categories on the same element.
 
 ```javascript
-class TooltipBehavior extends ElementBehavior {
-  #content = '';
-  #tooltipElement = null;
+class QRCodeBehavior extends EmbeddedContentBehavior {
+  #value = '';
+  #canvas = null;
+  #resizeObserver = null;
 
   behaviorAttachedCallback(internals) {
-    this.element.addEventListener('mouseenter', this.#show);
-    this.element.addEventListener('mouseleave', this.#hide);
-    this.element.addEventListener('focus', this.#show);
-    this.element.addEventListener('blur', this.#hide);
+    // Render into a canvas that fills the host's replaced box.
+    this.#canvas = document.createElement('canvas');
+    this.element.append(this.#canvas);
+    this.#render();
   }
 
-  #show = () => {
-    if (!this.#content) {
+  behaviorConnectedCallback() {
+    // Re-render at the host's size once it is laid out in the document.
+    this.#resizeObserver = new ResizeObserver(() => this.#render());
+    this.#resizeObserver.observe(this.element);
+  }
+
+  behaviorDisconnectedCallback() {
+    // Tear down the observer created outside the host's own subtree.
+    this.#resizeObserver?.disconnect();
+    this.#resizeObserver = null;
+  }
+
+  #render() {
+    if (!this.#canvas) {
       return;
     }
-    this.#tooltipElement = document.createElement('div');
-    this.#tooltipElement.className = 'tooltip';
-    this.#tooltipElement.textContent = this.#content;
-    this.#tooltipElement.setAttribute('role', 'tooltip');
-    document.body.appendChild(this.#tooltipElement);
-    // Position tooltip near element.
-  };
-
-  #hide = () => {
-    this.#tooltipElement?.remove();
-    this.#tooltipElement = null;
-  };
-
-  get content() {
-    return this.#content;
+    const ctx = this.#canvas.getContext('2d');
+    // Encode this.#value and draw the QR matrix onto the canvas.
   }
-  set content(val) {
-    this.#content = val;
+
+  get value() {
+    return this.#value;
+  }
+  set value(val) {
+    this.#value = val;
+    this.#render();
   }
 }
 ```
 
-Behaviors are classes with a `behaviorAttachedCallback` method. The behavior is instantiated and passed to `behaviors`:
+Behaviors are classes with a `behaviorAttachedCallback` method. A behavior is declared as a class reference in `static behaviors`; the platform instantiates it per host, and the author reaches the instance through `internals.behaviors`:
 
 ```javascript
-class CustomButton extends HTMLElement {
+class QRCodeButton extends HTMLElement {
+  static behaviors = [HTMLButtonBehavior, QRCodeBehavior];
+
+  #internals;
   constructor() {
     super();
+    this.#internals = this.attachInternals();
+    this.#internals.behaviors.get(HTMLButtonBehavior).type = 'button';
 
-    this._tooltipBehavior = new TooltipBehavior();
-    this._submitBehavior = new HTMLSubmitButtonBehavior();
-    this._internals = this.attachInternals({
-      behaviors: [this._tooltipBehavior, this._submitBehavior]
+    // On activation, copy the encoded URL to the clipboard.
+    this.addEventListener('click', () => {
+      const url = this.#internals.behaviors.get(QRCodeBehavior).value;
+      navigator.clipboard.writeText(url);
     });
   }
 
   connectedCallback() {
-    // Access state directly via the stored reference.
-    this._tooltipBehavior.content = this.getAttribute('tooltip');
+    // Access the platform-created instance via the behaviors collection.
+    this.#internals.behaviors.get(QRCodeBehavior).value = 'https://example.com';
   }
 }
 ```
 
-`TooltipBehavior` could be combined with platform-provided behaviors. Here, `CustomButton` gains both tooltip functionality (show on hover/focus) and submit button semantics (click/Enter submits forms, implicit submission, `role="button"`).
+`QRCodeBehavior` extends `EmbeddedContentBehavior`, and `HTMLButtonBehavior` is in the activation category. Because the two behaviors are in different categories, they compose: `QRCodeButton` renders a QR code (from `QRCodeBehavior`) and activates like a button (from `HTMLButtonBehavior`), so a click can, for example, copy the encoded link.
 
-#### ElementBehavior API
+## Choosing a category
 
-For developer-defined behaviors to work, `ElementBehavior` would need to expose an API that lets web developers set accessibility defaults, receive lifecycle notifications, and reference the host element:
+A developer-defined behavior extends one of the platform's [category base classes](explainer.md#behavior-categories-and-composition) (`ElementBehavior` is the abstract root):
+
+- A behavior that activates (runs an action on click or keyboard) extends `ActivationBehavior`.
+- A behavior that renders replaced content extends `EmbeddedContentBehavior`.
+
+The platform enforces composition with the same membership check it uses for platform behaviors, so developer-defined behaviors slot into the model without a separate compatibility mechanism.
+
+A capability that is not an activation or embedded-content identity does not map to a current category.
+
+## Goals
+
+- Let developers define reusable behaviors as subclasses of a platform category base (`ActivationBehavior` or `EmbeddedContentBehavior`) that attach through the same `static behaviors` declaration as platform-provided behaviors.
+- Give a behavior a complete, well-defined lifecycle (attach, connect, disconnect) and a clear story for cleaning up resources it creates outside the host element.
+- Encourage behaviors to be self-contained units with isolated effects.
+- Reuse the platform-provided-behaviors [category composition model](explainer.md#behavior-categories-and-composition) for developer-defined behaviors.
+
+## Non-goals
+
+- Cooperating between sibling behaviors through a shared `super` chain.
+- Granting a behavior capabilities it cannot already reach from script.
+
+## ElementBehavior API
+
+`ElementBehavior` exposes an API that lets web developers reference the host element, set accessibility and form defaults through `ElementInternals`, receive lifecycle notifications, and clean up resources. The members below mirror the subset of the custom-element lifecycle a behavior needs, without re-exposing callbacks that belong to the element itself:
 
 | Member | Kind | Description |
 |--------|------|-------------|
-| `element` | Property (read-only) | Reference to the host element. |
-| `behaviorAttachedCallback(internals)` | Lifecycle | Called when the behavior is attached to an element via `attachInternals()`. Receives the `ElementInternals` object. |
+| `element` | Property (read-only) | The custom element the behavior is attached to. Set by the platform before `behaviorAttachedCallback` runs. |
+| `behaviorAttachedCallback(internals)` | Lifecycle | Called once when the behavior is attached. Receives the host's `ElementInternals`. The place to set defaults (e.g. `internals.role`) and, for a category behavior, to override the category's hooks. |
+| `behaviorConnectedCallback()` | Lifecycle | Called when the host is inserted into the document, after the element's own `connectedCallback`. Use for work that only makes sense while connected (positioning, document-scoped listeners, observers). May run multiple times if the host moves in and out of the document. |
+| `behaviorDisconnectedCallback()` | Lifecycle | Called when the host is removed from the document. The place to tear down anything the behavior created outside the host (elements appended to `document.body`, listeners on `document`/`window`, observers, timers). |
 
-The following example shows how `HTMLButtonBehavior` (`type="button"`) would be implemented in userland:
+Because behaviors cannot be detached once attached (per the [platform-provided behaviors model](explainer.md#proposed-approach)), there is no `behaviorDetachedCallback`. Listeners registered directly on `element` are released together with the host when it is garbage-collected, so they do not need explicit removal; resources a behavior creates outside the host do.
+
+The following example shows how a userland behavior would implement `HTMLButtonBehavior` (`type="button"`) as an activation identity. Because it reimplements a platform behavior, the same class doubles as a polyfill. As an `ActivationBehavior` subclass, it receives the activation dispatch path from its base (click, keyboard activation via Space and Enter, `element.click()`, and `preventDefault()`/`stopPropagation()` handling) and overrides the activation algorithm to define what the button does when activated.
 
 ```javascript
-class HTMLButtonBehaviorExample extends ElementBehavior {
-  #disabled = false;
+class HTMLButtonBehaviorExample extends ActivationBehavior {
   #internals = null;
   #name = '';
   #value = '';
@@ -100,21 +136,17 @@ class HTMLButtonBehaviorExample extends ElementBehavior {
 
   behaviorAttachedCallback(internals) {
     this.#internals = internals;
+    // Declare the identity's defaults.
     this.#internals.role = 'button';
     this.element.setAttribute('tabindex', '0');
-
-    this.element.addEventListener('click', this.#handleClick);
-    this.element.addEventListener('keydown', this.#handleKeydown);
-    this.element.addEventListener('keyup', this.#handleKeyup);
   }
 
-  #handleClick = (e) => {
-    if (this.#disabled) {
-      e.stopImmediatePropagation();
-      e.preventDefault();
+  // The ActivationBehavior base calls this when the host is activated and the
+  // click was not canceled.
+  activationBehavior(event) {
+    if (this.#internals.states.has('disabled')) {
       return;
     }
-
     if (this.#popoverTargetElement) {
       switch (this.#popoverTargetAction) {
         case 'show': {
@@ -140,41 +172,19 @@ class HTMLButtonBehaviorExample extends ElementBehavior {
       });
       this.#commandForElement.dispatchEvent(commandEvent);
     }
-  };
-
-  #handleKeydown = (e) => {
-    if (this.#disabled) {
-      return;
-    }
-    if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      if (e.key === 'Enter') {
-        this.element.click();
-      }
-    }
-  };
-
-  #handleKeyup = (e) => {
-    if (this.#disabled) {
-      return;
-    }
-    if (e.key === ' ') {
-      this.element.click();
-    }
-  };
-
-  // Properties
-  get disabled() { return this.#disabled; }
-  set disabled(val) {
-    this.#disabled = val;
-    this.#internals?.setDisabled?.(this.#disabled);
   }
 
-  get name() { return this.#name; }
-  set name(val) { this.#name = val; }
-
-  get value() { return this.#value; }
-  set value(val) { this.#value = val; }
+  // Properties
+  get disabled() {
+    return this.#internals.states.has('disabled');
+  }
+  set disabled(val) {
+    if (val) {
+      this.#internals.states.add('disabled');
+    } else {
+      this.#internals.states.delete('disabled');
+    }
+  }
 
   // Popover target API.
   get popoverTargetElement() { return this.#popoverTargetElement; }
@@ -189,97 +199,34 @@ class HTMLButtonBehaviorExample extends ElementBehavior {
   set command(val) { this.#command = val; }
 }
 
-// Attaching the behavior to a custom element:
+// Use the native behavior when available, otherwise the userland polyfill.
+const HTMLButtonBehavior = globalThis.HTMLButtonBehavior ?? HTMLButtonBehaviorExample;
+
 class MyButton extends HTMLElement {
+  static behaviors = [HTMLButtonBehavior];
+
+  #internals;
   constructor() {
     super();
-    this._buttonBehavior = new HTMLButtonBehaviorExample();
-    this._internals = this.attachInternals({ behaviors: [this._buttonBehavior] });
+    this.#internals = this.attachInternals();
   }
 }
 ```
 
-- The subclass overrides `behaviorAttachedCallback(internals)` to receive the `ElementInternals` object; sets defaults such as `internals.role`; and register event listeners.
-- The platform would set `this.element` before calling `behaviorAttachedCallback`, so it is already available inside the callback. The example uses `this.element` to register event listeners and to trigger clicks during keyboard activation.
-- `ElementBehavior` needs to provide a way to affect the `:disabled` pseudo-class. The `setDisabled()` method (called in the `disabled` setter) would need to integrate with `ElementInternals` states.
+- The subclass overrides `behaviorAttachedCallback(internals)` to receive the `ElementInternals` object and set its defaults, such as `internals.role` and focusability.
+- The subclass overrides the activation algorithm `activationBehavior(event)`. The `ActivationBehavior` base invokes it when the host is activated by click, keyboard (Space/Enter), or `element.click()`, so the subclass does not register its own activation listeners.
+- The platform sets `this.element` before calling `behaviorAttachedCallback`, so the host is available inside the callback and the activation algorithm.
+- A developer-defined behavior cannot make the real `:disabled` UA pseudo-class match (that is reserved to platform-provided behaviors), so the example stores disabled state in the host's [`CustomStateSet`](https://developer.mozilla.org/en-US/docs/Web/API/CustomStateSet) (`internals.states`) as the single source of truth for its getter, setter, and activation guard. Authors style it with `:state(disabled)`; a native `HTMLButtonBehavior` would drive `:disabled` directly.
 
-#### Polyfilling behaviors
+## Composition and cooperation
 
-This design also would enable **polyfilling** new platform behaviors before they ship natively. Consider `HTMLDialogBehavior` (from `<dialog>`):
+Developer-defined behaviors compose the same way platform-provided behaviors do: each is listed as a class in `static behaviors`, the platform instantiates one per host, and each acts on the shared host element and its `ElementInternals`. Sibling behaviors share no prototype chain, so when two behaviors need to coordinate, the host mediates rather than one behavior reaching into another. The `QRCodeButton` example above already shows this shape: the host adds a `click` listener that reacts to the activation behavior and reads the embedded-content behavior's `value`.
 
-```javascript
-// Polyfill for HTMLDialogBehavior.
-class HTMLDialogBehaviorPolyfill extends ElementBehavior {
-  #open = false;
-  #returnValue = '';
-  #modal = false;
-  #previouslyFocused = null;
+## Open questions
 
-  behaviorAttachedCallback(internals) {
-    internals.role = 'dialog';
-    this.element.addEventListener('keydown', this.#handleKeydown);
-    this.element.addEventListener('click', this.#handleBackdropClick);
-  }
+- Should the platform offer a channel for one behavior to observe or extend another, or is host-mediated coordination enough?
+- Do developer-defined behaviors need any registration or naming convention, or are they purely local to the author's code?
 
-  show() {
-    this.#open = true;
-    this.#modal = false;
-    this.element.setAttribute('open', '');
-    // Focus first focusable element.
-  }
+## References
 
-  showModal() {
-    this.#open = true;
-    this.#modal = true;
-    this.#previouslyFocused = document.activeElement;
-    this.element.setAttribute('open', '');
-  }
-
-  close(returnValue) {
-    if (!this.#open) {
-      return;
-    }
-    if (returnValue !== undefined) {
-      this.#returnValue = returnValue;
-    }
-    this.#open = false;
-    this.element.removeAttribute('open');
-    this.#previouslyFocused?.focus();
-    this.element.dispatchEvent(new Event('close'));
-  }
-
-  #handleKeydown = (e) => {
-    if (e.key === 'Escape' && this.#open) {
-      const cancelEvent = new Event('cancel', { cancelable: true });
-      this.element.dispatchEvent(cancelEvent);
-      if (!cancelEvent.defaultPrevented) {
-        this.close();
-      }
-    }
-  };
-
-  // Implementation of focus trapping, backdrop click handling, etc.
-
-  get open() {
-    return this.#open;
-  }
-  get returnValue() {
-    return this.#returnValue;
-  }
-  set returnValue(val) {
-    this.#returnValue = val;
-  }
-
-  static behaviorName = 'htmlDialog';
-}
-
-// Use polyfill until native support arrives.
-const HTMLDialogBehavior = globalThis.HTMLDialogBehavior ?? HTMLDialogBehaviorPolyfill;
-```
-
-Although the polyfill above can't fully replicate a native `<dialog>` element (no true top layer, no `::backdrop`, no `:modal`), it provides a reasonable approximation.
-
-#### Considerations for developer-defined behaviors
-
-- They can compose with platform-provided behaviors.
-- The same conflict resolution strategies that apply to platform behaviors would need to work with developer-defined behaviors.
+- [Elix functional mixins](https://elix.org/elix/mixins). A component library that composes reusable behavior as class-level functional mixins (cooperating along the prototype chain via `super`, designed for order-independence and isolated effects). Useful prior art for how a behavior-composition system can be designed.
