@@ -31,7 +31,7 @@ to keep the community up to date.
   - [Non-goals](#non-goals)
 - [Motivation](#motivation)
 - [Proposed Approach](#proposed-approach)
-- [Open questions and challenges](#open-questions-and-challenges)
+- [Open questions](#open-questions)
 - [Alternatives Considered](#alternatives-considered)
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
@@ -293,12 +293,12 @@ explicit `<slot>`:
 **Proposed result:** the `<select>` recognizes both `<option>`s, because they
 are in the select's flat tree.
 
-A common reason to do this is styling. `::slotted()` can only style elements
-directly assigned to a slot, so a select's shadow root cannot reach `<option>`s
-nested inside a slotted `<optgroup>`. Wrapping each option in a custom element
-that keeps a real `<option>` in its own shadow root lets the component
-encapsulate the option's styles, because an element is styled by the CSS of the
-shadow tree it lives in:
+Keeping a native `<option>` inside custom option wrappers also lets the
+wrapper own that option's styles. This is useful because the outer `<my-select>`
+cannot style every consumer-provided option: `::slotted()` only matches elements
+directly assigned to its slot, not `<option>` descendants of a slotted
+`<optgroup>`. Putting the native option and its styles in the wrapper's shadow
+root avoids that limitation:
 
 ```html
 <my-select>
@@ -350,31 +350,18 @@ myCustomSelect.append(option);  // gets slotted into the inner <select>
 select.options.length;          // already reflects the new option
 ```
 
-## Open questions and challenges
-
-The proposed direction is to have a customizable `<select>` look for its options
-in the flat tree. The main things to work through:
+## Open questions
 
 - **Default vs customizable appearance.** This initially targets
   `appearance: base-select`, but the same flat-tree lookup could apply to a
   default-appearance `<select>` too. The main concern is web compatibility,
   which we would want to measure (for example, with use counters) before
   deciding.
-- **Performance.** The select should not walk its whole flat tree every time its
-  options are queried. It needs to update its option list incrementally as
-  slotting changes.
-- **Synchronous updates.** When slot assignment changes, the option list and the
-  selected option should update immediately, so a read right after a change is
-  correct.
-- **Trigger button vs options.** When a button and options are slotted through
-  the same slot, the select must treat the first button as its trigger and the
-  rest as options.
-- **Nested slotting.** Options can be forwarded through more than one slot
-  before reaching the select, so the lookup has to handle multiple shadow
-  boundaries.
-- **Spec algorithms.** A few algorithms assume tree order and DOM ancestry, such
-  as building the list of options and finding an option's nearest ancestor
-  select. These would need to consider the flat tree for base-select.
+- **Scope across other HTML elements.** Should this be solved specifically for
+  `<select>`, or as part of a general mechanism that applies to elements such as
+  `<datalist>`, `<table>`, `<fieldset>`, and `<form>`?
+- **Sequencing.** How should this work be prioritized relative to other
+  in-progress work on customizable `<select>`?
 
 ## Alternatives Considered
 
@@ -489,13 +476,8 @@ already compose.
   example:
   [1](https://github.com/whatwg/html/issues/11535#issuecomment-3155754832),
   [2](https://github.com/whatwg/html/issues/11535#issuecomment-3520607548).
-- **Open standards-level questions raised in discussion:**
-  - Whether to solve this for `<select>` in isolation, or as part of a general
-    mechanism that applies to many elements.
-  - How it sequences against other in-progress work on the customizable
-    `<select>`.
 
-These questions are being tracked in
+Discussion is being tracked in
 [whatwg/html#11535](https://github.com/whatwg/html/issues/11535).
 
 ## References
