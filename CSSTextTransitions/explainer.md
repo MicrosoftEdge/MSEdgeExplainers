@@ -44,13 +44,36 @@ given element.
 
 ## User-Facing Problem
 
-Many Web experiences animate text at sub-element granularity. Examples include:
+Many Web experiences animate text at sub-element granularity. This is a
+long-standing authoring need rather than a recent trend: designers have animated
+text word-by-word and letter-by-letter since the early days of the Web, in
+service of typographic expression, branding, and editorial storytelling.
+Examples include:
 
+- Marketing and editorial headlines that reveal word-by-word as they scroll into
+  view, a staple of brand and campaign sites for well over a decade.
+- Kinetic typography and animated mastheads that stagger words or characters for
+  emphasis and visual rhythm.
+- Staggered reveals of list, menu, and content items as a user navigates or
+  scrolls through a page.
 - AI chat interfaces that apply staggered fade-ins to each successive word, so
   that response text flows in smoothly at a steady rate.
 - Typing indicators that display "..." with each dot animating in sequence.
 - Loading or placeholder text that shimmers across words or characters to
   indicate progress.
+
+The demand for this capability is durable and measurable. A dedicated ecosystem
+of libraries exists for the sole purpose of splitting text into per-word or
+per-character elements so they can be animated:
+[Lettering.js](https://github.com/davatron5000/Lettering.js) introduced the
+pattern in 2010, and [GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/)
+remains an industry standard for professional text animation. As one signal of
+sustained, present-day usage, the
+[SplitType](https://github.com/lukePeavey/SplitType) package — whose only job is
+splitting text into word and character spans — is downloaded on the order of
+100,000 times per week, evidence of steady production demand rather than novelty.
+That authors continue to reach for these workarounds, year after year, indicates
+a genuine platform gap.
 
 One challenge with such effects is that the unit of currency for animations on
 the Web is the element. Effects such as those described above require authors to
@@ -68,11 +91,11 @@ problems:
 
 Additionally, it puts the requirement on Web authors to perform the text
 splitting. JavaScript `string.split()` can work when the desired unit is the
-word, and packages such as
-[GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) do exist to
-stagger animations on character, word, or line units. But the browser engine
-needs to do these things anyway to perform layout, so there's an opportunity to
-reuse that logic for animation purposes.
+word, and the splitting libraries noted above stagger animations on character,
+word, or line units. But the browser engine needs to do these things anyway to
+perform layout, so there's an opportunity to reuse that logic for animation
+purposes — removing the author's dependency on JavaScript and third-party
+libraries for an effect the engine is already equipped to produce.
 
 ### Goals
 
