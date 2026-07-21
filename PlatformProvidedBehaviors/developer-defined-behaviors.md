@@ -27,13 +27,13 @@ class QRCodeBehavior extends EmbeddedContentBehavior {
     this.#render();
   }
 
-  behaviorConnectedCallback() {
+  elementConnectedCallback() {
     // Re-render at the host's size once it is laid out in the document.
     this.#resizeObserver = new ResizeObserver(() => this.#render());
     this.#resizeObserver.observe(this.element);
   }
 
-  behaviorDisconnectedCallback() {
+  elementDisconnectedCallback() {
     // Tear down the observer created outside the host's own subtree.
     this.#resizeObserver?.disconnect();
     this.#resizeObserver = null;
@@ -57,7 +57,7 @@ class QRCodeBehavior extends EmbeddedContentBehavior {
 }
 ```
 
-Behaviors are classes with a `behaviorAttachedCallback` method. A behavior is declared as a class reference in `static behaviors`; the platform instantiates it per host, and the author reaches the instance through `internals.behaviors`:
+Behaviors are classes with a `behaviorAttachedCallback` method. A behavior is declared as a class reference in `static behaviors`; the platform instantiates it per host, and the author reaches the instance through `internals.behaviors` under a name the behavior declares. Platform behaviors use canonical names (`HTMLButtonBehavior` is `behaviors.button`); a developer-defined behavior declares its own (here `QRCodeBehavior` is exposed as `behaviors.qrCode`):
 
 ```javascript
 class QRCodeButton extends HTMLElement {
@@ -67,18 +67,18 @@ class QRCodeButton extends HTMLElement {
   constructor() {
     super();
     this.#internals = this.attachInternals();
-    this.#internals.behaviors.get(HTMLButtonBehavior).type = 'button';
+    this.#internals.behaviors.button.type = 'button';
 
     // On activation, copy the encoded URL to the clipboard.
     this.addEventListener('click', () => {
-      const url = this.#internals.behaviors.get(QRCodeBehavior).value;
+      const url = this.#internals.behaviors.qrCode.value;
       navigator.clipboard.writeText(url);
     });
   }
 
   connectedCallback() {
     // Access the platform-created instance via the behaviors collection.
-    this.#internals.behaviors.get(QRCodeBehavior).value = 'https://example.com';
+    this.#internals.behaviors.qrCode.value = 'https://example.com';
   }
 }
 ```
@@ -116,8 +116,8 @@ A capability that is not an activation or embedded-content identity does not map
 |--------|------|-------------|
 | `element` | Property (read-only) | The custom element the behavior is attached to. Set by the platform before `behaviorAttachedCallback` runs. |
 | `behaviorAttachedCallback(internals)` | Lifecycle | Called once when the behavior is attached. Receives the host's `ElementInternals`. The place to set defaults (e.g. `internals.role`) and, for a category behavior, to override the category's hooks. |
-| `behaviorConnectedCallback()` | Lifecycle | Called when the host is inserted into the document, after the element's own `connectedCallback`. Use for work that only makes sense while connected (positioning, document-scoped listeners, observers). May run multiple times if the host moves in and out of the document. |
-| `behaviorDisconnectedCallback()` | Lifecycle | Called when the host is removed from the document. The place to tear down anything the behavior created outside the host (elements appended to `document.body`, listeners on `document`/`window`, observers, timers). |
+| `elementConnectedCallback()` | Lifecycle | Called when the host is inserted into the document, after the element's own `connectedCallback`. Use for work that only makes sense while connected (positioning, document-scoped listeners, observers). May run multiple times if the host moves in and out of the document. |
+| `elementDisconnectedCallback()` | Lifecycle | Called when the host is removed from the document. The place to tear down anything the behavior created outside the host (elements appended to `document.body`, listeners on `document`/`window`, observers, timers). |
 
 Because behaviors cannot be detached once attached (per the [platform-provided behaviors model](explainer.md#proposed-approach)), there is no `behaviorDetachedCallback`. Listeners registered directly on `element` are released together with the host when it is garbage-collected, so they do not need explicit removal; resources a behavior creates outside the host do.
 

@@ -97,7 +97,7 @@ class CustomButton extends HTMLElement {
     this.#internals = this.attachInternals();
 
     // Access the behavior state directly.
-    const buttonBehavior = this.#internals.behaviors.get(HTMLButtonBehavior);
+    const buttonBehavior = this.#internals.behaviors.button;
 
     // Modify the behavior's properties.
     buttonBehavior.formAction = '/custom';
@@ -106,7 +106,7 @@ class CustomButton extends HTMLElement {
 }
 ```
 
-*Note: `new HTMLButtonBehavior()` throws an `"Illegal constructor"` `TypeError`, the same as `ElementInternals`, because a free-standing instance would have no host to act on. The instance is obtained only through `internals.behaviors.get(HTMLButtonBehavior)` after `attachInternals()` is called.*
+*Note: `new HTMLButtonBehavior()` throws an `"Illegal constructor"` `TypeError`, the same as `ElementInternals`, because a free-standing instance would have no host to act on. The instance is obtained only through `internals.behaviors` after `attachInternals()` is called. Each declared behavior is exposed there as a property named after the behavior: `HTMLButtonBehavior` is available as `internals.behaviors.button`, and the property is `null` when the behavior is not declared.*
 
 Each behavior names the specific platform logic it engages:
 
@@ -167,7 +167,7 @@ class ImageButton extends HTMLElement {
     super();
     this.#internals = this.attachInternals();
     // HTMLButtonBehavior defaults to type 'submit'.
-    this.#image = this.#internals.behaviors.get(HTMLImageBehavior);
+    this.#image = this.#internals.behaviors.image;
   }
 
   attributeChangedCallback(name, _old, value) {
@@ -200,13 +200,11 @@ The activation category corresponds to the DOM standard's [activation behavior](
 - Its keyboard-activation specifics.
 - Its own state and the protocol surface it exposes.
 
-Mapping a few native patterns onto categories helps validate the model:
+Other native patterns fit the same activation category:
 
-| Native pattern | Behavior | Category | Notes |
-|---|---|---|---|
-| `<button>` | `HTMLButtonBehavior` | activation | submit/reset/button via `type`; invoker surface; form participation. |
-| `<label>` | `HTMLLabelBehavior` | activation | `for`-attribute association and focus delegation, activation delegates a click to the labeled control, no implicit role, not focusable. |
-| `<input type=radio>` | `HTMLRadioGroupBehavior` | activation | `name`-based mutual exclusion. |
+- `<button>` - `HTMLButtonBehavior`: submit, reset, or generic button via `type`, plus the invoker surface and form participation.
+- `<label>` - `HTMLLabelBehavior`: `for`-attribute association and focus delegation, where activation delegates a click to the labeled control, with no implicit role and no focusability on the element.
+- `<input type=radio>` - `HTMLRadioGroupBehavior`: `name`-based mutual exclusion.
 
 The platform enforces the one-per-category rule without exposing the categories themselves. If [developer-defined behaviors](developer-defined-behaviors.md) are specified in the future, the categories could be promoted to real, subclassable base classes (for example, `class MyBehavior extends ActivationBehavior`) as an additive change.
 
@@ -242,7 +240,7 @@ A recurring concern about consolidating form-control semantics into an opt-in is
 
 ### Accessing behavior state
 
-Each behavior exposes properties from its corresponding native element. Behaviors can be accessed via `internals.behaviors`. For `HTMLButtonBehavior`, the following properties are available (mirroring [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement)):
+Each behavior exposes properties from its corresponding native element, and is reached as a property on `internals.behaviors` named after the behavior (`HTMLButtonBehavior` as `internals.behaviors.button`). For `HTMLButtonBehavior`, the following properties are available (mirroring [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement)):
 
 **Properties:**
 - `type` - selects the active button mode (`'submit'`, `'reset'`, or `'button'`); defaults to `'submit'`.
@@ -251,6 +249,8 @@ Each behavior exposes properties from its corresponding native element. Behavior
 - `name`, `value` - submitter name and value. Read on submission (`type === 'submit'`).
 - `formAction`, `formEnctype`, `formMethod`, `formNoValidate`, `formTarget` - submission overrides. Read on submission (`type === 'submit'`).
 - `labels` - read-only, delegates to `ElementInternals.labels`.
+- `popoverTargetElement`, `popoverTargetAction`, `commandForElement`, `command` - invoker properties that mirror `<button>`'s [popover target](https://html.spec.whatwg.org/multipage/popover.html#the-popover-target-attributes) and [command](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-commandfor) invoker attributes. 
+- `interestForElement` - the element for which the button shows interest UI when the user hovers or focuses it, mirroring `<button>`'s [`interestForElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement/interestForElement).
 
 *Note: `HTMLButtonElement` adds the properties listed above on top of `HTMLElement`. Custom elements already inherit the global `HTMLElement` IDL surface (`title`, `tabIndex`, `hidden`, etc.). Web authors can use these properties on the host as they would on any element.*
 
@@ -261,7 +261,7 @@ To expose these properties to external code, authors define getters and setters 
 | Event | Event |
 |-------|--------------|
 | Element creation (`new`, parser upgrade, or `customElements.upgrade()`) | The platform instantiates each declared behavior with its defined defaults. The behavior's `type` selects the initial active button mode (`'submit'` by default). Role, focusability, and pseudo-class participation are active from this point. |
-| `attachInternals()` | `internals.behaviors` is populated with the already-existing behavior instances. Authors have read/write access through `internals.behaviors.get(HTMLButtonBehavior)`. |
+| `attachInternals()` | `internals.behaviors` is populated with the already-existing behavior instances. Authors have read/write access through `internals.behaviors.button`. |
 | Host connected | Form association runs if `formAssociated = true`. The behavior's `form` is resolved. |
 | Host disconnected | Form association detaches. The behavior remains attached for when the host re-connects. |
 
@@ -270,7 +270,7 @@ To expose these properties to external code, authors define getters and setters 
 Setting `type` property to a new value toggles the activation path and which pseudo-classes match.
 
 ```javascript
-const buttonBehavior = this.#internals.behaviors.get(HTMLButtonBehavior);
+const buttonBehavior = this.#internals.behaviors.button;
 buttonBehavior.type = 'reset'; // Was 'submit', now 'reset'.
 ```
 
@@ -289,13 +289,6 @@ Setting `type` to an unknown string does not throw. The behavior coerces the val
 Changing the `type` between events of a single interaction (for example, between `mousedown` and `mouseup`, or between `keydown` and `keyup` on a key activation) queues the change. The change applies at end-of-interaction, between event tasks. This mirrors how the platform already handles `type` mutations on a native `<button>` during click dispatch.
 
 ### API design
-
-Authors declare behaviors via a static class property; the platform creates and exposes the instances:
-
-- `static behaviors` is an array of behavior classes (not instances).
-- The platform instantiates each declared behavior with its defined defaults at element creation.
-- `ElementInternals.behaviors` is a read-only collection keyed by behavior class. `internals.behaviors.get(HTMLButtonBehavior)` returns the instance for this host.
-- Web authors can hold references to behavior instances by looking them up through `internals.behaviors` once and caching the reference.
 
 #### Classes vs a string-based API
 
@@ -332,7 +325,7 @@ The three shapes have the following trade-offs:
 |---|---|---|---|
 | Same-category collision | The platform rejects it at `customElements.define()` time (a runtime check). | Only one property per category. | Only one key per category. |
 | Category visibility | An author writes the behavior class and never names its category. | An author has to know which property the behavior class belongs to. | An author has to name each behavior's category as its key. |
-| Precedent | New pattern. | Matches how custom elements already opt into form association and observed attributes. | New pattern. |
+| Precedent | Matches `static observedAttributes`, which is also an array of tokens. | Matches single-value opt-ins like `static formAssociated`. | New pattern. |
 | Extensibility | Absorbs new categories without changing shape. | Each new category adds a static property to the API surface. | Absorbs new categories by adding a new key. |
 | (Future) [developer-defined behaviors](developer-defined-behaviors.md) | Would accept an author's own class directly. | Would need a separate category. | Would need a category key. |
 
@@ -344,33 +337,9 @@ Web authors can detect whether behaviors are supported by checking for the exist
 
 ```javascript
 if (typeof HTMLButtonBehavior !== 'undefined') {
-  // Behaviors are supported.
-  class MyButton extends HTMLElement {
-    static formAssociated = true;
-    static behaviors = [HTMLButtonBehavior];
-
-    #internals;
-    constructor() {
-      super();
-      this.#internals = this.attachInternals();
-    }
-  }
-  customElements.define('my-button', MyButton);
+  // Button behavior is available.
 } else {
-  // Fall back to manual event handling.
-  class MyButton extends HTMLElement {
-    static formAssociated = true;
-
-    #internals;
-    constructor() {
-      super();
-      this.#internals = this.attachInternals();
-      this.addEventListener('click', () => {
-        this.#internals.form?.requestSubmit(this);
-      });
-    }
-  }
-  customElements.define('my-button', MyButton);
+  // Not available; fall back to a polyfill or manual event handling.
 }
 ```
 
@@ -397,7 +366,7 @@ class DesignSystemButton extends HTMLElement {
   constructor() {
     super();
     this.#internals = this.attachInternals();
-    this.#buttonBehavior = this.#internals.behaviors.get(HTMLButtonBehavior);
+    this.#buttonBehavior = this.#internals.behaviors.button;
     this.attachShadow({ mode: 'open' });
   }
 
@@ -462,7 +431,6 @@ Alternatives:
 | Name | Example class | Example API | Notes |
 |------|--------------|-------------|-------|
 | **mixin** | `HTMLButtonMixin` | `static mixins = [...]` | Related term, familiar concept but implies class-level composition |
-| **conduct** | `HTMLButtonConduct` | `static conducts = [...]` | Short |
 | **action** | `HTMLButtonAction` | `static actions = [...]` | Intuitive but overloaded (form `action` attribute) |
 | **trait** | `HTMLButtonTrait` | `static traits = [...]` | Related term and short |
 
