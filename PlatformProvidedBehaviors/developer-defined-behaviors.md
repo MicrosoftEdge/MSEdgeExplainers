@@ -16,6 +16,9 @@ The [Platform-Provided Behaviors](explainer.md) proposal introduces a set of bro
 
 ```javascript
 class QRCodeBehavior extends EmbeddedContentBehavior {
+  // The accessor name on internals.behaviors; here internals.behaviors.qrCode.
+  static behaviorName = 'qrCode';
+
   #value = '';
   #canvas = null;
   #resizeObserver = null;
@@ -57,7 +60,7 @@ class QRCodeBehavior extends EmbeddedContentBehavior {
 }
 ```
 
-Behaviors are classes with a `behaviorAttachedCallback` method. A behavior is declared as a class reference in `static behaviors`; the platform instantiates it per host, and the author reaches the instance through `internals.behaviors` under a name the behavior declares. Platform behaviors use canonical names (`HTMLButtonBehavior` is `behaviors.button`); a developer-defined behavior declares its own (here `QRCodeBehavior` is exposed as `behaviors.qrCode`):
+Behaviors are classes with a `behaviorAttachedCallback` method. A behavior is declared as a class reference in `static behaviors`; the platform instantiates it per host, and the author reaches the instance through `internals.behaviors` under a name the behavior declares in a `static behaviorName`. Platform behaviors use canonical names (`HTMLButtonBehavior` declares `"button"`, reached as `behaviors.button`); a developer-defined behavior declares its own (`QRCodeBehavior` declares `static behaviorName = 'qrCode'`, reached as `behaviors.qrCode`):
 
 ```javascript
 class QRCodeButton extends HTMLElement {
@@ -114,6 +117,7 @@ A capability that is not an activation or embedded-content identity does not map
 
 | Member | Kind | Description |
 |--------|------|-------------|
+| `behaviorName` | Static property | The name the behavior is exposed under on `internals.behaviors` (e.g. `static behaviorName = 'qrCode'` is reached as `internals.behaviors.qrCode`). |
 | `element` | Property (read-only) | The custom element the behavior is attached to. Set by the platform before `behaviorAttachedCallback` runs. |
 | `behaviorAttachedCallback(internals)` | Lifecycle | Called once when the behavior is attached. Receives the host's `ElementInternals`. The place to set defaults (e.g. `internals.role`) and, for a category behavior, to override the category's hooks. |
 | `elementConnectedCallback()` | Lifecycle | Called when the host is inserted into the document, after the element's own `connectedCallback`. Use for work that only makes sense while connected (positioning, document-scoped listeners, observers). May run multiple times if the host moves in and out of the document. |
