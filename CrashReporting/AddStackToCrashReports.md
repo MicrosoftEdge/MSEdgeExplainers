@@ -76,6 +76,32 @@ Individual stack frames from extension scripts will be replaced with `<redacted>
 ## How do wasm call stacks work with this proposal?
 Wasm stack frames will be supported. Typically the format is `${url}:wasm-function[${funcIndex}]:${pcOffset}` as found [here](https://webassembly.github.io/spec/web-api/index.html#conventions).
 
+## Addendum: OOM crash reports
+
+The Crash Reporting API also reports `reason: "oom"` when a renderer runs out of memory. This addendum proposes extending the existing `stack` member to eligible OOM reports; it does not introduce a new report field or a new developer-facing opt-in.
+
+### Proposed behavior
+
+The current specification permits `stack` only when all of the following are true:
+
+1. The crash reason is `unresponsive`.
+2. The document policy value for `include-js-call-stacks-in-crash-reports` is `true`.
+3. The call stack can be recovered from the crashed document.
+
+This addendum changes the first condition so the crash reason may be `unresponsive` or `oom`,
+while retaining the existing opt-in and recoverable, attributable stack requirements. For OOM,
+the user agent may collect the stack at a safe point before the renderer terminates.
+
+### Best-effort capture and scope
+
+An OOM stack is an execution-context diagnostic, not a guaranteed allocation-site or same-instruction snapshot. A user agent may omit `stack` when it cannot reach a safe JavaScript capture point before termination. This includes abrupt operating-system termination, native allocation failure, or any other OOM for which no attributable stack can be safely recovered.
+
+This addendum reports only main-thread document script. It does not add worker stacks.
+
+### Attribution across frames and navigations
+
+The user agent must verify that a captured stack belongs to the same frame and document for which it is generating a crash report. This prevents a stack captured in a same-process iframe or before a navigation from being attached to a different document's report.
+
 ## Privacy and Security Considerations
 
 ### Privacy
