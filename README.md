@@ -105,7 +105,6 @@ we move them into the [Alumni section](#alumni-) below.
 | [Network Efficiency Guardrails](PerformanceControlOfEmbeddedContent/neg-explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Network%20Efficiency%20Guardrails">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Network%20Efficiency%20Guardrails?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=network-efficiency-guardrails.md) | WICG |
 | [Conditional Tracing for LoAF](ConditionalTracing/explainer-for-loaf.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Conditional%20Tracing%20for%20LoAF">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Conditional%20Tracing%20for%20LoAF?label=issues)</a> | [New Issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=conditonal-tracing-loaf.md) | Web Perf |
 | [CSS Linked Parameters](SVG/CSSLinkedParameters/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/CSS%20Linked%20Parameters">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/CSS%20Linked%20Parameters?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?assignees=goldenboy777&labels=CSS%20Linked%20Parameters&template=css-linked-parameters.md&title=%5BCSS+Linked+Parameters%5D+%3CTITLE+HERE%3E) | CSS |
-| [Slotted Options in Customizable Select](SlottedOption/explainer.md) | <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/Slotted%20Option">![GitHub issues by-label](https://img.shields.io/github/issues/MicrosoftEdge/MSEdgeExplainers/Slotted%20Option?label=issues)</a> | [New issue...](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?labels=Slotted%20Option&title=%5BSlotted+Option%5D+%3CTITLE+HERE%3E) | HTML |
 
 # Brainstorming 🧠
 
@@ -178,6 +177,7 @@ standards communities. Thanks for your continued interest!
 | [Delayed Message Timing API](https://github.com/WICG/delayed-message-timing/blob/main/README.md) | [W3C Web Incubator Community Group](https://wicg.io/) | [2026-01-28](DelayedMessages/explainer.md) |
 | [CSS Gap Decorations](https://github.com/w3c/csswg-drafts/blob/main/css-gaps-1/explainer.md) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2026-02-27](CSSGapDecorations/explainer.md) |
 | [Web Haptics](https://github.com/WICG/web-haptics) | [W3C Web Incubator Community Group](https://wicg.io/) | [2026-04-27](Haptics/explainer.md) |
+| [Slotted Options in `<select>`](https://open-ui.org/components/select.slotted.option/) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2026-07-23](SlottedOption/explainer.md) |
 
 # DevTools 🧰
 

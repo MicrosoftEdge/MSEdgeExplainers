@@ -19,9 +19,9 @@ solutions to the problems described in this document progress along the
 standards track, we will retain this document as an archive and use this section
 to keep the community up to date.
 
-- This document status: **Active**
+- This document status: **Archived**
 - Expected venue: [WHATWG HTML](https://html.spec.whatwg.org/)
-- Current version: this document
+- Current version: [Slotted Options in <select> - OpenUI](https://open-ui.org/components/select.slotted.option/)
 
 ## Table of Contents
 
