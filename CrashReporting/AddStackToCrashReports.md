@@ -80,6 +80,8 @@ Wasm stack frames will be supported. Typically the format is `${url}:wasm-functi
 
 The Crash Reporting API also reports `reason: "oom"` when a renderer runs out of memory. This addendum proposes extending the existing `stack` member to eligible OOM reports; it does not introduce a new report field or a new developer-facing opt-in.
 
+Today an OOM report tells a developer that a page ran out of memory, but nothing about the code that was running when it happened; the report itself offers nothing to group on beyond the page URL. A best-effort stack lets the same server-side clustering that motivates stacks for unresponsive reports separate, for example, an OOM while parsing a large response from one while rendering a complex view. Because the stack is captured near, not at, the moment memory was exhausted, it points to the code path to investigate rather than to the allocation that consumed the memory.
+
 ### Proposed behavior
 
 The current specification permits `stack` only when all of the following are true:
