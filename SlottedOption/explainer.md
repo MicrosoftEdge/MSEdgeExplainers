@@ -21,7 +21,7 @@ to keep the community up to date.
 
 - This document status: **Archived**
 - Expected venue: [WHATWG HTML](https://html.spec.whatwg.org/)
-- Current version: [Slotted Options in <select> - OpenUI](https://open-ui.org/components/select.slotted.option/)
+- Current version: [Slotted Options in `<select>` - OpenUI](https://open-ui.org/components/select.slotted.option/)
 
 ## Table of Contents
 
