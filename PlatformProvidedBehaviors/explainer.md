@@ -70,7 +70,7 @@ This proposal is informed by:
    <ds-button>
      #shadow-root
      <button>Click Me</button>
-     <button type="submit" style="display: none;"></button> 
+     <button type="submit" style="display: none;"></button>
    </ds-button>
    ```
 
@@ -219,7 +219,8 @@ This proposal introduces `HTMLButtonBehavior`, a behavior in the activation cate
 - The same logic that toggles `:default`, `:disabled`/`:enabled`, `:focus`, and `:focus-visible` on native elements applies to the behavior's host. The `:default` pseudo-class only matches when `type === 'submit'` and the host is the form's default submit button.
 - Mirrored `HTMLButtonElement` properties are available on the behavior instance. They are configurable per-element and mutable for the life of the behavior.
 - The behavior has a `type` property (`'submit'` (default), `'reset'`, or `'button'`) that selects the active button mode. The `type` is mutable for the life of the behavior.
-- Form ownership applies whenever `type` is `'submit'` or `'reset'`. Activation behavior depends on `type`: `'submit'` triggers form submission and implicit submission; `'reset'` triggers form reset; `'button'` does generic activation.
+- Form ownership is independent of `type`; a form-associated host keeps the same `form` and remains in `form.elements` for all types. The `'reset'` and `'button'` states are barred from constraint validation.
+- A host that is an eligible invoker (`type='button'` carrying `commandfor` or `popovertarget`) is a first-class command/popover invoker, so assistive technology observes the same relationships as for a native `<button>`.
 
 `HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission to actually fire when `type` is `'submit'` or `'reset'`. Without it, `behavior.form` is always `null` and activation is a no-op even when the element is inside a form. This is a divergence from native `<button>`, which submits its form without any explicit opt-in. The platform could later imply form association, removing the extra opt-in.
 
@@ -228,6 +229,7 @@ This proposal introduces `HTMLButtonBehavior`, a behavior in the activation cate
 | Form-associated element inside a form, `type === 'submit'` | Activation triggers submission, participates in implicit submission, matches `:default`. Invoker attributes on the host (`commandfor`, `popovertarget`) are ignored. |
 | Form-associated element inside a form, `type === 'reset'` | Activation triggers form reset. Invoker attributes on the host are ignored. |
 | Form-associated element inside a form, `type === 'button'` | Activation is a no-op for form behavior. Invoker attributes on the host (`commandfor`, `popovertarget`) fire as usual. |
+| Form-associated element inside a form, Auto state with `command` or `commandfor` | The `type` getter returns `'button'`, but activation performs no action. Authors must explicitly set `type = 'button'` to opt into command activation from a form-associated button. |
 | Form-associated element outside a form, or non-form-associated element | `behavior.form` is `null`. With no form owner, the host behaves like a native `<button>` without a form owner for all `type` values: there is no form to submit or reset, but invoker attributes on the host (`commandfor`, `popovertarget`) fire as usual and the element still gets `role="button"` and implicit focusability. |
 
 ### Behaviors are not opaque tokens
@@ -245,12 +247,13 @@ Each behavior exposes properties from its corresponding native element, and is r
 **Properties:**
 - `type` - selects the active button mode (`'submit'`, `'reset'`, or `'button'`); defaults to `'submit'`.
 - `disabled` - read-only. Reflects whether the element is disabled, which is determined by the standard form-control mechanism (the `disabled` attribute or a `<fieldset disabled>` ancestor, [spec](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-disabled)) and surfaced through `ElementInternals`. This proposal does not add a separately settable per-behavior disabled state.
-- `form` - read-only, delegates to `ElementInternals.form`. Form ownership only affects activation when `type` is `'submit'` or `'reset'`.
+- `form` - read-only, delegates to `ElementInternals.form`.
 - `name`, `value` - submitter name and value. Read on submission (`type === 'submit'`).
 - `formAction`, `formEnctype`, `formMethod`, `formNoValidate`, `formTarget` - submission overrides. Read on submission (`type === 'submit'`).
 - `labels` - read-only, delegates to `ElementInternals.labels`.
-- `popoverTargetElement`, `popoverTargetAction`, `commandForElement`, `command` - invoker properties that mirror `<button>`'s [popover target](https://html.spec.whatwg.org/multipage/popover.html#the-popover-target-attributes) and [command](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-commandfor) invoker attributes. 
-- `interestForElement` - the element for which the button shows interest UI when the user hovers or focuses it, mirroring `<button>`'s [`interestForElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement/interestForElement).
+- `popoverTargetElement`, `popoverTargetAction`, and `commandForElement` - reflected invoker properties that mirror `<button>`'s [popover target](https://html.spec.whatwg.org/multipage/popover.html#the-popover-target-attributes) and [command](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-commandfor) attributes. The getters expose the configured target or action when submission or reset takes precedence.
+- `command` - follows the native command getter, including returning the empty string when the host is not currently eligible to invoke.
+- `interestForElement` - reflects the element for which the button shows interest UI, mirroring [`interestForElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement/interestForElement). The configured target remains observable when activation is ineligible.
 
 *Note: `HTMLButtonElement` adds the properties listed above on top of `HTMLElement`. Custom elements already inherit the global `HTMLElement` IDL surface (`title`, `tabIndex`, `hidden`, etc.). Web authors can use these properties on the host as they would on any element.*
 
@@ -278,15 +281,18 @@ Each subsystem affected by `type` is recomputed through the same paths the platf
 
 | Subsystem | Recompute when `behavior.type` is set |
 |-----------|--------------------------------------|
-| Form ownership | Re-association runs. `type === 'button'` detaches the behavior from form ownership; `type === 'submit'` or `'reset'` attaches it. |
+| Form ownership | Unchanged. Form association is independent of `type`; the host keeps the same `form` and remains in `form.elements`. |
 | Activation behavior | The next activation runs against the new `type`. |
+| Constraint validation | Re-evaluated. A submit button can participate; the reset and button states are barred from constraint validation. |
 | `:default` match | Re-evaluated. Only matches when `type === 'submit'` and the host is the form's default submit button. |
 | Implicit ARIA role | Unchanged. The role is `"button"` for all `type` values, so no recompute is needed. |
 | Focusability | Unchanged. Focusability is the same for all `type` values. |
 
-Setting `type` to an unknown string does not throw. The behavior coerces the value to the default state (`'submit'`), and the getter returns the canonical keyword for the active state. This matches the [Auto state](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-auto-state) that `<button>`'s `type` content attribute uses as the missing-value and invalid-value default.
+Setting `type` to an unknown string selects the [auto state](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-auto-state). The getter returns `'submit'` while the host qualifies as a custom element with `HTMLButtonBehavior` attached. Otherwise, the getter returns `'button'`.
 
-Changing the `type` between events of a single interaction (for example, between `mousedown` and `mouseup`, or between `keydown` and `keyup` on a key activation) queues the change. The change applies at end-of-interaction, between event tasks. This mirrors how the platform already handles `type` mutations on a native `<button>` during click dispatch.
+Auto remains distinct from an explicit Button state during activation. If the host has a form owner and Auto does not qualify as a submit button (for example, because `command` or `commandfor` is present), activation returns without invoking the command. Authors opt into command activation in that case by explicitly setting `behavior.type = 'button'`. Without a form owner, Auto can proceed to command or popover invocation.
+
+Changing the `type` between events of a single interaction (for example, between `mousedown` and `mouseup`, or between `keydown` and `keyup` on a key activation) takes effect immediately. An in-flight activation reads the current `type` when the activation behavior runs, so a value set during click dispatch is honored by that same activation.
 
 ### API design
 
