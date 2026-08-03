@@ -190,12 +190,14 @@ customElements.define('image-button', ImageButton);
 
 On activation the host submits the form (from `HTMLButtonBehavior`) while rendering the image and exposing its `alt` text as the accessible name (from `HTMLImageBehavior`). The two behaviors are in different categories, so the platform allows the combination. Each behavior carries its category internally, so the platform checks compatibility with a membership test. Adding a new behavior requires assigning it a category; it does not require enumerating its compatibility with every existing behavior.
 
+When composed behaviors provide different implicit role defaults, a non-null role from the activation behavior takes precedence over the embedded-content role. Therefore, an element combining `HTMLButtonBehavior` and `HTMLImageBehavior` is exposed as a button, while `HTMLImageBehavior` supplies its rendering and accessible-name computation from `alt`. If the activation behavior provides no role, the embedded-content role applies. Author-provided semantics through the `role` attribute or `ElementInternals.role` take precedence over behavior defaults.
+
 #### The activation category
 
 The activation category corresponds to the DOM standard's [activation behavior](https://dom.spec.whatwg.org/#eventtarget-activation-behavior): the algorithm an `EventTarget` runs when a `click` is dispatched to it and not canceled. Behaviors in the activation category share participation in the activation dispatch path (click, keyboard activation, and `element.click()`) and they honor both `preventDefault()` and `stopPropagation()`. Each concrete behavior supplies:
 
 - The activation algorithm.
-- Its implicit ARIA role default.
+- Its implicit ARIA role default, if any.
 - Its focusability default.
 - Its keyboard-activation specifics.
 - Its own state and the protocol surface it exposes.
@@ -704,6 +706,7 @@ class CustomButton extends HTMLElement {
 ### Accessibility
 
 - Platform-provided behaviors must set appropriate default ARIA roles and states (e.g., `role="button"` for `HTMLButtonBehavior`).
+- When composed behaviors provide different implicit role defaults, a non-null role from the activation behavior takes precedence over the embedded-content role. Author-provided role semantics take precedence over all behavior defaults.
 - Custom elements using a platform-provided behavior must gain the same keyboard handling and focus management as their native counterparts (e.g., Space/Enter activation).
 - Authors must be able to override default semantics using `ElementInternals.role` and `ElementInternals.aria*` properties if the default behavior does not match their specific use case.
 - The ARIAWG reviewed an alternative to this proposal on [2025-09-25](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) (tracking issue [w3c/aria#2637](https://github.com/w3c/aria/issues/2637)). The WG agreed that role and focusability defaults are appropriate when a custom element opts into an activation behavior, with form association left to per-behavior judgment. This proposal applies that guidance: `HTMLButtonBehavior` provides default `role="button"` and focusability, and the element opts into form association separately via `static formAssociated = true`.
