@@ -78,17 +78,17 @@ These frameworks mirror a native `<button>` by having one custom element class w
 
 ## Proposed approach
 
-A platform-provided behavior is a set of methods, values, and platform-protocol hooks that a custom element can participate in, which today are reserved to native HTML elements. This proposal introduces a `behaviors` static class property that declares which behaviors the platform attaches to instances of the class.
+A platform-provided behavior is a set of methods, values, and platform-protocol hooks that a custom element can participate in, which today are reserved to native HTML elements. This proposal introduces one static class property per behavior category. The first is `activationBehavior`, which declares the activation behavior the platform attaches to instances of the class.
 
-The platform reads `static behaviors` at `customElements.define()` time and stores it on the custom element definition, the same way it reads `static formAssociated`. When an element is created (`new`, parser upgrade, or `customElements.upgrade()`), the platform instantiates one of each declared behavior per host and associates them with the element. This mirrors how a form-associated custom element participates in form submission and form-related lifecycle callbacks.
+The platform reads `static activationBehavior` at `customElements.define()` time and stores it on the custom element definition, the same way it reads `static formAssociated`. When an element is created (`new`, parser upgrade, or `customElements.upgrade()`), the platform instantiates the declared behavior per host and associates it with the element. Future categories add their own static properties and contribute their behavior instances to the same host collection. This mirrors how a form-associated custom element participates in form submission and form-related lifecycle callbacks.
 
-`attachInternals()` is the author's access route to those already-existing instances, exposed through a new `behaviors` collection on `ElementInternals`. The set of behaviors attached to a host is fixed at the class declaration; the behavior instances' own properties remain mutable post-attachment.
+`attachInternals()` is the author's access route to those already-existing instances, exposed through a new `behaviors` collection on `ElementInternals`. It does not create or attach the behaviors. The set of behaviors attached to a host is fixed at the class declaration; the behavior instances' own properties remain mutable post-attachment.
 
 ```javascript
 class CustomButton extends HTMLElement {
   static formAssociated = true;
-  // Declare which behaviors the platform attaches to each instance.
-  static behaviors = [HTMLButtonBehavior];
+  // Declare the activation behavior the platform attaches.
+  static activationBehavior = HTMLButtonBehavior;
 
   #internals;
   constructor() {
@@ -119,7 +119,7 @@ Each behavior names the specific platform logic it engages:
 
 ### Behavior categories and composition
 
-Behaviors are organized into a set of categories. Categories are conceptual groupings the platform uses to decide which behaviors can coexist on one element. They are not classes exposed to authors; authors only ever reference the concrete behaviors (the leaves below).
+Behaviors are organized into a set of categories. Categories are conceptual groupings the platform uses to decide which behaviors can coexist on one element. Each category has a static declaration property and authors assign concrete behavior classes (the leaves below) to those properties.
 
 ```mermaid
 classDiagram
@@ -144,12 +144,10 @@ classDiagram
     EmbeddedContentBehavior <|-- HTMLImageBehavior
 ```
 
-An element attaches at most one behavior per category. Two behaviors in the same category are mutually exclusive, and attaching both throws a `TypeError`:
+An element attaches at most one behavior per category:
 
 ```javascript
-static behaviors = [HTMLButtonBehavior, HTMLLabelBehavior]; // throws!
-// TypeError: HTMLButtonBehavior and HTMLLabelBehavior cannot be combined;
-// an element can have only one activation behavior.
+static activationBehavior = HTMLButtonBehavior;
 ```
 
 Behaviors in different categories compose. Combining an `HTMLButtonBehavior` (activation) with an `HTMLImageBehavior` (embedded content) produces a submit button that renders as an image, similar to [`<input type=image>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/image):
@@ -158,7 +156,8 @@ Behaviors in different categories compose. Combining an `HTMLButtonBehavior` (ac
 class ImageButton extends HTMLElement {
   static formAssociated = true;
   static observedAttributes = ['src', 'alt'];
-  static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
+  static activationBehavior = HTMLButtonBehavior;
+  static embeddedContentBehavior = HTMLImageBehavior;
 
   #internals;
   #image;
@@ -188,13 +187,13 @@ customElements.define('image-button', ImageButton);
 </form>
 ```
 
-On activation the host submits the form (from `HTMLButtonBehavior`) while rendering the image and exposing its `alt` text as the accessible name (from `HTMLImageBehavior`). The two behaviors are in different categories, so the platform allows the combination. Each behavior carries its category internally, so the platform checks compatibility with a membership test. Adding a new behavior requires assigning it a category; it does not require enumerating its compatibility with every existing behavior.
+On activation the host submits the form (from `HTMLButtonBehavior`) while rendering the image and exposing its `alt` text as the accessible name (from `HTMLImageBehavior`). The two behaviors occupy different category properties, so they compose without a collision check. The platform validates that each assigned class belongs to the property's category. Adding a new behavior requires assigning it to an existing category; adding a new category requires a new static property.
 
 When composed behaviors provide different implicit role defaults, a non-null role from the activation behavior takes precedence over the embedded-content role. Therefore, an element combining `HTMLButtonBehavior` and `HTMLImageBehavior` is exposed as a button, while `HTMLImageBehavior` supplies its rendering and accessible-name computation from `alt`. If the activation behavior provides no role, the embedded-content role applies. Author-provided semantics through the `role` attribute or `ElementInternals.role` take precedence over behavior defaults.
 
 #### The activation category
 
-The activation category corresponds to the DOM standard's [activation behavior](https://dom.spec.whatwg.org/#eventtarget-activation-behavior): the algorithm an `EventTarget` runs when a `click` is dispatched to it and not canceled. Behaviors in the activation category share participation in the activation dispatch path (click, keyboard activation, and `element.click()`) and they honor both `preventDefault()` and `stopPropagation()`. Each concrete behavior supplies:
+The activation category corresponds to the DOM standard's [activation behavior](https://dom.spec.whatwg.org/#eventtarget-activation-behavior): the algorithm an `EventTarget` runs when a `click` is dispatched to it and not canceled. Behaviors in the activation category share participation in the activation dispatch path (click, keyboard activation, and `element.click()`), and cancellation through `preventDefault()` suppresses the activation behavior. Each concrete behavior supplies:
 
 - The activation algorithm.
 - Its implicit ARIA role default, if any.
@@ -208,7 +207,7 @@ Other native patterns fit the same activation category:
 - `<label>` - `HTMLLabelBehavior`: `for`-attribute association and focus delegation, where activation delegates a click to the labeled control, with no implicit role and no focusability on the element.
 - `<input type=radio>` - `HTMLRadioGroupBehavior`: `name`-based mutual exclusion.
 
-The platform enforces the one-per-category rule without exposing the categories themselves. If [developer-defined behaviors](developer-defined-behaviors.md) are specified in the future, the categories could be promoted to real, subclassable base classes (for example, `class MyBehavior extends ActivationBehavior`) as an additive change.
+If [developer-defined behaviors](developer-defined-behaviors.md) are specified in the future, the categories could be promoted to real, subclassable base classes (for example, `class MyBehavior extends ActivationBehavior`) as an additive change.
 
 ### HTMLButtonBehavior
 
@@ -224,7 +223,7 @@ This proposal introduces `HTMLButtonBehavior`, a behavior in the activation cate
 - Form ownership is independent of `type`; a form-associated host keeps the same `form` and remains in `form.elements` for all types. The `'reset'` and `'button'` states are barred from constraint validation.
 - A host that is an eligible invoker (`type='button'` carrying `commandfor` or `popovertarget`) is a first-class command/popover invoker, so assistive technology observes the same relationships as for a native `<button>`.
 
-`HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission to actually fire when `type` is `'submit'` or `'reset'`. Without it, `behavior.form` is always `null` and activation is a no-op even when the element is inside a form. This is a divergence from native `<button>`, which submits its form without any explicit opt-in. The platform could later imply form association, removing the extra opt-in.
+`HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission or reset to act on a form. Without it, `behavior.form` is always `null` even when the element is inside a form. This is a divergence from native `<button>`. The platform could later imply form association, removing the extra opt-in.
 
 | Scenario | Behavior |
 |----------|----------|
@@ -266,13 +265,14 @@ To expose these properties to external code, authors define getters and setters 
 | Event | Event |
 |-------|--------------|
 | Element creation (`new`, parser upgrade, or `customElements.upgrade()`) | The platform instantiates each declared behavior with its defined defaults. The behavior's `type` selects the initial active button mode (`'submit'` by default). Role, focusability, and pseudo-class participation are active from this point. |
-| `attachInternals()` | `internals.behaviors` is populated with the already-existing behavior instances. Authors have read/write access through `internals.behaviors.button`. |
+| `attachInternals()` | Accessing its `behaviors` collection exposes the existing instances. |
 | Host connected | Form association runs if `formAssociated = true`. The behavior's `form` is resolved. |
 | Host disconnected | Form association detaches. The behavior remains attached for when the host re-connects. |
+| Upgrade constructor throws | Upgrade fails, the behavior map is cleared, and behavior objects retained by constructor script are detached from the host. Host-dependent operations on those retained objects throw `InvalidStateError` or return their detached-state value, as appropriate. |
 
 ### Mutating the `type` property
 
-Setting `type` property to a new value toggles the activation path and which pseudo-classes match.
+Setting the behavior's `type` property to a new value updates the activation path and pseudo-classes matching. The property is behavior-owned state; it does not reflect to or read a `type` attribute on the custom-element host. Components that expose a `type` attribute forward it explicitly.
 
 ```javascript
 const buttonBehavior = this.#internals.behaviors.button;
@@ -290,54 +290,53 @@ Each subsystem affected by `type` is recomputed through the same paths the platf
 | Implicit ARIA role | Unchanged. The role is `"button"` for all `type` values, so no recompute is needed. |
 | Focusability | Unchanged. Focusability is the same for all `type` values. |
 
-Setting `type` to an unknown string selects the [auto state](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-auto-state). The getter returns `'submit'` while the host qualifies as a custom element with `HTMLButtonBehavior` attached. Otherwise, the getter returns `'button'`.
+Setting `type` to an unknown string selects the [auto state](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-auto-state). The getter returns `'submit'` when the host has no `command`/`commandfor` attribute. Otherwise, it returns `'button'`.
 
 Auto remains distinct from an explicit Button state during activation. If the host has a form owner and Auto does not qualify as a submit button (for example, because `command` or `commandfor` is present), activation returns without invoking the command. Authors opt into command activation in that case by explicitly setting `behavior.type = 'button'`. Without a form owner, Auto can proceed to command or popover invocation.
 
-Changing the `type` between events of a single interaction (for example, between `mousedown` and `mouseup`, or between `keydown` and `keyup` on a key activation) takes effect immediately. An in-flight activation reads the current `type` when the activation behavior runs, so a value set during click dispatch is honored by that same activation.
+Changing the `type` between events of a single interaction (for example, between `mousedown` and `mouseup`, or between `keydown` and `keyup` on a key activation) takes effect immediately. Activation resolves the current behavior state when the activation behavior begins, so a value set during click dispatch is honored by that activation.
 
 ### API design
 
 #### Classes vs a string-based API
 
-Behaviors are class references, not string tokens. An earlier proposal, [`elementInternals.type`](https://github.com/whatwg/html/issues/11061), took the string approach. A reason to prefer classes is extensibility for [developer-defined behaviors](developer-defined-behaviors.md); the `static behaviors` array could just take an author's own class. [A comment on the thread](https://github.com/whatwg/html/issues/11061#issuecomment-3146290495) raised this as the gap in the string design.
+Behaviors are class references. An earlier proposal, [`elementInternals.type`](https://github.com/whatwg/html/issues/11061), took the string approach. A reason to prefer classes is extensibility for [developer-defined behaviors](developer-defined-behaviors.md); a category property could eventually accept an author's own class that satisfies that category's contract. [A comment on the thread](https://github.com/whatwg/html/issues/11061#issuecomment-3146290495) raised this as the gap in the string design.
 
 However, we must note that the [TAG endorses string constants](https://www.w3.org/TR/design-principles/#string-constants) for selecting from a fixed set, and we believe the objections raised against strings in the thread are either shared with the class approach or resolvable:
 
-- Typos are not unique to strings. A misspelled identifier throws a `ReferenceError`, but a wrong-but-valid class (`static behaviors = [HTMLButtonElement]`) fails just as silently as a bad string; both can only be rejected when `customElements.define()` validates the array. A string token can be validated the same way, throwing on an unknown value.
+- Typos are not unique to strings. A misspelled identifier throws a `ReferenceError`, but a wrong-but-valid class (`static activationBehavior = HTMLButtonElement`) fails just as silently as a bad string until `customElements.define()` validates the property. A string token can be validated the same way, throwing on an unknown value.
 - Discoverability is resolvable. A string is opaque on its own, but an author can inspect a behavior's surface at runtime through the instance from `internals.behaviors`, and the set of tokens can be documented and feature-detected.
 
-#### Open question: declaring behaviors
+#### Declaring behaviors
 
-There are a few shapes for declaring which behaviors the platform attaches:
+The proposal uses one static property per behavior category:
 
-a. Single array of behavior classes:
-```javascript
-static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
-```
-
-b. Static property per category, each holding a single behavior class:
 ```javascript
 static activationBehavior = HTMLButtonBehavior;
 static embeddedContentBehavior = HTMLImageBehavior;
 ```
 
-c. Single object keyed by category, each holding a behavior class:
+`activationBehavior` can contain at most one activation behavior, invalid or wrong-category classes are rejected at `customElements.define()`, and future categories are additive. A missing, `null`, or `undefined` property declares no behavior. Subclasses inherit the property through normal JavaScript property lookup and can override it.
+
+This was selected over a single array:
+```javascript
+static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
+```
+
+and over a single object keyed by category:
 ```javascript
 static behaviors = { activationBehavior: HTMLButtonBehavior, embeddedContentBehavior: HTMLImageBehavior};
 ```
 
 The three shapes have the following trade-offs:
 
-| Consideration | `behaviors` array (a) | Per-category properties (b) | Category-keyed object (c) |
+| Consideration | Per-category properties | `behaviors` array | Category-keyed object |
 |---|---|---|---|
-| Same-category collision | The platform rejects it at `customElements.define()` time (a runtime check). | Only one property per category. | Only one key per category. |
-| Category visibility | An author writes the behavior class and never names its category. | An author has to know which property the behavior class belongs to. | An author has to name each behavior's category as its key. |
-| Precedent | Matches `static observedAttributes`, which is also an array of tokens. | Matches single-value opt-ins like `static formAssociated`. | New pattern. |
-| Extensibility | Absorbs new categories without changing shape. | Each new category adds a static property to the API surface. | Absorbs new categories by adding a new key. |
-| (Future) [developer-defined behaviors](developer-defined-behaviors.md) | Would accept an author's own class directly. | Would need a separate category. | Would need a category key. |
-
-*Note: This document uses the array form in its examples, but the choice is unresolved.*
+| Same-category collision | One property per category. | Requires a runtime check at `customElements.define()`. | One key per category. |
+| Category visibility | Authors name the category property. | Authors write behavior classes without naming categories. | Authors name category keys. |
+| Precedent | Matches single-value opt-ins like `static formAssociated`. | Matches `static observedAttributes`, which is an array of tokens. | New pattern. |
+| Extensibility | Each new category adds a static property to the API surface. | New categories do not change the declaration shape. | New categories add object keys. |
+| (Future) [developer-defined behaviors](developer-defined-behaviors.md) | Needs a way for an author's class to satisfy a category contract. | Could accept an author's class directly but still needs category classification. | Needs a category key and contract. |
 
 ### Feature detection
 
@@ -365,7 +364,7 @@ A design system can use a single class with one `HTMLButtonBehavior` and forward
 ```javascript
 class DesignSystemButton extends HTMLElement {
   static formAssociated = true;
-  static behaviors = [HTMLButtonBehavior];
+  static activationBehavior = HTMLButtonBehavior;
   static observedAttributes = ['type', 'formaction'];
 
   #internals;
@@ -655,7 +654,7 @@ Combining `HTMLButtonBehavior` with a primitive override:
 ```javascript
 class ScriptedSubmitter extends HTMLElement {
   static formAssociated = true;
-  static behaviors = [HTMLButtonBehavior];
+  static activationBehavior = HTMLButtonBehavior;
 
   #internals = this.attachInternals();
 
@@ -741,12 +740,12 @@ class CustomButton extends HTMLElement {
   - Current workarounds rely on wrapping a `<button>` and wiring it to `internals.form` by hand ([2025](https://github.com/WICG/webcomponents/issues/814#issuecomment-3382335174)).
 - One recurring ask is that, once an element is designated as a submit button via `ElementInternals`, it should "behave as a native button out of the box" so authors do not have to re-wire submission, implicit submission, or label activation ([2022](https://github.com/WICG/webcomponents/issues/814#issuecomment-1161845917), [2023](https://github.com/WICG/webcomponents/issues/814#issuecomment-1429901740)).
 - A 2023 [comment](https://github.com/WICG/webcomponents/issues/814#issuecomment-1448167731) enumerated the concrete semantics that a custom element with submit capabilities should have.
-- [Comments](https://github.com/WICG/webcomponents/issues/814#issuecomment-3392480397) in 2025 pushed for a pluggable, list-shaped mechanism aligned with the way other UI platforms expose attachable behaviors.
+- [Comments](https://github.com/WICG/webcomponents/issues/814#issuecomment-3392480397) in 2025 pushed for a pluggable mechanism aligned with the way other UI platforms expose attachable behaviors.
 
 How this proposal addresses these comments:
 
-- ✅ `static behaviors = [HTMLButtonBehavior]` accessed through `attachInternals()` is a list-shaped `ElementInternals` opt-in.
-- ✅ The API shape allows for composability.
+- `static activationBehavior = HTMLButtonBehavior` is a declarative class-level opt-in, and the platform-created instance is accessed through `attachInternals()`.
+- Separate category properties allow composition while preventing same-category collisions by construction.
 
 #### Issue [whatwg/html#11061](https://github.com/whatwg/html/issues/11061)
 
@@ -758,11 +757,11 @@ In addition to similar comments stated above, a 2025 [historical-perspective com
 
 How this proposal addresses these comments:
 
-- ✅ Element behaviors should be named for its capability (e.g., `HTMLButtonBehavior`).
-- ✅ The proposal extends the `ElementInternals` decomposition pattern in form-associated custom elements and `ARIAMixin`. It does not introduce a sugar layer that bypasses `attachInternals()`, and it does not automatically mirror native-element APIs onto custom elements.
-- ✅ `behaviors` is a list, not a singular `type` string. A custom element can attach multiple behaviors across categories at once, and future low-level primitives can override individual pieces of any behavior. See [Behavior categories and composition](#behavior-categories-and-composition) and [Alternative 7: Low-level primitives on `ElementInternals`](#alternative-7-low-level-primitives-on-elementinternals).
-- ✅ Behaviors are declared as a static class member (`static behaviors`), mirroring `static formAssociated`, so a base class can carry them to subclasses.
-- ✅ Form submission and invoker behavior are not bundled: `HTMLButtonBehavior` with `type='submit'` or `'reset'` participates in forms and ignores invoker attributes, while `type='button'` handles `commandfor`/`popovertarget` and does not submit. The active mode is selected by `type`, matching native `<button>`.
+- Element behaviors should be named for its capability (e.g., `HTMLButtonBehavior`).
+- The proposal extends the `ElementInternals` decomposition pattern in form-associated custom elements and `ARIAMixin`. It does not introduce a sugar layer that bypasses `attachInternals()`, and it does not automatically mirror native-element APIs onto custom elements.
+- Behavior classes are assigned to category-specific properties rather than selected by a singular `type` string. A custom element can declare one behavior in each category, and future low-level primitives can override individual pieces of any behavior. See [Behavior categories and composition](#behavior-categories-and-composition) and [Alternative 7: Low-level primitives on `ElementInternals`](#alternative-7-low-level-primitives-on-elementinternals).
+- Behaviors are declared as static class members (starting with `static activationBehavior`), mirroring `static formAssociated`, so a base class can carry them to subclasses.
+- Form submission and invoker behavior are not bundled: `HTMLButtonBehavior` with `type='submit'` or `'reset'` participates in forms and ignores invoker attributes, while `type='button'` handles `commandfor`/`popovertarget` and does not submit. The active mode is selected by `type`, matching native `<button>`.
 
 ## References & acknowledgements
 
@@ -784,7 +783,7 @@ Many thanks for valuable feedback and advice from:
 
 Thanks to the following proposals, articles, frameworks, and languages for their work on similar problems that influenced this proposal.
 
-- [A "story" about `<input>`](https://meowni.ca/posts/a-story-about-input/) by [Monica Dinculescu](https://meowni.ca) — analysis of `<input>` element design problems that informed our decision to use static behaviors.
+- [A "story" about `<input>`](https://meowni.ca/posts/a-story-about-input/) by [Monica Dinculescu](https://meowni.ca) — analysis of `<input>` element design problems that informed our decision to use static behavior declarations.
 - [Real Mixins with JavaScript Classes](https://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/) by [Justin Fagnani](https://github.com/justinfagnani).
 - [ElementInternals.type proposal](https://github.com/whatwg/html/issues/11061).
 - [Custom Attributes proposal](https://github.com/WICG/webcomponents/issues/1029).
