@@ -91,20 +91,8 @@ With this functionality, the text "Inside Shadow DOM" will be styled blue. The
 `specifierimport` attribute is resolved using the import map,
 `https://example.com/foo.css` is fetched as a CSS module, and the resulting
 stylesheet is applied to the shadow root. The shared `CSSStyleSheet` appears in
-the shadow root's `styleSheets` collection.
-
-Although the underlying object is shared, exposing it through `styleSheets` is
-intentional. Exposing declaratively linked sheets through `adoptedStyleSheets`
-would allow script to remove or reorder entries independently of the
-corresponding `<link>` elements, breaking synchronization between the DOM and
-the applied stylesheet list. The presence and state of qualifying `<link>`
-elements instead control membership in the read-only `styleSheets` collection,
-and their tree order controls the order of its entries. This distinction
-concerns the mutability of the collection's membership; the shared
-`CSSStyleSheet` object itself remains mutable, as shown below. This proposal
-therefore extends the CSSOM definition of which sheets are represented by
-`styleSheets`, introducing the concept of a DOM-associated constructed
-stylesheet.
+the shadow root's `styleSheets` collection. For more details, see the
+[dedicated section](#underlying-cssom-data-model) on this subject.
 
 ### Underlying Stylesheet Is Shared Between Tree Scopes
 
@@ -163,6 +151,22 @@ where each link normally has its own associated stylesheet and owner node. The
 proposal intentionally extends the link-associated stylesheet model: each link
 associates the same `CSSStyleSheet` object with its tree scope, and that object
 appears in each scope's `styleSheets` collection.
+
+### Underlying CSSOM Data Model
+
+Although the underlying `CSSStyleSheet` object is shared, exposing it through
+`styleSheets` instead of `adoptedStyleSheets` in this proposal is intentional.
+Exposing declaratively linked sheets through `adoptedStyleSheets` would allow
+script to remove or reorder entries independently of the corresponding
+`<link>` elements, breaking synchronization between the DOM and the applied
+stylesheet list. The presence and state of qualifying `<link>` elements
+instead control membership in the read-only `styleSheets` collection, and
+their tree order controls the order of its entries. This distinction concerns
+the mutability of the collection's membership; the shared `CSSStyleSheet`
+object itself remains mutable, as shown in the examples above. This proposal
+therefore extends the CSSOM definition of which sheets are represented by
+`styleSheets`, introducing the concept of a DOM-associated constructed
+stylesheet.
 
 ### Compatibility With Existing `<link>` Tag Capabilities
 
