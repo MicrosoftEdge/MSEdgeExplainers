@@ -96,11 +96,11 @@ the shadow root's `styleSheets` collection. For more details, see the
 
 ### Underlying Stylesheet Is Shared Between Tree Scopes
 
-The intended invariant is that links which resolve to the same URL and CSS
-module type in the same module map apply the same `CSSStyleSheet` object. Each
-link controls whether that object applies to its own tree scope. The following
-example applies one module stylesheet to the document and to two distinct
-shadow roots:
+The intended invariant is that links that resolve to the same URL (after import
+map processing) and CSS module type in the same module map apply the same
+`CSSStyleSheet` object. Each link controls whether that object applies to its
+own tree scope. The following example applies one module stylesheet to the
+document tree and to two distinct shadow roots:
 
 ```html
 <html>
@@ -134,8 +134,8 @@ shadow roots:
 
 As a result, modifying the shared stylesheet updates every tree scope to which
 it is applied. If all three module stylesheet links have loaded successfully,
-the following script resolves to the existing CSS module instance in the
-document's module map:
+executing the following script will resolve to the existing CSS module instance
+in the document's module map:
 
 ```js
 const foo = (await import("foo", { with: { type: "css" } })).default;
@@ -144,7 +144,7 @@ foo.replaceSync("p { color: green; }");
 
 The import can reuse the existing module-map entry without initiating another
 fetch and will update all of the text in the example to green because each link
-applies the same `CSSStyleSheet` object.
+applies the same underlying `CSSStyleSheet` object.
 
 This capability is not possible with a regular `<link rel="stylesheet">`,
 where each link normally has its own associated stylesheet and owner node. The
@@ -171,34 +171,38 @@ stylesheet.
 ### Compatibility With Existing `<link>` Tag Capabilities
 
 This proposal is intended to be compatible with many existing capabilities,
-such as `nonce` and `integrity`.
+including `nonce`, `onload`, and `onerror`.
 
 However, not all features supported by `<link rel="stylesheet">` apply in the
 same way to a CSS module. Several fundamental differences affect multiple
-existing link behaviors.
+existing link behaviors:
 
-CSS module script creation produces a constructed stylesheet. Because this
-proposal reuses the same CSS module instance, the stylesheet exposed through
-each link is constructed even though it is associated with one or more
-`<link>` elements. This differs from classic `<link rel="stylesheet">`
-behavior in several ways. For example, a constructed stylesheet has a null
-`ownerNode`. CSS modules also currently skip `@import` rules rather than
-loading the imported stylesheets.
+1. **Constructed stylesheets:** CSS module script creation produces a
+   constructed stylesheet. Because this proposal reuses the same CSS module
+   instance, the stylesheet exposed through each link is constructed even
+   though it is associated with one or more `<link>` elements. This differs
+   from classic `<link rel="stylesheet">` behavior in several ways. For
+   example, a constructed stylesheet has a null `ownerNode`. Constructed
+   stylesheets also currently skip `@import` rules rather than loading the
+   imported stylesheets. An empty-prelude `@scope` rule currently determines
+   its scoping root in part from the stylesheet's owner node, which will
+   differ with module imports because the owner node is null.
 
-Current `<link rel="stylesheet">` elements have a one-to-one association with
-their `CSSStyleSheet` objects. This proposal deliberately allows multiple link
-elements to share one `CSSStyleSheet`. As a result, attributes such as `media`
-and `title` cannot be mapped directly to the shared stylesheet because each
-link can apply the same `CSSStyleSheet` object with different per-link state.
+2. **Cardinality:** Current `<link rel="stylesheet">` elements have a
+   one-to-one association with their `CSSStyleSheet` objects. This proposal
+   deliberately allows multiple link elements to share one `CSSStyleSheet`.
+   As a result, attributes such as `media` and `title` cannot be mapped
+   directly to the shared stylesheet because each link can apply the same
+   `CSSStyleSheet` object with different per-link state.
 
-Classic stylesheet links and CSS module script fetches also differ. A classic
-stylesheet link creates a potential-CORS request that uses `no-cors` mode by
-default; its `crossorigin` attribute can opt into CORS. Module script requests
-use `cors` mode, so a cross-origin response must pass a CORS check. Their
-decoding also differs. Classic external CSS can use encoding information from
-the response, a recognized leading byte sequence that resembles an `@charset`
-declaration, or a legacy environment encoding. Module script responses are
-always decoded as UTF-8.
+3. **Fetch behavior:** Classic stylesheet links and CSS module script fetches
+   differ. A classic stylesheet link creates a potential-CORS request that
+   uses `no-cors` mode by default; its `crossorigin` attribute can opt into
+   CORS. Module script requests use `cors` mode, so a cross-origin response
+    must pass a CORS check. Their decoding also differs. Classic external CSS can
+    use encoding information from the response, a recognized leading byte
+    sequence that resembles an `@charset` declaration, or a legacy environment
+    encoding. Module script responses are always decoded as UTF-8.
 
 For a full list of differences and a discussion on options, please see
 the [planning document](https://docs.google.com/document/d/1SkHwxAIBW5I3uqnmmov4D71ZPbj9woouj3RdPqd3X1w).
