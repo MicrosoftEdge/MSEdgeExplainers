@@ -59,9 +59,9 @@ multiple tree scopes using the `<link>` element.
 
 ## Proposal: Module `<link rel="stylesheet">` Elements
 
-We propose a new `moduleimport` attribute for `<link rel="stylesheet">`. Its
-presence indicates that this is a module import. Its value is resolved as a
-module specifier through import map processing, using the module
+We propose a new module mode for `<link rel="stylesheet">`, selected by
+`type="module"`. In this mode, the value of `href` is resolved as a module
+specifier through import map processing, using the module
 `<link rel="stylesheet">` element's base URL. The resolved URL is then imported
 as a CSS module. Once the CSS module has loaded, its styles are applied to the
 module `<link rel="stylesheet">` element's tree scope.
@@ -80,7 +80,7 @@ For clarity, this explainer calls the existing form a "classic
 </script>
 <my-element>
   <template shadowrootmode="open">
-    <link rel="stylesheet" moduleimport="foo">
+    <link rel="stylesheet" type="module" href="foo">
     <p>Inside Shadow DOM</p>
   </template>
 </my-element>
@@ -93,19 +93,19 @@ p { color: blue; }
 ```
 
 With this functionality, the text "Inside Shadow DOM" will be styled blue. The
-value of the `moduleimport` attribute is resolved using the import map,
-`https://example.com/foo.css` is fetched as a CSS module, and the resulting
+value of the `href` attribute is resolved as a module specifier using the import
+map, `https://example.com/foo.css` is fetched as a CSS module, and the resulting
 stylesheet is applied to the shadow root. The shared `CSSStyleSheet` appears in
-the shadow root's `styleSheets` collection. For more details on why `styleSheets`
-is used instead of `adoptedStyleSheets`, see the
+the shadow root's `styleSheets` collection. For more details on why
+`styleSheets` is used instead of `adoptedStyleSheets`, see the
 [dedicated section](#imported-stylesheet-appears-in-stylesheets) on this
 subject.
 
 ### Underlying Stylesheet Is Shared Between Tree Scopes
 
 Within a given module map, module `<link rel="stylesheet">` elements whose
-specifiers resolve to the same URL use the same module map entry, keyed by that
-URL and the CSS module type, and apply the same `CSSStyleSheet` object.
+`href` values resolve to the same URL use the same module map entry, keyed by
+that URL and the CSS module type, and apply the same `CSSStyleSheet` object.
 
 The following example applies one module stylesheet to the root document tree
 and to two distinct shadow roots:
@@ -120,19 +120,19 @@ and to two distinct shadow roots:
         }
       }
     </script>
-    <link rel="stylesheet" moduleimport="foo">
+    <link rel="stylesheet" type="module" href="foo">
   </head>
   <body>
     <p>Text in the document tree</p>
     <first-element>
       <template shadowrootmode="open">
-        <link rel="stylesheet" moduleimport="foo">
+        <link rel="stylesheet" type="module" href="foo">
         <p>Inside the first shadow root</p>
       </template>
     </first-element>
     <second-element>
       <template shadowrootmode="open">
-        <link rel="stylesheet" moduleimport="foo">
+        <link rel="stylesheet" type="module" href="foo">
         <p>Inside the second shadow root</p>
       </template>
     </second-element>
@@ -212,12 +212,13 @@ stylesheet associated with each module `<link rel="stylesheet">` element is
 constructed. This results in behavior that differs from classic
 `<link rel="stylesheet">` elements in several ways:
 
-- CSS module scripts do not support `@import` rules.
+- CSS module scripts do not support `@import` CSS rules.
 - A constructed stylesheet always has a `null` `ownerNode`.
-- An empty-prelude `@scope` rule normally derives its scoping root from the
+- An empty-prelude `@scope` CSS rule normally derives its scoping root from the
   stylesheet's `ownerNode`. A constructed stylesheet's `null` `ownerNode`
   cannot identify the module `<link rel="stylesheet">` element's parent, and
-  thus CSS rule matching will differ in this scenario.
+  thus CSS rule matching will differ in this scenario from a classic
+  `<link rel="stylesheet">` element.
 
 In each of these cases, module `<link rel="stylesheet">` elements will apply
 the existing constructed stylesheet behavior, rather than the behaviors of
@@ -273,13 +274,11 @@ classic `<link rel="stylesheet">` element fetch behaviors.
 1. How should behavior be defined for the full list of differences from
     classic `<link rel="stylesheet">` elements? This is tracked in the
     [planning document](https://docs.google.com/document/d/1SkHwxAIBW5I3uqnmmov4D71ZPbj9woouj3RdPqd3X1w).
-2. Should module `<link rel="stylesheet">` elements use `moduleimport`, or
-    different syntax and `href`? This is essentially choosing between
-    `<link rel="stylesheet" moduleimport="foo">` and
-    `<link rel="stylesheet" type="module" href="foo">`.
-3. Should we attempt to make this feature backward-compatible with
+2. Should we attempt to make this feature backward-compatible with
     classic `<link rel="stylesheet">` elements, or are there too many
     differences?
+3. Is `href` the right way to go, even though it goes through import map
+    processing? Should we use a new attribute such as `moduleimport`?
 
 ## References & Acknowledgements
 
