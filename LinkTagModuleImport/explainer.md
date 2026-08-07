@@ -216,11 +216,12 @@ constructed. This results in behavior that differs from classic
 - A constructed stylesheet always has a `null` `ownerNode`.
 - An empty-prelude `@scope` rule normally derives its scoping root from the
   stylesheet's `ownerNode`. A constructed stylesheet's `null` `ownerNode`
-  cannot identify the module `<link rel="stylesheet">` element's parent.
+  cannot identify the module `<link rel="stylesheet">` element's parent, and
+  thus CSS rule matching will differ in this scenario.
 
-These differences follow from CSS module script and constructed stylesheet
-behaviors rather than the current processing model for classic
-`<link rel="stylesheet">` elements.
+In each of these cases, module `<link rel="stylesheet">` elements will apply
+the existing constructed stylesheet behavior, rather than the behaviors of
+classic `<link rel="stylesheet">` elements.
 
 ##### The Difference in Cardinality Changes the Behavior of Some Attributes
 
