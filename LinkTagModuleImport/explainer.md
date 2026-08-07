@@ -279,6 +279,8 @@ classic `<link rel="stylesheet">` element fetch behaviors.
     differences?
 3. Is `href` the right way to go, even though it goes through import map
     processing? Should we use a new attribute such as `moduleimport`?
+4. How should the cardinality issues for attributes like `media` be
+    addressed?
 
 ## References & Acknowledgements
 
