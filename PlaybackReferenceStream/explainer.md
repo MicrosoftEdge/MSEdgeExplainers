@@ -6,7 +6,7 @@
 - Max Solodovnikov
 - Hong Sodoma
 - Vinod Prakash
-- [Nishitha Dey](https://github.com/nishitha-burman) — Microsoft
+- [Nishitha Dey](https://github.com/nishitha-burman)
 
 ## Participate
 
