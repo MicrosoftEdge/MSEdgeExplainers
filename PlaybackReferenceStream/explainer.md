@@ -32,13 +32,12 @@ on the raw microphone signal.
 Two API shapes remain under consideration:
 
 1. A purpose-built `navigator.mediaDevices.getPlaybackReference()` method that
-   returns explicitly named microphone and nullable playback-reference tracks.
+   returns microphone and playback-reference tracks.
 2. An extension to `getUserMedia()` that requests an optional playback
    reference alongside microphone capture.
 
 Both options use a coordinated request, a shared permission model, and the
-same microphone-only fallback. This explainer intentionally does not select a
-preferred shape pending broader standards and implementer feedback.
+same microphone-only fallback.
 
 ## User-facing problem
 
@@ -260,7 +259,7 @@ and, where appropriate, browser-provided audio processing.
 Two API shapes are considered:
 
 1. Add a purpose-built `getPlaybackReference()` method.
-Extend `getUserMedia()` to request an optional playback reference.
+2. Extend `getUserMedia()` to request an optional playback reference.
 
 Both options can use the same permission UI and provide the same microphone-only fallback. The main difference is the developer-facing API and return shape.
 
