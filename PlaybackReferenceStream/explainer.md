@@ -257,12 +257,16 @@ The microphone remains available if the user declines playback-reference
 access. This lets the voice experience continue with microphone-only capture
 and, where appropriate, browser-provided audio processing.
 
-The following API shapes are conceptual and non-normative. They are open
-alternatives rather than a preferred design.
+Two API shapes are considered:
+
+1. Add a purpose-built `getPlaybackReference()` method.
+Extend `getUserMedia()` to request an optional playback reference.
+
+Both options can use the same permission UI and provide the same microphone-only fallback. The main difference is the developer-facing API and return shape.
 
 ### Option 1: Add `getPlaybackReference()`
 
-Add a purpose-built `MediaDevices` method that requests microphone capture and
+Add a new `MediaDevices` method that requests microphone capture and
 an optional playback reference together.
 
 ```js
@@ -306,7 +310,7 @@ if (!playbackReferenceTrack) {
 }
 ```
 
-Possible playback scopes are:
+Possible playback scopes include:
 
 - `"origin"`: audio produced by the requesting origin.
 - `"browser"`: audio produced by the browser.
@@ -370,8 +374,7 @@ succeeds. It contains a synchronized playback-reference track only when the
 user grants that access.
 
 This example uses a proposed `sourceType` setting to distinguish the two audio
-tracks. Another design could add a dedicated method such as
-`getPlaybackReferenceTracks()`.
+tracks.
 
 This option entails adding:
 
@@ -387,35 +390,9 @@ This option entails adding:
 | Pros | Cons |
 | --- | --- |
 | Reuses the established microphone-capture entry point. | Expands `getUserMedia()` beyond user-input devices. |
-| Naturally supports microphone-only fallback when playback access is declined. | Changes the expectation that audio returned by `getUserMedia()` comes from microphones. |
+| Naturally supports microphone-only fallback when playback access is declined. | Changes the expectation that `getUserMedia()` returns only microphone audio. |
 | Can build on existing constraints and permission-processing patterns. | Requires a new way to distinguish two kinds of audio track. |
 | Avoids adding another method to `MediaDevices`. | Makes the returned `MediaStream` and track-selection logic more complex. |
-
-### Constrainable pattern
-
-The proposal should reuse the existing constrainable pattern where it applies.
-This lets applications request track properties and inspect what the browser
-supports and provides:
-
-```js
-track.getCapabilities();
-track.getConstraints();
-track.getSettings();
-await track.applyConstraints({ channelCount: 1 });
-```
-
-The microphone portion should reuse the existing `MediaTrackConstraints`
-dictionary. New microphone constraints would then become available without a
-separate update to the playback-reference API.
-
-Playback-track properties such as sample rate and channel count could also use
-the constrainable pattern. Playback scope is different: it determines what
-sensitive source category the application may access. Scope should therefore
-be a permission-bearing request option and should not be mutable later through
-`applyConstraints()`.
-
-Synchronization, lifecycle, and track source type are API guarantees or
-read-only settings rather than constraints.
 
 ### Permission model shared by both options
 
