@@ -224,7 +224,7 @@ In each of these cases, module `<link rel="stylesheet">` elements will apply
 the existing constructed stylesheet behavior, rather than the behaviors of
 classic `<link rel="stylesheet">` elements.
 
-##### The Difference in Cardinality Changes the Behavior of Some Attributes
+##### Shared stylesheets
 
 Classic `<link rel="stylesheet">` elements have a one-to-one association with
 their `CSSStyleSheet` objects. This proposal deliberately allows multiple
@@ -236,6 +236,19 @@ with different per-element state. There are several potential ways to handle
 this scenario, including ignoring these attributes entirely (requiring them to
 be set directly on the `CSSStyleSheet` object imperatively),
 first-defined-wins, or last-defined-wins, each of which comes with tradeoffs.
+
+##### Render blocking is opt-in
+
+Unlike classic link stylesheet tags, module link stylesheet tags can be render blocking with the `blocking` attribute anywhere in the document, not only in the head, as a way to prevent FOUC:
+
+```html
+<link
+  rel="stylesheet"
+  type="module"
+  href="@some-org/some-lib"
+  blocking="render"
+/>
+```
 
 ##### Module Fetches Are Stricter Than Classic Fetches
 
