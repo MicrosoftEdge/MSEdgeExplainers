@@ -2,32 +2,16 @@
 
 ## Authors
 
+- [Huseyin Ozcan](https://github.com/huozcan-ms)
+- Max Solodovnikov
+- Hong Sodoma
+- Vinod Prakash
 - [Nishitha Dey](https://github.com/nishitha-burman) — Microsoft
 
 ## Participate
 
-- [Proposal issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1372)
+- [Proposal issue and discussion](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1372)
 - [MSEdgeExplainers issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues)
-
-## Table of contents
-
-- [Introduction](#introduction)
-- [User-facing problem](#user-facing-problem)
-- [Goals](#goals)
-- [Non-goals](#non-goals)
-- [Motivating use cases](#motivating-use-cases)
-- [Why existing APIs are insufficient](#why-existing-apis-are-insufficient)
-- [Why cascading browser processing with an application pipeline is not a solution](#why-cascading-browser-processing-with-an-application-pipeline-is-not-a-solution)
-- [Proposed approach](#proposed-approach)
-- [Detailed design considerations](#detailed-design-considerations)
-- [Security and privacy considerations](#security-and-privacy-considerations)
-- [Accessibility considerations](#accessibility-considerations)
-- [Internationalization considerations](#internationalization-considerations)
-- [Considered alternatives](#considered-alternatives)
-- [Dependencies on non-stable features](#dependencies-on-non-stable-features)
-- [Stakeholder feedback](#stakeholder-feedback)
-- [Open questions and future work](#open-questions-and-future-work)
-- [References and acknowledgements](#references-and-acknowledgements)
 
 ## Introduction
 
@@ -461,20 +445,6 @@ The permission flow can adapt to existing grants:
   access.
 - If both permissions are active for the session, do not prompt again.
 
-Additional requirements include:
-
-- Require a user-initiated request.
-- Treat microphone and playback-reference permissions separately.
-- Show a persistent indicator when playback-reference access is active.
-- Let the user stop playback-reference access while preserving microphone
-  capture.
-- End playback-reference access when the associated microphone capture ends.
-- Define how protected and cross-origin media are handled.
-- Use Permissions Policy to control access by embedded documents.
-
-The permission model should not rely solely on the application's stated
-processing purpose. Once audio samples are exposed to JavaScript, the
-application can process, store, or transmit them.
 
 ## Detailed design considerations
 
