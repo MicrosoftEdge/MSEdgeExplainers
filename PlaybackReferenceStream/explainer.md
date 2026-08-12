@@ -251,8 +251,7 @@ Introduce browser-mediated access to two separate audio tracks:
 Both are `MediaStreamTrack` objects whose `kind` is `"audio"`, but they carry
 audio from different sources. The browser creates them through one coordinated
 request and guarantees that their timestamps can be aligned. The application
-can then use both tracks for its own echo cancellation or audio-processing
-pipeline.
+can then use both tracks for its own audio-processing pipeline.
 
 The microphone remains available if the user declines playback-reference
 access. This lets the voice experience continue with microphone-only capture
