@@ -594,10 +594,7 @@ rather than external dependencies.
 
 ## Stakeholder feedback
 
-No implementer or standards stakeholder positions are documented yet. The
-[proposal issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1372)
-is the public venue for feedback on the need, permission model, source scopes,
-and the two API-shape alternatives.
+No implementer or standards stakeholder positions are documented yet.
 
 ## Open questions and future work
 
