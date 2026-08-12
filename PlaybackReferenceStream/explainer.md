@@ -1,4 +1,4 @@
-# Playback Reference Stream for Chromium Web Applications
+# Playback Reference Audio Capture
 
 ## Authors
 
