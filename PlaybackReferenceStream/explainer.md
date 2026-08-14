@@ -10,7 +10,7 @@
 
 ## Participate
 
-- [Proposal issue and discussion](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1372)
+- [Proposal issue and discussion](https://github.com/w3c/mediacapture-screen-share-extensions/issues/12)
 - [MSEdgeExplainers issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues)
 
 ## Introduction
