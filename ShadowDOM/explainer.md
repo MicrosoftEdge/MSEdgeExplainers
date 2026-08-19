@@ -232,14 +232,12 @@ stylesheet.
 
 Module and classic stylesheet links share fundamental `HTMLLinkElement`
 behavior, but they cannot be identical because module links import a shared,
-constructed stylesheet using module fetch semantics. The differences in
-`href` processing between the two would make backwards compatibility
-difficult.
+constructed stylesheet using module fetch semantics.
 
 #### Fundamental `HTMLLinkElement` behavior
 
 Existing behaviors that are not inherently tied to classic stylesheet fetches
-or one-to-one stylesheet ownership should also apply to module links. For
+or one-to-one stylesheet ownership will also apply to module links. For
 example, the `nonce` attribute and the `load` and `error` events apply to
 module `<link rel="stylesheet">` elements.
 
@@ -264,9 +262,7 @@ Classic stylesheet links have a one-to-one association with their
 `CSSStyleSheet` objects. Module links deliberately allow many elements to share
 one object. Attributes such as `media` and `title` therefore cannot be mapped
 directly to the shared stylesheet when different module links specify different
-values. Options include ignoring those attributes, using first-defined-wins or
-last-defined-wins behavior, or representing their state per element association.
-This remains an open design question.
+values. For this proposal, we plan on ignoring `media` and `title` entirely.
 
 #### Module fetch and decoding semantics
 
@@ -339,15 +335,10 @@ those changes by resolving `href` with the existing module system.
 
 ## Open issues
 
-1. How should behavior be defined for the full set of differences from classic
-   `<link rel="stylesheet">` elements? This is tracked in the
-   [planning document](https://docs.google.com/document/d/1SkHwxAIBW5I3uqnmmov4D71ZPbj9woouj3RdPqd3X1w).
-2. Is `href` the right attribute even though its value undergoes import map
-   processing, or should a new attribute such as `moduleimport` be used?
-3. How should the cardinality issues for attributes such as `media` and
-   `title` be addressed?
-
 ## References and acknowledgements
+
+For specific details on each property and how it is expected to work,
+please see the [planning document](https://docs.google.com/document/d/1SkHwxAIBW5I3uqnmmov4D71ZPbj9woouj3RdPqd3X1w)
 
 This consolidated explainer includes work, feedback, and advice from:
 
