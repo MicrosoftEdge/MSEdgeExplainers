@@ -1,1 +1,1 @@
-This explainer has been integrated into [Declarative CSS Modules](../ShadowDOM/explainer.md).
+This explainer has been integrated into [Declarative Shadow DOM Style Sharing](../ShadowDOM/explainer.md).

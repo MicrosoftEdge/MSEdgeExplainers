@@ -285,7 +285,7 @@ decoding semantics, with no option to fall back to the classic behavior.
 ### The `shadowrootadoptedstylesheets` attribute
 
 This proposal originally introduced a `shadowrootadoptedstylesheets` attribute
-the `<template>` element, which accepts a space-separated list of
+on the `<template>` element, which accepts a space-separated list of
 module specifiers and adds the corresponding CSS module exports to the shadow
 root's `adoptedStyleSheets` list.
 
