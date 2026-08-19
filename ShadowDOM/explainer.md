@@ -17,9 +17,10 @@
 
 This document is intended as a starting point for engaging the community and
 standards bodies in developing collaborative solutions fit for standardization.
-As the solutions described in this document progress along the standards
-track, we will retain this document as an archive and use this section to keep
-the community up to date with the current standards venue and content.
+As the solutions to problems described in this document progress along the
+standards-track, we will retain this document as an archive and use this section
+to keep the community up-to-date with the most current standards venue and
+content location of future work and discussions.
 
 - This document status: **Active**
 - Expected venues: [WHATWG](https://whatwg.org/) and the
@@ -66,15 +67,12 @@ all of those scopes a common, declarative reference.
 ## Goals
 
 - Allow developers to declaratively apply the same CSS module stylesheet to
-  the document and to multiple shadow roots.
-- Allow CSS to reside in an externally cacheable resource while reusing the
-  CSS module instance for the same resolved URL and module type in a module
-  map.
-- Work with Declarative Shadow DOM without requiring author JavaScript to
-  attach stylesheets.
-- Preserve familiar `<link>` element behavior, DOM ordering, and event handling
-  where those behaviors are compatible with shared CSS modules.
-- Avoid stylesheet and parsing duplication.
+  multiple tree scopes.
+- Allow the CSS to reside in an externally cacheable resource while reusing the
+  CSS module instance for the same resolved URL and module type within the
+  relevant module map.
+- Avoid patterns that would cause measurable performance regressions, such as
+  stylesheet duplication that cannot be deduplicated.
 
 ## Non-goals
 
@@ -177,6 +175,42 @@ The update changes the text in all three scopes to green because every module
 link applies the same underlying `CSSStyleSheet` object. This is not possible
 with classic `<link rel="stylesheet">` elements, for which each link has its
 own associated stylesheet.
+
+### Import Maps Are Not Necessary
+
+An import map is only needed to remap a module specifier. As with a JavaScript
+module import, a relative URL can be used directly and is resolved against the
+base URL of the module `<link rel="stylesheet">` element.
+
+The following example applies `./foo.css` to two shadow roots without an import
+map:
+
+```html
+<first-element>
+  <template shadowrootmode="open">
+    <link rel="stylesheet" type="module" href="./foo.css">
+    <p>Inside the first shadow root</p>
+  </template>
+</first-element>
+<second-element>
+  <template shadowrootmode="open">
+    <link rel="stylesheet" type="module" href="./foo.css">
+    <p>Inside the second shadow root</p>
+  </template>
+</second-element>
+```
+
+Each `href` resolves `./foo.css` against its link element's base URL. When both
+links resolve to the same URL, they use the same CSS module map entry and apply
+the same underlying `CSSStyleSheet` object. A JavaScript import that resolves
+to that URL and module type also reuses the entry:
+
+```js
+const foo = (await import("./foo.css", { with: { type: "css" } })).default;
+foo.replaceSync("p { color: green; }");
+```
+
+After the update, the text in both shadow roots is green.
 
 ### Imported stylesheets appear in `styleSheets`
 
