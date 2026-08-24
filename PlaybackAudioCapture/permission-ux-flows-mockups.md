@@ -1,4 +1,4 @@
-# Audio-only access UX flows
+# Permission UX Flow Mockups
 
 These flows illustrate how playback-audio access could work. The exact
 permission and selection UI is controlled by the browser.
