@@ -322,7 +322,7 @@ Playback audio may include sensitive content from tabs, applications, or the
 device.
 
 See the
-[permission UX flow mockups](permission-ux-flows-mockups.md).
+[permission UX flow mockups](permission-ux-flow-mockups.md).
 
 - Access requires a user action and browser-controlled permission.
 - A user-selected request uses browser UI; the website cannot enumerate or
