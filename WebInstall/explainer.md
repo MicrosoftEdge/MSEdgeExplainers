@@ -8,15 +8,6 @@
 ## Participate
 - [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Web%20Install%20API%22)
 
-> **Here for Origin Trials?**
-> The Web Install API is currently available as an [Origin Trial](https://developer.chrome.com/docs/web-platform/origin-trials/)
-in Chrome and Microsoft Edge versions 143-150. See [Origin Trial Instructions](https://github.com/MicrosoftEdge/Demos/blob/main/pwa-web-install-api/README.md)
-to learn more.
->
-> The Origin Trial exposes the earlier `install_url`-based shape of the API,
-which is being replaced. For background on that earlier design, see the archived
-[install-url-version/](./install-url-version/) explainers.
-
 ## Status of this Document
 
 This document is a starting point for engaging the community and standards
@@ -564,6 +555,6 @@ If the user were to deny the permission to install for the origin, they could br
 ## Additional Links
 
 - Archived earlier design: [install-url-version/explainer.md](./install-url-version/explainer.md)
-- Origin Trial demo: [MicrosoftEdge/Demos](https://github.com/MicrosoftEdge/Demos/blob/main/pwa-web-install-api/README.md)
+- Origin Trial demo: [MicrosoftEdge/Demos](https://github.com/MicrosoftEdge/Demos/blob/main/pwa-install-api/README.md)
 - [Chrome Status](https://chromestatus.com/feature/5183481574850560)
 - [TAG review (prior design)](https://github.com/w3ctag/design-reviews/issues/1051)
