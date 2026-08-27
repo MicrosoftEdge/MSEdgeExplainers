@@ -321,8 +321,10 @@ peerConnection.addTrack(playbackTrack, playbackStream);
 Playback audio may include sensitive content from tabs, applications, or the
 device.
 
-See the
-[permission UX flow mockups](permission-ux-flow-mockups.md).
+See the illustrative
+[permission and source-selection flow mockups](permission-ux-flow-mockups.md)
+and
+[ongoing capture indicator and control mockups](https://nishitha-burman.github.io/playback-audio-ongoing-use-mockups/).
 
 - Access requires a user action and browser-controlled permission.
 - A user-selected request uses browser UI; the website cannot enumerate or

@@ -356,6 +356,10 @@ failing does not affect the other.
 
 ## Ongoing controls
 
+See the
+[ongoing capture UX mockups](https://nishitha-burman.github.io/playback-audio-ongoing-use-mockups/)
+for illustrative ideas showing how users could monitor and stop active capture.
+
 All successful flows end with browser-controlled ongoing-use UI:
 
 ```text
