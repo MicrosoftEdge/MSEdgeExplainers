@@ -89,7 +89,7 @@ This proposal is informed by:
 
   These frameworks mirror a native `<button>` by having one custom element class whose form activation is selected by the `type` attribute. The same pattern appears in [Adobe Spectrum Web Components](https://github.com/adobe/spectrum-web-components/blob/main/1st-gen/packages/button/src/ButtonBase.ts), whose `<sp-button>` also uses a hidden `<button type="submit">` proxy.
 
-  An internal native button can supply individual interactions for components built around the wrapping pattern, but it does not make an autonomous custom element host itself the submitter or default button. This matters because the host is the public element that consumers configure, label, and interact with. Semantics placed on a shadow child must be routed across the shadow boundary and kept synchronized with the host. In Fluent, the public element carries the role, focus, disabled state, and form-facing API, while JavaScript and a hidden fallback control reproduce the native algorithms that remain unavailable to the host.
+  An internal native button can supply individual interactions for components built around the wrapping pattern, but it does not make an autonomous custom element host itself the submitter or default button. This matters because the host is the public element that consumers configure, label, and interact with. Semantics placed on a shadow child must be routed across the shadow boundary and kept synchronized with the host.
 
 ## Proposed approach
 
@@ -609,16 +609,13 @@ Changes can be done to address the cons and *shortcomings* of customized built-i
 The [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) exploration allows a native element inside a shadow root to stand in for its custom-element host. A component could keep an internal `<button>` or `<input>` and designate it as the host's semantic delegate.
 
 **Pros:**
-- Reuses a complete native element rather than decomposing its capabilities.
+- Reuses a complete native element and automatically benefits as that element gains new platform behavior.
 - Fits component libraries that already wrap native controls.
 - Could reduce manual forwarding of accessibility relationships, labeling, and form behavior.
-- Automatically benefits when the delegated native element gains new platform behavior.
 
 **Cons and open questions:**
 - Requires an internal native element and a two-element state model, which differs from components where the host itself is intended to be the control.
 - A single delegate may not represent components with multiple semantic parts.
-
-**Open questions**
 - The original exploration leaves the exact scope open, including form participation, focus, events, pseudo-classes, host attributes, methods, and properties.
 - Property ownership, conflicts, encapsulation, and behavior across nested shadow roots need specification.
 
@@ -794,8 +791,6 @@ class CustomButton extends HTMLElement {
 
 ### Accessibility
 
-- Platform-provided behaviors must set appropriate default ARIA roles and states (e.g., `role="button"` for `HTMLButtonBehavior`).
-- Custom elements using a platform-provided behavior must gain the same keyboard handling and focus management as their native counterparts (e.g., Space/Enter activation).
 - Authors must be able to override default semantics using `ElementInternals.role` and `ElementInternals.aria*` properties if the default behavior does not match their specific use case.
 - The ARIAWG reviewed an alternative to this proposal on [2025-09-25](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) (tracking issue [w3c/aria#2637](https://github.com/w3c/aria/issues/2637)). The WG agreed that role and focusability defaults are appropriate when a custom element opts into an activation behavior, with form association left to per-behavior judgment. This proposal applies that guidance: `HTMLButtonBehavior` provides default `role="button"` and focusability, and the element opts into form association separately via `static formAssociated = true`.
 
