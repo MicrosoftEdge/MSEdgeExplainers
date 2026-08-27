@@ -34,7 +34,7 @@ This creates a gap between what's possible with native elements and custom eleme
 
 ### Current scope and follow-up candidates
 
-This explainer proposes only `HTMLButtonBehavior`. The other capabilities below show where the same problem appears and help evaluate whether the API leaves room for credible follow-up work.
+This explainer proposes the behavior framework with `HTMLButtonBehavior` as a concrete behavior. The capabilities below show where the same problem appears and help evaluate the API's design.
 
 | Capability | Status | Problem to solve |
 |---|---|---|
@@ -142,7 +142,7 @@ The current proposal exposes one category declaration, `activationBehavior`, and
 static activationBehavior = HTMLButtonBehavior;
 ```
 
-Additional categories, cross-category composition, and conflict resolution are future design work, see [illustrative future extensibility sketch](#illustrative-future-extensibility-sketch-non-normative).
+As this proposal doesn't define multiple activation behaviors, cross-category composition, event or lifecycle ordering between behaviors, and conflict resolution are future design work. See the [future extensibility of the API](#future-extensibility-of-the-api).
 
 #### The activation category
 
@@ -174,8 +174,9 @@ This proposal introduces `HTMLButtonBehavior`, a behavior in the activation cate
 - The behavior has a mutable `type` property (`'submit'`, `'reset'`, or `'button'`) that selects the active button mode. Its initial state follows native `<button>`'s missing-value default, the [Auto state](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-auto-state).
 - Form ownership is independent of `type`; a form-associated host keeps the same `form` and remains in `form.elements` for all types. The `'reset'` and `'button'` states are barred from constraint validation.
 - A host that is an eligible invoker (`type='button'` carrying `commandfor` or `popovertarget`) is a first-class command/popover invoker, so assistive technology observes the same relationships as for a native `<button>`.
+- A host with `interestfor` participates in interest invocation under the same conditions as a native `<button>` and exposes its target through `interestForElement`.
 
-`HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission or reset to act on a form. Without it, `behavior.form` is always `null` even when the element is inside a form. This is a divergence from native `<button>`. The platform could later imply form association, removing the extra opt-in.
+`HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission or reset to act on a form. Without it, `behavior.form` is always `null` even when the element is inside a form. This is a divergence from native `<button>`.
 
 | Scenario | Behavior |
 |----------|----------|
@@ -416,7 +417,7 @@ A future extension could also allow developers to define their own reusable beha
 
 Although the behavior pattern could potentially be generalized to all HTML elements (e.g., a `<div>` element gains button behavior via behaviors), extending behaviors to native HTML elements would raise questions about correctness and accessibility.
 
-### Illustrative future extensibility sketch (non-normative)
+### Future extensibility of the API (non-normative)
 
 The following sketch is to help answer questions of how the framework could be developed. `EmbeddedContentBehavior`, `HTMLLabelBehavior`, `HTMLRadioGroupBehavior`, `HTMLCheckboxBehavior`, and `HTMLImageBehavior` aren't APIs proposed by this document.
 
@@ -633,7 +634,7 @@ The [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-dele
 - Authors still coordinate state and public properties between the host and internal control.
 - The internal control remains the native form control and activation target.
 
-Reference target along with the `formElement` proposal can solve some current workarounds.
+Semantic delegation, Reference Target, and `formElement` address components built around an internal native control. Platform-provided behaviors additionally target components where the custom element host itself is the control.
 
 ### Alternative 7: Expose certain behavioral attributes via ElementInternals (Proposed)
 
