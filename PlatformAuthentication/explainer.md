@@ -57,9 +57,10 @@ navigator.platformAuthentication.getSupportedContracts(
 ```
 `brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to "MicrosoftEntra". Browsers can define additional per-platform requirements for how new brokers can be registered and verified by the browser.
 
-The response for this API will be a sequence of contracts – initially those will be `get-token-and-sign-out` (which contains both `GetToken` and `SignOut` APIs).
+The response for this API will be a sequence of contracts. These include `get-cookies` (which contains the `GetCookies` API) and `get-token-and-sign-out` (which contains both `GetToken` and `SignOut` APIs).
 ```
 enum NativeAuthContracts { 
+    get-cookies,
     get-token-and-sign-out 
 } 
 ```
@@ -259,6 +260,41 @@ dictionary SignOutResult  {
     ErrorResult error 
 } 
 ```
+
+### GetCookies API
+When the response of `getSupportedContracts` contains `get-cookies`, the `getCookies` function can be used to retrieve cookies supplied by the platform broker (for example, a cookie carrying a device-bound SSO artifact). Unlike the other functions, `getCookies` is also available in service workers, which lets a service worker obtain broker cookies while handling network requests. The `getSupportedContracts`, `executeGetToken`, and `executeSignOut` functions are only available in window contexts.
+
+```
+navigator.platformAuthentication.getCookies(DOMString nonce) -> Promise<GetCookiesResult>
+```
+
+`nonce`: A caller-provided value the broker can use to prevent replay and to correlate the request with its response.
+
+#### GetCookies Response
+The `GetCookiesResult` is a dictionary that contains either the returned cookies or an error.
+
+```
+dictionary Cookie {
+    DOMString name,
+    DOMString data
+}
+
+dictionary GetCookiesResult {
+    required boolean isSuccess,
+    sequence<Cookie> cookies,
+    ErrorResult error
+}
+```
+
+`isSuccess`: `true` if the request succeeded, in which case `cookies` contains the broker-supplied cookies.
+
+`cookies`: The list of cookies supplied by the platform broker.
+
+`error`: An `ErrorResult` populated when the request fails.
+
+`name`: The cookie name supplied by the platform broker.
+
+`data`: Opaque cookie data supplied by the platform broker. The browser does not interpret or filter this value before returning it to the initiating page.
  
 ## Policies  
 We recommend user agents provide enterprise device administrators with a policy mechanism to control whether or not these APIs are visible to pages and/or functional. The browser should honor the state of its policy before allowing site access to the APIs.  
