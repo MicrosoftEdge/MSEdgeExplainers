@@ -57,9 +57,10 @@ navigator.platformAuthentication.getSupportedContracts(
 ```
 `brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to "MicrosoftEntra". Browsers can define additional per-platform requirements for how new brokers can be registered and verified by the browser.
 
-The response for this API will be a sequence of contracts – initially those will be `get-token-and-sign-out` (which contains both `GetToken` and `SignOut` APIs).
+The response for this API will be a sequence of contracts. These include `get-cookies` (which contains the `GetCookies` API) and `get-token-and-sign-out` (which contains both `GetToken` and `SignOut` APIs).
 ```
 enum NativeAuthContracts { 
+    get-cookies,
     get-token-and-sign-out 
 } 
 ```
@@ -74,43 +75,49 @@ navigator.platformAuthentication.executeGetToken(GetTokenParameters) -> Promise<
 navigator.platformAuthentication.executeSignOut(SignOutParameters) -> Promise<SignOutResult>
 ```
 
-The types `GetTokenResult`, `GetTokenParameters`, `SignOutResult` and `SignOutParameters` are strongly-typed dictionaries defined in WebIDL.
+The types `GetTokenResult`, `GetTokenParameters`, `SignOutResult` and `SignOutParameters` are strongly-typed dictionaries defined in WebIDL. Members marked `required` must be present; omitting one causes the WebIDL binding to throw a `TypeError` before the request reaches the broker. Members without `required` can be omitted.
 
 #### GetToken Request
 The `GetTokenParameters` request parameter is a dictionary containing all parameters needed to obtain an authentication token from the broker. The request payload closely follows the OAuth2 specification.
 ```
 dictionary GetTokenParameters {
-  DOMString brokerId, 
+  required DOMString brokerId,
   DOMString? accountId, 
-  DOMString clientId, 
+  required DOMString clientId,
   DOMString authority, 
-  DOMString scope, 
-  DOMString redirectUri, 
+  required DOMString scope,
+  required DOMString redirectUri,
   DOMString correlationId, 
   boolean isSecurityTokenService,
+  boolean preferBinding,
   DOMString? state, 
-  record<DOMString, DOMString>? extraParameters  
+  record<DOMString, DOMString>? extraParameters,
+  record<DOMString, DOMString>? extraParametersNoCache
 }    
 ``` 
 `brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to "MicrosoftEntra". Browsers can define additional per-platform requirements for how new brokers can be registered and verified by the browser.
 
 `accountId`: The platform-specific account ID that was previously assigned to the account by the platform broker. The app can pass this accountId to allow broker to look up the account without prompting the end user via additional account selection UX. Passing the accountId is the only way to obtain a token for an existing account without a prompt. It is obtained by the app from the Account property of a previous successful response. 
 
-`clientId`: Identifier provided by the identity provider for an application (the web site) requesting a token. Semantics of clientId match the [OAuth2 specification](https://datatracker.ietf.org/doc/html/rfc6749#section-2.1). Limitations that apply to public clients described in the OAuth2 specification apply to this parameter as well. 
+`clientId`: Required identifier provided by the identity provider for an application (the web site) requesting a token. Semantics of clientId match the [OAuth2 specification](https://datatracker.ietf.org/doc/html/rfc6749#section-2.1). Limitations that apply to public clients described in the OAuth2 specification apply to this parameter as well.
 
-`authority`: The authority that will be used for the OAuth2 request. Some brokers accept empty authority and will use a default one (https://login.microsoftonline.com). 
+`authority`: Optional authority that will be used for the OAuth2 request.
 
-`scope`: Defines a list of requested "scopes" which generally map to a set of permissions/capabilities the calling application (web site) is requesting access for. This matches [OAuth2 scope definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3).
+`scope`: Required list of requested "scopes" which generally map to a set of permissions/capabilities the calling application (web site) is requesting access for. This matches [OAuth2 scope definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3).
 
-`redirectURI`: The redirect URI for the application, matches [OAuth2 definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2). 
+`redirectUri`: Required redirect URI for the application, matching the [OAuth2 definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2).
 
-`correlationID`: A correlation ID for the application to track the specific request. The broker may choose to use this ID to associate telemetry and/or show users this ID in error scenarios to enable troubleshooting and error analysis.  
+`correlationId`: An optional correlation ID for the application to track the specific request. The broker may choose to use this ID to associate telemetry and/or show users this ID in error scenarios to enable troubleshooting and error analysis.
 
-`isSecurityTokenService`:` When this flag is true, the broker is expected to validate that the request is coming from the Identity provider URL it expects. To do that, as part of the API contract between the browser and the broker, the browser will send an additional "sender" parameter (which is the URL of the website that is initiating the request). If it is valid, this call comes from a security token service (STS). The "sender" is not part of the API described in this document as it is not sent by the JS application, but by the browser itself.
+`isSecurityTokenService`: Optional flag. When this flag is true, the broker is expected to validate that the request is coming from the Identity provider URL it expects. To do that, as part of the API contract between the browser and the broker, the browser will send an additional "sender" parameter (which is the URL of the website that is initiating the request). If it is valid, this call comes from a security token service (STS). The "sender" is not part of the API described in this document as it is not sent by the JS application, but by the browser itself.
+
+`preferBinding`: Optional field. When `true`, requests that the broker bind the access token to a broker-owned, attested key when the broker and identity provider support it. The broker may return an unbound token when binding is unavailable, so the caller must inspect the response properties to determine whether binding was applied.
 
 `state`: OAuth protocol "state" param. It will be returned without changes in the response.  
 
 `extraParameters`: A string map of additional parameters to send to token and authorize endpoints. 
+
+`extraParametersNoCache`: A string map of request-specific parameters that the broker passes to the token request but does not use when looking up or storing a token in its cache. For DPoP requests, this map can contain `pop_method`, `pop_uri`, and `pop_nonce`. These values describe the individual resource request and its proof, rather than the access token itself.
 
 There are additionally known optional parameters that can be passed in via the `extraParameters` map. This is to make the API easier to call from JS as most of the optional parameters will not be present. These optional parameters are:
 
@@ -126,12 +133,14 @@ There are additionally known optional parameters that can be passed in via the `
 
 `ProofOfPossessionParams`: The parameters used for Access Token (AT) proof-of-possession as described in [draft-ietf-oauth-signed-http-request-03](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03). For example, `bindingKeyInfo`, `keyId`, `tokenType`, `bindingClaims`, `bindingNonce`, `resourceRequestMethod`, `resourceRequestUri`, and `signPopToken`.
 
+`tokenType`: The requested access-token type. DPoP flows use `dpop` when requesting a DPoP-bound access token, or `dpop+proof` when the broker should also create the proof for the resource request. Request-specific proof inputs belong in `extraParametersNoCache` so they do not affect token-cache lookup.
+
 #### GetToken Response
 The GetTokenResult is a dictionary that contain either an error or the response data (e.g. `access_token`, `id_token`, `account`, etc.). 
 
 ```
 dictionary ErrorResult { 
-    DOMString code, 
+    required DOMString code,
     DOMString? description, 
     DOMString? errorCode,
     DOMString? protocolError, 
@@ -176,8 +185,8 @@ If the site doesn't understand the status code, we recommend it show the user a 
 
 ```
 dictionary Account { 
-    DOMString id, 
-    DOMString userName, 
+    DOMString id,
+    DOMString userName,
     record<DOMString, DOMString>? properties 
 }   
 ```
@@ -190,18 +199,18 @@ dictionary Account {
 
 ```
 dictionary GetTokenResult  { 
-    boolean isSuccess, 
+    required boolean isSuccess,
     DOMString? state, 
-    DOMString? accessToken, 
-    unsigned long long expiresIn, 
-    Account account, 
-    DOMString? clientInfo, 
-    DOMString? idToken, 
-    DOMString? scopes, 
+    DOMString? accessToken,
+    unsigned long long expiresIn,
+    Account account,
+    DOMString? clientInfo,
+    DOMString? idToken,
+    DOMString? scopes,
     DOMString? proofOfPossessionPayload, 
     boolean extendedLifetimeToken, 
     ErrorResult error, 
-    record<DOMString, DOMString>? properties 
+    record<DOMString, DOMString>? properties
 } 
 ```
 
@@ -223,21 +232,21 @@ dictionary GetTokenResult  {
 
 `extendedLifetimeToken`: `true` if the response was an extended lifetime token.
 
-`properties`: Additional response data that also may include platform-specific telemetry data.
+`properties`: Additional response data that also may include platform-specific telemetry data. For DPoP responses, this map can include `token_type`, `binding_attested`, and `dpop_proof`. `token_type` identifies the returned token type, `binding_attested` indicates whether the broker used an attested broker-owned key, and `dpop_proof` contains the proof generated by the broker when requested with the `dpop+proof` token type.
 
 #### SignOut Request
 The `SignOutParameters` request parameter is a dictionary containing all parameters needed to sign out a user from the from the broker:  
 
 ```
 dictionary SignOutParameters { 
-    DOMString brokerId,
-    DOMString accountId, 
+    required DOMString brokerId,
+    required DOMString accountId,
     record<DOMString, DOMString>? extraParameters 
 }   
 ```
 `brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to `MicrosoftEntra`. Browsers can define additional per-platform requirements for how new brokers can be registered and verified by the browser.
 
-`accountId`: The account ID for which the signout request is being made.
+`accountId`: Required account ID for which the signout request is being made.
 
 `extraParameters`: Optional broker-defined parameters.
 
@@ -247,10 +256,45 @@ The `SignOutResult` is also a dictionary that will contain an error in case ther
 
 ```
 dictionary SignOutResult  { 
-    boolean isSuccess,
+    required boolean isSuccess,
     ErrorResult error 
 } 
 ```
+
+### GetCookies API
+When the response of `getSupportedContracts` contains `get-cookies`, the `getCookies` function can be used to retrieve cookies supplied by the platform broker (for example, a cookie carrying a device-bound SSO artifact). Unlike the other functions, `getCookies` is also available in service workers, which lets a service worker obtain broker cookies while handling network requests. The `getSupportedContracts`, `executeGetToken`, and `executeSignOut` functions are only available in window contexts.
+
+```
+navigator.platformAuthentication.getCookies(DOMString nonce) -> Promise<GetCookiesResult>
+```
+
+`nonce`: A caller-provided value the broker can use to prevent replay and to correlate the request with its response.
+
+#### GetCookies Response
+The `GetCookiesResult` is a dictionary that contains either the returned cookies or an error.
+
+```
+dictionary Cookie {
+    DOMString name,
+    DOMString data
+}
+
+dictionary GetCookiesResult {
+    required boolean isSuccess,
+    sequence<Cookie> cookies,
+    ErrorResult error
+}
+```
+
+`isSuccess`: `true` if the request succeeded, in which case `cookies` contains the broker-supplied cookies.
+
+`cookies`: The list of cookies supplied by the platform broker.
+
+`error`: An `ErrorResult` populated when the request fails.
+
+`name`: The cookie name supplied by the platform broker.
+
+`data`: Opaque cookie data supplied by the platform broker. The browser does not interpret or filter this value before returning it to the initiating page.
  
 ## Policies  
 We recommend user agents provide enterprise device administrators with a policy mechanism to control whether or not these APIs are visible to pages and/or functional. The browser should honor the state of its policy before allowing site access to the APIs.  
