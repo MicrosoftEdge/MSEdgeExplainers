@@ -100,7 +100,7 @@ dictionary GetTokenParameters {
 
 `clientId`: Required identifier provided by the identity provider for an application (the web site) requesting a token. Semantics of clientId match the [OAuth2 specification](https://datatracker.ietf.org/doc/html/rfc6749#section-2.1). Limitations that apply to public clients described in the OAuth2 specification apply to this parameter as well.
 
-`authority`: Optional authority that will be used for the OAuth2 request. When omitted, the broker may use a default authority (for example, https://login.microsoftonline.com).
+`authority`: Optional authority that will be used for the OAuth2 request.
 
 `scope`: Required list of requested "scopes" which generally map to a set of permissions/capabilities the calling application (web site) is requesting access for. This matches [OAuth2 scope definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3).
 
@@ -110,7 +110,7 @@ dictionary GetTokenParameters {
 
 `isSecurityTokenService`: Optional flag. When this flag is true, the broker is expected to validate that the request is coming from the Identity provider URL it expects. To do that, as part of the API contract between the browser and the broker, the browser will send an additional "sender" parameter (which is the URL of the website that is initiating the request). If it is valid, this call comes from a security token service (STS). The "sender" is not part of the API described in this document as it is not sent by the JS application, but by the browser itself.
 
-`preferBinding`: Optional preference. When `true`, requests that the broker bind the access token to a broker-owned, attested key when the broker and identity provider support it. The broker may return an unbound token when binding is unavailable, so the caller must inspect the response properties to determine whether binding was applied.
+`preferBinding`: Optional field. When `true`, requests that the broker bind the access token to a broker-owned, attested key when the broker and identity provider support it. The broker may return an unbound token when binding is unavailable, so the caller must inspect the response properties to determine whether binding was applied.
 
 `state`: OAuth protocol "state" param. It will be returned without changes in the response.  
 
@@ -139,7 +139,7 @@ The GetTokenResult is a dictionary that contain either an error or the response 
 
 ```
 dictionary ErrorResult { 
-    DOMString code, 
+    required DOMString code,
     DOMString? description, 
     DOMString? errorCode,
     DOMString? protocolError, 
@@ -184,8 +184,8 @@ If the site doesn't understand the status code, we recommend it show the user a 
 
 ```
 dictionary Account { 
-    required DOMString id,
-    required DOMString userName,
+    DOMString id,
+    DOMString userName,
     record<DOMString, DOMString>? properties 
 }   
 ```
@@ -200,16 +200,16 @@ dictionary Account {
 dictionary GetTokenResult  { 
     required boolean isSuccess,
     DOMString? state, 
-    required DOMString? accessToken,
-    required unsigned long long expiresIn,
-    required Account account,
-    required DOMString? clientInfo,
-    required DOMString? idToken,
-    required DOMString? scopes,
+    DOMString? accessToken,
+    unsigned long long expiresIn,
+    Account account,
+    DOMString? clientInfo,
+    DOMString? idToken,
+    DOMString? scopes,
     DOMString? proofOfPossessionPayload, 
     boolean extendedLifetimeToken, 
     ErrorResult error, 
-    required record<DOMString, DOMString>? properties
+    record<DOMString, DOMString>? properties
 } 
 ```
 
@@ -255,7 +255,7 @@ The `SignOutResult` is also a dictionary that will contain an error in case ther
 
 ```
 dictionary SignOutResult  { 
-    boolean isSuccess,
+    required boolean isSuccess,
     ErrorResult error 
 } 
 ```
