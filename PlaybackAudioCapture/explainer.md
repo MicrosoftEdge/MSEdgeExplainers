@@ -322,9 +322,9 @@ Playback audio may include sensitive content from tabs, applications, or the
 device.
 
 See the illustrative
-[permission and source-selection flow mockups](permission-ux-flow-mockups.md)
+[permission and source-selection flow mockups](https://microsoftedge.github.io/MSEdgeExplainers/PlaybackAudioCapture/permission-ux-flow-mockups.html)
 and
-[ongoing capture indicator and control mockups](https://nishitha-burman.github.io/playback-audio-ongoing-use-mockups/).
+[ongoing capture indicator and control mockups](https://microsoftedge.github.io/MSEdgeExplainers/PlaybackAudioCapture/ongoing-use-mockups/).
 
 - Access requires a user action and browser-controlled permission.
 - A user-selected request uses browser UI; the website cannot enumerate or

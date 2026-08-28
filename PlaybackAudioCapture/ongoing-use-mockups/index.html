@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playback Audio Capture - Ongoing Use Mockups</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", Arial, sans-serif;
+      --accent: #0f6cbd;
+      --border: #d6d6d6;
+      --muted: #616161;
+      --surface: #fff;
+      --surface-subtle: #f5f5f5;
+      --text: #242424;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f0f2f5;
+      color: var(--text);
+      margin: 0;
+      padding: 40px 24px 64px;
+    }
+
+    main {
+      margin: 0 auto;
+      max-width: 1180px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 8px;
+    }
+
+    .intro {
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0 0 30px;
+    }
+
+    .precedent {
+      background: #eef6fd;
+      border: 1px solid #b7d8f4;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      padding: 18px 20px;
+    }
+
+    .precedent h2 {
+      margin-bottom: 8px;
+    }
+
+    .precedent p {
+      color: #3b4f61;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 5px 0;
+    }
+
+    .icon-exploration {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgb(0 0 0 / 8%);
+      margin-bottom: 24px;
+      padding: 22px;
+    }
+
+    .icon-exploration h2 {
+      margin-bottom: 6px;
+    }
+
+    .icon-exploration > p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin: 0 0 18px;
+    }
+
+    .icon-options {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .deferred-icons {
+      margin-bottom: 0;
+      margin-top: 24px;
+    }
+
+    .icon-option {
+      align-items: center;
+      background: var(--surface-subtle);
+      border: 1px solid #dedede;
+      border-radius: 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      min-height: 142px;
+      padding: 15px 10px 12px;
+      text-align: center;
+    }
+
+    .icon-preview {
+      align-items: center;
+      background: #fff;
+      border: 1px solid #d2d2d2;
+      border-radius: 50%;
+      color: var(--accent);
+      display: flex;
+      height: 48px;
+      justify-content: center;
+      position: relative;
+      width: 48px;
+    }
+
+    .icon-preview svg {
+      height: 27px;
+      overflow: visible;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+      width: 27px;
+    }
+
+    .record-dot {
+      background: #c42b1c;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      height: 11px;
+      position: absolute;
+      right: -1px;
+      top: -1px;
+      width: 11px;
+    }
+
+    .option-name {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .option-description {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.3;
+    }
+
+    .grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .concept {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgb(0 0 0 / 8%);
+      overflow: hidden;
+    }
+
+    .concept-header {
+      border-bottom: 1px solid #e8e8e8;
+      padding: 20px 22px 16px;
+    }
+
+    .concept-label {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      margin: 0 0 5px;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-size: 19px;
+      margin: 0 0 6px;
+    }
+
+    .description {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .stage {
+      background: #e9edf2;
+      min-height: 330px;
+      padding: 26px 20px;
+      position: relative;
+    }
+
+    .browser {
+      background: #fff;
+      border: 1px solid #aeb4bc;
+      border-radius: 9px;
+      box-shadow: 0 8px 18px rgb(0 0 0 / 14%);
+      min-height: 260px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tab-strip {
+      align-items: end;
+      background: #dfe3e8;
+      display: flex;
+      gap: 4px;
+      height: 42px;
+      padding: 8px 10px 0;
+    }
+
+    .tab {
+      align-items: center;
+      background: #eef0f3;
+      border-radius: 7px 7px 0 0;
+      color: #454545;
+      display: flex;
+      font-size: 12px;
+      gap: 7px;
+      height: 34px;
+      max-width: 220px;
+      padding: 0 11px;
+    }
+
+    .tab.active {
+      background: #fff;
+    }
+
+    .tab-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      align-items: center;
+      border-bottom: 1px solid #e4e4e4;
+      display: flex;
+      gap: 9px;
+      height: 44px;
+      padding: 7px 10px;
+    }
+
+    .nav-button {
+      color: #555;
+      font-size: 17px;
+    }
+
+    .address {
+      background: #f2f3f5;
+      border-radius: 16px;
+      color: #505050;
+      flex: 1;
+      font-size: 12px;
+      padding: 7px 12px;
+    }
+
+    .address.with-indicator {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 3px;
+      padding-right: 4px;
+      padding-top: 3px;
+    }
+
+    .capture-icon {
+      align-items: center;
+      background: #e7f3ff;
+      border: 1px solid #a9d2f5;
+      border-radius: 50%;
+      color: var(--accent);
+      display: inline-flex;
+      flex: 0 0 auto;
+      height: 29px;
+      justify-content: center;
+      position: relative;
+      width: 29px;
+    }
+
+    .capture-icon::after {
+      background: #c42b1c;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      content: "";
+      height: 7px;
+      position: absolute;
+      right: -2px;
+      top: -1px;
+      width: 7px;
+    }
+
+    .capture-icon svg,
+    .inline-capture-icon svg {
+      fill: none;
+      height: 22px;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+      width: 22px;
+    }
+
+    .page {
+      align-items: center;
+      color: #535353;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      gap: 8px;
+      justify-content: center;
+      min-height: 165px;
+      text-align: center;
+    }
+
+    .page-title {
+      color: #333;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .popover {
+      background: #fff;
+      border: 1px solid #c7c7c7;
+      border-radius: 9px;
+      box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
+      padding: 12px;
+      position: absolute;
+      right: 13px;
+      top: 82px;
+      width: 270px;
+      z-index: 2;
+    }
+
+    .popover h3 {
+      font-size: 13px;
+      margin: 0 0 7px;
+    }
+
+    .panel-message {
+      font-size: 11px;
+      line-height: 1.3;
+      margin: 0 0 8px;
+    }
+
+    .permission-choice {
+      align-items: flex-start;
+      display: flex;
+      font-size: 11px;
+      gap: 7px;
+      line-height: 1.3;
+      margin: 7px 0;
+    }
+
+    .permission-choice input {
+      accent-color: #242424;
+      flex: 0 0 auto;
+      height: 16px;
+      margin: 0;
+      width: 16px;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 7px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    .panel-actions button {
+      font-size: 11px;
+      min-width: 64px;
+      padding: 5px 10px;
+    }
+
+    .done {
+      background: #242424;
+      border-color: #242424;
+      color: #fff;
+    }
+
+    .manage {
+      background: #fff;
+    }
+
+    button {
+      border: 1px solid #8a8a8a;
+      border-radius: 5px;
+      cursor: default;
+      font: inherit;
+      padding: 7px 14px;
+    }
+
+    .tab-capture-badge {
+      align-items: center;
+      color: var(--accent);
+      display: inline-flex;
+      flex: 0 0 auto;
+      font-size: 11px;
+      font-weight: 600;
+      gap: 5px;
+    }
+
+    .mini-dot {
+      background: #c42b1c;
+      border-radius: 50%;
+      height: 7px;
+      width: 7px;
+    }
+
+    .inline-capture-icon {
+      align-items: center;
+      color: var(--accent);
+      display: inline-flex;
+      flex: 0 0 auto;
+      height: 18px;
+      justify-content: center;
+      position: relative;
+      width: 21px;
+    }
+
+    .inline-capture-icon svg {
+      height: 18px;
+      width: 18px;
+    }
+
+    .inline-capture-icon::after {
+      background: #c42b1c;
+      border: 1px solid #fff;
+      border-radius: 50%;
+      content: "";
+      height: 6px;
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 6px;
+    }
+
+    .source-banner {
+      align-items: center;
+      background: #e7f3ff;
+      border-bottom: 1px solid #a8d1f4;
+      color: #153b5c;
+      display: flex;
+      font-size: 12px;
+      gap: 10px;
+      justify-content: space-between;
+      padding: 9px 12px;
+    }
+
+    .source-banner strong {
+      color: #0b4f88;
+    }
+
+    .banner-stop {
+      background: #fff;
+      border-color: #7baed8;
+      color: #0b4f88;
+      padding: 5px 10px;
+    }
+
+    .banner-actions {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 7px;
+    }
+
+    .banner-stop.primary {
+      background: #242424;
+      border-color: #242424;
+      color: #fff;
+    }
+
+    .meeting-tile {
+      align-items: center;
+      background: #263238;
+      border-radius: 7px;
+      color: #fff;
+      display: flex;
+      height: 100px;
+      justify-content: center;
+      width: 72%;
+    }
+
+    .external-app {
+      background: #f7f7f7;
+      border: 1px solid #77808a;
+      border-radius: 8px;
+      box-shadow: 0 8px 18px rgb(0 0 0 / 14%);
+      height: 260px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .external-app-titlebar {
+      align-items: center;
+      background: #e7e7e7;
+      border-bottom: 1px solid #c9c9c9;
+      display: flex;
+      font-size: 12px;
+      height: 34px;
+      justify-content: space-between;
+      padding: 0 11px;
+    }
+
+    .external-app-content {
+      align-items: center;
+      color: #525252;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      height: 180px;
+      justify-content: center;
+    }
+
+    .document-line {
+      background: #d9d9d9;
+      border-radius: 2px;
+      height: 7px;
+      width: 58%;
+    }
+
+    .document-line.short {
+      width: 38%;
+    }
+
+    .floating-sharing-control {
+      align-items: center;
+      background: #fff;
+      bottom: 12px;
+      box-shadow: 0 5px 14px rgb(0 0 0 / 22%);
+      display: flex;
+      font-size: 11px;
+      gap: 9px;
+      left: 50%;
+      padding: 8px 10px;
+      position: absolute;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    .pause-mark {
+      color: #b3b3b3;
+      font-weight: 700;
+    }
+
+    .floating-stop {
+      background: #242424;
+      border-color: #242424;
+      color: #fff;
+      padding: 5px 9px;
+    }
+
+    .hide-link {
+      color: #0f6cbd;
+      text-decoration: underline;
+    }
+
+    .desktop {
+      background: #4c9bd3;
+      border: 1px solid #77808a;
+      border-radius: 8px;
+      box-shadow: 0 8px 18px rgb(0 0 0 / 14%);
+      height: 260px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .taskbar {
+      align-items: center;
+      background: rgb(245 247 250 / 94%);
+      bottom: 0;
+      display: flex;
+      height: 47px;
+      justify-content: flex-end;
+      left: 0;
+      padding: 0 13px;
+      position: absolute;
+      right: 0;
+    }
+
+    .tray {
+      align-items: center;
+      display: flex;
+      gap: 13px;
+    }
+
+    .tray-capture {
+      align-items: center;
+      color: #075fa8;
+      display: flex;
+      gap: 5px;
+    }
+
+    .tray-time {
+      color: #333;
+      font-size: 11px;
+      line-height: 1.2;
+      text-align: right;
+    }
+
+    @media (max-width: 850px) {
+      .icon-options {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .icon-options {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Ongoing playback-audio capture concepts</h1>
+    <p class="intro">
+      These mockups explore how browsers and operating systems could help users
+      remain aware of and stop playback-audio capture after permission is
+      granted. They are illustrative rather than proposed final UI and draw on
+      existing microphone, camera, and screen-sharing affordances in browsers.
+    </p>
+
+    <section class="precedent" aria-labelledby="precedent-title">
+      <h2 id="precedent-title">Existing screen-sharing UX patterns</h2>
+      <p>
+        Browser implementations vary. Current Microsoft Edge screen-sharing UI
+        is one example that informed the concepts below:
+      </p>
+      <p>
+        <strong>If a browser tab is shared:</strong> the browser can identify
+        sharing in both places. The captured tab can say which site is receiving
+        it, while the capturing tab can identify the selected tab and provide a
+        stop control.
+      </p>
+      <p>
+        <strong>If audio from an application or device is captured:</strong> a
+        persistent browser-controlled sharing indicator could keep the capture
+        visible and let the user stop it, even when another application is
+        active.
+      </p>
+    </section>
+
+    <div class="grid">
+      <article class="concept">
+        <header class="concept-header">
+          <p class="concept-label">Capturing browser tab</p>
+          <h2>1. Capturing-site sharing bar</h2>
+          <p class="description">
+            If audio from a tab, application, or device is captured, the
+            capturing tab could identify the source and provide a stop control.
+          </p>
+        </header>
+        <div class="stage">
+          <div class="browser">
+            <div class="tab-strip">
+              <div class="tab active">
+                <span class="tab-title">Meeting notes</span>
+              </div>
+              <div class="tab">
+                <span class="tab-title">Meeting app</span>
+                <span class="mini-dot"
+                      aria-label="This tab's audio is being shared"></span>
+              </div>
+            </div>
+            <div class="toolbar">
+              <span class="nav-button" aria-hidden="true">&larr;</span>
+              <div class="address">notes.example</div>
+              <span class="nav-button" aria-hidden="true">&#8942;</span>
+            </div>
+            <div class="source-banner">
+              <span>
+                Sharing audio from <strong>meetingapp.example</strong> to this
+                tab
+              </span>
+              <button class="banner-stop" type="button">Stop sharing</button>
+            </div>
+            <div class="page">
+              <span class="page-title">Meeting notes</span>
+              <span>Listening to the selected audio source</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="concept">
+        <header class="concept-header">
+          <p class="concept-label">Captured browser tab</p>
+          <h2>2. Captured-tab sharing bar</h2>
+          <p class="description">
+            If a browser tab is the selected source, that tab could identify
+            which site is receiving its audio and provide a stop control.
+          </p>
+        </header>
+        <div class="stage">
+          <div class="browser">
+            <div class="tab-strip">
+              <div class="tab active">
+                <span class="tab-title">Meeting app</span>
+                <span class="mini-dot"
+                      aria-label="This tab's audio is being shared"></span>
+              </div>
+              <div class="tab">
+                <span class="tab-title">Meeting notes</span>
+              </div>
+            </div>
+            <div class="toolbar">
+              <span class="nav-button" aria-hidden="true">&larr;</span>
+              <div class="address">meetingapp.example</div>
+              <span class="nav-button" aria-hidden="true">&#8942;</span>
+            </div>
+            <div class="source-banner">
+              <span>
+                This tab's audio is being shared with
+                <strong>notes.example</strong>
+              </span>
+              <button class="banner-stop" type="button">Stop</button>
+            </div>
+            <div class="page">
+              <div class="meeting-tile">Team meeting</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="concept">
+        <header class="concept-header">
+          <p class="concept-label">Another active browser tab</p>
+          <h2>3. Sharing status outside either site</h2>
+          <p class="description">
+            If Site A captures Site B while the user views Site C, the active
+            tab could still identify the source and destination, provide sharing
+            controls, and show the browser's playback-capture indicator.
+          </p>
+        </header>
+        <div class="stage">
+          <div class="browser">
+            <div class="tab-strip">
+              <div class="tab">
+                <span class="tab-title">Meeting notes</span>
+              </div>
+              <div class="tab">
+                <span class="tab-title">Meeting app</span>
+                <span class="mini-dot"
+                      aria-label="This tab's audio is being shared"></span>
+              </div>
+              <div class="tab active">
+                <span class="tab-title">Research</span>
+              </div>
+            </div>
+            <div class="toolbar">
+              <span class="nav-button" aria-hidden="true">&larr;</span>
+              <div class="address">research.example</div>
+              <span class="nav-button" aria-hidden="true">&#8942;</span>
+            </div>
+            <div class="source-banner">
+              <span>
+                Sharing <strong>meetingapp.example</strong> to
+                <strong>notes.example</strong>
+              </span>
+              <span class="banner-actions">
+                <button class="banner-stop primary" type="button">
+                  Stop sharing
+                </button>
+                <button class="banner-stop" type="button">
+                  Share this tab instead
+                </button>
+              </span>
+            </div>
+            <div class="page">
+              <span class="page-title">Research</span>
+              <span>Another site is open while audio sharing continues</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="concept">
+        <header class="concept-header">
+          <p class="concept-label">Outside the browser</p>
+          <h2>4. Persistent system-audio sharing control</h2>
+          <p class="description">
+            If a site captures system audio, a browser-owned floating control
+            could remain visible when the user switches to another application.
+          </p>
+        </header>
+        <div class="stage">
+          <div class="external-app">
+            <div class="external-app-titlebar">
+              <span>Document</span>
+              <span aria-hidden="true">- &nbsp; &#9633; &nbsp; &times;</span>
+            </div>
+            <div class="external-app-content">
+              <span>Another application is active</span>
+              <span class="document-line" aria-hidden="true"></span>
+              <span class="document-line" aria-hidden="true"></span>
+              <span class="document-line short" aria-hidden="true"></span>
+            </div>
+            <div class="floating-sharing-control">
+              <span class="pause-mark" aria-hidden="true">II</span>
+              <span>
+                <strong>notes.example</strong> is sharing your system audio.
+              </span>
+              <button class="floating-stop" type="button">Stop sharing</button>
+              <span class="hide-link">Hide</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="concept">
+        <header class="concept-header">
+          <p class="concept-label">Browser address bar</p>
+          <h2>5. Permission indicator and controls</h2>
+          <p class="description">
+            Extend Edge's microphone permission panel to show active
+            playback-audio access and let the user manage future access.
+          </p>
+        </header>
+        <div class="stage">
+          <div class="browser">
+            <div class="tab-strip">
+              <div class="tab active">
+                <span class="tab-title">Meeting notes</span>
+              </div>
+            </div>
+            <div class="toolbar">
+              <span class="nav-button" aria-hidden="true">&larr;</span>
+              <div class="address with-indicator">
+                <span>notes.example</span>
+                <div class="capture-icon"
+                     aria-label="Playback audio is being captured">
+                  <svg viewBox="0 0 28 28" aria-hidden="true">
+                    <path d="M4 11h4l5-4v14l-5-4H4z"></path>
+                    <path d="M17 10c2 2 2 6 0 8"></path>
+                    <path d="M20 7c4 4 4 10 0 14"></path>
+                  </svg>
+                </div>
+              </div>
+              <span class="nav-button" aria-hidden="true">&#8942;</span>
+            </div>
+            <div class="page">
+              <span class="page-title">Meeting notes</span>
+              <span>Transcription in progress</span>
+            </div>
+            <section class="popover" aria-label="Playback audio capture details">
+              <h3>Playback audio allowed</h3>
+              <p class="panel-message">
+                This page is accessing audio playing on your device.
+              </p>
+              <label class="permission-choice">
+                <input type="radio" name="playback-permission" checked>
+                <span>
+                  Continue allowing <strong>notes.example</strong> to access
+                  playback audio
+                </span>
+              </label>
+              <label class="permission-choice">
+                <input type="radio" name="playback-permission">
+                <span>Always block playback audio access</span>
+              </label>
+              <div class="panel-actions">
+                <button class="done" type="button">Done</button>
+                <button class="manage" type="button">Manage</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </article>
+
+      <article class="concept">
+        <header class="concept-header">
+          <p class="concept-label">Possible OS integration</p>
+          <h2>6. System taskbar indicator</h2>
+          <p class="description">
+            The OS could eventually expose playback capture similarly to
+            microphone use, with a distinct icon for audio being captured.
+          </p>
+        </header>
+        <div class="stage">
+          <div class="desktop">
+            <div class="taskbar">
+              <div class="tray">
+                <span aria-hidden="true">^</span>
+                <span class="tray-capture"
+                      aria-label="Playback audio is being captured">
+                  <span class="inline-capture-icon" aria-hidden="true">
+                    <svg viewBox="0 0 28 28">
+                      <path d="M4 11h4l5-4v14l-5-4H4z"></path>
+                      <path d="M17 10c2 2 2 6 0 8"></path>
+                      <path d="M20 7c4 4 4 10 0 14"></path>
+                    </svg>
+                  </span>
+                </span>
+                <span aria-hidden="true">&#128267;</span>
+                <span class="tray-time">2:15 PM<br>8/25/2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!--
+    <section class="icon-exploration deferred-icons"
+             aria-labelledby="deferred-icon-options-title">
+      <h2 id="deferred-icon-options-title">Icon directions considered</h2>
+      <p>
+        The mockups currently use Option A. The other directions are retained
+        for later exploration if it is too easily confused with audio playback.
+      </p>
+      <div class="icon-options">
+        <div class="icon-option">
+          <div class="icon-preview">
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M4 11h4l5-4v14l-5-4H4z"></path>
+              <path d="M17 10c2 2 2 6 0 8"></path>
+              <path d="M20 7c4 4 4 10 0 14"></path>
+            </svg>
+            <span class="record-dot" aria-hidden="true"></span>
+          </div>
+          <span class="option-name">A. Speaker + capture dot</span>
+          <span class="option-description">Familiar audio symbol with an active-capture signal.</span>
+        </div>
+
+        <div class="icon-option">
+          <div class="icon-preview">
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M3 9V4h5"></path>
+              <path d="M20 4h5v5"></path>
+              <path d="M25 19v5h-5"></path>
+              <path d="M8 24H3v-5"></path>
+              <path d="M8 12h3l4-3v10l-4-3H8z"></path>
+              <path d="M18 11c2 2 2 4 0 6"></path>
+            </svg>
+          </div>
+          <span class="option-name">B. Speaker in capture frame</span>
+          <span class="option-description">Explicitly combines audio with the capture metaphor.</span>
+        </div>
+
+        <div class="icon-option">
+          <div class="icon-preview">
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M3 14h3l2-6 3 12 3-15 3 18 3-12 2 6h3"></path>
+            </svg>
+            <span class="record-dot" aria-hidden="true"></span>
+          </div>
+          <span class="option-name">C. Waveform + capture dot</span>
+          <span class="option-description">Suggests an audio signal rather than audio playback.</span>
+        </div>
+
+        <div class="icon-option">
+          <div class="icon-preview">
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <circle cx="14" cy="14" r="10"></circle>
+              <path d="M7 14h3l2-5 3 10 2-7 2 4h2"></path>
+            </svg>
+          </div>
+          <span class="option-name">D. Recorded audio signal</span>
+          <span class="option-description">A waveform enclosed by a persistent recording ring.</span>
+        </div>
+
+        <div class="icon-option">
+          <div class="icon-preview">
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M3 11h4l5-4v14l-5-4H3z"></path>
+              <path d="M23 7v8"></path>
+              <path d="m19 11 4 4 4-4"></path>
+              <path d="M18 21h10"></path>
+            </svg>
+          </div>
+          <span class="option-name">E. Audio being acquired</span>
+          <span class="option-description">A speaker plus an arrow into a capture destination.</span>
+        </div>
+
+        <div class="icon-option">
+          <div class="icon-preview">
+            <svg viewBox="0 0 28 28" aria-hidden="true">
+              <path d="M3 9V5h4"></path>
+              <path d="M21 5h4v4"></path>
+              <path d="M25 19v4h-4"></path>
+              <path d="M7 23H3v-4"></path>
+              <path d="M7 14h2l2-4 3 8 3-10 3 7h2"></path>
+            </svg>
+          </div>
+          <span class="option-name">F. Signal in capture frame</span>
+          <span class="option-description">Most explicit combination of audio signal and capture.</span>
+        </div>
+      </div>
+    </section>
+    -->
+  </main>
+</body>
+</html>
