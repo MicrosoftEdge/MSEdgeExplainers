@@ -74,18 +74,18 @@ navigator.platformAuthentication.executeGetToken(GetTokenParameters) -> Promise<
 navigator.platformAuthentication.executeSignOut(SignOutParameters) -> Promise<SignOutResult>
 ```
 
-The types `GetTokenResult`, `GetTokenParameters`, `SignOutResult` and `SignOutParameters` are strongly-typed dictionaries defined in WebIDL.
+The types `GetTokenResult`, `GetTokenParameters`, `SignOutResult` and `SignOutParameters` are strongly-typed dictionaries defined in WebIDL. Members marked `required` must be present; omitting one causes the WebIDL binding to throw a `TypeError` before the request reaches the broker. Members without `required` can be omitted.
 
 #### GetToken Request
 The `GetTokenParameters` request parameter is a dictionary containing all parameters needed to obtain an authentication token from the broker. The request payload closely follows the OAuth2 specification.
 ```
 dictionary GetTokenParameters {
-  DOMString brokerId, 
+  required DOMString brokerId,
   DOMString? accountId, 
-  DOMString clientId, 
+  required DOMString clientId,
   DOMString authority, 
-  DOMString scope, 
-  DOMString redirectUri, 
+  required DOMString scope,
+  required DOMString redirectUri,
   DOMString correlationId, 
   boolean isSecurityTokenService,
   boolean preferBinding,
@@ -98,19 +98,19 @@ dictionary GetTokenParameters {
 
 `accountId`: The platform-specific account ID that was previously assigned to the account by the platform broker. The app can pass this accountId to allow broker to look up the account without prompting the end user via additional account selection UX. Passing the accountId is the only way to obtain a token for an existing account without a prompt. It is obtained by the app from the Account property of a previous successful response. 
 
-`clientId`: Identifier provided by the identity provider for an application (the web site) requesting a token. Semantics of clientId match the [OAuth2 specification](https://datatracker.ietf.org/doc/html/rfc6749#section-2.1). Limitations that apply to public clients described in the OAuth2 specification apply to this parameter as well. 
+`clientId`: Required identifier provided by the identity provider for an application (the web site) requesting a token. Semantics of clientId match the [OAuth2 specification](https://datatracker.ietf.org/doc/html/rfc6749#section-2.1). Limitations that apply to public clients described in the OAuth2 specification apply to this parameter as well.
 
-`authority`: The authority that will be used for the OAuth2 request. Some brokers accept empty authority and will use a default one (https://login.microsoftonline.com). 
+`authority`: Optional authority that will be used for the OAuth2 request. When omitted, the broker may use a default authority (for example, https://login.microsoftonline.com).
 
-`scope`: Defines a list of requested "scopes" which generally map to a set of permissions/capabilities the calling application (web site) is requesting access for. This matches [OAuth2 scope definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3).
+`scope`: Required list of requested "scopes" which generally map to a set of permissions/capabilities the calling application (web site) is requesting access for. This matches [OAuth2 scope definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3).
 
-`redirectURI`: The redirect URI for the application, matches [OAuth2 definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2). 
+`redirectUri`: Required redirect URI for the application, matching the [OAuth2 definition](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.2).
 
-`correlationID`: A correlation ID for the application to track the specific request. The broker may choose to use this ID to associate telemetry and/or show users this ID in error scenarios to enable troubleshooting and error analysis.  
+`correlationId`: An optional correlation ID for the application to track the specific request. The broker may choose to use this ID to associate telemetry and/or show users this ID in error scenarios to enable troubleshooting and error analysis.
 
-`isSecurityTokenService`:` When this flag is true, the broker is expected to validate that the request is coming from the Identity provider URL it expects. To do that, as part of the API contract between the browser and the broker, the browser will send an additional "sender" parameter (which is the URL of the website that is initiating the request). If it is valid, this call comes from a security token service (STS). The "sender" is not part of the API described in this document as it is not sent by the JS application, but by the browser itself.
+`isSecurityTokenService`: Optional flag. When this flag is true, the broker is expected to validate that the request is coming from the Identity provider URL it expects. To do that, as part of the API contract between the browser and the broker, the browser will send an additional "sender" parameter (which is the URL of the website that is initiating the request). If it is valid, this call comes from a security token service (STS). The "sender" is not part of the API described in this document as it is not sent by the JS application, but by the browser itself.
 
-`preferBinding`: When `true`, requests that the broker bind the access token to a broker-owned, attested key when the broker and identity provider support it. The broker may return an unbound token when binding is unavailable, so the caller must inspect the response properties to determine whether binding was applied.
+`preferBinding`: Optional preference. When `true`, requests that the broker bind the access token to a broker-owned, attested key when the broker and identity provider support it. The broker may return an unbound token when binding is unavailable, so the caller must inspect the response properties to determine whether binding was applied.
 
 `state`: OAuth protocol "state" param. It will be returned without changes in the response.  
 
@@ -184,8 +184,8 @@ If the site doesn't understand the status code, we recommend it show the user a 
 
 ```
 dictionary Account { 
-    DOMString id, 
-    DOMString userName, 
+    required DOMString id,
+    required DOMString userName,
     record<DOMString, DOMString>? properties 
 }   
 ```
@@ -198,18 +198,18 @@ dictionary Account {
 
 ```
 dictionary GetTokenResult  { 
-    boolean isSuccess, 
+    required boolean isSuccess,
     DOMString? state, 
-    DOMString? accessToken, 
-    unsigned long long expiresIn, 
-    Account account, 
-    DOMString? clientInfo, 
-    DOMString? idToken, 
-    DOMString? scopes, 
+    required DOMString? accessToken,
+    required unsigned long long expiresIn,
+    required Account account,
+    required DOMString? clientInfo,
+    required DOMString? idToken,
+    required DOMString? scopes,
     DOMString? proofOfPossessionPayload, 
     boolean extendedLifetimeToken, 
     ErrorResult error, 
-    record<DOMString, DOMString>? properties 
+    required record<DOMString, DOMString>? properties
 } 
 ```
 
@@ -238,14 +238,14 @@ The `SignOutParameters` request parameter is a dictionary containing all paramet
 
 ```
 dictionary SignOutParameters { 
-    DOMString brokerId,
-    DOMString accountId, 
+    required DOMString brokerId,
+    required DOMString accountId,
     record<DOMString, DOMString>? extraParameters 
 }   
 ```
 `brokerId`: Required parameter that identifies which platform broker to use. For Microsoft Entra brokers, this should be set to `MicrosoftEntra`. Browsers can define additional per-platform requirements for how new brokers can be registered and verified by the browser.
 
-`accountId`: The account ID for which the signout request is being made.
+`accountId`: Required account ID for which the signout request is being made.
 
 `extraParameters`: Optional broker-defined parameters.
 
