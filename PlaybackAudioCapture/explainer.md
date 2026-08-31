@@ -411,6 +411,20 @@ separately. It would not support audio-only recording, note taking,
 broadcasting, visualization, translation, processing, or sharing scenarios in
 the browser.
 
+## Stakeholder Feedback / Opposition
+
+This proposal is being shared to gather feedback from browser vendors, web
+developers, and standards participants.
+
+Developer interest and use cases are documented in
+[the existing W3C discussion](https://github.com/w3c/mediacapture-screen-share-extensions/issues/12).
+No browser vendor has yet expressed a formal position on either API option.
+
+Prior discussions have raised questions about platform support, privacy and
+security, source scope, permission UX, and whether playback-audio capture
+should extend an existing API or use a new API. These remain open areas for
+feedback and discussion.
+
 ## Acknowledgements
 
 This proposal builds on an
