@@ -44,7 +44,7 @@ JavaScript to apply the resulting stylesheet to each scope.
 
 This explainer proposes a declarative way to resolve a module specifier, fetch
 the result as a CSS module, and apply the resulting shared stylesheet to a tree
-scope using `<link rel="stylesheet" type="module">`.
+scope using `<link rel="stylesheet" import="...">`.
 
 ## Problem and use cases
 
@@ -80,21 +80,27 @@ all of those scopes a common, declarative reference.
   independently from the import mechanism proposed here.
 - Allowing selectors to cross a shadow boundary or otherwise weakening Shadow
   DOM encapsulation.
-- Making module `<link rel="stylesheet">` elements identical in every respect
-  to classic `<link rel="stylesheet">` elements, `<link rel="modulepreload">`
-  elements, `<style>` elements, or `adoptedStyleSheets` usage.
+- Making importing `<link rel="stylesheet" import="...">` elements identical
+  in every respect to classic `<link rel="stylesheet">` elements,
+  `<link rel="modulepreload">` elements, `<style>` elements, or
+  `adoptedStyleSheets` usage.
 
-## Proposal: Module `<link rel="stylesheet">` elements
+## Proposal: The `import` attribute on `<link rel="stylesheet">`
 
-We propose a module mode for `<link rel="stylesheet">`, selected by
-`type="module"`. In this mode, the value of `href` is resolved as a module
-specifier through import map processing, using the module
-`<link rel="stylesheet">` element's base URL. The resolved URL is imported as
-a CSS module. Once the module has loaded, its stylesheet is applied to the
-module `<link rel="stylesheet">` element's tree scope.
+We propose an `import` attribute for `<link rel="stylesheet">`. In browsers
+that support this attribute, its value is resolved as a module specifier
+through import map processing, using the `<link rel="stylesheet">` element's
+base URL. The resolved URL is imported as a CSS module. Once the module has
+loaded, its stylesheet is applied to the link element's tree scope.
+
+The existing `href` attribute can be supplied alongside `import` as a fallback.
+A browser that supports `import` uses the imported CSS module, while an
+unsupported browser ignores the unknown `import` attribute and loads `href` as
+a classic stylesheet. This provides progressively enhanced stylesheet sharing
+without preventing older browsers from styling the content.
 
 For clarity, this explainer calls the existing form a *classic*
-`<link rel="stylesheet">` element and the proposed form a *module*
+`<link rel="stylesheet">` element and the proposed form a *module import*
 `<link rel="stylesheet">` element.
 
 ```html
@@ -107,7 +113,7 @@ For clarity, this explainer calls the existing form a *classic*
 </script>
 <my-element>
   <template shadowrootmode="open">
-    <link rel="stylesheet" type="module" href="foo">
+    <link rel="stylesheet" import="foo">
     <p>Inside Shadow DOM</p>
   </template>
 </my-element>
@@ -119,14 +125,16 @@ Here, `https://example.com/foo.css` contains:
 p { color: blue; }
 ```
 
-The text inside the shadow root is styled blue. The `href` value is resolved as
-a module specifier using the import map, the resolved URL is fetched as a CSS
-module, and the resulting stylesheet is applied to the shadow root. The shared
-`CSSStyleSheet` appears in the shadow root's `styleSheets` collection.
+In a supporting browser, the text inside the shadow root is styled blue. The
+`import` value is resolved as a module specifier using the import map, the
+resolved URL is fetched as a CSS module, and the resulting stylesheet is
+applied to the shadow root. The shared `CSSStyleSheet` appears in the shadow
+root's `styleSheets` collection. In an unsupported browser, `import` is ignored
+and the absolute `href` is loaded as a classic stylesheet instead.
 
 ### The underlying stylesheet is shared between tree scopes
 
-Within a module map, module `<link rel="stylesheet">` elements whose `href`
+Within a module map, importing `<link rel="stylesheet">` elements whose `import`
 values resolve to the same URL use the same module map entry, keyed by that URL
 and the CSS module type. They therefore apply the same `CSSStyleSheet` object.
 
@@ -143,19 +151,19 @@ to two distinct shadow roots:
         }
       }
     </script>
-    <link rel="stylesheet" type="module" href="foo">
+    <link rel="stylesheet" import="foo">
   </head>
   <body>
     <p>Text in the document tree</p>
     <first-element>
       <template shadowrootmode="open">
-        <link rel="stylesheet" type="module" href="foo">
+        <link rel="stylesheet" import="foo">
         <p>Inside the first shadow root</p>
       </template>
     </first-element>
     <second-element>
       <template shadowrootmode="open">
-        <link rel="stylesheet" type="module" href="foo">
+        <link rel="stylesheet" import="foo">
         <p>Inside the second shadow root</p>
       </template>
     </second-element>
@@ -163,24 +171,23 @@ to two distinct shadow roots:
 </html>
 ```
 
-Once all three module links have loaded, importing the same module resolves to
-the existing module map entry without another fetch:
+Once all three importing links have loaded in a supporting browser, importing
+the same module resolves to the existing module map entry without another
+fetch:
 
 ```js
 const foo = (await import("foo", { with: { type: "css" } })).default;
 foo.replaceSync("p { color: green; }");
 ```
 
-The update changes the text in all three scopes to green because every module
-link applies the same underlying `CSSStyleSheet` object. This is not possible
-with classic `<link rel="stylesheet">` elements, for which each link has its
-own associated stylesheet.
+The update changes the text in all three scopes to green because every
+importing link applies the same underlying `CSSStyleSheet` object.
 
 ### Import Maps Are Not Necessary
 
 An import map is only needed to remap a module specifier. As with a JavaScript
 module import, a relative URL can be used directly and is resolved against the
-base URL of the module `<link rel="stylesheet">` element.
+base URL of the importing `<link rel="stylesheet">` element.
 
 The following example applies `./foo.css` to two shadow roots without an import
 map:
@@ -188,22 +195,22 @@ map:
 ```html
 <first-element>
   <template shadowrootmode="open">
-    <link rel="stylesheet" type="module" href="./foo.css">
+    <link rel="stylesheet" import="./foo.css">
     <p>Inside the first shadow root</p>
   </template>
 </first-element>
 <second-element>
   <template shadowrootmode="open">
-    <link rel="stylesheet" type="module" href="./foo.css">
+    <link rel="stylesheet" import="./foo.css">
     <p>Inside the second shadow root</p>
   </template>
 </second-element>
 ```
 
-Each `href` resolves `./foo.css` against its link element's base URL. When both
-links resolve to the same URL, they use the same CSS module map entry and apply
-the same underlying `CSSStyleSheet` object. A JavaScript import that resolves
-to that URL and module type also reuses the entry:
+Each `import` resolves `./foo.css` against its link element's base URL. When
+both imports resolve to the same URL, they use the same CSS module map entry
+and apply the same underlying `CSSStyleSheet` object. A JavaScript import that
+resolves to that URL and module type also reuses the entry:
 
 ```js
 const foo = (await import("./foo.css", { with: { type: "css" } })).default;
@@ -220,26 +227,30 @@ declaratively linked sheet through `adoptedStyleSheets` would allow script to
 remove or reorder the entry independently of its corresponding module link,
 breaking synchronization between DOM order and the applied stylesheet list.
 
-The presence and state of qualifying module links instead control membership
-in the read-only `styleSheets` collection, and their tree order controls the
-order of its entries. This distinction concerns the mutability of collection
-membership; the shared `CSSStyleSheet` object itself remains mutable, as shown
-above. The proposal therefore extends the CSSOM definition of which sheets are
-represented by `styleSheets`, introducing a DOM-associated constructed
-stylesheet.
+The presence and state of qualifying importing links instead control
+membership in the read-only `styleSheets` collection, and their tree order
+controls the order of its entries. This distinction concerns the mutability of
+collection membership; the shared `CSSStyleSheet` object itself remains
+mutable, as shown above. The proposal therefore extends the CSSOM definition
+of which sheets are represented by `styleSheets`, introducing a DOM-associated
+constructed stylesheet.
 
 ### Compatibility with classic `<link rel="stylesheet">` behavior
 
-Module and classic stylesheet links share fundamental `HTMLLinkElement`
-behavior, but they cannot be identical because module links import a shared,
-constructed stylesheet using module fetch semantics.
+Importing and classic stylesheet links share fundamental `HTMLLinkElement`
+behavior, but they cannot be identical because importing links apply a shared,
+constructed stylesheet using module fetch semantics in supporting browsers.
+
+With a new attribute (`import`), a fallback URL can be provided via `href`
+that does not go through import map processing. When both attributes are
+present, `import` takes precedence and only a single fetch occurs.
 
 #### Fundamental `HTMLLinkElement` behavior
 
 Existing behaviors that are not inherently tied to classic stylesheet fetches
-or one-to-one stylesheet ownership will also apply to module links. For
+or one-to-one stylesheet ownership will also apply to importing links. For
 example, the `nonce` attribute and the `load` and `error` events apply to
-module `<link rel="stylesheet">` elements.
+importing `<link rel="stylesheet">` elements.
 
 #### Constructed stylesheet behavior
 
@@ -254,15 +265,27 @@ produces several differences from classic stylesheet links:
   a module link, so rule matching differs from a classic stylesheet link in
   this case.
 
-Module links use the existing constructed stylesheet behavior in each case.
+Importing links use the existing constructed stylesheet behavior in each case.
 
 #### Per-link attributes and shared state
 
 Classic stylesheet links have a one-to-one association with their
-`CSSStyleSheet` objects. Module links deliberately allow many elements to share
-one object. Attributes such as `media` and `title` therefore cannot be mapped
-directly to the shared stylesheet when different module links specify different
-values. For this proposal, we plan on ignoring `media` and `title` entirely.
+`CSSStyleSheet` objects. Importing links deliberately allow many elements to
+share one object. Attributes such as `media` and `title` therefore cannot be
+mapped directly to the shared stylesheet when different importing links
+specify different values.
+
+For this proposal, we will ignore the `title` attribute, as it depedends on
+browser UI that doesn't cleanly scale to a many-to-one mapping and is also
+deprecated in most browsers.
+
+The `media` can be supported if it is applied at the `<link>` element level
+instead of applying it to the the stylesheet's `media` property. This is
+different than classic `<link>` stylesheet behavior but similar to how the
+`<source>` element works.
+
+These attributes retain their classic behaviors when an unsupported browser
+processes the `href` attribute as fallback.
 
 #### Module fetch and decoding semantics
 
@@ -273,8 +296,9 @@ mode, so a cross-origin response must pass a CORS check.
 
 Their decoding also differs. Classic stylesheets can use response-provided or
 legacy encoding information, while module script responses are always decoded
-as UTF-8. Module stylesheet links inherit the stricter module script fetch and
-decoding semantics, with no option to fall back to the classic behavior.
+as UTF-8. In supporting browsers, importing stylesheet links use the stricter
+module script fetch and decoding semantics. In unsupported browsers, the
+`href` fallback uses classic stylesheet fetch and decoding semantics.
 
 ## Alternate proposals
 
@@ -331,7 +355,7 @@ Inline module definitions could instead change module map keys from
 identifiers, or introduce a local-reference URL scheme. Those options create
 new interactions with import maps, document base URLs, fragment navigation,
 shadow-tree scoping, and custom scheme handlers. The primary proposal avoids
-those changes by resolving `href` with the existing module system.
+those changes by resolving `import` with the existing module system.
 
 ## Open issues
 
