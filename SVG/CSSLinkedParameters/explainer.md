@@ -7,7 +7,7 @@
 
 ## Status of this Document
 
-The CSS Linked Parameters Module Level 1 has been published as a [W3C Working Draft](https://www.w3.org/TR/css-link-params/). This explainer describes Chromium's phased implementation of the specification for external SVG images, including developer benefits and key implementation decisions.
+The CSS Linked Parameters Module Level 1 has been published as a [W3C Working Draft](https://www.w3.org/TR/css-link-params/). This explainer describes how CSS Linked Parameters apply to external SVG images, including developer benefits and key design decisions.
 
 ## Participate
 
@@ -34,7 +34,7 @@ This limitation particularly affects developers building design systems and icon
 |---|---|
 | Maintain separate SVG files for each variant | Duplicates assets and cache entries, increases maintenance, and requires changing the image URL to switch variants |
 | Inline the SVG and style it with mechanisms such as `currentColor` | Increases HTML size and prevents the SVG from being cached and reused independently as an image resource |
-| Fetch, modify, and inject SVG with JavaScript using libraries such as [svg-inject](https://github.com/niclasvaneyk/svg-inject) or [SVGInjector](https://github.com/iconic/SVGInjector) | Adds script complexity, can delay rendering, and may be restricted by Content Security Policy |
+| Fetch, modify, and inject SVG with JavaScript using libraries such as [SVGInject](https://github.com/iconfu/svg-inject) or [SVGInjector](https://github.com/iconic/SVGInjector) | Adds script complexity, can delay rendering, and may be restricted by Content Security Policy |
 
 ### Evidence of developer demand
 
@@ -54,12 +54,12 @@ Questions about changing SVG colors have attracted substantial attention on Stac
 
 - **Enable parameterized external SVG images** — allow developers to pass named values into external SVG images that can be read via `env()` in the SVG's own stylesheets.
 - **Support external SVG images across image-loading contexts** — work with `<img>` and CSS image properties such as `background-image` and `list-style-image`.
-- **Interop** — align Chromium's implementation with the [CSS Linked Parameters Module Level 1](https://drafts.csswg.org/css-link-params/) specification to support interoperability across browser engines.
+- **Interop** — align implementations of CSS Linked Parameters for external SVG images with the [CSS Linked Parameters Module Level 1](https://drafts.csswg.org/css-link-params/) specification to support interoperability across browser engines.
 - **Graceful degradation** — SVG images that use [`env()`](https://caniuse.com/css-env-function) with fallback values continue to render correctly in browsers that do not support link parameters.
 
 ## Non-Goals
 
-- **Other linked-resource contexts** — Chromium's implementation is limited to external SVG images. Applying CSS Linked Parameters to documents loaded through `<iframe>` or to other non-image resource contexts is outside scope.
+- **Other linked-resource contexts** — This explainer covers external SVG images only. Applying CSS Linked Parameters to documents loaded through `<iframe>` or other non-image resource contexts is outside its scope.
 
 ---
 
@@ -67,7 +67,7 @@ Questions about changing SVG colors have attracted substantial attention on Stac
 
 ### 1. The `link-parameters` CSS property
 
-A new CSS property, `link-parameters`, sets named parameters on an element or pseudo-element. For the Chromium implementation described in this explainer, those parameters are passed to external SVG images represented by the element, such as an `<img>` source, and to external SVG images referenced by CSS image properties, such as `background-image`.
+A new CSS property, `link-parameters`, sets named parameters on an element or pseudo-element. For the scope covered by this explainer, those parameters are passed to external SVG images represented by the element, such as an `<img>` source, and to external SVG images referenced by CSS image properties, such as `background-image`.
 
 ```css
 /* Set a single parameter */
@@ -180,14 +180,7 @@ If multiple link parameters have the same name, the last one in the list is used
 
 1. **`env()` rather than `var()` for consumption.** Link parameters are exposed as custom environment variables in the linked SVG and consumed through `env()`. Environment variables have one value throughout the SVG document and do not participate in the cascade, while custom properties consumed through `var()` do. Using environment variables therefore avoids defining how values from the embedding page would interact with the SVG's own cascade.
 
-2. **A single declaration applies across external SVG image-loading contexts.** On an `<img>`, `link-parameters` applies to its external SVG source. On any element or pseudo-element, it applies to external SVG images loaded by CSS image properties such as `background-image` and `list-style-image`. This keeps the API consistent across the supported image-loading contexts.
-
-3. **Phased implementation.** The Chromium implementation is split into three phases:
-   - **Phase 1:** The `link-parameters` CSS property — parsing, computed style, and SVG image pipeline wiring via `env()` variables.
-   - **Phase 2:** Parsing and application of link parameter directives in external SVG image URLs.
-   - **Phase 3:** `url()` function `param()` modifier support.
-
-   See the [Chromium design document](https://docs.google.com/document/d/1Dn0v19ljsQD8EKSxsAj2JhoG7DbK_Y3kZc7z8Fu36jg) for more details.
+2. **A single declaration applies across external SVG image-loading contexts.** On an `<img>`, `link-parameters` applies to its external SVG source. On any element or pseudo-element, it applies to external SVG images loaded by CSS image properties. This keeps the API consistent across the supported image-loading contexts.
 
 ---
 
@@ -209,7 +202,7 @@ If multiple link parameters have the same name, the last one in the list is used
 
 - **Privacy:** Link parameters are set by the embedding page and applied locally while rendering the linked SVG. They are not included in the SVG resource request and do not create additional network requests.
 
-- **Security:** Link parameters do not change existing resource-loading or origin checks. External SVG images remain isolated with scripts and plugins disabled, and non-data subresource requests blocked. Parameter values affect only CSS properties where the linked SVG explicitly uses the corresponding `env()` variable.
+- **Security:** Link parameters can be used with both same-origin and cross-origin external SVG images. Parameter values are applied locally during rendering and do not change existing resource-loading or origin checks. External SVG images remain isolated with scripts and plugins disabled, and non-data subresource requests blocked. Parameter values affect only CSS properties where the linked SVG explicitly uses the corresponding `env()` variable.
 
 ---
 
@@ -217,7 +210,7 @@ If multiple link parameters have the same name, the last one in the list is used
 
 | Stakeholder | Signal | Evidence |
 |---|---|---|
-| **Firefox** | ✅ Positive | The `link-parameters` property is enabled in Firefox Nightly starting with Firefox 153 ([implementation bug 2022783](https://bugzilla.mozilla.org/show_bug.cgi?id=2022783), [Firefox Nightly enablement bug 2046153](https://bugzilla.mozilla.org/show_bug.cgi?id=2046153)) |
+| **Firefox** | ✅ Positive | Firefox tracks the full specification in [meta bug 1812163](https://bugzilla.mozilla.org/show_bug.cgi?id=1812163). The `link-parameters` property is enabled for external SVG image rendering in Firefox Nightly starting with Firefox 153 ([implementation bug 2022783](https://bugzilla.mozilla.org/show_bug.cgi?id=2022783), [Nightly enablement bug 2046153](https://bugzilla.mozilla.org/show_bug.cgi?id=2046153)). Mozilla has [identified both URL-based mechanisms as follow-up implementation work](https://bugzilla.mozilla.org/show_bug.cgi?id=1812163#c2), with the `url()` modifier tracked in [bug 1812167](https://bugzilla.mozilla.org/show_bug.cgi?id=1812167). |
 | **Safari/WebKit** | No signal | No public position |
 | **Web developers** | ✅ Positive | External SVG styling and coloring are recurring developer pain points. See [State of CSS 2025 Shapes & Graphics pain points](https://2025.stateofcss.com/en-US/features/#shapes_graphics_pain_points). |
 
