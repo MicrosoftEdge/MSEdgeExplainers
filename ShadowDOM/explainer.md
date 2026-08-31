@@ -54,7 +54,7 @@ same CSS many times. This increases payload size, CPU cost, and memory use.
 
 Classic `<link rel="stylesheet">` elements avoid duplicating the CSS source in
 the HTML and can use the HTTP cache, but each element has its own associated
-stylesheet. Constructed stylesheets and CSS module scripts can share one 
+stylesheet. Constructed stylesheets and CSS module scripts can share one
 stylesheet object, but applying them currently requires JavaScript and can
 produce the same delayed styling problem.
 
@@ -100,7 +100,7 @@ a classic stylesheet. This provides progressively enhanced stylesheet sharing
 without preventing older browsers from styling the content.
 
 For clarity, this explainer calls the existing form a *classic*
-`<link rel="stylesheet">` element and the proposed form a *module import*
+`<link rel="stylesheet">` element and the proposed form an *importing*
 `<link rel="stylesheet">` element.
 
 ```html
@@ -129,8 +129,7 @@ In a supporting browser, the text inside the shadow root is styled blue. The
 `import` value is resolved as a module specifier using the import map, the
 resolved URL is fetched as a CSS module, and the resulting stylesheet is
 applied to the shadow root. The shared `CSSStyleSheet` appears in the shadow
-root's `styleSheets` collection. In an unsupported browser, `import` is ignored
-and the absolute `href` is loaded as a classic stylesheet instead.
+root's `styleSheets` collection.
 
 ### The underlying stylesheet is shared between tree scopes
 
@@ -232,8 +231,8 @@ membership in the read-only `styleSheets` collection, and their tree order
 controls the order of its entries. This distinction concerns the mutability of
 collection membership; the shared `CSSStyleSheet` object itself remains
 mutable, as shown above. The proposal therefore extends the CSSOM definition
-of which sheets are represented by `styleSheets`, introducing a DOM-associated
-constructed stylesheet.
+of which sheets are represented by `styleSheets` to include a constructed
+stylesheet associated with one or more DOM link elements.
 
 ### Compatibility with classic `<link rel="stylesheet">` behavior
 
@@ -241,9 +240,11 @@ Importing and classic stylesheet links share fundamental `HTMLLinkElement`
 behavior, but they cannot be identical because importing links apply a shared,
 constructed stylesheet using module fetch semantics in supporting browsers.
 
-With a new attribute (`import`), a fallback URL can be provided via `href`
-that does not go through import map processing. When both attributes are
-present, `import` takes precedence and only a single fetch occurs.
+With the new `import` attribute, a fallback URL can be provided via `href` that
+does not go through import map processing. When both attributes are present, a
+supporting browser ignores `href` and performs only the module fetch for the
+value of `import`. An unsupported browser doesn't recognize `import` and
+processes `href` normally.
 
 #### Fundamental `HTMLLinkElement` behavior
 
@@ -275,14 +276,14 @@ share one object. Attributes such as `media` and `title` therefore cannot be
 mapped directly to the shared stylesheet when different importing links
 specify different values.
 
-For this proposal, we will ignore the `title` attribute, as it depedends on
-browser UI that doesn't cleanly scale to a many-to-one mapping and is also
-deprecated in most browsers.
+For this proposal, we will ignore the `title` attribute because its alternate
+stylesheet behavior depends on browser UI that does not cleanly scale to a
+many-to-one mapping. This browser UI is also no longer present in most browsers.
 
-The `media` can be supported if it is applied at the `<link>` element level
-instead of applying it to the the stylesheet's `media` property. This is
-different than classic `<link>` stylesheet behavior but similar to how the
-`<source>` element works.
+The `media` attribute can instead gate whether the shared stylesheet is applied
+by each link element, without changing the shared stylesheet's `media`
+property. This differs from classic `<link>` stylesheet behavior but is similar
+to how the `<source>` element works.
 
 These attributes retain their classic behaviors when an unsupported browser
 processes the `href` attribute as fallback.
@@ -357,12 +358,10 @@ new interactions with import maps, document base URLs, fragment navigation,
 shadow-tree scoping, and custom scheme handlers. The primary proposal avoids
 those changes by resolving `import` with the existing module system.
 
-## Open issues
-
 ## References and acknowledgements
 
-For specific details on each property and how it is expected to work,
-please see the [planning document](https://docs.google.com/document/d/1SkHwxAIBW5I3uqnmmov4D71ZPbj9woouj3RdPqd3X1w)
+For specific details on each part of the proposal and how it is expected to
+work, please see the [planning document](https://docs.google.com/document/d/1SkHwxAIBW5I3uqnmmov4D71ZPbj9woouj3RdPqd3X1w)
 
 This consolidated explainer includes work, feedback, and advice from:
 
