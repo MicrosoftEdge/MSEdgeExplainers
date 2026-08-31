@@ -1,8 +1,9 @@
 # Playback Audio Capture Without Screen Sharing
 
-## Author
+## Authors
 
 - [Nishitha Dey](https://github.com/nishitha-burman)
+- [Steve Becker](https://github.com/SteveBeckerMSFT)
 
 ## Participate
 
@@ -409,3 +410,13 @@ Better browser echo cancellation would improve calls and should be explored
 separately. It would not support audio-only recording, note taking,
 broadcasting, visualization, translation, processing, or sharing scenarios in
 the browser.
+
+## Acknowledgements
+
+This proposal builds on an
+[earlier exploration of playback-reference audio](https://github.com/MicrosoftEdge/MSEdgeExplainers/pull/1377)
+by [Huseyin Ozcan](https://github.com/huozcan-ms),
+[Max Solodovnikov](https://github.com/solmaks), Hong Sodoma, and Vinod Prakash.
+
+Thanks to [Erik Anderson](https://github.com/erik-anderson) for reviewing and
+providing feedback on this explainer.
