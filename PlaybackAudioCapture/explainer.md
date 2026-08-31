@@ -9,6 +9,18 @@
 - [Proposal issue and discussion](https://github.com/w3c/mediacapture-screen-share-extensions/issues/12)
 - [MSEdgeExplainers issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues)
 
+## Status of this Document
+
+This document is a starting point for engaging the community and standards
+bodies in developing collaborative solutions fit for standardization. As the
+solutions described here progress along the standards track, we will retain
+this document as an archive and update this section with the current standards
+venue and content location.
+
+- This document status: **Active**
+- Expected venue: [WebRTC Working Group](https://www.w3.org/groups/wg/webrtc/)
+- Current version: this document
+
 ## Introduction
 
 Today, websites cannot capture audio playing in a browser tab, application, or
