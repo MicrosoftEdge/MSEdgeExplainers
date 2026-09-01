@@ -355,6 +355,9 @@ becomes unavailable, or the website stops the track.
 - How should an application reliably retrieve a playback track returned
   alongside a microphone track—for example, through playback-specific track
   metadata, a specialized track subtype, or a dedicated `MediaStream` getter?
+- Which audio constraints and capabilities should playback tracks support, and
+  how should `getCapabilities()`, `getSettings()`, `getConstraints()`, and
+  `applyConstraints()` behave for them?
 - What timing guarantees are needed when microphone and playback audio are
   processed together?
 - What sources and processing stages are included in system audio on each
