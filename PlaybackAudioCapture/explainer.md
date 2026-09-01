@@ -345,7 +345,7 @@ becomes unavailable, or the website stops the track.
 
 ## Open questions
 
-### API design and integration
+### API and media behavior
 
 - The existing `systemAudio` and `windowAudio` options in `getDisplayMedia()`
   express preferences about which audio choices the browser offers alongside
@@ -363,12 +363,17 @@ becomes unavailable, or the website stops the track.
   [constrainable pattern](https://w3c.github.io/mediacapture-main/#constrainable-interface),
   including `getCapabilities()`, `getSettings()`, `getConstraints()`, and
   `applyConstraints()`, apply to them?
-- How should playback-audio permission integrate with existing browser
-  permission controls and the proposed
-  [`<usermedia>`, `<camera>`, and `<microphone>` capability elements](https://chromestatus.com/feature/5153829504024576)?
+- What timing guarantees are needed when microphone and playback audio are
+  processed together?
+- What sources and processing stages should be included in
+  [system audio](https://w3c.github.io/mediacapture-screen-share/#dom-displaymediastreamoptions-systemaudio)
+  on each platform?
 
 ### Permission and privacy
 
+- How should playback-audio permission integrate with existing browser
+  permission controls and the proposed
+  [`<usermedia>`, `<camera>`, and `<microphone>` capability elements](https://chromestatus.com/feature/5153829504024576)?
 - How should self-capture work for playback audio? Should the requesting tab
   appear in the source picker, should system capture include audio produced by
   the requesting site, and should the proposal align with existing mechanisms
@@ -383,14 +388,6 @@ becomes unavailable, or the website stops the track.
   [`getDisplayMedia()`](https://w3c.github.io/mediacapture-screen-share/#dom-mediadevices-getdisplaymedia)?
   Should permission behavior differ between system audio and a user-selected
   source?
-
-### Media and platform behavior
-
-- What timing guarantees are needed when microphone and playback audio are
-  processed together?
-- What sources and processing stages should be included in
-  [system audio](https://w3c.github.io/mediacapture-screen-share/#dom-displaymediastreamoptions-systemaudio)
-  on each platform?
 
 ## Alternatives considered
 
