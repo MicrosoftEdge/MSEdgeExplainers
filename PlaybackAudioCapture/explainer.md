@@ -362,8 +362,9 @@ becomes unavailable, or the website stops the track.
   processed together?
 - What sources and processing stages are included in system audio on each
   platform?
-- How should playback permission integrate with existing browser permission
-  controls and capability elements?
+- Should playback-audio permission persist or require a new user decision for
+  every request? Should permission behavior differ between system audio and a
+  user-selected source?
 
 ## Alternatives considered
 
