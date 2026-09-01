@@ -352,6 +352,8 @@ becomes unavailable, or the website stops the track.
 
 ## Open questions
 
+- How should the playback-audio source model align with the existing
+  `systemAudio` and `windowAudio` options in `getDisplayMedia()`?
 - What timing guarantees are needed when microphone and playback audio are
   processed together?
 - What sources and processing stages are included in system audio on each
