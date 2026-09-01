@@ -80,8 +80,8 @@ all of those scopes a common, declarative reference.
   independently from the import mechanism proposed here.
 - Allowing selectors to cross a shadow boundary or otherwise weakening Shadow
   DOM encapsulation.
-- Making importing `<link rel="stylesheet" import="...">` elements identical
-  in every respect to classic `<link rel="stylesheet">` elements,
+- Making import links identical in every respect to classic
+  `<link rel="stylesheet">` elements,
   `<link rel="modulepreload">` elements, `<style>` elements, or
   `adoptedStyleSheets` usage.
 
@@ -99,9 +99,8 @@ unsupported browser ignores the unknown `import` attribute and loads `href` as
 a classic stylesheet. This provides progressively enhanced stylesheet sharing
 without preventing older browsers from styling the content.
 
-For clarity, this explainer calls the existing form a *classic*
-`<link rel="stylesheet">` element and the proposed form an *importing*
-`<link rel="stylesheet">` element.
+For clarity, this explainer calls the existing form a *classic link* and the
+proposed form an *import link*.
 
 ```html
 <script type="importmap">
@@ -133,9 +132,9 @@ root's `styleSheets` collection.
 
 ### The underlying stylesheet is shared between tree scopes
 
-Within a module map, importing `<link rel="stylesheet">` elements whose `import`
-values resolve to the same URL use the same module map entry, keyed by that URL
-and the CSS module type. They therefore apply the same `CSSStyleSheet` object.
+Within a module map, import links whose `import` values resolve to the same URL
+use the same module map entry, keyed by that URL and the CSS module type. They
+therefore apply the same `CSSStyleSheet` object.
 
 The following example applies one module stylesheet to the document tree and
 to two distinct shadow roots:
@@ -170,7 +169,7 @@ to two distinct shadow roots:
 </html>
 ```
 
-Once all three importing links have loaded in a supporting browser, importing
+Once all three import links have loaded in a supporting browser, importing
 the same module resolves to the existing module map entry without another
 fetch:
 
@@ -180,13 +179,13 @@ foo.replaceSync("p { color: green; }");
 ```
 
 The update changes the text in all three scopes to green because every
-importing link applies the same underlying `CSSStyleSheet` object.
+import link applies the same underlying `CSSStyleSheet` object.
 
 ### Import Maps Are Not Necessary
 
 An import map is only needed to remap a module specifier. As with a JavaScript
 module import, a relative URL can be used directly and is resolved against the
-base URL of the importing `<link rel="stylesheet">` element.
+base URL of the import link.
 
 The following example applies `./foo.css` to two shadow roots without an import
 map:
@@ -226,7 +225,7 @@ declaratively linked sheet through `adoptedStyleSheets` would allow script to
 remove or reorder the entry independently of its corresponding module link,
 breaking synchronization between DOM order and the applied stylesheet list.
 
-The presence and state of qualifying importing links instead control
+The presence and state of qualifying import links instead control
 membership in the read-only `styleSheets` collection, and their tree order
 controls the order of its entries. This distinction concerns the mutability of
 collection membership; the shared `CSSStyleSheet` object itself remains
@@ -236,8 +235,8 @@ stylesheet associated with one or more DOM link elements.
 
 ### Compatibility with classic `<link rel="stylesheet">` behavior
 
-Importing and classic stylesheet links share fundamental `HTMLLinkElement`
-behavior, but they cannot be identical because importing links apply a shared,
+Classic stylesheet links and import links share fundamental `HTMLLinkElement`
+behavior, but they cannot be identical because import links apply a shared,
 constructed stylesheet using module fetch semantics in supporting browsers.
 
 With the new `import` attribute, a fallback URL can be provided via `href` that
@@ -249,14 +248,14 @@ processes `href` normally.
 #### Fundamental `HTMLLinkElement` behavior
 
 Existing behaviors that are not inherently tied to classic stylesheet fetches
-or one-to-one stylesheet ownership will also apply to importing links. For
+or one-to-one stylesheet ownership will also apply to import links. For
 example, the `nonce` attribute and the `load` and `error` events apply to
-importing `<link rel="stylesheet">` elements.
+import links.
 
 #### Constructed stylesheet behavior
 
 Because the proposal builds on CSS module script imports, the associated
-stylesheet is constructed. Existing constructed stylesheet behavior therefore
+stylesheet is constructed. Existing constructed stylesheet behavior
 produces several differences from classic stylesheet links:
 
 - CSS module scripts do not support CSS `@import` rules.
@@ -266,14 +265,14 @@ produces several differences from classic stylesheet links:
   a module link, so rule matching differs from a classic stylesheet link in
   this case.
 
-Importing links use the existing constructed stylesheet behavior in each case.
+Import links use the existing constructed stylesheet behavior in each case.
 
 #### Per-link attributes and shared state
 
 Classic stylesheet links have a one-to-one association with their
-`CSSStyleSheet` objects. Importing links deliberately allow many elements to
+`CSSStyleSheet` objects. Import links deliberately allow many elements to
 share one object. Attributes such as `media` and `title` therefore cannot be
-mapped directly to the shared stylesheet when different importing links
+mapped directly to the shared stylesheet when different import links
 specify different values.
 
 For this proposal, we will ignore the `title` attribute because its alternate
@@ -297,7 +296,7 @@ mode, so a cross-origin response must pass a CORS check.
 
 Their decoding also differs. Classic stylesheets can use response-provided or
 legacy encoding information, while module script responses are always decoded
-as UTF-8. In supporting browsers, importing stylesheet links use the stricter
+as UTF-8. In supporting browsers, import links use the stricter
 module script fetch and decoding semantics. In unsupported browsers, the
 `href` fallback uses classic stylesheet fetch and decoding semantics.
 
