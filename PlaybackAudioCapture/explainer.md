@@ -352,8 +352,13 @@ becomes unavailable, or the website stops the track.
 
 ## Open questions
 
-- How should the playback-audio source model align with the existing
-  `systemAudio` and `windowAudio` options in `getDisplayMedia()`?
+- The existing `systemAudio` and `windowAudio` options in `getDisplayMedia()`
+  express preferences about which audio choices the browser offers alongside
+  display capture (see
+  [Screen Capture](https://w3c.github.io/mediacapture-screen-share/#displaymediastreamoptions)),
+  while the source values proposed here identify the type of audio-only source
+  being requested. Given these different roles, how, if at all, should the
+  playback-audio source model align with their terminology or semantics?
 - What timing guarantees are needed when microphone and playback audio are
   processed together?
 - What sources and processing stages are included in system audio on each
