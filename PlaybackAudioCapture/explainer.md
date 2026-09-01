@@ -263,18 +263,11 @@ website that can use either microphone or playback audio can request them
 separately and handle each result independently. Whether a future version
 should support an explicit best-effort playback request remains open.
 
-Both tracks are audio tracks, so the proposal must give developers a way to
-tell them apart. One possible design is a `sourceType` value:
-
-```js
-const microphoneTrack =
-    stream.getAudioTracks().find(track =>
-      track.getSettings().sourceType === "microphone");
-
-const playbackTrack =
-    stream.getAudioTracks().find(track =>
-      track.getSettings().sourceType === "playback");
-```
+Option 2 returns microphone and playback audio tracks in the same
+`MediaStream`, so the application needs a reliable way to retrieve the
+playback track. Possible approaches include playback-specific track metadata
+(such as a setting or attribute), a specialized track subtype, or a dedicated
+`MediaStream` getter. The appropriate mechanism remains open.
 
 Applications that process microphone and playback audio together need timing
 information that can be compared reliably. The exact clock, timestamp, drift,
@@ -289,7 +282,7 @@ audio being played by the device.
 | Option | Benefit | Tradeoff |
 | --- | --- | --- |
 | New `getPlaybackMedia()` | Clearly describes playback capture and works independently | A communication application makes separate microphone and playback requests |
-| Extend `getUserMedia()` | Can request microphone and playback audio together | Changes the meaning of `getUserMedia()`, may combine a permission prompt with a source picker, and requires a way to identify the two audio tracks |
+| Extend `getUserMedia()` | Can request microphone and playback audio together | Changes the meaning of `getUserMedia()`, may combine a permission prompt with a source picker, and requires a reliable way to retrieve the playback track |
 
 ### Source selection
 
@@ -359,6 +352,9 @@ becomes unavailable, or the website stops the track.
   while the source values proposed here identify the type of audio-only source
   being requested. Given these different roles, how, if at all, should the
   playback-audio source model align with their terminology or semantics?
+- How should an application reliably retrieve a playback track returned
+  alongside a microphone track—for example, through playback-specific track
+  metadata, a specialized track subtype, or a dedicated `MediaStream` getter?
 - What timing guarantees are needed when microphone and playback audio are
   processed together?
 - What sources and processing stages are included in system audio on each
