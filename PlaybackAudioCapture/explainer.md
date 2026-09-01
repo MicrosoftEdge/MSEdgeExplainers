@@ -425,7 +425,11 @@ security, source scope, permission UX, and whether playback-audio capture
 should extend an existing API or use a new API. These remain open areas for
 feedback and discussion.
 
-## Acknowledgements
+## References & Acknowledgements
+
+- [Media Capture and Streams](https://w3c.github.io/mediacapture-main/)
+- [Screen Capture](https://w3c.github.io/mediacapture-screen-share/)
+- [Media Capture Screen Share Extensions issue #12](https://github.com/w3c/mediacapture-screen-share-extensions/issues/12)
 
 This proposal builds on an
 [earlier exploration of playback-reference audio](https://github.com/MicrosoftEdge/MSEdgeExplainers/pull/1377)
