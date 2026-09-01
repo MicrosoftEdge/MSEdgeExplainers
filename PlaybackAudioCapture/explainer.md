@@ -355,9 +355,19 @@ becomes unavailable, or the website stops the track.
 - How should an application reliably retrieve a playback track returned
   alongside a microphone track—for example, through playback-specific track
   metadata, a specialized track subtype, or a dedicated `MediaStream` getter?
-- Which audio constraints and capabilities should playback tracks support, and
-  how should `getCapabilities()`, `getSettings()`, `getConstraints()`, and
-  `applyConstraints()` behave for them?
+- Which audio constraints and capabilities (see
+  [Screen Capture](https://www.w3.org/TR/screen-capture/#dom-displaymediastreamoptions-audio))
+  should playback tracks support, and how should `getCapabilities()`,
+  `getSettings()`, `getConstraints()`, and `applyConstraints()` behave for
+  them?
+- How should self-capture work for playback audio? Should the requesting tab
+  appear in the source picker, should system capture include audio produced by
+  the requesting site, and should the proposal align with existing mechanisms
+  such as
+  [`selfBrowserSurface`](https://w3c.github.io/mediacapture-screen-share/#dom-displaymediastreamoptions-selfbrowsersurface),
+  [`restrictOwnAudio`](https://w3c.github.io/mediacapture-screen-share/#def-constraint-restrictOwnAudio),
+  or
+  [`suppressLocalAudioPlayback`](https://w3c.github.io/mediacapture-screen-share/#def-constraint-suppressLocalAudioPlayback)?
 - What timing guarantees are needed when microphone and playback audio are
   processed together?
 - What sources and processing stages are included in system audio on each
@@ -365,6 +375,9 @@ becomes unavailable, or the website stops the track.
 - Should playback-audio permission persist or require a new user decision for
   every request? Should permission behavior differ between system audio and a
   user-selected source?
+- How should playback-audio permission integrate with existing browser
+  permission controls and the proposed
+  [`<usermedia>`, `<camera>`, and `<microphone>` capability elements](https://chromestatus.com/feature/5153829504024576)?
 
 ## Alternatives considered
 
