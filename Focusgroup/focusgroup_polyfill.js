@@ -238,7 +238,7 @@ class FocusGroupManager {
       return true;
     if ( node.nodeName == "TEXTAREA" && !node.hasAttribute( "disabled" ) )
       return true;
-    if ( node.hasAttribute( "contenteditable" ) && node.getAttribute("contenteditable") == "true" )
+    if ( node.contentEditable === "true" )
       return true;
     if ( node.nodeName == "IFRAME" )
       return true;
