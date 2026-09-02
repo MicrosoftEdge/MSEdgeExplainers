@@ -90,6 +90,7 @@ dictionary GetTokenParameters {
   DOMString correlationId, 
   boolean isSecurityTokenService,
   boolean preferBinding,
+  DOMString? requestConfirmation,
   DOMString? state, 
   record<DOMString, DOMString>? extraParameters,
   record<DOMString, DOMString>? extraParametersNoCache
@@ -112,6 +113,8 @@ dictionary GetTokenParameters {
 `isSecurityTokenService`: Optional flag. When this flag is true, the broker is expected to validate that the request is coming from the Identity provider URL it expects. To do that, as part of the API contract between the browser and the broker, the browser will send an additional "sender" parameter (which is the URL of the website that is initiating the request). If it is valid, this call comes from a security token service (STS). The "sender" is not part of the API described in this document as it is not sent by the JS application, but by the browser itself.
 
 `preferBinding`: Optional field. When `true`, requests that the broker bind the access token to a broker-owned, attested key when the broker and identity provider support it. The broker may return an unbound token when binding is unavailable, so the caller must inspect the response properties to determine whether binding was applied.
+
+`requestConfirmation`: Optional proof-of-possession confirmation value passed to the broker at the top-level of the token request. It allows the identity provider to bind the issued token to the key described by the request confirmation value.
 
 `state`: OAuth protocol "state" param. It will be returned without changes in the response.  
 
