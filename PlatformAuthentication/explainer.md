@@ -90,7 +90,7 @@ dictionary GetTokenParameters {
   DOMString correlationId, 
   boolean isSecurityTokenService,
   boolean preferBinding,
-  DOMString requestConfirmation,
+  DOMString? requestConfirmation,
   DOMString? state, 
   record<DOMString, DOMString>? extraParameters,
   record<DOMString, DOMString>? extraParametersNoCache
