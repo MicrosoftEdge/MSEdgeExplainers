@@ -114,7 +114,7 @@ dictionary GetTokenParameters {
 
 `preferBinding`: Optional field. When `true`, requests that the broker bind the access token to a broker-owned, attested key when the broker and identity provider support it. The broker may return an unbound token when binding is unavailable, so the caller must inspect the response properties to determine whether binding was applied.
 
-`requestConfirmation`: Optional proof-of-possession confirmation value passed to the broker at the top level of the token request. It allows the identity provider to bind the issued token to the key described by the request confirmation value.
+`requestConfirmation`: Optional proof-of-possession confirmation value passed to the broker at the top-level of the token request. It allows the identity provider to bind the issued token to the key described by the request confirmation value.
 
 `state`: OAuth protocol "state" param. It will be returned without changes in the response.  
 
