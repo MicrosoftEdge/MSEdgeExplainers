@@ -7,7 +7,7 @@
 
 ## Status of this Document
 
-The CSS Linked Parameters Module Level 1 has been published as a [W3C Working Draft](https://www.w3.org/TR/css-link-params/). This explainer describes how CSS Linked Parameters apply to external SVG images, including developer benefits and key design decisions.
+The CSS Linked Parameters Module Level 1 has been published as a [W3C Working Draft](https://www.w3.org/TR/css-link-params/). This explainer describes the developer benefits and key design decisions for applying CSS Linked Parameters to external SVG images loaded through `<img>` and CSS image properties.
 
 ## Participate
 
@@ -53,13 +53,13 @@ Questions about changing SVG colors have attracted substantial attention on Stac
 ## Goals
 
 - **Enable parameterized external SVG images** — allow developers to pass named values into external SVG images that can be read via `env()` in the SVG's own stylesheets.
-- **Support external SVG images across image-loading contexts** — work with `<img>` and CSS image properties such as `background-image` and `list-style-image`.
+- **Support external SVG image references** — work with `<img>` and CSS image properties.
 - **Interop** — align implementations of CSS Linked Parameters for external SVG images with the [CSS Linked Parameters Module Level 1](https://drafts.csswg.org/css-link-params/) specification to support interoperability across browser engines.
 - **Graceful degradation** — SVG images that use [`env()`](https://caniuse.com/css-env-function) with fallback values continue to render correctly in browsers that do not support link parameters.
 
 ## Non-Goals
 
-- **Other linked-resource contexts** — This explainer covers external SVG images only. Applying CSS Linked Parameters to documents loaded through `<iframe>` or other non-image resource contexts is outside its scope.
+- **Other uses of external SVGs** — This explainer is limited to external SVGs used as images through `<img>` and CSS image properties. Other uses of external SVGs are outside its scope.
 
 ---
 
@@ -67,7 +67,7 @@ Questions about changing SVG colors have attracted substantial attention on Stac
 
 ### 1. The `link-parameters` CSS property
 
-A new CSS property, `link-parameters`, sets named parameters on an element or pseudo-element. For the scope covered by this explainer, those parameters are passed to external SVG images represented by the element, such as an `<img>` source, and to external SVG images referenced by CSS image properties, such as `background-image`.
+A new CSS property, `link-parameters`, sets named parameters on an element or pseudo-element. For the scope covered by this explainer, those parameters apply to external SVGs used as images through `<img>` and CSS image properties.
 
 ```css
 /* Set a single parameter */
@@ -130,7 +130,7 @@ The `param()` function can be used as a `<url-modifier>` inside `url()`:
 
 ### How the SVG consumes parameters
 
-In the linked SVG resource, parameters are exposed as custom environment variables, accessible via `env()`:
+In the external SVG image, parameters are exposed as custom environment variables accessible through `env()`:
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg">
@@ -178,9 +178,9 @@ If multiple link parameters have the same name, the last one in the list is used
 
 ## Key Design Decisions
 
-1. **`env()` rather than `var()` for consumption.** Link parameters are exposed as custom environment variables in the linked SVG and consumed through `env()`. Environment variables have one value throughout the SVG document and do not participate in the cascade, while custom properties consumed through `var()` do. Using environment variables therefore avoids defining how values from the embedding page would interact with the SVG's own cascade.
+1. **`env()` rather than `var()` for consumption.** Link parameters are exposed as custom environment variables in the external SVG image and consumed through `env()`. These variables are globally scoped within the external SVG image and do not participate in the cascade, while custom properties consumed through `var()` do. Using environment variables therefore avoids defining how values from the embedding page would interact with the SVG's own cascade.
 
-2. **A single declaration applies across external SVG image-loading contexts.** On an `<img>`, `link-parameters` applies to its external SVG source. On any element or pseudo-element, it applies to external SVG images loaded by CSS image properties. This keeps the API consistent across the supported image-loading contexts.
+2. **A single declaration applies to external SVGs used as images through `<img>` and CSS image properties.** On an `<img>`, `link-parameters` applies to its external SVG source. On any element or pseudo-element, it applies to external SVGs referenced by CSS image properties. This keeps the API consistent across the use cases covered by this explainer.
 
 ---
 
@@ -196,13 +196,15 @@ If multiple link parameters have the same name, the last one in the list is used
 
 ## Accessibility, Internationalization, Privacy, and Security Considerations
 
+The following considerations apply to CSS Linked Parameters for external SVGs loaded through `<img>` and CSS image properties.
+
 - **Accessibility:** Link parameters affect visual styling but do not add or change document semantics or interaction behavior.
 
 - **Internationalization:** Link parameters use existing CSS syntax and introduce no new text-direction, locale, or language behavior.
 
 - **Privacy:** Link parameters are set by the embedding page and applied locally while rendering the linked SVG. They are not included in the SVG resource request and do not create additional network requests.
 
-- **Security:** Link parameters can be used with both same-origin and cross-origin external SVG images. Parameter values are applied locally during rendering and do not change existing resource-loading or origin checks. External SVG images remain isolated with scripts and plugins disabled, and non-data subresource requests blocked. Parameter values affect only CSS properties where the linked SVG explicitly uses the corresponding `env()` variable.
+- **Security:** Link parameters can be used with both same-origin and cross-origin external SVG images. Parameter values are applied locally during rendering and do not change existing resource loading behavior or origin checks. External SVG images remain isolated with scripts and plugins disabled, and non-`data:` subresource requests blocked. Parameter values affect only CSS properties where the SVG explicitly uses the corresponding `env()` variable. These isolation guarantees are specific to external SVGs used as images.
 
 ---
 
