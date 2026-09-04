@@ -1,7 +1,7 @@
 ---
-name: CSS Linked Parameters Support for External SVG Images
+name: CSS Linked Parameters for External SVGs
 about: new issue
-title: "[CSS Linked Parameters Support for External SVG Images] <TITLE HERE>"
+title: "[CSS Linked Parameters for External SVGs] <TITLE HERE>"
 labels: CSS Linked Parameters
 assignees: rahulthebuilder
 
