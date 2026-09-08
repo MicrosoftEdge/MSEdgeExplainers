@@ -6,6 +6,7 @@
 * [Diego Perez Botero](https://github.com/Diego-Perez-Botero)
 * [Philipp Hancke](https://github.com/fippo)
 * [Rahul Singh](https://github.com/rahulsingh-msft)
+* [Iris Zhou](https://github.com/irisxzhou)
 
 Much of this explainer synthesizes and consolidates prior discussions and contributions from members of the WebRTC working group.
 
@@ -16,23 +17,28 @@ Much of this explainer synthesizes and consolidates prior discussions and contri
 ## Introduction
 Game streaming platforms like Xbox Cloud Gaming and Nvidia GeForce Now rely on hardware decoding in browsers to deliver low-latency, power-efficient experiences. During a stream, the decoder's state can change. The codec can be renegotiated, the receiver can fall back from hardware to software decoding, or the decoder can fail outright. Applications have no event-driven way to observe these changes and failures as they occur. The existing statistics must be polled and terminal decoder errors are not surfaced at all.
 
-This proposal introduces two events on the receiver. The `decoderstatechange` event fires when the decoder's state changes. Codec changes always fire it. Hardware-to-software decoder changes fire it only while the application is capturing. In that state, the [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) statistics are already available. The `decodererror` event fires when the decoder hits a terminal error. Together they replace inefficient polling without exposing additional fingerprinting surface.
+This proposal has two parts. The first part adds two events on the receiver. The `decoderstatechange` event fires when the decoder's state changes. Codec changes always fire it, while decoder implementation changes, such as hardware-to-software fallback, fire only while hardware exposure is allowed. The `decodererror` event fires when the decoder hits a terminal error. Together the events replace inefficient polling.
+
+The second part updates that same check so hardware exposure would also be allowed for actively used interactive media receivers. It preserves the existing context-capturing condition and adds another way for the check to return true. This would allow qualifying non-capturing applications to receive implementation-change events and read the protected [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) statistics.
 
 ## User-Facing Problem
 When the decoder fails terminally, playback freezes. The failure is not surfaced to the application, so there is no direct signal that decoding has stopped. The decoder's state can also change during a stream, for example when the codec is renegotiated. There is no event for these changes either. The only way to observe decoder state today is to poll [`getStats()`](https://w3c.github.io/webrtc-pc/#dom-rtcrtpreceiver-getstats) repeatedly, which is inefficient.
 
-A related concern is decoder fallback. When the receiver falls back from a hardware to a software decoder, end users may experience increased latency, degraded quality, and battery drain. Developers would like to detect this in real time. They previously relied on the [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) statistic. As of Chromium M110+, it is only available while the application is capturing camera or microphone input. This proposal does not change that gating. For applications that are already capturing, it surfaces the fallback through an event instead of requiring polling. That capture-based gate fits real-time communication but not cloud gaming, another use case where low latency is essential to the user experience. A future extension could broaden the gating for `decoderImplementation` and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) to include signals typical of a cloud gaming session, such as gamepad input, keyboard lock, pointer lock, or fullscreen.
+A related concern is decoder fallback. When the receiver falls back from a hardware to a software decoder, end users may experience increased latency, degraded quality, and battery drain. Developers would like to detect this in real time. They previously relied on the [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) statistic. As of Chromium M110+, it is available only while the application is capturing camera or microphone input. The first part of this proposal preserves the existing hardware-exposure check while replacing polling with an event for applications that already qualify. Today, the check allows exposure only when the context capturing state is true. That condition fits real-time communication but not interactive streaming, where media capture is unrelated to the application's need to react to decoder fallback.
+
+The second part of this proposal would broaden decoder hardware exposure for a specific `RTCRtpReceiver` without requiring capture. The receiver's document would need to be visible and focused, the receiver would need to be actively receiving and decoding live WebRTC video, and the user would need to be demonstrably interacting with the experience. Qualifying interaction conditions could include pointer lock, keyboard lock, recent meaningful gamepad activity, or fullscreen combined with recent user input. These conditions could allow applications to react to fallback during an active interactive session without exposing protected decoder information to passive or background contexts.
 
 ## Goals
 * Enable developers to detect codec changes and decoder errors at runtime without requiring additional permissions like `getUserMedia()`.
 * Allow applications to diagnose regressions (e.g. codec negotiation issues, device specific problems).
 * Support user experience improvements by enabling apps to adapt (e.g. lowering resolution, re-negotiating codecs), alert end users to decoder errors, and display troubleshooting information.
+* After the events are defined, expand the conditions under which hardware exposure is allowed to support non-capturing interactive streaming while limiting exposure to a specific, actively used receiver.
 
 ## Non-goals
 * Exposing vendor-specific hardware information.
 * Exposing deterministic codec support/capabilities beyond what [`MediaCapabilities`](https://developer.mozilla.org/en-US/docs/Web/API/Media_Capabilities_API) already provides.
 * Providing detailed telemetry such as frame-level error counts or decoder identifiers.
-* Adding a new, unpermissioned path to power-efficiency or hardware-versus-software decode status. These remain available only through the [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) stats, which `getStats()` exposes only when [exposing hardware is allowed](https://w3c.github.io/webrtc-stats/#dfn-exposing-hardware-is-allowed).
+* Exposing decoder hardware information to passive, background, preflight, or capability-probing contexts.
 
 ## User Research
 Feedback from Xbox Cloud Gaming, Nvidia GeForce Now and similar partners shows:
@@ -43,14 +49,17 @@ Feedback from Xbox Cloud Gaming, Nvidia GeForce Now and similar partners shows:
 * Without these signals, developers cannot reliably detect decoder changes or diagnose errors as they occur.
 
 ## Proposed Approach
+
+### Part 1: Decoder state and error events
+
 Introduce two events on [`RTCRtpReceiver`](https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpReceiver):
 
 * A **`decoderstatechange`** event that fires when the receiver's decoder state changes, for example a codec change or a hardware-to-software fallback. The event carries only the media frame's `rtpTimestamp`. Applications can read what changed through the receiver's [`getStats()`](https://w3c.github.io/webrtc-pc/#dom-rtcrtpreceiver-getstats). See [Event triggers](#event-triggers) for details.
 * A **`decodererror`** event that fires when the decoder encounters a terminal, unrecoverable failure, for example when hardware decoding fails and no software decoder is available for a negotiated codec such as H.265. Following [`SensorErrorEvent`](https://w3c.github.io/sensors/#sensorerrorevent) and [WebCodecs](https://w3c.github.io/webcodecs/#dom-videodecoderinit-error), the failure is surfaced as a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException). Its [`name`](https://webidl.spec.whatwg.org/#dom-domexception-name) is [`EncodingError`](https://webidl.spec.whatwg.org/#encodingerror).
 
-Codec changes and decoder errors are surfaced without requiring [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) permissions. The `decodererror` event is coarse, carrying no decoder- or device-specific detail. Changes that reveal hardware-versus-software decoding are surfaced only when [exposing hardware is allowed](https://w3c.github.io/webrtc-stats/#dfn-exposing-hardware-is-allowed). This condition already gates the existing [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) stats, so the event reveals nothing the page cannot already read (see [Privacy Considerations](#privacy-considerations)). This enables applications to alert users, re-negotiate codecs, and debug issues at runtime.
+Codec changes and decoder errors are surfaced without requiring [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) permission and are not subject to the decoder hardware-exposure gate. The `decodererror` event is coarse, carrying no decoder- or device-specific detail. Changes that reveal hardware-versus-software decoding are surfaced only when [exposing hardware is allowed](https://w3c.github.io/webrtc-stats/#dfn-exposing-hardware-is-allowed). This condition already gates the existing [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) stats, so the event reveals nothing the page cannot already read (see [Privacy Considerations](#privacy-considerations)). This enables applications to alert users, re-negotiate codecs, and debug issues at runtime.
 
-### Event triggers
+#### Event triggers
 
 Two changes trigger the `decoderstatechange` event:
 
@@ -59,7 +68,7 @@ Two changes trigger the `decoderstatechange` event:
 
 The `decodererror` event fires when the decoder hits a terminal, unrecoverable failure, for example when hardware decoding fails and no software decoder is available for the negotiated codec (such as H.265). The failure is surfaced as an [`EncodingError`](https://webidl.spec.whatwg.org/#encodingerror) [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException). When a fallback succeeds (a software decoder is available), the receiver keeps decoding and may fire `decoderstatechange` instead, subject to the gating above.
 
-### Proposed IDL
+#### Proposed IDL
 
 ```JavaScript
 partial interface RTCRtpReceiver {
@@ -82,7 +91,7 @@ interface RTCDecoderErrorEvent : RTCDecoderStateChangeEvent {
 };
 ```
 
-### Example
+#### Example
 
 ```JavaScript
 const pc = new RTCPeerConnection();
@@ -90,7 +99,8 @@ const pc = new RTCPeerConnection();
 pc.addEventListener('track', (event) => {
   const receiver = event.receiver;
 
-  // The change event fires whenever the receiver's decoder state changes.
+  // Codec changes are always reported. Decoder implementation changes are
+  // reported only while hardware exposure is allowed for this receiver.
   receiver.addEventListener('decoderstatechange', async (ev) => {
     // Query getStats() for the codec currently in use on this receiver.
     const stats = await receiver.getStats();
@@ -102,10 +112,8 @@ pc.addEventListener('track', (event) => {
           codec = `${codecStats.mimeType}|${codecStats.sdpFmtpLine}`;
         }
 
-        // decoderImplementation and powerEfficientDecoder are permission-gated.
-        // They are only present when the web app is actively capturing
-        // microphone or camera input. Apps that already hold the permission can
-        // still read them here.
+        // decoderImplementation and powerEfficientDecoder are protected. They
+        // are present only while hardware exposure is allowed.
         if (report.decoderImplementation) {
           logMetric(`Decoder implementation: ${report.decoderImplementation}`);
         }
@@ -129,6 +137,33 @@ pc.addEventListener('track', (event) => {
 
 ```
 
+### Part 2: Expand when hardware exposure is allowed
+
+Part 2 proposes updating the existing hardware-exposure check. The context-capturing condition would continue to allow hardware exposure, and the active interactive media state would provide a second way for the check to return true. An `RTCRtpReceiver` would be in the **active interactive media state** when all of the following are true:
+
+* The receiver's associated document is visible and focused.
+* The receiver's track is a live video track.
+* The receiver has a live video track, and has received and successfully decoded a video frame within the
+  applicable time window.
+* At least one of the following qualifying interaction conditions is true:
+  * The document has a non-null [pointer-lock target](https://w3c.github.io/pointerlock/#dfn-pointer-lock-target).
+  * [Keyboard lock](https://fullscreen.spec.whatwg.org/#keyboard-locking) is active for the document.
+  * The user agent recently observed meaningful [gamepad](https://w3c.github.io/gamepad/) input associated with the document.
+  * The document's [fullscreen element](https://fullscreen.spec.whatwg.org/#fullscreen-element) is not null, and the user agent recently observed keyboard, pointer, touch, or meaningful gamepad input directed at the document.
+
+
+This state would be specific to one receiver. Activity on one receiver would not expose decoder information for another receiver that is not itself actively receiving and decoding live video. The state would end when any required condition becomes false. For example, it would end when the document becomes hidden or loses focus, the video track ends, the receiver stops receiving or decoding video, or no qualifying interaction condition remains. Navigation or document discard would also end the state.
+
+The time windows used for recent frame decoding and recent input remain to be defined. They should tolerate ordinary network jitter and pauses in user input without allowing exposure to persist after the interactive session has stopped.
+
+Conceptually, this would update the WebRTC Stats algorithm as follows:
+
+> To check if hardware exposure is allowed for a receiver:
+>
+> 1. If the context capturing state is true, return true.
+> 2. If the receiver is in the active interactive media state, return true.
+> 3. Return false.
+
 ## Alternatives Considered
 1. Use [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) info via WebRTC Stats API
     * Rejected because it now requires [`getUserMedia()`](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia) permissions, which are invasive and have a high failure rate.
@@ -142,10 +177,29 @@ pc.addEventListener('track', (event) => {
 
 ## Privacy Considerations
 
-The events carry only the media frame's `rtpTimestamp`. They expose no hardware vendor, device identity, or decoder detail. Applications can read decoder state through [`getStats()`](https://w3c.github.io/webrtc-pc/#dom-rtcrtpreceiver-getstats), which applies its existing privacy protections.
+### Event exposure
 
-* **`decoderstatechange`** follows the same gating as the stats that reflect the change. Codec changes are reflected in ungated stats, so the event fires regardless of capture state. Decoder implementation changes (such as a hardware-to-software fallback) are reflected only in [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder), which `getStats()` exposes only when [exposing hardware is allowed](https://w3c.github.io/webrtc-stats/#dfn-exposing-hardware-is-allowed). It therefore reveals nothing the page cannot already read.
-* **`decodererror`** exposes a single [`EncodingError`](https://webidl.spec.whatwg.org/#encodingerror) [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) `name`, with no decoder-, driver-, or device-specific detail in its `message`. The decode failure it reports is already observable through ungated statistics: [`framesReceived`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesreceived) keeps advancing while [`framesDecoded`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesdecoded) stalls, and [`freezeCount`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-freezecount) rises. Codec support is likewise already queryable via [`getCapabilities()`](https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpReceiver/getCapabilities_static). The event surfaces the failure sooner and more precisely than polling, but the underlying information is already available, so it does not increase the fingerprinting surface.
+The events carry only the media frame's `rtpTimestamp` and expose no hardware vendor, device identity, or decoder implementation detail.
+
+* **`decoderstatechange`** distinguishes between information classes. Codec changes are reflected in ungated stats, so codec-change events are ungated. Decoder implementation changes can reveal hardware use and therefore fire only while hardware exposure is allowed. The protected [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) statistics are available under that same condition.
+* **`decodererror`** is ungated and exposes a single [`EncodingError`](https://webidl.spec.whatwg.org/#encodingerror) [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) `name`, with no decoder-, driver-, or device-specific detail in its `message`. The decode failure it reports is already observable through ungated statistics: [`framesReceived`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesreceived) keeps advancing while [`framesDecoded`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesdecoded) stalls, and [`freezeCount`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-freezecount) rises. Codec support is likewise already queryable via [`getCapabilities()`](https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpReceiver/getCapabilities_static). The event surfaces the failure sooner and more precisely than polling, but the underlying information is already available, so it does not increase the fingerprinting surface.
+
+### Hardware-exposure safeguards
+
+Both parts retain a single check for whether hardware exposure is allowed. The gating update changes how that check can return true; it does not bypass the check. The existing context-capturing condition remains, and the active interactive media state adds another qualifying condition.
+
+The additional condition is scoped to a specific receiver and requires active video decoding in a visible, focused document together with a qualifying indication of user interaction. Exposure ends when any required condition stops being true. These constraints prevent an idle receiver, unrelated receiver, or background document from using the additional condition to access protected decoder information.
+
+### Relationship to MediaCapabilities
+
+[`MediaCapabilitiesInfo.powerEfficient`](https://www.w3.org/TR/media-capabilities/#dom-mediacapabilitiesinfo-powerefficient) can expose whether a hypothetical configuration is expected to be power efficient without requiring active capture. The protected WebRTC statistics differ because they describe the actual decoder and can change during a session, potentially revealing contention for shared hardware resources across tabs or applications. Requiring an active receiver, a foreground document, and ongoing user interaction limits this additional exposure to contexts that need the live operational signal.
+
+## Open Questions
+
+* **Timing windows:** How long should recent decoded frames and recent input continue to qualify? The values must avoid eligibility flicker during normal streaming while promptly ending exposure when interaction or decoding stops.
+* **Meaningful gamepad input:** What button, trigger, or axis thresholds distinguish intentional input from connection events, polling noise, and stick drift?
+* **Embedded contexts:** Which document's visibility, focus, fullscreen, locks, and input should be considered when the receiver belongs to an iframe? Should cross-origin use require explicit delegation through Permissions Policy?
+* **Information scope:** Should the interactive allowance expose both `decoderImplementation` and `powerEfficientDecoder`, or only the lower-entropy efficiency signal and corresponding state-change event?
 
 ## Stakeholder Feedback
 * Web Developers: Positive
@@ -167,4 +221,3 @@ Links to past working group meetings where this has been discussed:
 * 2025-09-16 WebRTC WG Call: [Slides 17-21](https://docs.google.com/presentation/d/11rr8X4aOao1AmvyoDLX8o9CPCmnDHkWGRM3nB4Q_104/edit?slide=id.g37afa1cfe47_0_26#slide=id.g37afa1cfe47_0_26) & [minutes](https://www.w3.org/2025/09/16-webrtc-minutes.html)
 * 2023-09-15 WebRTC WG Call: [Slides 25-31](https://docs.google.com/presentation/d/1FpCAlxvRuC0e52JrthMkx-ILklB5eHszbk8D3FIuSZ0/edit?slide=id.g2452ff65d17_0_71#slide=id.g2452ff65d17_0_71) & [minutes](https://www.w3.org/2023/09/15-webrtc-minutes.html)
 * 2023-03-21 WebRTC WG Call: [Slides 16-18](https://lists.w3.org/Archives/Public/www-archive/2023Mar/att-0004/WEBRTCWG-2023-03-21.pdf) & [minutes](https://www.w3.org/2023/03/21-webrtc-minutes.html)
-
