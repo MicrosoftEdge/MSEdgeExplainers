@@ -64,8 +64,6 @@
 - [Appendix](#appendix)
   - [Core API definition](#core-api-definition)
     - [WebIDL](#webidl)
-  - [Deferred transition extension sketch](#deferred-transition-extension-sketch)
-    - [CSS](#css)
   - [Preview examples](#preview-examples)
 
 ## Introduction
@@ -73,8 +71,6 @@
 **Image Preview lets a page provide a lightweight preview for an HTML image.** The browser shows the preview while the final image loads, then replaces it directly with the final image. This moves common preview decoding, lifecycle, and replacement behavior from site-specific code into the browser.
 
 Authors set the preview with a new `previewsrc` attribute on `<img>`. Existing `src`, `srcset`, and `sizes` behavior continues to select the final image.
-
-The core proposal does not depend on new image formats, View Transitions, or script-visible transition state. Compact preview formats and customizable transitions are described as optional capabilities that can be specified and implemented independently.
 
 ```html
 <img
@@ -125,8 +121,6 @@ The table below describes the major patterns used by current implementations. Re
 - Define skeleton or shimmer loading UI.
 - Give the preview separate alternative text or separate semantics.
 - Guarantee that a preview is displayed when the final image becomes ready first.
-- Define compact preview image formats.
-- Define an animated handoff or expose preview lifecycle state to script.
 
 ## Core Proposal
 
@@ -153,30 +147,6 @@ The core proposal applies only to HTML `<img>`. It does not add attributes to `<
 An `<img>` inside `<picture>` can use `previewsrc`, but the preview belongs to the `<img>` rather than to an individual `<source>`. The existing `<picture>`, `srcset`, and `sizes` algorithms continue selecting the final image. Version 1 deliberately provides one non-responsive preview URL and does not define `previewsrcset` or `previewsizes`.
 
 The preview should therefore represent every final candidate that the `<picture>` or `srcset` can select. If art direction, localization, writing direction, color scheme, or another condition changes the image's subject materially, the author should use a neutral preview suitable for every candidate or omit `previewsrc`. Responsive preview selection can be considered as a later extension if implementation experience demonstrates that one preview is insufficient.
-
-```html
-<img
-  previewsrc="photo-preview.avif"
-  src="photo.avif"
-  width="1200"
-  height="800"
-  alt="A mountain reflected in a lake">
-```
-
-The proposed flow is:
-
-```mermaid
-flowchart LR
-  A[Image element created] --> C[Select and start final image]
-  C --> B[Start lower-priority preview]
-  B -->|Preview ready first| D[Preview displayed]
-  C -->|Final ready first| F[Final image displayed]
-  D -->|Final image ready| F
-  B -->|Preview unavailable| G[No preview; final loading continues]
-  G -->|Final image ready| F
-```
-
-**Text alternative:** The browser selects and starts the final image before starting a lower-priority preview. The requests can then proceed independently for the same image element. If the preview is ready first, the browser displays it. When the final image becomes ready, the browser replaces the preview directly. If the final image is ready first, the browser displays it without waiting. Preview unavailability does not stop final-image loading.
 
 ### A low-resolution image preview
 
@@ -219,7 +189,7 @@ Preview processing is integrated into HTML's existing [update the image data](ht
 
 1. The browser selects the final image from `src`, `srcset`, `<picture>`, and `sizes`, and creates or updates the final-image request without waiting for the preview.
 2. If the element has a non-empty `previewsrc` and is eligible to load, the browser resolves it against the document base URL and may create a separate preview request.
-3. Preview and final requests are associated with the same invocation of the image-data update algorithm so that a result from an older invocation cannot replace content from a newer one.
+3. Preview and final requests form the [image generation](#source-updates-and-image-generations) associated with that invocation.
 
 The final image's discovery, selection, and request creation must not wait for preview fetching or decoding. When both require network work, the preview uses a lower internal priority than the final image. This minimizes contention but does not guarantee that an additional request consumes no bandwidth.
 
@@ -231,14 +201,22 @@ The preview is fetched with destination `image` and follows the `<img>` element'
 
 The proposed end-to-end flow is:
 
-1. The browser selects and starts the final-image request using existing image rules.
-2. If eligible, it resolves and starts the lower-priority preview request independently.
-3. If the preview becomes ready to paint while the final image is still pending, the browser displays the preview in the `<img>`.
-4. When the final image becomes ready to paint, the browser directly replaces the preview with the final image.
-5. If the final image becomes ready first, the browser displays it without waiting and makes preview work obsolete.
-6. A skipped, blocked, unsupported, malformed, or failed preview does not stop or alter final-image loading.
+```mermaid
+flowchart LR
+  A[Preview and final requests active] -->|Preview ready first| D[Preview displayed]
+  A -->|Final ready first| F[Final image displayed]
+  D -->|Final image ready| F
+  A -->|Preview unavailable| G[No preview displayed]
+  G -->|Final image ready| F
+```
 
-The existing `load` and `error` events describe the final image, not the preview.
+The numbered steps below are the text alternative for the diagram:
+
+1. After the requests begin under the [fetching and scheduling rules](#fetching-scheduling-and-html-integration), they proceed independently.
+2. If the preview becomes ready to paint while the final image is still pending, the browser displays the preview in the `<img>`.
+3. When the final image becomes ready to paint, the browser directly replaces the preview with the final image.
+4. If the final image becomes ready first, the browser displays it without waiting.
+5. A skipped, blocked, unsupported, malformed, or failed preview leaves no preview displayed and does not alter final-image loading.
 
 ### Lifecycle decisions
 
@@ -246,8 +224,8 @@ The existing `load` and `error` events describe the final image, not the preview
 - **Final-image failure:** If the final image fails, the browser stops displaying the preview and uses the element's normal broken-image and alternative-text rendering. A preview is temporary and cannot become successful fallback content.
 - **Animated previews:** If the selected preview format is animated, only its first successfully decoded frame is displayed. Preview animation does not run.
 - **Data-saving and resource pressure:** The browser may omit or abandon this best-effort preview in response to reduced-data preferences, memory pressure, battery constraints, or similar resource policy. This decision is not exposed through the core author API.
-- **Disconnection:** Disconnecting an element makes preview work obsolete when the corresponding final-image request is no longer relevant under the existing image-loading model. Reconnection runs the normal image-data update process; a stale preview result cannot newly appear.
-- **Document lifecycle:** Freezing a document for BFCache cancels any optional animated handoff. Already-painted and decoded state may be preserved to the same extent as ordinary `<img>` state, but only results belonging to the current image-data update can be used after restoration. Discarding the document makes preview work obsolete.
+- **Disconnection:** Disconnecting an element makes preview work obsolete when the corresponding final-image request is no longer relevant under the existing image-loading model. Reconnection runs the normal image-data update process.
+- **Document lifecycle:** Freezing a document for BFCache cancels any optional animated handoff. Already-painted and decoded state may be preserved to the same extent as ordinary `<img>` state. Discarding the document makes preview work obsolete.
 
 ### Source updates and image generations
 
@@ -262,9 +240,7 @@ image.src = photo.url;
 
 Changes to `previewsrc`, `src`, `srcset`, `sizes`, and relevant `<source>` elements participate in HTML's existing image-data update processing. For explanatory purposes, this document calls the preview and final-image work associated with one such update an *image generation*; it does not introduce a script-visible generation object.
 
-Preview and final-image requests are associated with that generation. When a new generation is created, the browser cancels obsolete requests when possible and cancels any handoff supplied by an optional transition mechanism; results from older generations are otherwise ignored. Previously painted content may remain until the current generation has a preview or final image ready, but an obsolete result cannot newly replace it.
-
-Preview decoding becomes obsolete when its result can no longer be displayed, including when a newer generation supersedes it, the final image becomes ready first, or the document is discarded. The browser must be able to stop obsolete decoding work rather than only ignore its eventual result.
+Preview and final-image requests are associated with that generation. Results from older generations are ignored and cannot newly replace painted content. The browser cancels obsolete requests, decoding, and optional handoffs when possible, including when a newer generation supersedes them, the final image becomes ready first, or the document is discarded. Previously painted content may remain until the current generation has a preview or final image ready.
 
 ### Image element state and rendering
 
@@ -284,9 +260,6 @@ The rendering outcomes are:
 | Ready | Pending | Preview |
 | Any state | Ready | Final image |
 | Any state | Failed | Normal broken-image and `alt` rendering |
-| Obsolete | Any current state | Ignore the obsolete result |
-
-An already-painted image from an older generation may remain temporarily while a newer generation is pending, consistent with existing image update behavior. An obsolete preview cannot newly replace painted content.
 
 ### Compatibility and fallback
 
@@ -299,7 +272,7 @@ const supportsImagePreview =
   "previewSrc" in HTMLImageElement.prototype;
 ```
 
-Support for `previewsrc` does not imply support for every preview format. If the browser cannot decode the preview resource, the preview is treated as unavailable and the final image continues loading and rendering normally. Low-resolution previews in existing image formats remain usable independently of support for compact formats such as BlurHash or ThumbHash.
+Unsupported formats follow the general preview-unavailable behavior. Support for optional [compact preview formats](#compact-encoded-preview-formats) is independent of support for `previewsrc`.
 
 Support for Image Preview does not imply support for customizable transitions. The core behavior always remains usable with direct replacement.
 
@@ -307,14 +280,7 @@ Developer tools may report that a preview was skipped, blocked, unsupported, or 
 
 ## Optional Capabilities
 
-The capabilities in this section are not part of the minimal `previewsrc` proposal. Each can be discussed, specified, and implemented independently without changing how an author supplies a preview or how the core preview lifecycle behaves.
-
-An implementation of the core proposal:
-
-- does not need to support a new image format;
-- does not need to animate the replacement;
-- does not need to expose preview or replacement state to script; and
-- must directly replace the preview when an optional transition mechanism is unavailable or disabled.
+The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). None is required to implement the core proposal.
 
 ### Compact encoded preview formats
 
@@ -384,7 +350,7 @@ The transition extension must separately define its default duration and easing,
 
 ### Script observability
 
-The core proposal intentionally exposes no preview-specific load event, error event, promise, or transition object. Existing `load`, `error`, and `decode()` behavior continues to describe the final image.
+The [core image state and rendering model](#image-element-state-and-rendering) provides no preview lifecycle hook.
 
 If concrete use cases establish a need for script observability, a follow-up proposal should evaluate an event, callback, or promise together with any transition object. It must also account for the additional timing and format-support information exposed by preview success, failure, and handoff timing.
 
@@ -538,13 +504,13 @@ The preview must not create a second accessibility node or a second announcement
 
 The proposal adds no user-facing text and no language-sensitive processing.
 
-Version 1 provides one preview for every final candidate selected through `<picture>` or `srcset`. When localization, writing direction, or another condition changes the subject materially, authors should use a neutral preview or omit `previewsrc`. A future responsive-preview extension can address demonstrated demand without expanding the core API.
+The guidance for localized or direction-dependent image candidates is covered by [Scope and responsive images](#scope-and-responsive-images).
 
 ### Privacy
 
 A URL in `previewsrc` can cause an additional request, with the same general privacy implications as requesting another image through `src`. The origin serving the preview can learn that the resource was requested.
 
-The preview request follows the same `crossorigin` credentials behavior, `referrerpolicy`, cache partitioning, service-worker interception, and Resource Timing protections as an image request through `src`. It follows the final image's lazy-loading eligibility, uses a lower internal priority than the final image, and can be omitted under reduced-data or resource-pressure policies.
+Existing image-fetch and Resource Timing protections limit what the document can observe about the additional request, as detailed in [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration). A browser decision to omit the preview under reduced-data or resource-pressure policies is not exposed through the core API.
 
 The core proposal adds no API exposing preview readiness, dimensions, decode failures, or handoff timing. Existing Resource Timing entries can expose ordinary request information to the extent already allowed for images. Adding a preview-specific state surface would reveal additional content-observation or format-support information and requires a separate privacy review. The optional transition pseudo-class can reveal through applied styling that a preview was displayed and its handoff began, but it does not expose preview metadata.
 
@@ -609,23 +575,6 @@ partial interface HTMLImageElement {
   [CEReactions] attribute USVString previewSrc;
 };
 ```
-
-No preview state, events, promises, or transition objects are exposed by the core API.
-
-### Deferred transition extension sketch
-
-#### CSS
-
-The optional transition extension could define an `:active-image-preview-transition` pseudo-class that matches an `<img>` only while the browser is performing an animated handoff from the displayed preview to the final image.
-
-While it matches, authors can style the preview and final snapshots through the Element Scoped View Transition pseudo-elements:
-
-```css
-img:active-image-preview-transition::view-transition-old(root)
-img:active-image-preview-transition::view-transition-new(root)
-```
-
-The `old(root)` snapshot represents the preview and the `new(root)` snapshot represents the final image.
 
 ### Preview examples
 
