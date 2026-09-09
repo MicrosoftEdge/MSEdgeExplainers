@@ -19,7 +19,7 @@ Game streaming platforms like Xbox Cloud Gaming and Nvidia GeForce Now rely on h
 
 This proposal has two parts. The first part adds two events on the receiver. The `decoderstatechange` event fires when the decoder's state changes. Codec changes always fire it, while decoder implementation changes, such as hardware-to-software fallback, fire only while hardware exposure is allowed. The `decodererror` event fires when the decoder hits a terminal error. Together the events replace inefficient polling.
 
-The second part updates that same check so hardware exposure would also be allowed for actively used interactive media receivers. It preserves the existing context-capturing condition and adds another way for the check to return true. This would allow qualifying non-capturing applications to receive implementation-change events and read the protected [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) statistics.
+The second part expands the existing hardware-exposure check for actively used interactive media receivers. The current check has no input because context capturing state applies to the entire context. To add a receiver-specific condition without broadening access to protected outbound statistics, the check would accept an optional `RTCRtpReceiver`. This would allow qualifying non-capturing applications to receive implementation-change events and read the protected [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) statistics.
 
 ## User-Facing Problem
 When the decoder fails terminally, playback freezes. The failure is not surfaced to the application, so there is no direct signal that decoding has stopped. The decoder's state can also change during a stream, for example when the codec is renegotiated. There is no event for these changes either. The only way to observe decoder state today is to poll [`getStats()`](https://w3c.github.io/webrtc-pc/#dom-rtcrtpreceiver-getstats) repeatedly, which is inefficient.
@@ -137,12 +137,17 @@ pc.addEventListener('track', (event) => {
 
 ```
 
-### Part 2: Expand when hardware exposure is allowed
+### Part 2: Expand the hardware-exposure check
 
-Part 2 proposes updating the existing hardware-exposure check. The context-capturing condition would continue to allow hardware exposure, and the active interactive media state would provide a second way for the check to return true. An `RTCRtpReceiver` would be in the **active interactive media state** when all of the following are true:
+Part 2 proposes extending the existing hardware-exposure check with an optional receiver input. When no receiver is supplied, the check would behave as it does today and allow exposure only when the context capturing state is true. When a receiver is supplied, the receiver's active interactive media state would provide another way for the check to return true.
+
+To avoid requiring applications to repeatedly reestablish user intent after temporary focus or visibility changes, this proposal distinguishes recognition of an interactive media session from its current eligibility for hardware exposure.
+
+#### Interactive media session recognition
+
+An `RTCRtpReceiver` would be recognized as belonging to an **interactive media session** when all of the following entry conditions are true at the same time:
 
 * The receiver's associated document is visible and focused.
-* The receiver's track is a live video track.
 * The receiver has a live video track, and has received and successfully decoded a video frame within the
   applicable time window.
 * At least one of the following qualifying interaction conditions is true:
@@ -152,17 +157,37 @@ Part 2 proposes updating the existing hardware-exposure check. The context-captu
   * The document's [fullscreen element](https://fullscreen.spec.whatwg.org/#fullscreen-element) is not null, and the user agent recently observed keyboard, pointer, touch, or meaningful gamepad input directed at the document.
 
 
-This state would be specific to one receiver. Activity on one receiver would not expose decoder information for another receiver that is not itself actively receiving and decoding live video. The state would end when any required condition becomes false. For example, it would end when the document becomes hidden or loses focus, the video track ends, the receiver stops receiving or decoding video, or no qualifying interaction condition remains. Navigation or document discard would also end the state.
+Recognition would be specific to one receiver. Activity on one receiver would not recognize another receiver as belonging to an interactive media session.
 
-The time windows used for recent frame decoding and recent input remain to be defined. They should tolerate ordinary network jitter and pauses in user input without allowing exposure to persist after the interactive session has stopped.
+Once established, recognition would persist until the receiver's video track ends, its associated transceiver is stopped, its peer connection is closed, its document navigates or is discarded, or it stops receiving and decoding video for a sustained session-termination period. The document becoming hidden or losing focus, an interaction lock ending, or a recent-input window expiring would not by itself end recognition.
 
-Conceptually, this would update the WebRTC Stats algorithm as follows:
+#### Active interactive media state
 
-> To check if hardware exposure is allowed for a receiver:
+A receiver would be in the **active interactive media state** while all of the following are true:
+
+* The receiver is recognized as belonging to an interactive media session.
+* The receiver's associated document is visible and focused.
+* The receiver has a live video track and has received and successfully decoded a video frame within the applicable time window.
+
+Hardware exposure through the receiver-specific condition would be suspended when any condition becomes false. If the user temporarily switches tabs or applications, the receiver would remain recognized as part of the same interactive media session, but protected decoder information would not be exposed while its document is hidden or unfocused. Exposure could resume automatically when the user returns and the receiver is again actively decoding, without requiring another pointer lock, keyboard lock, fullscreen interaction, or gamepad input.
+
+The time windows used for recent frame decoding, recent input, and session termination remain to be defined. They should tolerate ordinary network jitter, temporary interruptions, and pauses in user input without allowing recognition or exposure to persist after the interactive session has ended.
+
+Conceptually, the WebRTC Stats algorithm would be updated as follows:
+
+> To check if hardware exposure is allowed, given an optional `RTCRtpReceiver` *receiver*, run the following steps:
 >
 > 1. If the context capturing state is true, return true.
-> 2. If the receiver is in the active interactive media state, return true.
-> 3. Return false.
+> 2. If *receiver* was given and *receiver* is in the active interactive media state, return true.
+> 3. Otherwise return false.
+
+The relevant receiver would be supplied when checking whether to expose `decoderImplementation` or `powerEfficientDecoder` for that receiver, or whether to dispatch a decoder-implementation-change event. No receiver would be supplied when checking outbound statistics, including [`encoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcoutboundrtpstreamstats-encoderimplementation), [`powerEfficientEncoder`](https://w3c.github.io/webrtc-stats/#dom-rtcoutboundrtpstreamstats-powerefficientencoder), [`psnrSum`](https://w3c.github.io/webrtc-stats/#dom-rtcoutboundrtpstreamstats-psnrsum), and [`psnrMeasurements`](https://w3c.github.io/webrtc-stats/#dom-rtcoutboundrtpstreamstats-psnrmeasurements). Those fields would therefore remain available only when the context capturing state is true. Future callers would likewise receive the existing behavior unless they explicitly supply a receiver.
+
+#### Eligibility transitions
+
+If the receiver leaves the active interactive media state, protected decoder statistics would no longer be exposed and decoder-implementation-change events would be suppressed. This suspension would not clear the receiver's interactive media session recognition.
+
+If the receiver later reenters the active interactive media state and its current decoder implementation differs from the last implementation exposed to the application, the receiver would fire one coalesced `decoderstatechange` reflecting the current observable state. Intermediate changes while exposure was suspended would not be replayed. The event would use the `rtpTimestamp` of a frame decoded after exposure resumes rather than reveal when a hidden transition occurred.
 
 ## Alternatives Considered
 1. Use [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) info via WebRTC Stats API
@@ -186,9 +211,9 @@ The events carry only the media frame's `rtpTimestamp` and expose no hardware ve
 
 ### Hardware-exposure safeguards
 
-Both parts retain a single check for whether hardware exposure is allowed. The gating update changes how that check can return true; it does not bypass the check. The existing context-capturing condition remains, and the active interactive media state adds another qualifying condition.
+The proposed `decoderstatechange` event for decoder implementation changes and the protected decoder statistics would invoke the hardware-exposure check with the relevant receiver. Outbound statistics would invoke the same check without a receiver. This keeps one hardware-exposure algorithm while ensuring that active interactive media state can allow only receiver-related exposure.
 
-The additional condition is scoped to a specific receiver and requires active video decoding in a visible, focused document together with a qualifying indication of user interaction. Exposure ends when any required condition stops being true. These constraints prevent an idle receiver, unrelated receiver, or background document from using the additional condition to access protected decoder information.
+Interactive media session recognition is scoped to a specific receiver and requires active video decoding in a visible, focused document together with a qualifying indication of user interaction. Recognition alone does not expose protected information. Receiver-specific exposure remains limited to periods when the recognized receiver is actively decoding and its document is visible and focused. This allows temporary focus or visibility changes without requiring the user to reestablish the session, while preventing background observation of decoder state. The additional condition does not unlock protected outbound statistics, whose exposure remains tied to context capturing state.
 
 ### Relationship to MediaCapabilities
 
@@ -196,7 +221,8 @@ The additional condition is scoped to a specific receiver and requires active vi
 
 ## Open Questions
 
-* **Timing windows:** How long should recent decoded frames and recent input continue to qualify? The values must avoid eligibility flicker during normal streaming while promptly ending exposure when interaction or decoding stops.
+* **Timing windows:** How long should recent decoded frames and recent input continue to qualify? The values must avoid eligibility flicker during normal streaming while promptly suspending exposure when active decoding stops.
+* **Session lifetime:** How long may a recognized receiver stop receiving or decoding video before its interactive media session recognition ends? The period should tolerate temporary network interruptions without allowing a site to preserve recognition indefinitely.
 * **Meaningful gamepad input:** What button, trigger, or axis thresholds distinguish intentional input from connection events, polling noise, and stick drift?
 * **Embedded contexts:** Which document's visibility, focus, fullscreen, locks, and input should be considered when the receiver belongs to an iframe? Should cross-origin use require explicit delegation through Permissions Policy?
 * **Information scope:** Should the interactive allowance expose both `decoderImplementation` and `powerEfficientDecoder`, or only the lower-entropy efficiency signal and corresponding state-change event?
