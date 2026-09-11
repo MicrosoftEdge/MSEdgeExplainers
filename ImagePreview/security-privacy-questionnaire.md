@@ -3,7 +3,7 @@
 - **Feature:** Image Preview for HTML Images
 - **Explainer:** [explainer.md](explainer.md)
 - **Questionnaire:** [W3C Security and Privacy Self-Review Questionnaire](https://w3c.github.io/security-questionnaire/)
-- **Last updated:** 2026-09-07
+- **Last updated:** 2026-09-10
 
 ## 2.1. What information does this feature expose, and for what purposes?
 
@@ -31,7 +31,7 @@ The feature does not inspect, classify, or newly expose image content. The previ
 
 Preview requests follow the same credentials, referrer, Content Security Policy, mixed-content, cache-partitioning, service-worker interception, and image-fetching protections as final image requests.
 
-Preview fetching follows the final image's lazy-loading eligibility and uses a lower internal priority. The final image's selection and request creation do not wait for the preview. Preview decoding is asynchronous and best-effort.
+Preview fetching follows the final image's lazy-loading eligibility. The final image's selection and request creation do not wait for the preview, and the browser schedules best-effort preview work so that it does not block those operations. Preview decoding is asynchronous.
 
 ## 2.5. Does exposed data carry related but distinct information that may not be obvious?
 
@@ -39,7 +39,7 @@ The server providing a preview may receive request metadata even when the final 
 
 Existing Resource Timing behavior can expose request timing and transfer information for the preview to the extent ordinarily available for image requests. The design does not add a signal indicating whether the preview decoded successfully, was painted, or was later replaced, and it does not expose preview metadata or independent intrinsic dimensions.
 
-The browser can omit or abandon a preview under reduced-data, memory, battery, or similar resource policies. The core API does not expose that decision.
+The browser can omit or abandon a preview under reduced-data, memory, battery, or similar resource policies. The core API does not expose a dedicated outcome or reason for that decision, although existing Resource Timing information can reveal whether a separate preview request occurred.
 
 ## 2.6. Does the feature introduce state that persists across browsing sessions?
 
@@ -127,4 +127,4 @@ For features that add an auxiliary resource for existing content:
 - Can differences between auxiliary-resource cache hits, decoding support, and failures create new timing or fingerprinting signals?
 - When should auxiliary fetching and decoding be canceled as the document or primary resource state changes?
 
-For this proposal, final-image discovery and request creation never wait for the preview, and the preview uses a lower internal priority. The core API does not distinguish preview outcomes. Preview work becomes obsolete when the final image is ready first, a newer image-data update supersedes it, the relevant disconnected element no longer needs it, or the document is discarded.
+For this proposal, final-image discovery and request creation never wait for the preview, and the browser schedules best-effort preview work so that it does not block those operations. The core API does not distinguish preview outcomes. Preview work becomes obsolete when the final image is ready first, a newer image-data update supersedes it, the relevant disconnected element no longer needs it, or the document is discarded.

@@ -3,11 +3,11 @@
 ## Status of this Document
 
 - **Status:** Active draft
-- **Draft focus:** A minimal core proposal with optional capabilities separated for independent incubation.
+- **Draft focus:** The core proposal and the minimum developer-viable feature boundary.
 - **Proposed incubation venue:** [WICG](https://wicg.io/)
 - **Expected standards venue:** [WHATWG HTML](https://html.spec.whatwg.org/)
 - **Current version:** This draft
-- **Last updated:** 2026-09-07
+- **Last updated:** 2026-09-10
 
 ## Authors
 
@@ -30,6 +30,7 @@
   - [Goals](#goals)
   - [Non-goals](#non-goals)
 - [Core Proposal](#core-proposal)
+  - [Open question: Minimum viable feature](#open-question-minimum-viable-feature)
   - [Scope and responsive images](#scope-and-responsive-images)
   - [A low-resolution image preview](#a-low-resolution-image-preview)
   - [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration)
@@ -89,18 +90,16 @@ Sites can show previews today, but each site must build its own solution. Curren
 
 **Example scenario:** A user opens a photo gallery on a slow connection. The page knows a small preview for each photo. With Image Preview, the browser can show those previews in the image elements and replace each one as its final image becomes ready.
 
-This feature is meant both to improve website performance and to make image previews easier to build. Users can see useful image content sooner, while authors can rely on native behavior instead of maintaining custom markup, decoding, source-change handling, and replacement logic. Authors that need an animated handoff could use the optional transition extension.
-
 ### How authors provide previews today
 
 The table below describes the major patterns used by current implementations. Representative examples are provided in the [appendix](#preview-examples).
 
 | Pattern | Format | How it works | Examples and evidence |
 | --- | --- | --- | --- |
-| Pattern 1 — CSS background preview with final image overlay | Base64 8×8 BMP; tiny JPEG embedded in SVG; BlurHash-derived WebP; ThumbHash-derived PNG | Set the preview as the CSS background of the final `<img>` or its wrapper. The final image paints over it or becomes opaque after loading. | [Unsplash](https://unsplash.com/); [Next.js `<Image>`](https://image-component.nextjs.gallery/placeholder); [Jesus Film with Next.js](https://github.com/JesusFilm/core/blob/b2825dcb70a75b12a01f536b2f4b9c5637e8c6e8/libs/journeys/ui/src/components/Image/Image.tsx); [Tommy Chow homepage gallery preview](https://tommychow.com/) |
-| Pattern 2 — Decoded compact hash canvas | BlurHash decoded to canvas pixels | Decode the hash in script and paint it into a canvas occupying the image's display area. Load the final `<img>` independently; after it loads or decodes, reveal it and hide or remove the canvas. | [Minds](https://www.minds.com/newsfeed/1565424642032668690); [Mastodon](https://github.com/mastodon/mastodon/blob/main/app/javascript/mastodon/components/blurhash.tsx); [Misskey](https://github.com/misskey-dev/misskey/blob/b3ce198f4c55ace4daeba4cb1858b3a85bc9529b/packages/frontend/src/components/MkImgWithBlurhash.vue); [Nextcloud Talk](https://github.com/nextcloud/spreed/blob/030f4ae2bd69e30077ad7dbac428ace1e9a325d2/src/components/MessagesList/MessagesGroup/Message/MessagePart/FilePreview.vue); [Jellyfin Vue](https://github.com/jellyfin/jellyfin-vue/blob/63edc21f2787706d094a190c93bdc97edd5c233e/packages/frontend/src/components/Layout/Images/Blurhash/BlurhashImage.vue) |
-| Pattern 3 — Single-image source replacement | Cloudinary-transformed raster image; Cloudinary selects the delivered format automatically | Assign the placeholder URL to one `<img>`, preload the final resource, and replace the same element's `src`. | [Cloudinary training tool](https://cloudinary-training.github.io/cld-intro-react-sdk-training-tool/#/placeholder); [Cico Jazz hero](https://cicojazz.de/#hero); [Cloudinary plugin source](https://github.com/cloudinary/frontend-frameworks/blob/9a05f3571fec1a3d0ecc66a899db1833d326c094/packages/html/src/plugins/placeholder.ts#L10-L108) |
-| Pattern 4 — Progressive stacked preview layers | BlurHash, small thumbnail, and larger preview | Stack progressively better representations and fade in each layer after it loads. | [Nextcloud Photos](https://github.com/nextcloud/photos/blob/d12a25def30bf568d5e36339bea645203f7dba62/src/components/FileComponent.vue) |
+| 1. CSS background preview with final image overlay | Base64 8×8 BMP; tiny JPEG embedded in SVG; BlurHash-derived WebP; ThumbHash-derived PNG | Set the preview as the CSS background of the final `<img>` or its wrapper. The final image paints over it or becomes opaque after loading. | [Unsplash](https://unsplash.com/); [Next.js `<Image>`](https://image-component.nextjs.gallery/placeholder); [Jesus Film with Next.js](https://github.com/JesusFilm/core/blob/b2825dcb70a75b12a01f536b2f4b9c5637e8c6e8/libs/journeys/ui/src/components/Image/Image.tsx); [Tommy Chow homepage gallery preview](https://tommychow.com/) |
+| 2. Decoded compact hash canvas | BlurHash decoded to canvas pixels | Decode the hash in script and paint it into a canvas occupying the image's display area. Load the final `<img>` independently; after it loads or decodes, reveal it and hide or remove the canvas. | [Minds](https://www.minds.com/newsfeed/1565424642032668690); [Mastodon](https://github.com/mastodon/mastodon/blob/main/app/javascript/mastodon/components/blurhash.tsx); [Misskey](https://github.com/misskey-dev/misskey/blob/b3ce198f4c55ace4daeba4cb1858b3a85bc9529b/packages/frontend/src/components/MkImgWithBlurhash.vue); [Nextcloud Talk](https://github.com/nextcloud/spreed/blob/030f4ae2bd69e30077ad7dbac428ace1e9a325d2/src/components/MessagesList/MessagesGroup/Message/MessagePart/FilePreview.vue); [Jellyfin Vue](https://github.com/jellyfin/jellyfin-vue/blob/63edc21f2787706d094a190c93bdc97edd5c233e/packages/frontend/src/components/Layout/Images/Blurhash/BlurhashImage.vue) |
+| 3. Single-image source replacement | Cloudinary-transformed raster image; Cloudinary selects the delivered format automatically | Assign the placeholder URL to one `<img>`, preload the final resource, and replace the same element's `src`. | [Cloudinary training tool](https://cloudinary-training.github.io/cld-intro-react-sdk-training-tool/#/placeholder); [Cico Jazz hero](https://cicojazz.de/#hero); [Cloudinary plugin source](https://github.com/cloudinary/frontend-frameworks/blob/9a05f3571fec1a3d0ecc66a899db1833d326c094/packages/html/src/plugins/placeholder.ts#L10-L108) |
+| 4. Progressive stacked preview layers | BlurHash, small thumbnail, and larger preview | Stack progressively better representations and fade in each layer after it loads. | [Nextcloud Photos](https://github.com/nextcloud/photos/blob/d12a25def30bf568d5e36339bea645203f7dba62/src/components/FileComponent.vue) |
 
 ### Goals
 
@@ -128,6 +127,8 @@ Add a URL-valued `previewsrc` attribute to `<img>`.
 
 The preview is temporary visual content for the image. It is painted in the same image element. The final resource continues to come from the existing image source attributes.
 
+Authors should provide a preview that represents the same content as the final image. The browser cannot verify that correspondence, but unrelated or misleading preview content can give users an incorrect understanding of the image while the final resource loads.
+
 The proposal is divided along specification and implementation boundaries:
 
 | Capability | Scope | Intended venue |
@@ -138,7 +139,26 @@ The proposal is divided along specification and implementation boundaries:
 | Animated and author-customizable replacement | Optional extension | CSS View Transitions |
 | Script-visible preview or handoff state | Deferred pending demonstrated use cases | To be determined |
 
-When the final image is ready, the browser directly replaces the preview. An implementation can support a separately specified customizable transition, but transition support is not required to fetch, decode, display, or replace a preview.
+### Open question: Minimum viable feature
+
+Although the capabilities in the table above can be specified and implemented independently, it remains unclear which combination constitutes a developer-viable initial release.
+
+The core `previewsrc` API is usable with existing image formats and the [core handoff](#preview-lifecycle). However, requiring a separate raster preview might not provide enough transfer-size or authoring benefit over existing techniques. Similarly, developers might continue using custom markup and script if a visually acceptable handoff requires transition support.
+
+Possible deployment boundaries are:
+
+| MVP option | Included capabilities | Tradeoff |
+| --- | --- | --- |
+| Lifecycle only | `previewsrc` with existing image formats and the core handoff | Smallest platform change, but potentially limited benefit over current raster-placeholder techniques |
+| Lifecycle and compact formats | `previewsrc` plus at least one compact preview format | Provides transfer-size and decoder benefits, but replacement is not customizable |
+| Complete developer experience | `previewsrc`, compact formats, and customizable transitions | Addresses loading, payload size, and handoff UX, but depends on work across multiple specifications and implementation areas |
+
+The decision should be informed by developer research and prototyping that answers:
+
+- Would developers adopt `previewsrc` using only existing raster formats?
+- Is support for at least one compact format necessary to justify replacing current BlurHash or ThumbHash libraries?
+- Is the core handoff acceptable, or would the absence of transition customization cause developers to retain custom preview components?
+- Can the capabilities ship incrementally without sites depending on an unreliable combination of feature support?
 
 ### Scope and responsive images
 
@@ -188,16 +208,22 @@ Inlining avoids a separate preview request, but increases the size of the contai
 Preview processing is integrated into HTML's existing [update the image data](https://html.spec.whatwg.org/multipage/images.html#update-the-image-data) processing model:
 
 1. The browser selects the final image from `src`, `srcset`, `<picture>`, and `sizes`, and creates or updates the final-image request without waiting for the preview.
-2. If the element has a non-empty `previewsrc` and is eligible to load, the browser resolves it against the document base URL and may create a separate preview request.
+2. When the browser begins loading the selected final image, if the element has a non-empty `previewsrc`, it resolves the preview URL against the document base URL and may create a preview request.
 3. Preview and final requests form the [image generation](#source-updates-and-image-generations) associated with that invocation.
 
-The final image's discovery, selection, and request creation must not wait for preview fetching or decoding. When both require network work, the preview uses a lower internal priority than the final image. This minimizes contention but does not guarantee that an additional request consumes no bandwidth.
+If an update leaves the element without a valid final-image candidate, the browser does not process `previewsrc`. Pending preview work becomes obsolete, and a displayed preview is removed; the element then follows its ordinary no-source or broken-image rendering behavior. A preview cannot serve as a standalone image or fallback source.
 
-The element's `fetchpriority` and `decoding` attributes continue to describe the final image. Version 1 adds no preview-specific priority control: preview decoding is asynchronous and best-effort. The browser may skip the preview when the final image is already available or is expected to become ready before the preview would be useful.
+When `previewsrc` resolves to the same URL as the selected final image, the browser may reuse the same fetch and decode rather than perform duplicate work. The resource is treated as the final image and does not participate in the preview lifecycle.
 
-The preview is fetched with destination `image` and follows the `<img>` element's existing URL, `crossorigin`, credentials, `referrerpolicy`, Content Security Policy `img-src`, mixed-content, cookie, HTTP cache, network-partitioning, and service-worker interception rules. A separately fetched preview produces a Resource Timing entry under the rules for image requests, with `initiatorType` equal to `"img"`. The preview URL is not exposed through `currentSrc`.
+Final-image discovery, selection, and request creation must not wait for preview fetching or decoding. The browser schedules best-effort preview work so that it does not block those final-image operations and may choose its network, decoding, or task priority accordingly. An additional request can still consume bandwidth or contend with the final image.
+
+The element's `fetchpriority` and `decoding` attributes continue to describe the final image. Version 1 adds no preview-specific priority control: preview decoding is asynchronous and best-effort. The browser may skip the preview when the final image is already available or when its scheduling policy determines that the preview is unlikely to be useful before the final image.
+
+The preview is fetched with destination `image` and follows the same URL parsing, CORS, credentials, referrer-policy, Content Security Policy `img-src`, mixed-content, cookie, HTTP-cache, network-partitioning, and service-worker rules as other `<img>` requests. A separately fetched preview produces a Resource Timing entry under the rules for image requests, with `initiatorType` equal to `"img"`. The preview URL is not exposed through `currentSrc`.
 
 ### Preview lifecycle
+
+In this explainer, *ready to paint* means that a successfully fetched and decoded image representation is available for the browser to render. It does not mean that a rendering update has already painted the pixels, and it does not introduce a new script-visible state. A specification would express this condition using the existing HTML image-request and decoding states.
 
 The proposed end-to-end flow is:
 
@@ -220,10 +246,10 @@ The numbered steps below are the text alternative for the diagram:
 
 ### Lifecycle decisions
 
-- **Lazy loading:** Preview fetching follows the final image's `loading="lazy"` eligibility and must not start merely because `previewsrc` is present. Once the image becomes eligible, preview and final processing follow the scheduling rules above.
+- **Lazy loading:** Preview fetching follows the final image's lazy-loading behavior. If `loading="lazy"` causes the browser to defer the final-image request, it must also defer the preview request. When the browser begins loading the final image, it may begin best-effort preview processing according to the scheduling rules above.
 - **Final-image failure:** If the final image fails, the browser stops displaying the preview and uses the element's normal broken-image and alternative-text rendering. A preview is temporary and cannot become successful fallback content.
 - **Animated previews:** If the selected preview format is animated, only its first successfully decoded frame is displayed. Preview animation does not run.
-- **Data-saving and resource pressure:** The browser may omit or abandon this best-effort preview in response to reduced-data preferences, memory pressure, battery constraints, or similar resource policy. This decision is not exposed through the core author API.
+- **Data-saving and resource pressure:** The browser may omit or abandon this best-effort preview in response to reduced-data preferences, memory pressure, battery constraints, or similar resource policy. The core API exposes no dedicated reason or outcome for this decision, although existing facilities such as Resource Timing can reveal whether a separate request occurred.
 - **Disconnection:** Disconnecting an element makes preview work obsolete when the corresponding final-image request is no longer relevant under the existing image-loading model. Reconnection runs the normal image-data update process.
 - **Document lifecycle:** Freezing a document for BFCache cancels any optional animated handoff. Already-painted and decoded state may be preserved to the same extent as ordinary `<img>` state. Discarding the document makes preview work obsolete.
 
@@ -240,7 +266,7 @@ image.src = photo.url;
 
 Changes to `previewsrc`, `src`, `srcset`, `sizes`, and relevant `<source>` elements participate in HTML's existing image-data update processing. For explanatory purposes, this document calls the preview and final-image work associated with one such update an *image generation*; it does not introduce a script-visible generation object.
 
-Preview and final-image requests are associated with that generation. Results from older generations are ignored and cannot newly replace painted content. The browser cancels obsolete requests, decoding, and optional handoffs when possible, including when a newer generation supersedes them, the final image becomes ready first, or the document is discarded. Previously painted content may remain until the current generation has a preview or final image ready.
+Results from older generations are ignored and cannot newly replace painted content. The browser cancels obsolete requests, decoding, and optional handoffs when possible, including when a newer generation supersedes them, the final image becomes ready first, or the document is discarded. Previously painted content may remain until the current generation has a preview or final image ready.
 
 ### Image element state and rendering
 
@@ -274,19 +300,17 @@ const supportsImagePreview =
 
 Unsupported formats follow the general preview-unavailable behavior. Support for optional [compact preview formats](#compact-encoded-preview-formats) is independent of support for `previewsrc`.
 
-Support for Image Preview does not imply support for customizable transitions. The core behavior always remains usable with direct replacement.
-
 Developer tools may report that a preview was skipped, blocked, unsupported, or failed, but such diagnostics are not a web-observable API and are outside the HTML feature definition.
 
 ## Optional Capabilities
 
-The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). None is required to implement the core proposal.
+The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). They are independently specifiable, but whether some or all are required for a developer-viable initial release remains an [open question](#open-question-minimum-viable-feature).
 
 ### Compact encoded preview formats
 
 `previewsrc` accepts any image resource that the browser can decode. It therefore benefits automatically from compact image formats if those formats are specified and implemented, but the core proposal does not define, require, or special-case them.
 
-BlurHash and ThumbHash are examples of compact encodings that could be separately specified and registered as image formats. The media types and data URL serializations below are illustrative pending that work.
+BlurHash and ThumbHash are examples of compact encodings that could be separately specified and registered as image formats. The media type and data URL serialization below are illustrative pending that work.
 
 An author could provide a BlurHash value:
 
@@ -299,20 +323,9 @@ An author could provide a BlurHash value:
   alt="Portrait of a person">
 ```
 
-An author could provide a base64-encoded ThumbHash value:
+A separately specified ThumbHash image format could use an analogous data URL with its registered media type and serialization.
 
-```html
-<img
-  previewsrc="data:image/thumbhash;base64,..."
-  src="/images/beach.jpg"
-  width="1200"
-  height="800"
-  alt="Beach at sunset">
-```
-
-When one of these formats is supported, the browser decodes it through the normal image-decoding infrastructure and paints the result as the preview. When it is unsupported, the preview is unavailable and the final image continues loading.
-
-Each compact format specification is responsible for defining its media type, serialization, encoded-size and decoded-dimension limits, memory and processing bounds, and malformed-input behavior. A compact image resource must not initiate nested network requests. None of these requirements block implementation of `previewsrc` with existing formats such as JPEG, WebP, or AVIF.
+Each compact format specification must define its media type and serialization; encoded-size, decoded-dimension, memory, and processing limits; malformed-input behavior; and a prohibition on nested network requests.
 
 ### Customizable preview transitions
 
@@ -340,11 +353,9 @@ img:active-image-preview-transition::view-transition-new(root) {
 }
 ```
 
-While the pseudo-class matches, the `old(root)` snapshot represents the displayed preview and the `new(root)` snapshot represents the final image. The state ends when the handoff finishes or is canceled and does not match during unrelated scoped transitions on the element.
+While the pseudo-class matches, the `old(root)` snapshot represents the displayed preview and the `new(root)` snapshot represents the final image. The state ends when the handoff finishes or is canceled.
 
-This extension must fall back to the core direct replacement when transitions are unsupported, the user prefers reduced motion, or the document is hidden. Preview failure does not activate a transition and does not affect final-image loading.
-
-Element Scoped View Transitions are not implemented across all major browser engines as of September 2026. Chromium supports `Element.startViewTransition()` in stable releases starting with Chromium 147 ([Chrome announcement](https://developer.chrome.com/blog/element-scoped-view-transitions)); Gecko and WebKit do not currently support it. Current status is tracked in the [Web Platform Features compatibility table](https://caniuse.com/wf-view-transitions-element-scoped), [Mozilla's implementation bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1897323), and [WebKit's standards-position issue](https://github.com/WebKit/standards-positions/issues/611). Keeping this mechanism optional prevents that dependency from blocking the HTML feature.
+When a transition is unavailable or inappropriate, including because of reduced-motion preferences, the [core lifecycle](#preview-lifecycle) applies.
 
 The transition extension must separately define its default duration and easing, cancellation behavior, interaction with concurrent author transitions, and behavior during source changes and document lifecycle transitions.
 
@@ -355,8 +366,6 @@ The [core image state and rendering model](#image-element-state-and-rendering) p
 If concrete use cases establish a need for script observability, a follow-up proposal should evaluate an event, callback, or promise together with any transition object. It must also account for the additional timing and format-support information exposed by preview success, failure, and handoff timing.
 
 ## Alternatives considered
-
-The API names in this section are illustrative rather than proposed specification text.
 
 ### CSS property for the preview source
 
@@ -498,7 +507,7 @@ This would make additional formats extensible without requiring native decoders 
 
 The proposal uses one `<img>` for the preview and final image. The existing `alt` attribute describes that image.
 
-The preview must not create a second accessibility node or a second announcement. The core direct replacement does not animate. Any optional transition mechanism must respect `prefers-reduced-motion`.
+The preview must represent the same content described by the `alt` attribute and must not create a second accessibility node or a second announcement. The [core handoff](#preview-lifecycle) does not animate. Any optional transition mechanism must respect `prefers-reduced-motion`.
 
 ### Internationalization
 
@@ -510,7 +519,7 @@ The guidance for localized or direction-dependent image candidates is covered by
 
 A URL in `previewsrc` can cause an additional request, with the same general privacy implications as requesting another image through `src`. The origin serving the preview can learn that the resource was requested.
 
-Existing image-fetch and Resource Timing protections limit what the document can observe about the additional request, as detailed in [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration). A browser decision to omit the preview under reduced-data or resource-pressure policies is not exposed through the core API.
+Existing image-fetch and Resource Timing protections limit what the document can observe about the additional request, as detailed in [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration). The core API provides no preview-specific outcome or reason when the browser omits preview work under reduced-data or resource-pressure policies. However, existing Resource Timing information can let the document infer whether a separate preview request occurred.
 
 The core proposal adds no API exposing preview readiness, dimensions, decode failures, or handoff timing. Existing Resource Timing entries can expose ordinary request information to the extent already allowed for images. Adding a preview-specific state surface would reveal additional content-observation or format-support information and requires a separate privacy review. The optional transition pseudo-class can reveal through applied styling that a preview was displayed and its handoff began, but it does not expose preview metadata.
 
