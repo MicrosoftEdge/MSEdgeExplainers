@@ -207,7 +207,7 @@ If the receiver later reenters the active interactive media state and its curren
 The events carry only the media frame's `rtpTimestamp` and expose no hardware vendor, device identity, or decoder implementation detail.
 
 * **`decoderstatechange`** distinguishes between information classes. Codec changes are reflected in ungated stats, so codec-change events are ungated. Decoder implementation changes can reveal hardware use and therefore fire only while hardware exposure is allowed. The protected [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation) and [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder) statistics are available under that same condition.
-* **`decodererror`** is ungated and exposes a single [`EncodingError`](https://webidl.spec.whatwg.org/#encodingerror) [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) `name`, with no decoder-, driver-, or device-specific detail in its `message`. The decode failure it reports is already observable through ungated statistics: [`framesReceived`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesreceived) keeps advancing while [`framesDecoded`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesdecoded) stalls, and [`freezeCount`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-freezecount) rises. Codec support is likewise already queryable via [`getCapabilities()`](https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpReceiver/getCapabilities_static). The event surfaces the failure sooner and more precisely than polling, but the underlying information is already available, so it does not increase the fingerprinting surface.
+* **`decodererror`** is ungated and exposes a single [`EncodingError`](https://webidl.spec.whatwg.org/#encodingerror) [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) `name`, with no decoder-, driver-, or device-specific detail in its `message`. The decode failure it reports is already observable through ungated statistics: [`framesReceived`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesreceived) keeps advancing while [`framesDecoded`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesdecoded) stalls, and [`freezeCount`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-freezecount) rises. Codec support is likewise already queryable via [`getCapabilities()`](https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpReceiver/getCapabilities_static). The event surfaces the failure sooner and more precisely than polling, but the underlying information is already available.
 
 ### Hardware-exposure safeguards
 
@@ -218,6 +218,31 @@ Interactive media session recognition is scoped to a specific receiver and requi
 ### Relationship to MediaCapabilities
 
 [`MediaCapabilitiesInfo.powerEfficient`](https://www.w3.org/TR/media-capabilities/#dom-mediacapabilitiesinfo-powerefficient) can expose whether a hypothetical configuration is expected to be power efficient without requiring active capture. The protected WebRTC statistics differ because they describe the actual decoder and can change during a session, potentially revealing contention for shared hardware resources across tabs or applications. Requiring an active receiver, a foreground document, and ongoing user interaction limits this additional exposure to contexts that need the live operational signal.
+
+## Security Considerations
+
+This proposal does not introduce a new network transport, media source,
+script execution mechanism, or ability to select, configure, reserve, or
+control a decoder. It reports state changes and terminal failures associated
+with an existing `RTCRtpReceiver`.
+
+Decoder events and protected statistics must be scoped to the affected
+receiver and its associated document. A qualifying interaction associated
+with one receiver, document, or origin must not enable access for unrelated
+receivers or origins. Cross-origin iframe support is out of scope. Only
+browser-observed interaction state may satisfy the gate; synthetic events
+must not qualify.
+
+Documents that are not fully active, including documents in BFCache or
+disconnected documents, must not receive decoder events or access protected
+decoder statistics through the expanded gate. Changes that occur while access
+is blocked must not be queued or replayed later.
+
+The `decodererror` event exposes only a generic `EncodingError`. It must not
+include decoder, hardware, driver, platform error-code, or
+resource-availability details. Applications should treat these events as
+notifications that the decoder changed or failed, not as proof of the
+underlying cause.
 
 ## Open Questions
 
