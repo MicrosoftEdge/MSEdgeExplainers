@@ -84,6 +84,7 @@ all of those scopes a common, declarative reference.
   `<link rel="stylesheet">` elements,
   `<link rel="modulepreload">` elements, `<style>` elements, or
   `adoptedStyleSheets` usage.
+- Any changes to how CSS `@import` behaves.
 
 ## Proposal: The `import` attribute on `<link rel="stylesheet">`
 
