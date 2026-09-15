@@ -49,7 +49,7 @@
   - [Preview source in `<picture>`](#preview-source-in-picture)
   - [Reuse the `poster` attribute](#reuse-the-poster-attribute)
   - [Progressive and incrementally decoded images](#progressive-and-incrementally-decoded-images)
-  - [Native compact decoding without a managed lifecycle](#native-compact-decoding-without-a-managed-lifecycle)
+  - [Native compact-format decoding with an author-managed lifecycle](#native-compact-format-decoding-with-an-author-managed-lifecycle)
   - [Author-scripted scoped View Transition](#author-scripted-scoped-view-transition)
   - [Script-provided fallback decoder](#script-provided-fallback-decoder)
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
@@ -437,9 +437,9 @@ They do not replace every preview use case:
 
 Conversely, `previewsrc` can use an existing small image, be inlined, or be cached independently of the final image, and works regardless of whether the final format renders progressively. Its cost is an additional resource and possible bandwidth contention. Authors should prefer progressive delivery when it provides an adequate experience without that cost; Image Preview is complementary for cases that require an independently supplied preview.
 
-### Native compact decoding without a managed lifecycle
+### Native compact-format decoding with an author-managed lifecycle
 
-The browser could natively decode compact image formats while authors provide the preview and final image as separate elements:
+The browser could natively decode compact image formats without adding `previewsrc` or managing preview replacement. Authors would use ordinary image or canvas sources and continue coordinating preview and final content through script:
 
 ```html
 <div class="image-frame">
@@ -454,7 +454,7 @@ The browser could natively decode compact image formats while authors provide th
 </div>
 ```
 
-This would remove the need for a format-specific decoder library. Authors would still need to coordinate two elements, loading, source changes, failures, accessibility, and the preview-to-final transition. The proposed approach combines native decoding with a browser-managed lifecycle on one semantic image element.
+This would remove format-specific decoder libraries and could reduce script size and decoding cost. However, authors would still need to implement loading, replacement, cancellation, source-update handling, failures, and accessibility across multiple elements. The proposed `previewsrc` API adds that managed lifecycle in addition to using any image format the browser can decode.
 
 ### Author-scripted scoped View Transition
 
