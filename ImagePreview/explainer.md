@@ -3,7 +3,7 @@
 ## Status of this Document
 
 - **Status:** Active draft
-- **Draft focus:** The core proposal and the minimum developer-viable feature boundary.
+- **Draft focus:** The core proposal and its developer viability.
 - **Proposed incubation venue:** [WICG](https://wicg.io/)
 - **Expected standards venue:** [WHATWG HTML](https://html.spec.whatwg.org/)
 - **Current version:** This draft
@@ -30,7 +30,7 @@
   - [Goals](#goals)
   - [Non-goals](#non-goals)
 - [Core Proposal](#core-proposal)
-  - [Open question: Minimum viable feature](#open-question-minimum-viable-feature)
+  - [Open question: Developer viability](#open-question-developer-viability)
   - [Scope and responsive images](#scope-and-responsive-images)
   - [A low-resolution image preview](#a-low-resolution-image-preview)
   - [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration)
@@ -139,26 +139,11 @@ The proposal is divided along specification and implementation boundaries:
 | Animated and author-customizable replacement | Optional extension | CSS View Transitions |
 | Script-visible preview or handoff state | Deferred pending demonstrated use cases | To be determined |
 
-### Open question: Minimum viable feature
+### Open question: Developer viability
 
-Although the capabilities in the table above can be specified and implemented independently, it remains unclear which combination constitutes a developer-viable initial release.
+The core `previewsrc` lifecycle can be implemented independently using existing image formats and the [core handoff](#preview-lifecycle). It remains unclear whether developers would adopt it without a compact preview format or customizable handoff, or would continue using script-based preview components.
 
-The core `previewsrc` API is usable with existing image formats and the [core handoff](#preview-lifecycle). However, requiring a separate raster preview might not provide enough transfer-size or authoring benefit over existing techniques. Similarly, developers might continue using custom markup and script if a visually acceptable handoff requires transition support.
-
-Possible deployment boundaries are:
-
-| MVP option | Included capabilities | Tradeoff |
-| --- | --- | --- |
-| Lifecycle only | `previewsrc` with existing image formats and the core handoff | Smallest platform change, but potentially limited benefit over current raster-placeholder techniques |
-| Lifecycle and compact formats | `previewsrc` plus at least one compact preview format | Provides transfer-size and decoder benefits, but replacement is not customizable |
-| Complete developer experience | `previewsrc`, compact formats, and customizable transitions | Addresses loading, payload size, and handoff UX, but depends on work across multiple specifications and implementation areas |
-
-The decision should be informed by developer research and prototyping that answers:
-
-- Would developers adopt `previewsrc` using only existing raster formats?
-- Is support for at least one compact format necessary to justify replacing current BlurHash or ThumbHash libraries?
-- Is the core handoff acceptable, or would the absence of transition customization cause developers to retain custom preview components?
-- Can the capabilities ship incrementally without sites depending on an unreliable combination of feature support?
+Developer research should determine the relative priority of compact formats and handoff customization. These capabilities can be specified and shipped independently of the core lifecycle.
 
 ### Scope and responsive images
 
@@ -278,14 +263,7 @@ The preview is not exposed through `drawImage()`, `createImageBitmap()`, or othe
 
 Context menus, drag operations, saving, accessibility, and other semantics continue to identify the final image and its `src`/`currentSrc`, not the preview.
 
-The rendering outcomes are:
-
-| Preview state | Final-image state | Rendering |
-| --- | --- | --- |
-| Missing, pending, skipped, or failed | Pending | Normal pending-image rendering |
-| Ready | Pending | Preview |
-| Any state | Ready | Final image |
-| Any state | Failed | Normal broken-image and `alt` rendering |
+The [preview lifecycle](#preview-lifecycle) and [lifecycle decisions](#lifecycle-decisions) define the rendering outcomes for pending, ready, unavailable, and failed resources.
 
 ### Compatibility and fallback
 
@@ -298,13 +276,13 @@ const supportsImagePreview =
   "previewSrc" in HTMLImageElement.prototype;
 ```
 
-Unsupported formats follow the general preview-unavailable behavior. Support for optional [compact preview formats](#compact-encoded-preview-formats) is independent of support for `previewsrc`.
+Unsupported formats follow the [preview-unavailable lifecycle](#preview-lifecycle). Support for optional [compact preview formats](#compact-encoded-preview-formats) is independent of support for `previewsrc`.
 
 Developer tools may report that a preview was skipped, blocked, unsupported, or failed, but such diagnostics are not a web-observable API and are outside the HTML feature definition.
 
 ## Optional Capabilities
 
-The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). They are independently specifiable, but whether some or all are required for a developer-viable initial release remains an [open question](#open-question-minimum-viable-feature).
+The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). They are independently specifiable, but their priority depends on the [developer-viability question](#open-question-developer-viability).
 
 ### Compact encoded preview formats
 
@@ -529,7 +507,7 @@ The core proposal adds no API exposing preview readiness, dimensions, decode fai
 
 `previewsrc` follows the same URL parsing, Content Security Policy `img-src`, mixed-content, and image-fetching rules as `src`, unless a specific difference is identified.
 
-Preview decoding must enforce the limits applicable to the selected image format. Obsolete decoding work must be abortable, and repeated source changes must not create unbounded concurrent decoding work. Malformed or adversarial input must fail without affecting the final image. Separately specified compact formats require their own bounds and security analysis, including a prohibition on nested network requests.
+Preview decoding must enforce the limits applicable to the selected image format. Obsolete decoding work must be abortable, and repeated source changes must not create unbounded concurrent decoding work. Malformed or adversarial input follows the [preview-unavailable lifecycle](#preview-lifecycle). Separately specified compact formats require their own bounds and security analysis, including a prohibition on nested network requests.
 
 Because the preview is not exposed through image-extraction APIs, its origin does not independently affect canvas origin cleanliness. Canvas access continues to follow the origin-clean rules for the final image.
 
