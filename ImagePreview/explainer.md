@@ -117,8 +117,9 @@ The table below describes the major patterns used by current implementations. Re
 - Generate a preview from the final image.
 - Replace responsive image selection.
 - Replace `loading`, `decoding`, or `fetchpriority`.
-- Define skeleton or shimmer loading UI.
+- Render arbitrary HTML, skeletons, spinners, or other generated loading UI inside `<img>`.
 - Give the preview separate alternative text or separate semantics.
+- Expose preview pixels through canvas, WebGL, WebCodecs, or other APIs that consume or extract decoded image data.
 - Guarantee that a preview is displayed when the final image becomes ready first.
 
 ## Core Proposal
