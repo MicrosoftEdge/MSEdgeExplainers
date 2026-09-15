@@ -363,6 +363,8 @@ The transition extension must separately define its default duration and easing,
 
 The [core image state and rendering model](#image-element-state-and-rendering) provides no preview lifecycle hook.
 
+Without preview-specific events or state, sites cannot directly measure whether previews fetched, decoded, or displayed successfully. Resource Timing may indicate that a separate request occurred, but it does not report whether the preview decoded or was displayed. This limits preview-health monitoring but avoids adding new timing and format-support signals to the core API.
+
 If concrete use cases establish a need for script observability, a follow-up proposal should evaluate an event, callback, or promise together with any transition object. It must also account for the additional timing and format-support information exposed by preview success, failure, and handoff timing.
 
 ## Alternatives considered
