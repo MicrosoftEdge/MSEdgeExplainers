@@ -255,7 +255,11 @@ Results from older generations are ignored and cannot newly replace painted cont
 
 The browser temporarily displays the preview inside the image element, but the selected final image remains the element's current image resource. Standard `HTMLImageElement` state and events, including `currentSrc`, `complete`, `naturalWidth`, `naturalHeight`, `decode()`, `load`, and `error`, continue to describe the selected final image.
 
-The preview does not determine the image element's intrinsic dimensions, `naturalWidth`, `naturalHeight`, or layout size. Its decoded dimensions and aspect ratio are used only to fit and position its pixels within the element's content box using the existing `object-fit` and `object-position` properties. Once available, the final image remains the source of the element's intrinsic dimensions and related API state.
+The preview does not contribute intrinsic dimensions or otherwise determine the `<img>` element's layout size. The browser lays out the element using the same CSS, `width`, `height`, `aspect-ratio`, and final-image intrinsic-size rules that apply when `previewsrc` is absent.
+
+If those rules establish a nonzero content box before the final image is ready, the browser scales and positions the preview within that box according to `object-fit` and `object-position`. Preview dimensions do not create or resize the box.
+
+If the element has no nonzero content box, the browser may fetch and decode the preview but cannot visibly paint it. If a nonzero content box is later established while the final image remains pending, a ready preview may be painted according to the normal lifecycle. When the final image's intrinsic dimensions become available, they may affect layout under the existing `<img>` sizing rules. Authors should provide `width` and `height`, `aspect-ratio`, or CSS sizing when they want to reserve space before the final image loads.
 
 The preview is not exposed through `drawImage()`, `createImageBitmap()`, or other image-extraction APIs. While only the preview is displayed, those APIs behave exactly as they do when the final image has no available image data; they do not use preview pixels. Once the final image is available, they use it under their existing algorithms.
 
