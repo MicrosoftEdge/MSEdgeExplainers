@@ -535,7 +535,11 @@ A URL in `previewsrc` can cause an additional request, with the same general pri
 
 Existing image-fetch and Resource Timing protections limit what the document can observe about the additional request, as detailed in [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration). The core API provides no preview-specific outcome or reason when the browser omits preview work under reduced-data or resource-pressure policies. However, existing Resource Timing information can let the document infer whether a separate preview request occurred.
 
-The core proposal adds no API exposing preview readiness, dimensions, decode failures, or handoff timing. Existing Resource Timing entries can expose ordinary request information to the extent already allowed for images. Adding a preview-specific state surface would reveal additional content-observation or format-support information and requires a separate privacy review. The optional transition pseudo-class can reveal through applied styling that a preview was displayed and its handoff began, but it does not expose preview metadata.
+The core proposal adds no dedicated API exposing preview readiness, intrinsic dimensions, decode success or failure, decode duration, display, or handoff timing. Resource Timing can expose ordinary fetch and cache information, including whether a separate request occurred, but it does not report when preview decoding begins or completes.
+
+A site may obtain an indirect estimate of related decoding work by loading the same URL into a separate `Image` and timing `decode()`, `createImageBitmap()`, canvas drawing, or a WebGL texture upload. These operations use a separate API path, may benefit from shared caches, and do not directly measure the browser's internal preview decode or reveal whether the preview was displayed.
+
+Adding a preview-specific event, state property, selector, or transition signal could make decode duration, readiness, display, or format support more directly observable and requires separate privacy analysis.
 
 ### Security
 
