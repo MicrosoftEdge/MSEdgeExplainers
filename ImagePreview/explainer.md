@@ -30,7 +30,6 @@
   - [Goals](#goals)
   - [Non-goals](#non-goals)
 - [Core Proposal](#core-proposal)
-  - [Open question: Developer viability](#open-question-developer-viability)
   - [Scope and responsive images](#scope-and-responsive-images)
   - [A low-resolution image preview](#a-low-resolution-image-preview)
   - [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration)
@@ -43,6 +42,9 @@
   - [Compact encoded preview formats](#compact-encoded-preview-formats)
   - [Customizable preview transitions](#customizable-preview-transitions)
   - [Script observability](#script-observability)
+- [Open Questions](#open-questions)
+  - [Attribute name](#attribute-name)
+  - [Developer viability](#developer-viability)
 - [Alternatives considered](#alternatives-considered)
   - [CSS property for the preview source](#css-property-for-the-preview-source)
   - [Imperative-only image API](#imperative-only-image-api)
@@ -140,12 +142,6 @@ The proposal is divided along specification and implementation boundaries:
 | Compact encodings such as BlurHash or ThumbHash | Independent image formats | Their respective format specifications and registrations |
 | Animated and author-customizable replacement | Optional extension | CSS View Transitions |
 | Script-visible preview or handoff state | Deferred pending demonstrated use cases | To be determined |
-
-### Open question: Developer viability
-
-The core `previewsrc` lifecycle can be implemented independently using existing image formats and the [core handoff](#preview-lifecycle). It remains unclear whether developers would adopt it without a compact preview format or customizable handoff, or would continue using script-based preview components.
-
-Developer research should determine the relative priority of compact formats and handoff customization. These capabilities can be specified and shipped independently of the core lifecycle.
 
 ### Scope and responsive images
 
@@ -284,7 +280,7 @@ Developer tools may report that a preview was skipped, blocked, unsupported, or 
 
 ## Optional Capabilities
 
-The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). They are independently specifiable, but their priority depends on the [developer-viability question](#open-question-developer-viability).
+The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). They are independently specifiable, but their priority depends on the [developer-viability question](#developer-viability).
 
 ### Compact encoded preview formats
 
@@ -346,6 +342,18 @@ The [core image state and rendering model](#image-element-state-and-rendering) p
 Without preview-specific events or state, sites cannot directly measure whether previews fetched, decoded, or displayed successfully. Resource Timing may indicate that a separate request occurred, but it does not report whether the preview decoded or was displayed. This limits preview-health monitoring but avoids adding new timing and format-support signals to the core API.
 
 If concrete use cases establish a need for script observability, a follow-up proposal should evaluate an event, callback, or promise together with any transition object. It must also account for the additional timing and format-support information exposed by preview success, failure, and handoff timing.
+
+## Open Questions
+
+### Attribute name
+
+Should the preview URL use a new `previewsrc` attribute, or should `<img>` reuse the existing `poster` name? See [Reuse the `poster` attribute](#reuse-the-poster-attribute) for the tradeoff.
+
+### Developer viability
+
+The core `previewsrc` lifecycle can be implemented independently using existing image formats and the [core handoff](#preview-lifecycle). It remains unclear whether developers would adopt it without a compact preview format or customizable handoff, or would continue using script-based preview components.
+
+Developer research should determine the relative priority of compact formats and handoff customization. These capabilities can be specified and shipped independently of the core lifecycle.
 
 ## Alternatives considered
 
@@ -422,7 +430,11 @@ The `<video>` element uses `poster` to identify an image shown before video data
   alt="Forest trail in autumn">
 ```
 
-Although `poster` already identifies temporary visual content, its semantics are specific to video. Adding it to `<img>` would still require new image-loading and handoff behavior. `previewsrc` names its relationship to the final image explicitly.
+Reusing `poster` would avoid introducing another attribute name and would build on an existing concept for temporary visual content. Related work in [whatwg/html#12585](https://github.com/whatwg/html/pull/12585) proposes responsive video posters through a child `<img>`, although it does not add `poster` to `<img>`.
+
+The attribute name does not change the required implementation behavior. Adding `poster` to `<img>` would still require the fetching, scheduling, lifecycle, rendering, cancellation, and API-state rules described by this proposal. It would also need a reflected `HTMLImageElement` property.
+
+`previewsrc` makes the relationship to `src` explicit, while `poster` reuses a familiar platform term. The choice remains an [open naming question](#attribute-name).
 
 ### Progressive and incrementally decoded images
 
