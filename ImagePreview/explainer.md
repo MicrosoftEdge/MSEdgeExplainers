@@ -234,7 +234,7 @@ The numbered steps below are the text alternative for the diagram:
 
 - **Lazy loading:** Preview fetching follows the final image's lazy-loading behavior. If `loading="lazy"` causes the browser to defer the final-image request, it must also defer the preview request. When the browser begins loading the final image, it may begin best-effort preview processing according to the scheduling rules above.
 - **Final-image failure:** If the final image fails, the browser stops displaying the preview and uses the element's normal broken-image and alternative-text rendering. A preview is temporary and cannot become successful fallback content.
-- **Animated previews:** If the selected preview format is animated, only its first successfully decoded frame is displayed. Preview animation does not run.
+- **Animated previews:** Animated preview resources follow the platform's ordinary image-animation behavior. The computed [`image-animation`](https://drafts.csswg.org/css-image-animation-1/#image-animation) value on the `<img>` element applies to the preview as well as the final image. Replacing the preview ends its playback. This proposal adds no preview-specific animation controls.
 - **Data-saving and resource pressure:** The browser may omit or abandon this best-effort preview in response to reduced-data preferences, memory pressure, battery constraints, or similar resource policy. The core API exposes no dedicated reason or outcome for this decision, although existing facilities such as Resource Timing can reveal whether a separate request occurred.
 - **Disconnection:** Disconnecting an element makes preview work obsolete when the corresponding final-image request is no longer relevant under the existing image-loading model. Reconnection runs the normal image-data update process.
 - **Document lifecycle:** Freezing a document for BFCache cancels any optional animated handoff. Already-painted and decoded state may be preserved to the same extent as ordinary `<img>` state. Discarding the document makes preview work obsolete.
@@ -528,6 +528,7 @@ Because the preview is not exposed through image-extraction APIs, its origin doe
 ### Specifications and guidance
 
 - [Content Security Policy Level 3](https://www.w3.org/TR/CSP3/)
+- [CSS Image Animation Module Level 1](https://drafts.csswg.org/css-image-animation-1/)
 - [CSS View Transitions Module Level 2](https://www.w3.org/TR/css-view-transitions-2/)
 - [HTML: Images](https://html.spec.whatwg.org/multipage/images.html)
 - [Mixed Content](https://www.w3.org/TR/mixed-content/)
