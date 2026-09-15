@@ -46,6 +46,7 @@
 - [Alternatives considered](#alternatives-considered)
   - [CSS property for the preview source](#css-property-for-the-preview-source)
   - [Imperative-only image API](#imperative-only-image-api)
+  - [Preview source in `<picture>`](#preview-source-in-picture)
   - [Reuse the `poster` attribute](#reuse-the-poster-attribute)
   - [Progressive and incrementally decoded images](#progressive-and-incrementally-decoded-images)
   - [Native compact decoding without a managed lifecycle](#native-compact-decoding-without-a-managed-lifecycle)
@@ -388,7 +389,27 @@ const image = document.querySelector("#gallery-image");
 image.setPreviewSource("/images/forest-32.avif");
 ```
 
-This could accommodate imperative options, but it would require script for a basic loading feature, delay preview discovery until script runs, and prevent server-rendered markup from expressing it. A reflected attribute supports both declarative and dynamic use.
+This could accommodate imperative options, but it would require script for a basic loading feature, delay preview discovery until script runs, and prevent server-rendered markup from expressing it. In contrast, the proposed reflected `previewsrc` attribute supports declarative markup while remaining dynamically updateable through `previewSrc`.
+
+### Preview source in `<picture>`
+
+A special `media="poster"` value on a `<source>` element could identify that source as the preview rather than as a final-image candidate:
+
+```html
+<picture>
+  <source media="poster" srcset="/images/forest-preview.avif">
+  <source
+    media="(min-width: 800px)"
+    srcset="/images/forest-1600.avif">
+  <img
+    src="/images/forest-800.avif"
+    alt="Forest trail in autumn">
+</picture>
+```
+
+This approach keeps preview and final-image sources together and could support a different preview for each responsive or art-directed candidate. However, it would require `<picture>` for every image with a preview and would give `media` a new purpose: identifying a source's role rather than evaluating a media query.
+
+The proposed `previewsrc` attribute works on any `<img>`, including one inside `<picture>`, without changing `<source>` selection. Version 1 provides one preview for every possible final-image candidate; responsive or source-specific preview selection can be added later if developers need it.
 
 ### Reuse the `poster` attribute
 
