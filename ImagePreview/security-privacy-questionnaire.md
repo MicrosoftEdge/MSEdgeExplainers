@@ -9,7 +9,7 @@
 
 The core feature adds a `previewsrc` attribute and reflected `previewSrc` property containing a URL supplied by the page. The URL does not reveal information that the page did not provide.
 
-The core proposal adds no preview-specific event, promise, state property, or CSS selector. A customizable transition and its CSS pseudo-class are described as an optional extension and are outside the core review.
+The core proposal adds no preview-specific event, promise, state property, or CSS selector. The explainer records a CSS pseudo-class only as one possible solution for a future customizable-handoff extension, outside the core review.
 
 Fetching a preview can disclose the request and ordinary request metadata to the origin serving it. This is the same class of disclosure as an additional image request through `src`.
 

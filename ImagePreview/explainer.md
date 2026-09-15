@@ -40,20 +40,14 @@
   - [Compatibility and fallback](#compatibility-and-fallback)
 - [Optional Capabilities](#optional-capabilities)
   - [Compact encoded preview formats](#compact-encoded-preview-formats)
-  - [Customizable preview transitions](#customizable-preview-transitions)
+  - [Customizable handoff](#customizable-handoff)
   - [Script observability](#script-observability)
 - [Open Questions](#open-questions)
   - [Attribute name](#attribute-name)
-  - [Developer viability](#developer-viability)
+  - [Minimum developer-viable feature](#minimum-developer-viable-feature)
 - [Alternatives considered](#alternatives-considered)
-  - [CSS property for the preview source](#css-property-for-the-preview-source)
-  - [Imperative-only image API](#imperative-only-image-api)
-  - [Preview source in `<picture>`](#preview-source-in-picture)
-  - [Reuse the `poster` attribute](#reuse-the-poster-attribute)
-  - [Progressive and incrementally decoded images](#progressive-and-incrementally-decoded-images)
-  - [Native compact-format decoding with an author-managed lifecycle](#native-compact-format-decoding-with-an-author-managed-lifecycle)
-  - [Author-scripted scoped View Transition](#author-scripted-scoped-view-transition)
-  - [Script-provided fallback decoder](#script-provided-fallback-decoder)
+  - [Alternatives to the core proposal](#alternatives-to-the-core-proposal)
+  - [Alternatives to the combined solution](#alternatives-to-the-combined-solution)
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
   - [Accessibility](#accessibility)
   - [Internationalization](#internationalization)
@@ -68,6 +62,7 @@
 - [Appendix](#appendix)
   - [Core API definition](#core-api-definition)
     - [WebIDL](#webidl)
+  - [Possible CSS View Transition integration](#possible-css-view-transition-integration)
   - [Preview examples](#preview-examples)
 
 ## Introduction
@@ -140,7 +135,7 @@ The proposal is divided along specification and implementation boundaries:
 | `previewsrc` and `previewSrc` | Core | WHATWG HTML |
 | Preview fetching, decoding, display, replacement, and cancellation | Core | WHATWG HTML |
 | Compact encodings such as BlurHash or ThumbHash | Independent image formats | Their respective format specifications and registrations |
-| Animated and author-customizable replacement | Optional extension | CSS View Transitions |
+| Author-customizable handoff | Optional extension | To be determined; potentially CSS View Transitions |
 | Script-visible preview or handoff state | Deferred pending demonstrated use cases | To be determined |
 
 ### Scope and responsive images
@@ -284,7 +279,7 @@ Developer tools may report that a preview was skipped, blocked, unsupported, or 
 
 ## Optional Capabilities
 
-The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). They are independently specifiable, but their priority depends on the [developer-viability question](#developer-viability).
+The following sections expand the optional and deferred capabilities identified in the [scope table](#core-proposal). They are independently specifiable, but their priority depends on the [minimum developer-viable feature](#minimum-developer-viable-feature).
 
 ### Compact encoded preview formats
 
@@ -307,37 +302,13 @@ A separately specified ThumbHash image format could use an analogous data URL wi
 
 Each compact format specification must define its media type and serialization; encoded-size, decoded-dimension, memory, and processing limits; malformed-input behavior; and a prohibition on nested network requests.
 
-### Customizable preview transitions
+### Customizable handoff
 
-A separate transition extension could let the browser animate the replacement using [Element Scoped View Transitions](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API/Using_element-scoped). Authors could customize that handoff using an `:active-image-preview-transition` pseudo-class and the scoped View Transition pseudo-elements:
+The core lifecycle directly replaces the preview with the final image. Developer research should determine whether customizing this handoff is necessary for adoption.
 
-```css
-img:active-image-preview-transition::view-transition-old(root) {
-  animation: 200ms ease-out both image-preview-fade-out;
-}
+A future extension could integrate the browser-managed replacement with Element Scoped View Transitions. Unlike an author-scripted transition, the browser would initiate the transition when the final image becomes ready, while authors would customize its presentation through CSS. This explainer does not select an API for that integration. The [appendix](#possible-css-view-transition-integration) records one possible solution for further discussion.
 
-img:active-image-preview-transition::view-transition-new(root) {
-  animation: 200ms ease-in both image-preview-fade-in;
-}
-
-@keyframes image-preview-fade-out {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes image-preview-fade-in {
-  from {
-    opacity: 0;
-  }
-}
-```
-
-While the pseudo-class matches, the `old(root)` snapshot represents the displayed preview and the `new(root)` snapshot represents the final image. The state ends when the handoff finishes or is canceled.
-
-When a transition is unavailable or inappropriate, including because of reduced-motion preferences, the [core lifecycle](#preview-lifecycle) applies.
-
-The transition extension must separately define its default duration and easing, cancellation behavior, interaction with concurrent author transitions, and behavior during source changes and document lifecycle transitions.
+Any extension must define how authors identify the preview and final-image snapshots, when the transition starts, and how it interacts with cancellation, source changes, reduced-motion preferences, and document lifecycle changes. It should also determine whether Image Preview needs a specific API or can use a general mechanism for browser-managed resource transitions.
 
 ### Script observability
 
@@ -353,15 +324,17 @@ If concrete use cases establish a need for script observability, a follow-up pro
 
 Should the preview URL use a new `previewsrc` attribute, or should `<img>` reuse the existing `poster` name? See [Reuse the `poster` attribute](#reuse-the-poster-attribute) for the tradeoff.
 
-### Developer viability
+### Minimum developer-viable feature
 
-The core `previewsrc` lifecycle can be implemented independently using existing image formats and the [core handoff](#preview-lifecycle). It remains unclear whether developers would adopt it without a compact preview format or customizable handoff, or would continue using script-based preview components.
+The core `previewsrc` lifecycle can be implemented independently using existing image formats and the [core handoff](#preview-lifecycle). The open question is whether that core alone provides enough value for developers, or whether a minimum developer-viable feature also requires compact preview formats, a customizable handoff, or both.
 
-Developer research should determine the relative priority of compact formats and handoff customization. These capabilities can be specified and shipped independently of the core lifecycle.
+Developer research should determine whether developers would adopt each combination or continue using script-based preview components. Compact formats and handoff customization can be specified and shipped independently of the core lifecycle.
 
 ## Alternatives considered
 
-### CSS property for the preview source
+### Alternatives to the core proposal
+
+#### CSS property for the preview source
 
 The preview could be supplied through CSS instead of an HTML attribute:
 
@@ -382,7 +355,7 @@ The preview could be supplied through CSS instead of an HTML attribute:
 
 This would allow style rules and media queries to select previews. However, a preview represents the image's content rather than its presentation. Placing its URL in CSS separates it from `src`, complicates per-image updates, and provides no natural reflected `HTMLImageElement` property.
 
-### Imperative-only image API
+#### Imperative-only image API
 
 The browser-managed preview lifecycle could be exposed only through JavaScript:
 
@@ -403,7 +376,7 @@ image.setPreviewSource("/images/forest-32.avif");
 
 This could accommodate imperative options, but it would require script for a basic loading feature, delay preview discovery until script runs, and prevent server-rendered markup from expressing it. In contrast, the proposed reflected `previewsrc` attribute supports declarative markup while remaining dynamically updateable through `previewSrc`.
 
-### Preview source in `<picture>`
+#### Preview source in `<picture>`
 
 A special `media="poster"` value on a `<source>` element could identify that source as the preview rather than as a final-image candidate:
 
@@ -423,7 +396,7 @@ This approach keeps preview and final-image sources together and could support a
 
 The proposed `previewsrc` attribute works on any `<img>`, including one inside `<picture>`, without changing `<source>` selection. Version 1 provides one preview for every possible final-image candidate; responsive or source-specific preview selection can be added later if developers need it.
 
-### Reuse the `poster` attribute
+#### Reuse the `poster` attribute
 
 The `<video>` element uses `poster` to identify an image shown before video data is available. The same attribute could be added to `<img>`:
 
@@ -440,7 +413,7 @@ The attribute name does not change the required implementation behavior. Adding 
 
 `previewsrc` makes the relationship to `src` explicit, while `poster` reuses a familiar platform term. The choice remains an [open naming question](#attribute-name).
 
-### Progressive and incrementally decoded images
+#### Progressive and incrementally decoded images
 
 Progressive JPEG, interlaced image formats, and incremental decoding can reveal an increasingly complete version of one image as its bytes arrive. They avoid an additional resource request and can be the best option when the selected final format, encoder, delivery path, and browser produce useful intermediate paints.
 
@@ -453,7 +426,11 @@ They do not replace every preview use case:
 
 Conversely, `previewsrc` can use an existing small image, be inlined, or be cached independently of the final image, and works regardless of whether the final format renders progressively. Its cost is an additional resource and possible bandwidth contention. Authors should prefer progressive delivery when it provides an adequate experience without that cost; Image Preview is complementary for cases that require an independently supplied preview.
 
-### Native compact-format decoding with an author-managed lifecycle
+### Alternatives to the combined solution
+
+The following alternatives consider whether native compact-format decoding, existing transition APIs, or extensible author-provided decoders could provide the intended developer experience without combining the core browser-managed lifecycle with all optional capabilities.
+
+#### Native compact-format decoding with an author-managed lifecycle
 
 The browser could natively decode compact image formats without adding `previewsrc` or managing preview replacement. Authors would use ordinary image or canvas sources and continue coordinating preview and final content through script:
 
@@ -472,7 +449,7 @@ The browser could natively decode compact image formats without adding `previews
 
 This would remove format-specific decoder libraries and could reduce script size and decoding cost. However, authors would still need to implement loading, replacement, cancellation, source-update handling, failures, and accessibility across multiple elements. The proposed `previewsrc` API adds that managed lifecycle in addition to using any image format the browser can decode.
 
-### Author-scripted scoped View Transition
+#### Author-scripted scoped View Transition
 
 The platform could provide native compact decoding and scoped View Transitions but leave the handoff to author script:
 
@@ -499,7 +476,7 @@ await transition.finished;
 
 This gives authors full control and reuses a general transition API. It still requires every page to preload the final image, avoid stale source updates, and handle failures and cancellation. The core proposal makes the loading and replacement lifecycle browser-managed; the optional transition extension could additionally provide CSS customization while respecting reduced-motion and hidden-document behavior.
 
-### Script-provided fallback decoder
+#### Script-provided fallback decoder
 
 The browser could manage the preview lifecycle but invoke an author-registered decoder when it does not support the preview's media type:
 
@@ -607,6 +584,36 @@ partial interface HTMLImageElement {
   [CEReactions] attribute USVString previewSrc;
 };
 ```
+
+### Possible CSS View Transition integration
+
+One possible extension could integrate browser-managed preview replacement with [Element Scoped View Transitions](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API/Using_element-scoped). For example, an `:active-image-preview-transition` pseudo-class could allow authors to customize the old preview and new final-image snapshots:
+
+```css
+img:active-image-preview-transition::view-transition-old(root) {
+  animation: 200ms ease-out both image-preview-fade-out;
+}
+
+img:active-image-preview-transition::view-transition-new(root) {
+  animation: 200ms ease-in both image-preview-fade-in;
+}
+
+@keyframes image-preview-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes image-preview-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+```
+
+While the pseudo-class matches, the `old(root)` snapshot would represent the displayed preview and the `new(root)` snapshot would represent the final image. The state would end when the handoff finishes or is canceled.
+
+This sketch is illustrative and is not part of the core proposal or a selected extension API. Further work must compare an Image Preview-specific state with a general mechanism for browser-managed resource transitions.
 
 ### Preview examples
 
