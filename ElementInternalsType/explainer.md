@@ -164,7 +164,17 @@ class CustomButton extends HTMLElement {
         const command = this.getAttribute('command');
         const target = document.getElementById(targetId);
 
-        if (target) {
+        if (target) {                
+            // Create and fire command event at the target element
+            const commandEvent = new CommandEvent('command', {
+                bubbles: true,
+                cancelable: true
+                command: command,
+            });
+            // Don't commit the action if `.preventDefault()` was called
+            if (!target.dispatchEvent(commandEvent)) {
+              return;
+            }
             if (command === "toggle-popover") {
                 target.togglePopover();
             } else if (command === "show-popover") {
@@ -178,14 +188,6 @@ class CustomButton extends HTMLElement {
             } else if (command === "request-close") {
                 target.requestClose()
             } 
-                
-            // Create and fire command event at the target element
-            const commandEvent = new CustomEvent('command', {
-                bubbles: true,
-                cancelable: true
-            });
-            commandEvent.command = command;
-            target.dispatchEvent(commandEvent);
         }
     }
 }
@@ -673,4 +675,5 @@ Many thanks for valuable feedback and advice from:
 - [Leo Lee](https://github.com/leotlee)
 - [Open UI Community Group](https://www.w3.org/community/open-ui/)
 - [WHATWG](https://whatwg.org/)
+
 - [ARIA Working Group](https://www.w3.org/WAI/about/groups/ariawg/)
