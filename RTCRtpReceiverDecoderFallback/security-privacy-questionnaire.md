@@ -1,8 +1,8 @@
 # Security and Privacy Self-Review
 
 **Proposal:** RTCRtpReceiver Decoder State Changed and Error Events  
-**Status:** Working draft for internal review  
-**Last updated:** September 11, 2026
+**Status:** Completed self-review  
+**Last updated:** September 17, 2026
 
 This document answers the
 [W3C Security and Privacy Self-Review Questionnaire](https://w3c.github.io/security-questionnaire/)
@@ -18,145 +18,120 @@ for interactive media receiving scenarios such as cloud gaming.
 
 The proposal adds two events to `RTCRtpReceiver`:
 
-- `decoderstatechange` reports that the receiver's decoder state changed.
-  The motivating cases are codec changes and decoder implementation changes,
+- `decoderstatechange` reports codec or decoder implementation changes,
   including hardware-to-software fallback.
-- `decodererror` reports a terminal, unrecoverable decoding failure using a
+- `decodererror` reports a decoding failure as a
   generic [`EncodingError`](https://webidl.spec.whatwg.org/#encodingerror)
   `DOMException`.
 
-The events contain the RTP timestamp associated with the affected media frame.
-They do not directly contain the decoder name, hardware vendor, driver, or
-device identifier.
-
-Codec changes are already observable through ungated WebRTC statistics.
+The events do not expose a decoder name, hardware vendor, driver, or device
+identifier. Codec changes are already observable through ungated statistics.
 Decoder implementation changes are reflected in
 [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation)
 and
 [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder),
-which are currently available only when exposing hardware is allowed. Today,
-that check returns true when the context capturing state is true.
+which are protected by the
+[hardware-exposure gate](https://w3c.github.io/webrtc-stats/#dfn-exposing-hardware-is-allowed).
+The existing gate allows exposure when the context capturing state is true.
 
-The expanded gate under consideration extends the existing
-[hardware-exposure algorithm](https://w3c.github.io/webrtc-stats/#dfn-exposing-hardware-is-allowed),
-which currently relies on the
-[context capturing state](https://w3c.github.io/mediacapture-main/#context-capturing-state):
+The proposed receiver-specific path uses two states:
 
-```text
-To check if decoder hardware exposure is allowed for receiver:
+- **Interactive media session recognition** records that a receiver has
+  demonstrated an interactive-media use case.
+- **Active interactive media state** determines whether that recognized
+  receiver is currently eligible for hardware exposure.
 
-1. If the context capturing state is true, return true.
-2. If receiver satisfies the active interactive media conditions,
-   return true.
-3. Return false.
-```
+### Interactive media session recognition
 
-A receiver would satisfy the active interactive media conditions when:
+An `RTCRtpReceiver` establishes **interactive media session recognition**
+when:
 
-```text
-The receiver is actively receiving video
-AND its associated document is fully active, visible, and focused
-AND at least one qualifying interaction condition applies:
-    pointer lock
-    OR keyboard lock
-    OR recent trusted gamepad activity
-    OR qualifying fullscreen use
-```
+- Its associated document is visible and focused.
+- It has a live video track and has recently received and successfully decoded
+  a video frame.
+- It has pointer lock, keyboard lock, a gamepad user gesture within the recent
+  trusted-input duration, or fullscreen with recent keyboard, pointer, or
+  touch input.
 
-The following details remain under discussion:
+Recognition is receiver-specific. It persists through temporary loss of focus
+or visibility, the end of pointer or keyboard lock, and expiration of the
+recent-input window.
 
-1. How recent gamepad activity is defined and when it expires.
-2. Whether the event timestamp needs lower precision, coalescing, or rate
-   limiting.
-3. If a decoder implementation change occurs while the gating conditions are
-   not satisfied, whether an event is fired when the conditions later become
-   satisfied to report the decoder's current state.
+### Active interactive media state
+
+A receiver is in the **active interactive media state** while:
+
+- It is recognized as belonging to an interactive-media session.
+- Its associated document is visible and focused.
+- It has a live video track and has recently successfully decoded a frame.
+
+Protected information is exposed only while these conditions remain true.
+
+The existing capture-based condition remains unchanged. When the
+hardware-exposure check is invoked with a receiver, that receiver's active
+interactive-media state provides an additional way to allow exposure. Calls
+without a receiver, including calls for protected outbound statistics, retain
+the existing capture-based behavior.
+
+If a recognized receiver temporarily leaves the active state, protected
+information becomes unavailable but recognition persists. When it becomes
+active again, one event reports its current decoder implementation if it
+changed; intermediate changes are not replayed.
+
+**Open question:** What duration, or acceptable range of durations, should
+browsers use to decide whether a gamepad user gesture or
+fullscreen-associated keyboard, pointer, or touch input is recent?
 
 ## 2.1 What information does this feature expose, and for what purposes?
 
-### Information exposed by `decoderstatechange`
+### Information exposed
 
-The event reveals that the decoder associated with an `RTCRtpReceiver`
-changed state and provides the RTP timestamp of the affected media frame. It
-may be triggered by:
+`decoderstatechange` reveals that an `RTCRtpReceiver` changed codec or decoder
+implementation and provides the RTP timestamp associated with the change. The
+event does not identify what changed; the application uses existing WebRTC
+statistics to inspect the receiver's current state.
 
-- A codec change. The application can already determine the active codec from
-  the `RTCCodecStats` referenced by the inbound RTP statistics.
-- A decoder implementation change, such as hardware-to-software fallback. If
-  decoder hardware exposure is allowed, the application can call `getStats()`
-  and inspect
-  [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation)
-  and
-  [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder).
+`decodererror` reveals a decoding failure through a generic
+`EncodingError` and an associated RTP timestamp. It does not reveal whether
+the decoder was hardware or software or expose implementation-specific error
+details.
 
-Although the event does not directly describe the decoder, firing it reveals
-that a change occurred and when it occurred.
-
-This lets an interactive streaming application respond promptly by lowering
-resolution, renegotiating a codec, restarting the stream, or presenting
-troubleshooting guidance.
-
-### Information exposed by `decodererror`
-
-The event reveals a terminal, unrecoverable decoding failure through a generic
-`EncodingError` and the RTP timestamp of the affected frame. It does not
-identify whether the decoder was hardware or software or expose
-implementation-specific error details. This lets an application promptly
-recover from or explain a frozen stream.
-
-WebCodecs similarly reports decoding failures through the
-[`VideoDecoder` error callback](https://w3c.github.io/webcodecs/#dom-videodecoderinit-error).
-That callback only covers decoders created directly through WebCodecs; it
-cannot report errors from the browser-managed decoder used by an
-`RTCRtpReceiver`, which is the gap this proposal addresses.
+These events allow interactive streaming applications to respond promptly,
+such as by renegotiating a codec, changing stream quality, restarting playback,
+or explaining a frozen stream.
 
 ### First-party information
 
-The events make decoder changes and terminal failures easier for the first
-party to detect. Some of this information can already be obtained through
-existing WebRTC statistics or playback behavior:
+The events make existing or inferable information easier to detect:
 
-- **Codec changes:** `getStats()` already reports the codec currently used by
-  the receiver.
-- **Terminal decoder failures:** The application can observe that playback
-  freezes and use existing statistics to see that
+- Codec information is already available through ungated WebRTC statistics.
+- Decoder failures can be inferred when playback freezes while
   [`framesReceived`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesreceived)
-  continues increasing while
+  continues increasing and
   [`framesDecoded`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesdecoded)
-  stops increasing. This indicates that complete video frames continue to
-  arrive but are no longer being successfully decoded.
-  [`freezeCount`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-freezecount)
-  may also increase, providing additional evidence that playback has frozen.
-- **Decoder implementation changes:** When the existing capture-based
-  hardware-exposure gate is satisfied, `getStats()` already exposes
+  stops.
+- When hardware exposure is allowed,
   [`decoderImplementation`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-decoderimplementation)
   and
-  [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder).
+  [`powerEfficientDecoder`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-powerefficientdecoder)
+  already expose the active decoder's implementation and efficiency.
 
-The expanded gate makes the protected decoder statistics available in
-receiving-only interactive media scenarios, such as cloud gaming, where the
-page receives WebRTC video without capturing the user's camera, microphone,
-or screen.
+The receiver-specific gate makes the protected decoder statistics available
+to qualifying receiving-only interactive-media applications, such as cloud
+gaming, without requiring camera, microphone, or screen capture.
 
 ### Third-party information
 
-Cross-origin iframe use is out of scope. The receiver and qualifying
-interaction must belong to the first-party document.
+Cross-origin iframe use and delegation are out of scope. The receiver and
+qualifying interaction must belong to the first-party context.
 
 ## 2.2 Do features in this specification expose the minimum amount of information necessary to implement the intended functionality?
 
-Yes. The events are intentionally coarse:
-
-- `decoderstatechange` contains only an RTP timestamp and does not directly
-  identify the decoder or describe the change.
-- `decodererror` contains a generic `EncodingError` and does not expose
-  implementation-specific failure information.
-- The proposal does not expose decoder capacity, the number of hardware
-  decoding sessions, the GPU model, the driver version, or a persistent device
-  identifier.
-
-The application must use existing WebRTC statistics to determine what changed.
-Protected decoder statistics remain subject to a gate.
+Yes. `decoderstatechange` exposes only an RTP timestamp, while `decodererror`
+exposes a generic `EncodingError`. Neither event exposes decoder identity,
+hardware capacity, GPU or driver details, or a persistent identifier.
+Applications use existing WebRTC statistics to determine what changed, and
+protected statistics remain gated.
 
 ## 2.3 Do the features in this specification expose personal information, personally identifiable information, or information derived from either?
 
@@ -165,44 +140,33 @@ communications, media content, or other conventional personal information. It
 does expose potentially identifying information about decoder behavior,
 power efficiency, change timing, and shared hardware availability.
 
-These signals may add to the browser's fingerprinting surface when combined
-with other information. Decoder-change timing could also reveal changes in
-shared hardware availability, potentially allowing a site to infer that
-another tab or application started or stopped using video-decoding resources.
-
-The proposal minimizes these risks by preventing passive or background access:
-protected decoder information is available only for the affected receiver,
-while it is actively receiving video in a fully active, visible, and focused
-document with a qualifying user-interaction signal.
+These signals may contribute to fingerprinting or allow a site to infer that
+another tab or application started or stopped using shared video-decoding
+resources. These risks are limited by the
+[interactive media session recognition](#interactive-media-session-recognition)
+and [active interactive media state](#active-interactive-media-state)
+requirements described above, which prevent passive or background access and
+scope exposure to a specific receiver.
 
 ## 2.4 How do the features in this specification deal with sensitive information?
 
 The proposal does not intentionally expose sensitive personal information,
 but decoder and shared-resource signals may become sensitive when combined
-with other data.
-
-The proposal minimizes this risk by:
-
-- Exposing no hardware or decoder details in the event payload and continuing
-  to gate protected statistics.
-- Requiring active incoming video in a fully active, visible, and focused
-  document with a qualifying user-interaction signal.
-- Limiting access to the qualifying video receiver and clearing saved
-  qualifying state when the receiver or document session ends.
+with other data. It minimizes this risk by exposing no implementation details
+in event payloads, continuing to gate protected statistics, and limiting
+receiver-specific exposure through the
+[interactive media session recognition](#interactive-media-session-recognition)
+and [active interactive media state](#active-interactive-media-state)
+requirements described above.
 
 ## 2.5 Does data exposed by this specification carry related but distinct information that may not be obvious to users?
 
 Yes.
 
-A decoder implementation change may carry secondary information beyond the
-quality of the current stream:
-
-- Changes in shared hardware availability may reveal that another tab,
-  browser profile, or application started or stopped using video-decoding
-  resources.
-- Cooperating origins may attempt to consume and release decoder capacity
-  while observing decoder changes, creating a low-bandwidth covert channel or
-  allowing activity to be correlated.
+A decoder implementation change may reveal that another tab, browser profile,
+or application started or stopped using shared hardware-decoding resources.
+Cooperating origins could also create a low-bandwidth channel by consuming and
+releasing decoder capacity while observing decoder changes.
 
 Example:
 
@@ -213,35 +177,36 @@ Site A releases the capacity.
 Site B observes another decoder change.
 ```
 
-Whether this channel works reliably depends on the browser, operating system,
-hardware, codec, stream configuration, and decoder-allocation policy.
-The event may nevertheless make these changes easier to observe than existing
-performance heuristics.
+The reliability of this signal depends on the browser, operating system,
+hardware, codec, and decoder-allocation policy, but the event may make it
+easier to observe than existing performance heuristics.
 
-The active interactive media conditions prevent passive monitoring by pages
-that are hidden, unfocused, not actively receiving video, or lack a qualifying
-user-interaction signal. However, a page that satisfies these conditions could
-still potentially observe decoder changes caused by other users of shared
-hardware resources.
+The
+[interactive media session recognition](#interactive-media-session-recognition)
+and [active interactive media state](#active-interactive-media-state)
+requirements limit receiver-specific exposure to an active interactive use
+case. An eligible page might nevertheless observe decoder changes caused by
+other users of shared hardware resources.
 
 ## 2.6 Do the features in this specification introduce state that persists across browsing sessions?
 
-No. Any saved qualifying state is limited to the current receiver and
-document. It is cleared when the receiver's track ends, the receiver is
-replaced, or the document navigates or is discarded. It does not persist
-across browsing sessions.
+No. [Interactive media session recognition](#interactive-media-session-recognition)
+is scoped to the current receiver and document and does not persist across
+browsing sessions. It ends when the track, connection, or document session
+ends, or when successful decoding stops for the session-termination period.
+Temporary focus, visibility, lock, or recent-input changes do not alone end
+recognition.
 
 ## 2.7 Do the features in this specification expose information about the underlying platform to origins?
 
 Yes. `decoderImplementation` describes the decoder selected by the browser,
 and `powerEfficientDecoder` reports whether the active decoder is considered
-power-efficient. Their values and changes may reveal information about
-hardware support, software fallback, and shared decoder availability.
-
-The expanded gate applies to both fields. Exposure is limited to the affected
-receiver while it is actively receiving video in a fully active, visible, and
-focused document with a qualifying interaction signal. The proposal does not
-expose decoder capacity, device identifiers, GPU models, or driver details.
+power-efficient. These fields may reveal hardware support, software fallback,
+and changes in shared decoder availability. Both remain subject to the
+[interactive media session recognition](#interactive-media-session-recognition)
+and [active interactive media state](#active-interactive-media-state)
+requirements described above. The proposal does not expose decoder capacity,
+device identifiers, GPU models, or driver details.
 
 ## 2.8 Does this specification allow an origin to send data to the underlying platform?
 
@@ -251,9 +216,9 @@ select, configure, reserve, or control a hardware decoder.
 
 ## 2.9 Do features in this specification enable access to device sensors?
 
-No. Gamepad activity may be used as a qualifying interaction signal, but the
-proposal does not expose new gamepad data, enumerate gamepads, or reveal their
-models. Only trusted input observed by the browser can qualify.
+No. A gamepad user gesture may be used as a qualifying interaction signal, but
+the proposal does not expose new gamepad data, enumerate gamepads, or reveal
+their models. Only trusted input observed by the browser can qualify.
 
 ## 2.10 Do features in this specification enable new script execution or loading mechanisms?
 
@@ -274,25 +239,22 @@ does not activate those states or change their existing safeguards.
 
 ## 2.13 What temporary identifiers do the features in this specification create or expose to the web?
 
-No new identifier is created. The event includes an RTP timestamp associated
-with a frame in the existing WebRTC session. It is not intended to identify a
-user or device across contexts. Whether its precision adds meaningful timing
-or correlation risk remains under review.
+No new identifier is created. The event's RTP timestamp identifies a frame
+within the existing WebRTC session; it is not a persistent identifier for a
+user or device across contexts.
 
 ## 2.14 How does this specification distinguish between behavior in first-party and third-party contexts?
 
-The expanded gate is limited to first-party use. The receiver and qualifying
-interaction must belong to the first-party document. Cross-origin iframe use
-and delegation are out of scope.
+The receiver, its associated document, and the qualifying interaction must
+belong to the first-party context. Receiver-specific exposure and delegation
+in cross-origin iframes are out of scope.
 
 ## 2.15 How do the features in this specification work in Private Browsing or Incognito mode?
 
-The API and gating behavior should be the same in private and normal browsing,
-and no qualifying state should remain after a private session ends.
-
-If normal and private contexts share decoder hardware, decoder changes could
-potentially help correlate activity between them. Whether this is possible
-depends on the browser's resource-isolation model.
+The API and gate behave the same in private and normal browsing, and
+recognition does not persist after a private session ends. If the contexts
+share decoder hardware, decoder changes might allow activity to be correlated,
+depending on the browser's resource-isolation model.
 
 ## 2.16 Does this specification have both Security Considerations and Privacy Considerations sections?
 
@@ -303,48 +265,36 @@ describing the feature-specific risks and mitigations.
 
 ## 2.17 Do features in this specification enable origins to downgrade default security protections?
 
-No security protection is downgraded. The proposal broadens the privacy gate
-for two decoder statistics, but only for the affected receiver when the active
-interactive media conditions are satisfied.
+No existing protection is removed. The new receiver-specific path is limited
+by the
+[interactive media session recognition](#interactive-media-session-recognition)
+and [active interactive media state](#active-interactive-media-state)
+requirements. Existing capture-based behavior and the protection of outbound
+encoder statistics remain unchanged.
 
 ## 2.18 What happens when a document that uses this feature is kept alive in BFCache?
 
-A document in BFCache is not fully active, so it cannot satisfy the gate,
-receive decoder events, or access protected decoder statistics through the
-expanded gate.
-
-The behavior after the document is restored is still under consideration. In
-particular, if a decoder change occurred while the document was inactive and
-the gating conditions later become satisfied, it is not yet decided whether
-the browser reports the decoder's current state through an event or reports
-only subsequent decoder changes.
-
-<!--
-Proposed behavior:
-
-Events are not queued or replayed. If the document is restored, the browser
-recalculates the gating conditions. If access becomes allowed, `getStats()`
-reflects the current decoder state. Changes that occurred while the document
-was in BFCache are not replayed. Events fire only for new decoder changes that
-occur after restoration while the gating conditions are satisfied.
--->
+A document in BFCache cannot receive decoder events or access protected
+decoder statistics. Entering BFCache ends the receiver's interactive media
+session recognition. If the document is restored, the receiver must satisfy
+the recognition conditions again. Changes that occurred while the document
+was in BFCache are not queued or replayed.
 
 ## 2.19 What happens when a document that uses this feature gets disconnected?
 
-A disconnected document is not fully active. It stops receiving decoder
-events and can no longer access the gated `decoderImplementation` and
-`powerEfficientDecoder` statistics. Events are not queued for later delivery.
+A disconnected document is not fully active. It does not receive decoder
+events and cannot access the gated `decoderImplementation` or
+`powerEfficientDecoder` statistics. Disconnection ends the receiver's
+interactive media session recognition. Events are not queued or replayed.
 
 ## 2.20 Does this specification define when and how new kinds of errors should be raised?
 
-Yes. `decodererror` fires only for a terminal, unrecoverable decoding failure.
-A successful fallback may instead produce `decoderstatechange`, subject to the
-decoder hardware-exposure gate.
-
-The event reports a generic `EncodingError` for the affected receiver. It does
-not identify the decoder, hardware, driver, platform error code, or whether the
-failure occurred in hardware or software. The error message must not contain
-decoder-, hardware-, driver-, or platform-specific information.
+Yes. `decodererror` reports a decoding failure as a
+generic `EncodingError`; a successful fallback may instead produce
+`decoderstatechange`. The underlying failure is already observable or
+inferable, but `decodererror` provides a prompt, direct indication. The events
+do not expose decoder-, hardware-, driver-, platform-, or
+implementation-specific error details.
 
 ## 2.21 Does this feature allow sites to learn about the user's use of assistive technology?
 
