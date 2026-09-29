@@ -20,7 +20,7 @@ The proposal adds two events to `RTCRtpReceiver`:
 
 - `decoderstatechange` reports codec or decoder implementation changes,
   including hardware-to-software fallback.
-- `decodererror` reports a terminal decoding failure as a
+- `decodererror` reports a decoding failure as a
   generic [`EncodingError`](https://webidl.spec.whatwg.org/#encodingerror)
   `DOMException`.
 
@@ -91,7 +91,7 @@ implementation and provides the RTP timestamp associated with the change. The
 event does not identify what changed; the application uses existing WebRTC
 statistics to inspect the receiver's current state.
 
-`decodererror` reveals a terminal decoding failure through a generic
+`decodererror` reveals a decoding failure through a generic
 `EncodingError` and an associated RTP timestamp. It does not reveal whether
 the decoder was hardware or software or expose implementation-specific error
 details.
@@ -105,7 +105,7 @@ or explaining a frozen stream.
 The events make existing or inferable information easier to detect:
 
 - Codec information is already available through ungated WebRTC statistics.
-- Terminal failures can be inferred when playback freezes while
+- Decoder failures can be inferred when playback freezes while
   [`framesReceived`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesreceived)
   continues increasing and
   [`framesDecoded`](https://w3c.github.io/webrtc-stats/#dom-rtcinboundrtpstreamstats-framesdecoded)
@@ -289,7 +289,7 @@ interactive media session recognition. Events are not queued or replayed.
 
 ## 2.20 Does this specification define when and how new kinds of errors should be raised?
 
-Yes. `decodererror` reports a terminal, unrecoverable decoding failure as a
+Yes. `decodererror` reports a decoding failure as a
 generic `EncodingError`; a successful fallback may instead produce
 `decoderstatechange`. The underlying failure is already observable or
 inferable, but `decodererror` provides a prompt, direct indication. The events
