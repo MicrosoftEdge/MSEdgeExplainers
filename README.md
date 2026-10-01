@@ -181,6 +181,7 @@ standards communities. Thanks for your continued interest!
 | [CSS Gap Decorations](https://github.com/w3c/csswg-drafts/blob/main/css-gaps-1/explainer.md) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2026-02-27](CSSGapDecorations/explainer.md) |
 | [Web Haptics](https://github.com/WICG/web-haptics) | [W3C Web Incubator Community Group](https://wicg.io/) | [2026-04-27](Haptics/explainer.md) |
 | [Slotted Options in `<select>`](https://open-ui.org/components/select.slotted.option/) | [Open UI Community Group](https://www.w3.org/community/open-ui/) | [2026-07-23](SlottedOption/explainer.md) |
+| [CSS Mixins](https://drafts.csswg.org/css-mixins/) | [W3C CSS Working Group](https://www.w3.org/Style/CSS/) | [2026-10-01](CSSMixins/explainer.md) |
 
 # DevTools 🧰
 
