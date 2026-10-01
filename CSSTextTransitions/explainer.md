@@ -3,6 +3,7 @@
 ## Author
 
 - [Kevin Babbitt](https://github.com/kbabbitt) (Microsoft)
+- [John Jansen](https://github.com/thejohnjansen) (Microsoft)
 
 ## Participate
 
