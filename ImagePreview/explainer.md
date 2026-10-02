@@ -115,6 +115,7 @@ The table below describes the major patterns used by current implementations. Re
 - Generate a preview from the final image.
 - Replace responsive image selection.
 - Replace `loading`, `decoding`, or `fetchpriority`.
+- Accept CSS `<image>` values directly through `previewsrc`.
 - Render arbitrary HTML, skeletons, spinners, or other generated loading UI inside `<img>`.
 - Give the preview separate alternative text or separate semantics.
 - Expose preview pixels through canvas, WebGL, WebCodecs, or other APIs that consume or extract decoded image data.
@@ -178,6 +179,8 @@ The preview can also be an inline data URL:
 ```
 
 Inlining avoids a separate preview request, but increases the size of the containing document.
+
+`previewsrc` is URL-valued and cannot directly use CSS-generated images such as gradients, `cross-fade()`, Paint Worklets, or future mesh and patch gradients. Direct support would require a separate CSS integration.
 
 ### Fetching, scheduling, and HTML integration
 
@@ -336,24 +339,29 @@ Developer research should determine whether developers would adopt each combinat
 
 #### CSS property for the preview source
 
-The preview could be supplied through CSS instead of an HTML attribute:
-
-```html
-<img
-  class="gallery-image"
-  src="/images/forest-1600.avif"
-  width="1600"
-  height="1067"
-  alt="Forest trail in autumn">
-```
+A CSS property could provide the preview instead of, or alongside, the HTML attribute:
 
 ```css
 .gallery-image {
-  image-preview-source: url("/images/forest-32.avif");
+  image-preview-source:
+    linear-gradient(135deg, #68788c, #bcc4cc);
 }
 ```
 
-This would allow style rules and media queries to select previews. However, a preview represents the image's content rather than its presentation. Placing its URL in CSS separates it from `src`, complicates per-image updates, and provides no natural reflected `HTMLImageElement` property.
+Compared with `previewsrc`, this has several advantages:
+
+- It can accept the full CSS `<image>` syntax.
+- CSS rules and queries can select and reuse previews.
+- Abstract placeholders remain in the presentation layer.
+
+It also has disadvantages:
+
+- Preview URLs may be discovered only after stylesheets are fetched and parsed, leaving less time for the preview to appear before the final image.
+- Keeping the preview separate from the image's source attributes makes it easier for the preview and final image to become mismatched.
+- Cascade or query changes may replace a preview while loading, causing requests or decoding work to be restarted or discarded.
+- Without a reflected `HTMLImageElement` property, scripts must read and update the preview through styles instead of the image API.
+
+CSS would still need to define when the preview is displayed and replaced. A CSS property could therefore be considered as an alternative or companion to `previewsrc`.
 
 #### Imperative-only image API
 
