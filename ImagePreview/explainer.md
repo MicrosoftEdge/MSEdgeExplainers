@@ -7,7 +7,7 @@
 - **Proposed incubation venue:** [WICG](https://wicg.io/)
 - **Expected standards venue:** [WHATWG HTML](https://html.spec.whatwg.org/)
 - **Current version:** This draft
-- **Last updated:** 2026-09-10
+- **Last updated:** 2026-10-02
 
 ## Authors
 
@@ -47,6 +47,7 @@
   - [Minimum developer-viable feature](#minimum-developer-viable-feature)
 - [Alternatives considered](#alternatives-considered)
   - [Alternatives to the core proposal](#alternatives-to-the-core-proposal)
+    - [Historical `lowsrc` attribute](#historical-lowsrc-attribute)
   - [Alternatives to the combined solution](#alternatives-to-the-combined-solution)
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
   - [Accessibility](#accessibility)
@@ -56,6 +57,7 @@
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
   - [Specifications and guidance](#specifications-and-guidance)
+  - [Historical `lowsrc` sources](#historical-lowsrc-sources)
   - [Compact preview formats](#compact-preview-formats)
   - [Implementation evidence](#implementation-evidence)
   - [Acknowledgements](#acknowledgements)
@@ -63,6 +65,7 @@
   - [Core API definition](#core-api-definition)
     - [WebIDL](#webidl)
   - [Possible CSS View Transition integration](#possible-css-view-transition-integration)
+  - [Historical `lowsrc` research](#historical-lowsrc-research)
   - [Preview examples](#preview-examples)
 
 ## Introduction
@@ -327,6 +330,8 @@ If concrete use cases establish a need for script observability, a follow-up pro
 
 Should the preview URL use a new `previewsrc` attribute, or should `<img>` reuse the existing `poster` name? See [Reuse the `poster` attribute](#reuse-the-poster-attribute) for the tradeoff.
 
+The `lowsrc` name is excluded for compatibility reasons; see [Historical `lowsrc` attribute](#historical-lowsrc-attribute).
+
 ### Minimum developer-viable feature
 
 The core `previewsrc` lifecycle can be implemented independently using existing image formats and the [core handoff](#preview-lifecycle). The open question is whether that core alone provides enough value for developers, or whether a minimum developer-viable feature also requires compact preview formats, a customizable handoff, or both.
@@ -336,6 +341,12 @@ Developer research should determine whether developers would adopt each combinat
 ## Alternatives considered
 
 ### Alternatives to the core proposal
+
+#### Historical `lowsrc` attribute
+
+The historical `lowsrc` attribute is direct prior art: like `previewsrc`, it associated a temporary image with the final image. This proposal specifies how that behavior would integrate with the modern HTML image-loading model, while retaining the costs and risks of a separate resource.
+
+See [Historical `lowsrc` research](#historical-lowsrc-research) for its standards history, Gecko removal, and available usage evidence.
 
 #### CSS property for the preview source
 
@@ -561,6 +572,17 @@ Because the preview is not exposed through image-extraction APIs, its origin doe
 - [Referrer Policy](https://www.w3.org/TR/referrer-policy/)
 - [Resource Timing Level 2](https://www.w3.org/TR/resource-timing/)
 
+### Historical `lowsrc` sources
+
+- [Netscape Client-Side JavaScript Reference: `Image`](https://docs.oracle.com/cd/E19957-01/816-6408-10/image.htm)
+- [Microsoft `IHTMLImgElement::lowsrc`](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa752253(v=vs.85))
+- [DOM Level 1: `HTMLImageElement`](https://www.w3.org/TR/REC-DOM-Level-1/level-one-html.html#ID-17701901)
+- [DOM Level 2 HTML changes](https://www.w3.org/TR/DOM-Level-2-HTML/changes.html)
+- [HTML: obsolete `lowsrc` attribute](https://html.spec.whatwg.org/multipage/obsolete.html#attr-img-lowsrc)
+- [Mozilla bug 92453: remove `lowsrc` support](https://bugzilla.mozilla.org/show_bug.cgi?id=92453)
+- [Mozilla bug 94219: reported `lowsrc` compatibility](https://bugzilla.mozilla.org/show_bug.cgi?id=94219)
+- [WebKit bug 12305: `lowsrc` property compatibility](https://bugs.webkit.org/show_bug.cgi?id=12305)
+
 ### Compact preview formats
 
 - [BlurHash](https://github.com/woltapp/blurhash)
@@ -622,6 +644,43 @@ img:active-image-preview-transition::view-transition-new(root) {
 While the pseudo-class matches, the `old(root)` snapshot would represent the displayed preview and the `new(root)` snapshot would represent the final image. The state would end when the handoff finishes or is canceled.
 
 This sketch is illustrative and is not part of the core proposal or a selected extension API. Further work must compare an Image Preview-specific state with a general mechanism for browser-managed resource transitions.
+
+### Historical `lowsrc` research
+
+This section records the evidence used to evaluate `lowsrc` as prior art. It does not establish a single reason why the feature declined across the web.
+
+#### Standards history
+
+`LOWSRC` originated as a [Netscape extension](https://docs.oracle.com/cd/E19957-01/816-6408-10/image.htm) and was later [implemented by Internet Explorer](https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa752253(v=vs.85)). It allowed an `<img>` to specify a low-resolution resource that was displayed before the final `src` resource.
+
+The attribute was never part of the HTML standard. [DOM Level 1 exposed the `lowSrc` property](https://www.w3.org/TR/REC-DOM-Level-1/level-one-html.html#ID-17701901), but [DOM Level 2 removed it](https://www.w3.org/TR/DOM-Level-2-HTML/changes.html).
+
+[Current HTML](https://html.spec.whatwg.org/multipage/obsolete.html#attr-img-lowsrc):
+
+- makes the `lowsrc` content attribute non-conforming;
+- recommends progressive JPEG instead of two separate images; and
+- retains `HTMLImageElement.lowsrc` as a URL-reflecting compatibility property.
+
+#### Gecko removal
+
+[Mozilla bug 92453](https://bugzilla.mozilla.org/show_bug.cgi?id=92453) documents Gecko's 2001 decision to remove its `lowsrc` loading behavior. The discussion identifies implementation problems, the feature's non-standard status, and questions about its usefulness.
+
+#### Usage evidence
+
+Historical browser bug reports provide some evidence of `lowsrc` markup or property usage, including [Ameritrade](https://bugzilla.mozilla.org/show_bug.cgi?id=94219#c3), [gimp.org](https://bugzilla.mozilla.org/show_bug.cgi?id=92453#c5), and [CNN](https://bugs.webkit.org/show_bug.cgi?id=12305). However, no reliable data on its past or current usage was found.
+
+Although current HTML recommends progressive JPEG instead of `lowsrc`, no evidence was found that the availability of progressive image formats caused its decline. No evidence was found that later responsive-image features explain it either.
+
+#### Relevance to this proposal
+
+Clearer specification alone does not demonstrate user benefit or adoption. The same underlying risks still require evaluation:
+
+- additional bytes and possible request contention;
+- keeping preview and final resources synchronized;
+- responsive and art-directed image selection; and
+- whether progressive delivery is preferable for a given use case.
+
+The `lowsrc` name is not reused because browsers already expose `HTMLImageElement.lowsrc`. Reusing it would make property-based feature detection ambiguous and could give existing markup new loading behavior.
 
 ### Preview examples
 
