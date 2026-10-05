@@ -74,10 +74,12 @@ experience.
 Authors are already building these effects, but the available primitives leave
 important gaps:
 
-* [GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) creates an
-  element for each character, word, or line so that authors can animate them
-  independently. Its documentation describes the accessibility and responsive
-  layout work required to compensate for that generated structure.
+* Per-unit text effects are commonly implemented by segmenting text and
+  wrapping each character, word, or line in an element. Authors can write this
+  code themselves using `Intl.Segmenter` or `String.prototype.split()`, or use
+  a library such as [GSAP
+  SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) or
+  [Splitting.js](https://github.com/shshaw/Splitting).
 * A developer who [attempted an LLM typing effect with Custom
   Highlights](https://bsky.app/profile/zubiden.bsky.social/post/3mcxb3vsqtc2d)
   reports that the lack of animatable highlight properties, including opacity,
@@ -95,12 +97,12 @@ important gaps:
   output](https://shiki.style/guide/dual-themes) all associate visual
   presentation with independently meaningful text ranges.
 
-CSS animations and transitions normally operate on elements. As a result,
-effects which address individual words, tokens, or other text ranges generally
-require an author to wrap each range in its own `<span>`. For long or dynamic
-content, these wrappers increase the size and cost of the DOM, style, layout,
-and accessibility trees. They also complicate text updates and can interfere
-with selection, editing, copy and paste, and assistive technology.
+CSS animations and transitions normally operate on elements. Consequently,
+whether segmentation is library- or author-provided, independently animating
+each unit requires presentation-only wrappers. For long or dynamic content,
+the wrappers increase the size and cost of the DOM, style, layout, and
+accessibility trees. They also complicate text updates and can interfere with
+selection, editing, copy and paste, and assistive technology.
 
 The Custom Highlight API already lets authors identify arbitrary text ranges
 without changing the document structure. However, every range in a custom
@@ -128,7 +130,7 @@ Each proposal also has uses independent of the staggered fade scenario:
 
 | Scenario | Supporting evidence | Relevant proposals |
 | --- | --- | --- |
-| Staggered word or character animation | SplitText and [Splitting.js](https://github.com/shshaw/Splitting) generate per-unit elements; State of CSS respondents request individual-letter animation without spans or JavaScript splitting; one developer directly attempted the effect with Custom Highlights | Animations, per-range delays, and opacity |
+| Staggered word or character animation | Current implementations range from author-written segmentation and wrapper code to libraries such as SplitText and Splitting.js; State of CSS respondents request individual-letter animation without spans or JavaScript splitting; one developer directly attempted the effect with Custom Highlights | Animations, per-range delays, and opacity |
 | Spoken-word and read-along highlighting | Practitioner reports describe using Custom Highlights to follow spoken text; an accessibility discussion describes simultaneous current-word and current-sentence highlighting | Transitions when ranges enter and leave a highlight |
 | Data-driven range presentation | CodeMirror, Monaco, and [ProseMirror](https://prosemirror.net/docs/ref/#view.Decoration) expose range decorations; Shiki emits styled token spans; [Lexical](https://github.com/facebook/lexical/blob/main/packages/lexical-yjs/src/SyncCursors.ts) generates highlight names and CSS rules for arbitrary collaborator colors | Per-range styles, with optional transitions and opacity |
 
