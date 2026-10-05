@@ -223,6 +223,5 @@ TAG or a CSSWG resolution.
 This proposal builds on Miriam Suzanne's [earlier work](https://css.oddbird.net/sasslike/mixins-functions/). Many thanks for starting this conversation and driving CSS forward. 
 
 * [CSS Custom Functions and Mixins Editor's Draft](https://drafts.csswg.org/css-mixins/)
-* [Miriam Suzanne's CSS mixins and functions explainer](https://css.oddbird.net/sasslike/mixins-functions/) (archived background; its earlier authoring examples predate the resolutions above)
 * [CSSWG discussion, August 20, 2025](https://www.w3.org/2025/08/20-css-minutes.html)
 * [CSSWG issue 5798: author use cases and interest](https://github.com/w3c/csswg-drafts/issues/5798)
