@@ -6,7 +6,7 @@ This explainer summarizes the CSS Working Group's evolving design for reusable
 CSS rule blocks. It is a guide to the proposal, not normative specification
 text.
 
-* This document status: **Archived**
+* This document status: **Draft**
 * Current venue: [W3C CSS Working Group](https://www.w3.org/Style/CSS/)
 * Current Editor's Draft: [CSS Custom Functions and Mixins](https://drafts.csswg.org/css-mixins/)
 * Current design discussion: [CSSWG issue 14243](https://github.com/w3c/csswg-drafts/issues/14243)
