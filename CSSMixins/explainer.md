@@ -1,5 +1,10 @@
 # CSS Mixins
 
+## Authors
+
+- [Kevin Babbitt](https://github.com/kbabbitt)
+- [John Jansen](https://github.com/thejohnjansen)
+
 ## Status of this Document
 
 This explainer summarizes the CSS Working Group's evolving design for reusable
@@ -213,7 +218,9 @@ and [Chromium](https://issues.chromium.org/issues/406935599). A
 was opened on October 1, 2026. A review request is not an endorsement by the
 TAG or a CSSWG resolution.
 
-## References
+## References and acknowledgements
+
+This proposal builds on Miriam Suzanne's [earlier work](https://css.oddbird.net/sasslike/mixins-functions/). Many thanks for starting this conversation and driving CSS forward. 
 
 * [CSS Custom Functions and Mixins Editor's Draft](https://drafts.csswg.org/css-mixins/)
 * [Miriam Suzanne's CSS mixins and functions explainer](https://css.oddbird.net/sasslike/mixins-functions/) (archived background; its earlier authoring examples predate the resolutions above)
