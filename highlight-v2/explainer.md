@@ -66,20 +66,37 @@ selections, syntax highlighting, and other paint-only effects over text.
 
 ## User-Facing Problem
 
-People need to connect changing application state to the relevant text. Authors
-address this with visual cues such as a short staggered fade as streamed text
-arrives, or emphasis on the word currently being spoken in a read-along
-experience.
+Many Web experiences apply visual effects to text at sub-element granularity.
+Examples include fading in the words of a streamed response and emphasizing the
+word currently being spoken in a read-along experience.
 
-Authors are already building these effects, but the available primitives leave
-important gaps:
+The unit of currency for CSS animations and transitions is the element. An
+author-written implementation must therefore divide the text using a mechanism
+such as `Intl.Segmenter` or `String.prototype.split()`, wrap each resulting
+character, word, or other unit in an element such as a `<span>`, and apply the
+effect to each wrapper. This technique introduces several problems:
 
-* Per-unit text effects are commonly implemented by segmenting text and
-  wrapping each character, word, or line in an element. Authors can write this
-  code themselves using `Intl.Segmenter` or `String.prototype.split()`, or use
-  a library such as [GSAP
-  SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) or
-  [Splitting.js](https://github.com/shshaw/Splitting).
+* **Performance:** Each wrapper adds cost to the DOM, style calculation,
+  layout, and accessibility trees compared to a simple paragraph of text.
+* **Accessibility:** Assistive technology may announce heavily fragmented text
+  differently from an uninterrupted sentence. Authors sometimes compensate by
+  maintaining a separate accessible representation.
+* **Editing interaction:** Presentation-only elements can interfere with text
+  selection, editing, and copy and paste.
+* **Content maintenance:** When text changes, authors must preserve or rebuild
+  the generated structure while keeping animation state and application data
+  synchronized with it.
+
+Libraries such as [GSAP
+SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) and
+[Splitting.js](https://github.com/shshaw/Splitting) package this pattern and
+handle many of its authoring details. Because the resulting representation
+still uses an element for each text unit, it retains similar platform-level
+costs and tradeoffs.
+
+There is also evidence that these workloads extend beyond the original
+staggered text scenario:
+
 * A developer who [attempted an LLM typing effect with Custom
   Highlights](https://bsky.app/profile/zubiden.bsky.social/post/3mcxb3vsqtc2d)
   reports that the lack of animatable highlight properties, including opacity,
@@ -96,13 +113,6 @@ important gaps:
   and [Shiki token
   output](https://shiki.style/guide/dual-themes) all associate visual
   presentation with independently meaningful text ranges.
-
-CSS animations and transitions normally operate on elements. Consequently,
-whether segmentation is library- or author-provided, independently animating
-each unit requires presentation-only wrappers. For long or dynamic content,
-the wrappers increase the size and cost of the DOM, style, layout, and
-accessibility trees. They also complicate text updates and can interfere with
-selection, editing, copy and paste, and assistive technology.
 
 The Custom Highlight API already lets authors identify arbitrary text ranges
 without changing the document structure. However, every range in a custom
