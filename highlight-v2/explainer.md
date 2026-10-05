@@ -16,6 +16,7 @@
 - [Introduction](#introduction)
 - [User-Facing Problem](#user-facing-problem)
   - [Goals](#goals)
+- [User research](#user-research)
 - [Proposed Approach](#proposed-approach)
   - [CSS Animations and Transitions](#css-animations-and-transitions)
     - [Animation identity](#animation-identity)
@@ -23,7 +24,9 @@
     - [Events](#events)
   - [Per-range highlight styles](#per-range-highlight-styles)
   - [Opacity](#opacity)
-  - [Implementing a staggered fade animation](#implementing-a-staggered-fade-animation)
+  - [Solving staggered text animation](#solving-staggered-text-animation)
+  - [Solving spoken-word tracking](#solving-spoken-word-tracking)
+  - [Solving data-driven range styling](#solving-data-driven-range-styling)
 - [Alternatives considered](#alternatives-considered)
   - [CSS Text Transitions](#css-text-transitions)
     - [Pros](#pros)
@@ -58,17 +61,39 @@ unit in an element.
 
 The motivating use case is a word-by-word fade animation, such as the ones used
 by AI chat interfaces. The proposed primitives are intentionally more general:
-they can also support animated annotations, search and editing feedback,
-read-along experiences, syntax highlighting, and other paint-only effects over
-text.
+they can also support read-along experiences, data-driven annotations and
+selections, syntax highlighting, and other paint-only effects over text.
 
 ## User-Facing Problem
 
-Web applications increasingly use visual effects to help people follow content
-as it appears, changes, or becomes relevant. Examples include fading in the
-words of a streamed response, animating the current word in a read-along
-experience, drawing attention to a newly added annotation, or smoothly moving
-emphasis between search results.
+People need to connect changing application state to the relevant text. Authors
+address this with visual cues such as a short staggered fade as streamed text
+arrives, or emphasis on the word currently being spoken in a read-along
+experience.
+
+Authors are already building these effects, but the available primitives leave
+important gaps:
+
+* [GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) creates an
+  element for each character, word, or line so that authors can animate them
+  independently. Its documentation describes the accessibility and responsive
+  layout work required to compensate for that generated structure.
+* A developer who [attempted an LLM typing effect with Custom
+  Highlights](https://bsky.app/profile/zubiden.bsky.social/post/3mcxb3vsqtc2d)
+  reports that the lack of animatable highlight properties, including opacity,
+  prevented the approach from working.
+* Developers report using Custom Highlights to [follow spoken
+  text](https://bsky.app/profile/donnie.damato.design/post/3mcx2vrcoys2t) and
+  [highlight spoken words](https://bsky.app/profile/dbushell.com/post/3mcwkt7bs4c2l).
+  An earlier [accessibility
+  discussion](https://news.ycombinator.com/item?id=26841701) similarly
+  describes highlighting the current word and sentence during speech.
+* Editor and highlighter libraries expose mature range-decoration systems.
+  [CodeMirror decorations](https://codemirror.net/docs/ref/#view.Decoration),
+  [Monaco model decorations](https://github.com/microsoft/vscode/blob/main/src/vs/editor/common/model.ts),
+  and [Shiki token
+  output](https://shiki.style/guide/dual-themes) all associate visual
+  presentation with independently meaningful text ranges.
 
 CSS animations and transitions normally operate on elements. As a result,
 effects which address individual words, tokens, or other text ranges generally
@@ -101,16 +126,44 @@ the API cannot replace presentation-only wrappers for these effects.
 
 Each proposal also has uses independent of the staggered fade scenario:
 
-| Feature | Additional use cases |
-| --- | --- |
-| Animations and transitions | Introducing or removing annotations without abrupt flashes; transitioning between the current and inactive search result; animating diagnostics, edits, or collaborative selections; read-along and scroll-linked emphasis |
-| Per-range styles | Syntax tokens with data-derived colors; annotations whose appearance reflects category, severity, confidence, or state; one-off programmatic highlights without a generated CSS rule for every value |
-| Opacity | Fading transient editing feedback; dimming inactive code or annotations while retaining their other styles; fading a background, decoration, shadow, and foreground as one visual unit |
+| Scenario | Supporting evidence | Relevant proposals |
+| --- | --- | --- |
+| Staggered word or character animation | SplitText and [Splitting.js](https://github.com/shshaw/Splitting) generate per-unit elements; State of CSS respondents request individual-letter animation without spans or JavaScript splitting; one developer directly attempted the effect with Custom Highlights | Animations, per-range delays, and opacity |
+| Spoken-word and read-along highlighting | Practitioner reports describe using Custom Highlights to follow spoken text; an accessibility discussion describes simultaneous current-word and current-sentence highlighting | Transitions when ranges enter and leave a highlight |
+| Data-driven range presentation | CodeMirror, Monaco, and [ProseMirror](https://prosemirror.net/docs/ref/#view.Decoration) expose range decorations; Shiki emits styled token spans; [Lexical](https://github.com/facebook/lexical/blob/main/packages/lexical-yjs/src/SyncCursors.ts) generates highlight names and CSS rules for arbitrary collaborator colors | Per-range styles, with optional transitions and opacity |
 
 The proposal does not give highlights independent layout boxes. Effects which
 require transforms, clipping, generated content, or independent layout remain
 out of scope. It also does not replace the position mapping, virtualization,
 or semantic data models used by editors and annotation frameworks.
+
+## User research
+
+The evidence above combines direct Custom Highlight usage with adjacent evidence
+from established text-animation, editor, and syntax-highlighting ecosystems.
+The distinction is important:
+
+* There is direct evidence for attempting staggered Custom Highlight
+  animations and for using Custom Highlights in spoken-word experiences.
+* There is strong evidence that editors and syntax highlighters need
+  independently styled ranges, but those projects are not necessarily asking
+  for this particular API shape.
+* Automatic entry and exit transitions are a proposed way of expressing these
+  effects. The research did not find direct requests for that specific
+  lifecycle behavior.
+
+The [State of CSS 2025 typography
+responses](https://2025.stateofcss.com/en-US/features/typography/#typography_pain_points)
+include requests to animate individual letters without creating thousands of
+spans or splitting text in JavaScript. The [State of HTML 2024 Custom Highlight
+results](https://2024.stateofhtml.com/en-US/features/#custom_highlight_api)
+also record interest in syntax highlighting, avoiding extra wrappers, search
+term highlighting, and richer styling.
+
+These sources establish demand for the workloads more strongly than for the
+specific APIs proposed here. The proposal therefore treats the three features
+as general paint-only building blocks and demonstrates below how they address
+the evidenced scenarios.
 
 ## Proposed Approach
 
@@ -370,7 +423,7 @@ main-thread painting for complex overlap, fragmentation, or decoration cases.
 Whether an animation is compositor-driven is not author-observable and does not
 change the required result.
 
-### Implementing a staggered fade animation
+### Solving staggered text animation
 
 The following example uses `Intl.Segmenter` to create one range per word,
 assigns each range a different animation delay, and animates the highlight's
@@ -424,6 +477,78 @@ opacity. It does not add any presentation-only elements to the document.
 The shared `::highlight()` rule defines the animation, the per-range
 declarations stagger its timing, and atomic highlight opacity allows eligible
 animations to run on the compositor.
+
+### Solving spoken-word tracking
+
+The practitioner reports linked in the [User-Facing
+Problem](#user-facing-problem) use Custom Highlights to connect speech playback
+to the word being spoken. Given a set of word ranges, an application can keep
+the current word in one `Highlight`:
+
+```css
+::highlight(spoken-word) {
+  background-color: gold;
+  transition: background-color 120ms ease-out;
+}
+```
+
+```js
+const spokenWord = new Highlight();
+CSS.highlights.set("spoken-word", spokenWord);
+
+function setSpokenWord(range) {
+  spokenWord.clear();
+  spokenWord.add(range);
+}
+```
+
+The speech or media layer calls `setSpokenWord()` as playback advances. When
+the range changes, the old word transitions to the not-highlighted state while
+the new word transitions into the highlighted state. No timer is needed to
+drive intermediate colors, and neither word needs a wrapper element.
+
+The same pattern can use two Highlights to track the current word and current
+sentence independently.
+
+### Solving data-driven range styling
+
+Range-decoration systems commonly receive presentation data from an
+application model. For example, Lexical's [collaborative selection
+implementation](https://github.com/facebook/lexical/blob/main/packages/lexical-yjs/src/SyncCursors.ts)
+currently generates a highlight name and CSS rule for each collaborator's
+arbitrary color.
+
+Per-range styles allow one logical `Highlight` and one shared CSS rule to
+represent those selections:
+
+```css
+::highlight(remote-selections) {
+  background-color:
+      color-mix(in srgb, var(--selection-color) 35%, transparent);
+  transition: background-color 120ms;
+}
+```
+
+```js
+const remoteSelections = new Highlight();
+CSS.highlights.set("remote-selections", remoteSelections);
+
+function addRemoteSelection(range, color) {
+  remoteSelections.add(range);
+  remoteSelections.getRangeStyle(range)
+      .setProperty("--selection-color", color);
+}
+
+function removeRemoteSelection(range) {
+  remoteSelections.delete(range);
+}
+```
+
+The application supplies only the per-range data. The stylesheet continues to
+control how the color is presented, including its alpha, transition timing,
+forced-color behavior, and any future theme-specific adjustments. Syntax
+highlighters and analysis tools can use the same pattern for token categories,
+confidence scores, diagnostic severity, or other range-specific values.
 
 ## Alternatives considered
 
@@ -606,7 +731,6 @@ exposed by `Intl.Segmenter`.
 * [CSS Transitions Level 2](https://drafts.csswg.org/css-transitions-2/)
 * [`Intl.Segmenter`](https://tc39.es/ecma402/#segmenter-objects)
 * [GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/)
-* [Rough Notation](https://roughnotation.com/)
 
 Many thanks for valuable feedback and advice from:
 
