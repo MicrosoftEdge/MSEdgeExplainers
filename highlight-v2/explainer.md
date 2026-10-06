@@ -13,41 +13,46 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Introduction](#introduction)
-- [User-Facing Problem](#user-facing-problem)
-  - [Goals](#goals)
-- [User research](#user-research)
-- [Proposed Approach](#proposed-approach)
-  - [CSS Animations and Transitions](#css-animations-and-transitions)
-    - [Animation identity](#animation-identity)
-    - [Transitions](#transitions)
-    - [Events](#events)
-  - [Per-range highlight styles](#per-range-highlight-styles)
-  - [Opacity](#opacity)
-  - [Solving staggered text animation](#solving-staggered-text-animation)
-  - [Solving spoken-word tracking](#solving-spoken-word-tracking)
-  - [Solving data-driven range styling](#solving-data-driven-range-styling)
-- [Alternatives considered](#alternatives-considered)
-  - [CSS Text Transitions](#css-text-transitions)
-    - [Pros](#pros)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
-  - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
-    - [Pros](#pros-1)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
-  - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
-    - [Pros](#pros-2)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
-  - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
-    - [Pros](#pros-3)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
-  - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
-    - [Pros](#pros-4)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
-  - [Compositing `color` animations](#compositing-color-animations)
-    - [Pros](#pros-5)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
-- [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
-- [References & acknowledgements](#references--acknowledgements)
+- [Custom Highlight API Extensions](#custom-highlight-api-extensions)
+  - [Authors:](#authors)
+  - [Participate](#participate)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [User-Facing Problem](#user-facing-problem)
+    - [Goals](#goals)
+    - [Non-goals](#non-goals)
+  - [User research](#user-research)
+  - [Proposed Approach](#proposed-approach)
+    - [CSS Animations and Transitions](#css-animations-and-transitions)
+      - [Animation identity](#animation-identity)
+      - [Transitions](#transitions)
+      - [Events](#events)
+    - [Per-range highlight styles](#per-range-highlight-styles)
+    - [Opacity](#opacity)
+    - [Solving staggered text animation](#solving-staggered-text-animation)
+    - [Solving spoken-word tracking](#solving-spoken-word-tracking)
+    - [Solving data-driven range styling](#solving-data-driven-range-styling)
+  - [Alternatives considered](#alternatives-considered)
+    - [CSS Text Transitions](#css-text-transitions)
+      - [Pros](#pros)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
+    - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
+      - [Pros](#pros-1)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
+    - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
+      - [Pros](#pros-2)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
+    - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
+      - [Pros](#pros-3)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
+    - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
+      - [Pros](#pros-4)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
+    - [Compositing `color` animations](#compositing-color-animations)
+      - [Pros](#pros-5)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
+  - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+  - [References \& acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -66,12 +71,13 @@ selections, syntax highlighting, and other paint-only effects over text.
 
 ## User-Facing Problem
 
-Many Web experiences apply visual effects to text at sub-element granularity.
-Examples include fading in the words of a streamed response and emphasizing the
-word currently being spoken in a read-along experience.
+Many Web experiences apply visual effects to text.
+Examples include fading in the words of a streamed response,
+following spoken text or highlighting spoken words,
+and syntax highlighting in editing tools.
 
-The unit of currency for CSS animations and transitions is the element. An
-author-written implementation must therefore divide the text using a mechanism
+Authors are already building these effects, but the available primitives leave
+important gaps. The most common approach is to segment text using a mechanism
 such as `Intl.Segmenter` or `String.prototype.split()`, wrap each resulting
 character, word, or other unit in an element such as a `<span>`, and apply the
 effect to each wrapper. This technique introduces several problems:
@@ -87,95 +93,61 @@ effect to each wrapper. This technique introduces several problems:
   the generated structure while keeping animation state and application data
   synchronized with it.
 
-Libraries such as [GSAP
-SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) and
+Libraries such as [GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) and
 [Splitting.js](https://github.com/shshaw/Splitting) package this pattern and
 handle many of its authoring details. Because the resulting representation
 still uses an element for each text unit, it retains similar platform-level
 costs and tradeoffs.
 
-There is also evidence that these workloads extend beyond the original
-staggered text scenario:
-
-* A developer who [attempted an LLM typing effect with Custom
-  Highlights](https://bsky.app/profile/zubiden.bsky.social/post/3mcxb3vsqtc2d)
-  reports that the lack of animatable highlight properties, including opacity,
-  prevented the approach from working.
-* Developers report using Custom Highlights to [follow spoken
-  text](https://bsky.app/profile/donnie.damato.design/post/3mcx2vrcoys2t) and
-  [highlight spoken words](https://bsky.app/profile/dbushell.com/post/3mcwkt7bs4c2l).
-  An earlier [accessibility
-  discussion](https://news.ycombinator.com/item?id=26841701) similarly
-  describes highlighting the current word and sentence during speech.
-* Editor and highlighter libraries expose mature range-decoration systems.
-  [CodeMirror decorations](https://codemirror.net/docs/ref/#view.Decoration),
-  [Monaco model decorations](https://github.com/microsoft/vscode/blob/main/src/vs/editor/common/model.ts),
-  and [Shiki token
-  output](https://shiki.style/guide/dual-themes) all associate visual
-  presentation with independently meaningful text ranges.
-
 The Custom Highlight API already lets authors identify arbitrary text ranges
-without changing the document structure. However, every range in a custom
-`Highlight` currently shares one static `::highlight()` style. Authors cannot
-animate that style, assign a different value such as an animation delay to each
-range, or fade the complete painted contribution of a highlight. Consequently,
-the API cannot replace presentation-only wrappers for these effects.
+without changing the document structure. However, highlight styling only
+supports a limited set of properties and does not allow for per-range variants
+like an inline style on an element.
+Consequently, the API cannot replace element wrappers for these effects.
 
 ### Goals
 
 * Allow authors to animate and transition paint-only styles on custom
   highlights using familiar CSS syntax and timing behavior.
-* Allow small style variations between ranges in one `Highlight`, without
+* Allow style variations between ranges in one `Highlight`, without
   requiring a separate highlight name and CSS rule for every variation.
 * Support efficient opacity effects over all of a custom highlight's painted
   content without making highlights participate in layout.
 * Preserve the semantic document structure, text shaping, selection behavior,
   and accessibility representation of the highlighted content.
-* Support use cases beyond staggered text animation.
-* Let authors choose how to divide content into ranges. Different applications
-  and languages can use words, grapheme clusters, phrases, syntax tokens, or
-  application-defined units as appropriate.
 
-Each proposal also has uses independent of the staggered fade scenario:
+### Non-goals
 
-| Scenario | Supporting evidence | Relevant proposals |
-| --- | --- | --- |
-| Staggered word or character animation | Current implementations range from author-written segmentation and wrapper code to libraries such as SplitText and Splitting.js; State of CSS respondents request individual-letter animation without spans or JavaScript splitting; one developer directly attempted the effect with Custom Highlights | Animations, per-range delays, and opacity |
-| Spoken-word and read-along highlighting | Practitioner reports describe using Custom Highlights to follow spoken text; an accessibility discussion describes simultaneous current-word and current-sentence highlighting | Transitions when ranges enter and leave a highlight |
-| Data-driven range presentation | CodeMirror, Monaco, and [ProseMirror](https://prosemirror.net/docs/ref/#view.Decoration) expose range decorations; Shiki emits styled token spans; [Lexical](https://github.com/facebook/lexical/blob/main/packages/lexical-yjs/src/SyncCursors.ts) generates highlight names and CSS rules for arbitrary collaborator colors | Per-range styles, with optional transitions and opacity |
-
-The proposal does not give highlights independent layout boxes. Effects which
-require transforms, clipping, generated content, or independent layout remain
-out of scope. It also does not replace the position mapping, virtualization,
-or semantic data models used by editors and annotation frameworks.
+* Highlight effects are currently downstream of layout, and we do not wish to change
+  that relationship. Highlights do not gain their own layout boxes or create new
+  stacking contexts. Accordingly, effects which require transforms or clipping
+  remain out of scope.
+* We are leaving the division of text into sub-element units up to the author.
+  Prior research on other solutions for efficient text-level animations surfaced
+  internationalization and generalizability concerns with baking specific splitting
+  algorithms into platform features, so we avoid doing so here.
 
 ## User research
 
-The evidence above combines direct Custom Highlight usage with adjacent evidence
-from established text-animation, editor, and syntax-highlighting ecosystems.
-The distinction is important:
-
-* There is direct evidence for attempting staggered Custom Highlight
-  animations and for using Custom Highlights in spoken-word experiences.
-* There is strong evidence that editors and syntax highlighters need
-  independently styled ranges, but those projects are not necessarily asking
-  for this particular API shape.
-* Automatic entry and exit transitions are a proposed way of expressing these
-  effects. The research did not find direct requests for that specific
-  lifecycle behavior.
-
-The [State of CSS 2025 typography
-responses](https://2025.stateofcss.com/en-US/features/typography/#typography_pain_points)
-include requests to animate individual letters without creating thousands of
-spans or splitting text in JavaScript. The [State of HTML 2024 Custom Highlight
-results](https://2024.stateofhtml.com/en-US/features/#custom_highlight_api)
-also record interest in syntax highlighting, avoiding extra wrappers, search
-term highlighting, and richer styling.
-
-These sources establish demand for the workloads more strongly than for the
-specific APIs proposed here. The proposal therefore treats the three features
-as general paint-only building blocks and demonstrates below how they address
-the evidenced scenarios.
+* A developer who [attempted an LLM typing effect with Custom Highlights](https://bsky.app/profile/zubiden.bsky.social/post/3mcxb3vsqtc2d)
+  reported that the lack of animatable highlight properties, including opacity,
+  prevented the approach from working.
+* Developers reported using Custom Highlights to [follow spoken
+  text](https://bsky.app/profile/donnie.damato.design/post/3mcx2vrcoys2t) and
+  [highlight spoken words](https://bsky.app/profile/dbushell.com/post/3mcwkt7bs4c2l).
+  An earlier [accessibility
+  discussion](https://news.ycombinator.com/item?id=26841701) similarly
+  described highlighting the current word and sentence during speech.
+* Editor and highlighter libraries expose mature range-decoration systems.
+  Examples include 
+  [CodeMirror decorations](https://codemirror.net/docs/ref/#view.Decoration) and
+  [Shiki syntax highlighting](https://shiki.style/).
+* The [State of CSS 2025 typography responses](https://2025.stateofcss.com/en-US/features/typography/#typography_pain_points)
+  include requests to animate individual letters without creating thousands of
+  spans or splitting text in JavaScript.
+* The [State of HTML 2024 Custom Highlight results](https://2024.stateofhtml.com/en-US/features/#custom_highlight_api)
+  also record interest in syntax highlighting, avoiding extra wrappers, search
+  term highlighting, and richer styling.
 
 ## Proposed Approach
 
@@ -203,10 +175,8 @@ custom highlight pseudo-elements. For example:
 ```
 
 Animations and transitions can affect properties that are valid for highlight
-pseudo-elements, including the proposed `opacity` support. Enabling animation
-properties does not expand highlights into general CSS boxes: properties which
-do not apply to highlights remain inapplicable in keyframes and transition
-lists as well.
+pseudo-elements, including the proposed `opacity` support. Properties which
+do not apply to highlights are ignored in keyframes and transition lists.
 
 #### Animation identity
 
@@ -225,7 +195,7 @@ CSS.highlights.set("active-result", results);
 ```
 
 The two names can match different `::highlight()` rules, so they produce
-independent animation and transition streams. Removing and re-adding a range
+independent animation and transition effects. Removing and re-adding a range
 creates a new membership and therefore a new animation target.
 
 Animations start when both of the following are true:
@@ -292,11 +262,8 @@ interface HighlightTransitionEvent : TransitionEvent {
 };
 ```
 
-One event is dispatched per logical range and registry entry, not per element
-or paint fragment. These events do not bubble through the DOM because a
-`Highlight` is not a DOM node. In particular, an author can use
-`animationend`, `animationcancel`, `transitionend`, or `transitioncancel` for
-cleanup without estimating completion using a timer.
+One event is dispatched per logical range and registry entry.
+An author can use these events to do cleanup without estimating completion using a timer.
 
 ### Per-range highlight styles
 
@@ -307,7 +274,7 @@ Existing techniques are discussed in the "Alternatives Considered" section.
 
 Staggering animation effects that work on a per-element basis can take advantage
 of each element's inline style to achieve this effect. We propose a capability
-for highlight ranges that is similar in spirit.
+for highlight ranges that aims for similar flexibility.
 
 The proposed API is:
 
@@ -343,9 +310,9 @@ identity of entries in `Highlight`'s existing `setlike<AbstractRange>`.
 
 The declaration accepts custom properties and properties that are valid for
 highlight pseudo-elements, including animation, transition, and opacity
-properties added by this proposal. Invalid properties are ignored in the same
-way as they are in a style attribute. For example, script can supply data while
-leaving presentation in CSS:
+properties added by this proposal.
+For example, a per-range style can supply data for minor variants while leaving
+the general nature of an effect in a shared rule:
 
 ```js
 highlight.getRangeStyle(range).setProperty("--confidence", confidence);
@@ -358,10 +325,11 @@ highlight.getRangeStyle(range).setProperty("--confidence", confidence);
 ```
 
 Per-range declarations participate in the author cascade after the shared
-`::highlight()` rule, analogous to inline declarations. Normal importance
-rules still apply, so an important declaration in a stylesheet can override a
-normal per-range declaration. The resulting style is resolved separately for
-each originating element crossed by the range, since inheritance and
+`::highlight()` rule, analogous to inline declarations. Invalid properties
+are ignored in the same way as they are in a `::highlight()` rule. Normal importance
+rules still apply, so a `!important` declaration in a stylesheet can override a
+non-`!important` per-range declaration. The resulting style is resolved separately
+for each originating element crossed by the range, since inheritance and
 `currentColor` can differ across those elements.
 
 If the same `Highlight` is registered under multiple names, its per-range
@@ -369,13 +337,9 @@ declarations are shared, while each name contributes its own
 `::highlight()` rules. Authors who need independent per-name range data can
 use separate `Highlight` objects.
 
-Per-range styles also make overlap between members of the same `Highlight`
-observable. Where differently styled members overlap, declarations from all
-covering members participate in a range-local cascade, with later insertion
-order winning ties. The result is one effective style source for that interval,
-rather than duplicate painting of every overlapping member. Deleting and
-re-adding a range moves it to the end of the set and therefore updates this
-order.
+Where overlapping ranges have different per-range styles, later insertion
+order wins. In other words, we do not cascade or merge together per-range
+styles into a separate result for an "overlap sub-range."
 
 ### Opacity
 
@@ -390,10 +354,14 @@ benefits of avoiding DOM manipulation in a highlight-based animation. We therefo
 propose allowing `opacity` to apply to highlights.
 
 Applying `opacity` to a highlight necessarily behaves differently from applying
-it to an element. An arbitrary range has no single box, coordinate space, or
+it to an element. A range has no single box, coordinate space, or
 stacking position, and can cross elements, transforms, clips, columns, and
 pages. Highlight opacity therefore does not create a stacking context,
 containing block, or layout box.
+
+Additionally, overlapping highlights are currently painted in a "phase-major"
+order, in which all highlight backgrounds are painted before highlight shadows,
+decorations, and the single winning foreground.
 
 Instead, opacity applies to an **atomic highlight paint group**. Within the
 portion of a custom highlight owned by one originating box, the group contains:
@@ -404,42 +372,21 @@ portion of a custom highlight owned by one originating box, the group contains:
 * the foreground text, emphasis, stroke, and originating decorations where
   that highlight supplies the winning foreground style.
 
-The group is rendered to a transparent image and opacity is applied once to the
-result. Applying opacity after rendering avoids darkening where glyphs,
-shadows, or decorations within the group overlap.
+These effects are removed from the normal highlight paint order and instead
+stacked together into their own layer. Opacity is applied once to the result,
+and then it is painted above other overlapping highlight effects.
 
-Atomic grouping requires custom highlight groups to be painted contiguously in
-custom highlight stacking order. This differs from the current phase-major
-order, in which all highlight backgrounds are painted before highlight shadows,
-decorations, and the single winning foreground. For example, a
-higher-priority highlight's background can cover a lower-priority highlight's
-decoration. This paint-order change is the deliberate cost of giving each
-custom highlight element-like group opacity.
-
-The existing single winning foreground rule remains. Lower highlights do not
-receive hidden copies of the text, so making the topmost highlight transparent
-does not reveal a lower highlight's foreground color. This is important for
-reveal animations: `opacity: 0` on the winning highlight hides the text.
-
-The group identity consists of the registry entry, the effective style source,
-and the originating box. A range with a distinct per-range style has its own
-effective style source. Overlapping members first resolve through the
-range-local cascade described above and therefore do not apply opacity
-repeatedly to the same pixels.
-
-One logical range can produce multiple box-local groups when it crosses element
-boundaries. Those groups share animation timing, but implementations are not
-required to combine them into one physical surface. They can be composited
-independently when doing so produces equivalent pixels, and can fall back to
-main-thread painting for complex overlap, fragmentation, or decoration cases.
-Whether an animation is compositor-driven is not author-observable and does not
-change the required result.
+The existing "single winning foreground" rule remains.
+Making the topmost highlight transparent does not reveal a lower highlight's
+foreground color, or the foreground color of the originating element.
+This is important for reveal animations: `opacity: 0` on the winning highlight
+should hide the text.
 
 ### Solving staggered text animation
 
 The following example uses `Intl.Segmenter` to create one range per word,
 assigns each range a different animation delay, and animates the highlight's
-opacity. It does not add any presentation-only elements to the document.
+opacity.
 
 ```html
 <style>
@@ -487,14 +434,12 @@ opacity. It does not add any presentation-only elements to the document.
 ```
 
 The shared `::highlight()` rule defines the animation, the per-range
-declarations stagger its timing, and atomic highlight opacity allows eligible
-animations to run on the compositor.
+declarations stagger its timing, and using opacity allows the animation
+to run on the compositor.
 
 ### Solving spoken-word tracking
 
-The practitioner reports linked in the [User-Facing
-Problem](#user-facing-problem) use Custom Highlights to connect speech playback
-to the word being spoken. Given a set of word ranges, an application can keep
+Given a set of word ranges, an application can keep
 the current word in one `Highlight`:
 
 ```css
@@ -687,22 +632,18 @@ partial interface AbstractRange {
   on every present and future `AbstractRange` subtype, even when it is never
   used for highlighting.
 
-For these reasons, the proposal keeps style on the relationship between a
-`Highlight` and one of its members, exposed through
-`highlight.getRangeStyle(range)`.
-
 ### Compositing `color` animations
 
 #### Pros
 
 * Reuses the existing highlight painting model without introducing atomic
-  groups or changing the relative order of highlight contributions.
+  groups or changing the paint order of highlight contributions.
 
 #### Cons / Reasons for rejection
 
-* Only the winning foreground text color fades. Explicit backgrounds,
-  decorations, shadows, and replaced-content washes remain visible unless
-  authors animate each color-valued property separately.
+* Only benefits the winning foreground text color. Explicit backgrounds,
+  decorations, shadows, and replaced-content washes would still need to
+  have animations driven on the main thread.
 * Does not integrate as cleanly with non-text content that participates in a
   staggered fade. An image would still animate using `opacity`, requiring
   separate keyframes for text and non-text units.
@@ -742,7 +683,6 @@ exposed by `Intl.Segmenter`.
 * [CSS Animations Level 1](https://drafts.csswg.org/css-animations-1/)
 * [CSS Transitions Level 2](https://drafts.csswg.org/css-transitions-2/)
 * [`Intl.Segmenter`](https://tc39.es/ecma402/#segmenter-objects)
-* [GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/)
 
 Many thanks for valuable feedback and advice from:
 
