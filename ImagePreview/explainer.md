@@ -44,6 +44,7 @@
   - [Script observability](#script-observability)
 - [Open Questions](#open-questions)
   - [Attribute name](#attribute-name)
+  - [Independent preview loading](#independent-preview-loading)
   - [Minimum developer-viable feature](#minimum-developer-viable-feature)
 - [Alternatives considered](#alternatives-considered)
   - [Alternatives to the core proposal](#alternatives-to-the-core-proposal)
@@ -235,7 +236,7 @@ Keeping a displayed preview until the first frame of the selected image is decod
 
 ### Lifecycle decisions
 
-- **Lazy loading:** Preview fetching follows the selected image's lazy-loading behavior. If `loading="lazy"` causes the browser to defer the selected-image request, it must also defer the preview request. When the browser begins loading the selected image, it may begin best-effort preview processing according to the scheduling rules above.
+- **Lazy loading:** The current proposal makes preview processing follow the selected image's lazy-loading behavior. If `loading="lazy"` defers the selected-image request, it also defers the preview. Whether authors need independent control is an [open question](#independent-preview-loading).
 - **Selected-image failure:** If the selected image fails, the browser stops displaying the preview and uses the element's normal broken-image and alternative-text rendering. A preview is temporary and cannot become successful fallback content.
 - **Animated previews:** Animated preview resources follow the platform's ordinary image-animation behavior. The computed [`image-animation`](https://drafts.csswg.org/css-image-animation-1/#image-animation) value on the `<img>` element applies to the preview as well as the selected image. Replacing the preview ends its playback. This proposal adds no preview-specific animation controls.
 - **Animated selected images:** Handoff requires the first frame to be completely available and decoded for presentation. It does not require every animation frame to be available or decoded. After the handoff, animation follows the platform's ordinary image-animation behavior.
@@ -337,6 +338,14 @@ If concrete use cases establish a need for script observability, a follow-up pro
 Should the preview URL use a new `previewsrc` attribute, or should `<img>` reuse the existing `poster` name? See [Reuse the `poster` attribute](#reuse-the-poster-attribute) for the tradeoff.
 
 The `lowsrc` name is excluded for compatibility reasons; see [Historical `lowsrc` attribute](#historical-lowsrc-attribute).
+
+### Independent preview loading
+
+Should authors be able to load and display a preview before a lazy-loaded selected image?
+
+Loading the preview eagerly could reduce visible pop-in when an image approaches the viewport. For an inline preview, the bytes are already part of the document, although decoding and retaining the preview still have CPU and memory costs. For an external preview, eager loading could fetch resources for images the user never sees and compete with more important requests.
+
+The proposal needs to determine whether inline and external previews should follow the same loading behavior and whether authors need separate control over preview loading. This explainer does not yet select an API for that control.
 
 ### Minimum developer-viable feature
 
