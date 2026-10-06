@@ -139,7 +139,7 @@ Consequently, the API cannot replace element wrappers for these effects.
   discussion](https://news.ycombinator.com/item?id=26841701) similarly
   described highlighting the current word and sentence during speech.
 * Editor and highlighter libraries expose mature range-decoration systems.
-  Examples include 
+  Examples include
   [CodeMirror decorations](https://codemirror.net/docs/ref/#view.Decoration) and
   [Shiki syntax highlighting](https://shiki.style/).
 * The [State of CSS 2025 typography responses](https://2025.stateofcss.com/en-US/features/typography/#typography_pain_points)
@@ -373,8 +373,8 @@ portion of a custom highlight owned by one originating box, the group contains:
   that highlight supplies the winning foreground style.
 
 These effects are removed from the normal highlight paint order and instead
-stacked together into their own layer. Opacity is applied once to the result,
-and then it is painted above other overlapping highlight effects.
+stacked together as a group. Opacity is applied once to the result,
+and then it is painted in custom-highlight stacking order.
 
 The existing "single winning foreground" rule remains.
 Making the topmost highlight transparent does not reveal a lower highlight's
@@ -434,8 +434,8 @@ opacity.
 ```
 
 The shared `::highlight()` rule defines the animation, the per-range
-declarations stagger its timing, and using opacity allows the animation
-to run on the compositor.
+declarations stagger its timing, and using `opacity` makes the animation
+eligible for compositor acceleration.
 
 ### Solving spoken-word tracking
 
