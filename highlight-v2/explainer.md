@@ -337,9 +337,40 @@ declarations are shared, while each name contributes its own
 `::highlight()` rules. Authors who need independent per-name range data can
 use separate `Highlight` objects.
 
-Where overlapping ranges have different per-range styles, later insertion
-order wins. In other words, we do not cascade or merge together per-range
-styles into a separate result for an "overlap sub-range."
+Overlapping ranges with different per-range styles behave like overlapping
+ranges belonging to different named custom highlights. Each range's
+declaration is first combined with the shared `::highlight()` rule to produce
+an effective style for that range. Those effective styles are then painted as
+separate highlight layers; they are not cascaded or merged into one style for
+the overlap.
+
+For example:
+
+```js
+const first = new StaticRange(/* ... */);
+const second = new StaticRange(/* ... */);
+const highlight = new Highlight(first, second);
+
+highlight.getRangeStyle(first).backgroundColor = "yellow";
+highlight.getRangeStyle(second).color = "blue";
+```
+
+Where the ranges overlap, the yellow background contributed by `first` remains
+visible, while `second`, as the higher layer, supplies the winning blue
+foreground. This is the same result the author would get by placing `first`
+and `second` in separately named custom highlights with the corresponding
+styles.
+
+The existing custom-highlight stacking order continues to order different
+registry entries. Within one `Highlight`, range set insertion order supplies
+the additional ordering: later ranges paint above earlier ranges. Deleting and
+re-adding a range moves it to the end of the set and therefore makes it the
+highest range layer in that `Highlight`.
+
+Ranges without distinct per-range styles retain the existing behavior for
+members of one `Highlight`, including treating overlapping ranges as their
+union. The additional layers are needed only where per-range styling makes a
+difference observable.
 
 ### Opacity
 
@@ -375,6 +406,13 @@ portion of a custom highlight owned by one originating box, the group contains:
 These effects are removed from the normal highlight paint order and instead
 stacked together as a group. Opacity is applied once to the result,
 and then it is painted in custom-highlight stacking order.
+
+A distinct per-range style creates a distinct atomic paint group. When styled
+ranges overlap, their groups use the same ordering and painting behavior
+described above for overlapping custom highlights. Each background, shadow,
+and introduced decoration is painted as part of its owning group, while only
+the topmost group supplies the foreground text. Opacity is applied to each
+group before the groups are stacked.
 
 The existing "single winning foreground" rule remains.
 Making the topmost highlight transparent does not reveal a lower highlight's
