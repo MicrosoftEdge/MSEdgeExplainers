@@ -24,7 +24,7 @@
   - [User research](#user-research)
   - [Proposed Approach](#proposed-approach)
     - [CSS Animations and Transitions](#css-animations-and-transitions)
-      - [Animation identity](#animation-identity)
+      - [Effect identity](#effect-identity)
       - [Transitions](#transitions)
       - [Events](#events)
     - [Per-range highlight styles](#per-range-highlight-styles)
@@ -177,14 +177,26 @@ custom highlight pseudo-elements. For example:
 Animations and transitions can affect properties that are valid for highlight
 pseudo-elements, including the proposed `opacity` support. Properties which
 do not apply to highlights are ignored in keyframes and transition lists.
+Animation and transition properties declared on an ordinary originating
+element apply only to that element; they do not configure effects on its
+highlight pseudo-elements. Highlight effects are instead configured through
+the highlight cascade, including matching `::highlight()` rules, per-range
+declarations, and inheritance from corresponding ancestor highlight
+pseudo-elements. Custom properties inherited from the originating element can
+affect the resolved effect properties.
 
-#### Animation identity
+#### Effect identity
 
-Each `(Highlight registry entry, range)` tuple acts as one logical animation
-target. A range which crosses several elements, lines, or paint fragments still
-has one animation timeline. Implementations may need several internal style or
-compositor targets to paint those fragments, but those targets remain
-synchronized and are not separately exposed to authors.
+Each `(Highlight registry entry, range, originating element)` tuple acts as one
+animation or transition target. This follows the existing highlight styling
+model, in which each originating element draws its portion of a highlight using
+the corresponding highlight pseudo-element style. A range which crosses
+several elements can therefore produce effects with different property values,
+timing parameters, or both.
+
+Line boxes and paint fragments do not create additional animation targets. If
+one originating element draws a range in several fragments, those fragments
+share one animation timeline.
 
 The registry entry is part of the identity because the same `Highlight` can be
 registered under more than one name:
@@ -196,25 +208,34 @@ CSS.highlights.set("active-result", results);
 
 The two names can match different `::highlight()` rules, so they produce
 independent animation and transition effects. Removing and re-adding a range
-creates a new membership and therefore a new animation target.
+creates a new membership and therefore new animation targets for its
+originating elements.
 
-Animations start when both of the following are true:
+An animation starts for an originating element when all of the following are
+true:
 
 * the range is a member of the `Highlight`; and
 * the `Highlight` is registered under a name for which the combined
-  `::highlight()` and per-range style specifies an animation.
+  `::highlight()` and per-range style specifies an animation; and
+* the range contains content drawn by that originating element.
 
-Changing a live `Range`'s boundary points does not restart its animations.
-Changes to animation declarations follow the existing CSS Animations update
-rules. Internal fragment targets are not returned from
-`document.getAnimations()`, since exposing them would make author-visible
-behavior depend on layout and implementation details.
+Changing a live `Range`'s boundary points does not restart animations for
+originating elements which remain covered. It starts animations for newly
+covered originating elements and cancels them for elements which are no longer
+covered. Changes to animation declarations follow the existing CSS Animations
+update rules. Line boxes and internal paint fragments are not separately
+exposed to authors.
 
 #### Transitions
 
-Transitions run when the computed style for a logical highlight target changes,
-whether the change comes from a `::highlight()` rule, a per-range declaration,
-or a change in the originating element's highlight style.
+Transitions run when the computed style for one of these per-originating-element
+highlight targets changes, whether the change comes from a `::highlight()` rule,
+a per-range declaration, highlight inheritance, or an originating element's
+custom properties.
+
+As with animations and static highlight styling, different originating
+elements can resolve different property values and timing parameters for the
+same range. Their transitions run independently.
 
 Highlight membership changes also participate in transitions. The
 not-highlighted endpoint uses the originating foreground values, a transparent
@@ -227,16 +248,19 @@ the not-highlighted endpoint and its after-change style is the newly computed
 highlight style. `@starting-style` can override the starting values when an
 effect needs a different entry treatment.
 
-When a range is removed, the user agent retains its outgoing highlight paint
-long enough to transition from its current style to the not-highlighted
-endpoint. The range ceases to be a member immediately for JavaScript set
-operations; the retained paint exists only for the exit transition. It is
-discarded when all exit transitions finish or are canceled. The outgoing
-target's transition declarations control this exit transition, since there is
-no longer a matching `::highlight()` style after removal. Any CSS animations
-on the removed target are canceled before the exit transition begins.
+When a range is removed, the user agent retains each originating element's
+outgoing highlight paint long enough to transition from its current style to
+the not-highlighted endpoint. Deleting the range removes it from the
+`Highlight` immediately, so `has()`, iteration, and other setlike operations no
+longer expose it. The user agent retains each outgoing effect target, including
+its style and paint state, until its exit transitions finish or are canceled.
+Retaining the target does not restore its membership in the `Highlight`. The
+outgoing target's transition declarations control its exit transition, since
+there is no longer a matching `::highlight()` style after removal. Any CSS
+animations on the removed target are canceled before the exit transition
+begins.
 `clear()`, removal of a registry entry, and replacement of the registered
-`Highlight` apply the same behavior to each affected logical target.
+`Highlight` apply the same behavior to each affected target.
 
 If a range is re-added while its exit transition is running, the existing CSS
 transition reversal rules apply. A range which becomes invalid or no longer
@@ -247,7 +271,9 @@ without retaining stale paint.
 
 `Highlight` becomes an `EventTarget`. Animation and transition events are
 dispatched at the `Highlight`, with the affected `AbstractRange` exposed on the
-event. `event.pseudoElement` identifies the applicable registry name, such as
+event. Because the same range can produce an effect for more than one
+originating element, the event also exposes the originating element.
+`event.pseudoElement` identifies the applicable registry name, such as
 `::highlight(search-result)`.
 
 Conceptually, the events extend the existing event interfaces as follows:
@@ -255,15 +281,22 @@ Conceptually, the events extend the existing event interfaces as follows:
 ```webidl
 interface HighlightAnimationEvent : AnimationEvent {
   readonly attribute AbstractRange range;
+  readonly attribute Element originatingElement;
 };
 
 interface HighlightTransitionEvent : TransitionEvent {
   readonly attribute AbstractRange range;
+  readonly attribute Element originatingElement;
 };
 ```
 
-One event is dispatched per logical range and registry entry.
-An author can use these events to do cleanup without estimating completion using a timer.
+Events are generated independently for each `(Highlight registry entry, range,
+originating element)` target, following the existing CSS Animations and CSS
+Transitions event rules. The same range can therefore appear in multiple
+events, including events with different elapsed times. Line boxes and paint
+fragments do not generate additional events. An author can use the range and
+originating element to identify which effect completed without estimating
+completion using a timer.
 
 ### Per-range highlight styles
 
@@ -329,8 +362,9 @@ Per-range declarations participate in the author cascade after the shared
 are ignored in the same way as they are in a `::highlight()` rule. Normal importance
 rules still apply, so a `!important` declaration in a stylesheet can override a
 non-`!important` per-range declaration. The resulting style is resolved separately
-for each originating element crossed by the range, since inheritance and
-`currentColor` can differ across those elements.
+for each originating element crossed by the range, since inheritance, custom
+properties, and `currentColor` can differ across those elements. This includes
+animation and transition parameters.
 
 If the same `Highlight` is registered under multiple names, its per-range
 declarations are shared, while each name contributes its own
