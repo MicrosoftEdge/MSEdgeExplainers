@@ -180,7 +180,7 @@ do not apply to highlights are ignored in keyframes and transition lists.
 
 #### Animation identity
 
-Each `(Highlight, range, registry entry)` tuple acts as one logical animation
+Each `(Highlight registry entry, range)` tuple acts as one logical animation
 target. A range which crosses several elements, lines, or paint fragments still
 has one animation timeline. Implementations may need several internal style or
 compositor targets to paint those fragments, but those targets remain
