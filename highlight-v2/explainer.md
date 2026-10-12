@@ -13,72 +13,75 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Introduction](#introduction)
-- [User-Facing Problem](#user-facing-problem)
-  - [Goals](#goals)
-  - [Non-goals](#non-goals)
-- [User research](#user-research)
-- [Proposed Approach](#proposed-approach)
-  - [CSS Animations and Transitions](#css-animations-and-transitions)
-    - [Effect identity](#effect-identity)
-    - [Animations](#animations)
-    - [Transitions](#transitions)
-    - [Events](#events)
-  - [Per-range highlight styles](#per-range-highlight-styles)
-  - [Opacity](#opacity)
-  - [Solving staggered text animation](#solving-staggered-text-animation)
-  - [Solving spoken-word tracking](#solving-spoken-word-tracking)
-  - [Solving data-driven range styling](#solving-data-driven-range-styling)
-- [Alternatives considered](#alternatives-considered)
-  - [CSS Text Transitions](#css-text-transitions)
-    - [Pros](#pros)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
-  - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
-    - [Pros](#pros-1)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
-  - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
-    - [Pros](#pros-2)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
-  - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
-    - [Pros](#pros-3)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
-  - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
-    - [Pros](#pros-4)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
-  - [Compositing `color` animations](#compositing-color-animations)
-    - [Pros](#pros-5)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
-- [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
-- [References & acknowledgements](#references--acknowledgements)
+- [Custom Highlight API Extensions](#custom-highlight-api-extensions)
+  - [Authors:](#authors)
+  - [Participate](#participate)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [User-Facing Problem](#user-facing-problem)
+    - [Goals](#goals)
+    - [Non-goals](#non-goals)
+  - [User research](#user-research)
+  - [Proposed Approach](#proposed-approach)
+    - [CSS Animations and Transitions](#css-animations-and-transitions)
+      - [Effect identity](#effect-identity)
+      - [Animations](#animations)
+      - [Transitions](#transitions)
+      - [Events](#events)
+    - [Per-range highlight styles](#per-range-highlight-styles)
+    - [Opacity](#opacity)
+    - [Solving staggered text animation](#solving-staggered-text-animation)
+    - [Solving spoken-word tracking](#solving-spoken-word-tracking)
+    - [Solving data-driven range styling](#solving-data-driven-range-styling)
+  - [Alternatives considered](#alternatives-considered)
+    - [CSS Text Transitions](#css-text-transitions)
+      - [Pros](#pros)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
+    - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
+      - [Pros](#pros-1)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
+    - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
+      - [Pros](#pros-2)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
+    - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
+      - [Pros](#pros-3)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
+    - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
+      - [Pros](#pros-4)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
+    - [Compositing `color` animations](#compositing-color-animations)
+      - [Pros](#pros-5)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
+  - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+  - [References \& acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Introduction
 
-This explainer proposes three extensions to the CSS Custom Highlight API:
-support for CSS animations and transitions, per-range styles, and opacity.
-Together, these features allow authors to apply independently timed,
-compositor-driven effects to arbitrary text ranges without wrapping each text
-unit in an element.
+Many Web experiences apply visual effects to text. AI chat interfaces and
+online presentation tools have made text entry and exit effects especially
+prominent, while read-along experiences and editing tools use changing
+highlights to convey playback or analysis state.
 
-Motivating use cases include text entry and exit effects, such as those seen
-in online presentation applications and AI chat interfaces. The proposed
-primitives are intentionally more general: they can also support read-along
-experiences, data-driven annotations and selections, syntax highlighting, and
-other paint-only effects over text.
+Existing Web primitives for building text-level animation effects can be
+inefficient or limited since they generally require backing elements.
+This explainer proposes three extensions to the CSS Custom Highlight API,
+which together allow authors to apply independently timed,
+compositor-driven animations to arbitrary text ranges without
+introducing additional elements solely to achieve the effect.
+Although text animation motivates this proposal, the per-range styling
+capability also supports non-animated scenarios such as data-driven
+annotations, collaborative selections, syntax highlighting, and other cases
+where ranges within one `Highlight` need minor style variations.
+
 
 ## User-Facing Problem
 
-Many Web experiences apply visual effects to text.
-Examples include fading in the words of a streamed response,
-following spoken text or highlighting spoken words,
-and syntax highlighting in editing tools.
-
-Authors are already building these effects, but the available primitives leave
-important gaps. The most common approach is to segment text using a mechanism
-such as `Intl.Segmenter` or `String.prototype.split()`, wrap each resulting
-character, word, or other unit in an element such as a `<span>`, and apply the
-effect to each wrapper. This technique introduces several problems:
+The most common approach for building text-based effects is to segment the text using
+a mechanism such as `Intl.Segmenter` or `String.prototype.split()`, wrap each
+resulting character, word, or other unit in an element such as a `<span>`, and
+apply the effect to each wrapper. This technique introduces several problems:
 
 * **Performance:** Each wrapper adds cost to the DOM, style calculation,
   layout, and accessibility trees compared to a simple paragraph of text.
@@ -96,6 +99,14 @@ Libraries such as [GSAP SplitText](https://gsap.com/docs/v3/Plugins/SplitText/) 
 handle many of its authoring details. Because the resulting representation
 still uses an element for each text unit, it retains similar platform-level
 costs and tradeoffs.
+
+Libraries such as [Pretext](https://github.com/chenglou/pretext) provide an
+alternative for measuring text and laying it out in the DOM or on a Canvas.
+DOM-based layout would suffer from the same shortcomings as other approaches
+since an element would still be needed to back each independently animated
+unit of text. Canvas-based rendering avoids that drawback but introduces its
+own: the author becomes responsible for providing support for text handling
+interactions such as selection, as well as an accessibility representation.
 
 The Custom Highlight API already lets authors identify arbitrary text ranges
 without changing the document structure. However, highlight styling only
@@ -122,7 +133,7 @@ Consequently, the API cannot replace element wrappers for these effects.
   we can reasonably emulate this behavior in a highlight.
   Setting a transform on an element establishes a containing block,
   which influences positioning of descendant elements.
-  It is much harder to define an analagous behavior in a post-layout effect.
+  It is much harder to define an analogous behavior in a post-layout effect.
 * We are leaving the division of text into sub-element units (such as characters,
   words, or lines) up to the author.
   Prior research on other solutions for efficient text-level animations surfaced
@@ -252,19 +263,14 @@ the not-highlighted endpoint and its after-change style is the newly computed
 highlight style. `@starting-style` can override the starting values when an
 effect needs a different entry treatment.
 
-When a range is removed, the user agent retains each originating element's
-outgoing highlight paint long enough to transition from its current style to
-the not-highlighted endpoint. Deleting the range removes it from the
-`Highlight` immediately, so `has()`, iteration, and other setlike operations no
-longer expose it. The user agent retains each outgoing effect target, including
-its style and paint state, until its exit transitions finish or are canceled.
-Retaining the target does not restore its membership in the `Highlight`. The
-outgoing target's transition declarations control its exit transition, since
-there is no longer a matching `::highlight()` style after removal. Any CSS
-animations on the removed target are canceled before the exit transition
-begins.
-`clear()`, removal of a registry entry, and replacement of the registered
-`Highlight` apply the same behavior to each affected target.
+Removing a range from a `Highlight` deletes it immediately from the set but
+triggers an exit transition to the not-highlighted state.
+`Highlight.clear()` starts exit transitions for each member, just as deleting
+members individually would.
+Deleting a registry entry with `CSS.highlights.delete()`, or replacing
+its value with a different `Highlight` using `CSS.highlights.set()`, cancels all
+effects associated with the old registry entry, including any in-progress
+transitions.
 
 If a range is re-added while its exit transition is running, the existing CSS
 transition reversal rules apply. A range which becomes invalid or no longer
@@ -500,9 +506,9 @@ opacity.
 
   const highlight = new Highlight(...ranges);
 
-  const stagger_interval = 6 /* milliseconds */;
+  const staggerInterval = 6 /* milliseconds */;
   for (const [index, range] of ranges.entries()) {
-    highlight.getRangeStyle(range).animationDelay = `${index * stagger_interval}ms`;
+    highlight.getRangeStyle(range).animationDelay = `${index * staggerInterval}ms`;
   }
 
   // Register only after setting the delays, so all animations start together.
@@ -628,7 +634,7 @@ complicating factors.
 * Even though [UAX-29](https://www.unicode.org/reports/tr29/tr29-47.html) gives us *a*
   standardized way to split text on letter and word boundaries, it is not clear that
   this way is sufficiently universal across use cases to bake it into pseudo-elements.
-  For example, there may be differences in how an author wants to to handle adjacent
+  For example, there may be differences in how an author wants to handle adjacent
   whitespace or punctuation depending on whether they are implementing a per-word text
   entry effect, a read-along effect, or an editor highlight effect. Editing applications
   might also want to vary their behaviors to emulate native controls on the underlying platform.
@@ -738,10 +744,24 @@ should be respected.
 As with any opacity effect, user contrast preferences expressed via `prefers-contrast`
 or enabling Forced Colors Mode should be respected.
 
+These extensions affect painting and do not alter the DOM or accessibility
+tree. Range boundaries and animation timing do not add semantics or cause text
+to be announced. Authors remain responsible for ensuring that information
+conveyed by a highlight is also available to assistive technology when needed.
+Compared with presentation-only element wrappers, highlights preserve the
+accessible representation and native selection behavior of the underlying
+content.
+
 In contrast to other solutions explored in this space, this approach leaves the decision
 of how to segment text in the author's hands. For word-by-word animations or similar effects,
 authors are encouraged to use a standards-backed splitting algorithm such as the one
 exposed by `Intl.Segmenter`.
+
+The proposal builds on the existing Custom Highlight API and CSS animation
+models. It does not expose document content or ranges that the calling script
+could not already access. The new events describe only ranges already supplied
+to a `Highlight`, their originating elements, and the effects applied to them.
+No additional privacy or security considerations have been identified.
 
 <!--
 ## Stakeholder Feedback / Opposition
