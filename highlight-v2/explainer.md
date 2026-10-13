@@ -237,8 +237,40 @@ true:
 
 Changing a live `Range`'s boundary points does not restart animations for
 originating elements which remain covered. It starts animations for newly
-covered originating elements and cancels them for elements which are no longer
-covered. Changes to animation declarations follow the existing CSS Animations
+covered originating elements, with the timing synchronized to the remainder
+of the range, and cancels animations for elements which are no longer
+covered. 
+
+```html
+<p>This is a <b>paragraph</b> with <b>bold</b> words.</p>
+
+<style>
+  @keyframes pulse {
+    from { background: transparent; }
+    to { background: yellow; }
+  }
+  ::highlight(pulse) {
+    animation: pulse 1s infinite alternate;
+  }
+</style>
+<script>
+  // Start the pulse animation on the first word of the paragraph.
+  const paragraph = document.querySelector("p");
+  const firstWord = paragraph.firstChild.textContent.split(" ")[0];
+  const range = new Range();
+  range.setStart(paragraph.firstChild, 0);
+  range.setEnd(paragraph.firstChild, firstWord.length);
+  CSS.highlights.set("pulse", new Highlight(range));
+
+  // Later: Extend the pulse animation to the entire paragraph.
+  range.selectNodeContents(paragraph);
+
+  // The entire paragraph, including the <b> descendants,
+  // now runs the pulse animation on the same timeline.
+</script>
+```
+
+Changes to animation declarations follow the existing CSS Animations
 update rules. Line boxes and internal paint fragments are not separately
 exposed to authors.
 
