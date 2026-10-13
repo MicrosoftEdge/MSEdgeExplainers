@@ -1,6 +1,6 @@
 # Custom Highlight API Extensions
 
-## Authors:
+## Authors
 
 - [Kevin Babbitt](https://github.com/kbabbitt) (Microsoft)
 
@@ -14,7 +14,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Custom Highlight API Extensions](#custom-highlight-api-extensions)
-  - [Authors:](#authors)
+  - [Authors](#authors)
   - [Participate](#participate)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
@@ -65,7 +65,10 @@ prominent, while read-along experiences and editing tools use changing
 highlights to convey playback or analysis state.
 
 Existing Web primitives for building text-level animation effects can be
-inefficient or limited since they generally require backing elements.
+inefficient for these effects, since they require backing elements.
+For a per-word animation with a lot of text, hundreds of extra elements
+might be created for reason other than to support such an effect.
+
 This explainer proposes three extensions to the CSS Custom Highlight API,
 which together allow authors to apply independently timed,
 compositor-driven animations to arbitrary text ranges without
@@ -89,7 +92,7 @@ apply the effect to each wrapper. This technique introduces several problems:
   differently from an uninterrupted sentence. Authors sometimes compensate by
   maintaining a separate accessible representation.
 * **Editing interaction:** Presentation-only elements can interfere with text
-  selection, editing, and copy and paste.
+  selection, editing, and clipboard operations such as copy and paste.
 * **Content maintenance:** When text changes, authors must preserve or rebuild
   the generated structure while keeping animation state and application data
   synchronized with it.
@@ -101,18 +104,16 @@ still uses an element for each text unit, it retains similar platform-level
 costs and tradeoffs.
 
 Libraries such as [Pretext](https://github.com/chenglou/pretext) provide an
-alternative for measuring text and laying it out in the DOM or on a Canvas.
-DOM-based layout would suffer from the same shortcomings as other approaches
-since an element would still be needed to back each independently animated
-unit of text. Canvas-based rendering avoids that drawback but introduces its
-own: the author becomes responsible for providing support for text handling
-interactions such as selection, as well as an accessibility representation.
+alternative for measuring text and laying it out on a Canvas.
+Canvas-based rendering avoids some of the drawbacks of DOM-based solutions but
+introduces its own: the author becomes responsible for providing support for text
+handling interactions such as selection, as well as an accessibility representation.
 
 The Custom Highlight API already lets authors identify arbitrary text ranges
 without changing the document structure. However, highlight styling only
-supports a limited set of properties and does not allow for per-range variants
-like an inline style on an element.
-Consequently, the API cannot replace element wrappers for these effects.
+supports a limited set of properties and does not allow for animation effects or
+per-range variants like an inline style on an element.
+Consequently, the API cannot currently replace element wrappers for these effects.
 
 ### Goals
 
@@ -135,7 +136,7 @@ Consequently, the API cannot replace element wrappers for these effects.
   which influences positioning of descendant elements.
   It is much harder to define an analogous behavior in a post-layout effect.
 * We are leaving the division of text into sub-element units (such as characters,
-  words, or lines) up to the author.
+  words, or lines) up to the author rather than providing declarative options.
   Prior research on other solutions for efficient text-level animations surfaced
   internationalization and generalizability concerns with baking specific splitting
   algorithms into platform features, so we avoid doing so here.
