@@ -272,6 +272,8 @@ covered.
 </script>
 ```
 
+<img src="images/animation-pulse.gif" alt="Pulsing animation on the first word of a paragraph, which then expands to the entire paragraph, including two bolded words">
+
 Changes to animation declarations follow the existing CSS Animations
 update rules. Line boxes and internal paint fragments are not separately
 exposed to authors.
@@ -532,8 +534,23 @@ opacity.
 <script>
   const node = document.querySelector("#response").firstChild;
   const segmenter = new Intl.Segmenter(undefined, {granularity: "word"});
-  const words = [...segmenter.segment(node.data)]
-      .filter(segment => segment.isWordLike);
+
+  // Trailing punctuation joins the preceding word, so it fades in with it.
+  function splitWords(text) {
+    const words = [];
+    for (const {index, segment, isWordLike} of segmenter.segment(text)) {
+      const last = words.at(-1);
+      if (isWordLike) {
+        words.push({index, segment});
+      } else if (last && segment.trim() &&
+                 index == last.index + last.segment.length) {
+        last.segment += segment;
+      }
+    }
+    return words;
+  }
+
+  const words = splitWords(node.data);
 
   const ranges = words.map(({index, segment}) => new StaticRange({
     startContainer: node,
@@ -566,8 +583,7 @@ complete-word batches, each with its own stagger starting at zero:
 function appendResponseText(text) {
   const newNode = document.createTextNode(text);
   node.parentNode.append(newNode);
-  const newWords = [...segmenter.segment(text)]
-      .filter(segment => segment.isWordLike);
+  const newWords = splitWords(text);
 
   for (const [index, {index: offset, segment}] of newWords.entries()) {
     const range = new StaticRange({
@@ -593,6 +609,8 @@ existing ranges, even though all the words have the same originating `<p>`.
 Previously revealed words remain visible through `animation-fill-mode: both`,
 while each new range gets its own animation timeline. The same
 `prefers-reduced-motion` rule also applies to the newly added ranges.
+
+<img src="images/staggered-fade.gif" alt="Staggered text entry animation, with subsequent appended text">
 
 ### Solving spoken-word tracking
 
@@ -623,6 +641,8 @@ drive intermediate colors, and neither word needs a wrapper element.
 
 The same pattern can use two Highlights to track the current word and current
 sentence independently.
+
+<img src="images/spoken-word.gif" alt="Text with a highlight moving from one word to the next and fading smoothly in and out">
 
 ### Solving data-driven range styling
 
@@ -663,6 +683,8 @@ control how the color is presented, including its alpha, transition timing,
 forced-color behavior, and any future theme-specific adjustments. Syntax
 highlighters and analysis tools can use the same pattern for token categories,
 confidence scores, diagnostic severity, or other range-specific values.
+
+<img src="images/remote-selections.gif" alt="Collaborative text editing session with different editors' selections represented by different colors">
 
 ## Alternatives considered
 
