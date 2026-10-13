@@ -556,6 +556,42 @@ The shared `::highlight()` rule defines the animation, the per-range
 declarations stagger its timing, and using `opacity` makes the animation
 eligible for compositor acceleration.
 
+To append more text dynamically, the application can add ranges to the
+already registered `Highlight`. This continuation of the example receives
+complete-word batches, each with its own stagger starting at zero:
+
+```js
+function appendResponseText(text) {
+  const newNode = document.createTextNode(text);
+  node.parentNode.append(newNode);
+  const newWords = [...segmenter.segment(text)]
+      .filter(segment => segment.isWordLike);
+
+  for (const [index, {index: offset, segment}] of newWords.entries()) {
+    const range = new StaticRange({
+      startContainer: newNode,
+      startOffset: offset,
+      endContainer: newNode,
+      endOffset: offset + segment.length,
+    });
+    highlight.add(range);
+    highlight.getRangeStyle(range).animationDelay = `${index * staggerInterval}ms`;
+  }
+}
+
+// Later, when another batch of text arrives:
+appendResponseText(" Newly appended words fade in as they arrive.");
+```
+
+Each batch is appended as a new text node, leaving the existing `StaticRange`
+boundaries unchanged. The new ranges and their per-range delays are set
+synchronously, before the next style update, so their animations start with
+the intended stagger. Adding these ranges does not restart animations for
+existing ranges, even though all the words have the same originating `<p>`.
+Previously revealed words remain visible through `animation-fill-mode: both`,
+while each new range gets its own animation timeline. The same
+`prefers-reduced-motion` rule also applies to the newly added ranges.
+
 ### Solving spoken-word tracking
 
 Given a set of word ranges, an application can keep
