@@ -28,6 +28,7 @@
       - [Animations](#animations)
       - [Transitions](#transitions)
       - [Events](#events)
+      - [Web Animations API](#web-animations-api)
     - [Per-range highlight styles](#per-range-highlight-styles)
     - [Opacity](#opacity)
     - [Solving staggered text animation](#solving-staggered-text-animation)
@@ -346,6 +347,54 @@ events, including events with different elapsed times. Line boxes and paint
 fragments do not generate additional events. An author can use the range and
 originating element to identify which effect completed without estimating
 completion using a timer.
+
+#### Web Animations API
+
+Highlight effects participate in the Web Animations API. They are returned by
+`document.getAnimations()` and by `getAnimations()` on their originating
+element, following the same rules as effects on other pseudo-elements.
+The returned objects are `CSSAnimation` or `CSSTransition` objects, as
+appropriate.
+`KeyframeEffect.target` is the originating element and
+`KeyframeEffect.pseudoElement` identifies the registry entry, such as
+`::highlight(search-result)`.
+
+Because multiple ranges can share both values, `KeyframeEffect` additionally
+exposes the affected range for highlight effects:
+
+```webidl
+partial interface KeyframeEffect {
+  readonly attribute AbstractRange? highlightRange;
+};
+```
+
+The value is `null` for effects which do not target a custom highlight range.
+Together, `target`, `pseudoElement`, and `highlightRange` identify the
+`(Highlight registry entry, range, originating element)` target.
+
+`Highlight` also exposes the effects created for its memberships:
+
+```webidl
+partial interface Highlight {
+  sequence<Animation> getAnimations(
+      optional HighlightGetAnimationsOptions options = {});
+};
+
+dictionary HighlightGetAnimationsOptions {
+  AbstractRange? range = null;
+  Element? originatingElement = null;
+  CSSOMString? pseudoElement = null;
+};
+```
+
+Omitted or `null` members do not filter the results. The method continues to
+return retained exit transitions after their range has been deleted from the
+`Highlight`, until those transitions finish or are canceled. This gives
+authors a way to inspect and control each tuple using the normal `Animation`
+methods. In particular, calling `cancel()` on a retained exit transition
+immediately discards its retained target, style, and paint state. Calling
+`cancel()` also follows the existing Web Animations and CSS event rules,
+including dispatching the corresponding cancellation event.
 
 ### Per-range highlight styles
 
@@ -858,9 +907,10 @@ exposed by `Intl.Segmenter`.
 
 The proposal builds on the existing Custom Highlight API and CSS animation
 models. It does not expose document content or ranges that the calling script
-could not already access. The new events describe only ranges already supplied
-to a `Highlight`, their originating elements, and the effects applied to them.
-No additional privacy or security considerations have been identified.
+could not already access. The new events and Web Animations objects describe
+only ranges already supplied to a `Highlight`, their originating elements, and
+the effects applied to them. No additional privacy or security considerations
+have been identified.
 
 <!--
 ## Stakeholder Feedback / Opposition
@@ -880,6 +930,7 @@ No additional privacy or security considerations have been identified.
 * [CSS Pseudo-Elements Level 4: highlight pseudo-elements](https://drafts.csswg.org/css-pseudo-4/#highlight-pseudos)
 * [CSS Animations Level 1](https://drafts.csswg.org/css-animations-1/)
 * [CSS Transitions Level 2](https://drafts.csswg.org/css-transitions-2/)
+* [Web Animations Level 1](https://drafts.csswg.org/web-animations-1/)
 * [`Intl.Segmenter`](https://tc39.es/ecma402/#segmenter-objects)
 
 Many thanks for valuable feedback and advice from:
