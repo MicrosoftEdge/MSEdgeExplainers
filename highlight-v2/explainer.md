@@ -309,7 +309,7 @@ belongs to the applicable document cancels its animations and transitions
 without retaining stale paint.
 
 Deleting a registry entry with `CSS.highlights.delete()` or replacing
-its value with a different `Highlight` using `CSS.highlights.set()`, cancels all
+its value with a different `Highlight` using `CSS.highlights.set()` cancels all
 effects associated with the old registry entry, including any in-progress
 transitions.
 
@@ -684,8 +684,8 @@ the range changes, the old word transitions to the not-highlighted state while
 the new word transitions into the highlighted state. No timer is needed to
 drive intermediate colors, and neither word needs a wrapper element.
 
-The same pattern can use two Highlights to track the current word and current
-sentence independently.
+The same pattern can use two `Highlight` objects to track the current word and
+current sentence independently.
 
 <img src="images/spoken-word.gif" alt="Text with a highlight moving from one word to the next and fading smoothly in and out">
 
@@ -756,8 +756,9 @@ complicating factors.
   whitespace or punctuation depending on whether they are implementing a per-word text
   entry effect, a read-along effect, or an editor highlight effect. Editing applications
   might also want to vary their behaviors to emulate native controls on the underlying platform.
-* The same scenario may want to split different languages on different text units. For example,
-  a text fade stagger might want to split English text per-word and Japanese text per-phrase.
+* The same scenario may need to split different languages into different text
+  units. For example, a text fade stagger might split English text by word and
+  Japanese text by phrase.
   Tying the choice of text unit to the selector complicates the CSS that needs to be shipped,
   especially when languages are mixed on the same page.
 * Does not provide a better way to assign per-letter or per-word stagger
@@ -794,11 +795,11 @@ animation-text-unit: [ none | character | word | line ]#
 
 Instead of assigning per-range delays, authors could run a JavaScript loop. Once every `n`
 milliseconds, where `n` is the desired stagger interval, the next range would have the desired
-highlight (including animation effect) applied.
+highlight (including an animation effect) applied.
 
 #### Pros
 
-* Reduces need for new API surface.
+* Reduces the need for new API surface.
 
 #### Cons / Reasons for rejection
 
@@ -815,7 +816,7 @@ own `::highlight()` rule.
 
 #### Pros
 
-* Reduces need for new API surface.
+* Reduces the need for new API surface.
 
 #### Cons / Reasons for rejection
 
