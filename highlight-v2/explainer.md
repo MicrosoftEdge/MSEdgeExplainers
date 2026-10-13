@@ -87,10 +87,12 @@ resulting character, word, or other unit in an element such as a `<span>`, and
 apply the effect to each wrapper. This technique introduces several problems:
 
 * **Performance:** Each wrapper adds cost to the DOM, style calculation,
-  layout, and accessibility trees compared to a simple paragraph of text.
+  layout, and accessibility trees. For a per-word split in a chat application,
+  a long-running conversation could generate hundreds of these extra wrappers.
 * **Accessibility:** Assistive technology may announce heavily fragmented text
   differently from an uninterrupted sentence. Authors sometimes compensate by
-  maintaining a separate accessible representation.
+  maintaining a separate accessible representation. Or they may remove wrappers
+  as animations complete, which adds to the performance overhead.
 * **Editing interaction:** Presentation-only elements can interfere with text
   selection, editing, and clipboard operations such as copy and paste.
 * **Content maintenance:** When text changes, authors must preserve or rebuild
