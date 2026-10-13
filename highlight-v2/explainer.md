@@ -34,10 +34,10 @@
     - [Solving spoken-word tracking](#solving-spoken-word-tracking)
     - [Solving data-driven range styling](#solving-data-driven-range-styling)
   - [Alternatives considered](#alternatives-considered)
-    - [CSS Text Transitions](#css-text-transitions)
+    - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
       - [Pros](#pros)
       - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
-    - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
+    - [CSS Text Transitions](#css-text-transitions)
       - [Pros](#pros-1)
       - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
     - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
@@ -251,16 +251,18 @@ custom properties.
 
 As with animations and static highlight styling, different originating
 elements can resolve different property values and timing parameters for the
-same range. Their transitions run independently.
+same range. Their transitions run independently. Also similar to animations, changing
+the boundary points of a range does not generate new transitions or interrupt transitions
+that are already in progress.
 
 Highlight membership changes also participate in transitions. The
-not-highlighted endpoint uses the originating foreground values, a transparent
+not-highlighted transition endpoint uses the originating foreground values, a transparent
 background, no highlight-introduced shadow or decoration, and the initial value
 of other applicable properties. This gives adding and removing a range behavior
 similar to gaining or losing `:hover`.
 
 When a range is added to a registered `Highlight`, its before-change style is
-the not-highlighted endpoint and its after-change style is the newly computed
+the not-highlighted transition endpoint and its after-change style is the newly computed
 highlight style. `@starting-style` can override the starting values when an
 effect needs a different entry treatment.
 
@@ -268,15 +270,16 @@ Removing a range from a `Highlight` deletes it immediately from the set but
 triggers an exit transition to the not-highlighted state.
 `Highlight.clear()` starts exit transitions for each member, just as deleting
 members individually would.
-Deleting a registry entry with `CSS.highlights.delete()`, or replacing
-its value with a different `Highlight` using `CSS.highlights.set()`, cancels all
-effects associated with the old registry entry, including any in-progress
-transitions.
 
 If a range is re-added while its exit transition is running, the existing CSS
 transition reversal rules apply. A range which becomes invalid or no longer
 belongs to the applicable document cancels its animations and transitions
 without retaining stale paint.
+
+Deleting a registry entry with `CSS.highlights.delete()`, or replacing
+its value with a different `Highlight` using `CSS.highlights.set()`, cancels all
+effects associated with the old registry entry, including any in-progress
+transitions.
 
 #### Events
 
@@ -593,32 +596,9 @@ confidence scores, diagnostic severity, or other range-specific values.
 
 ## Alternatives considered
 
-### CSS Text Transitions
-
-A previous [proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/CSSTextTransitions/explainer.md)
-contemplated four new CSS properties:
-
-```css
-transition-text-interval: <time [0s,∞]>#
-transition-text-unit: [ none | character | word | line ]#
-animation-text-interval: <time [0s,∞]>#
-animation-text-unit: [ none | character | word | line ]#
-```
-
-#### Pros
-
-* Frees authors from having to think about how to split text.
-* Doing text splitting in the engine is faster than manipulating ranges in JavaScript.
-* Minimal new API surface.
-
-#### Cons / Reasons for rejection
-
-* Does not generalize well beyond the staggered text animation scenario.
-* Loses representability of intermediate values.
-
 ### `::nth-letter()` and `::nth-word()` pseudo-elements
 
-Another previous investigation contemplated introducing `::nth-letter()`
+A previous investigation contemplated introducing `::nth-letter()`
 and `::nth-word()` pseudo-element selectors. These selectors have a
 [long history](https://github.com/w3c/csswg-drafts/issues/3208)
 of being requested additions to CSS but come with their own
@@ -646,6 +626,31 @@ complicating factors.
 * Does not provide a clear way to assign per-letter or per-word stagger intervals that's better
   than having lots of `::nth-word()` rules. Words can cross element boundaries, so these
   pseudo-elements cannot be made tree-abiding, which rules out the use of CSS counters.
+
+### CSS Text Transitions
+
+Another previous [proposal](https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/CSSTextTransitions/explainer.md)
+contemplated four new CSS properties:
+
+```css
+transition-text-interval: <time [0s,∞]>#
+transition-text-unit: [ none | character | word | line ]#
+animation-text-interval: <time [0s,∞]>#
+animation-text-unit: [ none | character | word | line ]#
+```
+
+#### Pros
+
+* Frees authors from having to think about how to split text.
+* Doing text splitting in the engine is faster than manipulating ranges in JavaScript.
+* Minimal new API surface.
+
+#### Cons / Reasons for rejection
+
+* Similar concerns to `::nth-letter()` and `::nth-word()` around baking in specific
+  text-splitting algorithms apply to this approach as well.
+* Does not generalize well beyond the staggered text animation scenario.
+* Loses representability of intermediate values.
 
 ### Driving staggered highlight fades through JavaScript
 
