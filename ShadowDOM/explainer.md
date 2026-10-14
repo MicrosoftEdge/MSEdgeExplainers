@@ -362,7 +362,10 @@ those changes by resolving `import` with the existing module system.
 
 Another alternative would use `type="module"` to load a stylesheet module based
 on the value of the `href` attribute and `nomodule` on a separate link to
-provide a fallback URL.
+provide a fallback URL. Since `nomodule` is preventing a double-include of
+the stylesheet, it must be supported on `<link>` in sync with support for
+`<link type=module>`, similar to how `<script nomodule>` support was added
+ in sync with `<script type=module>`.
 
 Instead of:
 
@@ -395,11 +398,11 @@ The proposed `import` attribute instead allows a single link element to fall
 back to `href` in browsers that do not support it, which is the approach we have
 taken for this proposal.
 
-The `type="module"` pattern is also a less natural fit for `<link>` than for
-`<script>`. Executable scripts use JavaScript MIME types; other MIME types on
-`<script>` create data blocks rather than selecting a different executable
-format. Links can reference resources with a variety of MIME types, and their
-`type` attribute provides an advisory hint about that format.
+The `type="module"` pattern is also a less natural fit for `<link>`, where type is
+a MIME type used to provide an advisory hint about the format of the linked resource,
+and links can reference many different resource types. Since executable classic `<script>`
+elements use the `"text/javascript"` MIME type, it was more straightforward to extend type
+with special values such as `"module"` and `"importmap"`.
 
 In addition, making `href` behave differently based on the value of another
 attribute value would be inconsistent with how `href` generally behaves in HTML.
