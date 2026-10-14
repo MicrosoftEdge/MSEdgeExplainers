@@ -358,6 +358,58 @@ new interactions with import maps, document base URLs, fragment navigation,
 shadow-tree scoping, and custom scheme handlers. The primary proposal avoids
 those changes by resolving `import` with the existing module system.
 
+### `type="module"` and `nomodule` fallback
+
+Another alternative would use `type="module"` to load a stylesheet module based
+on the value of the `href` attribute and `nomodule` on a separate link to
+provide a fallback URL. Since `nomodule` is preventing a double-include of
+the stylesheet, it must be supported on `<link>` in sync with support for
+`<link type=module>`, similar to how `<script nomodule>` support was added
+ in sync with `<script type=module>`.
+
+Instead of:
+
+```html
+<script type="importmap">
+  {
+    "imports": {
+      "foo": "./styles/foo.css"
+    }
+  }
+</script>
+<link rel="stylesheet" href="./styles/foo.css" import="foo">
+```
+
+...authors would write:
+
+```html
+<script type="importmap">
+  {
+    "imports": {
+      "foo": "./styles/foo.css"
+    }
+  }
+</script>
+<link rel="stylesheet" type="module" href="foo">
+<link rel="stylesheet" href="./styles/foo.css" nomodule>
+```
+
+The proposed `import` attribute instead allows a single link element to fall
+back to `href` in browsers that do not support it, which is the approach we have
+taken for this proposal.
+
+The `type="module"` pattern is also a less natural fit for `<link>`, where type is
+a MIME type used to provide an advisory hint about the format of the linked resource,
+and links can reference many different resource types. Since executable classic `<script>`
+elements use the `"text/javascript"` MIME type, it was more straightforward to extend type
+with special values such as `"module"` and `"importmap"`.
+
+In addition, making `href` behave differently based on the value of another
+attribute value would be inconsistent with how `href` generally behaves in HTML.
+
+For these reasons, this proposal uses the `import` attribute instead of
+`type="module"` and `href`.
+
 ## References and acknowledgements
 
 For specific details on each part of the proposal and how it is expected to
