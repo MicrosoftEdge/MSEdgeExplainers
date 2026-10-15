@@ -223,10 +223,22 @@ independent animation and transition effects. Removing and re-adding a range
 creates a new membership and therefore new animation targets for its
 originating elements.
 
+**How effects respond when a range boundary moves is an open question.**
+Because the originating element is part of effect identity, crossing an element
+boundary can create or remove an effect target. Initiating an effect only in
+that case, however, would make behavior depend on markup boundaries: the same
+range expansion could behave differently depending on whether it crosses an
+element such as `<b>`. Possible approaches include treating boundary changes as
+non-triggering geometry updates, synchronizing newly created targets with an
+existing effect state, or reconsidering the identity model so that distinct
+text slices within an originating element can act as effect targets, allowing
+all range boundary moves to initiate effects regardless of whether they cross
+an element boundary.
+
 #### Animations
 
-An animation starts for an originating element when all of the following are
-true:
+An originating element is eligible for an animation when all of the following
+are true:
 
 * the range is a member of the `Highlight`; and
 * the `Highlight` is registered under a name for which the combined
@@ -234,10 +246,12 @@ true:
 * the range contains content drawn by that originating element.
 
 Changing a live `Range`'s boundary points does not restart animations for
-originating elements which remain covered. It starts animations for newly
-covered originating elements, with the timing synchronized to the remainder
-of the range, and cancels animations for elements which are no longer
-covered.
+originating elements which remain covered. The behavior for newly covered or
+no-longer-covered originating elements is part of the open question described
+above.
+
+One possible resolution would synchronize newly created targets with the
+existing animation state. Under that model:
 
 ```html
 <p>This is a <b>paragraph</b> with <b>bold</b> words.</p>
@@ -264,7 +278,7 @@ covered.
   range.selectNodeContents(paragraph);
 
   // The entire paragraph, including the <b> descendants,
-  // now runs the pulse animation on the same timeline.
+  // would now run the pulse animation on the same timeline.
 </script>
 ```
 
@@ -283,9 +297,10 @@ custom properties.
 
 As with animations and static highlight styling, different originating
 elements can resolve different property values and timing parameters for the
-same range. Their transitions run independently. As with animations, changing
-the boundary points of a range does not generate new transitions or interrupt
-transitions that are already in progress.
+same range. Their transitions run independently. Changing the boundary points
+of a range does not interrupt transitions for originating elements which
+remain covered. The behavior for newly covered or no-longer-covered originating
+elements is part of the open question described above.
 
 Highlight membership changes also participate in transitions. The
 not-highlighted transition endpoint uses the originating foreground values, a
