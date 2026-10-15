@@ -525,29 +525,36 @@ containing block, or layout box.
 
 Additionally, overlapping highlights are currently painted in a "phase-major"
 order. All highlight backgrounds are painted first, then highlight shadows,
-then underline and overline decorations, then text in the winning color, and
-finally strikethrough decorations. This is different from what happens when
-an element creates a stacking context: all content within that element is
-contained within its own paint layer.
+then underlines, then overlines, then text in the winning color, and finally
+line-throughs. This differs from a stacking context, whose contents are painted
+atomically relative to content outside it.
 
-**The paint order for overlapping highlights with opacity involved is currently
-an open question.**
-One idea is to pull the effects from a highlight with opacity into an
-"atomic highlight paint group". The group would contain all of the effects from
-that highlight, painted in a layer above highlights without opacity. Text in
-the winning color would be painted in the topmost such layer. This idea
-mirrors what happens with stacking context created by elements, and it
-simplifies assignment of compositor layers in engines supporting composited
-opacity. However, strikethrough effects become an issue: one would still
-reasonably expect these to paint above text.
+**The paint order when one or more highlights have non-default opacity is
+currently an open question.**
+One idea is to pull the effects from each such highlight into an "atomic
+highlight paint group". Each group would be painted as a unit, with the groups
+stacked on top of one another in custom-highlight stacking order rather than
+interleaving their backgrounds, shadows, decorations, and foreground across
+paint phases. Only the group belonging to the highlight that supplies the
+winning foreground would include foreground text. This mirrors the atomic
+painting of stacking contexts and can simplify the assignment of compositor
+layers in engines supporting composited opacity. However, it changes the
+existing line-through order: a line-through introduced by a lower highlight can
+currently paint above the winning text, whereas grouping would place it below a
+higher highlight's group.
 
 Another option is simply to maintain the existing paint order. This might
-require engines to create many compositor layers in highly complex cases.
-However, the most common use cases are expected to require only one or two
-layers per highlight, perhaps for the winning text color and for a background
-with opacity, for example.
+require separate compositor layers for contributions painted in different
+phases in complex cases. However, the most common use cases are expected to
+require only one or two layers per highlight, for example for the winning
+foreground and a background with opacity.
 
-Regardless of paint order, the existing "single winning foreground" rule should remain.
+Regardless of paint order, opacity applies to every painted contribution
+associated with a highlight: its background, shadows, introduced decorations,
+replaced-content wash, and, when it supplies the winning foreground, foreground
+text, emphasis, stroke, and originating decorations.
+
+The existing "single winning foreground" rule should also remain.
 Making the topmost highlight transparent does not reveal a lower highlight's
 foreground color, or the foreground color of the originating element.
 This is important for reveal animations: `opacity: 0` on the winning highlight
@@ -871,8 +878,7 @@ partial interface AbstractRange {
 #### Pros
 
 * Reuses the existing highlight painting model without introducing atomic
-  groups, changing the paint order of highlight contributions, or needing
-  many compositor layers for overlapping effects.
+  groups or changing the paint order of highlight contributions.
 
 #### Cons / Reasons for rejection
 
