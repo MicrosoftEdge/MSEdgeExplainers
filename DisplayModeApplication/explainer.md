@@ -6,7 +6,7 @@
 
 ## Participate
 
-- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues?q=is%3Aissue%20label%3A%22Application%20Context%20Media%20Feature%22)
+- [Issue tracker](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues?q=is%3Aissue%20label%3A%22DisplayModeApplication%22)
 - [CSSWG discussion](https://github.com/w3c/csswg-drafts/issues/14125)
 - [Web App Manifest discussion](https://github.com/w3c/manifest/issues/1092)
 
