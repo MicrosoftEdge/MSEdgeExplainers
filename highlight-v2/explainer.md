@@ -28,6 +28,7 @@
   - [Per-range highlight styles](#per-range-highlight-styles)
   - [Opacity](#opacity)
   - [Solving staggered text animation](#solving-staggered-text-animation)
+  - [Solving loading shimmer](#solving-loading-shimmer)
   - [Solving spoken-word tracking](#solving-spoken-word-tracking)
   - [Solving data-driven range styling](#solving-data-driven-range-styling)
 - [Alternatives considered](#alternatives-considered)
@@ -678,6 +679,70 @@ while each new range gets its own animation timeline. The same
 `prefers-reduced-motion` rule also applies to the newly added ranges.
 
 <img src="images/staggered-fade.gif" alt="Staggered text entry animation, with subsequent appended text">
+
+### Solving loading shimmer
+
+```html
+<style>
+  @keyframes shimmer {
+    0%,
+    100% {
+      color: #999;
+    }
+    50% {
+      color: #333;
+    }
+  }
+
+  ::highlight(loading-shimmer) {
+    color: #999;
+    animation: shimmer 1.5s ease-in-out infinite both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::highlight(loading-shimmer) {
+      animation: none;
+      color: #333;
+    }
+  }
+</style>
+
+<p id="loading-status">Loading...</p>
+
+<script>
+  const node = document.querySelector("#loading-status").firstChild;
+  const segmenter = new Intl.Segmenter(undefined, {granularity: "grapheme"});
+
+  const ranges = Array.from(
+    segmenter.segment(node.data),
+    ({index, segment}) => new StaticRange({
+      startContainer: node,
+      startOffset: index,
+      endContainer: node,
+      endOffset: index + segment.length,
+    }),
+  );
+
+  const highlight = new Highlight(...ranges);
+  const shimmerInterval = 100 /* milliseconds */;
+
+  for (const [index, range] of ranges.entries()) {
+    highlight.getRangeStyle(range).animationDelay =
+        `${index * shimmerInterval}ms`;
+  }
+
+  CSS.highlights.set("loading-shimmer", highlight);
+</script>
+```
+
+The shared `::highlight()` rule defines the looping color animation, while the
+per-range declarations offset each grapheme cluster by 100 milliseconds.
+`Intl.Segmenter` keeps user-perceived characters such as combining sequences
+together without introducing wrapper elements. Registering the `Highlight`
+after assigning the delays starts all of the animations from the same style
+update while preserving their stagger.
+
+<img src="images/loading-shimmer.gif" alt="Grayscale shimmer moving across the characters in 'Loading...'">
 
 ### Solving spoken-word tracking
 
