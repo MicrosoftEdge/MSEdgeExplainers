@@ -113,32 +113,111 @@ The picker concept is illustrative. The key requirements are:
 
 ## Use with a microphone
 
-An application that needs microphone and playback audio can request them
-separately:
+A single website control can coordinate microphone and playback capture, but
+the playback request must start directly from the user action.
 
 ```js
-const microphoneStream =
-    await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
+startButton.addEventListener("click", async () => {
+  const playbackStream =
+      await navigator.mediaDevices.getPlaybackMedia({
+        audio: true,
+      });
 
-const playbackStream =
-    await navigator.mediaDevices.getPlaybackMedia({
-      source: "system",
-    });
+  const microphoneStream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+  startFeature({
+    playbackStream,
+    microphoneStream,
+  });
+});
 ```
 
-The playback call above could instead use audio-only `getDisplayMedia()`. A
-single website control, such as **Start voice**, can begin the coordinated
-flow, but the browser still owns each permission and source-selection
-decision.
+The playback request above could instead use audio-only `getDisplayMedia()`:
 
-If playback capture is declined, the application can continue using the
-microphone. Communication and AI voice applications could use the playback
-track locally as a reference for echo cancellation and voice processing.
+```js
+startButton.addEventListener("click", async () => {
+  const playbackStream =
+      await navigator.mediaDevices.getDisplayMedia({
+        video: false,
+        audio: true,
+      });
 
-The `source` member is illustrative. Whether it represents a direct request,
-a preference, or a choice the user must make in the picker remains open.
+  const microphoneStream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+  startFeature({
+    playbackStream,
+    microphoneStream,
+  });
+});
+```
+
+```text
++---------------------------------------------------+
+| WEBSITE UI                                        |
+|                                                   |
+| Create notes from the meeting audio and your      |
+| microphone.                                       |
+|                                                   |
+|                                          [Start]  |
++--------------------------+------------------------+
+                           |
+                      User clicks
+                           |
+                           v
+              Website requests playback audio
+                           |
+                           v
++---------------------------------------------------+
+| BROWSER UI                                        |
+|                                                   |
+| Choose the audio source to share                  |
+|                                                   |
+|                               [Cancel]  [Share]   |
++--------------------------+------------------------+
+                           |
+                    Source selected
+                           |
+                           v
+               Playback audio track returned
+                           |
+                           v
+                Website requests microphone
+                           |
+                           v
++---------------------------------------------------+
+| BROWSER UI                                        |
+|                                                   |
+| Allow example.com to use your microphone?         |
+|                                                   |
+|                         [Don't allow]  [Allow]    |
++--------------------------+------------------------+
+                           |
+                           v
+              Website starts with available tracks
+```
+
+Microphone capture does not have the same transient-activation requirement, so
+it can be requested after the playback picker completes. The simplified
+examples above assume that both tracks are needed. An application that can
+continue with either track can handle each rejection independently or use
+separate controls:
+
+```text
+[Share meeting audio]    [Use microphone]
+```
+
+If playback capture is declined, the application can still request and use the
+microphone. If microphone access is declined, it can continue using the
+playback track.
+
+Communication and AI voice applications could use the playback track locally
+as a reference for echo cancellation and voice processing.
 
 ## Ongoing controls
 
