@@ -155,10 +155,13 @@ Regardless of the API entry point:
 
 - A recent user action is required before the request opens a picker.
 - The browser presents browser-controlled source-selection or permission UI.
-- The user can understand and approve the audio source or source scope.
+- The user can identify, understand, and approve the audio source or source
+  scope.
 - The website cannot enumerate or silently select applications.
 - The returned `MediaStream` contains only audio.
 - Browser-controlled UI indicates active capture and lets the user stop it.
+- Microphone and camera capture continue to use `getUserMedia()` and are
+  requested separately from playback capture.
 
 ### Option 1: Allow audio-only `getDisplayMedia()`
 
@@ -183,31 +186,26 @@ This option reuses the existing `getDisplayMedia()` user activation, source
 picker, non-persistent permission, and ongoing sharing-control model. It
 changes the current model in which video is required and audio is optional.
 
-A website that also needs microphone or camera input would request those
-tracks separately through `getUserMedia()`. The requests remain independent,
-so one request failing does not invalidate tracks returned by another.
-
 ### Option 2: Add `getPlaybackMedia()`
 
 Add a method for requesting playback audio:
 
 ```js
 const playbackStream =
-    await navigator.mediaDevices.getPlaybackMedia();
+    await navigator.mediaDevices.getPlaybackMedia({
+      audio: true,
+    });
 
 const playbackTrack = playbackStream.getAudioTracks()[0];
 ```
 
-A note-taking app could use this to open the browser picker and let the user
-select the tab or application where a meeting or lecture is playing.
-
 This option clearly separates playback capture from microphone, camera, and
 screen capture and avoids changing existing `getDisplayMedia()` behavior.
 
-Microphone and camera capture continue to use `getUserMedia()`, including its
-existing device and track constraints.
+The `audio` member provides a place for applicable audio constraints and
+playback-specific options. The exact option shape remains open.
 
-#### Use with a microphone
+### Use with a microphone
 
 A note-taking, communication, or AI voice-chat application first gets the
 microphone:
@@ -222,23 +220,42 @@ const microphoneTrack = microphoneStream.getAudioTracks()[0];
 ```
 
 A note-taking application could then let the user select the meeting or
-lecture audio:
+lecture audio through either proposed API.
+
+With audio-only `getDisplayMedia()`:
 
 ```js
 const playbackStream =
-    await navigator.mediaDevices.getPlaybackMedia();
+    await navigator.mediaDevices.getDisplayMedia({
+      video: false,
+      audio: true,
+    });
 ```
 
-A communication or AI voice-chat application that specifically needs combined
-device playback for echo cancellation or voice processing could illustrate
-that requirement as:
+With `getPlaybackMedia()`:
 
 ```js
 const playbackStream =
     await navigator.mediaDevices.getPlaybackMedia({
-      source: "system",
+      audio: true,
     });
 ```
+
+A communication or AI voice-chat application that specifically needs combined
+device playback for echo cancellation or voice processing could illustrate a
+playback-specific option as:
+
+```js
+const playbackStream =
+    await navigator.mediaDevices.getPlaybackMedia({
+      audio: {
+        source: "system",
+      },
+    });
+```
+
+The `source` member is illustrative. An equivalent option shape for audio-only
+`getDisplayMedia()` remains open.
 
 The microphone and playback requests are independent. If the user declines
 playback capture, the application can continue using the microphone.
@@ -269,9 +286,9 @@ cancellation and voice processing that require a reference for combined device
 playback. It must not allow silent capture: the request still requires a user
 action, explicit browser UI, ongoing indication, and a stop control.
 
-The `source` member shown above is illustrative. Whether `"system"` is a direct
-request, a non-binding preference, or a choice the user must make in the
-browser picker remains open. An equivalent shape for audio-only
+The `audio.source` member shown above is illustrative. Whether `"system"` is a
+direct request, a non-binding preference, or a choice the user must make in
+the browser picker remains open. An equivalent shape for audio-only
 `getDisplayMedia()` also remains open. The existing `systemAudio` member
 currently expresses only a preference about whether system audio is offered
 with monitor capture.
@@ -341,6 +358,11 @@ becomes unavailable, or the website stops the track.
   non-binding preference, or leave all source choice to the user?
 - How should either model align with the existing `systemAudio` and
   `windowAudio` preferences?
+- How should the browser help the user verify an audio source before sharing
+  it? Display capture can show a visual preview of the selected surface, but
+  audio has no direct equivalent. Should the picker use clear source names and
+  icons, audio-activity indicators, scope explanations, or another
+  confirmation mechanism?
 - Which audio constraints and capabilities should playback tracks support, and
   how should the
   [constrainable pattern](https://w3c.github.io/mediacapture-main/#constrainable-interface),
@@ -438,7 +460,9 @@ identify a fundamental blocker. WebRTC Working Group chairs discussed the API
 options: Jan-Ivar Bruaroey preferred extending `getDisplayMedia()`, Youenn
 Fablet preferred a new method that reuses display-capture infrastructure, and
 Guido Urdaneta leaned toward a new method but remained open to either
-direction. All three emphasized source-picker clarity and informed user choice.
+direction. All three emphasized source-picker clarity and informed user
+choice, including the challenge of helping users verify an audio source
+without the visual preview available during display capture.
 
 ## References & Acknowledgements
 
