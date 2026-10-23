@@ -13,45 +13,58 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Introduction](#introduction)
-- [User-Facing Problem](#user-facing-problem)
-  - [Goals](#goals)
-  - [Non-goals](#non-goals)
-- [User research](#user-research)
-- [Proposed Approach](#proposed-approach)
-  - [CSS Animations and Transitions](#css-animations-and-transitions)
-    - [Effect identity](#effect-identity)
-    - [Animations](#animations)
-    - [Transitions](#transitions)
-    - [Events](#events)
-    - [Web Animations API](#web-animations-api)
-  - [Per-range highlight styles](#per-range-highlight-styles)
-  - [Opacity](#opacity)
-  - [Solving staggered text animation](#solving-staggered-text-animation)
-  - [Solving loading shimmer](#solving-loading-shimmer)
-  - [Solving spoken-word tracking](#solving-spoken-word-tracking)
-  - [Solving data-driven range styling](#solving-data-driven-range-styling)
-- [Alternatives considered](#alternatives-considered)
-  - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
-    - [Pros](#pros)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
-  - [CSS Text Transitions](#css-text-transitions)
-    - [Pros](#pros-1)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
-  - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
-    - [Pros](#pros-2)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
-  - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
-    - [Pros](#pros-3)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
-  - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
-    - [Pros](#pros-4)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
-  - [Compositing `color` animations](#compositing-color-animations)
-    - [Pros](#pros-5)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
-- [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
-- [References & acknowledgements](#references--acknowledgements)
+- [Custom Highlight API Extensions](#custom-highlight-api-extensions)
+  - [Authors](#authors)
+  - [Participate](#participate)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [User-Facing Problem](#user-facing-problem)
+    - [Goals](#goals)
+    - [Non-goals](#non-goals)
+  - [User research](#user-research)
+  - [Proposed Approach](#proposed-approach)
+    - [CSS Animations and Transitions](#css-animations-and-transitions)
+      - [Effect identity](#effect-identity)
+      - [Animations](#animations)
+      - [Transitions](#transitions)
+      - [Events](#events)
+      - [Web Animations API](#web-animations-api)
+    - [Per-range highlight styles](#per-range-highlight-styles)
+    - [Opacity](#opacity)
+      - [Resolving highlight opacity](#resolving-highlight-opacity)
+      - [Applying the winning opacity](#applying-the-winning-opacity)
+      - [Interaction with element opacity](#interaction-with-element-opacity)
+    - [Solving staggered text animation](#solving-staggered-text-animation)
+    - [Solving loading shimmer](#solving-loading-shimmer)
+    - [Solving spoken-word tracking](#solving-spoken-word-tracking)
+    - [Solving data-driven range styling](#solving-data-driven-range-styling)
+  - [Alternatives considered](#alternatives-considered)
+    - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
+      - [Pros](#pros)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
+    - [CSS Text Transitions](#css-text-transitions)
+      - [Pros](#pros-1)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
+    - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
+      - [Pros](#pros-2)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
+    - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
+      - [Pros](#pros-3)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
+    - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
+      - [Pros](#pros-4)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
+    - [Per-highlight atomic paint groups](#per-highlight-atomic-paint-groups)
+      - [Pros](#pros-5)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
+    - [Per-contribution opacity in the existing paint order](#per-contribution-opacity-in-the-existing-paint-order)
+      - [Pros](#pros-6)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-6)
+    - [Compositing `color` animations](#compositing-color-animations)
+      - [Pros](#pros-7)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-7)
+  - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+  - [References \& acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -529,48 +542,70 @@ Trading away compositor support would curtail or even outweigh the performance
 benefits of avoiding DOM manipulation in a highlight-based animation. We therefore
 propose allowing `opacity` to apply to highlights.
 
-Applying `opacity` to a highlight has different implications from applying
-it to an element. A range has no single box, coordinate space, or
-stacking position, and can cross elements, transforms, clips, columns, and
-pages. Highlight opacity therefore does not create a stacking context,
-containing block, or layout box.
+Unlike opacity on nested elements, opacity values from overlapping highlights
+do not compound. Instead, one value wins as described below.
 
-Additionally, overlapping highlights are currently painted in a "phase-major"
-order. All highlight backgrounds are painted first, then highlight shadows,
-then underlines, then overlines, then text in the winning color, and finally
-line-throughs. This differs from a stacking context, whose contents are painted
-atomically relative to content outside it.
+#### Resolving highlight opacity
 
-**The paint order when one or more highlights have non-default opacity is
-currently an open question.**
-One idea is to pull the effects from each such highlight into an "atomic
-highlight paint group". Each group would be painted as a unit, with the groups
-stacked on top of one another in custom-highlight stacking order rather than
-interleaving their backgrounds, shadows, decorations, and foreground across
-paint phases. Only the group belonging to the highlight that supplies the
-winning foreground would include foreground text. This mirrors the atomic
-painting of stacking contexts and can simplify the assignment of compositor
-layers in engines supporting composited opacity. However, it changes the
-existing line-through order: a line-through introduced by a lower highlight can
-currently paint above the winning text, whereas grouping would place it below a
-higher highlight's group.
+Each `(Highlight registry entry, range, originating element)` target resolves
+opacity from its corresponding highlight pseudo-element style and any per-range
+style. The resulting value applies to the portion of the range painted by that
+originating element.
 
-Another option is simply to maintain the existing paint order. This might
-require separate compositor layers for contributions painted in different
-phases in complex cases. However, the most common use cases are expected to
-require only one or two layers per highlight, for example for the winning
-foreground and a background with opacity.
+When highlight layers overlap within an originating element, their opacity
+values do not multiply. Instead, the highest active layer that specifies an
+opacity value determines the winning opacity. If no active highlight specifies
+opacity, the resulting highlight opacity value is 1.
 
-Regardless of paint order, opacity applies to every painted contribution
-associated with a highlight: its background, shadows, introduced decorations,
-replaced-content wash, and, when it supplies the winning foreground, foreground
-text, emphasis, stroke, and originating decorations.
+For example, where two highlights overlap:
 
-The existing "single winning foreground" rule should also remain.
-Making the topmost highlight transparent does not reveal a lower highlight's
-foreground color, or the foreground color of the originating element.
-This is important for reveal animations: `opacity: 0` on the winning highlight
-should hide the text.
+| Lower highlight | Upper highlight | Resulting opacity |
+|---|---|---|
+| `opacity: .4` | `opacity: .7` | `.7` |
+| `opacity: .4` | Opacity omitted | `.4` |
+| `opacity: .4` | `opacity: 1` | `1` |
+| `opacity: .4` | `opacity: 0` | `0` |
+
+#### Applying the winning opacity
+
+The winning opacity applies once to the combined ink for the affected
+region: foreground text or replaced content, highlight backgrounds and shadows,
+and originating and highlight decorations.
+It does not independently fade each highlight's contributions.
+
+For example, an opaque blue glyph over an opaque yellow highlight background at
+winning opacity .5 is painted as blue over yellow and then faded as a unit. The
+yellow background does not show through the blue glyph as it would if the
+foreground and background were faded separately.
+
+The existing foreground painting behavior remains unchanged: the topmost active
+highlight overlay redraws the text, while lower highlight foregrounds and the
+originating text are not separately painted. Consequently, a winning opacity of 0
+makes the combined ink transparent; it does not reveal another highlight's foreground
+or the originating text beneath it.
+
+#### Interaction with element opacity
+
+Highlight opacity does not replace or override opacity on the originating
+element(s). Opacity effects on originating element(s) continue to apply
+as usual. The highlighted content resolves its own opacity and is rendered
+as a unit, but remains subject to opacity on the originating element(s)
+and ancestors.
+
+For example:
+
+```css
+span {
+  opacity: .25;
+}
+
+span::highlight(example) {
+  opacity: .75;
+}
+```
+
+The entire span is faded to opacity .25, and on top of that the highlighted range
+is faded to .75, for a net effective opacity of .25 x .75 = .1875.
 
 ### Solving staggered text animation
 
@@ -948,6 +983,49 @@ partial interface AbstractRange {
 * Adding presentation state to the base interface would impose these semantics
   on every present and future `AbstractRange` subtype, even when it is never
   used for highlighting.
+
+### Per-highlight atomic paint groups
+
+An alternate model for opacity would collect the contributions from each highlight with
+opacity < 1 into an atomic paint group. Each group would be painted as
+a unit, with the groups stacked in custom-highlight order rather than
+interleaving their backgrounds, shadows, decorations, and foreground.
+Only the group belonging to the highlight that supplies the winning foreground would
+include foreground text.
+
+#### Pros
+
+* Resembles the atomic painting of element stacking contexts.
+* Can simplify the assignment of compositor layers.
+
+#### Cons / Reasons for rejection
+
+* Incompatible with the existing decoration paint order. When one highlight
+  applies a line-through and an overlapping highlight applies text color plus
+  opacity < 1, atomic grouping would paint the line-through underneath the
+  text instead of above it.
+
+### Per-contribution opacity in the existing paint order
+
+Another alternate model for opacity retains the existing phase-major paint order:
+all highlight backgrounds, followed by shadows, underlines, overlines, the winning foreground,
+and line-throughs. Each highlight's opacity would apply independently to its
+contributions within those phases.
+
+#### Pros
+
+* Preserves the existing paint order.
+
+#### Cons / Reasons for rejection
+
+* Specifying opacity by itself in a highlight rule does nothing, which could be counterintuitive.
+  For example, solving the staggered text entry use case would require also specifying a
+  foreground text color. One might consider having `color: currentcolor` claim the text foreground
+  without changing the color, but this also produces counterintuitive results: If the originating
+  element had text with a shadow, the foreground text would be faded, but the shadow would still be
+  painted at full opacity, because the latter was not part of the highlight contribution.
+* Composited animation can demand many layers in complex cases, which can
+  significantly degrade performance.
 
 ### Compositing `color` animations
 
