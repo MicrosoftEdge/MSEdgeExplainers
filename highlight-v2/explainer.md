@@ -542,6 +542,9 @@ Trading away compositor support would curtail or even outweigh the performance
 benefits of avoiding DOM manipulation in a highlight-based animation. We therefore
 propose allowing `opacity` to apply to highlights.
 
+Unlike opacity on nested elements, opacity values from overlapping highlights
+do not compound. Instead, one value wins as described below.
+
 #### Resolving highlight opacity
 
 Each `(Highlight registry entry, range, originating element)` target resolves
@@ -997,10 +1000,10 @@ include foreground text.
 
 #### Cons / Reasons for rejection
 
-* Unacceptably changes the existing paint decoration order.
-  The problematic case is one highlight applying a line-through,
-  overlapped by another highlight applying text color plus opacity < 1.
-  This combination would result in the line-through painting underneath the text.
+* Incompatible with the existing decoration paint order. When one highlight
+  applies a line-through and an overlapping highlight applies text color plus
+  opacity < 1, atomic grouping would paint the line-through underneath the
+  text instead of above it.
 
 ### Per-contribution opacity in the existing paint order
 
@@ -1021,7 +1024,8 @@ contributions within those phases.
   without changing the color, but this also produces counterintuitive results: If the originating
   element had text with a shadow, the foreground text would be faded, but the shadow would still be
   painted at full opacity, because the latter was not part of the highlight contribution.
-* Composited animation can demand many layers in complex cases.
+* Composited animation can demand many layers in complex cases, which can
+  significantly degrade performance.
 
 ### Compositing `color` animations
 
