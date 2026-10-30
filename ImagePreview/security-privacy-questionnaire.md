@@ -3,43 +3,39 @@
 - **Feature:** Image Preview for HTML Images
 - **Explainer:** [explainer.md](explainer.md)
 - **Questionnaire:** [W3C Security and Privacy Self-Review Questionnaire](https://w3c.github.io/security-questionnaire/)
-- **Last updated:** 2026-09-10
+- **Last updated:** 2026-10-30
 
 ## 2.1. What information does this feature expose, and for what purposes?
 
-The core feature adds a `previewsrc` attribute and reflected `previewSrc` property containing a URL supplied by the page. The URL does not reveal information that the page did not provide.
+The core adds `preview` and `previewset` attributes and properties to `<img>` and `<source>` in `<picture>`. They reflect author-supplied URLs, compact representations, and colors, not the browser's selected preview. `previewset` supplies density-based candidates for the selected branch.
 
-The core proposal adds no preview-specific event, promise, state property, or CSS selector. The explainer records a CSS pseudo-class only as one possible solution for a future customizable-handoff extension, outside the core review.
+The core adds no preview-specific events, promises, state properties, or selectors. The independent styling and reveal sketches are outside this review. Styling phases and inspectable transitions would expose presentation state and require separate privacy review.
 
-Fetching a preview can disclose the request and ordinary request metadata to the origin serving it. This is the same class of disclosure as an additional image request through `src`.
+Fetching an external preview URL discloses an ordinary image request and its metadata to the serving origin. Literal colors and compact payloads make no requests.
 
 ## 2.2. Does the feature expose the minimum amount of information necessary?
 
-The browser displays the preview without exposing its pixels, intrinsic dimensions, decode result, or independent state through a new API. Existing `HTMLImageElement` properties and events continue to describe the final image.
+Existing image properties and events retain their selected-image meaning. The feature adds no API for reading preview pixels, intrinsic dimensions, or decode results.
 
-Existing platform facilities can still reveal ordinary network activity. In particular, a separately fetched preview can produce a Resource Timing entry, subject to the same-origin and `Timing-Allow-Origin` rules that apply to other image requests.
+Network information remains subject to ordinary image-request protections, including same-origin and `Timing-Allow-Origin` restrictions on Resource Timing.
 
 ## 2.3. Does the feature expose personal information or PII?
 
-No new personal information or PII is exposed by the API itself. A preview or final image can contain personal information, but both resources are selected by the page and are already rendered to the user as image content.
-
-A third-party origin hosting a preview can learn that the preview was requested. Authors can already cause the same disclosure with an ordinary image request.
+The API exposes no new personal information. Like other images, previews can contain personal information and disclose request metadata to their hosting origin.
 
 ## 2.4. How does the feature deal with sensitive information?
 
-The feature does not inspect, classify, or newly expose image content. The preview is displayed but is not available through `drawImage()`, `createImageBitmap()`, or other image-extraction APIs.
+The feature does not inspect or classify image content. Preview pixels are unavailable through `drawImage()`, `createImageBitmap()`, or other image-extraction APIs.
 
-Preview requests follow the same credentials, referrer, Content Security Policy, mixed-content, cache-partitioning, service-worker interception, and image-fetching protections as final image requests.
-
-Preview fetching follows the final image's lazy-loading eligibility. The final image's selection and request creation do not wait for the preview, and the browser schedules best-effort preview work so that it does not block those operations. Preview decoding is asynchronous.
+URL previews use the host `<img>`'s credentials, referrer, CSP, mixed-content, cache-partitioning, service-worker, and image-fetch protections, even for declarations on `<source>`. Unselected sources and candidates make no preview requests.
 
 ## 2.5. Does exposed data carry related but distinct information that may not be obvious?
 
-The server providing a preview may receive request metadata even when the final image is hosted elsewhere. Authors should account for this additional request when choosing a preview URL.
+The preview server receives request metadata even when the main image is hosted elsewhere.
 
-Existing Resource Timing behavior can expose request timing and transfer information for the preview to the extent ordinarily available for image requests. The design does not add a signal indicating whether the preview decoded successfully, was painted, or was later replaced, and it does not expose preview metadata or independent intrinsic dimensions.
+Resource Timing can expose ordinary request and transfer information, but not preview decoding, display, or replacement.
 
-The browser can omit or abandon a preview under reduced-data, memory, battery, or similar resource policies. The core API does not expose a dedicated outcome or reason for that decision, although existing Resource Timing information can reveal whether a separate preview request occurred.
+The browser may skip or abandon a preview for reduced-data, memory, battery, or similar policies. The API does not report why, although network information can reveal whether a request occurred.
 
 ## 2.6. Does the feature introduce state that persists across browsing sessions?
 
@@ -47,15 +43,15 @@ No new persistent state is introduced. Preview responses can use the existing HT
 
 ## 2.7. Does the feature expose information about the underlying platform?
 
-Feature detection can reveal whether `previewSrc` is implemented. The core author API does not distinguish unsupported formats from blocked, skipped, malformed, or failed previews, which avoids adding a direct format-support fingerprinting surface.
+Property detection reveals support for `preview` and `previewset`, not for individual compact formats.
 
-Developer tools may provide diagnostics, but those diagnostics are not exposed to page script.
+Candidate selection can reveal format support indirectly. Rejecting an unsupported compact value may trigger a URL fallback request, observable through Resource Timing or by the server.
 
 ## 2.8. Does the specification allow an origin to send data to the underlying platform?
 
-The page can provide an image URL or inline `data:` URL for decoding by the browser. This uses the browser's existing image fetching and decoding infrastructure rather than a new operating-system integration.
+Authors supply URLs, colors, or compact payloads for browser rendering, not a new operating-system integration. Invalid or unsupported values are never reinterpreted as URLs.
 
-Compact formats are optional, separately specified image formats. Each such format must define bounded inputs and must not initiate nested network requests; the core feature does not require them.
+Compact-format specifications must define input, dimension, memory, and processing limits and prohibit nested requests. Colors need no decoder; style-dependent values such as `var()` and `currentColor` are excluded.
 
 ## 2.9. Does the feature enable access to device sensors?
 
@@ -63,7 +59,7 @@ No.
 
 ## 2.10. Does the feature enable new script execution or loading mechanisms?
 
-No. Preview resources are decoded as images and cannot execute script. A script-provided fallback decoder is discussed only as a rejected alternative and is not part of the proposed API.
+No. Preview content cannot execute script. Author-provided decoders are a considered alternative, not part of the API.
 
 ## 2.11. Does the feature allow an origin to access other devices?
 
@@ -71,7 +67,7 @@ No. It can make ordinary image requests to network origins under existing web se
 
 ## 2.12. Does the feature allow control over browser-native UI?
 
-No. It affects only rendering inside the page's `<img>` element. The core behavior directly replaces the preview with the final image and exposes no browser-native UI.
+No. It changes page image rendering, not browser-native UI.
 
 ## 2.13. What temporary identifiers does the feature create or expose?
 
@@ -79,13 +75,11 @@ None. Internal image-generation identifiers used to reject obsolete work are not
 
 ## 2.14. How does behavior differ between first-party and third-party contexts?
 
-The API itself does not distinguish between first-party and third-party documents. Preview requests use the same context-dependent credentials, referrer, network isolation, cache partitioning, and Resource Timing protections as ordinary image requests.
-
-A third-party origin serving a preview receives the request in the same way it would for an image referenced by `src`.
+Preview requests use ordinary context-dependent image protections in both first-party and third-party documents. The API adds no distinction between them.
 
 ## 2.15. How does the feature work in Private Browsing or Incognito mode?
 
-The feature creates no new persistent state and requires no special private-browsing behavior. Preview requests and cached responses follow the browser's existing private-browsing isolation and data-lifetime rules for images.
+Preview requests and cached responses follow existing private-browsing isolation and data-lifetime rules. The feature adds no persistent state or special private-mode behavior.
 
 ## 2.16. Does the specification have Security Considerations and Privacy Considerations?
 
@@ -93,31 +87,33 @@ Yes. The explainer contains separate [Privacy](explainer.md#privacy) and [Securi
 
 ## 2.17. Can origins downgrade default security protections?
 
-No. `previewsrc` follows the same URL parsing, CSP `img-src`, mixed-content, credentials, referrer, and image-fetching rules as `src`. The feature provides no option to bypass those protections.
+No. URL previews use the host image's [normal fetch protections](explainer.md#fetching-scheduling-and-html-integration), with no bypass option.
+
+Literal colors and compact data are inline author data, so they do not trigger `img-src` request checks. They cannot execute script or load nested resources. Processing is bounded, and compact-format bindings require separate security review.
 
 ## 2.18. What happens when a document using the feature enters and leaves BFCache?
 
-The feature introduces no state that needs to persist outside the document. Freezing a document for BFCache cancels any optional animated handoff. Already-painted and decoded state can be preserved to the same extent as ordinary `<img>` state.
+Painted and decoded state may be preserved as for ordinary images. The independent styling proposal must define transition behavior on freezing and restoration.
 
-When the document is restored, only results belonging to the current image-data update may be displayed. A stale preview result cannot newly replace current content.
+On restoration, reevaluate selection if conditions changed and ignore stale results. A preview from an old branch cannot newly replace current content, even if the main-image URL is unchanged.
 
 ## 2.19. What happens when an element using the feature is disconnected?
 
-Disconnecting an element makes preview work obsolete when its corresponding final-image request is no longer relevant under the existing image-loading model. The browser must be able to stop obsolete decoding work.
+Preview work becomes obsolete when ordinary HTML rules no longer require the disconnected element's image request. The browser must be able to stop obsolete decoding.
 
-Reconnection runs the normal image-data update process. A stale preview or final-image result cannot replace the current generation.
+Reconnection runs normal image-data updates. Stale preview or main-image results cannot replace current content.
 
 ## 2.20. Does the specification define new errors?
 
-The proposal adds no new DOM exceptions or preview-specific `load` or `error` events. A preview fetch, format, validation, or decode failure makes the preview unavailable and does not affect final-image loading. Existing `load`, `error`, and `decode()` behavior continues to describe the final image.
+The proposal adds no DOM exceptions or preview-specific `load`/`error` events. Setters reflect strings even when their syntax is invalid. After candidate selection, fetch or decode failure makes the preview unavailable without retrying other candidates or changing the main image. Existing `load`, `error`, and `decode()` behavior is unchanged.
 
-If the final image fails after a preview was displayed, the browser removes the preview and uses normal broken-image and alternative-text rendering. Developer tools may distinguish preview failures, but the core author API does not.
+If the main image fails, remove the preview and use normal broken-image and alt-text rendering. Developer tools may distinguish preview failures; page script gets no dedicated failure signal.
 
 ## 2.21. Can sites learn whether the user uses assistive technology?
 
-No new assistive-technology signal is exposed. The preview and final image share one accessibility node and one `alt` value.
+No. The preview and main image share one accessibility node and one `alt` value.
 
-The core feature always performs a direct replacement. Any optional animated transition must respect `prefers-reduced-motion`. Sites can already query that preference; this feature does not expose which assistive technology, if any, caused it.
+Independent transition designs must respect `prefers-reduced-motion`. That preference is already queryable and does not identify any assistive technology.
 
 ## 2.22. What should this questionnaire have asked?
 
@@ -127,4 +123,4 @@ For features that add an auxiliary resource for existing content:
 - Can differences between auxiliary-resource cache hits, decoding support, and failures create new timing or fingerprinting signals?
 - When should auxiliary fetching and decoding be canceled as the document or primary resource state changes?
 
-For this proposal, final-image discovery and request creation never wait for the preview, and the browser schedules best-effort preview work so that it does not block those operations. The core API does not distinguish preview outcomes. Preview work becomes obsolete when the final image is ready first, a newer image-data update supersedes it, the relevant disconnected element no longer needs it, or the document is discarded.
+The explainer addresses these under [Fetching and scheduling](explainer.md#fetching-scheduling-and-html-integration), [Privacy](explainer.md#privacy), and [Source updates](explainer.md#source-updates-and-image-generations).
