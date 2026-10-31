@@ -15,9 +15,7 @@ Fetching an external preview URL discloses an ordinary image request and its met
 
 ## 2.2. Does the feature expose the minimum amount of information necessary?
 
-Existing image properties and events retain their selected-image meaning. The feature adds no API for reading preview pixels, intrinsic dimensions, or decode results.
-
-Network information remains subject to ordinary image-request protections, including same-origin and `Timing-Allow-Origin` restrictions on Resource Timing.
+Yes. Existing image APIs retain their main-image meaning; no new API exposes preview pixels, intrinsic dimensions, or decode results. Network information follows [ordinary image-request protections](#24-how-does-the-feature-deal-with-sensitive-information).
 
 ## 2.3. Does the feature expose personal information or PII?
 
@@ -27,15 +25,15 @@ The API exposes no new personal information. Like other images, previews can con
 
 The feature does not inspect or classify image content. Preview pixels are unavailable through `drawImage()`, `createImageBitmap()`, or other image-extraction APIs.
 
-URL previews use the host `<img>`'s credentials, referrer, CSP, mixed-content, cache-partitioning, service-worker, and image-fetch protections, even for declarations on `<source>`. Unselected sources and candidates make no preview requests.
+URL previews inherit the host `<img>`'s [fetch protections](explainer.md#fetching-scheduling-and-html-integration), including CORS, credentials, referrer policy, CSP, mixed-content rules, cache partitioning, and service-worker handling. These apply even to declarations on `<source>`; unselected sources and candidates make no preview requests.
+
+Resource Timing follows existing same-origin and `Timing-Allow-Origin` restrictions.
 
 ## 2.5. Does exposed data carry related but distinct information that may not be obvious?
 
-The preview server receives request metadata even when the main image is hosted elsewhere.
+Yes. The preview server receives request metadata even when the main image is hosted elsewhere. Resource Timing can expose request and transfer information under [normal protections](#24-how-does-the-feature-deal-with-sensitive-information), but not preview decoding, display, or replacement.
 
-Resource Timing can expose ordinary request and transfer information, but not preview decoding, display, or replacement.
-
-The browser may skip or abandon a preview for reduced-data, memory, battery, or similar policies. The API does not report why, although network information can reveal whether a request occurred.
+The browser may skip or abandon a preview under resource-saving policies. The API does not report why, although network information can reveal whether a request occurred.
 
 ## 2.6. Does the feature introduce state that persists across browsing sessions?
 
@@ -43,13 +41,13 @@ No new persistent state is introduced. Preview responses can use the existing HT
 
 ## 2.7. Does the feature expose information about the underlying platform?
 
-Property detection reveals support for `preview` and `previewset`, not for individual compact formats.
+Yes. Property detection reveals support for `preview` and `previewset`, not for individual compact formats.
 
 Candidate selection can reveal format support indirectly. Rejecting an unsupported compact value may trigger a URL fallback request, observable through Resource Timing or by the server.
 
 ## 2.8. Does the specification allow an origin to send data to the underlying platform?
 
-Authors supply URLs, colors, or compact payloads for browser rendering, not a new operating-system integration. Invalid or unsupported values are never reinterpreted as URLs.
+Yes. Authors supply URLs, colors, and encoded preview data for the browser to process. Invalid or unsupported values are never reinterpreted as URLs.
 
 Compact-format specifications must define input, dimension, memory, and processing limits and prohibit nested requests. Colors need no decoder; style-dependent values such as `var()` and `currentColor` are excluded.
 
@@ -75,7 +73,7 @@ None. Internal image-generation identifiers used to reject obsolete work are not
 
 ## 2.14. How does behavior differ between first-party and third-party contexts?
 
-Preview requests use ordinary context-dependent image protections in both first-party and third-party documents. The API adds no distinction between them.
+The API adds no first-party/third-party distinction. Requests follow the [image-fetch protections](#24-how-does-the-feature-deal-with-sensitive-information) applicable to their context.
 
 ## 2.15. How does the feature work in Private Browsing or Incognito mode?
 
@@ -87,13 +85,13 @@ Yes. The explainer contains separate [Privacy](explainer.md#privacy) and [Securi
 
 ## 2.17. Can origins downgrade default security protections?
 
-No. URL previews use the host image's [normal fetch protections](explainer.md#fetching-scheduling-and-html-integration), with no bypass option.
+No. URL previews cannot bypass the host image's [fetch protections](#24-how-does-the-feature-deal-with-sensitive-information).
 
 Literal colors and compact data are inline author data, so they do not trigger `img-src` request checks. They cannot execute script or load nested resources. Processing is bounded, and compact-format bindings require separate security review.
 
 ## 2.18. What happens when a document using the feature enters and leaves BFCache?
 
-Painted and decoded state may be preserved as for ordinary images. The independent styling proposal must define transition behavior on freezing and restoration.
+Painted and decoded state may be preserved as for ordinary images.
 
 On restoration, reevaluate selection if conditions changed and ignore stale results. A preview from an old branch cannot newly replace current content, even if the main-image URL is unchanged.
 
@@ -112,8 +110,6 @@ If the main image fails, remove the preview and use normal broken-image and alt-
 ## 2.21. Can sites learn whether the user uses assistive technology?
 
 No. The preview and main image share one accessibility node and one `alt` value.
-
-Independent transition designs must respect `prefers-reduced-motion`. That preference is already queryable and does not identify any assistive technology.
 
 ## 2.22. What should this questionnaire have asked?
 
