@@ -20,21 +20,14 @@
 
 ## Table of Contents
 
-- [Status of this Document](#status-of-this-document)
-- [Authors](#authors)
-- [Participate](#participate)
 - [Introduction](#introduction)
 - [User-Facing Problem](#user-facing-problem)
-  - [How authors provide previews today](#how-authors-provide-previews-today)
-  - [Goals](#goals)
-  - [Non-goals](#non-goals)
 - [Developer needs and proposal response](#developer-needs-and-proposal-response)
 - [Core Proposal](#core-proposal)
   - [Preview values and reflection](#preview-values-and-reflection)
   - [Scope and responsive images](#scope-and-responsive-images)
     - [Art direction and preview ownership](#art-direction-and-preview-ownership)
     - [Responsive preview candidates](#responsive-preview-candidates)
-  - [A low-resolution image preview](#a-low-resolution-image-preview)
   - [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration)
   - [Preview lifecycle](#preview-lifecycle)
   - [Lifecycle decisions](#lifecycle-decisions)
@@ -42,44 +35,18 @@
   - [Image element state and rendering](#image-element-state-and-rendering)
   - [Compatibility and fallback](#compatibility-and-fallback)
 - [Optional Capabilities](#optional-capabilities)
-  - [Compact encoded preview formats](#compact-encoded-preview-formats)
-  - [Script observability](#script-observability)
 - [Open Questions](#open-questions)
-  - [Independent preview loading](#independent-preview-loading)
-  - [Presentation during source replacement](#presentation-during-source-replacement)
-  - [Conditional preview use](#conditional-preview-use)
 - [Alternatives considered](#alternatives-considered)
   - [Earlier proposal versions](#earlier-proposal-versions)
-    - [URL-only `previewsrc` and `previewSrc`](#url-only-previewsrc-and-previewsrc)
-    - [One nonresponsive preview on `<img>`](#one-nonresponsive-preview-on-img)
-    - [Mandatory complete-frame handoff](#mandatory-complete-frame-handoff)
-    - [Browser-managed View Transitions](#browser-managed-view-transitions)
   - [Alternatives to the core proposal](#alternatives-to-the-core-proposal)
-    - [Historical `lowsrc` attribute](#historical-lowsrc-attribute)
-  - [Alternatives to the combined solution](#alternatives-to-the-combined-solution)
+  - [Other implementation approaches](#other-implementation-approaches)
 - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
-  - [Accessibility](#accessibility)
-  - [Internationalization](#internationalization)
-  - [Privacy](#privacy)
-  - [Security](#security)
 - [Stakeholder Feedback / Opposition](#stakeholder-feedback--opposition)
 - [References & acknowledgements](#references--acknowledgements)
-  - [Specifications and guidance](#specifications-and-guidance)
-  - [Historical `lowsrc` sources](#historical-lowsrc-sources)
-  - [Compact preview formats](#compact-preview-formats)
-  - [Implementation evidence](#implementation-evidence)
-  - [Acknowledgements](#acknowledgements)
 - [Appendix](#appendix)
   - [Core API definition](#core-api-definition)
-    - [WebIDL](#webidl)
   - [Exploratory CSS styling](#exploratory-css-styling)
-    - [Parts and presentation phases](#parts-and-presentation-phases)
-    - [Illustrative UA defaults](#illustrative-ua-defaults)
-    - [Author styling and transitions](#author-styling-and-transitions)
-    - [Outgoing content and remaining design work](#outgoing-content-and-remaining-design-work)
   - [Exploratory image reveal](#exploratory-image-reveal)
-  - [Historical `lowsrc` research](#historical-lowsrc-research)
-  - [Preview examples](#preview-examples)
 
 ## Introduction
 
@@ -141,18 +108,7 @@ The table below describes the major patterns used by current implementations. Re
 
 ## Developer needs and proposal response
 
-The [developer-needs document](developer-needs.md) records the evidence for these needs and their relationship to the proposal:
-
-| Developer need | Response |
-| --- | --- |
-| Reduce custom lifecycle code and reuse lightweight preview data (DN-01 through DN-03) | Browser-managed `preview` processing with URL, compact, and color inputs |
-| Match responsive images, crops, and color schemes (DN-04) | Branch-specific `preview` and density-based `previewset` on `<img>` and `<source>` |
-| Avoid delaying the main image and choose when to use previews (DN-05, DN-06) | Non-blocking, best-effort preview work and author-controlled inputs; independent loading and browser-managed conditional rules remain open |
-| Show waiting content, style image pixels, and customize transitions (DN-07 through DN-09) | The independent [CSS styling sketch](#exploratory-css-styling) |
-| Choose progressive or complete-first-frame presentation (DN-10) | Native timing in the core proposal; opt-in control in the independent [image-reveal sketch](#exploratory-image-reveal) |
-| Handle repeated replacements (DN-11) | Source-generation cancellation in the core; same-role transitions need further styling work |
-| Preserve semantics, layout, accessibility, and fallback (DN-12, DN-14) | One semantic image, unchanged selected-image APIs, and normal fallback when loading fails |
-| Observe preview success and measure presentation (DN-13) | Preview-specific observability and metric integration remain open |
+The [developer-needs document](developer-needs.md) maps the needs and supporting evidence to the main proposal, independent designs, and open questions.
 
 ## Core Proposal
 
@@ -185,6 +141,8 @@ The proposed value model distinguishes representations explicitly:
 | Color | `#ccd8e0` | Paint a temporary solid-color representation; no fetch or image decoder |
 
 URLs require `url(...)`. Missing, empty, invalid, or unsupported values provide no preview; they are never reinterpreted as URLs.
+
+An inline data URL avoids a separate request but increases document size.
 
 The initial color model accepts self-contained CSS colors, such as hex colors, named colors, and `rgb(...)`. It excludes `currentColor`, system colors, `light-dark()`, and `var()`, which would require style-resolution and invalidation rules.
 
@@ -263,26 +221,6 @@ The proposed selection rules are:
 The list accepts the same value kinds as `preview`. Commas inside functions or strings are not candidate separators. The main image's `sizes` does not apply to preview-resource widths, and the browser does not prefetch URLs to check format support.
 
 Changes in branch or preview selection participate in the [source-update lifecycle](#source-updates-and-image-generations), even when the main-image URL stays the same.
-
-### A low-resolution image preview
-
-An author can use a small, low-resolution JPEG, WebP, or AVIF image as the preview:
-
-```html
-<img
-  preview='url("/images/forest-32.avif")'
-  src="/images/forest-1600.avif"
-  srcset="/images/forest-800.avif 800w,
-          /images/forest-1600.avif 1600w"
-  sizes="(max-width: 700px) 100vw, 700px"
-  width="1600"
-  height="1067"
-  loading="lazy"
-  decoding="async"
-  alt="Forest trail in autumn">
-```
-
-An inline value such as `preview='url("data:image/avif;base64,...")'` avoids a separate request but increases document size.
 
 ### Fetching, scheduling, and HTML integration
 
@@ -366,6 +304,8 @@ Results from superseded work cannot newly replace current content. The browser c
 
 The browser temporarily displays the preview inside the image element, but the selected image remains the element's current image resource. Standard `HTMLImageElement` state and events, including `currentSrc`, `complete`, `naturalWidth`, `naturalHeight`, `decode()`, `load`, and `error`, continue to describe the selected image.
 
+The core exposes no preview-specific lifecycle events or status. Resource Timing describes separately fetched previews but does not report whether they decoded or were displayed.
+
 The preview does not determine the `<img>` element's intrinsic dimensions or layout size. Normal CSS, `width`, `height`, `aspect-ratio`, and selected-image sizing rules apply, including existing `<source>` dimension handling.
 
 A decoded image preview is fitted to the content box using `object-fit` and `object-position`. Compact formats define their decoded dimensions and aspect ratio. A color has no intrinsic dimensions and fills the box. Normal image-content clipping applies.
@@ -411,10 +351,6 @@ BlurHash and ThumbHash are examples of representations that could be integrated.
 ```
 
 A format binding must define encoded-size, output-dimension, memory, and processing limits; color and alpha behavior; malformed-input handling; and a prohibition on nested network requests. It must not depend on author-provided decoder script.
-
-### Script observability
-
-The core exposes no preview-specific lifecycle events or status. Resource Timing describes separately fetched previews but does not report whether they decoded or were displayed.
 
 ## Open Questions
 
@@ -601,7 +537,7 @@ They do not replace every preview use case:
 
 An independent preview can reuse a small image, travel inline, or be cached separately. It adds transfer or processing costs and may compete for bandwidth. Image Preview complements progressive delivery rather than replacing it; authors should omit previews when progressive rendering already provides an adequate experience.
 
-### Alternatives to the combined solution
+### Other implementation approaches
 
 These alternatives combine native decoding, existing transition APIs, and author script differently.
 
