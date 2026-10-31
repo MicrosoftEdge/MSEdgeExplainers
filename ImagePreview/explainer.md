@@ -784,90 +784,43 @@ partial interface HTMLSourceElement {
 
 ### Exploratory CSS styling
 
-This **independent proposal sketch** addresses [DN-07 through DN-09](developer-needs.md#dn-07-show-waiting-content-before-a-preview-is-available) and part of [DN-11](developer-needs.md#dn-11-handle-repeated-image-replacement). Its syntax and lifecycle rules are exploratory, not existing CSS.
-
-Placeholder and image styling can work without Image Preview; `::preview` and the `preview` phase would be extensions. This partially addresses [w3c/csswg-drafts#7467](https://github.com/w3c/csswg-drafts/issues/7467), without replacing general loading/error selectors.
+This independent, exploratory sketch addresses [DN-07 through DN-09](developer-needs.md#dn-07-show-waiting-content-before-a-preview-is-available) and part of [DN-11](developer-needs.md#dn-11-handle-repeated-image-replacement). Waiting and main-image styling work without Image Preview; preview-specific parts and phases are extensions.
 
 #### Parts and presentation phases
 
-The combined pseudo-tree is:
-
 ```text
 <img>
-└── ::image-group
-    ├── ::image-placeholder
-    ├── ::preview             (preview extension)
-    └── ::image
+└── ::image-group           shared clipping and isolated blending
+    ├── ::image-placeholder   waiting decoration
+    ├── ::preview             preview content
+    └── ::image               ordinary image content
 ```
 
-| Part | Purpose |
-| --- | --- |
-| `::image-group` | Content-only geometry, shared clipping, and compositing isolation |
-| `::image-placeholder` | CSS waiting decoration, such as a color, gradient, or shimmer |
-| `::preview` | The representation supplied by the selected preview declaration |
-| `::image` | The ordinary image-rendering path, styled independently of the host border and padding |
+These internal painting parts do not add DOM children, size the host, or duplicate the image. The `<img>` keeps its layout, borders, padding, accessibility, APIs, and native fallback. The group occupies its content box without requiring `position: relative`.
 
-These are internal rendering parts, not DOM children. They do not size the host or duplicate image painting. The `<img>` retains its layout, borders, padding, accessibility, and existing APIs. HTML still governs native alt-text and broken-image rendering.
-
-The group occupies the image content box without requiring `position: relative` on the host. It clips filtered content to the intended boundary and isolates blending from the page backdrop. The exact interaction with `object-fit`, `object-position`, rounded corners, and filters needs specification.
-
-The read-only `:image-phase(...)` selector describes the **presentation target**: the content selected for display.
+The read-only `:image-phase(...)` selector identifies the content selected for display, not general loading/error states ([w3c/csswg-drafts#7467](https://github.com/w3c/csswg-drafts/issues/7467)).
 
 | Phase | Condition |
 | --- | --- |
-| `none` | No preview or ordinary-image target, and no pending initial presentation; native empty/error fallback applies |
-| `waiting` | A selected image is pending, including lazy deferral, with neither preview nor ordinary-image content retained as the target |
-| `preview` | A usable preview is the current target; available only with the preview extension |
-| `image` | Ordinary image content is the target, possibly progressive or retained from a previous request |
+| `none` | No image/preview target or pending initial presentation; native fallback applies |
+| `waiting` | Image pending, including lazy deferral, with no preview or retained image target |
+| `preview` | A usable preview is selected for display |
+| `image` | Ordinary image content, including progressive or retained content |
 
-Phases are determined before painting, independently of author opacity or visibility. `image` does not mean that loading, decoding, or a transition has finished. It can remain active while an old image is retained during a new request. Removing `src` does not produce `none` if another source still selects an image.
-
-Without preview use or part styling, ordinary image behavior remains unchanged. Hiding a part must not make decoding depend on the very phase change that decoding would trigger.
+Phases are chosen before painting, independently of author opacity or visibility, and do not signal loading, decoding, or transition completion. Changing or removing `src` need not change the phase if retained content or another selected source remains. Author styles must not make decoding wait for a phase change that decoding itself would trigger.
 
 #### Illustrative UA defaults
 
-These illustrative defaults require browser support for the parts' geometry, content, and lifetime; they are not a polyfill:
+These defaults require browser-provided parts; they are not a polyfill:
 
-```css
-img::image-group {
-  overflow: clip;
-  isolation: isolate;
-  pointer-events: none;
-  object-fit: inherit;
-  object-position: inherit;
-}
+| Part or condition | Default style |
+| --- | --- |
+| `::image-group` | `overflow: clip; isolation: isolate; pointer-events: none` |
+| All three content parts | `display: block; opacity: 1; mix-blend-mode: normal; transition: none; animation: none` |
+| Placeholder outside `waiting`; preview outside `preview` | `display: none !important; opacity: 0` |
+| Placeholder/preview entry | `@starting-style` sets `opacity: 0` |
 
-img::image-placeholder,
-img::preview,
-img::image {
-  display: block;
-  opacity: 1;
-  mix-blend-mode: normal;
-  transition: none;
-  animation: none;
-}
-
-img::preview,
-img::image {
-  object-fit: inherit;
-  object-position: inherit;
-}
-
-img:where(:not(:image-phase(waiting)))::image-placeholder,
-img:where(:not(:image-phase(preview)))::preview {
-  display: none !important;
-  opacity: 0;
-}
-
-@starting-style {
-  img::image-placeholder,
-  img::preview {
-    opacity: 0;
-  }
-}
-```
-
-The important `display: none` rule prevents authors from permanently retaining inactive placeholder/preview parts. A running transition can temporarily override it. Entry starting styles apply only to those additional parts. **The UA never hides `::image` based on a phase**, and no transition runs by default.
+The group, preview, and image parts inherit `object-fit` and `object-position`. The important rule prevents permanent retention of inactive parts, but transitions can temporarily override it. **The UA never hides `::image` based on a phase.** Without previews or author part styling, ordinary image behavior is unchanged.
 
 #### Author styling and transitions
 
@@ -919,32 +872,25 @@ The important `display: none` rule prevents authors from permanently retaining i
 }
 ```
 
-This stylesheet opts into a gradient placeholder, a blurred preview, and a crossfade to the main image. The browser skips unavailable stages; it must not manufacture a placeholder flash to run an animation. The author, not the UA defaults, chooses to fade in `::image`.
-
-Within the isolated group, `plus-lighter` supports alpha-correct crossfading when outgoing and incoming opacities are complementary. Different timings or interrupted transitions are not automatically normalized. Isolation neither clips content nor makes it opaque.
-
-Authors can pause a placeholder's loading animation when `waiting` ends or let it continue through the outgoing fade.
+This example adds a gradient, preview-only blur, and an author-controlled crossfade. Skip unavailable stages rather than creating a placeholder flash. In the isolated group, `plus-lighter` supports alpha-correct blending when layer opacities are complementary; different timings or interrupted transitions are not automatically normalized. Isolation neither clips content nor makes it opaque.
 
 #### Outgoing content and remaining design work
 
-The key retention mechanism is a discrete `display` transition, not an opacity animation:
+The browser must support this retention lifecycle:
 
-1. When a placeholder or preview loses its role, retain its rendering instance through the style change to `display: none`.
-2. A `display` transition with `allow-discrete` may keep that outgoing instance rendered while its exit effect runs.
-3. Release the outgoing rendering reference when the part is no longer rendered. Opacity, transform animations, animation fill, and infinite shimmers do not independently keep it alive.
-4. If the part becomes active again, cancel pending removal and retarget transitions from their current values. A stale completion must not remove a newly active part.
+1. Preserve an outgoing placeholder/preview through the style change to `display: none`, allowing an `allow-discrete` display transition to retain it for exit effects.
+2. Release its rendering reference when no longer rendered. Opacity, transforms, animation fill, and looping animations do not independently extend retention.
+3. On reactivation, cancel removal and retarget transitions from current values. Stale completions cannot remove a newly active part.
 
-This requires new lifecycle rules, not just CSS declarations. Outgoing animated previews can remain live, but keeping them available must not delay selected-image loading events or `decode()`.
+Outgoing animations can remain live without delaying selected-image loading events or `decode()`. Releasing a rendering reference does not require eviction from shared caches.
 
-Further rules are needed for excessive or stalled exit transitions, resource pressure, document freezing, and failure. Outgoing decoration must not indefinitely cover native fallback. Releasing a rendering reference does not require immediate eviction from shared caches.
+Open work includes object-fitting geometry, rounded corners, filters, excessive or stalled exits, resource pressure, freezing, and errors. Outgoing decoration must not indefinitely obscure native fallback.
 
-Phases alone cannot trigger image-to-image or preview-to-preview transitions when the phase stays unchanged. Resource-triggered transitions, possibly reusing [scoped View Transitions](#browser-managed-view-transitions), need further design. The [replacement policy](#presentation-during-source-replacement) is a separate lifecycle decision.
-
-The styling proposal must also address [presentation-state exposure](#privacy) and [accessibility](#accessibility).
+Unchanged phases cannot trigger image-to-image or preview-to-preview transitions. [Resource-triggered transitions](#browser-managed-view-transitions) and [source replacement](#presentation-during-source-replacement) need separate design, alongside [privacy](#privacy) and [accessibility](#accessibility) review.
 
 ### Exploratory image reveal
 
-This independent sketch addresses [DN-10](developer-needs.md#dn-10-control-progressive-versus-complete-frame-presentation). It controls **when the main image becomes the presentation target**, not the handoff's appearance or duration.
+This independent sketch addresses [DN-10](developer-needs.md#dn-10-control-progressive-versus-complete-frame-presentation). It controls **when the main image can appear**, not how it animates, and works without previews or CSS parts.
 
 ```css
 .photo {
@@ -959,15 +905,13 @@ This independent sketch addresses [DN-10](developer-needs.md#dn-10-control-progr
 | Value | Proposed behavior |
 | --- | --- |
 | `normal` (initial value) | Preserve native presentation timing, including progressive rendering |
-| `complete-frame` | Present a new main-image representation only when native presentation is permitted and the first frame is completely available and decoded |
+| `complete-frame` | Wait until native presentation is permitted and the first frame is complete and decoded |
 
-The policy applies with or without previews or CSS parts, including when replacing retained image content. For animated images, `complete-frame` concerns only the first frame.
+The policy applies when replacing a placeholder, preview, or retained image. Animated images need only their first frame, not the whole animation.
 
-With `complete-frame` and a 180 ms crossfade, the browser waits for the complete decoded first frame, selects it for display, then runs the transition.
+Source selection, fetching, `load`, `decode()`, and image-extraction APIs are unchanged; the property neither creates nor removes `::image`. Policy changes cannot hide an already-presented image generation. Switching to `normal` while waiting may reveal progressive content.
 
-Source selection, fetching, `load`, `decode()`, and image-extraction APIs remain unchanged. The property does not create or remove `::image`. Changing it must not hide an image already presented for that generation. Switching to `normal` while waiting may reveal available progressive content.
-
-Failure uses normal error/alt rendering, not a permanent preview fallback. The separate proposal must specify dynamic changes, retained-content handling, inheritance, and integration with HTML rendering.
+Failures use native error/alt rendering. Inheritance, dynamic changes, retained-content handling, and HTML integration need separate specification.
 
 ### Historical `lowsrc` research
 
