@@ -33,7 +33,7 @@ The sources establish needs and constraints, not API consensus or universal user
 | [DN-08](#dn-08-style-image-pixels-with-correct-geometry-and-compositing) | Style image pixels with correct geometry and compositing | Invariant; Styling for customization |
 | [DN-09](#dn-09-customize-activity-feedback-and-transitions) | Customize activity feedback and transitions | Styling |
 | [DN-10](#dn-10-control-progressive-versus-complete-frame-presentation) | Control progressive versus complete-frame presentation | Reveal |
-| [DN-11](#dn-11-handle-repeated-image-replacement) | Handle repeated image replacement | Main proposal; Styling |
+| [DN-11](#dn-11-handle-repeated-image-replacement) | Handle repeated image replacement | Main proposal; replacement presentation and transitions open |
 | [DN-12](#dn-12-preserve-image-semantics-layout-and-accessibility) | Preserve image semantics, layout, and accessibility | Invariant |
 | [DN-13](#dn-13-observe-and-measure-meaningful-loading-milestones) | Observe and measure meaningful loading milestones | Open |
 | [DN-14](#dn-14-retain-predictable-fallback-and-platform-protections) | Retain predictable fallback and platform protections | Invariant |
@@ -62,7 +62,7 @@ The sources establish needs and constraints, not API consensus or universal user
 
 **Evidence.** [whatwg/html#3631][html3631] requests several input types; [MicrosoftEdge/MSEdgeExplainers#1406][edge1406] discusses quality-per-byte and format costs. Partner feedback adds compact response payloads and shared-pipeline compatibility.
 
-**Proposal response.** `preview` supports URLs, compact representations, and colors, such as `url("thumb.avif")`, `blurhash("...")`, and `#ccd8e0`.
+**Proposal response.** `preview` accepts [URLs, compact representations, and colors](explainer.md#preview-values-and-reflection), allowing authors to reuse existing preview data.
 
 ### DN-04: Keep previews aligned with responsive images and art direction
 
@@ -126,7 +126,7 @@ The sources establish needs and constraints, not API consensus or universal user
 
 **Evidence.** [w3c/csswg-drafts#7467][css7467] discusses visible content coexisting with a pending request. Partner feedback requests support for successive generated images and transitions between them.
 
-**Proposal response.** The main lifecycle handles source changes and discards outdated preview results. The styling appendix records the additional work needed to animate replacements that do not change phase.
+**Proposal response.** The [lifecycle](explainer.md#source-updates-and-image-generations) discards outdated results after source changes. Whether to [retain the old image or show a new preview](explainer.md#presentation-during-source-replacement), and how to animate successive images, remain open questions.
 
 ### DN-12: Preserve image semantics, layout, and accessibility
 
@@ -134,7 +134,7 @@ The sources establish needs and constraints, not API consensus or universal user
 
 **Evidence.** [MicrosoftEdge/MSEdgeExplainers#1408][edge1408], [w3c/aria#1317][aria1317], and [w3c/wcag#2048][wcag2048] address visible alt text, loading announcements, and indicator contrast.
 
-**Proposal response.** Keep one accessible image and normal layout. Existing APIs, including pixel-extraction APIs, continue to use the main image. A preview can replace visible loading-time `alt` text, even though `alt` remains available to assistive technologies. Styling must respect reduced-motion preferences and keep informative loading indicators distinguishable from their background.
+**Proposal response.** [Image semantics and layout](explainer.md#image-element-state-and-rendering) remain unchanged. A preview can displace visible loading-time `alt` text without removing its accessible description; the [accessibility guidance](explainer.md#accessibility) also covers motion and contrast.
 
 ### DN-13: Observe and measure meaningful loading milestones
 
@@ -150,7 +150,7 @@ The sources establish needs and constraints, not API consensus or universal user
 
 **Evidence.** [whatwg/html#3631][html3631] discusses failure behavior, compatibility, and CSP.
 
-**Proposal response.** An invalid, unsupported, or failed preview must not prevent the main image from loading. Preview requests follow normal image-fetch protections, and decoding work remains bounded. If the main image fails, use normal broken-image and alt-text rendering instead of retaining the preview.
+**Proposal response.** Preview failures do not block the main image; main-image failure uses [native fallback](explainer.md#lifecycle-decisions). [Security requirements](explainer.md#security) cover fetch protections and processing limits.
 
 ## Design evolution
 
