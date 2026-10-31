@@ -414,7 +414,7 @@ A format binding must define encoded-size, output-dimension, memory, and process
 
 ### Script observability
 
-The core provides no preview lifecycle hook. Resource Timing describes separately fetched previews but does not report whether they decoded or were displayed.
+The core exposes no preview-specific lifecycle events or status. Resource Timing describes separately fetched previews but does not report whether they decoded or were displayed.
 
 ## Open Questions
 
@@ -802,7 +802,7 @@ The read-only `:image-phase(...)` selector identifies the content selected for d
 
 | Phase | Condition |
 | --- | --- |
-| `none` | No image/preview target or pending initial presentation; native fallback applies |
+| `none` | No image or preview is selected for display, and no initial presentation is pending; native fallback applies |
 | `waiting` | Image pending, including lazy deferral, with no preview or retained image target |
 | `preview` | A usable preview is selected for display |
 | `image` | Ordinary image content, including progressive or retained content |
@@ -907,7 +907,7 @@ This independent sketch addresses [DN-10](developer-needs.md#dn-10-control-progr
 | `normal` (initial value) | Preserve native presentation timing, including progressive rendering |
 | `complete-frame` | Wait until native presentation is permitted and the first frame is complete and decoded |
 
-The policy applies when replacing a placeholder, preview, or retained image. Animated images need only their first frame, not the whole animation.
+The policy applies when replacing a placeholder, preview, or retained image. For animated images, `complete-frame` waits for a complete decoded first frame, not the whole animation.
 
 Source selection, fetching, `load`, `decode()`, and image-extraction APIs are unchanged; the property neither creates nor removes `::image`. Policy changes cannot hide an already-presented image generation. Switching to `normal` while waiting may reveal progressive content.
 
