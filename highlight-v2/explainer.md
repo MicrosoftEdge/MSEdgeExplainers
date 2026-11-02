@@ -29,12 +29,15 @@
       - [Transitions](#transitions)
       - [Events](#events)
       - [Web Animations API](#web-animations-api)
-    - [Per-range highlight styles](#per-range-highlight-styles)
+    - [Non-semantic highlight style variations](#non-semantic-highlight-style-variations)
+      - [Option 1: Per-range highlight styles](#option-1-per-range-highlight-styles)
+      - [Option 2: The `range-index()` function](#option-2-the-range-index-function)
     - [Opacity](#opacity)
       - [Resolving highlight opacity](#resolving-highlight-opacity)
       - [Applying the winning opacity](#applying-the-winning-opacity)
       - [Interaction with element opacity](#interaction-with-element-opacity)
     - [Solving staggered text animation](#solving-staggered-text-animation)
+      - [Using `range-index()`](#using-range-index)
     - [Solving loading shimmer](#solving-loading-shimmer)
     - [Solving spoken-word tracking](#solving-spoken-word-tracking)
     - [Solving data-driven range styling](#solving-data-driven-range-styling)
@@ -180,8 +183,8 @@ Consequently, the API cannot currently replace element wrappers for these effect
 We propose three enhancements to the Custom Highlight API:
 
 1. CSS Animations and Transitions on highlight ranges.
-1. Per-range styles to allow for minor variations on a given `::highlight()` rule.
-1. Opacity support on highlight ranges.
+2. Style variations among ranges within a single Highlight using either per-range declarations or a `range-index()` function.
+3. Opacity support on highlight ranges.
 
 ### CSS Animations and Transitions
 
@@ -410,16 +413,26 @@ immediately discards its retained target, style, and paint state. Calling
 `cancel()` also follows the existing Web Animations and CSS event rules,
 including dispatching the corresponding cancellation event.
 
-### Per-range highlight styles
+### Non-semantic highlight style variations
 
 A staggered text fade requires each successive word to start its animation
 slightly later than the preceding word. This is technically achievable with
 custom highlights today, but in ways that are poorly suited to the scenario.
 Existing techniques are discussed in the "Alternatives Considered" section.
 
+Conceptually, a given highlight used to implement a text entry animation
+represents a single semantic; the individual stagger offsets are implementation
+details of that semantic. Thus, it makes sense to introduce the staggers as
+variations applied to each range included in the highlight. We propose two
+different options for doing so. These options are not mutually exclusive;
+either or both could be implemented depending on adjacent use cases.
+
+#### Option 1: Per-range highlight styles
+
 Staggering animation effects that work on a per-element basis can take advantage
-of each element's inline style to achieve this effect. We propose a capability
-for highlight ranges that aims for similar flexibility.
+of each element's inline style to achieve this effect. As one option for
+non-semantic variations within a highlight, we propose a capability that aims
+for flexibility similar to element inline styles.
 
 The proposed API is:
 
@@ -519,6 +532,43 @@ members of one `Highlight`, including treating overlapping ranges as their
 union. The additional layers are needed only where per-range styling makes an
 observable difference.
 
+#### Option 2: The `range-index()` function
+
+Authors can achieve styling variances among a set of sibling elements using the
+`sibling-index()` and `sibling-count()` functions. As another option for
+non-semantic variations within a highlight, we propose a `range-index()` function
+which works similarly for ranges within a custom highlight.
+
+A Highlight object is defined to be `setlike<AbstractRange>`, which means the
+Ranges within a highlight are kept as an ordered set. When used in a property
+applied to a highlight, `range-index()` resolves to the zero-based index of the Range
+within that ordered set. The value is the same for every originating element covered
+by the Range.
+In other contexts, `range-index()` resolves to the guaranteed-invalid value.
+
+A new range added to the highlight gets the next available index. When a range is
+deleted, subsequent ranges have their indices reduced by 1, and any styles
+dependent on `range-index()` are recalculated. Such changes follow typical CSS
+update rules and may trigger new transitions or update animations accordingly.
+
+Styles that differ because of `range-index()` use the same overlapping-range
+layering rules described under Option 1.
+
+With this function, an author could declare a staggered fade highlight as follows:
+
+```css
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+::highlight(response-words) {
+  --stagger-interval: 6ms;
+  animation: fade-in 600ms ease-in-out both;
+  animation-delay: calc(var(--stagger-interval) * range-index());
+}
+```
+
 ### Opacity
 
 To take advantage of compositor support in modern engines, staggering animation
@@ -599,8 +649,8 @@ is faded to .75, for a net effective opacity of .25 x .75 = .1875.
 ### Solving staggered text animation
 
 The following example uses `Intl.Segmenter` to create one range per word,
-assigns each range a different animation delay, and animates the highlight's
-opacity.
+assigns each range a different animation delay using the per-range style option,
+and animates the highlight's opacity.
 
 ```html
 <style>
@@ -701,6 +751,17 @@ existing ranges, even though all the words have the same originating `<p>`.
 Previously revealed words remain visible through `animation-fill-mode: both`,
 while each new range gets its own animation timeline. The same
 `prefers-reduced-motion` rule also applies to the newly added ranges.
+
+#### Using `range-index()`
+
+The same solution could be implemented using `range-index()` by adding
+`animation-delay: calc(6ms * range-index())` to the `::highlight(response-words)`
+rule and removing the calls to `getRangeStyle()`.
+However, in `appendResponseText()`, new ranges would continue the stagger
+according to their position in the existing highlight rather than restarting
+at zero. Restarting each batch at zero would require waiting for the previous
+batch to finish. The function could then either remove existing ranges from the
+highlight, or register a new highlight containing the new ranges under the same name.
 
 <img src="images/staggered-fade.gif" alt="Staggered text entry animation, with subsequent appended text">
 
@@ -1093,3 +1154,4 @@ Many thanks for valuable feedback and advice from:
 - Greg Whitworth
 - Hoch Hochkeppel
 - Kurt Catti-Schmidt
+- Megan Gardner
