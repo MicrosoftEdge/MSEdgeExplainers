@@ -13,61 +13,56 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Custom Highlight API Extensions](#custom-highlight-api-extensions)
-  - [Authors](#authors)
-  - [Participate](#participate)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [User-Facing Problem](#user-facing-problem)
-    - [Goals](#goals)
-    - [Non-goals](#non-goals)
-  - [User research](#user-research)
-  - [Proposed Approach](#proposed-approach)
-    - [CSS Animations and Transitions](#css-animations-and-transitions)
-      - [Effect identity](#effect-identity)
-      - [Animations](#animations)
-      - [Transitions](#transitions)
-      - [Events](#events)
-      - [Web Animations API](#web-animations-api)
-    - [Non-semantic highlight style variations](#non-semantic-highlight-style-variations)
-      - [Option 1: Per-range highlight styles](#option-1-per-range-highlight-styles)
-      - [Option 2: The `range-index()` function](#option-2-the-range-index-function)
-    - [Opacity](#opacity)
-      - [Resolving highlight opacity](#resolving-highlight-opacity)
-      - [Applying the winning opacity](#applying-the-winning-opacity)
-      - [Interaction with element opacity](#interaction-with-element-opacity)
-    - [Solving staggered text animation](#solving-staggered-text-animation)
-      - [Using `range-index()`](#using-range-index)
-    - [Solving loading shimmer](#solving-loading-shimmer)
-    - [Solving spoken-word tracking](#solving-spoken-word-tracking)
-    - [Solving data-driven range styling](#solving-data-driven-range-styling)
-  - [Alternatives considered](#alternatives-considered)
-    - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
-      - [Pros](#pros)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
-    - [CSS Text Transitions](#css-text-transitions)
-      - [Pros](#pros-1)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
-    - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
-      - [Pros](#pros-2)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
-    - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
-      - [Pros](#pros-3)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
-    - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
-      - [Pros](#pros-4)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
-    - [Per-highlight atomic paint groups](#per-highlight-atomic-paint-groups)
-      - [Pros](#pros-5)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
-    - [Per-contribution opacity in the existing paint order](#per-contribution-opacity-in-the-existing-paint-order)
-      - [Pros](#pros-6)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-6)
-    - [Compositing `color` animations](#compositing-color-animations)
-      - [Pros](#pros-7)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-7)
-  - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
-  - [References \& acknowledgements](#references--acknowledgements)
+- [Introduction](#introduction)
+- [User-Facing Problem](#user-facing-problem)
+  - [Goals](#goals)
+  - [Non-goals](#non-goals)
+- [User research](#user-research)
+- [Proposed Approach](#proposed-approach)
+  - [CSS Animations and Transitions](#css-animations-and-transitions)
+    - [Effect identity](#effect-identity)
+    - [Animations](#animations)
+    - [Transitions](#transitions)
+    - [Events](#events)
+    - [Web Animations API](#web-animations-api)
+  - [Non-semantic highlight style variations](#non-semantic-highlight-style-variations)
+    - [Option 1: Per-range highlight styles](#option-1-per-range-highlight-styles)
+    - [Option 2: The `range-index()` function](#option-2-the-range-index-function)
+  - [Opacity](#opacity)
+    - [Resolving highlight opacity](#resolving-highlight-opacity)
+    - [Applying the winning opacity](#applying-the-winning-opacity)
+    - [Interaction with element opacity](#interaction-with-element-opacity)
+  - [Solving staggered text animation](#solving-staggered-text-animation)
+    - [Using `range-index()`](#using-range-index)
+  - [Solving loading shimmer](#solving-loading-shimmer)
+  - [Solving spoken-word tracking](#solving-spoken-word-tracking)
+- [Alternatives considered](#alternatives-considered)
+  - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
+    - [Pros](#pros)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
+  - [CSS Text Transitions](#css-text-transitions)
+    - [Pros](#pros-1)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
+  - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
+    - [Pros](#pros-2)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
+  - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
+    - [Pros](#pros-3)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
+  - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
+    - [Pros](#pros-4)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
+  - [Per-highlight atomic paint groups](#per-highlight-atomic-paint-groups)
+    - [Pros](#pros-5)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
+  - [Per-contribution opacity in the existing paint order](#per-contribution-opacity-in-the-existing-paint-order)
+    - [Pros](#pros-6)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-6)
+  - [Compositing `color` animations](#compositing-color-animations)
+    - [Pros](#pros-7)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-7)
+- [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+- [References & acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -860,48 +855,6 @@ The same pattern can use two `Highlight` objects to track the current word and
 current sentence independently.
 
 <img src="images/spoken-word.gif" alt="Text with a highlight moving from one word to the next and fading smoothly in and out">
-
-### Solving data-driven range styling
-
-Range-decoration systems commonly receive presentation data from an
-application model. For example, Lexical's [collaborative selection
-implementation](https://github.com/facebook/lexical/blob/main/packages/lexical-yjs/src/SyncCursors.ts)
-currently generates a highlight name and CSS rule for each collaborator's
-arbitrary color.
-
-Per-range styles allow one logical `Highlight` and one shared CSS rule to
-represent those selections:
-
-```css
-::highlight(remote-selections) {
-  background-color:
-      color-mix(in srgb, var(--selection-color) 35%, transparent);
-  transition: background-color 120ms;
-}
-```
-
-```js
-const remoteSelections = new Highlight();
-CSS.highlights.set("remote-selections", remoteSelections);
-
-function addRemoteSelection(range, color) {
-  remoteSelections.add(range);
-  remoteSelections.getRangeStyle(range)
-      .setProperty("--selection-color", color);
-}
-
-function removeRemoteSelection(range) {
-  remoteSelections.delete(range);
-}
-```
-
-The application supplies only the per-range data. The stylesheet continues to
-control how the color is presented, including its alpha, transition timing,
-forced-color behavior, and any future theme-specific adjustments. Syntax
-highlighters and analysis tools can use the same pattern for token categories,
-confidence scores, diagnostic severity, or other range-specific values.
-
-<img src="images/remote-selections.gif" alt="Collaborative text editing session with different editors' selections represented by different colors">
 
 ## Alternatives considered
 
