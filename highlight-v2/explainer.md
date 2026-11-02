@@ -587,18 +587,38 @@ style. The resulting value applies to the portion of the range painted by that
 originating element.
 
 When highlight layers overlap within an originating element, their opacity
-values do not multiply. Instead, the highest active layer that specifies an
-opacity value determines the winning opacity. If no active highlight specifies
+values do not multiply. Instead, the highest active layer that contributes an
+opacity value determines the winning opacity. If no active highlight contributes
 opacity, the resulting highlight opacity value is 1.
+
+For `color`, a single winning text color is determined by finding the topmost
+highlight that has a value for `color` other than `currentColor`. For `opacity`
+we have no such sentinel value. To fill that gap, we introduce `auto` as a
+valid value for `opacity` and add the following to the UA stylesheet:
+
+```css
+/* See https://drafts.csswg.org/css-pseudo-4/#highlight-cascade for why :root */
+:root::highlight(*) {
+  opacity: auto;
+}
+```
+
+In all contexts other than a highlight pseudo-element, the value of `auto`
+computes to `1`. In a highlight pseudo-element, `auto` indicates that the highlight
+does not contribute an opacity value.
+In the context of a highlight, a transition or animation between `auto` and a
+numeric value is handled as a discrete flip.
 
 For example, where two highlights overlap:
 
 | Lower highlight | Upper highlight | Resulting opacity |
 |---|---|---|
 | `opacity: .4` | `opacity: .7` | `.7` |
-| `opacity: .4` | Opacity omitted | `.4` |
+| `opacity: .4` | Opacity omitted (`auto`)* | `.4` |
 | `opacity: .4` | `opacity: 1` | `1` |
 | `opacity: .4` | `opacity: 0` | `0` |
+
+\* *assuming no numeric value is inherited from an ancestor highlight*
 
 #### Applying the winning opacity
 
@@ -1108,3 +1128,4 @@ Many thanks for valuable feedback and advice from:
 - Hoch Hochkeppel
 - Kurt Catti-Schmidt
 - Megan Gardner
+- Tab Atkins-Bittner
