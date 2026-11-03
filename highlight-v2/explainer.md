@@ -536,9 +536,8 @@ which works similarly for ranges within a custom highlight.
 
 A Highlight object is defined to be `setlike<AbstractRange>`, which means the
 Ranges within a highlight are kept as an ordered set. When used in a property
-applied to a highlight, `range-index()` resolves to the zero-based index of the Range
-within that ordered set. The value is the same for every originating element covered
-by the Range.
+applied to a highlight, `range-index()` resolves to the one-based index of the Range
+within that ordered set. The value is the same for every originating element covered by the Range.
 In other contexts, `range-index()` resolves to the guaranteed-invalid value.
 
 A new range added to the highlight gets the next available index. When a range is
@@ -560,7 +559,7 @@ With this function, an author could declare a staggered fade highlight as follow
 ::highlight(response-words) {
   --stagger-interval: 6ms;
   animation: fade-in 600ms ease-in-out both;
-  animation-delay: calc(var(--stagger-interval) * range-index());
+  animation-delay: calc(var(--stagger-interval) * (range-index() - 1));
 }
 ```
 
@@ -598,6 +597,11 @@ valid value for `opacity` and add the following to the UA stylesheet:
 
 ```css
 /* See https://drafts.csswg.org/css-pseudo-4/#highlight-cascade for why :root */
+:root::selection,
+:root::search-text,
+:root::target-text,
+:root::spelling-error,
+:root::grammar-error,
 :root::highlight(*) {
   opacity: auto;
 }
@@ -770,7 +774,7 @@ while each new range gets its own animation timeline. The same
 #### Using `range-index()`
 
 The same solution could be implemented using `range-index()` by adding
-`animation-delay: calc(6ms * range-index())` to the `::highlight(response-words)`
+`animation-delay: calc(6ms * (range-index() - 1))` to the `::highlight(response-words)`
 rule and removing the calls to `getRangeStyle()`.
 However, in `appendResponseText()`, new ranges would continue the stagger
 according to their position in the existing highlight rather than restarting
