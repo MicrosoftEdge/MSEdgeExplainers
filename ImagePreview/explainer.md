@@ -297,7 +297,8 @@ Results from superseded work cannot newly replace current content. The browser c
 
 - A branch change invalidates and removes its preview, even if both branches use the same main-image URL.
 - A resolution-only change within one branch can reuse an unchanged preview while the newly selected image loads.
-- A preview-candidate change while the preview is eligible invalidates the old candidate's work. Changing preview declarations after the same selected image has been presented does not hide that image or reopen its preview phase.
+- For preview-only changes, loading and replacement follow the same model as changes to an image's `src`: an already-displayed preview remains visible while its replacement loads. Canceling superseded work does not itself remove displayed content.
+- Changing preview declarations after the same selected image has been presented does not hide that image or reopen its preview phase.
 - Previously presented main-image content can remain under ordinary HTML replacement rules. Whether a new preview should replace such retained content is an explicit [open question](#presentation-during-source-replacement).
 
 ### Image element state and rendering
@@ -329,7 +330,7 @@ const supportsImagePreview =
   "preview" in HTMLImageElement.prototype;
 ```
 
-This detects the property, not support for a particular compact format. `previewset` and the `<source>` properties can likewise be checked on their corresponding prototypes. Unsupported representations follow the candidate-selection and [preview-unavailable lifecycle](#preview-lifecycle) rules.
+This detects API support, not support for individual compact formats. Per-format capability detection remains an [open question](#preview-format-support-detection). `previewset` and the `<source>` properties can likewise be checked on their corresponding prototypes. Unsupported representations follow the candidate-selection and [preview-unavailable lifecycle](#preview-lifecycle) rules.
 
 Developer tools may report that a preview was skipped, blocked, unsupported, or failed, but such diagnostics are not a web-observable API and are outside the HTML feature definition.
 
@@ -353,6 +354,10 @@ BlurHash and ThumbHash are examples of representations that could be integrated.
 A format binding must define encoded-size, output-dimension, memory, and processing limits; color and alpha behavior; malformed-input handling; and a prohibition on nested network requests. It must not depend on author-provided decoder script.
 
 ## Open Questions
+
+### Preview format support detection
+
+Should authors be able to query support for individual preview formats?
 
 ### Independent preview loading
 
