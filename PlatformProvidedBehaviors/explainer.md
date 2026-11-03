@@ -10,7 +10,7 @@
 
 ## Introduction
 
-Custom element authors frequently need their elements to use platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). The motivation of this proposal is to give custom element authors visibility into the same protocols, lifecycle hooks, and internal state that native elements use. Platform-provided behaviors name the platform-internal logic HTML already runs for native elements and expose it for reuse, rather than asking authors to reimplement that logic in Javascript.
+Custom element authors frequently need their elements to use platform behaviors that are currently exclusive to native HTML elements, such as [form submission](https://github.com/WICG/webcomponents/issues/814), [popover invocation](https://github.com/whatwg/html/issues/9110), [label behaviors](https://github.com/whatwg/html/issues/5423#issuecomment-1517653183), [form semantics](https://github.com/whatwg/html/issues/10220), and [radio button grouping](https://github.com/whatwg/html/issues/11061#issuecomment-3250415103). The motivation of this proposal is to give custom element authors visibility into the same protocols, lifecycle hooks, and internal state that native elements use. Platform-provided behaviors name the platform-internal logic HTML already runs for native elements and expose it for reuse, rather than asking authors to reimplement that logic in JavaScript.
 
 ## User-facing problem
 
@@ -24,13 +24,24 @@ This creates a gap between what's possible with native elements and custom eleme
 
 ### Goals
 
-- Establish an extensible framework for custom elements to adopt native behaviors for built in elements.
+- Establish an extensible framework for custom elements to adopt native behaviors.
 - Enable autonomous custom elements to adopt native `<button>` behavior (submit, reset, and generic button) as the initial capability of this framework.
 
 ### Non-goals
 
 - Recreating all native element behaviors in this initial proposal.
 - Making updates to customized built-ins.
+
+### Current scope and follow-up candidates
+
+This explainer proposes the behavior framework with `HTMLButtonBehavior` as a concrete behavior. The capabilities below show where the same problem appears and help evaluate the API's design.
+
+| Capability | Status | Problem to solve |
+|---|---|---|
+| Button behavior | **Current proposal** | Design systems currently reimplement button activation, form participation, focusability, accessibility defaults, and related state on the custom element host. |
+| Label association and focus delegation | Near-term candidate | Custom elements cannot fully reproduce native `<label>` association and activation across component boundaries. |
+| Radio grouping | Near-term candidate | Design systems build controls that are semantically radios but cannot reuse native grouping, labeling, and form behavior on their hosts. |
+| Additional behavior categories and cross-category composition | Exploratory only | Test framework's extensibility. |
 
 ## User research
 
@@ -64,6 +75,8 @@ This proposal is informed by:
 
    - [Material Web](https://github.com/material-components/material-web/blob/main/button/internal/button.ts): Renders a `<button>` inside the Shadow DOM for accessibility/clicks. They created a [dedicated class](https://github.com/material-components/material-web/blob/main/internal/controller/form-submitter.ts) to handle form submission and intercept the click event to call `form.requestSubmit(this)`.
 
+   - [Fluent UI Web Components](https://github.com/microsoft/fluentui/blob/master/packages/web-components/src/button/button.base.ts): Makes the autonomous custom element host the button. Its base class sets the implicit role, manages `tabindex`, implements Enter/Space activation and disabled handling, handles submit and reset, and inserts a hidden native submit button when the custom element cannot be passed to `requestSubmit()`.
+
    - Older method (used by earlier design systems): To enable implicit submission, the component injects a hidden `<button type="submit">` into its own light DOM. This approach breaks encapsulation, risks unintended layout effects by participating in the parent’s flow or the surrounding container, and can pollute the accessibility tree.
 
    ```html
@@ -74,13 +87,17 @@ This proposal is informed by:
    </ds-button>
    ```
 
-These frameworks mirror a native `<button>` by having one custom element class whose form activation is selected by the `type` attribute. The same pattern appears across other design systems including [Adobe Spectrum Web Components](https://github.com/adobe/spectrum-web-components/blob/main/1st-gen/packages/button/src/ButtonBase.ts) (`<sp-button>` with `type` attribute, hidden `<button type="submit">` proxy) and [Microsoft Fluent UI Web Components](https://github.com/microsoft/fluentui/blob/master/packages/web-components/src/button/button.base.ts) (`<fluent-button>` with `type` attribute, built on the FAST web component foundation).
+  These frameworks mirror a native `<button>` by having one custom element class whose form activation is selected by the `type` attribute. The same pattern appears in [Adobe Spectrum Web Components](https://github.com/adobe/spectrum-web-components/blob/main/1st-gen/packages/button/src/ButtonBase.ts), whose `<sp-button>` also uses a hidden `<button type="submit">` proxy.
+
+  An internal native button can supply individual interactions for components built around the wrapping pattern, but it does not make an autonomous custom element host itself the submitter or default button. This matters because the host is the public element that consumers configure, label, and interact with. Semantics placed on a shadow child must be routed across the shadow boundary and kept synchronized with the host.
 
 ## Proposed approach
 
 A platform-provided behavior is a set of methods, values, and platform-protocol hooks that a custom element can participate in, which today are reserved to native HTML elements. This proposal introduces one static class property per behavior category. The first is `activationBehavior`, which declares the activation behavior the platform attaches to instances of the class.
 
-The platform reads `static activationBehavior` at `customElements.define()` time and stores it on the custom element definition, the same way it reads `static formAssociated`. When an element is created (`new`, parser upgrade, or `customElements.upgrade()`), the platform instantiates the declared behavior per host and associates it with the element. Future categories add their own static properties and contribute their behavior instances to the same host collection. This mirrors how a form-associated custom element participates in form submission and form-related lifecycle callbacks.
+The platform reads `static activationBehavior` at `customElements.define()` time and stores it on the custom element definition, the same way it reads `static formAssociated`. When an element is created (`new`, parser upgrade, or `customElements.upgrade()`), the platform instantiates the declared behavior per host and associates it with the element. This mirrors how a form-associated custom element participates in form submission and form-related lifecycle callbacks.
+
+Behavior declaration properties apply only to autonomous custom elements. They are not read for customized built-in definitions, whose instances already inherit native element behavior.
 
 `attachInternals()` is the author's access route to those already-existing instances, exposed through a new `behaviors` collection on `ElementInternals`. It does not create or attach the behaviors. The set of behaviors attached to a host is fixed at the class declaration; the behavior instances' own properties remain mutable post-attachment.
 
@@ -119,77 +136,13 @@ Each behavior names the specific platform logic it engages:
 
 ### Behavior categories and composition
 
-Behaviors are organized into a set of categories. Categories are conceptual groupings the platform uses to decide which behaviors can coexist on one element. Each category has a static declaration property and authors assign concrete behavior classes (the leaves below) to those properties.
-
-```mermaid
-classDiagram
-    class ElementBehavior
-    class ActivationBehavior {
-        <<category>>
-    }
-    class EmbeddedContentBehavior {
-        <<category>>
-    }
-    class HTMLButtonBehavior
-    class HTMLLabelBehavior
-    class HTMLRadioGroupBehavior
-    class HTMLCheckboxBehavior
-    class HTMLImageBehavior
-    ElementBehavior <|-- ActivationBehavior
-    ElementBehavior <|-- EmbeddedContentBehavior
-    ActivationBehavior <|-- HTMLButtonBehavior
-    ActivationBehavior <|-- HTMLLabelBehavior
-    ActivationBehavior <|-- HTMLRadioGroupBehavior
-    ActivationBehavior <|-- HTMLCheckboxBehavior
-    EmbeddedContentBehavior <|-- HTMLImageBehavior
-```
-
-An element attaches at most one behavior per category:
+The current proposal exposes one category declaration, `activationBehavior`, and an element can declare at most one value for it:
 
 ```javascript
 static activationBehavior = HTMLButtonBehavior;
 ```
 
-Behaviors in different categories compose. Combining an `HTMLButtonBehavior` (activation) with an `HTMLImageBehavior` (embedded content) produces a submit button that renders as an image, similar to [`<input type=image>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/image):
-
-```javascript
-class ImageButton extends HTMLElement {
-  static formAssociated = true;
-  static observedAttributes = ['src', 'alt'];
-  static activationBehavior = HTMLButtonBehavior;
-  static embeddedContentBehavior = HTMLImageBehavior;
-
-  #internals;
-  #image;
-
-  constructor() {
-    super();
-    this.#internals = this.attachInternals();
-    // HTMLButtonBehavior defaults to type 'submit'.
-    this.#image = this.#internals.behaviors.image;
-  }
-
-  attributeChangedCallback(name, _old, value) {
-    if (name === 'src') {
-      this.#image.src = value;
-    }
-    if (name === 'alt') {
-      this.#image.alt = value;
-    }
-  }
-}
-customElements.define('image-button', ImageButton);
-```
-
-```html
-<form action="/search">
-  <image-button src="/go.png" alt="Search"></image-button>
-</form>
-```
-
-On activation the host submits the form (from `HTMLButtonBehavior`) while rendering the image and exposing its `alt` text as the accessible name (from `HTMLImageBehavior`). The two behaviors occupy different category properties, so they compose without a collision check. The platform validates that each assigned class belongs to the property's category. Adding a new behavior requires assigning it to an existing category; adding a new category requires a new static property.
-
-When composed behaviors provide different implicit role defaults, a non-null role from the activation behavior takes precedence over the embedded-content role. Therefore, an element combining `HTMLButtonBehavior` and `HTMLImageBehavior` is exposed as a button, while `HTMLImageBehavior` supplies its rendering and accessible-name computation from `alt`. If the activation behavior provides no role, the embedded-content role applies. Author-provided semantics through the `role` attribute or `ElementInternals.role` take precedence over behavior defaults.
+As this proposal doesn't define multiple activation behaviors, cross-category composition, event or lifecycle ordering between behaviors, and conflict resolution are future design work. See the [future extensibility of the API](#future-extensibility-of-the-api).
 
 #### The activation category
 
@@ -201,13 +154,12 @@ The activation category corresponds to the DOM standard's [activation behavior](
 - Its keyboard-activation specifics.
 - Its own state and the protocol surface it exposes.
 
-Other native patterns fit the same activation category:
+Other native patterns are follow-up candidates for the same activation category:
 
-- `<button>` - `HTMLButtonBehavior`: submit, reset, or generic button via `type`, plus the invoker surface and form participation.
-- `<label>` - `HTMLLabelBehavior`: `for`-attribute association and focus delegation, where activation delegates a click to the labeled control, with no implicit role and no focusability on the element.
-- `<input type=radio>` - `HTMLRadioGroupBehavior`: `name`-based mutual exclusion.
+- `<label>`: `for`-attribute association and focus delegation, where activation delegates a click to the labeled control, with no implicit role and no focusability on the element.
+- `<input type=radio>`: `name`-based mutual exclusion, labeling, and form participation. A design-system color swatch is a concrete example of a control that needs these semantics without looking like a native radio.
 
-If [developer-defined behaviors](developer-defined-behaviors.md) are specified in the future, the categories could be promoted to real, subclassable base classes (for example, `class MyBehavior extends ActivationBehavior`) as an additive change.
+[Developer-defined behaviors](developer-defined-behaviors.md) are not part of this proposal. Supporting them later requires decisions about category contracts, validation, lifecycle, state ownership, event ordering, and conflict resolution.
 
 ### HTMLButtonBehavior
 
@@ -219,11 +171,12 @@ This proposal introduces `HTMLButtonBehavior`, a behavior in the activation cate
 - The custom element with HTMLButtonBehavior participates in sequential focus navigation, with `tabindex` and disabled state following established rules.
 - The same logic that toggles `:default`, `:disabled`/`:enabled`, `:focus`, and `:focus-visible` on native elements applies to the behavior's host. The `:default` pseudo-class only matches when `type === 'submit'` and the host is the form's default submit button.
 - Mirrored `HTMLButtonElement` properties are available on the behavior instance. They are configurable per-element and mutable for the life of the behavior.
-- The behavior has a `type` property (`'submit'` (default), `'reset'`, or `'button'`) that selects the active button mode. The `type` is mutable for the life of the behavior.
+- The behavior has a mutable `type` property (`'submit'`, `'reset'`, or `'button'`) that selects the active button mode. Its initial state follows native `<button>`'s missing-value default, the [Auto state](https://html.spec.whatwg.org/multipage/form-elements.html#attr-button-type-auto-state).
 - Form ownership is independent of `type`; a form-associated host keeps the same `form` and remains in `form.elements` for all types. The `'reset'` and `'button'` states are barred from constraint validation.
 - A host that is an eligible invoker (`type='button'` carrying `commandfor` or `popovertarget`) is a first-class command/popover invoker, so assistive technology observes the same relationships as for a native `<button>`.
+- A host with `interestfor` participates in interest invocation under the same conditions as a native `<button>` and exposes its target through `interestForElement`.
 
-`HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission or reset to act on a form. Without it, `behavior.form` is always `null` even when the element is inside a form. This is a divergence from native `<button>`. The platform could later imply form association, removing the extra opt-in.
+`HTMLButtonBehavior` builds on top of [form-associated custom elements (FACEs)](https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-elements). The custom element still has to opt in to form association with `static formAssociated = true` for submission or reset to act on a form. Without it, `behavior.form` is always `null` even when the element is inside a form. This is a divergence from native `<button>`.
 
 | Scenario | Behavior |
 |----------|----------|
@@ -239,14 +192,14 @@ A recurring concern about consolidating form-control semantics into an opt-in is
 
 - Each element behavior maps to a single native pattern (e.g., `HTMLButtonBehavior` provides exactly the semantics of `<button>`). Future element behaviors will need to follow the same naming convention.
 - Each behavior is specified in terms of existing HTML algorithms. The behavior is the union of those algorithms, applied to a custom element.
-- Web authors can override individual defaults. This already works today for role: `internals.role` overrides a behavior's default role without replacing the behavior. The same layering pattern can extend to other defaults (focusability, keyboard activation, and similar) if and when future proposals add the corresponding primitives on `ElementInternals`. The layering example in [Alternative 7](#alternative-7-low-level-primitives-on-elementinternals) walks through what that would look like.
+- Web authors can override individual defaults. This already works today for role: `internals.role` overrides a behavior's default role without replacing the behavior. The same layering pattern can extend to other defaults (focusability, keyboard activation, and similar) if and when future proposals add the corresponding primitives on `ElementInternals`. The layering example in [Alternative 9](#alternative-9-low-level-primitives-on-elementinternals) walks through what that would look like.
 
 ### Accessing behavior state
 
 Each behavior exposes properties from its corresponding native element, and is reached as a property on `internals.behaviors` named after the behavior (`HTMLButtonBehavior` as `internals.behaviors.button`). For `HTMLButtonBehavior`, the following properties are available (mirroring [`HTMLButtonElement`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement)):
 
 **Properties:**
-- `type` - selects the active button mode (`'submit'`, `'reset'`, or `'button'`); defaults to `'submit'`.
+- `type` - selects the active button mode (`'submit'`, `'reset'`, or `'button'`). Its initial state is native `<button>`'s Auto state; in ordinary button usage, the getter returns `'submit'`.
 - `disabled` - read-only. Reflects whether the element is disabled, which is determined by the standard form-control mechanism (the `disabled` attribute or a `<fieldset disabled>` ancestor, [spec](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-disabled)) and surfaced through `ElementInternals`. This proposal does not add a separately settable per-behavior disabled state.
 - `form` - read-only, delegates to `ElementInternals.form`.
 - `name`, `value` - submitter name and value. Read on submission (`type === 'submit'`).
@@ -262,9 +215,9 @@ To expose these properties to external code, authors define getters and setters 
 
 ### Behavior lifecycle
 
-| Event | Event |
+| Lifecycle point | Result |
 |-------|--------------|
-| Element creation (`new`, parser upgrade, or `customElements.upgrade()`) | The platform instantiates each declared behavior with its defined defaults. The behavior's `type` selects the initial active button mode (`'submit'` by default). Role, focusability, and pseudo-class participation are active from this point. |
+| Element creation (`new`, parser upgrade, or `customElements.upgrade()`) | The platform instantiates each declared behavior with its defined defaults. The button behavior starts in the native Auto state, which ordinarily behaves as submit. Role, focusability, and pseudo-class participation are active from this point. |
 | `attachInternals()` | Accessing its `behaviors` collection exposes the existing instances. |
 | Host connected | Form association runs if `formAssociated = true`. The behavior's `form` is resolved. |
 | Host disconnected | Form association detaches. The behavior remains attached for when the host re-connects. |
@@ -307,25 +260,26 @@ However, we must note that the [TAG endorses string constants](https://www.w3.or
 - Typos are not unique to strings. A misspelled identifier throws a `ReferenceError`, but a wrong-but-valid class (`static activationBehavior = HTMLButtonElement`) fails just as silently as a bad string until `customElements.define()` validates the property. A string token can be validated the same way, throwing on an unknown value.
 - Discoverability is resolvable. A string is opaque on its own, but an author can inspect a behavior's surface at runtime through the instance from `internals.behaviors`, and the set of tokens can be documented and feature-detected.
 
+A shorter shape such as `static activation = "button"` with `internals.activation` is an alternative naming design for the same model. This proposal remains open to that more compact spelling.
+
 #### Declaring behaviors
 
 The proposal uses one static property per behavior category:
 
 ```javascript
 static activationBehavior = HTMLButtonBehavior;
-static embeddedContentBehavior = HTMLImageBehavior;
 ```
 
-`activationBehavior` can contain at most one activation behavior, invalid or wrong-category classes are rejected at `customElements.define()`, and future categories are additive. A missing, `null`, or `undefined` property declares no behavior. Subclasses inherit the property through normal JavaScript property lookup and can override it.
+`activationBehavior` can contain at most one activation behavior, invalid or wrong-category classes are rejected at `customElements.define()`, and a missing, `null`, or `undefined` property declares no behavior. Subclasses inherit the property through normal JavaScript property lookup and can override it. A future category would add another declaration property.
 
 This was selected over a single array:
 ```javascript
-static behaviors = [HTMLButtonBehavior, HTMLImageBehavior];
+static behaviors = [HTMLButtonBehavior];
 ```
 
 and over a single object keyed by category:
 ```javascript
-static behaviors = { activationBehavior: HTMLButtonBehavior, embeddedContentBehavior: HTMLImageBehavior};
+static behaviors = { activationBehavior: HTMLButtonBehavior };
 ```
 
 The three shapes have the following trade-offs:
@@ -355,11 +309,48 @@ if (typeof HTMLButtonBehavior !== 'undefined') {
 This proposal supports common web component patterns:
 
 - Because behaviors are pinned to existing algorithms, this framework also enables polyfilling: authors can approximate new behaviors in *userland* before native support ships, though some capabilities (CSS pseudo-classes in particular) can only be partially approximated, often at a performance cost.
-- While this proposal uses an imperative API, the design supports a future declarative form. That declarative approach will be proposed separately once the imperative shape is agreed upon.
+- While this proposal uses a JavaScript API, the design supports a future declarative form. That approach will be proposed separately.
 
 ### Use case: Design system button
 
-A design system can use a single class with one `HTMLButtonBehavior` and forward the host's `type` attribute to the behavior.
+#### Before: reimplementing the platform behavior
+
+Fluent UI's [`BaseButton`](https://github.com/microsoft/fluentui/blob/master/packages/web-components/src/button/button.base.ts) makes the custom-element host the public button. The following abbreviated code illustrates the responsibilities its implementation has to coordinate today:
+
+```javascript
+class CurrentDesignSystemButton extends HTMLElement {
+  static formAssociated = true;
+
+  #internals = this.attachInternals();
+
+  constructor() {
+    super();
+    this.#internals.role = 'button';
+  }
+
+  keypressHandler(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      this.click();
+    }
+  }
+
+  formDisabledCallback(disabled) {
+    // Keep focusability, activation, and accessibility state synchronized.
+    this.tabIndex = disabled ? -1 : 0;
+  }
+
+  submitForm() {
+    // Call requestSubmit(), or create and insert a hidden native submit
+    // button when the custom element cannot be used as the submitter.
+  }
+}
+```
+
+The full implementation also handles click activation, reset, submitter override properties, and cleanup of the fallback control. These paths must remain coordinated as disabled state and `type` change.
+
+#### After: adopting the platform behavior
+
+A design system can instead use a single class with one `HTMLButtonBehavior` and forward the host's `type` and `formaction` attributes to the behavior:
 
 ```javascript
 class DesignSystemButton extends HTMLElement {
@@ -384,9 +375,8 @@ class DesignSystemButton extends HTMLElement {
   attributeChangedCallback(name, _oldValue, newValue) {
     switch (name) {
       case 'type': {
-        if (newValue === 'submit' || newValue === 'reset' || newValue === 'button') {
-          this.#buttonBehavior.type = newValue;
-        }
+        // The behavior maps missing and invalid values to the native Auto state.
+        this.#buttonBehavior.type = newValue ?? '';
         break;
       }
       case 'formaction': {
@@ -415,13 +405,82 @@ document.querySelector('ds-button').setAttribute('type', 'reset');
 // The behavior's type is now 'reset'. The next activation triggers form reset.
 ```
 
+For a design system, the practical value is that most of the non-differentiating code in the "before" example disappears: custom click and key handlers, disabled-state synchronization, form submission and reset plumbing, the implicit-submission fallback control, and role setup. The component retains its rendering and the public API forwarding it chooses to expose.
+
 ## Future work
 
-The near-term focus is to implement the other activation-category leaves surveyed in [the activation category](#the-activation-category): `HTMLLabelBehavior` and `HTMLRadioGroupBehavior`.
+### Near-term follow-up candidates
 
-A future extension of this proposal could allow developers to define their own reusable behaviors by subclassing an `ElementBehavior` base class. This direction is explored in a separate document: [Developer-defined behaviors](developer-defined-behaviors.md). It is not part of the current proposal and should be treated as forward-looking exploration.
+Label association/focus delegation and radio grouping are the closest follow-up candidates surveyed in [the activation category](#the-activation-category). They address established custom-element gaps.
+
+A future extension could also allow developers to define their own reusable behaviors. This direction is explored separately in [Developer-defined behaviors](developer-defined-behaviors.md), but it is not part of the current proposal. Deferring it keeps the initial button work narrower, but does not guarantee that subclassing can be added without affecting the behavior model.
 
 Although the behavior pattern could potentially be generalized to all HTML elements (e.g., a `<div>` element gains button behavior via behaviors), extending behaviors to native HTML elements would raise questions about correctness and accessibility.
+
+### Future extensibility of the API (non-normative)
+
+The following sketch is to help answer questions of how the framework could be developed. `EmbeddedContentBehavior`, `HTMLLabelBehavior`, `HTMLRadioGroupBehavior`, `HTMLCheckboxBehavior`, and `HTMLImageBehavior` aren't APIs proposed by this document.
+
+```mermaid
+classDiagram
+    class ElementBehavior
+    class ActivationBehavior {
+        <<illustrative category>>
+    }
+    class EmbeddedContentBehavior {
+        <<illustrative category>>
+    }
+    class HTMLButtonBehavior
+    class HTMLLabelBehavior
+    class HTMLRadioGroupBehavior
+    class HTMLCheckboxBehavior
+    class HTMLImageBehavior
+    ElementBehavior <|-- ActivationBehavior
+    ElementBehavior <|-- EmbeddedContentBehavior
+    ActivationBehavior <|-- HTMLButtonBehavior
+    ActivationBehavior <|-- HTMLLabelBehavior
+    ActivationBehavior <|-- HTMLRadioGroupBehavior
+    ActivationBehavior <|-- HTMLCheckboxBehavior
+    EmbeddedContentBehavior <|-- HTMLImageBehavior
+```
+
+For example, a future composition design might allow button activation and image rendering to be applied to the same host, producing something similar to `<input type="image">`:
+
+```javascript
+class ImageButton extends HTMLElement {
+  static formAssociated = true;
+  static observedAttributes = ['src', 'alt'];
+  static activationBehavior = HTMLButtonBehavior;
+  // Illustrative only.
+  static embeddedContentBehavior = HTMLImageBehavior;
+
+  #internals;
+  #image;
+
+  constructor() {
+    super();
+    this.#internals = this.attachInternals();
+    // The native Auto state ordinarily behaves as submit.
+    this.#image = this.#internals.behaviors.image;
+  }
+
+  attributeChangedCallback(name, _old, value) {
+    if (name === 'src') {
+      this.#image.src = value;
+    }
+    if (name === 'alt') {
+      this.#image.alt = value;
+    }
+  }
+}
+customElements.define('image-button', ImageButton);
+```
+
+```html
+<form action="/search">
+  <image-button src="/go.png" alt="Search"></image-button>
+</form>
+```
 
 ## Open questions
 
@@ -516,7 +575,7 @@ HTMLElement.attributeRegistry.define('submit-button', SubmitButtonAttribute);
 
 Custom attributes are complementary but don't provide access to native behaviors. They're useful for *userland* behavior composition but can't trigger form submission, invoke popovers through platform code, etc.
 
-### Alternative 4: Customized Built-ins
+### Alternative 4: Customized Built-ins (limited browser compatibility)
 
 Extend native element classes directly.
 
@@ -538,15 +597,43 @@ customElements.define('fancy-button', FancyButton, { extends: 'button' });
 - Natural inheritance model.
 
 **Cons:**
-- Interoperability issues across browsers.
-- [Limited Shadow DOM support](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#elements_you_can_attach_a_shadow_to) - only certain elements can be shadow hosts
-- Can't use `ElementInternals` API.
+- The current model has [limited Shadow DOM support](https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow#elements_you_can_attach_a_shadow_to), because only certain built-in elements can be shadow hosts.
+- Customized built-ins currently can't use the `ElementInternals` API.
 - The `is=` syntax isn't considered developer-friendly to some.
-- Doesn't support composing behaviors from different base elements.
+- The current single-inheritance model doesn't support composing capabilities from different built-in base elements.
 
-While customized built-ins are useful where supported, the issues listed above makes them unsuitable as the primary solution.
+Changes can be done to address the cons and *shortcomings* of customized built-ins. For example, Shadow DOM or `ElementInternals` access could be extended and an alternative registration model could avoid `is=`.
 
-### Alternative 5: Expose certain behavioral attributes via ElementInternals (Proposed)
+### Alternative 5: Semantic delegation
+
+The [Semantic Delegate](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md) exploration allows a native element inside a shadow root to stand in for its custom-element host. A component could keep an internal `<button>` or `<input>` and designate it as the host's semantic delegate.
+
+**Pros:**
+- Reuses a complete native element and automatically benefits as that element gains new platform behavior.
+- Fits component libraries that already wrap native controls.
+- Could reduce manual forwarding of accessibility relationships, labeling, and form behavior.
+
+**Cons and open questions:**
+- Requires an internal native element and a two-element state model, which differs from components where the host itself is intended to be the control.
+- A single delegate may not represent components with multiple semantic parts.
+- The original exploration leaves the exact scope open, including form participation, focus, events, pseudo-classes, host attributes, methods, and properties.
+- Property ownership, conflicts, encapsulation, and behavior across nested shadow roots need specification.
+
+### Alternative 6: `formElement` ([Proposed](https://github.com/whatwg/html/issues/12743))
+
+[Reference Target](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/reference-target-explainer.md) lets references aimed at a custom-element host, such as `for`, `commandfor`, or ARIA ID references, resolve to an element inside its shadow tree. The separate [`formElement` proposal](https://github.com/whatwg/html/issues/12743) would let a form control inside a shadow tree associate with a form in an ancestor tree.
+
+**Pros:**
+- `formElement` addresses the outbound cross-shadow references for form ownership and may eliminate manual submission code.
+
+**Cons:**
+- `formElement` doesn't supply the host's native role, focusability, activation, public API, or pseudo-class state.
+- Authors still coordinate state and public properties between the host and internal control.
+- The internal control remains the native form control and activation target.
+
+Semantic delegation, Reference Target, and `formElement` address components built around an internal native control. Platform-provided behaviors additionally target components where the custom element host itself is the control.
+
+### Alternative 7: Expose certain behavioral attributes via ElementInternals (Proposed)
 
 Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`) via `ElementInternals` so custom elements can adopt them without exposing the attribute to the user. See [issue #11752](https://github.com/whatwg/html/issues/11752).
 
@@ -557,9 +644,9 @@ Expose specific behavioral attributes (like `popover`, `draggable`, `focusgroup`
 **Cons:**
 - Doesn't currently address form submission behavior.
 - Scoped to specific attributes rather than general behaviors.
-- Difficult coflict resolution.
+- Difficult conflict resolution.
 
-### Alternative 6: Fully Customizable Native Elements
+### Alternative 8: Fully Customizable Native Elements
 
 Modify existing native HTML elements to be fully stylable and customizable, similar to [Customizable Select](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select).
 
@@ -574,7 +661,7 @@ Modify existing native HTML elements to be fully stylable and customizable, simi
 
 This can be a parallel effort. Even if all native elements were customizable, there would still be valid use cases for autonomous custom elements that need to participate in native behaviors while maintaining their own identity and API.
 
-### Alternative 7: Low-level primitives on ElementInternals
+### Alternative 9: Low-level primitives on ElementInternals
 
 Expose individual primitives on `ElementInternals`. Authors compose every native capability piece by piece.
 
@@ -678,7 +765,7 @@ class ScriptedSubmitter extends HTMLElement {
 }
 ```
 
-### Alternative 8: TC39 Decorators
+### Alternative 10: TC39 Decorators
 
 Use [TC39 decorators](https://github.com/tc39/proposal-decorators) to attach behaviors to custom element classes.
 
@@ -704,9 +791,6 @@ class CustomButton extends HTMLElement {
 
 ### Accessibility
 
-- Platform-provided behaviors must set appropriate default ARIA roles and states (e.g., `role="button"` for `HTMLButtonBehavior`).
-- When composed behaviors provide different implicit role defaults, a non-null role from the activation behavior takes precedence over the embedded-content role. Author-provided role semantics take precedence over all behavior defaults.
-- Custom elements using a platform-provided behavior must gain the same keyboard handling and focus management as their native counterparts (e.g., Space/Enter activation).
 - Authors must be able to override default semantics using `ElementInternals.role` and `ElementInternals.aria*` properties if the default behavior does not match their specific use case.
 - The ARIAWG reviewed an alternative to this proposal on [2025-09-25](https://www.w3.org/2025/09/25-aria-minutes.html#d0af) (tracking issue [w3c/aria#2637](https://github.com/w3c/aria/issues/2637)). The WG agreed that role and focusability defaults are appropriate when a custom element opts into an activation behavior, with form association left to per-behavior judgment. This proposal applies that guidance: `HTMLButtonBehavior` provides default `role="button"` and focusability, and the element opts into form association separately via `static formAssociated = true`.
 
@@ -745,7 +829,7 @@ class CustomButton extends HTMLElement {
 How this proposal addresses these comments:
 
 - `static activationBehavior = HTMLButtonBehavior` is a declarative class-level opt-in, and the platform-created instance is accessed through `attachInternals()`.
-- Separate category properties allow composition while preventing same-category collisions by construction.
+- A single property (`activationBehavior`) prevents same-category collisions by construction.
 
 #### Issue [whatwg/html#11061](https://github.com/whatwg/html/issues/11061)
 
@@ -757,9 +841,9 @@ In addition to similar comments stated above, a 2025 [historical-perspective com
 
 How this proposal addresses these comments:
 
-- Element behaviors should be named for its capability (e.g., `HTMLButtonBehavior`).
+- Element behaviors should be named for their capabilities (e.g., `HTMLButtonBehavior`).
 - The proposal extends the `ElementInternals` decomposition pattern in form-associated custom elements and `ARIAMixin`. It does not introduce a sugar layer that bypasses `attachInternals()`, and it does not automatically mirror native-element APIs onto custom elements.
-- Behavior classes are assigned to category-specific properties rather than selected by a singular `type` string. A custom element can declare one behavior in each category, and future low-level primitives can override individual pieces of any behavior. See [Behavior categories and composition](#behavior-categories-and-composition) and [Alternative 7: Low-level primitives on `ElementInternals`](#alternative-7-low-level-primitives-on-elementinternals).
+- The current explainer assigns the button class to the category-specific `activationBehavior` property rather than selecting it through a singular `type` string. Additional categories and composition remain future design work, and future low-level primitives could override individual defaults. See [Behavior categories and composition](#behavior-categories-and-composition) and [Alternative 9: Low-level primitives on `ElementInternals`](#alternative-9-low-level-primitives-on-elementinternals).
 - Behaviors are declared as static class members (starting with `static activationBehavior`), mirroring `static formAssociated`, so a base class can carry them to subclasses.
 - Form submission and invoker behavior are not bundled: `HTMLButtonBehavior` with `type='submit'` or `'reset'` participates in forms and ignores invoker attributes, while `type='button'` handles `commandfor`/`popovertarget` and does not submit. The active mode is selected by `type`, matching native `<button>`.
 
@@ -787,6 +871,9 @@ Thanks to the following proposals, articles, frameworks, and languages for their
 - [Real Mixins with JavaScript Classes](https://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/) by [Justin Fagnani](https://github.com/justinfagnani).
 - [ElementInternals.type proposal](https://github.com/whatwg/html/issues/11061).
 - [Custom Attributes proposal](https://github.com/WICG/webcomponents/issues/1029).
+- [Semantic Delegate exploration](https://github.com/alice/aom/blob/gh-pages/semantic-delegate.md).
+- [Reference Target proposal](https://github.com/WICG/webcomponents/blob/gh-pages/proposals/reference-target-explainer.md).
+- [`formElement` proposal](https://github.com/whatwg/html/issues/12743).
 - [TC39 Maximally Minimal Mixins proposal](https://github.com/tc39/proposal-mixins).
 - [TC39 Decorators proposal](https://github.com/tc39/proposal-decorators).
 - Lit framework's [reactive controllers pattern](https://lit.dev/docs/composition/controllers/).
@@ -798,6 +885,7 @@ Thanks to the following proposals, articles, frameworks, and languages for their
 - [whatwg/html#9110](https://github.com/whatwg/html/issues/9110) - Popover invocation
 - [whatwg/html#5423](https://github.com/whatwg/html/issues/5423), [whatwg/html#11584](https://github.com/whatwg/html/issues/11584) - Label behaviors
 - [whatwg/html#10220](https://github.com/whatwg/html/issues/10220) - Custom elements as forms
+- [whatwg/html#12743](https://github.com/whatwg/html/issues/12743) - Programmatic form association
 - [w3c/tpac2023-breakouts#44](https://github.com/w3c/tpac2023-breakouts/issues/44) - TPAC 2023 discussion
 - [WebKit/standards-positions#97](https://github.com/WebKit/standards-positions/issues/97) - WebKit position on customized built-ins
 - [MicrosoftEdge/MSEdgeExplainers#1353](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1353) - Discrete behavior categories and composition
