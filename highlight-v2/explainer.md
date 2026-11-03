@@ -13,58 +13,56 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Custom Highlight API Extensions](#custom-highlight-api-extensions)
-  - [Authors](#authors)
-  - [Participate](#participate)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [User-Facing Problem](#user-facing-problem)
-    - [Goals](#goals)
-    - [Non-goals](#non-goals)
-  - [User research](#user-research)
-  - [Proposed Approach](#proposed-approach)
-    - [CSS Animations and Transitions](#css-animations-and-transitions)
-      - [Effect identity](#effect-identity)
-      - [Animations](#animations)
-      - [Transitions](#transitions)
-      - [Events](#events)
-      - [Web Animations API](#web-animations-api)
-    - [Per-range highlight styles](#per-range-highlight-styles)
-    - [Opacity](#opacity)
-      - [Resolving highlight opacity](#resolving-highlight-opacity)
-      - [Applying the winning opacity](#applying-the-winning-opacity)
-      - [Interaction with element opacity](#interaction-with-element-opacity)
-    - [Solving staggered text animation](#solving-staggered-text-animation)
-    - [Solving loading shimmer](#solving-loading-shimmer)
-    - [Solving spoken-word tracking](#solving-spoken-word-tracking)
-    - [Solving data-driven range styling](#solving-data-driven-range-styling)
-  - [Alternatives considered](#alternatives-considered)
-    - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
-      - [Pros](#pros)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
-    - [CSS Text Transitions](#css-text-transitions)
-      - [Pros](#pros-1)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
-    - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
-      - [Pros](#pros-2)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
-    - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
-      - [Pros](#pros-3)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
-    - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
-      - [Pros](#pros-4)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
-    - [Per-highlight atomic paint groups](#per-highlight-atomic-paint-groups)
-      - [Pros](#pros-5)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
-    - [Per-contribution opacity in the existing paint order](#per-contribution-opacity-in-the-existing-paint-order)
-      - [Pros](#pros-6)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-6)
-    - [Compositing `color` animations](#compositing-color-animations)
-      - [Pros](#pros-7)
-      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-7)
-  - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
-  - [References \& acknowledgements](#references--acknowledgements)
+- [Introduction](#introduction)
+- [User-Facing Problem](#user-facing-problem)
+  - [Goals](#goals)
+  - [Non-goals](#non-goals)
+- [User research](#user-research)
+- [Proposed Approach](#proposed-approach)
+  - [CSS Animations and Transitions](#css-animations-and-transitions)
+    - [Effect identity](#effect-identity)
+    - [Animations](#animations)
+    - [Transitions](#transitions)
+    - [Events](#events)
+    - [Web Animations API](#web-animations-api)
+  - [Non-semantic highlight style variations](#non-semantic-highlight-style-variations)
+    - [Option 1: Per-range highlight styles](#option-1-per-range-highlight-styles)
+    - [Option 2: The `range-index()` function](#option-2-the-range-index-function)
+  - [Opacity](#opacity)
+    - [Resolving highlight opacity](#resolving-highlight-opacity)
+    - [Applying the winning opacity](#applying-the-winning-opacity)
+    - [Interaction with element opacity](#interaction-with-element-opacity)
+  - [Solving staggered text animation](#solving-staggered-text-animation)
+    - [Using `range-index()`](#using-range-index)
+  - [Solving loading shimmer](#solving-loading-shimmer)
+  - [Solving spoken-word tracking](#solving-spoken-word-tracking)
+- [Alternatives considered](#alternatives-considered)
+  - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
+    - [Pros](#pros)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
+  - [CSS Text Transitions](#css-text-transitions)
+    - [Pros](#pros-1)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
+  - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
+    - [Pros](#pros-2)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
+  - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
+    - [Pros](#pros-3)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
+  - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
+    - [Pros](#pros-4)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
+  - [Per-highlight atomic paint groups](#per-highlight-atomic-paint-groups)
+    - [Pros](#pros-5)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
+  - [Per-contribution opacity in the existing paint order](#per-contribution-opacity-in-the-existing-paint-order)
+    - [Pros](#pros-6)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-6)
+  - [Compositing `color` animations](#compositing-color-animations)
+    - [Pros](#pros-7)
+    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-7)
+- [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+- [References & acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -180,8 +178,8 @@ Consequently, the API cannot currently replace element wrappers for these effect
 We propose three enhancements to the Custom Highlight API:
 
 1. CSS Animations and Transitions on highlight ranges.
-1. Per-range styles to allow for minor variations on a given `::highlight()` rule.
-1. Opacity support on highlight ranges.
+2. Style variations among ranges within a single Highlight using either per-range declarations or a `range-index()` function.
+3. Opacity support on highlight ranges.
 
 ### CSS Animations and Transitions
 
@@ -410,16 +408,26 @@ immediately discards its retained target, style, and paint state. Calling
 `cancel()` also follows the existing Web Animations and CSS event rules,
 including dispatching the corresponding cancellation event.
 
-### Per-range highlight styles
+### Non-semantic highlight style variations
 
 A staggered text fade requires each successive word to start its animation
 slightly later than the preceding word. This is technically achievable with
 custom highlights today, but in ways that are poorly suited to the scenario.
 Existing techniques are discussed in the "Alternatives Considered" section.
 
+Conceptually, a given highlight used to implement a text entry animation
+represents a single semantic; the individual stagger offsets are implementation
+details of that semantic. Thus, it makes sense to introduce the staggers as
+variations applied to each range included in the highlight. We propose two
+different options for doing so. These options are not mutually exclusive;
+either or both could be implemented depending on adjacent use cases.
+
+#### Option 1: Per-range highlight styles
+
 Staggering animation effects that work on a per-element basis can take advantage
-of each element's inline style to achieve this effect. We propose a capability
-for highlight ranges that aims for similar flexibility.
+of each element's inline style to achieve this effect. As one option for
+non-semantic variations within a highlight, we propose a capability that aims
+for flexibility similar to element inline styles.
 
 The proposed API is:
 
@@ -519,6 +527,42 @@ members of one `Highlight`, including treating overlapping ranges as their
 union. The additional layers are needed only where per-range styling makes an
 observable difference.
 
+#### Option 2: The `range-index()` function
+
+Authors can achieve styling variances among a set of sibling elements using the
+`sibling-index()` and `sibling-count()` functions. As another option for
+non-semantic variations within a highlight, we propose a `range-index()` function
+which works similarly for ranges within a custom highlight.
+
+A Highlight object is defined to be `setlike<AbstractRange>`, which means the
+Ranges within a highlight are kept as an ordered set. When used in a property
+applied to a highlight, `range-index()` resolves to the one-based index of the Range
+within that ordered set. The value is the same for every originating element covered by the Range.
+In other contexts, `range-index()` resolves to the guaranteed-invalid value.
+
+A new range added to the highlight gets the next available index. When a range is
+deleted, subsequent ranges have their indices reduced by 1, and any styles
+dependent on `range-index()` are recalculated. Such changes follow typical CSS
+update rules and may trigger new transitions or update animations accordingly.
+
+Styles that differ because of `range-index()` use the same overlapping-range
+layering rules described under Option 1.
+
+With this function, an author could declare a staggered fade highlight as follows:
+
+```css
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+::highlight(response-words) {
+  --stagger-interval: 6ms;
+  animation: fade-in 600ms ease-in-out both;
+  animation-delay: calc(var(--stagger-interval) * (range-index() - 1));
+}
+```
+
 ### Opacity
 
 To take advantage of compositor support in modern engines, staggering animation
@@ -542,18 +586,43 @@ style. The resulting value applies to the portion of the range painted by that
 originating element.
 
 When highlight layers overlap within an originating element, their opacity
-values do not multiply. Instead, the highest active layer that specifies an
-opacity value determines the winning opacity. If no active highlight specifies
+values do not multiply. Instead, the highest active layer that contributes an
+opacity value determines the winning opacity. If no active highlight contributes
 opacity, the resulting highlight opacity value is 1.
+
+For `color`, a single winning text color is determined by finding the topmost
+highlight that has a value for `color` other than `currentColor`. For `opacity`
+we have no such sentinel value. To fill that gap, we introduce `auto` as a
+valid value for `opacity` and add the following to the UA stylesheet:
+
+```css
+/* See https://drafts.csswg.org/css-pseudo-4/#highlight-cascade for why :root */
+:root::selection,
+:root::search-text,
+:root::target-text,
+:root::spelling-error,
+:root::grammar-error,
+:root::highlight(*) {
+  opacity: auto;
+}
+```
+
+In all contexts other than a highlight pseudo-element, the value of `auto`
+computes to `1`. In a highlight pseudo-element, `auto` indicates that the highlight
+does not contribute an opacity value.
+In the context of a highlight, a transition or animation between `auto` and a
+numeric value is handled as a discrete flip.
 
 For example, where two highlights overlap:
 
 | Lower highlight | Upper highlight | Resulting opacity |
 |---|---|---|
 | `opacity: .4` | `opacity: .7` | `.7` |
-| `opacity: .4` | Opacity omitted | `.4` |
+| `opacity: .4` | Opacity omitted (`auto`)* | `.4` |
 | `opacity: .4` | `opacity: 1` | `1` |
 | `opacity: .4` | `opacity: 0` | `0` |
+
+\* *assuming no numeric value is inherited from an ancestor highlight*
 
 #### Applying the winning opacity
 
@@ -599,8 +668,8 @@ is faded to .75, for a net effective opacity of .25 x .75 = .1875.
 ### Solving staggered text animation
 
 The following example uses `Intl.Segmenter` to create one range per word,
-assigns each range a different animation delay, and animates the highlight's
-opacity.
+assigns each range a different animation delay using the per-range style option,
+and animates the highlight's opacity.
 
 ```html
 <style>
@@ -702,6 +771,17 @@ Previously revealed words remain visible through `animation-fill-mode: both`,
 while each new range gets its own animation timeline. The same
 `prefers-reduced-motion` rule also applies to the newly added ranges.
 
+#### Using `range-index()`
+
+The same solution could be implemented using `range-index()` by adding
+`animation-delay: calc(6ms * (range-index() - 1))` to the `::highlight(response-words)`
+rule and removing the calls to `getRangeStyle()`.
+However, in `appendResponseText()`, new ranges would continue the stagger
+according to their position in the existing highlight rather than restarting
+at zero. Restarting each batch at zero would require waiting for the previous
+batch to finish. The function could then either remove existing ranges from the
+highlight, or register a new highlight containing the new ranges under the same name.
+
 <img src="images/staggered-fade.gif" alt="Staggered text entry animation, with subsequent appended text">
 
 ### Solving loading shimmer
@@ -799,48 +879,6 @@ The same pattern can use two `Highlight` objects to track the current word and
 current sentence independently.
 
 <img src="images/spoken-word.gif" alt="Text with a highlight moving from one word to the next and fading smoothly in and out">
-
-### Solving data-driven range styling
-
-Range-decoration systems commonly receive presentation data from an
-application model. For example, Lexical's [collaborative selection
-implementation](https://github.com/facebook/lexical/blob/main/packages/lexical-yjs/src/SyncCursors.ts)
-currently generates a highlight name and CSS rule for each collaborator's
-arbitrary color.
-
-Per-range styles allow one logical `Highlight` and one shared CSS rule to
-represent those selections:
-
-```css
-::highlight(remote-selections) {
-  background-color:
-      color-mix(in srgb, var(--selection-color) 35%, transparent);
-  transition: background-color 120ms;
-}
-```
-
-```js
-const remoteSelections = new Highlight();
-CSS.highlights.set("remote-selections", remoteSelections);
-
-function addRemoteSelection(range, color) {
-  remoteSelections.add(range);
-  remoteSelections.getRangeStyle(range)
-      .setProperty("--selection-color", color);
-}
-
-function removeRemoteSelection(range) {
-  remoteSelections.delete(range);
-}
-```
-
-The application supplies only the per-range data. The stylesheet continues to
-control how the color is presented, including its alpha, transition timing,
-forced-color behavior, and any future theme-specific adjustments. Syntax
-highlighters and analysis tools can use the same pattern for token categories,
-confidence scores, diagnostic severity, or other range-specific values.
-
-<img src="images/remote-selections.gif" alt="Collaborative text editing session with different editors' selections represented by different colors">
 
 ## Alternatives considered
 
@@ -1093,3 +1131,5 @@ Many thanks for valuable feedback and advice from:
 - Greg Whitworth
 - Hoch Hochkeppel
 - Kurt Catti-Schmidt
+- Megan Gardner
+- Tab Atkins-Bittner
