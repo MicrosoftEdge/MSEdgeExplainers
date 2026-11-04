@@ -1,10 +1,11 @@
-# CSS ::tooltip Pseudo Element
+# Customization and accessibility improvements for built-in tooltips
 
 ## Authors
 
 - [Alison Maher](https://github.com/alisonmaher)
+- [Patrick Brosset](https://github.com/captainbrosset)
 - [Lea Verou](https://github.com/LeaVerou) (author of the [original
-proposal](https://github.com/w3c/csswg-drafts/issues/8930)) 
+proposal](https://github.com/w3c/csswg-drafts/issues/8930))
 
 ## Participate
 
@@ -34,6 +35,8 @@ content location of future work and discussions.
 - [Goals](#goals)
 - [Non-goals](#non-goals)
 - [User research](#user-research)
+  - [Current `title` attribute usage](#current-title-attribute-usage)
+  - [Use cases for custom tooltips](#use-cases-for-custom-tooltips)
 - [Existing and upcoming tools available for custom tooltips](#existing-and-upcoming-tools-available-for-custom-tooltips)
   - [Use an existing library or component](#use-an-existing-library-or-component)
   - [Create a fully custom tooltip](#create-a-fully-custom-tooltip)
@@ -47,22 +50,25 @@ content location of future work and discussions.
     - [Chromium](#chromium-1)
     - [Gecko](#gecko-1)
     - [Webkit](#webkit-1)
-- [The `::tooltip` pseudo element](#the-tooltip-pseudo-element)
-  - [How to trigger `::tooltip` default styles?](#how-to-trigger-tooltip-default-styles)
-  - [How to set the `::tooltip` content?](#how-to-set-the-tooltip-content)
+- [Proposed solution](#proposed-solution)
+- [Elements the tooltip can be applied to](#elements-the-tooltip-can-be-applied-to)
+- [Opt-in mechanism](#opt-in-mechanism)
+  - [Opt-in mechanism A - The new `tooltip` HTML attribute](#opt-in-mechanism-a---the-new-tooltip-html-attribute)
+  - [Opt-in mechanism B - The `appearance:base` CSS declaration](#opt-in-mechanism-b---the-appearancebase-css-declaration)
+- [Styling mechanism: the `::tooltip` pseudo element](#styling-mechanism-the-tooltip-pseudo-element)
   - [Positioning for `::tooltip`](#positioning-for-tooltip)
-  - [`::tooltip` sizing](#tooltip-sizing)
+  - [Sizing the `::tooltip`](#sizing-the-tooltip)
   - [Default styles for `::tooltip`](#default-styles-for-tooltip)
   - [What styles can be applied to `::tooltip`?](#what-styles-can-be-applied-to-tooltip)
+  - [Customizing the delay](#customizing-the-delay)
   - [`::tooltip` style inheritance](#tooltip-style-inheritance)
   - [What user interaction triggers the built-in tooltip?](#what-user-interaction-triggers-the-built-in-tooltip)
-  - [Dependencies on non-stable features](#dependencies-on-non-stable-features)
+- [Dependencies on non-stable features](#dependencies-on-non-stable-features)
 - [Key scenarios](#key-scenarios)
-  - [Scenario 1: Opt-into the new base `::tooltip` styles](#scenario-1-opt-into-the-new-base-tooltip-styles)
+  - [Scenario 1: Get a consistent and accessible tooltip](#scenario-1-get-a-consistent-and-accessible-tooltip)
   - [Scenario 2: Adjusting the look and feel of built-in tooltips](#scenario-2-adjusting-the-look-and-feel-of-built-in-tooltips)
   - [Scenario 3: Adjusting tooltip timing](#scenario-3-adjusting-tooltip-timing)
-  - [Scenario 4: Setting the name using `title` without rendering a tooltip](#scenario-4-setting-the-name-using-title-without-rendering-a-tooltip)
-  - [Scenario 5: Providing custom positioning to a tooltip](#scenario-5-providing-custom-positioning-to-a-tooltip)
+  - [Scenario 4: Providing custom positioning to a tooltip](#scenario-4-providing-custom-positioning-to-a-tooltip)
 - [Accessibility Considerations](#accessibility-considerations)
   - [What is the current accessibility experience of tooltips across browsers?](#what-is-the-current-accessibility-experience-of-tooltips-across-browsers)
   - [Proposed improvements](#proposed-improvements)
@@ -80,6 +86,7 @@ content location of future work and discussions.
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+
 ## Introduction
 
 Tooltips are used by authors to provide additional contextul information to users
@@ -88,18 +95,33 @@ a textbox that appears on hover (or potentially some other user interaction, lik
 keyboard focus, or long-press on a touchscreen device) on the element the
 tooltip is associated with.
 
+![A button titled Button Example with a hover tooltip that says This is a button!](images/simple-button-chromium-windows.png)
+
 Authors can utilize the browser's built-in tooltips by setting the
 [`title`](https://html.spec.whatwg.org/multipage/dom.html#attr-title)
 attribute on an element of interest, or via the [`<title>`](
 https://html.spec.whatwg.org/multipage/semantics.html#the-title-element)
-element in SVG. However, the tooltip that appears as a result is not
-customizable in any way by the author.
+element in SVG.
+
+However, the tooltip that appears as a result is not customizable in any way by
+the author. In particular, authors cannot:
+
+* Change the visual aspect of the tooltip box (e.g., colors, fonts, borders).
+* Change the positioning of the tooltip.
+* Change the timing of when the tooltip appears or disappears.
 
 This lack of customizability has been a source of common frustration for authors
 who want to keep a consistent look and feel across all of their UI.
 
-This document explores a new `::tooltip` pseudo element that aims to provide authors
-with a low effort mechanism to adjust styles for browser built-in tooltips without
+In addition, the `title` attribute is strongly discouraged by many developer
+resources, as it can lead to accessibility issues. For example:
+
+* [The Trials and Tribulations of the Title Attribute](https://www.24a11y.com/2017/the-trials-and-tribulations-of-the-title-attribute/).
+* [Accessibility concerns in _title HTML global attribute_](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/title#accessibility_concerns), at MDN.
+* [Note in The title attribute section of the HTML specification](https://html.spec.whatwg.org/multipage/dom.html#the-title-attribute)
+
+This document explores a new opt-in tooltip mechanism that aims to provide authors
+with a low effort way to adjust styles for browser built-in tooltips without
 having to create a fully custom solution, leaving positioning, input handling, and
 accessibility for their tooltips up to the browser.
 
@@ -112,28 +134,31 @@ the author by default.
 * Allow authors to override the default positioning behavior of the built-in
 tooltips.
 * Allow authors to change the timing of built-in tooltips.
-* Improve accessibility of the `title` attribute, particularly for keyboard users.
 * Guarantee security best practices, given that tooltips today can extend past
 the bounds of the browser window.
-* Styling built-in tooltips should produce consistent results across all browsers 
+* Styling built-in tooltips should produce consistent results across all browsers
 on the same OS, ensuring an interoperable experience for authors.
+* Allow authors to reuse their built-in tooltip styles for richer custom
+tooltips, for example those built by using the Popover API.
 
 ## Non-goals
 
 * This proposal is not meant to support tooltips with arbitrary HTML content, which
 can be covered by existing solutions, like `popover`, CSS Anchor positioning, and
-the not-yet-available `interestfor` attribute.
-* Provide a means to set a [pointer](#tooltip-pointerarrow) on the `title` based
-tooltip. The solution should be specified to allow for this functionality in
-the future, though.
+the `interestfor` attribute.
+* Provide a means to set a [pointer](#tooltip-pointerarrow) on the tooltip. The
+solution should be specified to allow for this functionality in the future, though.
+* Provide a means to set the content of the tooltip in CSS.
 
 ## User research
 
-Use cases in this explainer were collected from the discussion in issue
-[8930](https://github.com/w3c/csswg-drafts/issues/8930). Additional inspiration
-was drawn from discussions in issues
-[9447](https://github.com/w3c/csswg-drafts/issues/9447), and OpenUI issue
-[730](https://github.com/openui/open-ui/issues/730).
+Use cases in this explainer were collected from:
+
+* The discussion in CSSWG issue [#8930: Standardize tooltip styling and expose as ::tooltip](https://github.com/w3c/csswg-drafts/issues/8930).
+* Discussions in CSSWG issue [#9447: Which properties should be available to ::tooltip?](https://github.com/w3c/csswg-drafts/issues/9447).
+* OpenUI issue [#730: Consider providing a way for authors to style the title attribute's tooltip](https://github.com/openui/open-ui/issues/730).
+* [Title Attribute Usage — Findings Report](https://github.com/captainbrosset/title-attribute-research/blob/main/REPORT.md).
+* Discussions on two social media threads: [on Bluesky](https://bsky.app/profile/did:plc:vcrxgrk7qttaunjut34oe5oq/post/3mwlodpeuoc2b) and [on Mastodon](https://mas.to/@patrickbrosset/117349471742171926).
 
 There are also many articles on the web that walk authors through various
 options for creating custom tooltips using tools available to them today.
@@ -141,27 +166,66 @@ One such [article](https://blog.replaybird.com/css-tooltip-examples/)
 walks through different options, along with various examples and use cases
 for tooltips on the web.
 
+### Current `title` attribute usage
+
+Our [research](https://github.com/captainbrosset/title-attribute-research/blob/main/README.md), based on Tranco's top sites list, showed that:
+
+* Current usage of the `title` attribute in top sites is dominated by `<a>` and `<img>` elements.
+* For both elements, most `title` attribute values are redundant. They carry no meaningfully new information beyond what's already available via the link text or image `alt` attribute.
+
+We are attributing this redundancy to:
+* Search engine optimization patterns.
+* Accidental redundancy due to CMS tools.
+* Developer oversight or lack of awareness about accessibility best practices.
+
+In the same research, cases where the `title` attribute was genuinely different included:
+* Disclosure of click/interaction behavior.
+* Attribution/credit.
+* Restating a truncated or iconic label in full.
+
+When it comes to link and image elements, there are more accessible native alternatives to the above: `aria-label`, `aria-describedby`, a visible caption, or just fuller `alt` attribute or link text.
+
+### Use cases for custom tooltips
+
+As the previous section showed, the `title` attribute is mostly used redundantly or incorrectly. However, the [large demand for custom tooltip libraries](#use-an-existing-library-or-component) shows that there are legitimate use cases for custom tooltips.
+
+According to [Tooltips & Toggletips](https://inclusive-components.design/tooltips-toggletips/):
+
+* Labeling icon-only controls:
+
+  A button represented only by an icon. The tooltip provides the missing label, such as "Notifications" or "Settings".
+
+* Providing extra clarification about a control:
+
+  The control already has a label, but some additional explanation may help. For example when the label says "Notifications", the tooltip could say "View notifications and manage settings".
+
+* Dense toolbars where visible text truly won't fit:
+
+  For example, WYSIWYG editor toolbar with many controls.
+
 ## Existing and upcoming tools available for custom tooltips
 
-If an author would like to adjust the style of their tooltip today, they must resort
-to one of the following alternative approaches to the built-in tooltip that they
+If an author wants to display a custom style tooltip today, they must resort to
+one of the following alternative approaches to the built-in tooltip that they
 get with the `title` attribute.
 
 ### Use an existing library or component
 
 Authors can use an existing library or component for a fully customizable tooltip.
 Some example libraries include:
-  - https://fluent2.microsoft.design/components/web/react/core/tooltip/usage
-  - https://www.opentip.org/
-  - https://floating-ui.com/
-  - https://www.npmjs.com/search?ranking=popularity&q=tooltip
-  - Many more   
+
+* [Fluent 2 Tooltip component](https://fluent2.microsoft.design/components/web/react/core/tooltip/usage)
+* [opentip library](https://www.opentip.org/)
+* [Floating UI library](https://floating-ui.com/)
+* [Radix UI React tooltip component](https://www.radix-ui.com/primitives/docs/components/tooltip)
+* [Many tooltip NPM packages](https://www.npmjs.com/search?ranking=popularity&q=tooltip)
+* Many more
 
 It is clear that there are many libraries and components for creating custom tooltips
 that authors can use to solve their need for more customization.
 
 If the library chosen is well architected to properly handle accessibility, this can
-also be a convenient way to get such functionality "for free". However, relying on
+also be a convenient way to get such functionality "for free". However, relying on an
 external library to get accessibility right can be risky, which may limit the usability
 if not done correctly.
 
@@ -185,37 +249,35 @@ want to do is adjust a few simple styles on the built-in tooltip.
 #### Utilize `popover`, CSS anchor positioning, and/or `interestfor`
 
 Although creating a custom tooltip can be cumbersome for an author who is looking
-to just adjust a few simple styles, they do have some new (and upcoming) web
-APIs, that can help them in accomplishing a fully customizable tooltip more
-easily:
-  - The [`popover`](
-    https://html.spec.whatwg.org/multipage/popover.html#dom-popover) attribute,
-    which is [baseline](
-    https://developer.mozilla.org/en-US/docs/Glossary/Baseline/Compatibility)
-    across browsers as of April 2024.
-  - [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position-1/),
-    which is not yet baseline, but is part of the [Interop 2025 effort](
-    https://github.com/web-platform-tests/interop/blob/main/2025/README.md#css-anchor-positioning).
-  - The [`interestfor`](
-    https://open-ui.org/components/interest-invokers.explainer/#keyboard) attribute,
-    which is currently being investigated, with a prototype already in working
-    shape in Chromium.
+to just adjust a few simple styles, they do have new and upcoming web APIs which
+can help them in accomplishing a fully customizable tooltip more easily:
+
+* The [`popover`](
+  https://html.spec.whatwg.org/multipage/popover.html#dom-popover) attribute,
+  which is [Baseline](https://web-platform-dx.github.io/baseline/) as of
+  [January 2025](https://web-platform-dx.github.io/web-features-explorer/features/popover/).
+* [CSS Anchor Positioning](https://drafts.csswg.org/css-anchor-position-1/),
+  which is not yet Baseline, but was part of the [Interop 2025 and 2026 projects](
+  https://wpt.fyi/results/css/css-anchor-position?aligned&view=interop&q=label%3Ainterop-2025-anchor-positioning).
+* The [`interestfor`](
+  https://open-ui.org/components/interest-invokers.explainer/#keyboard) attribute,
+  which is currently implemented in Chromium.
 
 One benefit that authors get with `interestfor` over the other existing solutions
 is that it creates a more accessible experience out-of-the-box and handles input
 handling for the author, creating a more seamless approach than is available with
-the `popover`attribute on its own. It is also a great solution if an author wants
+the `popover` attribute on its own. It is also a great solution if an author wants
 custom HTML within their tooltip, as opposed to simple textual content.
 
-However, `interestfor` does have some limitations. Currently, `interestfor`
-is only allowed on buttons and links, which is more limited than the `title`
-attribute.
-_____________________________
+However, `interestfor` is only allowed on buttons and links, which is more limited
+than the `title` attribute.
 
-All of these options do allow authors to create more custom tooltip experiences
-than what is currently available through the browser's built-in option using the
-`title` attribute, but these options often require more work than should be
-necessary for a simple style adjustment.
+---
+
+All of these options allow authors to create more custom tooltip experiences than
+what is currently available through the browser's built-in option using the `title`
+attribute, but these options often require more work than should be necessary for
+a simple style adjustment.
 
 ## Current landscape of built-in tooltips
 
@@ -225,11 +287,11 @@ tooltips today, in no particular order.
 
 ### Simple tooltips across browsers
 
-In this section is a comparison of basic tooltip rendering across each
-browser engine using the code example below.
+This section compares tooltip rendering across browser engines using the following
+code sample:
 
 ```html
-<button title="This is a button!">Button Example</button> 
+<button title="This is a button!">Button Example</button>
 ```
 
 #### Chromium
@@ -342,7 +404,7 @@ the tooltip appears to have uneven padding. For example:
 ![Screenshot of a long tooltip in Webkit on Mac](
 images/out-of-bounds-webkit-mac.png)
 
-_________________________
+---
 
 It is clear that the tooltips provided by the top browser engines are
 inconsistent in styling between each other and across OS, and there are
@@ -351,105 +413,111 @@ divergences in positioning and some behaviors with longer tooltip text.
 This inconsistency and lack of customizability leads authors to find
 alternatives that often require more work and maintenance.
 
-## The `::tooltip` pseudo element
+## Proposed solution
+
+The sections below describe the proposed solution for an stylable and
+accessible built-in tooltip.
+
+## Elements the tooltip can be applied to
+
+The `title` attribute is global and can therefore be applied to any element.
+
+Our proposal for a new customizable built-in tooltip is restricted to the
+following focusable elements only:
+
+* `<button>`
+* `<a>`
+* `<input>`
+* `<textarea>`
+* `<select>`
+
+One of the main accessibility issues with built-in `title` attribute-based
+tooltips is that they are not accessible to keyboard and screen reader users
+because they're applied to elements that can't be focused.
+
+As the [user research section](#use-cases-for-custom-tooltips) shows,
+legitimate use cases for custom tooltips include icon buttons, UI controls,
+and toolbar buttons, all of which are focusable.
+
+## Opt-in mechanism
+
+We are proposing to make the new customizable tooltip an opt-in feature,
+which allows us to meaningfully depart from how the current `title` attribute
+works.
+
+We are considering two ways to opt-in:
+
+### Opt-in mechanism A - The new `tooltip` HTML attribute
+
+A new HTML attribute called `tooltip`, made specifically for display a custom
+tooltip on one of the focusable elements listed above. Example:
+
+```html
+<button tooltip="This is a tooltip">Hover me</button>
+```
+
+* Pros:
+  * Simple to use.
+* Cons:
+  * TODO
+
+### Opt-in mechanism B - The `appearance:base` CSS declaration
+
+Use the [`appearance: base`](
+https://www.w3.org/TR/css-forms-1/#valdef-appearance-base) CSS declaration
+within the `::tooltip` pseudo element (described below) to opt-in to the new
+customizable tooltip.
+
+```html
+<style>
+  ::tooltip {
+    appearance: base;
+  }
+</style>
+<button title="This is a tooltip">Hover me</button>
+```
+
+Without this opt-in mechanism, always applying the default `::tooltip` styles
+by default may be a breaking change for some browsers. The UA should be able to
+style tooltips in their own chosen way, unless the new tooltip mode is
+triggered.
+
+Authors may also want to trigger this path without triggering any styles beyond
+those that are default. As such, there requires some mechanism for authors to
+trigger the new `::tooltip`-based default.
+
+This is similar to what was done for [customizable select elements](
+https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select).
+
+* Pros:
+  * No new attribute to discover and learn.
+* Cons:
+  * Requires all browsers to fix their implementation of the `title` attribute
+  when the `appearance: base` declaration is used.
+  * Requires convincing authors that the `title` attribute is now OK to use for
+  tooltips in certain cases.
+  * Requires an explicit opt-in from authors to use the new tooltip styles.
+
+## Styling mechanism: the `::tooltip` pseudo element
 
 Many have proposed a pseudo for styling browser tooltips over the years,
 with the [first proposal](
 https://lists.w3.org/Archives/Public/www-style/2000Apr/0014.html)
 originating around April 2000, and the most [recent proposal](
 https://github.com/w3c/csswg-drafts/issues/8930)
-from Lea Verou in 2023. 
+from Lea Verou in 2023.
 
-The proposal in this document takes close inspiration from these, by
-introducing a new pseudo element, called `::tooltip`, that can be
-used by authors to style the browser tooltip that is displayed when
-the `title` attribute is set on an HTML element.
+Our proposal takes close inspiration from these, by introducing a new pseudo
+element, called `::tooltip`, that can be used by authors to style the new
+built-in customizable tooltip.
 
 The `::tooltip` pseudo element will have default UA styles that will
 be required to be applied when an author adjusts tooltip styles
 within a `::tooltip` pseudo element selector.
 
-The idea behind this proposal is that authors would be able to
-create simple text-based tooltips, and adjust the styles of color
-properties, shadowing, border properties, font properties, etc
-to better match the look and feel of their site, leaving
-positioning, input handling, and accessibility up to the browser.
-
-### How to trigger `::tooltip` default styles?
-
-Currently, browser default tooltips are triggered by the `title`
-attribute being set, or by the presence of the `<title>` element for
-SVG elements.
-
-We could have the default `::tooltip` apply in all cases by default,
-but this may be a breaking change for some browsers. Instead, the UA
-should be able to style tooltips in their own chosen way, unless
-`::tooltip` is triggered in some way.
-
-Authors may also want to trigger this path without triggering any
-styles beyond those that are default. As such, there requires
-some mechanism for authors to trigger the new `::tooltip`-based
-default.
-
-An initial suggestion would be to utilize [`appearance: base`](
-https://www.w3.org/TR/css-forms-1/#valdef-appearance-base), similar
-to what was done for [customizable select elements](
-https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Customizable_select), that an author can use within the `::tooltip`
-pseudo element to trigger the new base default styles and
-customizability.
-
-For example, in order to set the `color` of your tooltip to `red`,
-one could apply the following styles:
-
-```css
-::tooltip {
-  appearance: base;
-  color: red;
-}
-```
-
-The downside of this is that it requires explicit opt-in, rather than
-only needing to set the `color` to `red`, but would allow an author to
-trigger the new base tooltip styles without having to set any styles.
-This triggering mechanism remains an open question and is welcome
-to additional suggestions and input from the wider community.
-
-### How to set the `::tooltip` content?
-
-There has been debate in the [most recent proposal](
-https://lists.w3.org/Archives/Public/www-style/2000Apr/0014.html)
-for `::tooltip` for how best to set the content of the `::tooltip`
-pseudo element.
-
-The content itself will be pulled from the `title` attribute, or in
-the case of SVG, the `<title>` element. The initial proposal is to
-utilize the `content` property for applying the content to the
-`::tooltip` pseudo element itself.
-
-The initial suggestion by Lea Verou in the CSSWG proposal was to
-set this via the default stylesheet in the following manner:
-
-```css
-::tooltip {
-  content: attr(title);
-  ...
-}
-```
-
-There were some concerns that this wouldn't work well for SVGs,
-since SVGs use `<title>` instead of the `title` attribute for
-built-in tooltips. [@bleper](https://github.com/bleper) put
-together a [potential proposal](
-https://github.com/w3c/csswg-drafts/issues/8930#issuecomment-1581848840)
-for how to address this issue.
-
-However, a simpler approach may be to define what `normal` means
-uniquely for `::tooltip` such that `normal` is equivalent to
-`content: attr(title)` in all cases, but SVG, where in SVG,
-`normal` is equivalent to the content of the `<title>` element.
-
-This item remains an open question and is welcome to input from
-the wider community.
+Authors can then adjust the styles of color properties, shadowing, border
+properties, font properties, etc. to better match the look and feel of their
+site, leaving positioning, input handling, and accessibility up to the browser.
 
 ### Positioning for `::tooltip`
 
@@ -460,7 +528,7 @@ tooltips can escape the bounds of the browser window today (see
 [Security Considerations](#security-considerations) for more details).
 
 Given the proposal to not allow tooltips styled through the
-`::tooltip` psuedo element to escape the bounds of the windows (see
+`::tooltip` pseudo element to escape the bounds of the windows (see
 [Security Considerations](#security-considerations) for more details),
 this proposal also includes the ability for authors to customize the
 tooltip positioning.
@@ -470,11 +538,10 @@ https://drafts.csswg.org/css-anchor-position-1/) to define the default
 position of the `::tooltip` pseudo element, which will allow authors
 to override this in the way that they see fit.
 
-As a result, this means that the element associated with the `title`
-attribute (or `<title>` element in the case of SVG) will be an implied
-anchor for the rendered tooltip.
+As a result, this means that the element associated with the tooltip
+is an implied anchor for the rendered tooltip.
 
-### `::tooltip` sizing
+### Sizing the `::tooltip`
 
 This proposal sizes the default `::tooltip`-based tooltip according to
 default sizing definitions (where the size of the tooltip is based on
@@ -497,23 +564,19 @@ questions for further discussion.
 
 ### Default styles for `::tooltip`
 
-When the new default `::tooltip` styles are triggered via the
-`appearance` property, a set of default styles would be applied
-by the UA.
+When the new default `::tooltip` styles are triggered, a set of default
+styles is applied by the UA.
 
 These styles were mostly pulled directly from Lea Verou's initial
 [proposal](
-https://github.com/w3c/csswg-drafts/issues/8930) with a couple of
-minor edits based on the new proposal for an updated definition of
-`content: normal` within the `::tooltip` pseudo element, as well
-as the proposal to define the position via CSS Anchor Positioning
-(which was included as an option in Lea's original proposal, as
-well).
+https://github.com/w3c/csswg-drafts/issues/8930) with a minor edit
+based on the new proposal to define the position via CSS Anchor
+Positioning (which was included as an option in Lea's original proposal,
+as well).
 
 ```css
 /* UA styles */
 ::tooltip {
-  /* content: normal; is implied */
   color: InfoText;
   background: InfoBackground;
   font-size: .8rem;
@@ -522,7 +585,7 @@ well).
   position-area: top right;
   position-try-fallbacks: top left, top center, bottom right, bottom left, bottom center, center right, center left;
   transition: 0s 3s visibility;
-  
+
   @starting-style {
     visibility: hidden;
   }
@@ -539,8 +602,7 @@ to the styles above (notably, this doesn't include the defined
 `transition` and sets `margin` to `0` to account for the default
 `popover` styles). Since this is based on `interestfor`, at the
 time of writing, this demo is required to be tested in a Chromium-based
-browser with [Web Platform Experimental features flag](
-chrome://flags/#enable-experimental-web-platform-features) enabled.
+browser.
 
 ### What styles can be applied to `::tooltip`?
 
@@ -556,25 +618,23 @@ https://github.com/w3c/csswg-drafts/issues/9447) to discuss what
 properties should be styleable within a `::tooltip` pseudo element.
 As such, the complete list of properties is up for discussion, but
 as the proposal notes, the core set of properties should include:
-- `content` for setting the text displayed in the tooltip (whether
-authors should be allowed to change this is up for debate, as it
-may have some accessibility implications if the tooltip and `title`
-have different text)
-- `appearance` as a means to trigger new default tooltip styles
-- All font properties, `text-transform`, `letter-spacing`,
+
+* `appearance` as a means to trigger new default tooltip styles (only
+  for opt-in mechanism B)
+* All font properties, `text-transform`, `letter-spacing`,
 `word-spacing`, and the i18n text properties
-- `background`, `color`, `box-shadow`, `text-shadow`,
-`border-radius`, `border`, `padding`, `opacity` (including their
-longhands)
-- `color-scheme` and `forced-color-adjust` (these two were not
+* `background`, `color`, `box-shadow`, `text-shadow`,
+`border-radius`, `corner-shape`, `border-shape`, `border`,
+`padding`, `opacity` (including their longhands)
+* `color-scheme` and `forced-color-adjust` (these two were not
 included in the initial [CSSWG proposal](
 https://github.com/w3c/csswg-drafts/issues/9447), but would likely
 be helpful for authors to guarantee consistent theming capabilites
 with the rest of their page.)
-- Transitions
-- `transform`, `transform-origin`, `rotate`, `scale`, `translate`
-- Custom properties
-- Given that the proposal suggests using anchor positioning for
+* Transitions
+* `transform`, `transform-origin`, `rotate`, `scale`, `translate`
+* Custom properties
+* Given that the proposal suggests using anchor positioning for
 default styling of the position of `::tooltip`, we should also
 include [CSS Anchor Positioning](
 https://drafts.csswg.org/css-anchor-position-1/) properties
@@ -584,19 +644,35 @@ The list above should handle the majority of styling use cases
 for authors, however the [current proposal](
 https://github.com/w3c/csswg-drafts/issues/9447) also notes that
 the following properties would be nice to have, as well:
-- `clip-path`
-- Filters and `backdrop-filter`
-- `animation`
-- `mix-blend-mode`
-- `border-image`
-- `outline`
-- `text-decoration`
-- `fill` and `stroke`
+* `clip-path`
+* Filters and `backdrop-filter`
+* `animation`
+* `mix-blend-mode`
+* `border-image`
+* `outline`
+* `text-decoration`
+* `fill` and `stroke`
 
 As noted, the first list of valid properties is still up for
 debate, so any thoughts or input are welcome as we continue to
 explore the [open issue](
 https://github.com/w3c/csswg-drafts/issues/9447).
+
+### Customizing the delay
+
+A common requirement from authors when using custom tooltips is the
+ability to define the delay before the tooltip is shown, and the
+delay after which it disappears as well.
+
+In [Default styles for `::tooltip`](#default-styles-for-tooltip), we
+proposed adding `transition: 0s 3s visibility;` in the default styles,
+to control the delay.
+
+Another option is to make the element which the tooltip is attached to
+an invoker element, per the [Interest Invoker API](
+https://developer.mozilla.org/en-US/docs/Web/API/Popover_API/Using_interest_invokers),
+and let authors customize the delay by using the `interest-delay` CSS
+property instead.
 
 ### `::tooltip` style inheritance
 
@@ -628,13 +704,15 @@ trigger built-in tooltips using the `::tooltip` pseudo element. This
 functionality is being considered as a [future addition](#future-ideas)
 to this proposal.
 
-### Dependencies on non-stable features
+## Dependencies on non-stable features
 
 This proposal makes use of [CSS Anchor Positioning](
 https://drafts.csswg.org/css-anchor-position-1/), to define the default
 positioning of the base `::tooltip` styles. This feature is not yet
-baseline, but it is part of [Interop 2025](
-https://github.com/web-platform-tests/interop/blob/main/2025/README.md#css-anchor-positioning).
+baseline, but it was part of [Interop 2025](
+https://github.com/web-platform-tests/interop/blob/main/2025/README.md#css-anchor-positioning)
+and [Interop 2026](
+https://github.com/web-platform-tests/interop/blob/main/2026/README.md#css-anchor-positioning).
 
 There is also a thought on whether `::tooltip` should be defined to be
 based on `interestfor`, given there is an overlap between the two
@@ -644,12 +722,21 @@ the base set of styles and specified interactions are met.
 
 ## Key scenarios
 
-### Scenario 1: Opt-into the new base `::tooltip` styles
+### Scenario 1: Get a consistent and accessible tooltip
 
-In its most base form, an author could opt-into the new `::tooltip` base
-styles without adjusting any of its styles in order to get a consistent basic
-styling for tooltips across browsers. An author could accomplish this with
-the following HTML and CSS.
+An author could simply opt-into the new tooltip without adjusting any of its
+styles, in order to get a consistent tooltip appearance across browsers, which
+respects the user's and page's font settings, and is accessible by default.
+
+With opt-in mechanism option A:
+
+```html
+<button tooltip="This is a button!">
+  The tooltip shown will follow the UA base styles across all browsers.
+</button>
+```
+
+With opt-in mechanism option B:
 
 ```html
 <style>
@@ -657,7 +744,6 @@ the following HTML and CSS.
     appearance: base;
   }
 </style>
-
 <button title="This is a button!">
   The tooltip shown will follow the UA base styles across all browsers.
 </button>
@@ -668,6 +754,22 @@ the following HTML and CSS.
 If an author doesn't like the base `::tooltip` style, they can adjust the
 styles as follows:
 
+With opt-in mechanism option A:
+
+```html
+<style>
+  ::tooltip {
+    background: orange;
+    color: blue;
+  }
+</style>
+<button tooltip="This is a button!">
+  The tooltip shown will have a blue background and orange text.
+</button>
+```
+
+With opt-in mechanism option B:
+
 ```html
 <style>
   ::tooltip {
@@ -676,7 +778,6 @@ styles as follows:
     color: blue;
   }
 </style>
-
 <button title="This is a button!">
   The tooltip shown will have a blue background and orange text.
 </button>
@@ -684,23 +785,18 @@ styles as follows:
 
 ### Scenario 3: Adjusting tooltip timing
 
-An author may not like the timing of the built-in tooltip popup. An author
-can change this by adjusting the tooltip `transition`, as demonstrated in
-the example below:
+Authors can change the default delay used for showing and hiding the tooltip.
+
+This can be done either by adjusting the `transition` property:
 
 ```html
 <style>
   ::tooltip {
-    appearance: base;
     transition: 0s 1s visibility;
   }
 </style>
-
-<button title="This is a button!">
-  The tooltip shown will be shown more quickly than the default UA
-  provided styles.
-</button>
 ```
+
 One may find it is strange that an author could adjust the `transition`
 of the `visibility` property, without being able to update the `visibility`
 property itself. This is because the UA owns the user interaction, and as such,
@@ -718,30 +814,18 @@ find it useful to adjust the timing the tooltip is shown, which we are proposing
 can be accomplished via adjustment to the `transition` defined in the UA default
 styles for `::tooltip`.
 
-### Scenario 4: Setting the name using `title` without rendering a tooltip
+As proposed in [Customizing the delay](#customizing-the-delay), another approach
+would be to use  the `interest-delay` property:
 
-There is no existing way to set an [accessible description](
-https://developer.mozilla.org/en-US/docs/Glossary/Accessible_description#accessible_description_computation) for most
-elements without using ARIA or without a tooltip being shown (via
-the `title` attribute).
-
-We can consider making this possible through the `::tooltip` proposal
-utilizing `content: none` as follows:
-
-```css
-::tooltip {
-  appearance: base;
-  content: none;
-}
+```html
+<style>
+  ::tooltip {
+    interest-delay: 1s 0.5s;
+  }
+</style>
 ```
 
-Whether authors should be able to change the `content` of these tooltips
-is still an open question. There may be accessibility implications with
-allowing the tooltip text to be different than the `title`. If we decide
-that is not allowed, this would require a different mechanism (like
-utilizing `visibility`) if we want to support this use case for authors.
-
-### Scenario 5: Providing custom positioning to a tooltip
+### Scenario 4: Providing custom positioning to a tooltip
 
 Given that this proposal uses CSS Anchor Positioning to define the base
 positions of the `::tooltip` pseudo element, this would open up an
@@ -750,7 +834,6 @@ below:
 
 ```css
 ::tooltip {
-  appearance: base;
   position-area: start span-all;
 }
 ```
@@ -759,7 +842,8 @@ below:
 
 According to the [WCAG](
 https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus.html),
-“Content which can be triggered via pointer hover should also be able to be triggered by keyboard focus.” As such, tooltips should also be keyboard
+“Content which can be triggered via pointer hover should also be able to be
+triggered by keyboard focus.” As such, tooltips should also be keyboard
 accessible, and per guidance should also be dismissible.
 
 ### What is the current accessibility experience of tooltips across browsers?
@@ -796,7 +880,15 @@ applies focus just outside of a target element within that container.
 
 An alternative for browser vendors to consider is including a user
 setting that forces a `tabindex` of `0` in such cases, allowing the
-user more control over the resulting behavior as they see fit.
+user more control over the resulting behavior as they see fit. This
+is also not ideal as it still forces a change in focus behavior from
+what the site author intended.
+
+This is why our proposal restricts the `::tooltip` pseudo element (and
+the `tooltip` attribute, if this approach is chosen) to only a few
+focusable elements which are commonly used today in tooltip scenarios.
+See the list in [Elements the tooltip can be applied to](
+#elements-the-tooltip-can-be-applied-to).
 
 Creating a more accessible tooltip experience for users is one of
 the key goals of this proposal, so additional ideas from the
@@ -952,5 +1044,5 @@ inspiration for this document.
 - Thank you to Tantek Çelik, whose [original proposal](
 https://lists.w3.org/Archives/Public/www-style/2000Apr/0014.html) kicked
 off discussion for `::tooltip` back in April of 2000.
-- Thank you to Scott O'Hara, who also recently brought a similar proposal to the 
+- Thank you to Scott O'Hara, who also recently brought a similar proposal to the
 [OpenUI](https://github.com/openui/open-ui/issues/730) group.
