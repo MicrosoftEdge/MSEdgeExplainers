@@ -27,7 +27,42 @@ This explainer proposes a new attribute to allow specifying a checkbox's
 indeterminate state statically. The primary motivation for this is to allow
 more effective server-side rendering for indeterminate checkboxes.
 
-## Proposed approach
+## User-Facing Problem
+
+Checkboxes today cannot be statically defined to have an indeterminate state,
+and can only reach that state post-creation through JavaScript invoking a
+property setter. It _is_ possible to represent indeterminateness to Assistive
+Technologies (ATs) via the `aria-checked=mixed` content attribute value, but
+that _only_ applies to Assistive Technologies. The
+[discussion in whatwg/html#6578](https://github.com/whatwg/html/issues/6578)
+identified several situations where this gap is made apparent today:
+
+- **Static component examples.** A component library or style guide should be
+  able to show an indeterminate native checkbox alongside checked, unchecked,
+  and disabled examples without [initialization scripts](https://github.com/whatwg/html/issues/6578#issuecomment-818499168).
+- **Server-rendered forms and components.** A form generated from prefilled
+  data may need a logically-grouped checkbox to start indeterminate because only
+  some sub-options are selected. Users should see the correct state immediately,
+  rather than waiting for JavaScript to initialize or
+  [hydrate a framework component](https://github.com/whatwg/html/issues/6578#issuecomment-1017575165).
+- **Static renderer output.** Users of formats such as
+  [GitHub Flavored Markdown](https://github.com/whatwg/html/issues/6578#issuecomment-894712701)
+  could benefit from indeterminate checkboxes in generated HTML where authors
+  cannot supply initialization scripts.
+
+### Goals
+
+- Allow static HTML and server-rendered components to express an initially
+  indeterminate native checkbox without JavaScript initialization.
+- Allow form reset to restore initial indeterminate state.
+- Preserve existing checkbox interaction, form submission, and validation
+  behavior.
+
+### Non-goals
+
+- Change the relationship between checkedness and indeterminateness.
+
+## Proposed Approach
 
 We propose adding a boolean `defaultindeterminate` content attribute to
 `<input type="checkbox">`, reflected by a `defaultIndeterminate` IDL attribute.
