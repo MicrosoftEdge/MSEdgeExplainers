@@ -13,56 +13,60 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Introduction](#introduction)
-- [User-Facing Problem](#user-facing-problem)
-  - [Goals](#goals)
-  - [Non-goals](#non-goals)
-- [User research](#user-research)
-- [Proposed Approach](#proposed-approach)
-  - [CSS Animations and Transitions](#css-animations-and-transitions)
-    - [Effect identity](#effect-identity)
-    - [Animations](#animations)
-    - [Transitions](#transitions)
-    - [Events](#events)
-    - [Web Animations API](#web-animations-api)
-  - [Non-semantic highlight style variations](#non-semantic-highlight-style-variations)
-    - [Option 1: Per-range highlight styles](#option-1-per-range-highlight-styles)
-    - [Option 2: The `range-index()` function](#option-2-the-range-index-function)
-  - [Opacity](#opacity)
-    - [Resolving highlight opacity](#resolving-highlight-opacity)
-    - [Applying the winning opacity](#applying-the-winning-opacity)
-    - [Interaction with element opacity](#interaction-with-element-opacity)
-  - [Solving staggered text animation](#solving-staggered-text-animation)
-    - [Using `range-index()`](#using-range-index)
-  - [Solving loading shimmer](#solving-loading-shimmer)
-  - [Solving spoken-word tracking](#solving-spoken-word-tracking)
-- [Alternatives considered](#alternatives-considered)
-  - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
-    - [Pros](#pros)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
-  - [CSS Text Transitions](#css-text-transitions)
-    - [Pros](#pros-1)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
-  - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
-    - [Pros](#pros-2)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
-  - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
-    - [Pros](#pros-3)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
-  - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
-    - [Pros](#pros-4)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
-  - [Per-highlight atomic paint groups](#per-highlight-atomic-paint-groups)
-    - [Pros](#pros-5)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
-  - [Per-contribution opacity in the existing paint order](#per-contribution-opacity-in-the-existing-paint-order)
-    - [Pros](#pros-6)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-6)
-  - [Compositing `color` animations](#compositing-color-animations)
-    - [Pros](#pros-7)
-    - [Cons / Reasons for rejection](#cons--reasons-for-rejection-7)
-- [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
-- [References & acknowledgements](#references--acknowledgements)
+- [Custom Highlight API Extensions](#custom-highlight-api-extensions)
+  - [Authors](#authors)
+  - [Participate](#participate)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [User-Facing Problem](#user-facing-problem)
+    - [Goals](#goals)
+    - [Non-goals](#non-goals)
+  - [User research](#user-research)
+  - [Proposed Approach](#proposed-approach)
+    - [CSS Animations and Transitions](#css-animations-and-transitions)
+      - [Effect identity](#effect-identity)
+      - [Animations](#animations)
+      - [Transitions](#transitions)
+      - [Events](#events)
+      - [Web Animations API](#web-animations-api)
+    - [Non-semantic highlight style variations](#non-semantic-highlight-style-variations)
+      - [Option 1: Per-range highlight styles](#option-1-per-range-highlight-styles)
+      - [Option 2: The `range-index()` function](#option-2-the-range-index-function)
+    - [Opacity](#opacity)
+      - [Resolving highlight opacity](#resolving-highlight-opacity)
+      - [Applying the winning opacity](#applying-the-winning-opacity)
+      - [Interaction with element opacity](#interaction-with-element-opacity)
+    - [Solving staggered text animation](#solving-staggered-text-animation)
+      - [Using `range-index()`](#using-range-index)
+    - [Solving loading shimmer](#solving-loading-shimmer)
+    - [Solving spoken-word tracking](#solving-spoken-word-tracking)
+  - [Alternatives considered](#alternatives-considered)
+    - [`::nth-letter()` and `::nth-word()` pseudo-elements](#nth-letter-and-nth-word-pseudo-elements)
+      - [Pros](#pros)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection)
+    - [CSS Text Transitions](#css-text-transitions)
+      - [Pros](#pros-1)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-1)
+    - [Driving staggered highlight fades through JavaScript](#driving-staggered-highlight-fades-through-javascript)
+      - [Pros](#pros-2)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-2)
+    - [One ::highlight() rule per animation offset](#one-highlight-rule-per-animation-offset)
+      - [Pros](#pros-3)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-3)
+    - [Extending `AbstractRange` with an inline `style` property](#extending-abstractrange-with-an-inline-style-property)
+      - [Pros](#pros-4)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-4)
+    - [Per-highlight atomic paint groups](#per-highlight-atomic-paint-groups)
+      - [Pros](#pros-5)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-5)
+    - [Per-contribution opacity in the existing paint order](#per-contribution-opacity-in-the-existing-paint-order)
+      - [Pros](#pros-6)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-6)
+    - [Compositing `color` animations](#compositing-color-animations)
+      - [Pros](#pros-7)
+      - [Cons / Reasons for rejection](#cons--reasons-for-rejection-7)
+  - [Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+  - [References \& acknowledgements](#references--acknowledgements)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -78,14 +82,14 @@ because they require backing elements.
 For a per-word animation with a lot of text, hundreds of extra elements
 might be created for no reason other than to support such an effect.
 
-This explainer proposes three extensions to the CSS Custom Highlight API,
-which together allow authors to apply independently timed,
+This explainer proposes three extensions to highlight pseudo-element styling
+and the CSS Custom Highlight API, which together allow authors to apply independently timed,
 compositor-driven animations to arbitrary text ranges without
 introducing additional elements solely to achieve the effect.
-Although text animation motivates this proposal, the per-range styling
-capability also supports non-animated scenarios such as data-driven
-annotations, collaborative selections, syntax highlighting, and other cases
-where ranges within one `Highlight` need minor style variations.
+The per-range styling capability lets authors express non-semantic variations,
+such as staggered animation delays, among ranges within one `Highlight`.
+Animations, transitions, and opacity apply to all highlight pseudo-elements,
+not just custom highlights.
 
 ## User-Facing Problem
 
@@ -127,11 +131,11 @@ Consequently, the API cannot currently replace element wrappers for these effect
 
 ### Goals
 
-* Allow authors to animate and transition paint-only styles on custom
-  highlights using familiar CSS syntax and timing behavior.
+* Allow authors to animate and transition paint-only styles on all highlight
+  pseudo-elements using familiar CSS syntax and timing behavior.
 * Allow style variations between ranges in one `Highlight`, without
   requiring a separate highlight name and CSS rule for every variation.
-* Support efficient opacity effects over all of a custom highlight's painted
+* Support efficient opacity effects over all of a highlight's painted
   content without making highlights participate in layout.
 * Preserve the semantic document structure, text shaping, selection behavior,
   and accessibility representation of the highlighted content.
@@ -175,16 +179,19 @@ Consequently, the API cannot currently replace element wrappers for these effect
 
 ## Proposed Approach
 
-We propose three enhancements to the Custom Highlight API:
+We propose three enhancements to highlight styling and the Custom Highlight API:
 
 1. CSS Animations and Transitions on highlight ranges.
 2. Style variations among ranges within a single Highlight using either per-range declarations or a `range-index()` function.
 3. Opacity support on highlight ranges.
 
+Animations, transitions, and opacity apply to all highlight pseudo-elements.
+Per-range declarations and/or `range-index()` apply only to custom highlights.
+
 ### CSS Animations and Transitions
 
 We propose allowing the CSS animation and transition properties to apply to
-custom highlight pseudo-elements. For example:
+all highlight pseudo-elements. The examples below use custom highlights:
 
 ```css
 @keyframes emphasize {
@@ -204,19 +211,22 @@ do not apply to highlights are ignored in keyframes and transition lists.
 Animation and transition properties declared on an originating
 element apply only to that element; they do not configure effects on its
 highlight pseudo-elements. Highlight effects are instead configured through
-the highlight cascade, including matching `::highlight()` rules, per-range
-declarations, and inheritance from corresponding ancestor highlight
-pseudo-elements. Custom properties inherited from the originating element can
-affect the resolved effect properties.
+the highlight cascade, including matching highlight pseudo-element rules,
+per-range declarations for custom highlights, and inheritance from corresponding
+ancestor highlight pseudo-elements. Custom properties inherited from the
+originating element can affect the resolved effect properties.
 
 #### Effect identity
 
-Each `(Highlight registry entry, range, originating element)` tuple acts as one
+Each originating element draws its portion of a highlighted range using the
+corresponding highlight pseudo-element style, and that portion acts as one
 animation or transition target. This follows the existing highlight styling
-model, in which each originating element draws its portion of a highlight using
-the corresponding highlight pseudo-element style. A range which crosses
+model. A range which crosses
 several elements can therefore produce effects with different property values,
 timing parameters, or both.
+
+For custom highlights, the target is identified by the
+`(Highlight registry entry, range, originating element)` tuple.
 
 Line boxes and paint fragments do not create additional animation targets. If
 one originating element draws a range in several fragments, those fragments
@@ -242,12 +252,12 @@ to an element.
 
 #### Animations
 
-An originating element is eligible for an animation when all of the following
-are true:
+An originating element is eligible for a highlight animation when all of the
+following are true:
 
-* the range is a member of the `Highlight`; and
-* the `Highlight` is registered under a name for which the combined
-  `::highlight()` and per-range style specifies an animation; and
+* the range is affected by the highlight pseudo-element; and
+* the resolved highlight pseudo-element style, including any applicable
+  per-range declarations for custom highlights, specifies an animation; and
 * the range contains content drawn by that originating element.
 
 Changing a live `Range`'s boundary points does not restart animations.
@@ -291,10 +301,10 @@ exposed to authors.
 
 #### Transitions
 
-Transitions run when the computed style for one of these per-originating-element
-highlight targets changes, whether the change comes from a `::highlight()` rule,
-a per-range declaration, highlight inheritance, or an originating element's
-custom properties.
+Transitions run when the computed style for one of these
+per-originating-element targets changes, whether the change comes from a
+highlight pseudo-element rule, a per-range declaration for a custom highlight,
+highlight inheritance, or an originating element's custom properties.
 
 As with animations and static highlight styling, different originating
 elements can resolve different property values and timing parameters for the
@@ -303,7 +313,7 @@ of a range does not interrupt transitions for originating elements which
 remain covered, nor does it start transitions for content that is newly
 covered or no-longer-covered.
 
-Highlight membership changes also participate in transitions. The
+Custom highlight membership changes also participate in transitions. The
 not-highlighted transition endpoint uses the originating foreground values, a
 transparent background, no highlight-introduced shadow or decoration, and the
 initial value of other applicable properties. This makes adding and removing a
@@ -331,9 +341,9 @@ transitions.
 
 #### Events
 
-`Highlight` becomes an `EventTarget`. Animation and transition events are
-dispatched at the `Highlight`, with the affected `AbstractRange` exposed on the
-event. Because the same range can produce an effect for more than one
+`Highlight` becomes an `EventTarget`. For custom highlights, animation and
+transition events are dispatched at the `Highlight`, with the affected
+`AbstractRange` exposed on the event. Because the same range can produce an effect for more than one
 originating element, the event also exposes the originating element.
 `event.pseudoElement` identifies the applicable registry name, such as
 `::highlight(search-result)`.
@@ -362,8 +372,8 @@ completion using a timer.
 
 #### Web Animations API
 
-Highlight effects participate in the Web Animations API. They are returned by
-`document.getAnimations()` and by `getAnimations()` on their originating
+Custom highlight effects participate in the Web Animations API. They are
+returned by `document.getAnimations()` and by `getAnimations()` on their originating
 element, following the same rules as effects on other pseudo-elements.
 The returned objects are `CSSAnimation` or `CSSTransition` objects, as
 appropriate.
@@ -573,17 +583,19 @@ as images, in a single staggered-entry effect that encompasses both.
 
 Trading away compositor support would curtail or even outweigh the performance
 benefits of avoiding DOM manipulation in a highlight-based animation. We therefore
-propose allowing `opacity` to apply to highlights.
+propose allowing `opacity` to apply to all highlight pseudo-elements, including
+built-in highlights such as `::selection` as well as `::highlight()`.
 
 Unlike opacity on nested elements, opacity values from overlapping highlights
 do not compound. Instead, one value wins as described below.
 
 #### Resolving highlight opacity
 
-Each `(Highlight registry entry, range, originating element)` target resolves
-opacity from its corresponding highlight pseudo-element style and any per-range
-style. The resulting value applies to the portion of the range painted by that
-originating element.
+Each highlight resolves opacity from its corresponding highlight pseudo-element
+style. For custom highlights, each
+`(Highlight registry entry, range, originating element)` target also incorporates
+any per-range style. The resulting value applies to the portion of the
+highlight painted by that originating element.
 
 When highlight layers overlap within an originating element, their opacity
 values do not multiply. Instead, the highest active layer that contributes an
@@ -1096,10 +1108,15 @@ exposed by `Intl.Segmenter`.
 
 The proposal builds on the existing Custom Highlight API and CSS animation
 models. It does not expose document content or ranges that the calling script
-could not already access. The new events and Web Animations objects describe
-only ranges already supplied to a `Highlight`, their originating elements, and
-the effects applied to them. No additional privacy or security considerations
-have been identified.
+could not already access. For custom highlights, the new events and Web
+Animations objects describe only ranges already supplied to a `Highlight`,
+their originating elements, and the effects applied to them.
+For built-in highlights, animation and transition observability must preserve
+existing privacy protections, including for spelling and grammar checker
+results and browser find-in-page matches. The exact restrictions remain to be
+specified.
+
+See also: [Security and Privacy Questionnaire](security-privacy-questionnaire.md)
 
 <!--
 ## Stakeholder Feedback / Opposition
