@@ -84,7 +84,7 @@ compositor-driven animations to arbitrary text ranges without
 introducing additional elements solely to achieve the effect.
 The per-range styling capability lets authors express non-semantic variations,
 such as staggered animation delays, among ranges within one `Highlight`.
-Animations, transitions, and opacity apply to all highlight pseudo-elements,
+Animations, transitions, and opacity can apply to highlight pseudo-elements,
 not just custom highlights.
 
 ## User-Facing Problem
@@ -127,8 +127,8 @@ Consequently, the API cannot currently replace element wrappers for these effect
 
 ### Goals
 
-* Allow authors to animate and transition paint-only styles on all highlight
-  pseudo-elements using familiar CSS syntax and timing behavior.
+* Allow authors to animate and transition paint-only styles on supported
+  highlight pseudo-elements using familiar CSS syntax and timing behavior.
 * Allow style variations between ranges in one `Highlight`, without
   requiring a separate highlight name and CSS rule for every variation.
 * Support efficient opacity effects over all of a highlight's painted
@@ -177,17 +177,21 @@ Consequently, the API cannot currently replace element wrappers for these effect
 
 We propose three enhancements to highlight styling and the Custom Highlight API:
 
-1. CSS Animations and Transitions on highlight ranges.
+1. CSS Animations and Transitions on highlight pseudo-elements.
 2. Style variations among ranges within a single Highlight using either per-range declarations or a `range-index()` function.
-3. Opacity support on highlight ranges.
+3. Opacity support on highlight pseudo-elements.
 
-Animations, transitions, and opacity apply to all highlight pseudo-elements.
-Per-range declarations and/or `range-index()` apply only to custom highlights.
+Animations and transitions apply to highlight pseudo-elements except
+`::search-text`, `::spelling-error`, and `::grammar-error`; see the
+[Accessibility, Internationalization, Privacy, and Security Considerations](#accessibility-internationalization-privacy-and-security-considerations)
+section for the reason behind this limitation. Opacity applies to all
+highlight pseudo-elements. Per-range declarations and/or `range-index()`
+apply only to custom highlights.
 
 ### CSS Animations and Transitions
 
 We propose allowing the CSS animation and transition properties to apply to
-all highlight pseudo-elements. The examples below use custom highlights:
+supported highlight pseudo-elements. The examples below use custom highlights:
 
 ```css
 @keyframes emphasize {
@@ -1107,10 +1111,15 @@ models. It does not expose document content or ranges that the calling script
 could not already access. For custom highlights, the new events and Web
 Animations objects describe only ranges already supplied to a `Highlight`,
 their originating elements, and the effects applied to them.
-For built-in highlights, animation and transition observability must preserve
-existing privacy protections, including for spelling and grammar checker
-results and browser find-in-page matches. The exact restrictions remain to be
-specified.
+
+CSS Pseudo-Elements Level 4 [requires user agents to mitigate](https://drafts.csswg.org/css-pseudo-4/#highlight-security)
+direct style reads and timing attacks on spelling and grammar error highlights.
+The [TAG review of `::search-text`](https://github.com/w3ctag/design-reviews/issues/1120)
+raises similar concerns about exposing active find-in-page matches. Accordingly,
+these three pseudo-elements are excluded from the proposed animations,
+transitions, and their script-visible events and Web Animations API exposure.
+Opacity remains available; like existing author styling such as transparent
+text color, it does not add script-visible access to active match state.
 
 See also: [Security and Privacy Questionnaire](security-privacy-questionnaire.md)
 

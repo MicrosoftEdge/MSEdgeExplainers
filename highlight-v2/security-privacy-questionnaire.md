@@ -17,7 +17,14 @@ No.
 
 ## 2.4. How do the features in your specification deal with sensitive information?
 
-The proposal does not collect sensitive information or change access to it.
+The proposal excludes `::search-text`, `::spelling-error`, and
+`::grammar-error` from animations, transitions, and their script-visible
+events and Web Animations exposure. This preserves the restrictions in
+[CSS Pseudo-Elements Level 4 §3.7](https://drafts.csswg.org/css-pseudo-4/#highlight-security)
+and the privacy boundary discussed in the
+[TAG review of `::search-text`](https://github.com/w3ctag/design-reviews/issues/1120).
+Opacity remains a visual style and does not add script-visible access to active
+UA-managed matches.
 
 ## 2.5. Does data exposed by your specification carry related but distinct information that may not be obvious to users?
 
