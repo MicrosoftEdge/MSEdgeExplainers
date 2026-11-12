@@ -27,6 +27,16 @@ This explainer proposes a new attribute to allow specifying a checkbox's
 indeterminate state statically. The primary motivation for this is to allow
 more effective server-side rendering for indeterminate checkboxes.
 
+The below table shows checkboxes in various states across different rendering
+engines. An [interactive demo](https://microsoftedge.github.io/MSEdgeExplainers/DefaultIndeterminate/demo.html)
+is also available.
+
+|             | Unchecked / Checked / Indeterminate |
+|------------:|:-----------------------------------:|
+| Edge/Chrome | <img src="example-edge.jpg">        |
+| Firefox     | <img src="example-firefox.jpg">     |
+| Safari      | <img src="example-safari.jpg">      |
+
 ## User-Facing Problem
 
 Checkboxes today cannot be statically defined to have an indeterminate state,
@@ -49,6 +59,18 @@ identified several situations where this gap is made apparent today:
   [GitHub Flavored Markdown](https://github.com/whatwg/html/issues/6578#issuecomment-894712701)
   could benefit from indeterminate checkboxes in generated HTML where authors
   cannot supply initialization scripts.
+
+An example of how to mark a checkbox as indeterminate today can be seen here:
+
+```html
+<label>
+  <input id="select-all" type="checkbox">
+  Select all options
+</label>
+<script>
+  document.querySelector("#select-all").indeterminate = true;
+</script>
+```
 
 An additional concern with indeterminate checkboxes is that the form reset
 algorithm does not remove indeterminateness. This is likely an oversight, since
@@ -77,7 +99,21 @@ The following checkbox starts indeterminate, using its native appearance and
 accessibility behavior, without JavaScript:
 
 ```html
-<input type="checkbox" defaultindeterminate>
+<label>
+  <input id="select-all" type="checkbox" defaultindeterminate>
+  Select all options
+</label>
+```
+
+```diff
+ <label>
+-  <input id="select-all" type="checkbox">
++  <input id="select-all" type="checkbox" defaultindeterminate>
+   Select all options
+ </label>
+-<script>
+-  document.querySelector("#select-all").indeterminate = true;
+-</script>
 ```
 
 As with `checked` and `defaultChecked`, changing the default does not overwrite
@@ -105,8 +141,34 @@ continues to reflect the live state.
 - An `indeterminate` content attribute reflecting the live property would
   conflate default and current state, and could cause attribute mutations
   during checkbox activation.
+  ```html
+  <label>
+    <input id="select-all" type="checkbox" indeterminate>
+    Select all options
+  </label>
+  ```
+  ```diff
+   <label>
+  -  <input id="select-all" type="checkbox" defaultindeterminate>
+  +  <input id="select-all" type="checkbox" indeterminate>
+     Select all options
+   </label>
+  ```
 - Making `checked` tri-state would change established boolean-attribute
   semantics and lose the distinction between checkedness and indeterminateness.
+  ```html
+  <label>
+    <input id="select-all" type="checkbox" checked="mixed">
+    Select all options
+  </label>
+  ```
+  ```diff
+   <label>
+  -  <input id="select-all" type="checkbox" defaultindeterminate>
+  +  <input id="select-all" type="checkbox" checked="mixed">
+     Select all options
+   </label>
+  ```
 - Reusing dirty checkedness would couple two independent states; the existing
   `indeterminate` setter does not dirty checkedness today, and it's unclear if
   there is a benefit to doing so.
