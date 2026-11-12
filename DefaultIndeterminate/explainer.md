@@ -50,6 +50,10 @@ identified several situations where this gap is made apparent today:
   could benefit from indeterminate checkboxes in generated HTML where authors
   cannot supply initialization scripts.
 
+An additional concern with indeterminate checkboxes is that the form reset
+algorithm does not remove indeterminateness. This is likely an oversight, since
+even checkedness applied solely via IDL attribute setter will be reset.
+
 ### Goals
 
 - Allow static HTML and server-rendered components to express an initially
@@ -78,12 +82,17 @@ accessibility behavior, without JavaScript:
 
 As with `checked` and `defaultChecked`, changing the default does not overwrite
 a live state that has already been changed. To keep default and live state
-independent, the platform will keep track of a **dirty indeterminateness**
-flag, alongside dirty checkedness. It starts false; changing the live
-`indeterminate` property or activating the checkbox sets it. While the flag is
-false, adding or removing `defaultindeterminate` updates the live state. Form
-reset clears the flag and restores the live state from the attribute. The
-attribute does not track user interaction or changes to the live property.
+independent, the platform will keep track of a *dirty indeterminateness* flag,
+alongside dirty checkedness. It starts false; changing the live `indeterminate`
+property or activating the checkbox sets it. While the flag is false, adding or
+removing `defaultindeterminate` updates the live state. The attribute does not
+track user interaction or changes to the live property.
+
+Form reset should clear the *dirty indeterminateness* flag from a checkbox, and
+restore the indeterminateness to the default state as specified by
+`defaultindeterminate` content attribute. This is in line with how the algorithm
+handles checkedness, and in general, considerations made for *dirty checkedness*
+should be made for *dirty indeterminateness* as well.
 
 Indeterminateness remains independent of checkedness: a checkbox can be both
 checked and indeterminate, and clearing indeterminateness reveals its checked
@@ -101,3 +110,13 @@ continues to reflect the live state.
 - Reusing dirty checkedness would couple two independent states; the existing
   `indeterminate` setter does not dirty checkedness today, and it's unclear if
   there is a benefit to doing so.
+
+## Open Questions
+
+- **Is the change to have the reset algorithm consider indeterminateness worth
+  making?** It's a breaking change, though hopefully one that would be rare in
+  practice. The change itself makes the reset algorithm treat indeterminateness
+  similarly to how it treats checkedness. Additionally, not fixing this is even
+  more glaring with the introduction of a default state for indeterminateness.
+  - I will create a Chromium use-counter to collect metrics about how often
+    indeterminate checkboxes are reset, to build confidence in this approach.
