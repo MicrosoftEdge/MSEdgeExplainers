@@ -439,6 +439,16 @@ The historical `lowsrc` attribute associated a temporary low-resolution image wi
 
 See [Historical `lowsrc` research](#historical-lowsrc-research) for its standards history, Gecko removal, and available usage evidence.
 
+#### Existing CSS backgrounds
+
+A background on `<img>` can display a preview without extra markup, but does not automatically:
+
+- Disappear when main-image content becomes presentable, preventing show-through beneath transparent pixels.
+- Use `object-fit` and `object-position`; equivalent background geometry requires separate configuration.
+- Follow image lazy loading, `<picture>` selection, or failure handling.
+
+Image Preview supplies this integration. A new CSS feature could potentially do so too.
+
 #### CSS property for the preview source
 
 A CSS property could provide the preview instead of, or alongside, the HTML attribute:
