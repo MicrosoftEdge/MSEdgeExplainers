@@ -258,7 +258,7 @@ The core handoff does not animate.
 
 ### Lifecycle decisions
 
-- **Lazy loading:** Deferring the selected image with `loading="lazy"` also defers preview processing. Independent preview loading remains an [open question](#independent-preview-loading).
+- **Lazy loading:** Deferring the selected image with `loading="lazy"` also defers preview fetching and decoding, including decoding inline previews. Independent preview loading remains an [open question](#independent-preview-loading).
 - **Selected-image failure:** If the selected image fails, the browser stops displaying the preview and uses the element's normal broken-image and alternative-text rendering. A preview is temporary and cannot become successful fallback content.
 - **Animated previews:** The host's computed [`image-animation`](https://drafts.csswg.org/css-image-animation-1/#image-animation) value applies to both preview and selected-image animations. Replacing the preview ends its playback. There are no preview-specific animation controls.
 - **Animated selected images:** Native image presentation and animation timing apply. The core does not wait for the full animation or introduce a new first-frame threshold.
@@ -291,7 +291,7 @@ Results from superseded work cannot newly replace current content. The browser c
 
 ### Image element state and rendering
 
-The browser temporarily displays the preview inside the image element, but the selected image remains the element's current image resource. Standard `HTMLImageElement` state and events, including `currentSrc`, `complete`, `naturalWidth`, `naturalHeight`, `decode()`, `load`, and `error`, continue to describe the selected image.
+The browser temporarily displays the preview inside the image element, but the selected image remains the element's current image resource. Standard `HTMLImageElement` state and events, including `currentSrc`, `complete`, `naturalWidth`, `naturalHeight`, `decode()`, `load`, and `error`, continue to describe the selected image. Preview processing does not gate the image element's `load` event or independently delay the document's `load` event. Existing main-image load-blocking rules remain unchanged for eager and lazy images.
 
 The core exposes no preview-specific lifecycle events or status. Resource Timing describes separately fetched previews but does not report whether they decoded or were displayed.
 
