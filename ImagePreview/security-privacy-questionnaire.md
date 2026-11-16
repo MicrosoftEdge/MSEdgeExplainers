@@ -3,11 +3,11 @@
 - **Feature:** Image Preview for HTML Images
 - **Explainer:** [explainer.md](explainer.md)
 - **Questionnaire:** [W3C Security and Privacy Self-Review Questionnaire](https://w3c.github.io/security-questionnaire/)
-- **Last updated:** 2026-10-30
+- **Last updated:** 2026-11-16
 
 ## 2.1. What information does this feature expose, and for what purposes?
 
-The core adds `preview` and `previewset` attributes and properties to `<img>` and `<source>` in `<picture>`. They reflect author-supplied URLs, compact representations, and colors, not the browser's selected preview. `previewset` supplies density-based candidates for the selected branch.
+The core adds a `preview` attribute and reflected property to `<img>` and `<source>` in `<picture>`. The property reflects the author-supplied URL, compact representation, or color, not the browser's selected preview. Each branch supplies one preview value.
 
 The core adds no preview-specific events, promises, state properties, or selectors. The independent styling and reveal sketches are outside this review. Styling phases and inspectable transitions would expose presentation state and require separate privacy review.
 
@@ -25,7 +25,7 @@ The API exposes no new personal information. Like other images, previews can con
 
 The feature does not inspect or classify image content. Preview pixels are unavailable through `drawImage()`, `createImageBitmap()`, or other image-extraction APIs.
 
-URL previews inherit the host `<img>`'s [fetch protections](explainer.md#fetching-scheduling-and-html-integration), including CORS, credentials, referrer policy, CSP, mixed-content rules, cache partitioning, and service-worker handling. These apply even to declarations on `<source>`; unselected sources and candidates make no preview requests.
+URL previews inherit the host `<img>`'s [fetch protections](explainer.md#fetching-scheduling-and-html-integration), including CORS, credentials, referrer policy, CSP, mixed-content rules, cache partitioning, and service-worker handling. These apply even to declarations on `<source>`; unselected sources make no preview requests.
 
 Resource Timing follows existing same-origin and `Timing-Allow-Origin` restrictions.
 
@@ -41,9 +41,9 @@ No new persistent state is introduced. Preview responses can use the existing HT
 
 ## 2.7. Does the feature expose information about the underlying platform?
 
-Yes. Property detection reveals support for `preview` and `previewset`, not for individual compact formats.
+Yes. Property detection reveals support for `preview`, not for individual compact formats.
 
-Candidate selection can reveal format support indirectly. Rejecting an unsupported compact value may trigger a URL fallback request, observable through Resource Timing or by the server.
+An unsupported compact value provides no preview and does not trigger a URL fallback request. Per-format capability detection remains an [open question](explainer.md#preview-format-support-detection).
 
 ## 2.8. Does the specification allow an origin to send data to the underlying platform?
 
@@ -103,7 +103,7 @@ Reconnection runs normal image-data updates. Stale preview or main-image results
 
 ## 2.20. Does the specification define new errors?
 
-The proposal adds no DOM exceptions or preview-specific `load`/`error` events. Setters reflect strings even when their syntax is invalid. After candidate selection, fetch or decode failure makes the preview unavailable without retrying other candidates or changing the main image. Existing `load`, `error`, and `decode()` behavior is unchanged.
+The proposal adds no DOM exceptions or preview-specific `load`/`error` events. Setters reflect strings even when their syntax is invalid. A fetch or decode failure makes the preview unavailable without changing the main image. Existing `load`, `error`, and `decode()` behavior is unchanged.
 
 If the main image fails, remove the preview and use normal broken-image and alt-text rendering. Developer tools may distinguish preview failures; page script gets no dedicated failure signal.
 

@@ -6,7 +6,7 @@
 - **Draft focus:** Image Preview inputs, lifecycle, responsive images, and art direction, with exploratory companion designs for styling and reveal control.
 - **Proposed incubation venue:** [WICG](https://wicg.io/)
 - **Expected standards venue:** [WHATWG HTML](https://html.spec.whatwg.org/)
-- **Last updated:** 2026-10-30
+- **Last updated:** 2026-11-16
 
 ## Authors
 
@@ -27,7 +27,7 @@
   - [Preview values and reflection](#preview-values-and-reflection)
   - [Scope and responsive images](#scope-and-responsive-images)
     - [Art direction and preview ownership](#art-direction-and-preview-ownership)
-    - [Responsive preview candidates](#responsive-preview-candidates)
+    - [Preview resolution and art direction](#preview-resolution-and-art-direction)
   - [Fetching, scheduling, and HTML integration](#fetching-scheduling-and-html-integration)
   - [Preview lifecycle](#preview-lifecycle)
   - [Lifecycle decisions](#lifecycle-decisions)
@@ -52,7 +52,7 @@
 
 **Image Preview lets a page provide a lightweight preview while its main image loads.** The browser replaces the preview when the main image would normally be displayed, including progressive content. If the main image is ready first, it skips the preview. The browser manages this lifecycle instead of requiring site-specific code.
 
-The `preview` attribute accepts an image URL, compact representation, or color. Its reflected property also works on images created with `new Image()`. `previewset` supplies optional density-based candidates. Both attributes apply to `<img>` and `<source>` in `<picture>`, while existing source-selection rules continue to choose the main image.
+The `preview` attribute accepts an image URL, compact representation, or color. Its reflected property also works on images created with `new Image()`. The attribute applies to `<img>` and `<source>` in `<picture>`, providing one preview per branch while existing source-selection rules continue to choose the main image.
 
 ```html
 <img
@@ -88,7 +88,7 @@ The table below describes the major patterns used by current implementations. Re
 
 - Display a temporary preview in the same `<img>` until the main image can be shown.
 - Support image URLs, compact representations, and colors as preview inputs.
-- Associate previews with the selected `<picture>` branch and support density-based candidates without changing main-image selection.
+- Associate previews with the selected `<picture>` branch without changing main-image selection.
 - Let the browser manage the preview lifecycle, reducing the need for custom markup and script.
 - Never delay main-image discovery or request creation, and minimize network contention with the main image.
 - Keep the main image and page usable when a preview format is unsupported.
@@ -112,7 +112,7 @@ The [developer-needs document](developer-needs.md) maps the needs and supporting
 
 ## Core Proposal
 
-Add `preview` and `previewset` attributes to `<img>` and to `<source>` elements used by `<picture>`.
+Add a `preview` attribute to `<img>` and to `<source>` elements used by `<picture>`.
 
 The preview is temporary visual content painted inside the image element. The **selected image** is the main resource chosen by normal `src`, `srcset`, `sizes`, and `<picture>` processing for the current [image generation](#source-updates-and-image-generations).
 
@@ -123,7 +123,7 @@ The proposal is divided along specification and implementation boundaries:
 | Capability | Scope | Intended venue |
 | --- | --- | --- |
 | `preview` and its reflected property; typed URL, compact, and color inputs | Core | WHATWG HTML, coordinating value syntax with CSS |
-| `previewset` and branch-specific preview selection in `<picture>` | Core | WHATWG HTML |
+| Branch-specific preview selection in `<picture>` | Core | WHATWG HTML |
 | Preview fetching, decoding, display, replacement, and cancellation | Core | WHATWG HTML |
 | Compact encodings such as BlurHash or ThumbHash | Independently specified formats and input bindings | Their respective specifications |
 | Image-part styling and transitions | Independent exploratory proposal | CSS, coordinated with HTML |
@@ -146,12 +146,11 @@ An inline data URL avoids a separate request but increases document size.
 
 The initial color model accepts self-contained CSS colors, such as hex colors, named colors, and `rgb(...)`. It excludes `currentColor`, system colors, `light-dark()`, and `var()`, which would require style-resolution and invalidation rules.
 
-`preview` and `previewset` are string-reflecting `DOMString` properties. Their getters return the authored attribute value, or an empty string when absent. Setters preserve invalid values; parsing determines whether they can supply a preview. Unlike `src`, these getters do not resolve URLs.
+`preview` is a string-reflecting `DOMString` property on both interfaces. Its getter returns the authored attribute value, or an empty string when absent. Its setter preserves invalid values; parsing determines whether they can supply a preview. Unlike `src`, the getter does not resolve URLs.
 
 ```js
 const image = new Image();
 image.preview = 'url("thumb.avif")';
-image.previewset = 'url("thumb.avif") 1x, url("thumb-2x.avif") 2x';
 image.src = "photo.avif";
 ```
 
@@ -165,7 +164,7 @@ Preview rendering applies only to HTML `<img>`. `<source>` supplies declarations
 
 First select the main image using the existing `<picture>`, `srcset`, and `sizes` algorithms. The element supplying that image's source set owns its preview declarations:
 
-- If a `<source>` is selected, use only that source's `preview` and `previewset`.
+- If a `<source>` is selected, use only that source's `preview`.
 - Otherwise, use the `<img>` element's declarations.
 - A selected `<source>` with no usable preview does **not** inherit the `<img>` preview. It might represent a different crop, subject, locale, or color scheme.
 - Preview availability never changes main-image source selection. A preview failure does not select a different `<source>`.
@@ -191,34 +190,23 @@ For example, the dark-mode branch supplies its own preview:
 
 The dark branch uses its own preview, avoiding a light-preview flash. The same rule handles different crops and other art direction; the browser does not recolor or recrop previews. Authors can repeat a shared preview on branches where it is appropriate.
 
-#### Responsive preview candidates
+#### Preview resolution and art direction
 
-The same preview can represent every resolution in an `<img>` or `<source>` source set. Authors do not need a separate preview for each main-image URL.
+Main-image resolution selection and preview selection serve different purposes. Main images need sufficient detail for their rendered size and display density. Previews provide a temporary impression of content, so they do not necessarily need the same resolution choices.
 
-For different preview sampling densities, `previewset` provides a list of typed preview values with positive `x` density descriptors:
+The initial proposal therefore provides one `preview` value per `<img>` or selected `<source>` branch. That preview can represent all main-image resolutions within the branch; authors do not need a preview for every `srcset` candidate.
 
 ```html
 <img
   src="forest-1600.avif"
   srcset="forest-800.avif 800w, forest-1600.avif 1600w"
   sizes="(max-width: 800px) 100vw, 800px"
-  preview="#667788"
-  previewset='url("forest-preview-32.avif") 1x,
-              url("forest-preview-64.avif") 2x'
+  preview='url("forest-preview-32.avif")'
   width="1600" height="1000"
   alt="A forest lake">
 ```
 
-`1x` identifies the author's baseline preview quality; `2x` provides higher sampling density. Neither promises a sharp image at the element's display size or changes its intrinsic dimensions.
-
-The proposed selection rules are:
-
-1. Parse the owning branch's list. A missing descriptor means `1x`; densities must be positive, finite, and unique. Width descriptors and a separate `previewsizes` attribute are not included.
-2. Exclude unsupported representation kinds, then select at most one candidate using the policy for `srcset` with `x` descriptors, including device density and browser resource policy. Do not fetch every candidate or cycle through them as quality steps.
-3. If the list is absent, empty, malformed, or has no supported candidate, use that branch's `preview`. A usable list takes precedence; `preview` is not an implicit additional `1x` candidate.
-4. Once a candidate is selected, a fetch or decode failure follows the normal preview-unavailable lifecycle. It does not trigger a retry chain through the other candidates or `preview`.
-
-The list accepts the same value kinds as `preview`. Commas inside functions or strings are not candidate separators. The main image's `sizes` does not apply to preview-resource widths, and the browser does not prefetch URLs to check format support.
+Art direction remains supported through [branch-specific previews](#art-direction-and-preview-ownership). When `<picture>` selects a different crop, subject, or color scheme, the selected `<source>` can provide a matching preview. This is independent of offering multiple resolutions of the same preview. Multiple preview resolutions remain an [open question](#are-multiple-preview-resolutions-needed).
 
 Changes in branch or preview selection participate in the [source-update lifecycle](#source-updates-and-image-generations), even when the main-image URL stays the same.
 
@@ -227,7 +215,7 @@ Changes in branch or preview selection participate in the [source-update lifecyc
 Preview processing integrates with HTML's [update the image data](https://html.spec.whatwg.org/multipage/images.html#update-the-image-data) algorithm:
 
 1. Select the main image and create or update its request.
-2. Choose a preview using the [ownership](#art-direction-and-preview-ownership) and [candidate-selection](#responsive-preview-candidates) rules. Unselected branches and candidates do not initiate preview work.
+2. Use the owning branch's `preview` under the [ownership](#art-direction-and-preview-ownership) and [value-parsing](#preview-values-and-reflection) rules. Unselected branches do not initiate preview work.
 3. When selected-image loading is eligible, the browser may fetch and decode the URL preview, decode a compact value, or prepare a color.
 
 Without a valid main-image candidate, pending preview work becomes obsolete and any displayed preview is removed. Normal no-source or broken-image rendering applies; a preview is not a standalone image or fallback source.
@@ -291,7 +279,7 @@ image.src = photo.url;
 
 `photo.previewValue` contains a value such as `url("thumb.avif")`, not a bare URL. If a `<source>` supplies the selected image, update that source's preview declarations instead.
 
-Changes to `preview`, `previewset`, `src`, `srcset`, `sizes`, and relevant `<source>` elements or selection conditions participate in HTML's existing image-data update processing. An *image generation* identifies the selected branch, main-image request, and chosen preview value; it is not a script-visible object.
+Changes to `preview`, `src`, `srcset`, `sizes`, and relevant `<source>` elements or selection conditions participate in HTML's existing image-data update processing. An *image generation* identifies the selected branch, main-image request, and chosen preview value; it is not a script-visible object.
 
 Results from superseded work cannot newly replace current content. The browser cancels obsolete fetching and decoding when possible. In particular:
 
@@ -321,7 +309,7 @@ Context menus, drag operations, saving, accessibility, and other semantics conti
 
 ### Compatibility and fallback
 
-In a browser that does not implement Image Preview, the unrecognized `preview` and `previewset` attributes have no effect and the existing image source attributes continue to work.
+In a browser that does not implement Image Preview, the unrecognized `preview` attribute has no effect and the existing image source attributes continue to work.
 
 Script can detect support for the reflected property:
 
@@ -330,7 +318,7 @@ const supportsImagePreview =
   "preview" in HTMLImageElement.prototype;
 ```
 
-This detects API support, not support for individual compact formats. Per-format capability detection remains an [open question](#preview-format-support-detection). `previewset` and the `<source>` properties can likewise be checked on their corresponding prototypes. Unsupported representations follow the candidate-selection and [preview-unavailable lifecycle](#preview-lifecycle) rules.
+This detects API support, not support for individual compact formats. Per-format capability detection remains an [open question](#preview-format-support-detection). The `preview` property on `<source>` can likewise be checked on `HTMLSourceElement.prototype`. Unsupported representations follow the [preview-unavailable lifecycle](#preview-lifecycle) rules.
 
 Developer tools may report that a preview was skipped, blocked, unsupported, or failed, but such diagnostics are not a web-observable API and are outside the HTML feature definition.
 
@@ -354,6 +342,10 @@ BlurHash and ThumbHash are examples of representations that could be integrated.
 A format binding must define encoded-size, output-dimension, memory, and processing limits; color and alpha behavior; malformed-input handling; and a prohibition on nested network requests. It must not depend on author-provided decoder script.
 
 ## Open Questions
+
+### Are multiple preview resolutions needed?
+
+Larger rendered sizes and higher display densities may make additional preview detail useful. However, the proposal does not yet establish when that benefit justifies additional candidate-selection machinery for intentionally low-detail content. Density-based `previewset` is deferred pending concrete developer use cases and evidence of a useful quality/resource tradeoff.
 
 ### Preview format support detection
 
@@ -405,9 +397,9 @@ General image-format support would also need to address compact encodings in `<i
 
 `preview` instead accepts preview-specific compact-format bindings and colors without requiring support in other image consumers. It retains `url(...)` for ordinary image resources and reflects all values as authored strings.
 
-#### One nonresponsive preview on `<img>`
+#### One global preview on `<img>`
 
-The earlier draft used one `previewsrc` on `<img>` for all main-image candidates, reducing scope but risking mismatched crops or color schemes. The revised design supports source-specific previews and density-based `previewset`, with no fallback from a selected `<source>` to the `<img>` preview.
+The earlier draft used one `previewsrc` on `<img>` for all main-image candidates, reducing scope but risking mismatched crops or color schemes. The revised design provides one preview per selected branch, with no fallback from a selected `<source>` to the `<img>` preview. This addresses art-direction mismatches without requiring multiple resolutions of the same preview.
 
 #### Mandatory complete-frame handoff
 
@@ -512,7 +504,7 @@ A special `media="poster"` value on a `<source>` element could identify that sou
 
 This keeps preview and main-image sources together, but requires `<picture>` for every preview. It also repurposes `media` to identify a source's role rather than evaluate a media query.
 
-The proposed `preview` and `previewset` attributes instead annotate the existing `<img>` or selected `<source>`, without giving `media` a special role or requiring `<picture>` when no art direction is needed.
+The proposed `preview` attribute instead annotates the existing `<img>` or selected `<source>`, without giving `media` a special role or requiring `<picture>` when no art direction is needed.
 
 #### Reuse the `poster` attribute
 
@@ -630,11 +622,11 @@ The guidance for localized or direction-dependent image candidates is covered by
 
 ### Privacy
 
-Fetching an external URL preview discloses an ordinary image request and its metadata to the serving origin. Unselected branches and candidates are not fetched. Literal colors and compact payloads make no requests.
+Fetching an external URL preview discloses an ordinary image request and its metadata to the serving origin. Unselected branches do not initiate preview requests. Literal colors and compact payloads make no requests.
 
 Resource Timing exposes ordinary fetch and cache information under existing [image-request protections](#fetching-scheduling-and-html-integration). The core adds no dedicated signals for preview readiness, dimensions, decoding, display, handoff timing, or the reason a preview was skipped.
 
-Candidate selection can reveal format support indirectly. Rejecting an unsupported compact value may cause a URL fallback request, observable through network information or by the server.
+An unsupported compact value provides no preview and does not trigger a URL fallback request.
 
 A site can also time decoding or drawing the same resource through another `Image`, `createImageBitmap()`, canvas, or WebGL. Shared caches may affect those timings, but they do not directly measure the internal preview decode or reveal whether it was displayed.
 
@@ -714,12 +706,10 @@ The properties use the [string-reflection rules](#preview-values-and-reflection)
 ```webidl
 partial interface HTMLImageElement {
   [CEReactions] attribute DOMString preview;
-  [CEReactions] attribute DOMString previewset;
 };
 
 partial interface HTMLSourceElement {
   [CEReactions] attribute DOMString preview;
-  [CEReactions] attribute DOMString previewset;
 };
 ```
 
