@@ -52,7 +52,7 @@
 
 **Image Preview lets a page provide a lightweight preview while its main image loads.** The browser replaces the preview when the main image would normally be displayed, including progressive content. If the main image is ready first, it skips the preview. The browser manages this lifecycle instead of requiring site-specific code.
 
-The `preview` attribute accepts an image URL, compact representation, or color. Its reflected property also works on images created with `new Image()`. The attribute applies to `<img>` and `<source>` in `<picture>`, providing one preview per branch while existing source-selection rules continue to choose the main image.
+The `preview` attribute accepts an image URL, compact representation, or color. Its reflected property also works on images created with `new Image()`. The attribute applies to `<img>` and to `<source>` elements in `<picture>` to support [art direction](https://developer.mozilla.org/en-US/docs/Web/HTML/Guides/Responsive_images#art_direction). Each branch can provide its own preview to match its image content. Existing HTML rules continue to select the main image.
 
 ```html
 <img
