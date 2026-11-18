@@ -1,0 +1,43 @@
+# Image Preview: HTML and CSS authoring comparison
+
+This document compares HTML-defined previews with a CSS alternative using the proposal's [exploratory styling parts](explainer.md#exploratory-css-styling). It supports discussion of [MicrosoftEdge/MSEdgeExplainers#1440](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/1440).
+
+## Status and assumptions
+
+The HTML examples use the proposed `preview` attribute. The CSS examples use `background-image` or `background-color` on `::preview`. This part, along with `::image-placeholder` and `:image-phase()`, belongs to the proposal's independent, exploratory CSS styling sketch; these are not existing standardized features.
+
+For this comparison, assume CSS-sourced previews do not require an HTML `preview` attribute. An image preview becomes ready when its background image loads; a color-only preview becomes ready when its background color is resolved. Both follow the same display rules as HTML previews.
+## Use cases
+
+| Use case | HTML preview | CSS preview |
+| :--- | :--- | :--- |
+| **Content-specific thumbnail** | **HTML**<br>`<img`<br>`  src="lake.avif"`<br>`  preview='url("lake-thumb.avif")'`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">` | **1: URL in a stylesheet rule**<br>**HTML**<br>`<img`<br>`  class="photo lake"`<br>`  src="lake.avif"`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">`<br>**CSS**<br>`.photo::preview {`<br>`  background-size: 100% 100%;`<br>`  background-repeat: no-repeat;`<br>`}`<br>`.lake::preview {`<br>`  background-image: url("lake-thumb.avif");`<br>`}`<br>**2: URL in an inline custom property**<br>**HTML**<br>`<img`<br>`  class="photo"`<br>`  src="lake.avif"`<br>`  style='--image-preview: url("lake-thumb.avif")'`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">`<br>**CSS**<br>`.photo::preview {`<br>`  background-image: var(--image-preview, none);`<br>`  background-size: 100% 100%;`<br>`  background-repeat: no-repeat;`<br>`}` |
+| **Content-derived dominant color** | **HTML**<br>`<img`<br>`  src="lake.avif"`<br>`  preview="#68788c"`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">` | **HTML**<br>`<img`<br>`  class="lake"`<br>`  src="lake.avif"`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">`<br>**CSS**<br>`.lake::preview {`<br>`  background-color: #68788c;`<br>`}` |
+| **Wide and portrait crops** | **HTML**<br>`<picture>`<br>`  <source`<br>`    media="(width >= 800px)"`<br>`    srcset="lake-wide.avif"`<br>`    preview='url("lake-wide-thumb.avif")'`<br>`    width="1200" height="800">`<br>`  <img`<br>`    src="lake-portrait.avif"`<br>`    preview='url("lake-portrait-thumb.avif")'`<br>`    width="600" height="800"`<br>`    alt="A mountain reflected in a lake">`<br>`</picture>` | **HTML**<br>`<picture>`<br>`  <source`<br>`    media="(width >= 800px)"`<br>`    srcset="lake-wide.avif"`<br>`    width="1200" height="800">`<br>`  <img`<br>`    class="photo lake"`<br>`    src="lake-portrait.avif"`<br>`    width="600" height="800"`<br>`    alt="A mountain reflected in a lake">`<br>`</picture>`<br>**CSS**<br>`.photo::preview {`<br>`  background-size: 100% 100%;`<br>`  background-repeat: no-repeat;`<br>`}`<br>`.lake::preview {`<br>`  background-image: url("lake-portrait-thumb.avif");`<br>`}`<br>`@media (width >= 800px) {`<br>`  .lake::preview {`<br>`    background-image: url("lake-wide-thumb.avif");`<br>`  }`<br>`}` |
+| **Script updates in a gallery** | **HTML**<br>`<img`<br>`  id="gallery-image"`<br>`  src="lake.avif"`<br>`  preview='url("lake-thumb.avif")'`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">`<br>**CSS**<br>None required.<br>**JavaScript**<br>`const image = document.querySelector("#gallery-image");`<br>`const nextPhoto = {`<br>`  src: "forest.avif",`<br>`  preview: 'url("forest-thumb.avif")',`<br>`  alt: "Sunlight falling through a forest canopy"`<br>`};`<br>`image.alt = nextPhoto.alt;`<br>`image.preview = nextPhoto.preview;`<br>`image.src = nextPhoto.src;` | **HTML**<br>`<img`<br>`  id="gallery-image" class="photo"`<br>`  src="lake.avif"`<br>`  style='--image-preview: url("lake-thumb.avif")'`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">`<br>**CSS**<br>`.photo::preview {`<br>`  background-image: var(--image-preview, none);`<br>`  background-size: 100% 100%;`<br>`  background-repeat: no-repeat;`<br>`}`<br>**JavaScript**<br>`const image = document.querySelector("#gallery-image");`<br>`const nextPhoto = {`<br>`  src: "forest.avif",`<br>`  preview: 'url("forest-thumb.avif")',`<br>`  alt: "Sunlight falling through a forest canopy"`<br>`};`<br>`image.alt = nextPhoto.alt;`<br>`image.style.setProperty(`<br>`  "--image-preview", nextPhoto.preview`<br>`);`<br>`image.src = nextPhoto.src;` |
+| **Theme-derived or reusable presentation** | **No preview input needed for this waiting decoration.** Use the independent CSS styling sketch.<br>**HTML**<br>`<img`<br>`  class="photo"`<br>`  src="lake.avif"`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">`<br>**CSS**<br>`:root { --placeholder-color: #68788c; }`<br>`@media (prefers-color-scheme: dark) {`<br>`  :root { --placeholder-color: #344052; }`<br>`}`<br>`.photo::image-placeholder {`<br>`  background-color: var(--placeholder-color);`<br>`}` | Same as in HTML |
+| **Waiting decoration: shimmer** | **No preview input needed.**<br>**HTML**<br>`<img`<br>`  class="shimmer"`<br>`  src="lake.avif"`<br>`  width="1200" height="800"`<br>`  alt="A mountain reflected in a lake">`<br>**CSS**<br>`.shimmer::image-placeholder {`<br>`  background-color: #e2e8f0;`<br>`  background-image: linear-gradient(`<br>`    100deg, transparent 35%,`<br>`    rgb(255 255 255 / 60%) 50%,`<br>`    transparent 65%`<br>`  );`<br>`  background-size: 200% 100%;`<br>`  background-repeat: no-repeat;`<br>`}`<br>`.shimmer:image-phase(waiting)::image-placeholder {`<br>`  animation: shimmer 1.4s linear infinite;`<br>`}`<br>`@keyframes shimmer {`<br>`  from { background-position: 200% 0; }`<br>`  to { background-position: -100% 0; }`<br>`}`<br>`@media (prefers-reduced-motion: reduce) {`<br>`  .shimmer:image-phase(waiting)::image-placeholder {`<br>`    animation: none;`<br>`    background-image: none;`<br>`  }`<br>`}` | Same as in HTML |
+
+## Pros and cons
+
+These are authoring preferences, assuming both alternatives provide the same browser-managed preview lifecycle.
+
+| Consideration | HTML preview | CSS preview | Preferred |
+| :--- | :--- | :--- | :--- |
+| **A thumbnail for each image** | Put it beside `src`. | Use a CSS rule or variable. | **HTML** |
+| **Different image crops** | Preview follows the selected image source. | Repeat the selection conditions in CSS. | **HTML** |
+| **Inline styles blocked by CSP** | Preview attribute still works, subject to image-source policy. | Use an allowed stylesheet instead. | **HTML** for per-image values |
+| **Change or disable previews based on page styling** | CSS can change appearance, but not the attribute's source value. | CSS rules can replace the preview source or set it to `none`. | **CSS** for source overrides |
+| **Rich preview values** | URLs, fixed colors, proposed compact formats. | CSS images, gradients, and theme colors; proposed compact formats. | **CSS**, when needed to represent content |
+| **Update from JavaScript** | Set `image.preview`. | Set a CSS variable used by a rule. | **HTML**, slightly simpler |
+| **Discover preview before styles load** | Possible directly from markup. | May need to wait for styles. | **HTML**; faster painting is not guaranteed |
+| **Style or animate the preview** | Use CSS on `::preview`. | Use CSS on `::preview`. | **Either** |
+| **Shimmer or shared waiting decoration** | No preview attribute needed. | No preview source needed. | **Neither**; style `::image-placeholder` |
+| **Similarity to prior art** | Video `poster` and historical, non-standard `lowsrc`. | Low-resolution background placeholders, but without native preview handoff. | **HTML**; closer precedent for a browser-managed preview source. |
+
+
+## Conclusion
+
+HTML is the preferred default for specifying preview content; CSS for styling it. 
+HTML keeps per-image preview data alongside the main image source and associates previews with the selected `<picture>` source without duplicating selection conditions in CSS. CSS sourcing remains useful when authors need rule-based preview-source overrides or CSS image values.
+Styling and animation are available with either approach.
