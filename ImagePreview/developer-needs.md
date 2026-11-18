@@ -1,10 +1,10 @@
 # Image Preview: developer needs and design response
 
-Last updated: October 30, 2026.
+Last updated: November 16, 2026.
 
 This document links developer needs and supporting evidence to the revised [Image Preview proposal](explainer.md).
 
-The main proposal covers `preview`, `previewset`, and their reflected properties, including responsive previews and art direction. Styling and reveal control are independent proposals sketched in the explainer's appendix.
+The main proposal covers `preview` and its reflected property on `<img>` and `<source>`, including branch-specific previews for art direction. Multiple preview resolutions are deferred pending evidence. Styling and reveal control are independent proposals sketched in the explainer's appendix.
 
 Image Preview does not define compact formats or their encoding and decoding algorithms. These require separate specifications; `blurhash("...")` is illustrative syntax.
 
@@ -70,7 +70,7 @@ The sources establish needs and constraints, not API consensus or universal user
 
 **Evidence.** [whatwg/html#3631][html3631] requests `<img>` and `<source>` support. [MicrosoftEdge/MSEdgeExplainers#1402][edge1402] raises art direction and light-preview flashes before dark-mode content.
 
-**Proposal response.** `preview` associates content with the selected `<img>` or `<source>` branch; `previewset` adds density-based candidates. A dark-mode source can supply its own preview without falling back to a shared light preview.
+**Proposal response.** `preview` associates content with the selected `<img>` or `<source>` branch. One preview can represent all main-image resolutions within that branch. A dark-mode source can supply its own preview without falling back to a shared light preview. Art direction does not require multiple resolutions of the same preview; [density-based preview selection is deferred](explainer.md#are-multiple-preview-resolutions-needed) pending concrete use cases and evidence of a useful quality/resource tradeoff.
 
 ### DN-05: Control loading cost without delaying important content
 
