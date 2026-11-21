@@ -16,11 +16,9 @@ text.
 * Current Editor's Draft: [CSS Custom Functions and Mixins](https://drafts.csswg.org/css-mixins/)
 * Current design discussion: [CSSWG issue 14243](https://github.com/w3c/csswg-drafts/issues/14243)
 
-The Editor's Draft currently defines custom functions, but does not yet define
-mixins. The CSSWG's August 2026 resolutions on the mixin authoring model are
-being worked into the design and its open issues. The feature is experimental
-and evolving; this document does not imply browser availability or
-interoperability.
+The CSSWG's August 2026 resolutions on the mixin authoring model are being
+worked into the design and its open issues. The feature is experimental and
+evolving; this document does not imply browser availability or interoperability.
 
 ## Participate
 
@@ -38,7 +36,7 @@ interoperability.
 * [Accessibility, internationalization, privacy, and security](#accessibility-internationalization-privacy-and-security)
 * [Resolved design choices](#resolved-design-choices)
 * [Remaining questions and status](#remaining-questions-and-status)
-* [References](#references)
+* [References](#references-and-acknowledgements)
 
 ## Introduction
 
@@ -46,7 +44,7 @@ Stylesheets often repeat the same group of declarations across components:
 button treatments, visually hidden patterns, layout recipes, and other
 component styles. Sass, Less, and other preprocessors have long offered mixins
 for defining and reusing such groups, and developers have extensive experience
-with that model. The [ChromeStatus feature entry](https://chromestatus.com/feature/406935599)
+with that model. The [ChromeStatus feature entry](https://chromestatus.com/feature/5108022310469632)
 also records positive developer interest, consistent with this long-standing use.
 
 CSS custom properties help reuse individual values, but they do not package a
@@ -212,7 +210,7 @@ Details of [how arguments and local values resolve on elements](https://github.c
 remain under discussion, as does [mixin lookup across shadow trees](https://github.com/w3c/csswg-drafts/issues/12671).
 These are not settled by the authoring-model decisions above.
 
-The feature is tracked in [ChromeStatus](https://chromestatus.com/feature/406935599)
+The feature is tracked in [ChromeStatus](https://chromestatus.com/feature/5108022310469632)
 and [Chromium](https://issues.chromium.org/issues/406935599). A
 [TAG design-review request](https://github.com/w3ctag/design-reviews/issues/1290)
 was opened on October 1, 2026. A review request is not an endorsement by the
