@@ -171,18 +171,6 @@ produce static output during a build.
 No specific accessibility, internationalization, privacy, 
 or security concerns have been identified.
 
-## Remaining questions and status
-
-Details of [how arguments and local values resolve on elements](https://github.com/w3c/csswg-drafts/issues/13454)
-remain under discussion, as does [mixin lookup across shadow trees](https://github.com/w3c/csswg-drafts/issues/12671).
-These are not settled by the authoring-model decisions above.
-
-The feature is tracked in [ChromeStatus](https://chromestatus.com/feature/5108022310469632)
-and [Chromium](https://issues.chromium.org/issues/406935599). A
-[TAG design-review request](https://github.com/w3ctag/design-reviews/issues/1290)
-was opened on October 1, 2026. A review request is not an endorsement by the
-TAG or a CSSWG resolution.
-
 ## References and acknowledgements
 
 This proposal builds on Miriam Suzanne's [earlier work](https://css.oddbird.net/sasslike/mixins-functions/). Many thanks for starting this conversation and driving CSS forward. 
