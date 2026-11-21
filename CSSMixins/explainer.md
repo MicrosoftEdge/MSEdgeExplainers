@@ -152,6 +152,40 @@ repeating both branches for each component:
 .empty-state { @apply --center-content; }
 ```
 
+A mixin can also carry nested rules as part of the reusable treatment. For
+example, the base, hover, focus, and pressed styles of a control could stay
+together:
+
+```css
+@mixin --interactive-control {
+  border: 1px solid CanvasText;
+  border-radius: 0.25rem;
+
+  &:hover {
+    background: ButtonFace;
+  }
+
+  &:focus-visible {
+    outline: 2px solid Highlight;
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.primary-action { @apply --interactive-control; }
+.custom-element-action { @apply --interactive-control; }
+```
+
+The same need arises across shadow roots. A design system may define a visual
+treatment once, then want components implemented in separate shadow trees to
+apply that treatment to their internal controls without copying the complete
+rule block into each component. Cross-tree mixin lookup and adoption through
+stylesheets are still under discussion, but this is a motivating use case:
+components could retain their encapsulated structure and behavior while sharing
+presentation supplied by a surrounding design system.
+
 This is different from a custom function, which computes a CSS value for use
 inside a property value. A mixin operates at the style-rule level and can
 provide multiple declarations and nested CSS rules. It can therefore express
