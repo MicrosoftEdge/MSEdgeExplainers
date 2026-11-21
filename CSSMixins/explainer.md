@@ -159,11 +159,23 @@ produce static output during a build.
 * **Use Sass, Less, or another preprocessor.** These already provide mixins,
   but require a build step and expand their output before the browser can
   resolve the cascade and other runtime CSS conditions.
-* **Keep separate `@macro` and `@mixin` rules or require `@result`.** Those
-  earlier designs distinguished forms of reuse or explicitly marked the
-  output block. The [CSSWG design discussion](https://github.com/w3c/csswg-drafts/issues/14243)
-  instead favored one author-facing construct, with `@private` marking only
-  the local values and the remaining body supplying the styles.
+* **Require a separate `@macro` rule for simple, unscoped reuse.** Earlier 
+  models distinguished `@mixin` from `@macro`, even though authors would invoke 
+  both with `@apply` for essentially the same purpose. Once mixins no longer 
+  require special output wrapping, a separate construct adds a concept and 
+  forces authors to choose between nearly identical forms. Keeping one `@mixin` 
+  construct reduces that terminology and decision burden while covering both 
+  fixed and parameterized reuse.
+* **Put emitted styles inside an `@result` block.** A required `@result` 
+  adds an extra nesting level that provides no information when the mixin 
+  has no local values, and it separates computation from the nested styles 
+  that consume it. Treating the body as the result makes the common case shorter 
+  and preserves the natural shape of a CSS style rule. `@private` 
+  marks only the exceptional declarations that are local.
+
+The resolved model optimizes the common case and makes special behavior explicit: 
+ordinary body contents are the emitted styles, 
+while only private computation requires extra syntax.
 
 ## Accessibility, internationalization, privacy, and security
 
