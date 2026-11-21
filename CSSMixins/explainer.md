@@ -16,8 +16,8 @@ text.
 * Current Editor's Draft: [CSS Custom Functions and Mixins](https://drafts.csswg.org/css-mixins/)
 * Current design discussion: [CSSWG issue 14243](https://github.com/w3c/csswg-drafts/issues/14243)
 
-The feature is experimental and
-evolving; this document does not imply browser availability or interoperability.
+The CSSWG's August 2026 resolutions on the mixin authoring model are being
+worked into the design and its open issues.
 
 ## Participate
 
