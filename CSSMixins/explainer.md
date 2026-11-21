@@ -152,8 +152,7 @@ produce static output during a build.
 
 * **Repeat the declarations or share classes.** This works today with no new
   CSS feature, but repeated declarations must be updated in every copy.
-  Shared classes can reuse fixed styles, though passing a value to a recipe
-  or reusing nested rules in different selectors is less direct.
+  Shared classes can reuse fixed styles but aren't as easy to parameterize.
 * **Use custom properties or custom functions.** These are useful for sharing
   individual values and calculations. They do not, on their own, insert a
   group of declarations and nested rules at an application site.
