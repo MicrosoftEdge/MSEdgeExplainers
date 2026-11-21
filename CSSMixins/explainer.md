@@ -16,8 +16,7 @@ text.
 * Current Editor's Draft: [CSS Custom Functions and Mixins](https://drafts.csswg.org/css-mixins/)
 * Current design discussion: [CSSWG issue 14243](https://github.com/w3c/csswg-drafts/issues/14243)
 
-The CSSWG's August 2026 resolutions on the mixin authoring model are being
-worked into the design and its open issues. The feature is experimental and
+The feature is experimental and
 evolving; this document does not imply browser availability or interoperability.
 
 ## Participate
@@ -113,15 +112,7 @@ shared recipe lives in one place and each card supplies its background:
 }
 ```
 
-Here the mixin supplies several related declarations from one reusable
-definition. Its parameter provides the background color, while the private
-custom property is an intermediate value used to compute the border. In the
-model resolved for further specification work, `@private` is nested in a style
-rule and provides lexically scoped local custom properties; those names are
-hygienically rewritten so they do not collide with ordinary custom properties.
-Changing the shared border treatment would update both card variants without
-editing each call site. Authors remain responsible for checking text contrast
-with any supplied background.
+Here the mixin supplies several related declarations from one reusable definition. Its parameter provides the background color, while the private custom property is an intermediate value used to compute the border. The specification defines @private as a way to create lexically scoped private custom properties within a style rule and its nested rules. References to their names are rewritten to unique private names, so they do not collide with same-named ordinary custom properties. Changing the shared border treatment would update both card variants without editing each call site. Authors remain responsible for checking text contrast with any supplied background.
 
 Mixins can also reuse conditional styles. For example, a centered layout could
 start with a flex fallback and switch to grid where it is supported, without
@@ -190,10 +181,8 @@ conclusion is claimed here.
 
 The CSSWG discussed CSS mixins in 2025 and continued design work at its August
 2026 face-to-face meeting. The August resolutions establish a direction for
-`@private`, removal of `@result`, and using `@mixin` instead of `@macro`; they
-do not mean those changes are already incorporated into the Editor's Draft.
-See the [design convergence issue](https://github.com/w3c/csswg-drafts/issues/14243)
-and these decisions:
+`@private`, removal of `@result`, and using `@mixin` instead of `@macro`
+as well as these decisions:
 
 * [Lexically scoped locals and `@private`](https://github.com/w3c/csswg-drafts/issues/14004)
 * [Using the mixin body as the result](https://github.com/w3c/csswg-drafts/issues/13524)
