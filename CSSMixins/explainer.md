@@ -89,7 +89,10 @@ interaction.
 ## Non-goals
 
 * Replace preprocessors for general-purpose programming, loops, or
-  build-time code generation.
+  build-time code generation. Expanding a mixin ahead of time can reduce
+  client-side work and remains useful when its output is known statically;
+  native mixins are useful when reuse must participate in the browser's
+  cascade and conditional CSS processing.
 * Turn CSS into an imperative language. A mixin describes CSS; it is not a
   script that runs arbitrary logic.
 * Replace custom properties for sharing individual values, or custom
