@@ -44,11 +44,12 @@ button treatments, visually hidden patterns, layout recipes, and other
 component styles. Sass, Less, and other preprocessors have long offered mixins
 for defining and reusing such groups.
 
-CSS custom properties help reuse individual values, but they do not package a
-whole style block for reuse. Preprocessor mixins can generate CSS at build time,
-but that output is fixed before the browser applies the cascade. A native CSS
-mechanism could reuse declarations and nested rules while working with CSS
-values and the context in which styles are applied.
+CSS custom properties reuse individual values, but cannot package declarations 
+and nested rules. Preprocessor mixins expand before the browser knows the 
+element and computed CSS values, so each variant must be generated ahead of time. 
+Native mixins let the engine apply one reusable rule block in the cascade 
+and conditional context of each application site, using that site’s 
+values and custom properties without a preprocessing step.
 
 ## User-facing problem
 
