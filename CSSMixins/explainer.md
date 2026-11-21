@@ -178,13 +178,20 @@ together:
 .custom-element-action { @apply --interactive-control; }
 ```
 
-The same need arises across shadow roots. A design system may define a visual
-treatment once, then want components implemented in separate shadow trees to
-apply that treatment to their internal controls without copying the complete
-rule block into each component. Cross-tree mixin lookup and adoption through
-stylesheets are still under discussion, but this is a motivating use case:
-components could retain their encapsulated structure and behavior while sharing
-presentation supplied by a surrounding design system.
+The same need arises across shadow roots. A design system can define a theme
+once in the document, then let controls in separate shadow trees opt in to it
+with `@apply`. This gives the document and the components' internal controls a
+shared visual treatment without copying a complete rule block into every shadow
+tree or adopting a small stylesheet that contains only the shared styles.
+
+This also gives component authors a way to share a treatment for an entire
+internal subtree, including nested states and selectors, rather than exposing
+and forwarding every internal element through `::part` and `exportparts`.
+Because the component author writes the `@apply`, the surrounding definition is
+not applied to an arbitrary shadow tree. The component retains control over
+which internal rule uses the shared presentation, and the surrounding site can
+update the treatment in one place. Mixin lookup across tree scopes is resolved
+to use loose name matching.
 
 This is different from a custom function, which computes a CSS value for use
 inside a property value. A mixin operates at the style-rule level and can
