@@ -168,29 +168,8 @@ produce static output during a build.
 
 ## Accessibility, internationalization, privacy, and security
 
-Mixins can help keep accessibility-related styles consistent, but they do not
-enforce contrast, focus visibility, or other accessibility requirements. They
-do not introduce new language-specific syntax for content, but reusable styles
-must still work for different writing modes and text sizes. This proposal is
-not intended to expose new user data or grant access to resources outside
-CSS's existing styling model. Privacy and security implications of the final
-lookup, scoping, and evaluation rules, as well as runtime cost, need assessment
-as those rules are specified. No completed impact assessment or interop
-conclusion is claimed here.
-
-## Resolved design choices
-
-The CSSWG discussed CSS mixins in 2025 and continued design work at its August
-2026 face-to-face meeting. The August resolutions establish a direction for
-`@private`, removal of `@result`, and using `@mixin` instead of `@macro`
-as well as these decisions:
-
-* [Lexically scoped locals and `@private`](https://github.com/w3c/csswg-drafts/issues/14004)
-* [Using the mixin body as the result](https://github.com/w3c/csswg-drafts/issues/13524)
-* [One `@mixin` concept, not `@macro`](https://github.com/w3c/csswg-drafts/issues/13680)
-* [Dropping the earlier scoped-rule restriction on mixins](https://github.com/w3c/csswg-drafts/issues/13727)
-* [`!important` is invalid in function bodies, function and mixin arguments,
-  and `@private` blocks](https://github.com/w3c/csswg-drafts/issues/14212)
+No specific accessibility, internationalization, privacy, 
+or security concerns have been identified.
 
 ## Remaining questions and status
 
