@@ -58,6 +58,25 @@ invoke mixins themselves. But when a site repeats a component's styling in
 several places, a later change can miss one copy. For example, the border
 of one card may be updated for clarity while an otherwise identical card
 keeps the old treatment. Sharing the recipe makes consistent updates easier.
+
+Presentation and semantics are also independent concerns. A native `<button>`,
+an anchor styled as a button, and a button custom element may need to share
+the same visual treatment while retaining different semantics and behavior.
+Likewise, a component with tablist, navigation, or radio-group semantics might
+use a button-like or tab-like presentation, and one visual pattern may apply
+to all of them. A card is another example: it is a presentational concept
+that products may want to apply consistently to many different kinds of
+content.
+
+HTML and custom elements provide reusable structures, semantics, and behavior,
+but CSS lacks an equivalent way to define a reusable presentation and apply it
+across different selectors or element types. Mixins would let design systems
+share these visual foundations independently from the functional role of the
+element receiving them. For example, a single button treatment could be used
+by native controls, links that open button-like actions, segmented controls,
+and color swatches, without changing which element is appropriate for each
+interaction.
+
 Mixins do not themselves make a site accessible or guarantee a faster site;
 authors still need to choose usable styles, and the performance of evaluating
 mixins needs assessment.
