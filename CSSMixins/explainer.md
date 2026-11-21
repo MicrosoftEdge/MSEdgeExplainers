@@ -43,9 +43,7 @@ evolving; this document does not imply browser availability or interoperability.
 Stylesheets often repeat the same group of declarations across components:
 button treatments, visually hidden patterns, layout recipes, and other
 component styles. Sass, Less, and other preprocessors have long offered mixins
-for defining and reusing such groups, and developers have extensive experience
-with that model. The [ChromeStatus feature entry](https://chromestatus.com/feature/5108022310469632)
-also records positive developer interest, consistent with this long-standing use.
+for defining and reusing such groups.
 
 CSS custom properties help reuse individual values, but they do not package a
 whole style block for reuse. Preprocessor mixins can generate CSS at build time,
