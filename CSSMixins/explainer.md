@@ -33,8 +33,6 @@ worked into the design and its open issues.
 * [Proposed author-facing model](#proposed-author-facing-model)
 * [Alternatives considered](#alternatives-considered)
 * [Accessibility, internationalization, privacy, and security](#accessibility-internationalization-privacy-and-security)
-* [Resolved design choices](#resolved-design-choices)
-* [Remaining questions and status](#remaining-questions-and-status)
 * [References](#references-and-acknowledgements)
 
 ## Introduction
