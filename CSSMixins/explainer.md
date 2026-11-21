@@ -55,7 +55,8 @@ This is primarily an authoring feature: people using a website would not
 invoke mixins themselves. But when a site repeats a component's styling in
 several places, a later change can miss one copy. For example, the border
 of one card may be updated for clarity while an otherwise identical card
-keeps the old treatment. Sharing the recipe makes consistent updates easier.
+keeps the old treatment. A single, shared block of declarations 
+makes consistent updates easier.
 
 Presentation and semantics are also independent concerns. A native `<button>`,
 an anchor styled as a button, and a button custom element may need to share
@@ -74,10 +75,6 @@ element receiving them. For example, a single button treatment could be used
 by native controls, links that open button-like actions, segmented controls,
 and color swatches, without changing which element is appropriate for each
 interaction.
-
-Mixins do not themselves make a site accessible or guarantee a faster site;
-authors still need to choose usable styles, and the performance of evaluating
-mixins needs assessment.
 
 ## Goals
 
@@ -151,12 +148,6 @@ repeating both branches for each component:
 .dialog { @apply --center-content; }
 .empty-state { @apply --center-content; }
 ```
-
-These examples illustrate the design direction, not a guarantee that every
-detail of the syntax or processing model is final. In particular, mixins do not
-use an `@result` block: the rest of the mixin body is its emitted result. The
-CSSWG also resolved to keep a single `@mixin` concept rather than a separate
-`@macro` construct.
 
 This is different from a custom function, which computes a CSS value for use
 inside a property value. A mixin operates at the style-rule level and can
