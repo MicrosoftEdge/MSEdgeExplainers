@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Compare native checkbox states initialized with IDL attributes and content attributes, with and without indeterminateness.">
+    <title>Checkbox states | Interactive demo</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #080b12;
+            --surface: #101620;
+            --surface-raised: #161e2b;
+            --text: #f4f7fb;
+            --text-soft: #b7c1d1;
+            --line: #2a3545;
+            --accent: #79e7c4;
+            --focus: #ffe27a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 15% -10%, rgb(121 231 196 / 13%), transparent 32rem),
+                radial-gradient(circle at 90% 18%, rgb(184 154 255 / 10%), transparent 28rem),
+                var(--bg);
+            color: var(--text);
+            font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        header,
+        main,
+        footer {
+            max-width: 1040px;
+            margin-inline: auto;
+            padding-inline: 2rem;
+        }
+
+        header {
+            padding-top: 3.75rem;
+            padding-bottom: 2.75rem;
+        }
+
+        .eyebrow,
+        .kicker {
+            margin: 0;
+            color: var(--accent);
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0.7rem 0 0;
+            font-size: clamp(3rem, 8vw, 5.8rem);
+            line-height: 1;
+            letter-spacing: -0.065em;
+        }
+
+        h1 span {
+            color: var(--accent);
+            font-weight: 400;
+        }
+
+        .lede {
+            max-width: 650px;
+            margin: 1.25rem 0;
+            color: var(--text-soft);
+            font-size: clamp(1rem, 2.4vw, 1.3rem);
+        }
+
+        a {
+            color: var(--accent);
+            text-underline-offset: 0.2em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.45rem 0.85rem;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--text-soft);
+            font-size: 0.8rem;
+        }
+
+        .section-heading {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        h2 {
+            margin: 0.3rem 0 0;
+            font-size: clamp(1.7rem, 4vw, 2.5rem);
+            line-height: 1.1;
+            letter-spacing: -0.045em;
+        }
+
+        .demo-shell {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: 0 24px 80px rgb(0 0 0 / 28%);
+        }
+
+        .demo-toolbar,
+        .demo-note {
+            margin: 0;
+            padding: 1rem 1.5rem;
+            color: var(--text-soft);
+            font-size: 0.85rem;
+        }
+
+        .demo-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            border-bottom: 1px solid var(--line);
+            background: var(--surface-raised);
+        }
+
+        .demo-toolbar p {
+            margin: 0;
+        }
+
+        .reset-button {
+            flex-shrink: 0;
+            padding: 0.55rem 0.85rem;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text);
+            font: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        kbd {
+            padding: 0.15rem 0.4rem;
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            background: var(--surface);
+            color: var(--text);
+            font: 0.8rem "Cascadia Code", Consolas, monospace;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            padding: 1.15rem 1.5rem;
+            border-bottom: 1px solid var(--line);
+            text-align: center;
+        }
+
+        th:first-child {
+            width: 50%;
+            text-align: left;
+        }
+
+        thead th {
+            color: var(--text-soft);
+            font-size: 0.8rem;
+            font-weight: 650;
+        }
+
+        tbody th[scope="row"] {
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding-left: 3rem;
+        }
+
+        .group-heading th {
+            padding-block: 0.65rem;
+            background: var(--surface-raised);
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 650;
+            letter-spacing: 0.04em;
+        }
+
+        input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin: 0;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--focus);
+            outline-offset: 4px;
+        }
+
+        footer {
+            padding-top: 1.5rem;
+            padding-bottom: 3rem;
+            color: var(--text-soft);
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 560px) {
+            header,
+            main,
+            footer {
+                padding-inline: 1rem;
+            }
+
+            header {
+                padding-top: 2.5rem;
+            }
+
+            th,
+            td {
+                padding: 1rem 0.6rem;
+            }
+
+            .demo-toolbar,
+            .demo-note {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <p class="eyebrow">Native controls / Interactive demo</p>
+        <h1>Checkbox <span>states</span></h1>
+        <p class="lede">A side-by-side look at checkedness and indeterminateness. Compare native controls initialized using IDL attributes and content attributes.</p>
+        <a href="https://github.com/MicrosoftEdge/MSEdgeExplainers/blob/main/DefaultIndeterminate/explainer.md">Read the explainer &rarr;</a>
+    </header>
+
+    <main>
+        <section aria-labelledby="comparison-title">
+            <div class="section-heading">
+                <div>
+                    <p class="kicker">01 / State comparison</p>
+                    <h2 id="comparison-title">IDL attributes vs. content attributes.</h2>
+                </div>
+                <span class="badge">4 states / 2 variations</span>
+            </div>
+
+            <div class="demo-shell">
+                <div class="demo-toolbar">
+                    <p>Try it: <kbd>Tab</kbd> to a checkbox, then press <kbd>Space</kbd> to toggle.</p>
+                    <button class="reset-button" id="reset1">Reset Form</button>
+                </div>
+                <form id="form1">
+                <table aria-labelledby="comparison-title" aria-describedby="comparison-note">
+                    <thead>
+                        <tr>
+                            <th scope="col">Initial state</th>
+                            <th scope="col" id="idl-attribute-column">IDL Attribute</th>
+                            <th scope="col" id="content-attribute-column">Content Attribute</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="group-heading">
+                            <th colspan="3" scope="rowgroup">Without indeterminateness</th>
+                        </tr>
+                        <tr>
+                            <th scope="row" id="state1">Unchecked</th>
+                            <td><input type="checkbox" id="idlAttribute1" aria-labelledby="idl-attribute-column state1"></td>
+                            <td><input type="checkbox" id="contentAttribute1" aria-labelledby="content-attribute-column state1"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row" id="state2">Checked</th>
+                            <td><input type="checkbox" id="idlAttribute2" aria-labelledby="idl-attribute-column state2"></td>
+                            <td><input type="checkbox" id="contentAttribute2" aria-labelledby="content-attribute-column state2" checked></td>
+                        </tr>
+                    </tbody>
+                    <tbody>
+                        <tr class="group-heading">
+                            <th colspan="3" scope="rowgroup">With indeterminateness</th>
+                        </tr>
+                        <tr>
+                            <th scope="row" id="state3">Unchecked</th>
+                            <td><input type="checkbox" id="idlAttribute3" aria-labelledby="idl-attribute-column state3"></td>
+                            <td><input type="checkbox" id="contentAttribute3" aria-labelledby="content-attribute-column state3" defaultindeterminate></td>
+                        </tr>
+                        <tr>
+                            <th scope="row" id="state4">Checked</th>
+                            <td><input type="checkbox" id="idlAttribute4" aria-labelledby="idl-attribute-column state4"></td>
+                            <td><input type="checkbox" id="contentAttribute4" aria-labelledby="content-attribute-column state4" checked defaultindeterminate></td>
+                        </tr>
+                    </tbody>
+                </table>
+                </form>
+                <p class="demo-note" id="comparison-note">Interacting with a checkbox changes its state, and can be reset using the button above.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>Native checkbox appearance may vary by browser and operating system. The content-attribute indeterminate examples require a browser implementing the proposed <code>defaultindeterminate</code> attribute; browsers without support display those examples as ordinary unchecked or checked checkboxes.</footer>
+
+    <script>
+        reset1.addEventListener("click", () => {
+            form1.reset();
+            idlAttribute2.checked = true;
+            idlAttribute3.indeterminate = true;
+            idlAttribute4.checked = true;
+            idlAttribute4.indeterminate = true;
+        });
+        reset1.click();
+    </script>
+</body>
+</html>
