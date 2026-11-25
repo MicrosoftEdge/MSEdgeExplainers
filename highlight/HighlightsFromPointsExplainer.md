@@ -21,7 +21,7 @@ Here are some inspirational examples of how users may interact with highlighted 
  - When a user clicks a highlighted result from find-on-page, the selection may be moved to cover the result so that it can be copied or edited easily.
  - When a user clicks an annotation in a document, the web app may emphasize and scroll into view the corresponding annotation in a pane which lists all the annotations in the document.
 
-Currently, web developers who want to implement some sort of interaction with custom highlights need to use workarounds that are cumbersome to code and maintain and that potentially incur performance penalties.
+Currently, web developers who want to implement interactions with custom highlights often need to use workarounds that involve directly editing the DOM with static ranges. This approach is cumbersome to code, difficult to maintain, and incurs performance penalties.
 
 ## Customer Problem Example
 
@@ -203,6 +203,10 @@ The API introduces no new security risks.
 
   ---
   [Related issues](https://github.com/MicrosoftEdge/MSEdgeExplainers/labels/highlightsFromPoint) | [Open a new issue](https://github.com/MicrosoftEdge/MSEdgeExplainers/issues/new?template=highlightsfrompoint.md)
+
+## Questions of Interest
+Is there a demand for the API to return the Range object in addition to the Highlight object?
+Are there performance issues regarding the "FromPoint" APIs (e.g. [caretPositionFromPoint](https://developer.mozilla.org/en-US/docs/Web/API/Document/caretPositionFromPoint))synchronous implementations?
 
 ## Appendix
 
